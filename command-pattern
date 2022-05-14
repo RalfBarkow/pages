@@ -1,0 +1,752 @@
+{
+  "title": "Command Pattern",
+  "story": [
+    {
+      "type": "html",
+      "text": "<b>Intent:</b> Encapsulate a request as an object, thereby letting you parameterize clients with different requests, queue or log requests, and support undoable operations. ",
+      "id": "2d563662de25eb1370a3d2c1ece771ee"
+    },
+    {
+      "type": "html",
+      "text": "<b>See also:</b> [[Command Object]], [[Design Patterns]], [[Threaded Command Object]], [[Scheduler Pattern]]",
+      "id": "4351c398c8e073c5dd338d1505c42f25"
+    },
+    {
+      "type": "html",
+      "text": "<b>AKA:</b> Object version of closure.",
+      "id": "abf6898f05e8f37581e8dadb4c323645"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e8664f28002e8111f72bcba7ddaf6944"
+    },
+    {
+      "type": "html",
+      "text": "\nThe [[Gang Of Four]] [[Command Pattern]] documents the recurring design theme of separating execution of a command from its invoker.  Different variations were mentioned, like being able to undo the execution of commands, and executing commands in batch.  More patterns that extend the Command pattern are being discovered. -- [[Philip Eskelin]]",
+      "id": "43397001f5633d05a9856e57993cafaa"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e8664f28002e8111f72bcba7ddaf6944"
+    },
+    {
+      "type": "html",
+      "text": "\nBesides Undo, when you turn all user actions into a \"command stream\" passing through a \"command engine\", as mentioned above, you can insert synthetic commands into the stream to implement scripting, and save the command stream to implement recordable macros. You can also redirect the command stream to another computer to remote control another app over the internet.",
+      "id": "05c6f017f96d1aec9d6640d21ce3524a"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e8664f28002e8111f72bcba7ddaf6944"
+    },
+    {
+      "type": "html",
+      "text": "\nThat is true, the \"command pattern\" concept does not include or require undo. I focus on undo because the command pattern is a very intuitive and extensible way to implement it. Approaching a problem using this pattern tends to organize things and make them more consistent. It also tends to reveal opportunities to factor out repetitive code. You can separate similar commands into families, and factor repeated code into shared base classes.",
+      "id": "6b1fd8cd2fead9f01e82f5df0c425ce0"
+    },
+    {
+      "type": "html",
+      "text": "\nThis pattern works very well in GUI code, but it can be applied wherever it is possible and worthwhile to make operations reversible. For example, you could use it to undo filesystem changes, or database transactions. Commands can fail, and roll-back is easily implemented, so the system can make a best-effort to stay in a valid state. ",
+      "id": "913f5a518cb2d999cfe9730926c4bdbf"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e8664f28002e8111f72bcba7ddaf6944"
+    },
+    {
+      "type": "html",
+      "text": "\nI don't know, it seems like a \"glorified\" function call to me.",
+      "id": "792e3767fce6efa25773475be0a89610"
+    },
+    {
+      "type": "html",
+      "text": "[It's a function call that has state, it's a closure, it remembers how to undo itself, that's far more than just a function call.]",
+      "id": "1da85d702473fd7f94a14c1fac9e176d"
+    },
+    {
+      "type": "html",
+      "text": "<i>That's the point. A call \"glorified\" (or reified) so that you can pass it around, and maybe store it for later usage.</i>",
+      "id": "3b3302c42399030e4db83d62a78519dd"
+    },
+    {
+      "type": "html",
+      "text": "\nYou mean like in LISP? :-) [This simulates Lisp's closures.]",
+      "id": "6ec5d2946052c4c47f608513244d8d0a"
+    },
+    {
+      "type": "html",
+      "text": "<i>Yes. Some languages like Lisp and Python have built-in features to pass around methods. This can be used instead of this pattern, or as a way to implement it.</i>",
+      "id": "4b7dee2b141b7a78a8b9ea15bd1045c9"
+    },
+    {
+      "type": "html",
+      "text": "\nI suppose any language that can reference an algorithm by name or address and \"run\" it could also apply (to various degrees). This might be as simple as:",
+      "id": "2ee39b787e95aa6978f6cfe3cf3c2532"
+    },
+    {
+      "type": "code",
+      "text": "  commands = fileToString(\"myPath/myCode.prg\")\n  executeString(commands)",
+      "id": "64319c6a67a17b6d52b82dcf49d187aa"
+    },
+    {
+      "type": "html",
+      "text": "<i>Wait, if you use function pointers instead of a Command object (with do and undo methods), don't you lose the undo feature, which is the main concrete feature touted above?</i>",
+      "id": "c29666ce41d18c2f704afd1c8b97893e"
+    },
+    {
+      "type": "html",
+      "text": "<b>Undo is not a feature of the Command pattern, it is simply one of the application features you could implement using it. Using single-argument function pointers in a language like C, you could use an array of function-pointer/argument pairs as your undo stack.</b>",
+      "id": "60235d4c20ca6f63e1fc1a7eea7c0a63"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e8664f28002e8111f72bcba7ddaf6944"
+    },
+    {
+      "type": "html",
+      "text": "\nI find the DataAccessCommandP<b></b>attern very useful for persistence. For example, if I want to display the shopping cart using the following query:",
+      "id": "f7b5c6be759c9881693e4fc25d270e83"
+    },
+    {
+      "type": "html",
+      "text": "\nselect product.name as product_name, item.item_id as item_id, \nitem.description as item_description, item.price as item_price, quantity from cartitems, item, product \t\nwhere cart_id=? and cartitems.item_id = item.item_id and item.product_id = product.product_id",
+      "id": "394428d3b334a503e24c02435114fa40"
+    },
+    {
+      "type": "html",
+      "text": "\nWith the DataAccessCommandP<b></b>attern I would have (in Java):",
+      "id": "baca29de20029388ffe6903c320f540c"
+    },
+    {
+      "type": "code",
+      "text": "  public class View''''''Cart''''''Command{\n    private Row''''''Set rs;\n    private int _cartId;",
+      "id": "7e04407f56a09d6f8eb0253a74726205"
+    },
+    {
+      "type": "code",
+      "text": "    public void setCartId(int cartId){ _cartId = cartId; }",
+      "id": "2ce641f08715a162d20cb4ff384bf460"
+    },
+    {
+      "type": "code",
+      "text": "    public void execute() throws DataCommandE''''''xception{\n      Connection conn = null;\n      PreparedStatement stat = null;\n      try{\n        conn = ConnectionPool.getConnection();\n        stat = conn.prepareStatement(query);\n        stat.setInt(1, _cartId);\n        rs.populate(stat.executeQuery());\n        rs.beforeFirst();\n      }catch(SQLException e){\n        throw new DataCommandE''''''xception(e);\n      }finally{\n        try{\n          if(stat != null) stat.close();\n          if(conn != null) conn.close();\n        }catch(SQLException err){ throw new DataCommandE''''''xception(\"failed to close db resources\", err); }\n      }\n    }",
+      "id": "cb74ff8e6f187e73c22bb43179fd28c9"
+    },
+    {
+      "type": "code",
+      "text": "    public String getProductName(){ return rs.getString(\"product_name\"); }\n    // etc\n  }",
+      "id": "5ce12a17171fa61d171b15b7f2a41516"
+    },
+    {
+      "type": "html",
+      "text": "The advantage of this approach compared to O/R mapping solutions (including DataAccessObjectP<b></b>attern) is that you don't have to navigate an object graph or create custom value objects. For more information check out [http://www.theserverside.com/books/EJBDesignPatterns/index.jsp www.theserverside.com]",
+      "id": "9f3f23a661ea8164b67977a389995744"
+    },
+    {
+      "type": "html",
+      "text": "-- Cameron Zemek (grom_3@optusnet.com.au)",
+      "id": "62f6dcee6ac94bb1036d7e0949aabc53"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e8664f28002e8111f72bcba7ddaf6944"
+    },
+    {
+      "type": "html",
+      "text": "\nI'm confused by that DataAccessCommandP<b></b>attern up above. Could someone explain to me why it's a good idea in that shopping cart context? It stores, using a Row<b></b>Set, a single cart entry and holds on to it. I haven't used JDBC directly in a little while, but won't you have to re-execute that command all the time anyway? Maybe it's a good idea to separate the database stuff from the storage stuff. I guess I just don't see the magic there.",
+      "id": "c78f513bf69f85480d87f47be7415bbd"
+    },
+    {
+      "type": "html",
+      "text": "\nAlso, don't you have to roll forward the Rowset by one before you can get that first (and only) row?",
+      "id": "fcf17fc94c8212c31b94736ee77abb4a"
+    },
+    {
+      "type": "html",
+      "text": "-- Dustin PENTO",
+      "id": "45e32a014bb046deec14236810a13059"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e8664f28002e8111f72bcba7ddaf6944"
+    },
+    {
+      "type": "html",
+      "text": "I never really understood the command pattern until I worked with some code written by someone else who really got it. There's probably a bunch of lessons in that about reading good code, just plain reading other's code, the apprentice system, etc.",
+      "id": "87984f52f419c27b5c221d3e466f2f04"
+    },
+    {
+      "type": "html",
+      "text": "\nIt also helped that I've been looking at Ruby. Once I realized that 'hey, this is sort of like a way to do Ruby blocks in C++', things came together quickly. Probably a lot more general lessons in that too.",
+      "id": "61483bd1a84a36ed0d373ecaba025981"
+    },
+    {
+      "type": "html",
+      "text": "<i>I was wondering if this was just about [[Smalltalk Block]]s, or how would it be something else. It actually says it's the Object version of cosure... The mention of Lisps closures plus [[Ruby Block]]s is a confirmation.</i>",
+      "id": "3a0afae44f1ca4706ccea733d19e21e8"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e8664f28002e8111f72bcba7ddaf6944"
+    },
+    {
+      "type": "html",
+      "text": "In the [[Component Design Patterns]] project, a mini-pattern language has emerged from a pattern submitted to PLoP 1998 called Override Current Processing ([http://jerry.cs.uiuc.edu/~plop/plop98/final_submissions/P46.pdf jerry.cs.uiuc.edu]) is being broken up into these Command patterns.",
+      "id": "0ea129d54bcff97b92bf6e0d473019f5"
+    },
+    {
+      "type": "html",
+      "text": " [[Interruptible Command]].",
+      "id": "d272c19c833a52f90601cde47f275741"
+    },
+    {
+      "type": "html",
+      "text": " [[Acid Command]].",
+      "id": "8c5af126dfa1308d22fe3021d126f4c8"
+    },
+    {
+      "type": "html",
+      "text": " [[Concurrent Commands]].\nMany times, each of these patterns has a resulting context that leads to [[Connection Patterns]].",
+      "id": "dc7ea63656326efc728894df5171c518"
+    },
+    {
+      "type": "html",
+      "text": "\nThe command pattern is excellent for supporting undo. The idea is to have a base class that defines a method to \"do\" a command, and another method to \"undo\" a command. Then, for each command, you derive from the command base class and fill in the code for the do and undo methods. The \"do\" method is expected to store any information needed to \"undo\" the command. For example, the command to delete an item would remember the content of the item being deleted.",
+      "id": "4897309bc17844b00e12b1788c378aac"
+    },
+    {
+      "type": "html",
+      "text": "\nHere's where the undo/redo comes in: You have a stack of objects (which could be implemented as an array). When you want to execute a command, you construct a command object of the appropriate type, call its \"do\" method. If \"do\" succeeds, you push it to the command stack (append it to the array).",
+      "id": "0e8dac19732ad5165c99e4a15c842a55"
+    },
+    {
+      "type": "html",
+      "text": "\nWhen you want to undo a command, you call the undo method of the command at the stack pointer, and decrement the stack pointer.",
+      "id": "88ba30b85f535bb3ea96973174dd93fa"
+    },
+    {
+      "type": "html",
+      "text": "\nWhen you want to redo a command, you increment the stack pointer and call the \"do\" method of the object at the stack pointer.",
+      "id": "31e697102b41bd01c7e769d600bda398"
+    },
+    {
+      "type": "html",
+      "text": "\nNote that the act of pushing a new command to the command stack truncates the stack at that point, discarding all of the command objects after the current top-of-stack stack entry.",
+      "id": "15e7000a3428fa826866171da4e3b55f"
+    },
+    {
+      "type": "html",
+      "text": "\nRedoing and undoing just move the stack pointer up and down the stack.",
+      "id": "3742c0df00dfc9c98dc3c1e691724c58"
+    },
+    {
+      "type": "html",
+      "text": "\nTheoretically, all this is seems fine, but when I tried to implement it I ran into two scenarios: ",
+      "id": "0f0292b44a359ca2c2274e60dae0372b"
+    },
+    {
+      "type": "html",
+      "text": " Commands that have ALREADY occurred, such as catching a change to an editbox after it has occurred.",
+      "id": "cc3c8ce742e345e1437a923a710302e3"
+    },
+    {
+      "type": "html",
+      "text": " Commands that are about to occur.",
+      "id": "f0fdd3ef75b482b8689419bdbb1adbf2"
+    },
+    {
+      "type": "html",
+      "text": "\nSometimes you want to construct a command object and place it on the undo stack, WITHOUT calling it's \"do\" method, because it has already occurred. If you caught a change to an editbox, the character has already been added so you don't want to \"do\" that command, you just want to remember information about where the insertion occurred and what was inserted (a simplification is to simply remember the old and new content of the field, or use the old and new contents to deduce the information to be stored compactly).",
+      "id": "d1861242795f91a3efb014894613b37f"
+    },
+    {
+      "type": "html",
+      "text": "\nOn the other hand, if the user selects an item and clicks Delete, then the \"do\" method of the \"delete\" command object would store the details of the item being deleted and it would actually perform the deletion.",
+      "id": "dbe3d36c6e88eb3774ea3d2412fcc5bd"
+    },
+    {
+      "type": "html",
+      "text": "\nIn my implementation, I have an object that manages the undo stack. It has three methods for updating the stack:",
+      "id": "c98cff5cd0246d63d7f920a00e7c0958"
+    },
+    {
+      "type": "html",
+      "text": " Do<b></b>Command",
+      "id": "ecc3e8c946c9377a64561e72d310d38c"
+    },
+    {
+      "type": "html",
+      "text": " Undo<b></b>Command",
+      "id": "c53cd4dccdd2496fc9e9f23a1f47eedf"
+    },
+    {
+      "type": "html",
+      "text": " Add<b></b>Command",
+      "id": "235256c5135ebdd6c1983b96c957166b"
+    },
+    {
+      "type": "html",
+      "text": "\nEach of these methods take a command object as a parameter (except Undo<b></b>Command).",
+      "id": "fc86aee6f8ab474127257ffeab3cdb4e"
+    },
+    {
+      "type": "html",
+      "text": "\nDo<b></b>Command pushes the object to the stack AND calls its \"do\" method.",
+      "id": "273bc608732c947cf7a899de4f7e88bc"
+    },
+    {
+      "type": "html",
+      "text": "\nUndo<b></b>Command calls the \"undo\" method of the command at the stack pointer, and adjusts the stack pointer.",
+      "id": "1f30cb3744e7a65329b22c13371a3982"
+    },
+    {
+      "type": "html",
+      "text": "\nAdd<b></b>Command pushes a new command object to the stack WITHOUT calling its \"do\" method.",
+      "id": "60c0b8baca694afe099910b595e8793c"
+    },
+    {
+      "type": "html",
+      "text": "\nOne of the problems with this pattern is that it can cause an explosion of little command classes. It is important to have a good naming convention and to do your best to factor common classes.",
+      "id": "784c93729858f971ac14e3c290463718"
+    },
+    {
+      "type": "html",
+      "text": "\nTo handle events that need to be undone as a group, I implemented a \"group undo\" class. It's job is to be a container for several command objects. When code is performing an operation to be done as a group, it creates a group command object and appends the commands to it. The Do method calls all of it's children's Do methods. It's undo method calls all of its children's Undo methods in reverse order. When pushing to the stack, if a command execution fails, this class also undoes the commands done so far (which rolls state back to the way it was before the group was executed) then it fails the creation of the group object.",
+      "id": "2d4a77f79caae6cd28a00251643244ba"
+    },
+    {
+      "type": "html",
+      "text": "\nThis pattern also opens the door to implementing a macro language. Each macro command could create and execute a command object.",
+      "id": "17ca8cf5e0557ba0e653ff66714804ca"
+    },
+    {
+      "type": "html",
+      "text": "\nGroups can in turn contain other groups. The very execution of a macro itself is a group. If anything fails, it rolls back to the state prior to the execution of the macro.",
+      "id": "3685e002df08e926c48d007164595a44"
+    },
+    {
+      "type": "html",
+      "text": "-- Doug Gale (dgale@excite.com)",
+      "id": "007f547ec712497c442f988f6292fd46"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e8664f28002e8111f72bcba7ddaf6944"
+    },
+    {
+      "type": "html",
+      "text": "\nForgive me for asking, but isn't this basically just an [[Io Monad]]? --[[Anonymous Donor]]",
+      "id": "ac97fe560278dc9dd8545190897f44fe"
+    },
+    {
+      "type": "html",
+      "text": "<i>The way I see it, they're different concepts, with which you usually do similar things. The semantics of monads don't map to objects, or vice versa, but they can solve similar problems. Anyway, I don't fully get my head around monads. (Just remove this when a real comparison arrives :P )</i>",
+      "id": "dbc82f4eab64e0e6815ae60205662c46"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e8664f28002e8111f72bcba7ddaf6944"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Pattern]] [[Category Behavioral Patterns]]",
+      "id": "72e1c6882d4ef0f0486647733a282ad4"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?CommandPattern c2.com]",
+      "id": "00021e51a76164a2b725caca363996cd"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1393970022000,
+      "id": "973bc4069473664f59fa6347b11365fb",
+      "type": "create",
+      "item": {
+        "title": "Command Pattern",
+        "story": [
+          {
+            "type": "html",
+            "text": "<b>Intent:</b> Encapsulate a request as an object, thereby letting you parameterize clients with different requests, queue or log requests, and support undoable operations. ",
+            "id": "2d563662de25eb1370a3d2c1ece771ee"
+          },
+          {
+            "type": "html",
+            "text": "<b>See also:</b> [[Command Object]], [[Design Patterns]], [[Threaded Command Object]], [[Scheduler Pattern]]",
+            "id": "4351c398c8e073c5dd338d1505c42f25"
+          },
+          {
+            "type": "html",
+            "text": "<b>AKA:</b> Object version of closure.",
+            "id": "abf6898f05e8f37581e8dadb4c323645"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e8664f28002e8111f72bcba7ddaf6944"
+          },
+          {
+            "type": "html",
+            "text": "\nThe [[Gang Of Four]] [[Command Pattern]] documents the recurring design theme of separating execution of a command from its invoker.  Different variations were mentioned, like being able to undo the execution of commands, and executing commands in batch.  More patterns that extend the Command pattern are being discovered. -- [[Philip Eskelin]]",
+            "id": "43397001f5633d05a9856e57993cafaa"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e8664f28002e8111f72bcba7ddaf6944"
+          },
+          {
+            "type": "html",
+            "text": "\nBesides Undo, when you turn all user actions into a \"command stream\" passing through a \"command engine\", as mentioned above, you can insert synthetic commands into the stream to implement scripting, and save the command stream to implement recordable macros. You can also redirect the command stream to another computer to remote control another app over the internet.",
+            "id": "05c6f017f96d1aec9d6640d21ce3524a"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e8664f28002e8111f72bcba7ddaf6944"
+          },
+          {
+            "type": "html",
+            "text": "\nThat is true, the \"command pattern\" concept does not include or require undo. I focus on undo because the command pattern is a very intuitive and extensible way to implement it. Approaching a problem using this pattern tends to organize things and make them more consistent. It also tends to reveal opportunities to factor out repetitive code. You can separate similar commands into families, and factor repeated code into shared base classes.",
+            "id": "6b1fd8cd2fead9f01e82f5df0c425ce0"
+          },
+          {
+            "type": "html",
+            "text": "\nThis pattern works very well in GUI code, but it can be applied wherever it is possible and worthwhile to make operations reversible. For example, you could use it to undo filesystem changes, or database transactions. Commands can fail, and roll-back is easily implemented, so the system can make a best-effort to stay in a valid state. ",
+            "id": "913f5a518cb2d999cfe9730926c4bdbf"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e8664f28002e8111f72bcba7ddaf6944"
+          },
+          {
+            "type": "html",
+            "text": "\nI don't know, it seems like a \"glorified\" function call to me.",
+            "id": "792e3767fce6efa25773475be0a89610"
+          },
+          {
+            "type": "html",
+            "text": "[It's a function call that has state, it's a closure, it remembers how to undo itself, that's far more than just a function call.]",
+            "id": "1da85d702473fd7f94a14c1fac9e176d"
+          },
+          {
+            "type": "html",
+            "text": "<i>That's the point. A call \"glorified\" (or reified) so that you can pass it around, and maybe store it for later usage.</i>",
+            "id": "3b3302c42399030e4db83d62a78519dd"
+          },
+          {
+            "type": "html",
+            "text": "\nYou mean like in LISP? :-) [This simulates Lisp's closures.]",
+            "id": "6ec5d2946052c4c47f608513244d8d0a"
+          },
+          {
+            "type": "html",
+            "text": "<i>Yes. Some languages like Lisp and Python have built-in features to pass around methods. This can be used instead of this pattern, or as a way to implement it.</i>",
+            "id": "4b7dee2b141b7a78a8b9ea15bd1045c9"
+          },
+          {
+            "type": "html",
+            "text": "\nI suppose any language that can reference an algorithm by name or address and \"run\" it could also apply (to various degrees). This might be as simple as:",
+            "id": "2ee39b787e95aa6978f6cfe3cf3c2532"
+          },
+          {
+            "type": "code",
+            "text": "  commands = fileToString(\"myPath/myCode.prg\")\n  executeString(commands)",
+            "id": "64319c6a67a17b6d52b82dcf49d187aa"
+          },
+          {
+            "type": "html",
+            "text": "<i>Wait, if you use function pointers instead of a Command object (with do and undo methods), don't you lose the undo feature, which is the main concrete feature touted above?</i>",
+            "id": "c29666ce41d18c2f704afd1c8b97893e"
+          },
+          {
+            "type": "html",
+            "text": "<b>Undo is not a feature of the Command pattern, it is simply one of the application features you could implement using it. Using single-argument function pointers in a language like C, you could use an array of function-pointer/argument pairs as your undo stack.</b>",
+            "id": "60235d4c20ca6f63e1fc1a7eea7c0a63"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e8664f28002e8111f72bcba7ddaf6944"
+          },
+          {
+            "type": "html",
+            "text": "\nI find the DataAccessCommandP<b></b>attern very useful for persistence. For example, if I want to display the shopping cart using the following query:",
+            "id": "f7b5c6be759c9881693e4fc25d270e83"
+          },
+          {
+            "type": "html",
+            "text": "\nselect product.name as product_name, item.item_id as item_id, \nitem.description as item_description, item.price as item_price, quantity from cartitems, item, product \t\nwhere cart_id=? and cartitems.item_id = item.item_id and item.product_id = product.product_id",
+            "id": "394428d3b334a503e24c02435114fa40"
+          },
+          {
+            "type": "html",
+            "text": "\nWith the DataAccessCommandP<b></b>attern I would have (in Java):",
+            "id": "baca29de20029388ffe6903c320f540c"
+          },
+          {
+            "type": "code",
+            "text": "  public class View''''''Cart''''''Command{\n    private Row''''''Set rs;\n    private int _cartId;",
+            "id": "7e04407f56a09d6f8eb0253a74726205"
+          },
+          {
+            "type": "code",
+            "text": "    public void setCartId(int cartId){ _cartId = cartId; }",
+            "id": "2ce641f08715a162d20cb4ff384bf460"
+          },
+          {
+            "type": "code",
+            "text": "    public void execute() throws DataCommandE''''''xception{\n      Connection conn = null;\n      PreparedStatement stat = null;\n      try{\n        conn = ConnectionPool.getConnection();\n        stat = conn.prepareStatement(query);\n        stat.setInt(1, _cartId);\n        rs.populate(stat.executeQuery());\n        rs.beforeFirst();\n      }catch(SQLException e){\n        throw new DataCommandE''''''xception(e);\n      }finally{\n        try{\n          if(stat != null) stat.close();\n          if(conn != null) conn.close();\n        }catch(SQLException err){ throw new DataCommandE''''''xception(\"failed to close db resources\", err); }\n      }\n    }",
+            "id": "cb74ff8e6f187e73c22bb43179fd28c9"
+          },
+          {
+            "type": "code",
+            "text": "    public String getProductName(){ return rs.getString(\"product_name\"); }\n    // etc\n  }",
+            "id": "5ce12a17171fa61d171b15b7f2a41516"
+          },
+          {
+            "type": "html",
+            "text": "The advantage of this approach compared to O/R mapping solutions (including DataAccessObjectP<b></b>attern) is that you don't have to navigate an object graph or create custom value objects. For more information check out [http://www.theserverside.com/books/EJBDesignPatterns/index.jsp www.theserverside.com]",
+            "id": "9f3f23a661ea8164b67977a389995744"
+          },
+          {
+            "type": "html",
+            "text": "-- Cameron Zemek (grom_3@optusnet.com.au)",
+            "id": "62f6dcee6ac94bb1036d7e0949aabc53"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e8664f28002e8111f72bcba7ddaf6944"
+          },
+          {
+            "type": "html",
+            "text": "\nI'm confused by that DataAccessCommandP<b></b>attern up above. Could someone explain to me why it's a good idea in that shopping cart context? It stores, using a Row<b></b>Set, a single cart entry and holds on to it. I haven't used JDBC directly in a little while, but won't you have to re-execute that command all the time anyway? Maybe it's a good idea to separate the database stuff from the storage stuff. I guess I just don't see the magic there.",
+            "id": "c78f513bf69f85480d87f47be7415bbd"
+          },
+          {
+            "type": "html",
+            "text": "\nAlso, don't you have to roll forward the Rowset by one before you can get that first (and only) row?",
+            "id": "fcf17fc94c8212c31b94736ee77abb4a"
+          },
+          {
+            "type": "html",
+            "text": "-- Dustin PENTO",
+            "id": "45e32a014bb046deec14236810a13059"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e8664f28002e8111f72bcba7ddaf6944"
+          },
+          {
+            "type": "html",
+            "text": "I never really understood the command pattern until I worked with some code written by someone else who really got it. There's probably a bunch of lessons in that about reading good code, just plain reading other's code, the apprentice system, etc.",
+            "id": "87984f52f419c27b5c221d3e466f2f04"
+          },
+          {
+            "type": "html",
+            "text": "\nIt also helped that I've been looking at Ruby. Once I realized that 'hey, this is sort of like a way to do Ruby blocks in C++', things came together quickly. Probably a lot more general lessons in that too.",
+            "id": "61483bd1a84a36ed0d373ecaba025981"
+          },
+          {
+            "type": "html",
+            "text": "<i>I was wondering if this was just about [[Smalltalk Block]]s, or how would it be something else. It actually says it's the Object version of cosure... The mention of Lisps closures plus [[Ruby Block]]s is a confirmation.</i>",
+            "id": "3a0afae44f1ca4706ccea733d19e21e8"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e8664f28002e8111f72bcba7ddaf6944"
+          },
+          {
+            "type": "html",
+            "text": "In the [[Component Design Patterns]] project, a mini-pattern language has emerged from a pattern submitted to PLoP 1998 called Override Current Processing ([http://jerry.cs.uiuc.edu/~plop/plop98/final_submissions/P46.pdf jerry.cs.uiuc.edu]) is being broken up into these Command patterns.",
+            "id": "0ea129d54bcff97b92bf6e0d473019f5"
+          },
+          {
+            "type": "html",
+            "text": " [[Interruptible Command]].",
+            "id": "d272c19c833a52f90601cde47f275741"
+          },
+          {
+            "type": "html",
+            "text": " [[Acid Command]].",
+            "id": "8c5af126dfa1308d22fe3021d126f4c8"
+          },
+          {
+            "type": "html",
+            "text": " [[Concurrent Commands]].\nMany times, each of these patterns has a resulting context that leads to [[Connection Patterns]].",
+            "id": "dc7ea63656326efc728894df5171c518"
+          },
+          {
+            "type": "html",
+            "text": "\nThe command pattern is excellent for supporting undo. The idea is to have a base class that defines a method to \"do\" a command, and another method to \"undo\" a command. Then, for each command, you derive from the command base class and fill in the code for the do and undo methods. The \"do\" method is expected to store any information needed to \"undo\" the command. For example, the command to delete an item would remember the content of the item being deleted.",
+            "id": "4897309bc17844b00e12b1788c378aac"
+          },
+          {
+            "type": "html",
+            "text": "\nHere's where the undo/redo comes in: You have a stack of objects (which could be implemented as an array). When you want to execute a command, you construct a command object of the appropriate type, call its \"do\" method. If \"do\" succeeds, you push it to the command stack (append it to the array).",
+            "id": "0e8dac19732ad5165c99e4a15c842a55"
+          },
+          {
+            "type": "html",
+            "text": "\nWhen you want to undo a command, you call the undo method of the command at the stack pointer, and decrement the stack pointer.",
+            "id": "88ba30b85f535bb3ea96973174dd93fa"
+          },
+          {
+            "type": "html",
+            "text": "\nWhen you want to redo a command, you increment the stack pointer and call the \"do\" method of the object at the stack pointer.",
+            "id": "31e697102b41bd01c7e769d600bda398"
+          },
+          {
+            "type": "html",
+            "text": "\nNote that the act of pushing a new command to the command stack truncates the stack at that point, discarding all of the command objects after the current top-of-stack stack entry.",
+            "id": "15e7000a3428fa826866171da4e3b55f"
+          },
+          {
+            "type": "html",
+            "text": "\nRedoing and undoing just move the stack pointer up and down the stack.",
+            "id": "3742c0df00dfc9c98dc3c1e691724c58"
+          },
+          {
+            "type": "html",
+            "text": "\nTheoretically, all this is seems fine, but when I tried to implement it I ran into two scenarios: ",
+            "id": "0f0292b44a359ca2c2274e60dae0372b"
+          },
+          {
+            "type": "html",
+            "text": " Commands that have ALREADY occurred, such as catching a change to an editbox after it has occurred.",
+            "id": "cc3c8ce742e345e1437a923a710302e3"
+          },
+          {
+            "type": "html",
+            "text": " Commands that are about to occur.",
+            "id": "f0fdd3ef75b482b8689419bdbb1adbf2"
+          },
+          {
+            "type": "html",
+            "text": "\nSometimes you want to construct a command object and place it on the undo stack, WITHOUT calling it's \"do\" method, because it has already occurred. If you caught a change to an editbox, the character has already been added so you don't want to \"do\" that command, you just want to remember information about where the insertion occurred and what was inserted (a simplification is to simply remember the old and new content of the field, or use the old and new contents to deduce the information to be stored compactly).",
+            "id": "d1861242795f91a3efb014894613b37f"
+          },
+          {
+            "type": "html",
+            "text": "\nOn the other hand, if the user selects an item and clicks Delete, then the \"do\" method of the \"delete\" command object would store the details of the item being deleted and it would actually perform the deletion.",
+            "id": "dbe3d36c6e88eb3774ea3d2412fcc5bd"
+          },
+          {
+            "type": "html",
+            "text": "\nIn my implementation, I have an object that manages the undo stack. It has three methods for updating the stack:",
+            "id": "c98cff5cd0246d63d7f920a00e7c0958"
+          },
+          {
+            "type": "html",
+            "text": " Do<b></b>Command",
+            "id": "ecc3e8c946c9377a64561e72d310d38c"
+          },
+          {
+            "type": "html",
+            "text": " Undo<b></b>Command",
+            "id": "c53cd4dccdd2496fc9e9f23a1f47eedf"
+          },
+          {
+            "type": "html",
+            "text": " Add<b></b>Command",
+            "id": "235256c5135ebdd6c1983b96c957166b"
+          },
+          {
+            "type": "html",
+            "text": "\nEach of these methods take a command object as a parameter (except Undo<b></b>Command).",
+            "id": "fc86aee6f8ab474127257ffeab3cdb4e"
+          },
+          {
+            "type": "html",
+            "text": "\nDo<b></b>Command pushes the object to the stack AND calls its \"do\" method.",
+            "id": "273bc608732c947cf7a899de4f7e88bc"
+          },
+          {
+            "type": "html",
+            "text": "\nUndo<b></b>Command calls the \"undo\" method of the command at the stack pointer, and adjusts the stack pointer.",
+            "id": "1f30cb3744e7a65329b22c13371a3982"
+          },
+          {
+            "type": "html",
+            "text": "\nAdd<b></b>Command pushes a new command object to the stack WITHOUT calling its \"do\" method.",
+            "id": "60c0b8baca694afe099910b595e8793c"
+          },
+          {
+            "type": "html",
+            "text": "\nOne of the problems with this pattern is that it can cause an explosion of little command classes. It is important to have a good naming convention and to do your best to factor common classes.",
+            "id": "784c93729858f971ac14e3c290463718"
+          },
+          {
+            "type": "html",
+            "text": "\nTo handle events that need to be undone as a group, I implemented a \"group undo\" class. It's job is to be a container for several command objects. When code is performing an operation to be done as a group, it creates a group command object and appends the commands to it. The Do method calls all of it's children's Do methods. It's undo method calls all of its children's Undo methods in reverse order. When pushing to the stack, if a command execution fails, this class also undoes the commands done so far (which rolls state back to the way it was before the group was executed) then it fails the creation of the group object.",
+            "id": "2d4a77f79caae6cd28a00251643244ba"
+          },
+          {
+            "type": "html",
+            "text": "\nThis pattern also opens the door to implementing a macro language. Each macro command could create and execute a command object.",
+            "id": "17ca8cf5e0557ba0e653ff66714804ca"
+          },
+          {
+            "type": "html",
+            "text": "\nGroups can in turn contain other groups. The very execution of a macro itself is a group. If anything fails, it rolls back to the state prior to the execution of the macro.",
+            "id": "3685e002df08e926c48d007164595a44"
+          },
+          {
+            "type": "html",
+            "text": "-- Doug Gale (dgale@excite.com)",
+            "id": "007f547ec712497c442f988f6292fd46"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e8664f28002e8111f72bcba7ddaf6944"
+          },
+          {
+            "type": "html",
+            "text": "\nForgive me for asking, but isn't this basically just an [[Io Monad]]? --[[Anonymous Donor]]",
+            "id": "ac97fe560278dc9dd8545190897f44fe"
+          },
+          {
+            "type": "html",
+            "text": "<i>The way I see it, they're different concepts, with which you usually do similar things. The semantics of monads don't map to objects, or vice versa, but they can solve similar problems. Anyway, I don't fully get my head around monads. (Just remove this when a real comparison arrives :P )</i>",
+            "id": "dbc82f4eab64e0e6815ae60205662c46"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e8664f28002e8111f72bcba7ddaf6944"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Pattern]] [[Category Behavioral Patterns]]",
+            "id": "72e1c6882d4ef0f0486647733a282ad4"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?CommandPattern c2.com]",
+            "id": "00021e51a76164a2b725caca363996cd"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1644300558899
+    }
+  ]
+}

@@ -1,0 +1,692 @@
+{
+  "title": "Securing Transports",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "f8758ab6c6d655ca",
+      "text": "Transporters provide a mechanism for bringing content into a wiki site. Here we record a possible way of restricting access to transporters so that they can only be accessed by the owner of the wiki that is accessing them."
+    },
+    {
+      "type": "markdown",
+      "id": "b99498bd18c96399",
+      "text": "There are three possible way of protecting transporters: -\n\n- Make the transporters available as a package that a wiki owner can install locally, and be available as localhost.\n- Use a proxy server in front of the transporters, and wiki, and make the transporters available within the wiki domain - this is the mechanism we will look at here.\n- Secure the transporters seperately from the wiki.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "a002da59dbef6647",
+      "text": "### Making Transporter available in wiki domain."
+    },
+    {
+      "type": "markdown",
+      "id": "6b5975187863a78a",
+      "text": "The idea behind making a group of transporters available with in the wiki uri namespace is so that the wiki session cookie will also be passed to the transporter. This is achieved using a reverse proxy, for this example we will be using an example wiki domain of `example.wiki`, and a simple echo transporter. There is nothing special in the wiki config, being something like:"
+    },
+    {
+      "type": "code",
+      "id": "3d4f895d327b9117",
+      "text": "{\n  \"farm\": true,\n  ... whatever config is required for security ...,\n  \"wikiDomains\": {\n    \"example.wiki\": {}\n  }\n}"
+    },
+    {
+      "type": "markdown",
+      "id": "2f3a8f96829e76cc",
+      "text": "We will expose the transports as a subdomain `transport.example.wiki`, which will allow it to act a foreign wiki server. However this will get the wiki users identity, without a modification to the transporter plugin which has other implications, so we will also expose the transporter on a subdirectory for when restricted access if required. In this example we will use `/transport`, so our example echo transporter will be available as `/transport/echo`. "
+    },
+    {
+      "type": "paragraph",
+      "id": "6d0aa7818deae82b",
+      "text": "Using Caddy 2, as an example proxy, our configuration would look like, tls config is not included:"
+    },
+    {
+      "type": "code",
+      "id": "45f6756c40f6c5ff",
+      "text": "transporter.example.wiki:443 {\n  uri /transport/* strip_prefix /transport\n  reverse_proxy localhost:8081 {\n    header_up Host {host}\n  }\n}\n\nexample.wiki:443, *.example.wiki:443 {\n  route /transport/* {\n    uri /transport/* strip_prefix /transport\n    reverse_proxy localhost:8081 {\n      header_up Host {host}\n    }\n  }\n  reverse_proxy localhost:3000 {\n    header_up Host {host}\n  }\n}"
+    },
+    {
+      "type": "markdown",
+      "id": "82ba29b37249187e",
+      "text": "Using this example the echo plugin would be avaiable by using `POST /transport/echo/`."
+    },
+    {
+      "type": "paragraph",
+      "id": "3e4f2daea44545dd",
+      "text": "To restrict access to the transporter to just the owner of the wiki that's making the transport request, the transporter code will need to modified to read: i) the origin of the wiki the request is coming from, ii) the identity cookie for the user making the request, and iii) use that information to check if they are indeed the wiki owner."
+    },
+    {
+      "type": "paragraph",
+      "id": "6816134409ef6486",
+      "text": "The full code of a sample echo transporter is available as [https://gist.github.com/paul90/fa54c1a112f8fa0b2b3a5ea19e085c4e gist], lets step though the code."
+    },
+    {
+      "type": "code",
+      "id": "ebc7c976cb7dc867",
+      "text": "app.post('/echo', function (req, res) {\n// So lets restrict access to this to only the\n// owner of the wiki making the request.\n//\n// First we need to know which wiki the request was\n// made on, and the wikiSession of the person\n// making the request. So, lets extract the\n// referer and cookie from the request.\n  console.log('/echo')\n  var wikiOrigin = undefined\n  var wikiHost = undefined\n  var requestCookies = undefined\n  if (req.headers.referer) {\n    wikiOrigin = new URL(req.headers.referer).origin\n    wikiHost = new URL(req.headers.referer).host\n  }\n  if (req.headers.cookie) {\n    requestCookies = req.headers.cookie\n  }"
+    },
+    {
+      "type": "paragraph",
+      "id": "103ee3c97a761664",
+      "text": "In this inital section we get the origin, and host, of the wiki the request is being made from, and the cookies from the request."
+    },
+    {
+      "type": "code",
+      "id": "e881fc1bda0ce9ee",
+      "text": "  if (typeof wikiOrigin !== 'undefined' && typeof requestCookies !== 'undefined') {\n    // we now know the origin of the wiki the\n    // request was made on, and the user's cookies\n    // so we can check that the user is the wiki\n    // owner.\n    // we can use the private proxy in the wiki\n    // server to check if the user is the wiki\n    // owner\n    var url = wikiOrigin + `/proxy/${wikiHost}/welcome-visitors.json`\n    \n    // isWikiOwner makes a call using the private\n    // proxy, it will return true if the user is\n    // the owner, and false if they are not.\n    const isWikiOwner = async url => {  \n      const response = await fetch(url, {'headers': {\n          'accept': '*/*',\n          'cookie': requestCookies\n        }\n      })\n      .then(function(response) {\n        if (response.ok)\n          return true\n      }).catch(function(error) {\n        return false\n      })\n    }"
+    },
+    {
+      "type": "markdown",
+      "id": "6f4aec8d66e85daa",
+      "text": "As long as we have both the wikiOrigin and request cookies, we can proceed. The `url` is for making a proxy request from itself, this could be for any resource that will exist. The function `isWikiOwner` fetches the url, adding the cookies to the request. As long as the cookies identify the wiki owner the fetch will succeed, but if they are not it will return a `403`. "
+    },
+    {
+      "type": "code",
+      "id": "4c25c2b7ce902692",
+      "text": "    if (isWikiOwner(url)) {\n      // the user is the wiki owner, so send the\n      // response\n      res.json({'title': 'Transport Parameters',\n                'story': [{'type': 'paragraph',\n                          'id': random_id(), \n                          'text': 'These are all of the parameters sent in the post body of the transport request.'},\n                          {'type': 'code',\n                          'id': random_id(),\n                          'text': `${JSON.stringify(req.body, null, '  ')}`}],\n                'journal': [] })\n    } else {\n      // we will get here if the check to see if the user is the wikiOwner fails.\n      res.json({'title': 'Echo Transporter',\n      'story': [{'type': 'paragraph',\n                'id': random_id(), \n                'text': 'This transporter is only available to the wiki owner.'},\n                ],\n      'journal': [] })\n    }\n  } else {\n      // we will get here if the request does not\n      // include the referer or any cookies\n      res.json({'title': 'Echo Transporter',\n      'story': [{'type': 'paragraph',\n                'id': random_id(), \n                'text': 'This transporter is only available to the wiki owner.'},\n                ],\n      'journal': [] })\n  }\n})"
+    },
+    {
+      "type": "markdown",
+      "id": "aa7de0e9c2fe2296",
+      "text": "We check if the user is the wiki owner, by calling `isWikiOwner`. If they are we perform the transporter, in this case a simple echo of data passed to the transporter. If they are not, or if we didn't get the information required to check, a simple error page is returned."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Securing Transports",
+        "story": []
+      },
+      "date": 1587304517133,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f8758ab6c6d655ca"
+      },
+      "id": "f8758ab6c6d655ca",
+      "type": "add",
+      "date": 1587304520287,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "f8758ab6c6d655ca",
+      "item": {
+        "type": "paragraph",
+        "id": "f8758ab6c6d655ca",
+        "text": "Transporters provide a mechanism for bringing content into a wiki site. Here we record a possible way of restricting access to transporters so that they can only be accessed by the owner of the wiki that is accessing them."
+      },
+      "date": 1587304534841,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b99498bd18c96399"
+      },
+      "id": "b99498bd18c96399",
+      "type": "add",
+      "after": "f8758ab6c6d655ca",
+      "date": 1587304549694,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "b99498bd18c96399",
+      "item": {
+        "type": "markdown",
+        "id": "b99498bd18c96399",
+        "text": "There are three possible way of protecting transporters: -\n\n- Make the transporters available as a package that a wiki owner can install locally, and be available as localhost.\n- Use a proxy server in front of the transporters, and wiki, and make the transporters available within the wiki domain - this is the mechanism we will look at here.\n- Secure the transporters seperately from the wiki.\n"
+      },
+      "date": 1587304554056,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a002da59dbef6647"
+      },
+      "id": "a002da59dbef6647",
+      "type": "add",
+      "after": "b99498bd18c96399",
+      "date": 1587304562573,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "a002da59dbef6647",
+      "item": {
+        "type": "markdown",
+        "id": "a002da59dbef6647",
+        "text": "### Making Transporter available in wiki domain."
+      },
+      "date": 1587304575327,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6b5975187863a78a"
+      },
+      "id": "6b5975187863a78a",
+      "type": "add",
+      "after": "a002da59dbef6647",
+      "date": 1587304577726,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "6b5975187863a78a",
+      "item": {
+        "type": "markdown",
+        "id": "6b5975187863a78a",
+        "text": "The idea behind making a group of transporters available with in the wiki uri namespace is so that the wiki session cookie will also be passed to the transporter. This is achieved using a reverse proxy, for this example we will be using an example wiki domain of example.wiki, and a simple echo transporter. There is nothing special in the wiki config, being something like:"
+      },
+      "date": 1587304587894,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "6b5975187863a78a",
+      "item": {
+        "type": "markdown",
+        "id": "6b5975187863a78a",
+        "text": "The idea behind making a group of transporters available with in the wiki uri namespace is so that the wiki session cookie will also be passed to the transporter. This is achieved using a reverse proxy, for this example we will be using an example wiki domain of `example.wiki`, and a simple echo transporter. There is nothing special in the wiki config, being something like:"
+      },
+      "date": 1587304603581,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3d4f895d327b9117"
+      },
+      "id": "3d4f895d327b9117",
+      "type": "add",
+      "after": "6b5975187863a78a",
+      "date": 1587304614156,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "3d4f895d327b9117",
+      "item": {
+        "type": "code",
+        "id": "3d4f895d327b9117",
+        "text": "{\n  \"farm\": true,\n  ... whatever config is required for security ...,\n  \"wikiDomains\": {\n    \"example.wiki\": {}\n  }\n}"
+      },
+      "date": 1587304618293,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2f3a8f96829e76cc"
+      },
+      "id": "2f3a8f96829e76cc",
+      "type": "add",
+      "after": "3d4f895d327b9117",
+      "date": 1587304629747,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "2f3a8f96829e76cc",
+      "item": {
+        "type": "markdown",
+        "id": "2f3a8f96829e76cc",
+        "text": "We will expose the transports as a subdomain `transport.example.wiki`, which will allow it to act a foreign wiki server. However this will get the wiki users identity, without a modification to the transporter plugin which has other implications, so we will also expose the transporter on a subdirectory for when restricted access if required. In this example we will use `/transport`, so our example echo transporter will be available as `/transport/echo`. "
+      },
+      "date": 1587304663284,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6d0aa7818deae82b"
+      },
+      "id": "6d0aa7818deae82b",
+      "type": "add",
+      "after": "2f3a8f96829e76cc",
+      "date": 1587304673625,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "6d0aa7818deae82b",
+      "item": {
+        "type": "paragraph",
+        "id": "6d0aa7818deae82b",
+        "text": "Using Caddy 2, as an example proxy, our configuration would look like, tls config is not included:"
+      },
+      "date": 1587304676731,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "45f6756c40f6c5ff"
+      },
+      "id": "45f6756c40f6c5ff",
+      "type": "add",
+      "after": "6d0aa7818deae82b",
+      "date": 1587304686809,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "45f6756c40f6c5ff",
+      "item": {
+        "type": "code",
+        "id": "45f6756c40f6c5ff",
+        "text": "transporter.example.wiki:443 {\n  uri /transport/* strip_prefix /transport\n  reverse_proxy localhost:8081 {\n    header_up Host {host}\n  }\n}\n\nexample.wiki:443, *.example.wiki:443 {\n  route /transport/* {\n    uri /transport/* strip_prefix /transport\n    reverse_proxy localhost:8081 {\n      header_up Host {host}\n    }\n  }\n  reverse_proxy localhost:3000 {\n    header_up Host {host}\n  }\n}"
+      },
+      "date": 1587304690778,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "82ba29b37249187e"
+      },
+      "id": "82ba29b37249187e",
+      "type": "add",
+      "after": "45f6756c40f6c5ff",
+      "date": 1587304709240,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "82ba29b37249187e",
+      "item": {
+        "type": "markdown",
+        "id": "82ba29b37249187e",
+        "text": "Using this example the echo plugin would be avaiable by using `POST /transport/echo/`."
+      },
+      "date": 1587304718993,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3e4f2daea44545dd"
+      },
+      "id": "3e4f2daea44545dd",
+      "type": "add",
+      "after": "82ba29b37249187e",
+      "date": 1587304728335,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "3e4f2daea44545dd",
+      "item": {
+        "type": "paragraph",
+        "id": "3e4f2daea44545dd",
+        "text": "To restrict access to the transporter to just the owner of the wiki that's making the transport request, the transporter code will need to modified to read: i) the origin of the wiki the request is coming from, ii) the identity cookie for the user making the request, and iii) use that information to check if they are indeed the wiki owner."
+      },
+      "date": 1587304732217,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6816134409ef6486"
+      },
+      "id": "6816134409ef6486",
+      "type": "add",
+      "after": "3e4f2daea44545dd",
+      "date": 1587304791381,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "6816134409ef6486",
+      "item": {
+        "type": "paragraph",
+        "id": "6816134409ef6486",
+        "text": "The full code of a sample echo transporter is available as [https://gist.github.com/paul90/fa54c1a112f8fa0b2b3a5ea19e085c4e gist], lets step though the code."
+      },
+      "date": 1587304796807,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ebc7c976cb7dc867"
+      },
+      "id": "ebc7c976cb7dc867",
+      "type": "add",
+      "after": "6816134409ef6486",
+      "date": 1587304816324,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "ebc7c976cb7dc867",
+      "item": {
+        "type": "code",
+        "id": "ebc7c976cb7dc867",
+        "text": "app.post('/echo', function (req, res) {\n// So lets restrict access to this to only the owner of the wiki making the request.\n//\n// First we need to know which wiki the request was made on, and the wikiSession of the \n// person making the request. So, lets extract the referer and cookie from the request.\n  console.log('/echo')\n  var wikiOrigin = undefined\n  var wikiHost = undefined\n  var requestCookies = undefined\n  if (req.headers.referer) {\n    wikiOrigin = new URL(req.headers.referer).origin\n    wikiHost = new URL(req.headers.referer).host\n  }\n  if (req.headers.cookie) {\n    requestCookies = req.headers.cookie\n  }"
+      },
+      "date": 1587304819502,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "103ee3c97a761664"
+      },
+      "id": "103ee3c97a761664",
+      "type": "add",
+      "after": "ebc7c976cb7dc867",
+      "date": 1587304837211,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "103ee3c97a761664",
+      "item": {
+        "type": "paragraph",
+        "id": "103ee3c97a761664",
+        "text": "In this inital section we get the origin, and host, of the wiki the request is being made from, and the cookies from the request."
+      },
+      "date": 1587304846556,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e881fc1bda0ce9ee"
+      },
+      "id": "e881fc1bda0ce9ee",
+      "type": "add",
+      "after": "103ee3c97a761664",
+      "date": 1587304855178,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "e881fc1bda0ce9ee",
+      "item": {
+        "type": "code",
+        "id": "e881fc1bda0ce9ee",
+        "text": "  if (typeof wikiOrigin !== 'undefined' && typeof requestCookies !== 'undefined') {\n    // we now know the origin of the wiki the request was made on, and the user's cookies\n    // so we can check that the user is the wiki owner.\n    // we can use the private proxy in the wiki server to check if the user is the wiki owner\n    var url = wikiOrigin + `/proxy/${wikiHost}/welcome-visitors.json`\n    \n    // isWikiOwner makes a call using the private proxy, \n    // it will return true if the user is the owner, and false if they are not.\n    const isWikiOwner = async url => {  \n      const response = await fetch(url, {'headers': {\n          'accept': '*/*',\n          'cookie': requestCookies\n        }\n      })\n      .then(function(response) {\n        if (response.ok)\n          return true\n      }).catch(function(error) {\n        return false\n      })\n    }"
+      },
+      "date": 1587304860980,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6f4aec8d66e85daa"
+      },
+      "id": "6f4aec8d66e85daa",
+      "type": "add",
+      "after": "e881fc1bda0ce9ee",
+      "date": 1587304873889,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "6f4aec8d66e85daa",
+      "item": {
+        "type": "markdown",
+        "id": "6f4aec8d66e85daa",
+        "text": "As long as we have both the wikiOrigin and request cookies, we can proceed. The `url` is for making a proxy request from itself, this could be for any resource that will exist. The function `isWikiOwner` fetches the url, adding the cookies to the request. As long as the cookies identify the wiki owner the fetch will succeed, but if they are not it will return a `403`. "
+      },
+      "date": 1587304899163,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4c25c2b7ce902692"
+      },
+      "id": "4c25c2b7ce902692",
+      "type": "add",
+      "after": "6f4aec8d66e85daa",
+      "date": 1587304911176,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "4c25c2b7ce902692",
+      "item": {
+        "type": "code",
+        "id": "4c25c2b7ce902692",
+        "text": "    if (isWikiOwner(url)) {\n      // the user is the wiki owner, so send the response\n      res.json({'title': 'Transport Parameters',\n                'story': [{'type': 'paragraph',\n                          'id': random_id(), \n                          'text': 'These are all of the parameters sent in the post body of the transport request.'},\n                          {'type': 'code',\n                          'id': random_id(),\n                          'text': `${JSON.stringify(req.body, null, '  ')}`}],\n                'journal': [] })\n    } else {\n      // we will get here if the check to see if the user is the wikiOwner fails.\n      res.json({'title': 'Echo Transporter',\n      'story': [{'type': 'paragraph',\n                'id': random_id(), \n                'text': 'This transporter is only available to the wiki owner.'},\n                ],\n      'journal': [] })\n    }\n  } else {\n      // we will get here if the request does not include the referer or any cookies\n      res.json({'title': 'Echo Transporter',\n      'story': [{'type': 'paragraph',\n                'id': random_id(), \n                'text': 'This transporter is only available to the wiki owner.'},\n                ],\n      'journal': [] })\n  }\n})"
+      },
+      "date": 1587304915873,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "aa7de0e9c2fe2296"
+      },
+      "id": "aa7de0e9c2fe2296",
+      "type": "add",
+      "after": "4c25c2b7ce902692",
+      "date": 1587304943295,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "aa7de0e9c2fe2296",
+      "item": {
+        "type": "markdown",
+        "id": "aa7de0e9c2fe2296",
+        "text": "We check if the user is the wiki owner, by calling `isWikiOwner`. If they are we perform the transporter, in this case a simple echo of data passed to the transporter. If they are not, or if we didn't get the information required to check, a simple error page is returned."
+      },
+      "date": 1587304951649,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "ebc7c976cb7dc867",
+      "item": {
+        "type": "code",
+        "id": "ebc7c976cb7dc867",
+        "text": "app.post('/echo', function (req, res) {\n// So lets restrict access to this to only the\n// owner of the wiki making the request.\n//\n// First we need to know which wiki the request was\n// made on, and the wikiSession of the person\n// making the request. So, lets extract the\n// referer and cookie from the request.\n  console.log('/echo')\n  var wikiOrigin = undefined\n  var wikiHost = undefined\n  var requestCookies = undefined\n  if (req.headers.referer) {\n    wikiOrigin = new URL(req.headers.referer).origin\n    wikiHost = new URL(req.headers.referer).host\n  }\n  if (req.headers.cookie) {\n    requestCookies = req.headers.cookie\n  }"
+      },
+      "date": 1587305009671,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "e881fc1bda0ce9ee",
+      "item": {
+        "type": "code",
+        "id": "e881fc1bda0ce9ee",
+        "text": "  if (typeof wikiOrigin !== 'undefined' && typeof requestCookies !== 'undefined') {\n    // we now know the origin of the wiki the\n    // request was made on, and the user's cookies\n    // so we can check that the user is the wiki\n    // owner.\n    // we can use the private proxy in the wiki\n    // server to check if the user is the wiki\n    // owner\n    var url = wikiOrigin + `/proxy/${wikiHost}/welcome-visitors.json`\n    \n    // isWikiOwner makes a call using the private\n    // proxy, it will return true if the user is\n    // the owner, and false if they are not.\n    const isWikiOwner = async url => {  \n      const response = await fetch(url, {'headers': {\n          'accept': '*/*',\n          'cookie': requestCookies\n        }\n      })\n      .then(function(response) {\n        if (response.ok)\n          return true\n      }).catch(function(error) {\n        return false\n      })\n    }"
+      },
+      "date": 1587305108123,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "edit",
+      "id": "4c25c2b7ce902692",
+      "item": {
+        "type": "code",
+        "id": "4c25c2b7ce902692",
+        "text": "    if (isWikiOwner(url)) {\n      // the user is the wiki owner, so send the\n      // response\n      res.json({'title': 'Transport Parameters',\n                'story': [{'type': 'paragraph',\n                          'id': random_id(), \n                          'text': 'These are all of the parameters sent in the post body of the transport request.'},\n                          {'type': 'code',\n                          'id': random_id(),\n                          'text': `${JSON.stringify(req.body, null, '  ')}`}],\n                'journal': [] })\n    } else {\n      // we will get here if the check to see if the user is the wikiOwner fails.\n      res.json({'title': 'Echo Transporter',\n      'story': [{'type': 'paragraph',\n                'id': random_id(), \n                'text': 'This transporter is only available to the wiki owner.'},\n                ],\n      'journal': [] })\n    }\n  } else {\n      // we will get here if the request does not\n      // include the referer or any cookies\n      res.json({'title': 'Echo Transporter',\n      'story': [{'type': 'paragraph',\n                'id': random_id(), \n                'text': 'This transporter is only available to the wiki owner.'},\n                ],\n      'journal': [] })\n  }\n})"
+      },
+      "date": 1587305142257,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "fork",
+      "date": 1587305206293,
+      "error": {
+        "type": "error",
+        "msg": "Forbidden",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "fork",
+      "date": 1587305281978
+    },
+    {
+      "type": "fork",
+      "site": "goals.pod.rodwell.me",
+      "date": 1627053400707
+    }
+  ]
+}

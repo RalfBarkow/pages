@@ -1,0 +1,1122 @@
+{
+  "title": "Emulate Keyword And Default Parameters",
+  "story": [
+    {
+      "type": "html",
+      "text": "A nice pattern to be used especially when designing highly reusable classes/functions, with lots of options. We try to achieve [[Economy Of Expression]] for the client context, as well as [[Information Hiding]] as much as possible. In particular by language features such as [[Keyword Parameter Passing]] (Lisp, PL/SQL,Ada'95, [[Objective Caml]], most Unix utilities with regards to command line invocation) strongly supports these properties and we want to emulate this behavior in language without support for [[Keyword Parameter Passing]], following the principle [[Program Intoa Language]].",
+      "id": "56e45c19f10c7915bb4ea84197257ea9"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "132d499403b3478a942a8a2eba61e221"
+    },
+    {
+      "type": "html",
+      "text": "\nIn language such as Java, C++, C#, a serious limitation is lack of [[Keyword Parameter Passing]]. This makes creating frameworks with [[Long Parameter List]] unlikely. Often times I've seen people avoid a design with [[Long Parameter List]] just because it is thought ugly in Java. C++ went only a quarter of the way towards a good language design solution and it has default values. But that is a half-baked horror!! We'll see why.",
+      "id": "ddfa5fcc4f63809af86afc337f1bed37"
+    },
+    {
+      "type": "html",
+      "text": "\nA [[Long Parameter List]] is typical of an operation provided by a highly reusable framework, that has a lot of <b>options</b>. For example a Xerces SAX Parser has a long list of boolean options: whether or not to validate, to warn of various warnings, to load external dtds, to continue after errors, etc. Most of these do have sensible defaults, so in a language with default parameters, a call to the parse operation is just a one liner, where the client can affect just the paramters he's interested in, something like:",
+      "id": "f647deb10c3d9c9aa893a2383b4715c5"
+    },
+    {
+      "type": "code",
+      "text": "  ParserUtility.parse inputStream saxHandler ~namespaces:false  ~validate:false ~loadExternalDTDs:false",
+      "id": "998c7859ad34dccb5a59defa1a57ba0b"
+    },
+    {
+      "type": "html",
+      "text": "Now following the idiomatic standard, if I were to design the [[Parser Utility]] class, I obviously could not do it. How about in C++? Well, in C++ it is even worse, because the designer can mistakenly create something like:",
+      "id": "3963f1c483dad6d6514469de2de9f2fc"
+    },
+    {
+      "type": "code",
+      "text": "  Class::method( option1=true, option2=false, option3=true, ..., optionN = false)",
+      "id": "bc92cf63a11cefae0cbc6da7c149856d"
+    },
+    {
+      "type": "html",
+      "text": "And courtesy of C++, if the client needs to alter the rightmost or last option, optionN, he needs to specify all the other options:",
+      "id": "b883801224a6eb64d942599f1cb8babb"
+    },
+    {
+      "type": "code",
+      "text": "  object.method( false, false, false, true, ..., true) ",
+      "id": "e25e1e08ea81538e012654d0d96be44f"
+    },
+    {
+      "type": "html",
+      "text": "Now we have to copy (meaning duplicate) the default parameters from the source code of Class to the place of the call. That's what I call coupling indeed. And for example if the user was to use something like the copy command on the Unix command line from a C++ API (see [[Long Parameter List]]) he may become aware not only of the existence and position of all the other parameters, but also the client becomes aware of their default values. How about if the default values are not fixed but only chosen later depending of the mandatory input (for example, if the source directory resides on a network SAMBA file system, a lot of parameters do not even make sense). So C++ default parameters are clearly unsatisfactory in the general case.",
+      "id": "56d22eee13319eedff79c0dd63ab505e"
+    },
+    {
+      "type": "html",
+      "text": "<b>Therefore:</b> [[Emulate Keyword And Default Parameters]] :",
+      "id": "11b0cbd5010f082a9a567d8db7190b65"
+    },
+    {
+      "type": "html",
+      "text": "\nFrom the general method:",
+      "id": "ac273303a2211817a208eae0c992abc6"
+    },
+    {
+      "type": "code",
+      "text": "  public class OuterClass {\n  ...\n  methodName ( <mandatoryParams>, <optionalParams> )\n  ...\n  }",
+      "id": "85800318040e7364cb8554e25bff4b88"
+    },
+    {
+      "type": "html",
+      "text": "\nrefactor to a [[Method Object]]. The preference in Java is for an [[Inner Class]] named [[Method Name Operation]], having a private constructor taking the mandatory params. The fields of the inner class should correspond to both optional and mandatory params.",
+      "id": "cb3e04b07bc923fda9106c4962a89701"
+    },
+    {
+      "type": "code",
+      "text": "  OuterClass {\n  ...\n  public class MethodNameOperation  {\n  <fields from mandatory params>\n  <field from optional params >\n  private MethodNameOperation(<mandatoryParams>) {\n    // assign the mandatory fields here\n  }\n  ...\n  }",
+      "id": "71097f49b6516fed5fa3f30e5ab0540f"
+    },
+    {
+      "type": "html",
+      "text": "\nThen for each optional param, put the default value in the initialization of the corresponding fields, for example what in another language might be:",
+      "id": "458dc81b3cb0d0cbd328e9c119aa8457"
+    },
+    {
+      "type": "code",
+      "text": "  method ... ?(param1:int = 1 ) ...",
+      "id": "ddd9e7ad8e4add1c2e908de1e6a028a8"
+    },
+    {
+      "type": "html",
+      "text": "in Java will reflect in the inner class:",
+      "id": "ccbe6a5d9bcbf3aeef005501582a657c"
+    },
+    {
+      "type": "code",
+      "text": "  int param1=1",
+      "id": "e4e205ee8b955c4f52443a0aab73dd50"
+    },
+    {
+      "type": "html",
+      "text": "For each optional parameter create a <i>X</i>(value) method in the inner class that allows the client context to set the value of the parameter:",
+      "id": "f8fceb7ade7fd3b6c228f64b8537805f"
+    },
+    {
+      "type": "code",
+      "text": "  public class MethodNameOperation\n  ...\n  public MethodNameOperation Param1(int value_) { this.param1= value_; return '''this'''; } // you may add some checking here ",
+      "id": "5de5317de5766ec2cce177066a67bb38"
+    },
+    {
+      "type": "html",
+      "text": "\nPlease note that <b>return this</b> is essential for the syntactic trick we need to support in the client code. Add to the M<b></b>ethodObject a prototypical method call() or execute():",
+      "id": "af6f01d82c24fff74c1aafa4b564edd0"
+    },
+    {
+      "type": "code",
+      "text": "  public class MethodNameOperation {\n  ...\n  public <result type> call() {\n  // here you use all the parameter/fields LongParameterList\n  }\n  }",
+      "id": "00edeb056b0bbed327649c8170705ddf"
+    },
+    {
+      "type": "html",
+      "text": "<i>Added sometime later. I was bothered by the violation of [[Economy Of Expression]] that is apparent in the client context where the invocation looks something like this:  new [[Method Object]](value1, value2).ValueX(x).ValueY(y).call() . Surely the last call is superfluous. Therefore to my surprise I invented [[Use The Undescore]] so that if the functional object is f, rather than writing.</i>",
+      "id": "f651461bd4c132b6fc4d0b86b2ae8352"
+    },
+    {
+      "type": "code",
+      "text": "   f.call()\n   :  ''I can now write:''\n   f._()\n   :  ''So if you are like me, you'll like _() much better as a notation than the bulky call() or execute(). I have used this pervasively in my Java code and I have been relatively pleased with the results. --CostinCozianu''",
+      "id": "e2479512f72bf50e44c908d384e9f7cc"
+    },
+    {
+      "type": "html",
+      "text": "\nNow we replace the original method in the [[Outer Class]]:",
+      "id": "d32358bfd975563ea7180faf96c19878"
+    },
+    {
+      "type": "code",
+      "text": "  public class OuterClass {\n  ....  \n  public MethodNameOperation methodName(<mandatoryParams>) { return new MethodNameOperation(<mandatory params>);}\n  }",
+      "id": "0126a9505ce6316f37c472825cd2e626"
+    },
+    {
+      "type": "html",
+      "text": "So in the end, we offer a more convenient call to the client. Instead of",
+      "id": "ba62cb9879f61b4dff0b8913607990f8"
+    },
+    {
+      "type": "code",
+      "text": "  object.methodName( < LongParameterList >)",
+      "id": "e5afa42251b5b79fc1a457c30bc79135"
+    },
+    {
+      "type": "html",
+      "text": "the client can now write:",
+      "id": "14f38fff57709d83afa2471497e7c31d"
+    },
+    {
+      "type": "code",
+      "text": "  object.methodName(<mandatoryParams>). setParameterX(ValueX)...setParameterY(valueY).call()",
+      "id": "fb280c389e86f1972da54cb516aed71e"
+    },
+    {
+      "type": "html",
+      "text": "He need not set any optional parameters because they are already set to default values in the initializer of our method object. Thus he effectively has now [[Keyword Parameter Passing]].",
+      "id": "d441d13ca4f12b2c6d1aaff71eaf6558"
+    },
+    {
+      "type": "html",
+      "text": "\nIn the form above the pattern still preserves the positional form for mandatory parameters. This is because the general rule for good design of [[Long Parameter List]] is that only very few parameters should be mandatory (strictly the minimum required), and the rest (which may be a lot -- try a <i>man find</i> command in Unix) should have sensible default values or otherwise should be able to have empty values. Therefore if you have only a few mandatory params (2,3 and at a maximum 4), it is generally no problem for the client to pass params by position. It also easier and faster to type.",
+      "id": "0f554e1336e85db3716b937c1a413312"
+    },
+    {
+      "type": "html",
+      "text": "\nThe pattern can easily be adapted to emulate [[Keyword Parameter Passing]] even for the mandatory params, but if you have only 2 or 3 mandatory params this is not warranted. It will be more mess and won't make the code any clearer. But if you have 4 or more mandatory params, that is a strong [[Code Smell]]: try to change at least some of them from mandatory to optional by providing sensible values. Have pity on the guy who calls you! If you still thik you have to have lots of mandatory params go ahead and make them \"keyword enabled\" (left as exercise for the reader).",
+      "id": "9277c1403b4f5deee2178d9ecc713348"
+    },
+    {
+      "type": "html",
+      "text": "<i>Added bonus</i>'. In languages with keyword params the user of the call has to remember the name of your formal keyword correctly (possibly including the case). But now in Java your users will be able to use the (in)famous [[Control Space]] and the modern Java IDE will present a list of the options to be set. Advantage, Java!",
+      "id": "0ba4b5525e22054d99d829b1d60361ac"
+    },
+    {
+      "type": "html",
+      "text": "<b>Example</b>: transform the code from",
+      "id": "73c34f6cbf54886d3a42b17a4e144968"
+    },
+    {
+      "type": "code",
+      "text": "  class ParserUtility {",
+      "id": "b6a99aa07b4cc46ddc68dc4cd27bc1ed"
+    },
+    {
+      "type": "code",
+      "text": "  public static void parse ( InputStream is /*M*/, Handler handler /*M*/, \n      boolean validating /*O=true*/, boolean namespaces /*O=true*/,\n      boolean loadDTDs /*O=true*/ ... )",
+      "id": "3d14f9cb9474b40ea6127657ac66ccfd"
+    },
+    {
+      "type": "code",
+      "text": "  // where M means mandatory, O=x means optional with default value x\n  }",
+      "id": "7df028e6aa2fa832b46fc965c265bf78"
+    },
+    {
+      "type": "html",
+      "text": "to:",
+      "id": "62dd58957d13411122836e902820e0f5"
+    },
+    {
+      "type": "code",
+      "text": "  class ParserUtility {\n  ...\n  public static class ParseOperator {\n  InputStream is;\n  Handler handler;\n  validating= true;",
+      "id": "c4392018defe6a3ee24a888d4e75ebfc"
+    },
+    {
+      "type": "code",
+      "text": "  loadDTDs= true;\n  namespaces= true;\n  // all the other defaults \n  private ParseOperator( InputStream is_, Handler handler_) { \n  /*check the parameters and set the fields*/\n   this.is= is_;\n   this.handler= handler_;\n  }",
+      "id": "6fa653fec92fa7d36dea878013efb9f0"
+    },
+    {
+      "type": "code",
+      "text": "  public void execute() {\n  // call the parsing operation here with all the parameters\n  // Now the LongParameterList appears OnceAndOnlyOnce\n  realParser.parse(is, handler, validating, namespace, loadDTDs, ... )\n  }",
+      "id": "86d63571b9a7830f8e377c3e46f13f68"
+    },
+    {
+      "type": "code",
+      "text": "  public ParserOperator setValidating( boolean validating_ ) {\n  //check and set the optional parameter, \n  //the checking part is skipped here for brevity\n  this.validating=validating_;\n  return '''this'''; // this allows for the syntactic trick on the client  \n  }",
+      "id": "cc7c942a8be7fb21bffe1031fc016030"
+    },
+    {
+      "type": "code",
+      "text": "  public ParserOperator setLoadExternalDTDs( boolean loadExternalDTDs ) { this.loadDTDs= loadExternalDTDs; return this }\n  // ... so on so forth\n  } // End of class ParserOperator",
+      "id": "abfa38bb38d4bcc0dd2b90cccd9c436a"
+    },
+    {
+      "type": "code",
+      "text": "  //now the method formerly with many parameters takes just the mandatory params\n  public ParserOperator parse ( InputStream is, Handler handler )  {\n    return new ParserOperator (is, handler);\n  }\n }",
+      "id": "3e7adda9a67bdccdcd17da9054109066"
+    },
+    {
+      "type": "html",
+      "text": "\nNow after the designer of the reusable code went through all this hoopla, the client has the satisfaction to [[Emulate Keyword And Default Parameters]]:",
+      "id": "35c490279be107bf0a533af6ebc19a49"
+    },
+    {
+      "type": "code",
+      "text": "  ParserUtility.parse(is, handler).setValidating(false).setLoadExternalDTDs(false).setNamespaces(false).execute();",
+      "id": "65e2fd538f6d71fbe7aa5ecc6f5d71eb"
+    },
+    {
+      "type": "html",
+      "text": "Compared to:",
+      "id": "e428ed8dc37927158530515e0120fe52"
+    },
+    {
+      "type": "html",
+      "text": "[[Parser Utility]].parse is handler  ~validating:<br>false ~loadExternalDTDs: false ~namespaces: false",
+      "id": "539e37f02a1ad7326520e0654c520909"
+    },
+    {
+      "type": "html",
+      "text": "The Java solution has the same readability and decoupling benefits of real [[Keyword Parameter Passing]] (actually if we get rid of Java setXXX convention and we put just validating(false) it looks almost identical. ",
+      "id": "d6b1f61e1e189c0061cfed2360d90a6e"
+    },
+    {
+      "type": "html",
+      "text": "\nOk, that's basically it. -- [[Costin Cozianu]]",
+      "id": "e99318cb61355474272dde6578bf1afd"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "132d499403b3478a942a8a2eba61e221"
+    },
+    {
+      "type": "html",
+      "text": "<i>Would an accurate paraphrase of this be \"turn optional method parameters into static public properties\"?</i>",
+      "id": "b10db3c4b01606367deb4cb8be9eb67c"
+    },
+    {
+      "type": "html",
+      "text": "\nActually the aparatus behind it is not at all interesting per se, and I wouldn't want to formulate a profound design pattern from here (like identifying new objects trying to pop out from the code) -- actually that's a drawback I think in many refacttoring patterns: that they make the details have some kind of importance as elements of OO design.",
+      "id": "c20c1a6464f872e3f1647a3aafbd4741"
+    },
+    {
+      "type": "html",
+      "text": "\nThe bottom line is to faithfully emulate the syntax for the call in a language with keywords and optional parameters. That's why for example I prefer to have an inner class and not an [[Argument Object]] so that the call can be",
+      "id": "5db7ac63e2aef32c96fa58a28afbf9f7"
+    },
+    {
+      "type": "code",
+      "text": " /*-1-*/  object.method(<mandatory params>).OptionK(ValueK).OptionV(ValueV)._()",
+      "id": "d46b9a7729c557c802fa54ea392cb2ab"
+    },
+    {
+      "type": "html",
+      "text": "and not ",
+      "id": "42e5ab938ee5723dce0c14e8769167ac"
+    },
+    {
+      "type": "code",
+      "text": " /*-2-*/  object.method( new ArgumentObject ( Value1, Value2, ..., ValueN) )",
+      "id": "a471c697470a06a0a89ffee5245ec451"
+    },
+    {
+      "type": "html",
+      "text": "I hold that the firts form has an obvious [[Economy Of Expression]] advantage over the second form.",
+      "id": "90682f3d987909072a77dc555d407f52"
+    },
+    {
+      "type": "html",
+      "text": "\nThe first line communicates to the reader that it is a simple method call, and I don't want the caller to spend several lines of code trying to make a call, like in the XML parsing example posted on [[Keyword Parameter Passing]]. The second thing that is very important is to communicate are the names that are attached to the values, cause I had the pleasure to see APIs looking like this:",
+      "id": "73c8a6f5a5a90ef15a7c92f478d52057"
+    },
+    {
+      "type": "code",
+      "text": "  // guess what the hell is happening below\n  // if you wonder about the strings they're gonna be packaghed in XML so that's why they are strings\n  object.method( \"Something Readable\",\"1001\", \"0\", \"1\",  \"true\", \"false\",\"0\",\"1\",\"true\", \"false\", \"false\", \"false\" \"true\");",
+      "id": "8f9249da05b43772a59bb2c4ca3ca872"
+    },
+    {
+      "type": "html",
+      "text": "Under the [[Introduce Argument Object]], I still see a lot of code out there written like:",
+      "id": "6285a753a5a373c130033c92cf10d042"
+    },
+    {
+      "type": "html",
+      "text": "/*-3-*/",
+      "id": "b289d6b5d8099b0a9196a3978a561f15"
+    },
+    {
+      "type": "code",
+      "text": "       ArgumentType argument= new Argument(<mandatory params>);\n       argument.setOption1(value1);\n       ...\n       argument.setOptionN(valueN);\n       object.method(argument);",
+      "id": "bc40cbe342d226211af6300f58577920"
+    },
+    {
+      "type": "html",
+      "text": "And in fewer cases developer apply the <b>return this</b> trick, so you see a better form of [[Introduce Parameter Object]]:",
+      "id": "fb4f9cdaa88a7649f3f90075ead533a0"
+    },
+    {
+      "type": "html",
+      "text": "/*-4-*/",
+      "id": "905143febf0a482328b253054d59d9d7"
+    },
+    {
+      "type": "code",
+      "text": "       object.method(new ArgumentType(<mandatory params>).setOption1(Value1).setOptionN.(ValueN))",
+      "id": "ffc5473bfed6f965ef142a67cab12afc"
+    },
+    {
+      "type": "html",
+      "text": "Which is more esthetically pleasing. But if we hold that the best [[Economy Of Expression]] is done via [[Keyword Parameter Passing]], then the form -1- is still closer to the ideal form:  no superfluous \"new [[Argument Type]]\" sidetracks the reader from the intention of the expression, which is simply a function call wi8th keyword and optional parameter. Therefore in my view this is a better form of expression than that obtained with [[Introduce Parameter Object]]. --Costin",
+      "id": "10d9e251314b37377d7c08bf016a0724"
+    },
+    {
+      "type": "html",
+      "text": "Another important decision is that the name of the auxiliary class is hidden. Actually that's a recurring pattern in my designs, whenever a class is just an auxiliary to a principal class, like it is in this case - it merely serves for synctactic trick, I want it hidden in the namespace of the main class. This way, when somebody looks at the package view in an IDE, or just at the list of java files in the directory, he only sees the important classes and not the insignifiant details.",
+      "id": "82f71853572d7519b3dcfba9a2cb639a"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "132d499403b3478a942a8a2eba61e221"
+    },
+    {
+      "type": "html",
+      "text": "\nAnother approach is a \"string\" parameter that is parsed into local values. One basically creates an API to parse it and put it into a local associative array:",
+      "id": "3b9c5d2caecd70d1a06fcc45b08d94e5"
+    },
+    {
+      "type": "code",
+      "text": "  myFunc(11, 22, \"foo=7, bar='ffg'\");\n  ...\n  function myFunc(a, b, c) {\n     myParams = parseParams(c);  \n     print(\"bar=\" . myParams['bar']);\n  }",
+      "id": "3f8372c645f16730458fa45916a1b2bd"
+    },
+    {
+      "type": "html",
+      "text": "\nThis can get fancier. For example, an alternative or extra for the 4th line:",
+      "id": "04eed3849ee02dcd93cb8d423b12ef8e"
+    },
+    {
+      "type": "code",
+      "text": "     myParams = parseParams(c, \"foo='',bar='x'\");  // 2nd param specifies the defaults",
+      "id": "c513048be1ba0fe2c0565e8fb9e2685c"
+    },
+    {
+      "type": "html",
+      "text": "\nA simpler approach is to put parentheses around Boolean-like flags:",
+      "id": "a96ee375cb549eef08fefd35d2abbb27"
+    },
+    {
+      "type": "code",
+      "text": "  myFunct(11, 22, \"(bold)(padleft)(shade)\");",
+      "id": "b75077d29ab2fbbfba9d3dc99ed2e269"
+    },
+    {
+      "type": "html",
+      "text": "\nThis approach works reasonably well if there are a lot of on-off type of switches. It is also relatively easy and fast to parse, even in SQL expressions. I tried using commas, but they didn't work as well and in not as many languages. Often I find that only about 1 in 5 new parameters need to be anything other than on-off flags. Thus, the need to introduce a former parameter can be cut into about 1/5.",
+      "id": "7c56fd21c86b761e64c3bb85477c7297"
+    },
+    {
+      "type": "html",
+      "text": "\nAnother option is to use simple letters. However, these have obvious problems in the self-documenting department.",
+      "id": "fb22b0514861f0567393315372288f7f"
+    },
+    {
+      "type": "html",
+      "text": "--top",
+      "id": "79b43b25255b3bdca8d3bc78fe145c9d"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "132d499403b3478a942a8a2eba61e221"
+    },
+    {
+      "type": "html",
+      "text": "<i>Originally, the string parameter approach was described on another page and moved here.  On the same page, for contrast, the following OO approach was described below.  Although the [[Method Object]] approach is described above, the following is intended to complement the string parameter approach.  And, from the admittedly biased position of being the author, I feel it is a clearer example than the one above. If it isn't, please feel free to delete it.  [[Delete When Cooked]]</i>",
+      "id": "4d5bf80a5e9b25eb0fa727eb234b9237"
+    },
+    {
+      "type": "html",
+      "text": "\nA parameter class is created, as follows:",
+      "id": "c3cc281fa29d624552d800baae86c9ad"
+    },
+    {
+      "type": "code",
+      "text": " class Parms {\n   private boolean bold = false;\n   private boolean padleft = false;\n   private boolean shade = false;\n   private Colour colour = new Colour(255, 255, 255);\n   // ...etc...\n   public Parms doBold() {bold=true; return this;}\n   public Parms doPadleft() {padleft=true; return this;}\n   public Parms doShade() {shade=true; return this;}\n   public Parms setColour(Colour c) {colour=c; return this;}\n   // ...etc...\n   public boolean isBold() {return bold;}\n   public boolean isPadleft() {return padleft;}\n   public boolean isShade() {return shade;}\n   public Colour getColour() {return colour;}\n }",
+      "id": "dd242f5bc8a3ddfe024d682868d2e641"
+    },
+    {
+      "type": "html",
+      "text": "\nThen you can use it like this:",
+      "id": "de317590bbf535a47f0d4c701d8ef774"
+    },
+    {
+      "type": "html",
+      "text": "\nAssume you have the following procedure or method with a Parms parameter. ",
+      "id": "e23e7114c2f27afdbd483c6e0e3aab6b"
+    },
+    {
+      "type": "code",
+      "text": " void myFunct(int x, int y, Parms p) {\n   ...\n   if (p.isShade()) {\n     ...\n   }\n   ...\n }",
+      "id": "e1c2bfe72c7889f2e663dbbe0d26bdbd"
+    },
+    {
+      "type": "html",
+      "text": "\nYou can invoke it like this:",
+      "id": "7f135fa9a08aa72d8c7f635c8195b89b"
+    },
+    {
+      "type": "code",
+      "text": "  myFunct(11, 22, (new Parms()).doPadleft().doBold().doShade().setColour(128, 128, 0));",
+      "id": "10035bbf7725f195c0238de941939c47"
+    },
+    {
+      "type": "html",
+      "text": "\nIf all you need are the defaults, it becomes this...",
+      "id": "a87f5a82372540a66a9f48bc927b48c8"
+    },
+    {
+      "type": "code",
+      "text": "  myFunct(11, 22, new Parms());",
+      "id": "06809d093a09a85db94c60c12e4cd23a"
+    },
+    {
+      "type": "html",
+      "text": "...or maybe even this, assuming appropriate logic in myFunct:",
+      "id": "b270cc2ec105757431eb3c738e80e5e6"
+    },
+    {
+      "type": "code",
+      "text": "  myFunct(11, 22, null);",
+      "id": "fadc4a644e50c839136d03f0fe95a3bc"
+    },
+    {
+      "type": "html",
+      "text": "\nNote the use of 'return this' in the relevant methods so that their invocations can be chained, as shown above.",
+      "id": "be2439684f49ce8de300080cd1e67c19"
+    },
+    {
+      "type": "html",
+      "text": "\nThis approach is relatively faster than the string method described above and the syntax is checked at compile-time -- at the expense of a bit more code.  It also supports more than just boolean parameters, though obviously the string-based technique can be extended to parse anything you like.  In the absence of an object-oriented language, similar mechanisms can be built using C structs (or some equivalent in whatever language you're using) and associated functions/procedures to manipulate them.",
+      "id": "45434f748610fea32c3084f3c7e03744"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Dave Voorhis]]",
+      "id": "0b4275cdf0b7f54ef6e798b7ecbbf50e"
+    },
+    {
+      "type": "html",
+      "text": "<i>If one is using a dynamic/lax typing language or style, that compile-time checking is not an issue. Further, the string approach(es) allows one to store or use parameters to and from a database if necessary (it is poor normalization, but many-to-many tables can be overkill sometimes). It is also shorter, prints easily when debugging, and works in just about any language. But, to each their own.</i>",
+      "id": "7a1067b12f5f9b5d3bdc46e31f0909dc"
+    },
+    {
+      "type": "html",
+      "text": "\nIt's only shorter if you entirely discount the string parser; the string method exhibits poorer performance; and compile-time checking is often desirable.  As for printing easily when debugging, simply implement a toString() method in the Parms class.  ",
+      "id": "a9398836c1f3a159d69984055cc61031"
+    },
+    {
+      "type": "html",
+      "text": "\nShould dynamic strings be a desirable means of setting parameters (as from a database, though I'm not sure how that turns into poor normalization or what it has to do with many-to-many relationships), an appropriate parseParams(...) method can be implemented in or inherited into the Parms class.  -- [[Dave Voorhis]]",
+      "id": "65749e7f5601c196953ecaa6c15854f8"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "132d499403b3478a942a8a2eba61e221"
+    },
+    {
+      "type": "html",
+      "text": "I'm shocked that nobody has brought up taglists.  These were used to very good effect in AmigaOS, for example, to replace long argument lists.  I'm also aware of at least one X11 widget library which did something similar.  I'm not sure which came first; probably the latter, but the technique applies generally.  <b>However,</b> it requires varargs support to implement well.",
+      "id": "cb3d14b8d08c69b69b5ccac41a7516f5"
+    },
+    {
+      "type": "html",
+      "text": "\nQNX uses a somewhat related mechanism.  You have a parameter block PB, and a set of flags indicating which fields of the PB you'd like to affect.  For example:",
+      "id": "331e18a37bec545bf0a80562e906a7ee"
+    },
+    {
+      "type": "code",
+      "text": "  PB.foo = 2;\n  PB.bar = \"Hello world\";",
+      "id": "89fae7f43dd5a916556c544ffe9ce98e"
+    },
+    {
+      "type": "code",
+      "text": "  result = doSomethingWith_using_(mandatoryInputHere, &PB, PBF_FOO | PBF_BAR);",
+      "id": "ea271a1ef654c438b8a2a588e7bbebac"
+    },
+    {
+      "type": "html",
+      "text": "\nThis way, you have a finite list of parameters, while still having the flexibility of optionally setting only those parameters you'd like.  --[[Samuel Falvo]]",
+      "id": "019c94a1bdf7f4da1eaecb2f2e1e8f91"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "132d499403b3478a942a8a2eba61e221"
+    },
+    {
+      "type": "html",
+      "text": "See also [[Argument Object]] or [[Introduce Parameter Object]] from [[Martin Fowler]]'s [[Refactoring Improving The Design Of Existing Code]].",
+      "id": "c87219334acf523f06fc1a911d0fb142"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "132d499403b3478a942a8a2eba61e221"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Refactoring]], [[Category Language Feature]]",
+      "id": "8a89925813710b3e769b05a30b981c7c"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?EmulateKeywordAndDefaultParameters c2.com]",
+      "id": "2ed0538729ab9f814a78bc00ba7b400f"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1193180350000,
+      "id": "5a8af4c3b1e72ecb7e2d6fddf6df2e4e",
+      "type": "create",
+      "item": {
+        "title": "Emulate Keyword And Default Parameters",
+        "story": [
+          {
+            "type": "html",
+            "text": "A nice pattern to be used especially when designing highly reusable classes/functions, with lots of options. We try to achieve [[Economy Of Expression]] for the client context, as well as [[Information Hiding]] as much as possible. In particular by language features such as [[Keyword Parameter Passing]] (Lisp, PL/SQL,Ada'95, [[Objective Caml]], most Unix utilities with regards to command line invocation) strongly supports these properties and we want to emulate this behavior in language without support for [[Keyword Parameter Passing]], following the principle [[Program Intoa Language]].",
+            "id": "56e45c19f10c7915bb4ea84197257ea9"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "132d499403b3478a942a8a2eba61e221"
+          },
+          {
+            "type": "html",
+            "text": "\nIn language such as Java, C++, C#, a serious limitation is lack of [[Keyword Parameter Passing]]. This makes creating frameworks with [[Long Parameter List]] unlikely. Often times I've seen people avoid a design with [[Long Parameter List]] just because it is thought ugly in Java. C++ went only a quarter of the way towards a good language design solution and it has default values. But that is a half-baked horror!! We'll see why.",
+            "id": "ddfa5fcc4f63809af86afc337f1bed37"
+          },
+          {
+            "type": "html",
+            "text": "\nA [[Long Parameter List]] is typical of an operation provided by a highly reusable framework, that has a lot of <b>options</b>. For example a Xerces SAX Parser has a long list of boolean options: whether or not to validate, to warn of various warnings, to load external dtds, to continue after errors, etc. Most of these do have sensible defaults, so in a language with default parameters, a call to the parse operation is just a one liner, where the client can affect just the paramters he's interested in, something like:",
+            "id": "f647deb10c3d9c9aa893a2383b4715c5"
+          },
+          {
+            "type": "code",
+            "text": "  ParserUtility.parse inputStream saxHandler ~namespaces:false  ~validate:false ~loadExternalDTDs:false",
+            "id": "998c7859ad34dccb5a59defa1a57ba0b"
+          },
+          {
+            "type": "html",
+            "text": "Now following the idiomatic standard, if I were to design the [[Parser Utility]] class, I obviously could not do it. How about in C++? Well, in C++ it is even worse, because the designer can mistakenly create something like:",
+            "id": "3963f1c483dad6d6514469de2de9f2fc"
+          },
+          {
+            "type": "code",
+            "text": "  Class::method( option1=true, option2=false, option3=true, ..., optionN = false)",
+            "id": "bc92cf63a11cefae0cbc6da7c149856d"
+          },
+          {
+            "type": "html",
+            "text": "And courtesy of C++, if the client needs to alter the rightmost or last option, optionN, he needs to specify all the other options:",
+            "id": "b883801224a6eb64d942599f1cb8babb"
+          },
+          {
+            "type": "code",
+            "text": "  object.method( false, false, false, true, ..., true) ",
+            "id": "e25e1e08ea81538e012654d0d96be44f"
+          },
+          {
+            "type": "html",
+            "text": "Now we have to copy (meaning duplicate) the default parameters from the source code of Class to the place of the call. That's what I call coupling indeed. And for example if the user was to use something like the copy command on the Unix command line from a C++ API (see [[Long Parameter List]]) he may become aware not only of the existence and position of all the other parameters, but also the client becomes aware of their default values. How about if the default values are not fixed but only chosen later depending of the mandatory input (for example, if the source directory resides on a network SAMBA file system, a lot of parameters do not even make sense). So C++ default parameters are clearly unsatisfactory in the general case.",
+            "id": "56d22eee13319eedff79c0dd63ab505e"
+          },
+          {
+            "type": "html",
+            "text": "<b>Therefore:</b> [[Emulate Keyword And Default Parameters]] :",
+            "id": "11b0cbd5010f082a9a567d8db7190b65"
+          },
+          {
+            "type": "html",
+            "text": "\nFrom the general method:",
+            "id": "ac273303a2211817a208eae0c992abc6"
+          },
+          {
+            "type": "code",
+            "text": "  public class OuterClass {\n  ...\n  methodName ( <mandatoryParams>, <optionalParams> )\n  ...\n  }",
+            "id": "85800318040e7364cb8554e25bff4b88"
+          },
+          {
+            "type": "html",
+            "text": "\nrefactor to a [[Method Object]]. The preference in Java is for an [[Inner Class]] named [[Method Name Operation]], having a private constructor taking the mandatory params. The fields of the inner class should correspond to both optional and mandatory params.",
+            "id": "cb3e04b07bc923fda9106c4962a89701"
+          },
+          {
+            "type": "code",
+            "text": "  OuterClass {\n  ...\n  public class MethodNameOperation  {\n  <fields from mandatory params>\n  <field from optional params >\n  private MethodNameOperation(<mandatoryParams>) {\n    // assign the mandatory fields here\n  }\n  ...\n  }",
+            "id": "71097f49b6516fed5fa3f30e5ab0540f"
+          },
+          {
+            "type": "html",
+            "text": "\nThen for each optional param, put the default value in the initialization of the corresponding fields, for example what in another language might be:",
+            "id": "458dc81b3cb0d0cbd328e9c119aa8457"
+          },
+          {
+            "type": "code",
+            "text": "  method ... ?(param1:int = 1 ) ...",
+            "id": "ddd9e7ad8e4add1c2e908de1e6a028a8"
+          },
+          {
+            "type": "html",
+            "text": "in Java will reflect in the inner class:",
+            "id": "ccbe6a5d9bcbf3aeef005501582a657c"
+          },
+          {
+            "type": "code",
+            "text": "  int param1=1",
+            "id": "e4e205ee8b955c4f52443a0aab73dd50"
+          },
+          {
+            "type": "html",
+            "text": "For each optional parameter create a <i>X</i>(value) method in the inner class that allows the client context to set the value of the parameter:",
+            "id": "f8fceb7ade7fd3b6c228f64b8537805f"
+          },
+          {
+            "type": "code",
+            "text": "  public class MethodNameOperation\n  ...\n  public MethodNameOperation Param1(int value_) { this.param1= value_; return '''this'''; } // you may add some checking here ",
+            "id": "5de5317de5766ec2cce177066a67bb38"
+          },
+          {
+            "type": "html",
+            "text": "\nPlease note that <b>return this</b> is essential for the syntactic trick we need to support in the client code. Add to the M<b></b>ethodObject a prototypical method call() or execute():",
+            "id": "af6f01d82c24fff74c1aafa4b564edd0"
+          },
+          {
+            "type": "code",
+            "text": "  public class MethodNameOperation {\n  ...\n  public <result type> call() {\n  // here you use all the parameter/fields LongParameterList\n  }\n  }",
+            "id": "00edeb056b0bbed327649c8170705ddf"
+          },
+          {
+            "type": "html",
+            "text": "<i>Added sometime later. I was bothered by the violation of [[Economy Of Expression]] that is apparent in the client context where the invocation looks something like this:  new [[Method Object]](value1, value2).ValueX(x).ValueY(y).call() . Surely the last call is superfluous. Therefore to my surprise I invented [[Use The Undescore]] so that if the functional object is f, rather than writing.</i>",
+            "id": "f651461bd4c132b6fc4d0b86b2ae8352"
+          },
+          {
+            "type": "code",
+            "text": "   f.call()\n   :  ''I can now write:''\n   f._()\n   :  ''So if you are like me, you'll like _() much better as a notation than the bulky call() or execute(). I have used this pervasively in my Java code and I have been relatively pleased with the results. --CostinCozianu''",
+            "id": "e2479512f72bf50e44c908d384e9f7cc"
+          },
+          {
+            "type": "html",
+            "text": "\nNow we replace the original method in the [[Outer Class]]:",
+            "id": "d32358bfd975563ea7180faf96c19878"
+          },
+          {
+            "type": "code",
+            "text": "  public class OuterClass {\n  ....  \n  public MethodNameOperation methodName(<mandatoryParams>) { return new MethodNameOperation(<mandatory params>);}\n  }",
+            "id": "0126a9505ce6316f37c472825cd2e626"
+          },
+          {
+            "type": "html",
+            "text": "So in the end, we offer a more convenient call to the client. Instead of",
+            "id": "ba62cb9879f61b4dff0b8913607990f8"
+          },
+          {
+            "type": "code",
+            "text": "  object.methodName( < LongParameterList >)",
+            "id": "e5afa42251b5b79fc1a457c30bc79135"
+          },
+          {
+            "type": "html",
+            "text": "the client can now write:",
+            "id": "14f38fff57709d83afa2471497e7c31d"
+          },
+          {
+            "type": "code",
+            "text": "  object.methodName(<mandatoryParams>). setParameterX(ValueX)...setParameterY(valueY).call()",
+            "id": "fb280c389e86f1972da54cb516aed71e"
+          },
+          {
+            "type": "html",
+            "text": "He need not set any optional parameters because they are already set to default values in the initializer of our method object. Thus he effectively has now [[Keyword Parameter Passing]].",
+            "id": "d441d13ca4f12b2c6d1aaff71eaf6558"
+          },
+          {
+            "type": "html",
+            "text": "\nIn the form above the pattern still preserves the positional form for mandatory parameters. This is because the general rule for good design of [[Long Parameter List]] is that only very few parameters should be mandatory (strictly the minimum required), and the rest (which may be a lot -- try a <i>man find</i> command in Unix) should have sensible default values or otherwise should be able to have empty values. Therefore if you have only a few mandatory params (2,3 and at a maximum 4), it is generally no problem for the client to pass params by position. It also easier and faster to type.",
+            "id": "0f554e1336e85db3716b937c1a413312"
+          },
+          {
+            "type": "html",
+            "text": "\nThe pattern can easily be adapted to emulate [[Keyword Parameter Passing]] even for the mandatory params, but if you have only 2 or 3 mandatory params this is not warranted. It will be more mess and won't make the code any clearer. But if you have 4 or more mandatory params, that is a strong [[Code Smell]]: try to change at least some of them from mandatory to optional by providing sensible values. Have pity on the guy who calls you! If you still thik you have to have lots of mandatory params go ahead and make them \"keyword enabled\" (left as exercise for the reader).",
+            "id": "9277c1403b4f5deee2178d9ecc713348"
+          },
+          {
+            "type": "html",
+            "text": "<i>Added bonus</i>'. In languages with keyword params the user of the call has to remember the name of your formal keyword correctly (possibly including the case). But now in Java your users will be able to use the (in)famous [[Control Space]] and the modern Java IDE will present a list of the options to be set. Advantage, Java!",
+            "id": "0ba4b5525e22054d99d829b1d60361ac"
+          },
+          {
+            "type": "html",
+            "text": "<b>Example</b>: transform the code from",
+            "id": "73c34f6cbf54886d3a42b17a4e144968"
+          },
+          {
+            "type": "code",
+            "text": "  class ParserUtility {",
+            "id": "b6a99aa07b4cc46ddc68dc4cd27bc1ed"
+          },
+          {
+            "type": "code",
+            "text": "  public static void parse ( InputStream is /*M*/, Handler handler /*M*/, \n      boolean validating /*O=true*/, boolean namespaces /*O=true*/,\n      boolean loadDTDs /*O=true*/ ... )",
+            "id": "3d14f9cb9474b40ea6127657ac66ccfd"
+          },
+          {
+            "type": "code",
+            "text": "  // where M means mandatory, O=x means optional with default value x\n  }",
+            "id": "7df028e6aa2fa832b46fc965c265bf78"
+          },
+          {
+            "type": "html",
+            "text": "to:",
+            "id": "62dd58957d13411122836e902820e0f5"
+          },
+          {
+            "type": "code",
+            "text": "  class ParserUtility {\n  ...\n  public static class ParseOperator {\n  InputStream is;\n  Handler handler;\n  validating= true;",
+            "id": "c4392018defe6a3ee24a888d4e75ebfc"
+          },
+          {
+            "type": "code",
+            "text": "  loadDTDs= true;\n  namespaces= true;\n  // all the other defaults \n  private ParseOperator( InputStream is_, Handler handler_) { \n  /*check the parameters and set the fields*/\n   this.is= is_;\n   this.handler= handler_;\n  }",
+            "id": "6fa653fec92fa7d36dea878013efb9f0"
+          },
+          {
+            "type": "code",
+            "text": "  public void execute() {\n  // call the parsing operation here with all the parameters\n  // Now the LongParameterList appears OnceAndOnlyOnce\n  realParser.parse(is, handler, validating, namespace, loadDTDs, ... )\n  }",
+            "id": "86d63571b9a7830f8e377c3e46f13f68"
+          },
+          {
+            "type": "code",
+            "text": "  public ParserOperator setValidating( boolean validating_ ) {\n  //check and set the optional parameter, \n  //the checking part is skipped here for brevity\n  this.validating=validating_;\n  return '''this'''; // this allows for the syntactic trick on the client  \n  }",
+            "id": "cc7c942a8be7fb21bffe1031fc016030"
+          },
+          {
+            "type": "code",
+            "text": "  public ParserOperator setLoadExternalDTDs( boolean loadExternalDTDs ) { this.loadDTDs= loadExternalDTDs; return this }\n  // ... so on so forth\n  } // End of class ParserOperator",
+            "id": "abfa38bb38d4bcc0dd2b90cccd9c436a"
+          },
+          {
+            "type": "code",
+            "text": "  //now the method formerly with many parameters takes just the mandatory params\n  public ParserOperator parse ( InputStream is, Handler handler )  {\n    return new ParserOperator (is, handler);\n  }\n }",
+            "id": "3e7adda9a67bdccdcd17da9054109066"
+          },
+          {
+            "type": "html",
+            "text": "\nNow after the designer of the reusable code went through all this hoopla, the client has the satisfaction to [[Emulate Keyword And Default Parameters]]:",
+            "id": "35c490279be107bf0a533af6ebc19a49"
+          },
+          {
+            "type": "code",
+            "text": "  ParserUtility.parse(is, handler).setValidating(false).setLoadExternalDTDs(false).setNamespaces(false).execute();",
+            "id": "65e2fd538f6d71fbe7aa5ecc6f5d71eb"
+          },
+          {
+            "type": "html",
+            "text": "Compared to:",
+            "id": "e428ed8dc37927158530515e0120fe52"
+          },
+          {
+            "type": "html",
+            "text": "[[Parser Utility]].parse is handler  ~validating:<br>false ~loadExternalDTDs: false ~namespaces: false",
+            "id": "539e37f02a1ad7326520e0654c520909"
+          },
+          {
+            "type": "html",
+            "text": "The Java solution has the same readability and decoupling benefits of real [[Keyword Parameter Passing]] (actually if we get rid of Java setXXX convention and we put just validating(false) it looks almost identical. ",
+            "id": "d6b1f61e1e189c0061cfed2360d90a6e"
+          },
+          {
+            "type": "html",
+            "text": "\nOk, that's basically it. -- [[Costin Cozianu]]",
+            "id": "e99318cb61355474272dde6578bf1afd"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "132d499403b3478a942a8a2eba61e221"
+          },
+          {
+            "type": "html",
+            "text": "<i>Would an accurate paraphrase of this be \"turn optional method parameters into static public properties\"?</i>",
+            "id": "b10db3c4b01606367deb4cb8be9eb67c"
+          },
+          {
+            "type": "html",
+            "text": "\nActually the aparatus behind it is not at all interesting per se, and I wouldn't want to formulate a profound design pattern from here (like identifying new objects trying to pop out from the code) -- actually that's a drawback I think in many refacttoring patterns: that they make the details have some kind of importance as elements of OO design.",
+            "id": "c20c1a6464f872e3f1647a3aafbd4741"
+          },
+          {
+            "type": "html",
+            "text": "\nThe bottom line is to faithfully emulate the syntax for the call in a language with keywords and optional parameters. That's why for example I prefer to have an inner class and not an [[Argument Object]] so that the call can be",
+            "id": "5db7ac63e2aef32c96fa58a28afbf9f7"
+          },
+          {
+            "type": "code",
+            "text": " /*-1-*/  object.method(<mandatory params>).OptionK(ValueK).OptionV(ValueV)._()",
+            "id": "d46b9a7729c557c802fa54ea392cb2ab"
+          },
+          {
+            "type": "html",
+            "text": "and not ",
+            "id": "42e5ab938ee5723dce0c14e8769167ac"
+          },
+          {
+            "type": "code",
+            "text": " /*-2-*/  object.method( new ArgumentObject ( Value1, Value2, ..., ValueN) )",
+            "id": "a471c697470a06a0a89ffee5245ec451"
+          },
+          {
+            "type": "html",
+            "text": "I hold that the firts form has an obvious [[Economy Of Expression]] advantage over the second form.",
+            "id": "90682f3d987909072a77dc555d407f52"
+          },
+          {
+            "type": "html",
+            "text": "\nThe first line communicates to the reader that it is a simple method call, and I don't want the caller to spend several lines of code trying to make a call, like in the XML parsing example posted on [[Keyword Parameter Passing]]. The second thing that is very important is to communicate are the names that are attached to the values, cause I had the pleasure to see APIs looking like this:",
+            "id": "73c8a6f5a5a90ef15a7c92f478d52057"
+          },
+          {
+            "type": "code",
+            "text": "  // guess what the hell is happening below\n  // if you wonder about the strings they're gonna be packaghed in XML so that's why they are strings\n  object.method( \"Something Readable\",\"1001\", \"0\", \"1\",  \"true\", \"false\",\"0\",\"1\",\"true\", \"false\", \"false\", \"false\" \"true\");",
+            "id": "8f9249da05b43772a59bb2c4ca3ca872"
+          },
+          {
+            "type": "html",
+            "text": "Under the [[Introduce Argument Object]], I still see a lot of code out there written like:",
+            "id": "6285a753a5a373c130033c92cf10d042"
+          },
+          {
+            "type": "html",
+            "text": "/*-3-*/",
+            "id": "b289d6b5d8099b0a9196a3978a561f15"
+          },
+          {
+            "type": "code",
+            "text": "       ArgumentType argument= new Argument(<mandatory params>);\n       argument.setOption1(value1);\n       ...\n       argument.setOptionN(valueN);\n       object.method(argument);",
+            "id": "bc40cbe342d226211af6300f58577920"
+          },
+          {
+            "type": "html",
+            "text": "And in fewer cases developer apply the <b>return this</b> trick, so you see a better form of [[Introduce Parameter Object]]:",
+            "id": "fb4f9cdaa88a7649f3f90075ead533a0"
+          },
+          {
+            "type": "html",
+            "text": "/*-4-*/",
+            "id": "905143febf0a482328b253054d59d9d7"
+          },
+          {
+            "type": "code",
+            "text": "       object.method(new ArgumentType(<mandatory params>).setOption1(Value1).setOptionN.(ValueN))",
+            "id": "ffc5473bfed6f965ef142a67cab12afc"
+          },
+          {
+            "type": "html",
+            "text": "Which is more esthetically pleasing. But if we hold that the best [[Economy Of Expression]] is done via [[Keyword Parameter Passing]], then the form -1- is still closer to the ideal form:  no superfluous \"new [[Argument Type]]\" sidetracks the reader from the intention of the expression, which is simply a function call wi8th keyword and optional parameter. Therefore in my view this is a better form of expression than that obtained with [[Introduce Parameter Object]]. --Costin",
+            "id": "10d9e251314b37377d7c08bf016a0724"
+          },
+          {
+            "type": "html",
+            "text": "Another important decision is that the name of the auxiliary class is hidden. Actually that's a recurring pattern in my designs, whenever a class is just an auxiliary to a principal class, like it is in this case - it merely serves for synctactic trick, I want it hidden in the namespace of the main class. This way, when somebody looks at the package view in an IDE, or just at the list of java files in the directory, he only sees the important classes and not the insignifiant details.",
+            "id": "82f71853572d7519b3dcfba9a2cb639a"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "132d499403b3478a942a8a2eba61e221"
+          },
+          {
+            "type": "html",
+            "text": "\nAnother approach is a \"string\" parameter that is parsed into local values. One basically creates an API to parse it and put it into a local associative array:",
+            "id": "3b9c5d2caecd70d1a06fcc45b08d94e5"
+          },
+          {
+            "type": "code",
+            "text": "  myFunc(11, 22, \"foo=7, bar='ffg'\");\n  ...\n  function myFunc(a, b, c) {\n     myParams = parseParams(c);  \n     print(\"bar=\" . myParams['bar']);\n  }",
+            "id": "3f8372c645f16730458fa45916a1b2bd"
+          },
+          {
+            "type": "html",
+            "text": "\nThis can get fancier. For example, an alternative or extra for the 4th line:",
+            "id": "04eed3849ee02dcd93cb8d423b12ef8e"
+          },
+          {
+            "type": "code",
+            "text": "     myParams = parseParams(c, \"foo='',bar='x'\");  // 2nd param specifies the defaults",
+            "id": "c513048be1ba0fe2c0565e8fb9e2685c"
+          },
+          {
+            "type": "html",
+            "text": "\nA simpler approach is to put parentheses around Boolean-like flags:",
+            "id": "a96ee375cb549eef08fefd35d2abbb27"
+          },
+          {
+            "type": "code",
+            "text": "  myFunct(11, 22, \"(bold)(padleft)(shade)\");",
+            "id": "b75077d29ab2fbbfba9d3dc99ed2e269"
+          },
+          {
+            "type": "html",
+            "text": "\nThis approach works reasonably well if there are a lot of on-off type of switches. It is also relatively easy and fast to parse, even in SQL expressions. I tried using commas, but they didn't work as well and in not as many languages. Often I find that only about 1 in 5 new parameters need to be anything other than on-off flags. Thus, the need to introduce a former parameter can be cut into about 1/5.",
+            "id": "7c56fd21c86b761e64c3bb85477c7297"
+          },
+          {
+            "type": "html",
+            "text": "\nAnother option is to use simple letters. However, these have obvious problems in the self-documenting department.",
+            "id": "fb22b0514861f0567393315372288f7f"
+          },
+          {
+            "type": "html",
+            "text": "--top",
+            "id": "79b43b25255b3bdca8d3bc78fe145c9d"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "132d499403b3478a942a8a2eba61e221"
+          },
+          {
+            "type": "html",
+            "text": "<i>Originally, the string parameter approach was described on another page and moved here.  On the same page, for contrast, the following OO approach was described below.  Although the [[Method Object]] approach is described above, the following is intended to complement the string parameter approach.  And, from the admittedly biased position of being the author, I feel it is a clearer example than the one above. If it isn't, please feel free to delete it.  [[Delete When Cooked]]</i>",
+            "id": "4d5bf80a5e9b25eb0fa727eb234b9237"
+          },
+          {
+            "type": "html",
+            "text": "\nA parameter class is created, as follows:",
+            "id": "c3cc281fa29d624552d800baae86c9ad"
+          },
+          {
+            "type": "code",
+            "text": " class Parms {\n   private boolean bold = false;\n   private boolean padleft = false;\n   private boolean shade = false;\n   private Colour colour = new Colour(255, 255, 255);\n   // ...etc...\n   public Parms doBold() {bold=true; return this;}\n   public Parms doPadleft() {padleft=true; return this;}\n   public Parms doShade() {shade=true; return this;}\n   public Parms setColour(Colour c) {colour=c; return this;}\n   // ...etc...\n   public boolean isBold() {return bold;}\n   public boolean isPadleft() {return padleft;}\n   public boolean isShade() {return shade;}\n   public Colour getColour() {return colour;}\n }",
+            "id": "dd242f5bc8a3ddfe024d682868d2e641"
+          },
+          {
+            "type": "html",
+            "text": "\nThen you can use it like this:",
+            "id": "de317590bbf535a47f0d4c701d8ef774"
+          },
+          {
+            "type": "html",
+            "text": "\nAssume you have the following procedure or method with a Parms parameter. ",
+            "id": "e23e7114c2f27afdbd483c6e0e3aab6b"
+          },
+          {
+            "type": "code",
+            "text": " void myFunct(int x, int y, Parms p) {\n   ...\n   if (p.isShade()) {\n     ...\n   }\n   ...\n }",
+            "id": "e1c2bfe72c7889f2e663dbbe0d26bdbd"
+          },
+          {
+            "type": "html",
+            "text": "\nYou can invoke it like this:",
+            "id": "7f135fa9a08aa72d8c7f635c8195b89b"
+          },
+          {
+            "type": "code",
+            "text": "  myFunct(11, 22, (new Parms()).doPadleft().doBold().doShade().setColour(128, 128, 0));",
+            "id": "10035bbf7725f195c0238de941939c47"
+          },
+          {
+            "type": "html",
+            "text": "\nIf all you need are the defaults, it becomes this...",
+            "id": "a87f5a82372540a66a9f48bc927b48c8"
+          },
+          {
+            "type": "code",
+            "text": "  myFunct(11, 22, new Parms());",
+            "id": "06809d093a09a85db94c60c12e4cd23a"
+          },
+          {
+            "type": "html",
+            "text": "...or maybe even this, assuming appropriate logic in myFunct:",
+            "id": "b270cc2ec105757431eb3c738e80e5e6"
+          },
+          {
+            "type": "code",
+            "text": "  myFunct(11, 22, null);",
+            "id": "fadc4a644e50c839136d03f0fe95a3bc"
+          },
+          {
+            "type": "html",
+            "text": "\nNote the use of 'return this' in the relevant methods so that their invocations can be chained, as shown above.",
+            "id": "be2439684f49ce8de300080cd1e67c19"
+          },
+          {
+            "type": "html",
+            "text": "\nThis approach is relatively faster than the string method described above and the syntax is checked at compile-time -- at the expense of a bit more code.  It also supports more than just boolean parameters, though obviously the string-based technique can be extended to parse anything you like.  In the absence of an object-oriented language, similar mechanisms can be built using C structs (or some equivalent in whatever language you're using) and associated functions/procedures to manipulate them.",
+            "id": "45434f748610fea32c3084f3c7e03744"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Dave Voorhis]]",
+            "id": "0b4275cdf0b7f54ef6e798b7ecbbf50e"
+          },
+          {
+            "type": "html",
+            "text": "<i>If one is using a dynamic/lax typing language or style, that compile-time checking is not an issue. Further, the string approach(es) allows one to store or use parameters to and from a database if necessary (it is poor normalization, but many-to-many tables can be overkill sometimes). It is also shorter, prints easily when debugging, and works in just about any language. But, to each their own.</i>",
+            "id": "7a1067b12f5f9b5d3bdc46e31f0909dc"
+          },
+          {
+            "type": "html",
+            "text": "\nIt's only shorter if you entirely discount the string parser; the string method exhibits poorer performance; and compile-time checking is often desirable.  As for printing easily when debugging, simply implement a toString() method in the Parms class.  ",
+            "id": "a9398836c1f3a159d69984055cc61031"
+          },
+          {
+            "type": "html",
+            "text": "\nShould dynamic strings be a desirable means of setting parameters (as from a database, though I'm not sure how that turns into poor normalization or what it has to do with many-to-many relationships), an appropriate parseParams(...) method can be implemented in or inherited into the Parms class.  -- [[Dave Voorhis]]",
+            "id": "65749e7f5601c196953ecaa6c15854f8"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "132d499403b3478a942a8a2eba61e221"
+          },
+          {
+            "type": "html",
+            "text": "I'm shocked that nobody has brought up taglists.  These were used to very good effect in AmigaOS, for example, to replace long argument lists.  I'm also aware of at least one X11 widget library which did something similar.  I'm not sure which came first; probably the latter, but the technique applies generally.  <b>However,</b> it requires varargs support to implement well.",
+            "id": "cb3d14b8d08c69b69b5ccac41a7516f5"
+          },
+          {
+            "type": "html",
+            "text": "\nQNX uses a somewhat related mechanism.  You have a parameter block PB, and a set of flags indicating which fields of the PB you'd like to affect.  For example:",
+            "id": "331e18a37bec545bf0a80562e906a7ee"
+          },
+          {
+            "type": "code",
+            "text": "  PB.foo = 2;\n  PB.bar = \"Hello world\";",
+            "id": "89fae7f43dd5a916556c544ffe9ce98e"
+          },
+          {
+            "type": "code",
+            "text": "  result = doSomethingWith_using_(mandatoryInputHere, &PB, PBF_FOO | PBF_BAR);",
+            "id": "ea271a1ef654c438b8a2a588e7bbebac"
+          },
+          {
+            "type": "html",
+            "text": "\nThis way, you have a finite list of parameters, while still having the flexibility of optionally setting only those parameters you'd like.  --[[Samuel Falvo]]",
+            "id": "019c94a1bdf7f4da1eaecb2f2e1e8f91"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "132d499403b3478a942a8a2eba61e221"
+          },
+          {
+            "type": "html",
+            "text": "See also [[Argument Object]] or [[Introduce Parameter Object]] from [[Martin Fowler]]'s [[Refactoring Improving The Design Of Existing Code]].",
+            "id": "c87219334acf523f06fc1a911d0fb142"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "132d499403b3478a942a8a2eba61e221"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Refactoring]], [[Category Language Feature]]",
+            "id": "8a89925813710b3e769b05a30b981c7c"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?EmulateKeywordAndDefaultParameters c2.com]",
+            "id": "2ed0538729ab9f814a78bc00ba7b400f"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1628112760187
+    }
+  ]
+}

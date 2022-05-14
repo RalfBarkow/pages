@@ -1,0 +1,103 @@
+{
+  "title": "mandelbrot",
+  "story": [
+    {
+      "type": "frame",
+      "id": "6cafc7e70d6ca803",
+      "text": "//wiki.ralfbarkow.ch/assets/lambda-talk-in-a-frame/repl.html\nHEIGHT 800"
+    },
+    {
+      "type": "code",
+      "id": "670cbc178e634cc3",
+      "text": "_h1 mandelbrot {sup {sup interactive}}\n\n_p The amazing {b Mandelbrot Set} is built on a very simple expression: {code z=z{sup 2}+c}, where {code z} and {code c} are the so-called complex numbers {code z=x+iy} and {code c=a+ib}. When {code c=-1}, this expression reduces to {code z=z{sup 2}-1} which can be written: {code z{sup 2}-z-1=0}. It's a second degree equation with two real roots, {code 1.618.. and 0.618..}, known as the {b golden ratio, Ø}!\n\n{center \n{canvas  \n {@ id=\"mycanvas\" width=\"420\"; height=\"420\" \n    style=\"background:#ffe; border:0; box-shadow:0 0 8px black;\"}}}\n\n{pre {@ style=\"position:absolute; top:220px; right:-100px; width:250px; padding:2px; \n               background:#fff; opacity:0.9; box-shadow:0 0 4px #000; \"}\n{drag} \n{input {@ id=\"reset\" type=\"submit\" value=\"reset\" onclick=\"MANDEL.reset()\"}}\n{input\n {@ type=\"range\" min=\"0\" max=\"100\" value=\"10\" step=\"1\"\n    oninput =\"getId('iter').value = this.value; MANDEL.update()\"}}\niterations: {input {@ id=\"iter\" type=\"text\" value=\"10\" style=\"height:1.0em; background:transparent; border:0; width:30px; padding:0;\" onkeyup=\"MANDEL.update()\"}}  \n      zoom: {input {@ id=\"zoom\" type=\"text\" value=\"4\" style=\"height:1.0em; background:transparent; border:0; width:130px; padding:0;\" onkeyup=\"MANDEL.update()\"}}\n        x0: {span {@ id=\"x0\"}0}\n        y0: {span {@ id=\"y0\"}0}\n      {span {@ id=\"info\"}time:}\n} \n\n_h2 using the mandelbrot set editor\n_ul {b 1)} mouse-draw a rect around any point in the canvas to define a zoom around it, or click any point to get a predefined zoom x2,\n_ul {b 2)} edit fields \"iterations\" and \"zoom\",\n_ul {b 3)} click on \"reset\" to re-initialize the mandelbrot set.\n\n\n{script ;;\nvar getId = function(id) { return document.getElementById(id) };\n\nvar MANDEL = (function () { // the only one global var\n\nvar ctx,    // global 2D context\n    iter,   // can be edited by field\n    zoom,   // can be edited by field and by mouse \n    x0, y0; // modified by mouse\n\nfunction init () {\n   var canvas = getId( \"mycanvas\" );\n   ctx = canvas.getContext( \"2d\" );\n   add_zoom_to_mouse( canvas );\n   getId(\"iter\").value = iter = 10;\n   getId(\"zoom\").value = zoom = 4;\n   x0 = 0;\n   y0 = 0;\n   compute_imageData();\n}  \n\nfunction reset () {\n   getId(\"iter\").value = iter = 10;\n   getId(\"zoom\").value = zoom = 4;\n   getId(\"x0\").innerHTML = x0 = 0;\n   getId(\"y0\").innerHTML = y0 = 0;\n   compute_imageData();\n}\n\nfunction update () {\n   iter = getId(\"iter\").value;\n   iter = (iter < 1)? 1 : (iter > 1000)? 1000 : iter;\n   zoom = getId(\"zoom\").value;\n   compute_imageData();\n}\n\nfunction add_zoom_to_mouse ( can ) {\n\nvar context = can.getContext( \"2d\" );\nvar flag = false, coords, z, zmin = 50;\n\ncan.getMouse = function (event) {\n  var totalOffsetX = 0,\n      totalOffsetY = 0,\n      canvasX = 0,\n      canvasY = 0;\n  var currentElement = this; // recursive search\n  do { totalOffsetX += currentElement.offsetLeft;\n       totalOffsetY += currentElement.offsetTop; \n  } while(currentElement = currentElement.offsetParent)\n  canvasX = event.pageX - totalOffsetX;\n  canvasY = event.pageY - totalOffsetY;\n  return {x:canvasX, y:canvasY};\n};\n\ncan.onmouseover = function(e) { \n   this.style.cursor = \"crosshair\"; \n};\n\ncan.onmouseout  = function(e) { \n   this.style.cursor = \"default\"; \n};\n\ncan.onmousedown = function (e) {\n   iter = parseInt(getId(\"iter\").value);\n   var zoom_prev = zoom;\n   zoom = parseFloat(getId(\"zoom\").value);\n   x0 = x0*zoom_prev/zoom;\n   y0 = y0*zoom_prev/zoom;\n   coords = this.getMouse( e );\n   x0 =   coords.x/this.width  - 0.5  + x0;\n   y0 = -(coords.y/this.height - 0.5) + y0;\n   getId(\"x0\").innerHTML = x0;\n   getId(\"y0\").innerHTML = y0;\n   context.strokeStyle = \"#888\"; \n   context.lineWidth = 1;\n   z = zmin;\n   flag = true;\n};\n\ncan.onmousemove = function (e) {\n   if (!flag) return;\n   var coords_2 = this.getMouse( e );\n   var w = Math.abs( coords_2.x - coords.x );\n   var h = Math.abs( coords_2.y - coords.y );\n   z = Math.max( w, h );\n   context.strokeRect( coords.x - z/2, coords.y - z/2, z, z );\n};\n\ncan.onmouseup = function (e) {\n   var zoom_prev = zoom;\n   z = (z < zmin)? zmin : z;\n   zoom = zoom*z/this.width;\n   getId(\"zoom\").value = zoom;\n   x0 = x0*zoom_prev/zoom;\n   y0 = y0*zoom_prev/zoom;\n   flag = false;\n   compute_imageData();\n};\n   \n} // end add_mouse_zoom_to ( canvas )\n\n/////////////////////////////\n// MANDEL\n/////////////////////////////\n\nfunction compute_imageData() {\n   var width  = ctx.canvas.width, \n       height = ctx.canvas.height,\n       imageData = ctx.createImageData( width, height ),\n       data = imageData.data,\n       rgba = {r:0, g:0, b:0, a:255},\n       index;\n   var t0 = new Date().getTime();\n   for (var i=0; i< width; i++) {\n      var x = zoom*( i/width - 0.5 + x0);\n      for (var j=0; j< height; j++) {\n         var y = zoom*(-j/height + 0.5 + y0);\n         mandel_geo( x, y ); // compute count and norme;\n         mandel_col( rgba );\n         index = (i + j * width) * 4;\n         data[index]   = rgba.r;\n         data[index+1] = rgba.g;\n         data[index+2] = rgba.b;\n         data[index+3] = rgba.a;\n      }\n   }\n   var t1 = new Date().getTime();\n   getId( \"info\" ).innerHTML = \"time: \" + (t1-t0) + \"ms\";\n   ctx.putImageData( imageData, 0, 0 );\n}\n\nvar count, norme; // shared by mandel_geo and mandel_col\n\nfunction mandel_geo( cx, cy ) { // compute k at point C\n   var x = 0.0, y = 0.0; // initialyze z = x + iy = 0\n   for (count = 0; count < iter; count++) {\n      var X = x*x - y*y + cx; // compute z = z^2 + c\n      var Y = 2*x*y + cy;\n      norme = X*X + Y*Y;\n      if ( norme > 4.0 )\t\n         break; // exit if norme > 2\n      x = X; // update z = x +iy\n      y = Y;\n   } \n}\n\nfunction mandel_col( rgba ) {\n   var u = 255*(norme*0.25 - 1);\n   if ( count < iter ) {\n      rgba.r = u;\n      rgba.g = u;\n      rgba.b = u;\n   } else {\n      rgba.r = -u;\n      rgba.g = 0;\n      rgba.b = 0;\n   }\n}\n\nreturn {init, update, reset};\n\n})();  \n\nsetTimeout( MANDEL.init, 1 )\n\n}"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "mandelbrot",
+        "story": []
+      },
+      "date": 1642617016359
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6cafc7e70d6ca803"
+      },
+      "id": "6cafc7e70d6ca803",
+      "type": "add",
+      "date": 1642617018401
+    },
+    {
+      "type": "edit",
+      "id": "6cafc7e70d6ca803",
+      "item": {
+        "type": "frame",
+        "id": "6cafc7e70d6ca803",
+        "text": "http://code.fed.wiki/assets/pages/lambda-talk-in-a-frame/repl.html\nHEIGHT 400"
+      },
+      "date": 1642617023122
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "670cbc178e634cc3"
+      },
+      "id": "670cbc178e634cc3",
+      "type": "add",
+      "after": "6cafc7e70d6ca803",
+      "date": 1642617045687
+    },
+    {
+      "type": "edit",
+      "id": "670cbc178e634cc3",
+      "item": {
+        "type": "code",
+        "id": "670cbc178e634cc3",
+        "text": "_h1 mandelbrot {sup {sup interactive}}\n\n_p The amazing {b Mandelbrot Set} is built on a very simple expression: {code z=z{sup 2}+c}, where {code z} and {code c} are the so-called complex numbers {code z=x+iy} and {code c=a+ib}. When {code c=-1}, this expression reduces to {code z=z{sup 2}-1} which can be written: {code z{sup 2}-z-1=0}. It's a second degree equation with two real roots, {code 1.618.. and 0.618..}, known as the {b golden ratio, Ø}!\n\n{center \n{canvas  \n {@ id=\"mycanvas\" width=\"420\"; height=\"420\" \n    style=\"background:#ffe; border:0; box-shadow:0 0 8px black;\"}}}\n\n{pre {@ style=\"position:absolute; top:220px; right:-100px; width:250px; padding:2px; \n               background:#fff; opacity:0.9; box-shadow:0 0 4px #000; \"}\n{drag} \n{input {@ id=\"reset\" type=\"submit\" value=\"reset\" onclick=\"MANDEL.reset()\"}}\n{input\n {@ type=\"range\" min=\"0\" max=\"100\" value=\"10\" step=\"1\"\n    oninput =\"getId('iter').value = this.value; MANDEL.update()\"}}\niterations: {input {@ id=\"iter\" type=\"text\" value=\"10\" style=\"height:1.0em; background:transparent; border:0; width:30px; padding:0;\" onkeyup=\"MANDEL.update()\"}}  \n      zoom: {input {@ id=\"zoom\" type=\"text\" value=\"4\" style=\"height:1.0em; background:transparent; border:0; width:130px; padding:0;\" onkeyup=\"MANDEL.update()\"}}\n        x0: {span {@ id=\"x0\"}0}\n        y0: {span {@ id=\"y0\"}0}\n      {span {@ id=\"info\"}time:}\n} \n\n_h2 using the mandelbrot set editor\n_ul {b 1)} mouse-draw a rect around any point in the canvas to define a zoom around it, or click any point to get a predefined zoom x2,\n_ul {b 2)} edit fields \"iterations\" and \"zoom\",\n_ul {b 3)} click on \"reset\" to re-initialize the mandelbrot set.\n\n\n{script ;;\nvar getId = function(id) { return document.getElementById(id) };\n\nvar MANDEL = (function () { // the only one global var\n\nvar ctx,    // global 2D context\n    iter,   // can be edited by field\n    zoom,   // can be edited by field and by mouse \n    x0, y0; // modified by mouse\n\nfunction init () {\n   var canvas = getId( \"mycanvas\" );\n   ctx = canvas.getContext( \"2d\" );\n   add_zoom_to_mouse( canvas );\n   getId(\"iter\").value = iter = 10;\n   getId(\"zoom\").value = zoom = 4;\n   x0 = 0;\n   y0 = 0;\n   compute_imageData();\n}  \n\nfunction reset () {\n   getId(\"iter\").value = iter = 10;\n   getId(\"zoom\").value = zoom = 4;\n   getId(\"x0\").innerHTML = x0 = 0;\n   getId(\"y0\").innerHTML = y0 = 0;\n   compute_imageData();\n}\n\nfunction update () {\n   iter = getId(\"iter\").value;\n   iter = (iter < 1)? 1 : (iter > 1000)? 1000 : iter;\n   zoom = getId(\"zoom\").value;\n   compute_imageData();\n}\n\nfunction add_zoom_to_mouse ( can ) {\n\nvar context = can.getContext( \"2d\" );\nvar flag = false, coords, z, zmin = 50;\n\ncan.getMouse = function (event) {\n  var totalOffsetX = 0,\n      totalOffsetY = 0,\n      canvasX = 0,\n      canvasY = 0;\n  var currentElement = this; // recursive search\n  do { totalOffsetX += currentElement.offsetLeft;\n       totalOffsetY += currentElement.offsetTop; \n  } while(currentElement = currentElement.offsetParent)\n  canvasX = event.pageX - totalOffsetX;\n  canvasY = event.pageY - totalOffsetY;\n  return {x:canvasX, y:canvasY};\n};\n\ncan.onmouseover = function(e) { \n   this.style.cursor = \"crosshair\"; \n};\n\ncan.onmouseout  = function(e) { \n   this.style.cursor = \"default\"; \n};\n\ncan.onmousedown = function (e) {\n   iter = parseInt(getId(\"iter\").value);\n   var zoom_prev = zoom;\n   zoom = parseFloat(getId(\"zoom\").value);\n   x0 = x0*zoom_prev/zoom;\n   y0 = y0*zoom_prev/zoom;\n   coords = this.getMouse( e );\n   x0 =   coords.x/this.width  - 0.5  + x0;\n   y0 = -(coords.y/this.height - 0.5) + y0;\n   getId(\"x0\").innerHTML = x0;\n   getId(\"y0\").innerHTML = y0;\n   context.strokeStyle = \"#888\"; \n   context.lineWidth = 1;\n   z = zmin;\n   flag = true;\n};\n\ncan.onmousemove = function (e) {\n   if (!flag) return;\n   var coords_2 = this.getMouse( e );\n   var w = Math.abs( coords_2.x - coords.x );\n   var h = Math.abs( coords_2.y - coords.y );\n   z = Math.max( w, h );\n   context.strokeRect( coords.x - z/2, coords.y - z/2, z, z );\n};\n\ncan.onmouseup = function (e) {\n   var zoom_prev = zoom;\n   z = (z < zmin)? zmin : z;\n   zoom = zoom*z/this.width;\n   getId(\"zoom\").value = zoom;\n   x0 = x0*zoom_prev/zoom;\n   y0 = y0*zoom_prev/zoom;\n   flag = false;\n   compute_imageData();\n};\n   \n} // end add_mouse_zoom_to ( canvas )\n\n/////////////////////////////\n// MANDEL\n/////////////////////////////\n\nfunction compute_imageData() {\n   var width  = ctx.canvas.width, \n       height = ctx.canvas.height,\n       imageData = ctx.createImageData( width, height ),\n       data = imageData.data,\n       rgba = {r:0, g:0, b:0, a:255},\n       index;\n   var t0 = new Date().getTime();\n   for (var i=0; i< width; i++) {\n      var x = zoom*( i/width - 0.5 + x0);\n      for (var j=0; j< height; j++) {\n         var y = zoom*(-j/height + 0.5 + y0);\n         mandel_geo( x, y ); // compute count and norme;\n         mandel_col( rgba );\n         index = (i + j * width) * 4;\n         data[index]   = rgba.r;\n         data[index+1] = rgba.g;\n         data[index+2] = rgba.b;\n         data[index+3] = rgba.a;\n      }\n   }\n   var t1 = new Date().getTime();\n   getId( \"info\" ).innerHTML = \"time: \" + (t1-t0) + \"ms\";\n   ctx.putImageData( imageData, 0, 0 );\n}\n\nvar count, norme; // shared by mandel_geo and mandel_col\n\nfunction mandel_geo( cx, cy ) { // compute k at point C\n   var x = 0.0, y = 0.0; // initialyze z = x + iy = 0\n   for (count = 0; count < iter; count++) {\n      var X = x*x - y*y + cx; // compute z = z^2 + c\n      var Y = 2*x*y + cy;\n      norme = X*X + Y*Y;\n      if ( norme > 4.0 )\t\n         break; // exit if norme > 2\n      x = X; // update z = x +iy\n      y = Y;\n   } \n}\n\nfunction mandel_col( rgba ) {\n   var u = 255*(norme*0.25 - 1);\n   if ( count < iter ) {\n      rgba.r = u;\n      rgba.g = u;\n      rgba.b = u;\n   } else {\n      rgba.r = -u;\n      rgba.g = 0;\n      rgba.b = 0;\n   }\n}\n\nreturn {init, update, reset};\n\n})();  \n\nsetTimeout( MANDEL.init, 1 )\n\n}"
+      },
+      "date": 1642617065277
+    },
+    {
+      "type": "edit",
+      "id": "6cafc7e70d6ca803",
+      "item": {
+        "type": "frame",
+        "id": "6cafc7e70d6ca803",
+        "text": "http://code.fed.wiki/assets/pages/lambda-talk-in-a-frame/repl.html\nHEIGHT 800"
+      },
+      "date": 1642617098232
+    },
+    {
+      "type": "fork",
+      "site": "alain.lambda.ustawi.wiki",
+      "date": 1645109936140
+    },
+    {
+      "type": "edit",
+      "id": "6cafc7e70d6ca803",
+      "item": {
+        "type": "frame",
+        "id": "6cafc7e70d6ca803",
+        "text": "//wiki.ralfbarkow.ch/assets/lambda-talk-in-a-frame/repl.html\nHEIGHT 800"
+      },
+      "date": 1645109956544
+    },
+    {
+      "type": "edit",
+      "id": "6cafc7e70d6ca803",
+      "item": {
+        "type": "frame",
+        "id": "6cafc7e70d6ca803",
+        "text": "//wiki.ralfbarkow.ch/assets/lambda-talk-in-a-frame/repl.html\nHEIGHT 800"
+      },
+      "date": 1645109965293
+    },
+    {
+      "type": "fork",
+      "date": 1645109977144
+    }
+  ]
+}

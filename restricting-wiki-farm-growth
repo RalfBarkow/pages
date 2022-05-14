@@ -1,0 +1,840 @@
+{
+  "title": "Restricting Wiki Farm Growth",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "98f3624cfc6ab062",
+      "text": "As part of returning to provisioning wiki sites as part of registering members of a community, we look at stopping the creation of new wiki on first access.  [https://github.com/fedwiki/wiki/tree/restrict-new-wiki github]"
+    },
+    {
+      "type": "paragraph",
+      "id": "2470d5b17419ead8",
+      "text": "The wiki-server will by default create the directory structure it requires when it is started. To prevent this from happening, in an uncontrolled way, we can modify the existing farm code so that the server for a particular wiki is only started if data directory for that wiki already exists. We can then rely on a registration process creating at least the top level directory for the new wiki."
+    },
+    {
+      "type": "markdown",
+      "id": "c8d149d1b6eb72e2",
+      "text": "# Thinking Through A Solution"
+    },
+    {
+      "type": "markdown",
+      "id": "67431b066f4299a6",
+      "text": "We will modify the existing `allowed` parameter. Currently this takes a comma separated list of wiki that we will start wiki servers for. As an alternative to a list we add `*` which will scan the wiki farm's data directory for wiki data directories, and allow those. *We will also watch this directory for wiki being added/removed and include those changes in the list of wiki allowed.*"
+    },
+    {
+      "type": "paragraph",
+      "id": "c3582a1a3e11e3b9",
+      "text": "When wiki starts we can easily create a list of the existing wiki data directories."
+    },
+    {
+      "type": "code",
+      "id": "99d5b9f61be70b2a",
+      "text": "allowedHosts = fs.readdirSync(wikiDir, {withFileTypes: true})\n  .filter (item) -> item.isDirectory()\n  .map (item) -> item.name"
+    },
+    {
+      "type": "markdown",
+      "id": "f3aa672704adc2fb",
+      "text": "This list is used in the checks in the `allow` function, to check if the any particular wiki in *allowed* in the farm."
+    },
+    {
+      "type": "paragraph",
+      "id": "e32214eb0d2a44e3",
+      "text": "The obvious problem with this is that any wiki added while the server is running will not be in the list, and not allowed."
+    },
+    {
+      "type": "markdown",
+      "id": "76d94c2d6c56c3a4",
+      "text": "So, we need to either i) watch the contents of the data directory and add new wiki to the list (and remove any that are deleted), ii) add an extra test to `allow` to check for a data directory for any wiki not in the list, or iii) an internal function to add a new wiki to the list."
+    },
+    {
+      "type": "paragraph",
+      "id": "8bf7f6d3bee4eab2",
+      "text": "We'll rule out checking for new wiki data directories, option (ii)."
+    },
+    {
+      "type": "paragraph",
+      "id": "4b47312a24ae8681",
+      "text": "An internal function looks to be the best option, option (iii). But, will be linked with the eventual registration process so is probably best left until that is better understood."
+    },
+    {
+      "type": "paragraph",
+      "id": "54e7b624d3da56ed",
+      "text": "There are limitations to watching for changes in the farm's data directory, option (i). See [https://nodejs.org/dist/latest-v12.x/docs/api/fs.html#fs_caveats fs.watch]. But, there is a wrapper, chokidar, which helps address at least some of those limitation."
+    },
+    {
+      "type": "paragraph",
+      "id": "86007ebd04f62f90",
+      "text": "So, the initial implementation will watch for new/deleted wiki, using `chokidar`. For those environments where the `fs.watch` doesn't work and `fs.watchFile`, which uses polling, is required chokidar uses environment variables to allow the switch to be made."
+    },
+    {
+      "type": "paragraph",
+      "id": "b3f5d9847e134433",
+      "text": "The code for this."
+    },
+    {
+      "type": "code",
+      "id": "b887cb3dd4a304fc",
+      "text": "    watcher = chokidar.watch wikiDir, {\n      persistent: true\n      ignoreInitial: true\n      depth: 0\n    }\n\n    watcher\n      .on('addDir', (newWiki) -> \n        newWiki = path.basename(newWiki)\n        allowedHosts.push(newWiki)\n      .on('unlinkDir', (delWiki) -> \n        delWiki = path.basename(delWiki)\n        _.pull(allowedHosts, delWiki)\n"
+    },
+    {
+      "type": "markdown",
+      "id": "6b82b0d005860248",
+      "text": "# Restrictions / Limitations"
+    },
+    {
+      "type": "paragraph",
+      "id": "3b330a3a39d2c5b3",
+      "text": "Some limitation that exist in the initial version."
+    },
+    {
+      "type": "markdown",
+      "id": "c63c7ce3a6ad9f53",
+      "text": "* We only look at, and watch, the contents of `argv.data` for data directories for existing wiki. *This is not complete, as it is possible to override this parameter by `wikiDomains`. A complete solution will need to scan any `wikiDomains` and create a list of locations to scan/watch for existing wiki.*"
+    },
+    {
+      "type": "markdown",
+      "id": "c9451243b8489d00",
+      "text": "* We are using a mainly default configuration for the fs.watch/fs.watchFile/FSEvents wrapper, chokidar. This will default to using `fs.watch` (or FSEvents on macOS).\n\n  In some environments, typically if using a network file system or virtual environment, it might be necessary to switch to using `fs.watchFile` (backed by polling). To do this set the environment variable `CHOKIDAR_USEPOLLING` to true (1). You will also want to set the fire system polling interval, `CHOKIDAR_INTERVAL`, in milliseconds, default `100`.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "ed4f3eb1a1b4f1ab",
+      "text": "* The use of `fs.readdirSync` option `withFileTypes` requires at least Node.js version 10.10.0, so the minimum version has been increased to that.\n\n   **N.B.** Node.js 8 is end of life on December 31, 2019.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "6d283e3ed58bc264",
+      "text": "* ~~Current response is a `400` HTTP status and the text `Invalid host`.~~ replaced with nicer looking error page, still with the `400` status code.\n\n  ~~A better default error page, and the ability to redirect to a custom one are needed.~~ done.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "2908fd0d4142121e",
+      "text": "* The interaction between `wikiDomains` and `allow` parameters need exploring, and making more intelligent."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Restricting Wiki Farm Growth",
+        "story": []
+      },
+      "date": 1573127303816
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "98f3624cfc6ab062"
+      },
+      "id": "98f3624cfc6ab062",
+      "type": "add",
+      "date": 1573127333043
+    },
+    {
+      "type": "edit",
+      "id": "98f3624cfc6ab062",
+      "item": {
+        "type": "paragraph",
+        "id": "98f3624cfc6ab062",
+        "text": "As part of returning to provisioning wiki sites as part of registering members of a community, we look at stopping the creation of new wiki on first access. "
+      },
+      "date": 1573127588792
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2470d5b17419ead8"
+      },
+      "id": "2470d5b17419ead8",
+      "type": "add",
+      "after": "98f3624cfc6ab062",
+      "date": 1573127673756
+    },
+    {
+      "type": "edit",
+      "id": "2470d5b17419ead8",
+      "item": {
+        "type": "paragraph",
+        "id": "2470d5b17419ead8",
+        "text": "As `wiki-server` will create "
+      },
+      "date": 1573128896009
+    },
+    {
+      "type": "edit",
+      "id": "2470d5b17419ead8",
+      "item": {
+        "type": "paragraph",
+        "id": "2470d5b17419ead8",
+        "text": "The wiki-server will by default create the directory structure it requires when it is started. To prevent this from happening we can modify the existing farm code so that the server for a particular wiki is only started if data directory for the wiki exists. We can then rely on a registration process creating at least the top level directory for the new wiki."
+      },
+      "date": 1573130320543
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c8d149d1b6eb72e2"
+      },
+      "id": "c8d149d1b6eb72e2",
+      "type": "add",
+      "after": "2470d5b17419ead8",
+      "date": 1573209871158
+    },
+    {
+      "type": "edit",
+      "id": "c8d149d1b6eb72e2",
+      "item": {
+        "type": "markdown",
+        "id": "c8d149d1b6eb72e2",
+        "text": "# Thoughts"
+      },
+      "date": 1573209905630
+    },
+    {
+      "type": "edit",
+      "id": "c8d149d1b6eb72e2",
+      "item": {
+        "type": "markdown",
+        "id": "c8d149d1b6eb72e2",
+        "text": "# Thinking Through A Solution"
+      },
+      "date": 1573209933333
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "67431b066f4299a6"
+      },
+      "id": "67431b066f4299a6",
+      "type": "add",
+      "after": "c8d149d1b6eb72e2",
+      "date": 1573209976106
+    },
+    {
+      "type": "edit",
+      "id": "67431b066f4299a6",
+      "item": {
+        "type": "paragraph",
+        "id": "67431b066f4299a6",
+        "text": "Let's add a configuration flag `restricted` so we know that we want to use this new behavior. We'll set the default to `false`, so that wiki defaults to the current behavior."
+      },
+      "date": 1573210141517
+    },
+    {
+      "type": "edit",
+      "id": "67431b066f4299a6",
+      "item": {
+        "type": "paragraph",
+        "id": "67431b066f4299a6",
+        "text": "Let's add a configuration flag `restricted` so we know that we want to use this new behaviour. We'll set the default to `false`, so that wiki defaults to the current behaviour."
+      },
+      "date": 1573210169755
+    },
+    {
+      "type": "edit",
+      "id": "67431b066f4299a6",
+      "item": {
+        "type": "markdown",
+        "id": "67431b066f4299a6",
+        "text": "Let's add a configuration flag `restricted` so we know that we want to use this new behaviour. We'll set the default to `false`, so that wiki defaults to the current behaviour."
+      },
+      "date": 1573210216431
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c3582a1a3e11e3b9"
+      },
+      "id": "c3582a1a3e11e3b9",
+      "type": "add",
+      "after": "67431b066f4299a6",
+      "date": 1573210313257
+    },
+    {
+      "type": "edit",
+      "id": "c3582a1a3e11e3b9",
+      "item": {
+        "type": "paragraph",
+        "id": "c3582a1a3e11e3b9",
+        "text": "When wiki starts we can easily create a list of the existing wiki data directories."
+      },
+      "date": 1573210376187
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "99d5b9f61be70b2a"
+      },
+      "id": "99d5b9f61be70b2a",
+      "type": "add",
+      "after": "c3582a1a3e11e3b9",
+      "date": 1573210386196
+    },
+    {
+      "type": "edit",
+      "id": "99d5b9f61be70b2a",
+      "item": {
+        "type": "code",
+        "id": "99d5b9f61be70b2a",
+        "text": "    existingWiki = fs.readdirSync(wikiDir, {withFileTypes: true})\n      .filter (item) -> item.isDirectory()\n      .map (item) -> item.name"
+      },
+      "date": 1573210389752
+    },
+    {
+      "type": "edit",
+      "id": "99d5b9f61be70b2a",
+      "item": {
+        "type": "code",
+        "id": "99d5b9f61be70b2a",
+        "text": "existingWiki = fs.readdirSync(wikiDir, {withFileTypes: true})\n  .filter (item) -> item.isDirectory()\n  .map (item) -> item.name"
+      },
+      "date": 1573210420067
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f3aa672704adc2fb"
+      },
+      "id": "f3aa672704adc2fb",
+      "type": "add",
+      "after": "99d5b9f61be70b2a",
+      "date": 1573210431610
+    },
+    {
+      "type": "edit",
+      "id": "f3aa672704adc2fb",
+      "item": {
+        "type": "markdown",
+        "id": "f3aa672704adc2fb",
+        "text": "N.B. This requires a "
+      },
+      "date": 1573210456506
+    },
+    {
+      "type": "edit",
+      "id": "f3aa672704adc2fb",
+      "item": {
+        "type": "markdown",
+        "id": "f3aa672704adc2fb",
+        "text": "This list can then be used `allow`, together with any `wikiDomains` configuration to check if the any particular wiki in *allowed* in the farm."
+      },
+      "date": 1573210662622
+    },
+    {
+      "type": "edit",
+      "id": "f3aa672704adc2fb",
+      "item": {
+        "type": "markdown",
+        "id": "f3aa672704adc2fb",
+        "text": "This list can added to the checks in the `allow` function, to check if the any particular wiki in *allowed* in the farm. By adding a simple check."
+      },
+      "date": 1573210877335
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "de9344f5d573fb7f"
+      },
+      "id": "de9344f5d573fb7f",
+      "type": "add",
+      "after": "f3aa672704adc2fb",
+      "date": 1573210879073
+    },
+    {
+      "type": "edit",
+      "id": "de9344f5d573fb7f",
+      "item": {
+        "type": "code",
+        "id": "de9344f5d573fb7f",
+        "text": "if argv.restricted and !existingWiki.includes(host)\n  return false"
+      },
+      "date": 1573210898455
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e32214eb0d2a44e3"
+      },
+      "id": "e32214eb0d2a44e3",
+      "type": "add",
+      "after": "de9344f5d573fb7f",
+      "date": 1573210922485
+    },
+    {
+      "type": "edit",
+      "id": "e32214eb0d2a44e3",
+      "item": {
+        "type": "paragraph",
+        "id": "e32214eb0d2a44e3",
+        "text": "The obvious problem with this is that any wiki added while the server is running will not be in the list, and not allowed."
+      },
+      "date": 1573210996121
+    },
+    {
+      "type": "add",
+      "id": "76d94c2d6c56c3a4",
+      "item": {
+        "type": "paragraph",
+        "id": "76d94c2d6c56c3a4",
+        "text": "So, we need to either i) watch the contents of the data directory and add new wiki to the list (and remove any that are deleted), ii) add an extra test to "
+      },
+      "after": "e32214eb0d2a44e3",
+      "date": 1573212592186
+    },
+    {
+      "type": "edit",
+      "id": "76d94c2d6c56c3a4",
+      "item": {
+        "type": "paragraph",
+        "id": "76d94c2d6c56c3a4",
+        "text": "So, we need to either i) watch the contents of the data directory and add new wiki to the list (and remove any that are deleted), ii) add an extra test to `allow` to check for a data directory for any wiki not in the list, or iii) an internal function to add a new wiki to the list."
+      },
+      "date": 1573212890367
+    },
+    {
+      "type": "edit",
+      "id": "76d94c2d6c56c3a4",
+      "item": {
+        "type": "markdown",
+        "id": "76d94c2d6c56c3a4",
+        "text": "So, we need to either i) watch the contents of the data directory and add new wiki to the list (and remove any that are deleted), ii) add an extra test to `allow` to check for a data directory for any wiki not in the list, or iii) an internal function to add a new wiki to the list."
+      },
+      "date": 1573212900015
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8bf7f6d3bee4eab2"
+      },
+      "id": "8bf7f6d3bee4eab2",
+      "type": "add",
+      "after": "76d94c2d6c56c3a4",
+      "date": 1573213329507
+    },
+    {
+      "type": "edit",
+      "id": "8bf7f6d3bee4eab2",
+      "item": {
+        "type": "paragraph",
+        "id": "8bf7f6d3bee4eab2",
+        "text": "There are limitations to watching for changes in the farm's data directory. See "
+      },
+      "date": 1573213408070
+    },
+    {
+      "type": "edit",
+      "id": "8bf7f6d3bee4eab2",
+      "item": {
+        "type": "paragraph",
+        "id": "8bf7f6d3bee4eab2",
+        "text": "There are limitations to watching for changes in the farm's data directory. See [https://nodejs.org/dist/latest-v12.x/docs/api/fs.html#fs_caveats fs.watch]. There is a wrapper"
+      },
+      "date": 1573213620222
+    },
+    {
+      "type": "edit",
+      "id": "8bf7f6d3bee4eab2",
+      "item": {
+        "type": "paragraph",
+        "id": "8bf7f6d3bee4eab2",
+        "text": "We'll rule out checking for new wiki data directories, option (ii)."
+      },
+      "date": 1573214120466
+    },
+    {
+      "type": "add",
+      "id": "4b47312a24ae8681",
+      "item": {
+        "type": "paragraph",
+        "id": "4b47312a24ae8681",
+        "text": "An internal function looks to be the best option, option (iii). But, will be linked with the eventual registration process so is probably best left until that is better understood."
+      },
+      "after": "8bf7f6d3bee4eab2",
+      "date": 1573214369982
+    },
+    {
+      "type": "add",
+      "id": "54e7b624d3da56ed",
+      "item": {
+        "type": "paragraph",
+        "id": "54e7b624d3da56ed",
+        "text": "There are limitations to watching for changes in the farm's data directory, option (i). See [https://nodejs.org/dist/latest-v12.x/docs/api/fs.html#fs_caveats fs.watch]. But, there is a wrapper, chokidar, which helps address at least some of those limitation. "
+      },
+      "after": "4b47312a24ae8681",
+      "date": 1573214439908
+    },
+    {
+      "type": "edit",
+      "id": "54e7b624d3da56ed",
+      "item": {
+        "type": "paragraph",
+        "id": "54e7b624d3da56ed",
+        "text": "There are limitations to watching for changes in the farm's data directory, option (i). See [https://nodejs.org/dist/latest-v12.x/docs/api/fs.html#fs_caveats fs.watch]. But, there is a wrapper, chokidar, which helps address at least some of those limitation."
+      },
+      "date": 1573214635892
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "86007ebd04f62f90"
+      },
+      "id": "86007ebd04f62f90",
+      "type": "add",
+      "after": "54e7b624d3da56ed",
+      "date": 1573214699466
+    },
+    {
+      "type": "edit",
+      "id": "86007ebd04f62f90",
+      "item": {
+        "type": "paragraph",
+        "id": "86007ebd04f62f90",
+        "text": "So, the initial implementation will watch for new/deleted wiki, using `chokidar`. For those environments where the default"
+      },
+      "date": 1573214908264
+    },
+    {
+      "type": "edit",
+      "id": "86007ebd04f62f90",
+      "item": {
+        "type": "paragraph",
+        "id": "86007ebd04f62f90",
+        "text": "So, the initial implementation will watch for new/deleted wiki, using `chokidar`. For those environments where the `fs.watch` doesn't work and `fs.watchFile`, which uses polling, is required chokidar uses environment variables to allow the switch to be made."
+      },
+      "date": 1573215029379
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b3f5d9847e134433"
+      },
+      "id": "b3f5d9847e134433",
+      "type": "add",
+      "after": "86007ebd04f62f90",
+      "date": 1573221591998
+    },
+    {
+      "type": "edit",
+      "id": "b3f5d9847e134433",
+      "item": {
+        "type": "paragraph",
+        "id": "b3f5d9847e134433",
+        "text": "The code for this."
+      },
+      "date": 1573221602926
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b887cb3dd4a304fc"
+      },
+      "id": "b887cb3dd4a304fc",
+      "type": "add",
+      "after": "b3f5d9847e134433",
+      "date": 1573221604230
+    },
+    {
+      "type": "edit",
+      "id": "b887cb3dd4a304fc",
+      "item": {
+        "type": "code",
+        "id": "b887cb3dd4a304fc",
+        "text": "    watcher = chokidar.watch wikiDir, {\n      persistent: true\n      ignoreInitial: true\n      depth: 0\n    }\n\n    watcher\n      .on('addDir', (newWiki) -> \n        newWiki = path.basename(newWiki)\n        existingWiki.push(newWiki)\n      .on('unlinkDir', (delWiki) -> \n        delWiki = path.basename(delWiki)\n        _.pull(existingWiki, delWiki)\n"
+      },
+      "date": 1573221612516
+    },
+    {
+      "type": "edit",
+      "id": "de9344f5d573fb7f",
+      "item": {
+        "type": "code",
+        "id": "de9344f5d573fb7f",
+        "text": "if argv.restrict and !existingWiki.includes(host)\n  return false"
+      },
+      "date": 1573288966558
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6b82b0d005860248"
+      },
+      "id": "6b82b0d005860248",
+      "type": "add",
+      "after": "b887cb3dd4a304fc",
+      "date": 1573288980015
+    },
+    {
+      "type": "edit",
+      "id": "6b82b0d005860248",
+      "item": {
+        "type": "markdown",
+        "id": "6b82b0d005860248",
+        "text": "# Restrictions / Limitations"
+      },
+      "date": 1573288998714
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3b330a3a39d2c5b3"
+      },
+      "id": "3b330a3a39d2c5b3",
+      "type": "add",
+      "after": "6b82b0d005860248",
+      "date": 1573289011058
+    },
+    {
+      "type": "edit",
+      "id": "3b330a3a39d2c5b3",
+      "item": {
+        "type": "paragraph",
+        "id": "3b330a3a39d2c5b3",
+        "text": "Some limitation that exist in the initial version."
+      },
+      "date": 1573289049416
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c63c7ce3a6ad9f53"
+      },
+      "id": "c63c7ce3a6ad9f53",
+      "type": "add",
+      "after": "3b330a3a39d2c5b3",
+      "date": 1573289050930
+    },
+    {
+      "type": "edit",
+      "id": "c63c7ce3a6ad9f53",
+      "item": {
+        "type": "markdown",
+        "id": "c63c7ce3a6ad9f53",
+        "text": "* We only look at, and watch, the contents of `argv.data` for data directories for existing wiki. *This is not complete, as it is possible to override this parameter by `wikiDomains`. A complete solution will need to scan any `wikiDomains` and create a list of locations to scan/watch for existing wiki.*"
+      },
+      "date": 1573289347005
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c9451243b8489d00"
+      },
+      "id": "c9451243b8489d00",
+      "type": "add",
+      "after": "c63c7ce3a6ad9f53",
+      "date": 1573289400189
+    },
+    {
+      "type": "edit",
+      "id": "c9451243b8489d00",
+      "item": {
+        "type": "markdown",
+        "id": "c9451243b8489d00",
+        "text": "* We are using a mainly default configuration for the fs.watch/fs.watchFile/FSEvents wrapper, chokidar. This will default to using `fs.watch` (or FSEvents on macOS).\n\nIn some environments, typically if using a network file system or virtual environment, it might be necessary to switch to using `fs.watchFile` (backed by polling). To do this set the environment variable `CHOKIDAR_USEPOLLING` to true (1). You will also want to set the fire system polling interval, `CHOKIDAR_INTERVAL`, in milliseconds, default `100`."
+      },
+      "date": 1573289966987
+    },
+    {
+      "type": "edit",
+      "id": "c9451243b8489d00",
+      "item": {
+        "type": "markdown",
+        "id": "c9451243b8489d00",
+        "text": "* We are using a mainly default configuration for the fs.watch/fs.watchFile/FSEvents wrapper, chokidar. This will default to using `fs.watch` (or FSEvents on macOS).\n\n  In some environments, typically if using a network file system or virtual environment, it might be necessary to switch to using `fs.watchFile` (backed by polling). To do this set the environment variable `CHOKIDAR_USEPOLLING` to true (1). You will also want to set the fire system polling interval, `CHOKIDAR_INTERVAL`, in milliseconds, default `100`."
+      },
+      "date": 1573289975474
+    },
+    {
+      "type": "edit",
+      "id": "c9451243b8489d00",
+      "item": {
+        "type": "markdown",
+        "id": "c9451243b8489d00",
+        "text": "* We are using a mainly default configuration for the fs.watch/fs.watchFile/FSEvents wrapper, chokidar. This will default to using `fs.watch` (or FSEvents on macOS).\n\n  In some environments, typically if using a network file system or virtual environment, it might be necessary to switch to using `fs.watchFile` (backed by polling). To do this set the environment variable `CHOKIDAR_USEPOLLING` to true (1). You will also want to set the fire system polling interval, `CHOKIDAR_INTERVAL`, in milliseconds, default `100`.\n"
+      },
+      "date": 1573290111326
+    },
+    {
+      "type": "add",
+      "id": "ed4f3eb1a1b4f1ab",
+      "item": {
+        "type": "markdown",
+        "id": "ed4f3eb1a1b4f1ab",
+        "text": "* The use of `fs.readdirSync` option `withFileTypes` requires at least Node.js version 10.10.0, so the minimum version has been increased to that.\n\n   "
+      },
+      "after": "c9451243b8489d00",
+      "date": 1573290278931
+    },
+    {
+      "type": "edit",
+      "id": "ed4f3eb1a1b4f1ab",
+      "item": {
+        "type": "markdown",
+        "id": "ed4f3eb1a1b4f1ab",
+        "text": "* The use of `fs.readdirSync` option `withFileTypes` requires at least Node.js version 10.10.0, so the minimum version has been increased to that.\n\n   **N.B.** Node.js 8 is end of life at the end of 2019."
+      },
+      "date": 1573290353715
+    },
+    {
+      "type": "edit",
+      "id": "ed4f3eb1a1b4f1ab",
+      "item": {
+        "type": "markdown",
+        "id": "ed4f3eb1a1b4f1ab",
+        "text": "* The use of `fs.readdirSync` option `withFileTypes` requires at least Node.js version 10.10.0, so the minimum version has been increased to that.\n\n   **N.B.** Node.js 8 is end of life on December 31, 2019."
+      },
+      "date": 1573290406122
+    },
+    {
+      "type": "edit",
+      "id": "ed4f3eb1a1b4f1ab",
+      "item": {
+        "type": "markdown",
+        "id": "ed4f3eb1a1b4f1ab",
+        "text": "* The use of `fs.readdirSync` option `withFileTypes` requires at least Node.js version 10.10.0, so the minimum version has been increased to that.\n\n   **N.B.** Node.js 8 is end of life on December 31, 2019.\n"
+      },
+      "date": 1573291578951
+    },
+    {
+      "type": "add",
+      "id": "6d283e3ed58bc264",
+      "item": {
+        "type": "markdown",
+        "id": "6d283e3ed58bc264",
+        "text": "* There is no configuration for showing a custom error page for when somebody tries to access a wiki that does not exist.\n\n  Current response is a `400` HTTP status and the text `Invalid host`.\n\n  A better default error page, and the ability to redirect to a custom one are needed."
+      },
+      "after": "ed4f3eb1a1b4f1ab",
+      "date": 1573291787725
+    },
+    {
+      "type": "fork",
+      "site": "goals.pod.rodwell.me",
+      "date": 1573355358288
+    },
+    {
+      "type": "edit",
+      "id": "98f3624cfc6ab062",
+      "item": {
+        "type": "paragraph",
+        "id": "98f3624cfc6ab062",
+        "text": "As part of returning to provisioning wiki sites as part of registering members of a community, we look at stopping the creation of new wiki on first access.  [https://github.com/fedwiki/wiki/tree/restrict-new-wiki github]"
+      },
+      "date": 1573355438257
+    },
+    {
+      "type": "fork",
+      "site": "ward.asia.wiki.org",
+      "date": 1573466088273
+    },
+    {
+      "type": "edit",
+      "id": "2470d5b17419ead8",
+      "item": {
+        "type": "paragraph",
+        "id": "2470d5b17419ead8",
+        "text": "The wiki-server will by default create the directory structure it requires when it is started. To prevent this from happening, in an uncontrolled way, we can modify the existing farm code so that the server for a particular wiki is only started if data directory for that wiki already exists. We can then rely on a registration process creating at least the top level directory for the new wiki."
+      },
+      "date": 1573470491195
+    },
+    {
+      "type": "edit",
+      "id": "67431b066f4299a6",
+      "item": {
+        "type": "markdown",
+        "id": "67431b066f4299a6",
+        "text": "We will modify the existing `allowed` parameter. Currently this takes a comma separated list of wiki that we will start wiki servers for. As an alternative to a list we add `*` which will scan the wiki farm's data directory for wiki data directories, and allow those. *We will also watch this directory for wiki being added/removed and include those changes in the list of wiki allowed.*"
+      },
+      "date": 1573470842885
+    },
+    {
+      "type": "edit",
+      "id": "99d5b9f61be70b2a",
+      "item": {
+        "type": "code",
+        "id": "99d5b9f61be70b2a",
+        "text": "allowedHosts = fs.readdirSync(wikiDir, {withFileTypes: true})\n  .filter (item) -> item.isDirectory()\n  .map (item) -> item.name"
+      },
+      "date": 1573470915635
+    },
+    {
+      "type": "edit",
+      "id": "f3aa672704adc2fb",
+      "item": {
+        "type": "markdown",
+        "id": "f3aa672704adc2fb",
+        "text": "This list is used in the checks in the `allow` function, to check if the any particular wiki in *allowed* in the farm."
+      },
+      "date": 1573470997685
+    },
+    {
+      "type": "remove",
+      "id": "de9344f5d573fb7f",
+      "date": 1573471002140
+    },
+    {
+      "type": "edit",
+      "id": "b887cb3dd4a304fc",
+      "item": {
+        "type": "code",
+        "id": "b887cb3dd4a304fc",
+        "text": "    watcher = chokidar.watch wikiDir, {\n      persistent: true\n      ignoreInitial: true\n      depth: 0\n    }\n\n    watcher\n      .on('addDir', (newWiki) -> \n        newWiki = path.basename(newWiki)\n        allowedHosts.push(newWiki)\n      .on('unlinkDir', (delWiki) -> \n        delWiki = path.basename(delWiki)\n        _.pull(allowedHosts, delWiki)\n"
+      },
+      "date": 1573471058548
+    },
+    {
+      "type": "edit",
+      "id": "6d283e3ed58bc264",
+      "item": {
+        "type": "markdown",
+        "id": "6d283e3ed58bc264",
+        "text": "* There is no configuration for showing a custom error page for when somebody tries to access a wiki that does not exist.\n\n  Current response is a `400` HTTP status and the text `Invalid host`.\n\n  ~~A better default error page, and the ability to redirect to a custom one are needed.~~ done."
+      },
+      "date": 1573645428733
+    },
+    {
+      "type": "edit",
+      "id": "6d283e3ed58bc264",
+      "item": {
+        "type": "markdown",
+        "id": "6d283e3ed58bc264",
+        "text": "* There is no configuration for showing a custom error page for when somebody tries to access a wiki that does not exist.\n\n  ~~Current response is a `400` HTTP status and the text `Invalid host`.~~ replaced with nicer looking error page, still with the `400` status code.\n\n  ~~A better default error page, and the ability to redirect to a custom one are needed.~~ done."
+      },
+      "date": 1573645517420
+    },
+    {
+      "type": "edit",
+      "id": "6d283e3ed58bc264",
+      "item": {
+        "type": "markdown",
+        "id": "6d283e3ed58bc264",
+        "text": "* ~~Current response is a `400` HTTP status and the text `Invalid host`.~~ replaced with nicer looking error page, still with the `400` status code.\n\n  ~~A better default error page, and the ability to redirect to a custom one are needed.~~ done."
+      },
+      "date": 1573645755656
+    },
+    {
+      "type": "edit",
+      "id": "6d283e3ed58bc264",
+      "item": {
+        "type": "markdown",
+        "id": "6d283e3ed58bc264",
+        "text": "* ~~Current response is a `400` HTTP status and the text `Invalid host`.~~ replaced with nicer looking error page, still with the `400` status code.\n\n  ~~A better default error page, and the ability to redirect to a custom one are needed.~~ done.\n"
+      },
+      "date": 1573661408434
+    },
+    {
+      "type": "add",
+      "id": "2908fd0d4142121e",
+      "item": {
+        "type": "markdown",
+        "id": "2908fd0d4142121e",
+        "text": "* The interaction between `wikiDomains` and `allow` parameters need exploring, and making more intelligent."
+      },
+      "after": "6d283e3ed58bc264",
+      "date": 1573661501021
+    },
+    {
+      "type": "fork",
+      "site": "goals.pod.rodwell.me",
+      "date": 1645789637893
+    }
+  ]
+}

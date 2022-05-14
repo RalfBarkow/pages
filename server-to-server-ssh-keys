@@ -1,0 +1,995 @@
+{
+  "title": "Server-to-server SSH keys",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "95c7fb77e2c4875c",
+      "text": "In order to allow scripts on one server (say [[rest.livecode.world]]) to execute shell commands on another server (for instance to access the filesystem) we need to provide the same sort of password-less  public key access that we enable on the laptop. \n"
+    },
+    {
+      "type": "markdown",
+      "id": "a61707baa1e20f0d",
+      "text": "This means generating ssh keys on the server in question and copying the public key from that server to the other server. Since this is a public server and therefore constantly available to anyone on the internet such  password-less key access is not to be recommended on anything you do not wiping and getting back up and running from source.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "1b5b4bf4f2aadb8e",
+      "text": "# First generate a key-pair\n"
+    },
+    {
+      "type": "code",
+      "id": "a1b7ca105c559eb3",
+      "text": "ssh fortyfoxes@rest.livecode.world\n\nfortyfoxes@LiveWorld:~/.ssh$ ssh-keygen -t rsa\nGenerating public/private rsa key pair.\nEnter file in which to save the key (/home/fortyfoxes/.ssh/id_rsa): \nEnter passphrase (empty for no passphrase): \nEnter same passphrase again: \nYour identification has been saved in /home/fortyfoxes/.ssh/id_rsa.\nYour public key has been saved in /home/fortyfoxes/.ssh/id_rsa.pub.\nThe key fingerprint is:\n56:56:63:c4:f6:2c:7c:67:dd:74:69:bc:6a:05:ff:c0 fortyfoxes@LiveWorld\nThe key's randomart image is:\n+--[ RSA 2048]----+\n|           o= . .|\n|           ooo +o|\n|          oo ++.=|\n|         o  o E+=|\n|        S    oo+.|\n|       .     o  .|\n|            .    |\n|                 |\n|                 |\n+-----------------+\n"
+    },
+    {
+      "type": "markdown",
+      "id": "e89a3a53163d48e9",
+      "text": "# Copy remote public key to your laptop\n"
+    },
+    {
+      "type": "markdown",
+      "id": "534357a684eee094",
+      "text": "Either in another terminal window or `exit` from your remote sessions and copy the default remote public key to your local `.ssh` folder:"
+    },
+    {
+      "type": "code",
+      "id": "ab732ae81550712b",
+      "text": "ssh fortyfoxes@rest.livecode.world cat /home/fortyfoxes/.ssh/id_rsa.pub > lcw.pub"
+    },
+    {
+      "type": "markdown",
+      "id": "2c0f56ad25c3bfcc",
+      "text": "You might want to refresh your memory about how you pipe or write / append data to files:\n"
+    },
+    {
+      "type": "reference",
+      "id": "9f769326322f4b69",
+      "site": "cli.livecode.world",
+      "slug": "piping-files",
+      "title": "Piping Files",
+      "text": "Here we look at the basics of writing files, piping data and appending data to file outputs."
+    },
+    {
+      "type": "markdown",
+      "id": "f0a29680127f73b5",
+      "text": "You only need to copy the new public key to your laptop if you don't have [[ssh-copy-id]] on the remote server. Otherwise you could stay logged into the remote server and issue a simple [[ssh-copy-id]] command there.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "8da51eb48bf36784",
+      "text": "You can look at these links to figure out how to copy these files without using [[cch-copy-di]]:\n"
+    },
+    {
+      "type": "markdown",
+      "id": "f8063fac5d22d0bb",
+      "text": "- https://unix.stackexchange.com/questions/255883/cat-file-pipe-another-cat-command\n- https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/to-existing-droplet/#with-ssh"
+    },
+    {
+      "type": "markdown",
+      "id": "16f1b6a84eec44d7",
+      "text": "# Force ssh-copy-id to upload copied key\n"
+    },
+    {
+      "type": "markdown",
+      "id": "6a7c5d6b9e6c9b5a",
+      "text": "Now you can use [[ssh-copy-id]] to copy the new public key from the (rest.livecode.world) server to the other (fedwiki.org) remote server.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "3c47699d00df2b18",
+      "text": "The issue here is that [[ssh-copy-id]] requires both the public and private key to do it's checking. That's all right - simply use the `- f` option to override checking - [https://superuser.com/questions/874406/to-use-ssh-id-copy-do-you-need-both-id-rsa-pub-and-id-rsa superuser]\n"
+    },
+    {
+      "type": "code",
+      "id": "5d3cb40fa5a82515",
+      "text": "ssh-copy-id -f -i ~/.ssh/lcw.pub user@fedwiki.org"
+    },
+    {
+      "type": "markdown",
+      "id": "f0bc70ddac8f88ea",
+      "text": "Now you can login into the first server and from there check you can ssh to the second server. A cooler way to do the same thing is to proxy to the second server:\n"
+    },
+    {
+      "type": "code",
+      "id": "d13bf1e84e919fd9",
+      "text": "ssh -tt fortyfoxes@rest.livecode.world ssh -tt user@fedwiki.org ls -la\n"
+    },
+    {
+      "type": "markdown",
+      "id": "90e3c07f51d6a235",
+      "text": "Neater still is to use the `-J` or jump syntax:"
+    },
+    {
+      "type": "code",
+      "id": "27da533255084f65",
+      "text": "ssh -J fortyfoxes@rest.livecode.world user@fedwiki.org ls -la"
+    },
+    {
+      "type": "markdown",
+      "id": "63b3a6d69f675c25",
+      "text": "- https://www.cyberciti.biz/faq/linux-unix-ssh-proxycommand-passing-through-one-host-gateway-server/\n- https://en.wikibooks.org/wiki/OpenSSH/Cookbook/Proxies_and_Jump_Hosts"
+    },
+    {
+      "type": "markdown",
+      "id": "268a61ffc267f033",
+      "text": "# Enabling access to www-data\n"
+    },
+    {
+      "type": "code",
+      "id": "03cd9572b5b67787",
+      "text": "su - www-data -c 'ssh user@fedwiki.org ls /user/.wiki/'"
+    },
+    {
+      "type": "markdown",
+      "id": "638112eecc79287c",
+      "text": "- https://serverfault.com/questions/260756/allow-scp-ssh-for-www-data-user\n- https://askubuntu.com/questions/702060/how-to-give-permissions-to-www-data-to-log-in-with-ssh"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Server-to-server SSH keys",
+        "story": []
+      },
+      "date": 1553257226777
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "95c7fb77e2c4875c",
+        "text": "In order to allow scripts on one server (say [[rest.livecode.world]]) to execute shell commands on another server (for instance to access the filesystem) we need to provide the same sort of password-less  public key access that we enable on the laptop. \n"
+      },
+      "id": "95c7fb77e2c4875c",
+      "date": 1553257233168
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "a61707baa1e20f0d",
+        "text": "This means generating ssh keys on the server in question and copying the public key from that server to the other server. Since this is a public server and therefore constantly available to anyone on the internet such  password-less key access is not to be recommended on anything you do not wiping and getting back up and running from source."
+      },
+      "after": "95c7fb77e2c4875c",
+      "id": "a61707baa1e20f0d",
+      "date": 1553257235329
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "9f769326322f4b69",
+        "site": "cli.livecode.world",
+        "slug": "piping-files",
+        "title": "Piping Files",
+        "text": "Here we look at the basics of writing files, piping data and appending data to file outputs."
+      },
+      "after": "a61707baa1e20f0d",
+      "id": "9f769326322f4b69",
+      "date": 1553257238848
+    },
+    {
+      "type": "edit",
+      "id": "a61707baa1e20f0d",
+      "item": {
+        "type": "markdown",
+        "id": "a61707baa1e20f0d",
+        "text": "This means generating ssh keys on the server in question and copying the public key from that server to the other server. Since this is a public server and therefore constantly available to anyone on the internet such  password-less key access is not to be recommended on anything you do not wiping and getting back up and running from source.\n"
+      },
+      "date": 1553257304112
+    },
+    {
+      "type": "add",
+      "id": "1b5b4bf4f2aadb8e",
+      "item": {
+        "type": "markdown",
+        "id": "1b5b4bf4f2aadb8e",
+        "text": "# First generate a key-pair"
+      },
+      "after": "a61707baa1e20f0d",
+      "date": 1553257318524
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a1b7ca105c559eb3"
+      },
+      "id": "a1b7ca105c559eb3",
+      "type": "add",
+      "after": "9f769326322f4b69",
+      "date": 1553257358231
+    },
+    {
+      "type": "edit",
+      "id": "a1b7ca105c559eb3",
+      "item": {
+        "type": "code",
+        "id": "a1b7ca105c559eb3",
+        "text": "fortyfoxes@LiveWorld:~/.ssh$ ssh-keygen -t rsa\nGenerating public/private rsa key pair.\nEnter file in which to save the key (/home/fortyfoxes/.ssh/id_rsa): \nEnter passphrase (empty for no passphrase): \nEnter same passphrase again: \nYour identification has been saved in /home/fortyfoxes/.ssh/id_rsa.\nYour public key has been saved in /home/fortyfoxes/.ssh/id_rsa.pub.\nThe key fingerprint is:\n56:56:63:c4:f6:2c:7c:67:dd:74:69:bc:6a:05:ff:c0 fortyfoxes@LiveWorld\nThe key's randomart image is:\n+--[ RSA 2048]----+\n|           o= . .|\n|           ooo +o|\n|          oo ++.=|\n|         o  o E+=|\n|        S    oo+.|\n|       .     o  .|\n|            .    |\n|                 |\n|                 |\n+-----------------+\n"
+      },
+      "date": 1553257361072
+    },
+    {
+      "type": "move",
+      "order": [
+        "95c7fb77e2c4875c",
+        "a61707baa1e20f0d",
+        "1b5b4bf4f2aadb8e",
+        "a1b7ca105c559eb3",
+        "9f769326322f4b69"
+      ],
+      "id": "a1b7ca105c559eb3",
+      "date": 1553257364184
+    },
+    {
+      "type": "edit",
+      "id": "a1b7ca105c559eb3",
+      "item": {
+        "type": "code",
+        "id": "a1b7ca105c559eb3",
+        "text": "ssh fortyfoxes@rest.livecode.world\n\nfortyfoxes@LiveWorld:~/.ssh$ ssh-keygen -t rsa\nGenerating public/private rsa key pair.\nEnter file in which to save the key (/home/fortyfoxes/.ssh/id_rsa): \nEnter passphrase (empty for no passphrase): \nEnter same passphrase again: \nYour identification has been saved in /home/fortyfoxes/.ssh/id_rsa.\nYour public key has been saved in /home/fortyfoxes/.ssh/id_rsa.pub.\nThe key fingerprint is:\n56:56:63:c4:f6:2c:7c:67:dd:74:69:bc:6a:05:ff:c0 fortyfoxes@LiveWorld\nThe key's randomart image is:\n+--[ RSA 2048]----+\n|           o= . .|\n|           ooo +o|\n|          oo ++.=|\n|         o  o E+=|\n|        S    oo+.|\n|       .     o  .|\n|            .    |\n|                 |\n|                 |\n+-----------------+\n"
+      },
+      "date": 1553257402078
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c602c7a8b67d4ac2"
+      },
+      "id": "c602c7a8b67d4ac2",
+      "type": "add",
+      "after": "9f769326322f4b69",
+      "date": 1553257467895
+    },
+    {
+      "type": "move",
+      "order": [
+        "95c7fb77e2c4875c",
+        "a61707baa1e20f0d",
+        "1b5b4bf4f2aadb8e",
+        "a1b7ca105c559eb3",
+        "c602c7a8b67d4ac2",
+        "9f769326322f4b69"
+      ],
+      "id": "c602c7a8b67d4ac2",
+      "date": 1553257469895
+    },
+    {
+      "type": "remove",
+      "id": "c602c7a8b67d4ac2",
+      "date": 1553257520991
+    },
+    {
+      "type": "edit",
+      "id": "1b5b4bf4f2aadb8e",
+      "item": {
+        "type": "markdown",
+        "id": "1b5b4bf4f2aadb8e",
+        "text": "# First generate a key-pair\n"
+      },
+      "date": 1553257602705
+    },
+    {
+      "type": "add",
+      "id": "e89a3a53163d48e9",
+      "item": {
+        "type": "markdown",
+        "id": "e89a3a53163d48e9",
+        "text": "# Copy remote public key to your laptop\n"
+      },
+      "after": "1b5b4bf4f2aadb8e",
+      "date": 1553257622722
+    },
+    {
+      "type": "add",
+      "id": "534357a684eee094",
+      "item": {
+        "type": "markdown",
+        "id": "534357a684eee094",
+        "text": "Eithere in another terminal window or `exit` from your remote sessions and:"
+      },
+      "after": "e89a3a53163d48e9",
+      "date": 1553257652396
+    },
+    {
+      "type": "move",
+      "order": [
+        "95c7fb77e2c4875c",
+        "a61707baa1e20f0d",
+        "1b5b4bf4f2aadb8e",
+        "e89a3a53163d48e9",
+        "a1b7ca105c559eb3",
+        "534357a684eee094",
+        "9f769326322f4b69"
+      ],
+      "id": "534357a684eee094",
+      "date": 1553257655025
+    },
+    {
+      "type": "move",
+      "order": [
+        "95c7fb77e2c4875c",
+        "a61707baa1e20f0d",
+        "1b5b4bf4f2aadb8e",
+        "a1b7ca105c559eb3",
+        "e89a3a53163d48e9",
+        "534357a684eee094",
+        "9f769326322f4b69"
+      ],
+      "id": "e89a3a53163d48e9",
+      "date": 1553257659775
+    },
+    {
+      "type": "edit",
+      "id": "534357a684eee094",
+      "item": {
+        "type": "markdown",
+        "id": "534357a684eee094",
+        "text": "Either in another terminal window or `exit` from your remote sessions and:"
+      },
+      "date": 1553257662644
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ab732ae81550712b"
+      },
+      "id": "ab732ae81550712b",
+      "type": "add",
+      "after": "9f769326322f4b69",
+      "date": 1553257664209
+    },
+    {
+      "type": "move",
+      "order": [
+        "95c7fb77e2c4875c",
+        "a61707baa1e20f0d",
+        "1b5b4bf4f2aadb8e",
+        "a1b7ca105c559eb3",
+        "e89a3a53163d48e9",
+        "534357a684eee094",
+        "ab732ae81550712b",
+        "9f769326322f4b69"
+      ],
+      "id": "ab732ae81550712b",
+      "date": 1553257665721
+    },
+    {
+      "type": "edit",
+      "id": "ab732ae81550712b",
+      "item": {
+        "type": "code",
+        "id": "ab732ae81550712b",
+        "text": "ssh fortyfoxes@rest.livecode.world cat /home/fortyfoxes/.ssh/id_rsa.pub > lcw.pub"
+      },
+      "date": 1553257667924
+    },
+    {
+      "type": "edit",
+      "id": "534357a684eee094",
+      "item": {
+        "type": "markdown",
+        "id": "534357a684eee094",
+        "text": "Either in another terminal window or `exit` from your remote sessions and copy tthe defulat remote publick key to your local .ssh folder:"
+      },
+      "date": 1553257693779
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2c0f56ad25c3bfcc"
+      },
+      "id": "2c0f56ad25c3bfcc",
+      "type": "add",
+      "after": "9f769326322f4b69",
+      "date": 1553257699278
+    },
+    {
+      "type": "move",
+      "order": [
+        "95c7fb77e2c4875c",
+        "a61707baa1e20f0d",
+        "1b5b4bf4f2aadb8e",
+        "a1b7ca105c559eb3",
+        "e89a3a53163d48e9",
+        "534357a684eee094",
+        "ab732ae81550712b",
+        "2c0f56ad25c3bfcc",
+        "9f769326322f4b69"
+      ],
+      "id": "2c0f56ad25c3bfcc",
+      "date": 1553257700798
+    },
+    {
+      "type": "edit",
+      "id": "534357a684eee094",
+      "item": {
+        "type": "markdown",
+        "id": "534357a684eee094",
+        "text": "Either in another terminal window or `exit` from your remote sessions and copy the default remote public key to your local `.ssh` folder:"
+      },
+      "date": 1553257717596
+    },
+    {
+      "type": "edit",
+      "id": "2c0f56ad25c3bfcc",
+      "item": {
+        "type": "markdown",
+        "id": "2c0f56ad25c3bfcc",
+        "text": "You might want to refresh your memory about how you pipe or write / append data to files:"
+      },
+      "date": 1553257764431
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "16f1b6a84eec44d7"
+      },
+      "id": "16f1b6a84eec44d7",
+      "type": "add",
+      "after": "9f769326322f4b69",
+      "date": 1553257774154
+    },
+    {
+      "type": "edit",
+      "id": "16f1b6a84eec44d7",
+      "item": {
+        "type": "markdown",
+        "id": "16f1b6a84eec44d7",
+        "text": "# Force ssh-copy-id to upload copied key\n"
+      },
+      "date": 1553257796627
+    },
+    {
+      "type": "add",
+      "id": "6a7c5d6b9e6c9b5a",
+      "item": {
+        "type": "markdown",
+        "id": "6a7c5d6b9e6c9b5a",
+        "text": "Now you can use [[ssh-copy-id]] to copy the "
+      },
+      "after": "16f1b6a84eec44d7",
+      "date": 1553257822415
+    },
+    {
+      "type": "edit",
+      "id": "2c0f56ad25c3bfcc",
+      "item": {
+        "type": "markdown",
+        "id": "2c0f56ad25c3bfcc",
+        "text": "You might want to refresh your memory about how you pipe or write / append data to files:\n"
+      },
+      "date": 1553257824067
+    },
+    {
+      "type": "add",
+      "id": "f0a29680127f73b5",
+      "item": {
+        "type": "markdown",
+        "id": "f0a29680127f73b5",
+        "text": "You only need to copy the new public key to your laptop if you don't have [[ssh-copy-id]] on the remote server."
+      },
+      "after": "2c0f56ad25c3bfcc",
+      "date": 1553257873618
+    },
+    {
+      "type": "move",
+      "order": [
+        "95c7fb77e2c4875c",
+        "a61707baa1e20f0d",
+        "1b5b4bf4f2aadb8e",
+        "a1b7ca105c559eb3",
+        "e89a3a53163d48e9",
+        "534357a684eee094",
+        "ab732ae81550712b",
+        "2c0f56ad25c3bfcc",
+        "9f769326322f4b69",
+        "f0a29680127f73b5",
+        "16f1b6a84eec44d7",
+        "6a7c5d6b9e6c9b5a"
+      ],
+      "id": "f0a29680127f73b5",
+      "date": 1553257875586
+    },
+    {
+      "type": "edit",
+      "id": "f0a29680127f73b5",
+      "item": {
+        "type": "markdown",
+        "id": "f0a29680127f73b5",
+        "text": "You only need to copy the new public key to your laptop if you don't have [[ssh-copy-id]] on the remote server. Otherwise you could stay logged into the remote server and issue a simple [[ssh-copy-id]] there."
+      },
+      "date": 1553257903548
+    },
+    {
+      "type": "edit",
+      "id": "f0a29680127f73b5",
+      "item": {
+        "type": "markdown",
+        "id": "f0a29680127f73b5",
+        "text": "You only need to copy the new public key to your laptop if you don't have [[ssh-copy-id]] on the remote server. Otherwise you could stay logged into the remote server and issue a simple [[ssh-copy-id]] command there."
+      },
+      "date": 1553257910147
+    },
+    {
+      "type": "edit",
+      "id": "6a7c5d6b9e6c9b5a",
+      "item": {
+        "type": "markdown",
+        "id": "6a7c5d6b9e6c9b5a",
+        "text": "Now you can use [[ssh-copy-id]] to copy the new public key from the (rest.livecode.world) server to the other (fedwiki.org) remote server.\n"
+      },
+      "date": 1553257974615
+    },
+    {
+      "type": "add",
+      "id": "3c47699d00df2b18",
+      "item": {
+        "type": "markdown",
+        "id": "3c47699d00df2b18",
+        "text": "The issue here is that "
+      },
+      "after": "6a7c5d6b9e6c9b5a",
+      "date": 1553257982516
+    },
+    {
+      "type": "edit",
+      "id": "3c47699d00df2b18",
+      "item": {
+        "type": "markdown",
+        "id": "3c47699d00df2b18",
+        "text": "The issue here is that [[ssh-copy-id]] requires both the public and private key to do it's checking. That's all right - simply use the `- f` option to override checking."
+      },
+      "date": 1553258044397
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5d3cb40fa5a82515"
+      },
+      "id": "5d3cb40fa5a82515",
+      "type": "add",
+      "after": "3c47699d00df2b18",
+      "date": 1553258083343
+    },
+    {
+      "type": "edit",
+      "id": "5d3cb40fa5a82515",
+      "item": {
+        "type": "code",
+        "id": "5d3cb40fa5a82515",
+        "text": "BabyBlue$ ssh-copy-id -f -i ~/.ssh/lcw.pub root@fedwiki.org\n/usr/local/bin/ssh-copy-id: INFO: Source of key(s) to be installed: \"/Users/BabyBlue/.ssh/lcw.pub\"\n\nNumber of key(s) added:        1\n"
+      },
+      "date": 1553258091815
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a6ae5fa7b170eaff"
+      },
+      "id": "a6ae5fa7b170eaff",
+      "type": "add",
+      "after": "5d3cb40fa5a82515",
+      "date": 1553258110489
+    },
+    {
+      "type": "edit",
+      "id": "5d3cb40fa5a82515",
+      "item": {
+        "type": "code",
+        "id": "5d3cb40fa5a82515",
+        "text": "BabyBlue$ ssh-copy-id -f -i ~/.ssh/lcw.pub root@fedwiki.org"
+      },
+      "date": 1553258111664
+    },
+    {
+      "type": "remove",
+      "id": "a6ae5fa7b170eaff",
+      "date": 1553258117238
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3170154007aceb10"
+      },
+      "id": "3170154007aceb10",
+      "type": "add",
+      "after": "5d3cb40fa5a82515",
+      "date": 1553258133079
+    },
+    {
+      "type": "remove",
+      "id": "3170154007aceb10",
+      "date": 1553258146736
+    },
+    {
+      "type": "edit",
+      "id": "5d3cb40fa5a82515",
+      "item": {
+        "type": "code",
+        "id": "5d3cb40fa5a82515",
+        "text": "BabyBlue$ ssh-copy-id -f -i ~/.ssh/lcw.pub user@fedwiki.org"
+      },
+      "date": 1553258150521
+    },
+    {
+      "type": "edit",
+      "id": "5d3cb40fa5a82515",
+      "item": {
+        "type": "code",
+        "id": "5d3cb40fa5a82515",
+        "text": "ssh-copy-id -f -i ~/.ssh/lcw.pub user@fedwiki.org"
+      },
+      "date": 1553258156073
+    },
+    {
+      "type": "edit",
+      "id": "3c47699d00df2b18",
+      "item": {
+        "type": "markdown",
+        "id": "3c47699d00df2b18",
+        "text": "The issue here is that [[ssh-copy-id]] requires both the public and private key to do it's checking. That's all right - simply use the `- f` option to override checking.\n"
+      },
+      "date": 1553258187003
+    },
+    {
+      "type": "add",
+      "id": "f0bc70ddac8f88ea",
+      "item": {
+        "type": "markdown",
+        "id": "f0bc70ddac8f88ea",
+        "text": "Now you can login into the first server and from there check you can ssh to the second server."
+      },
+      "after": "3c47699d00df2b18",
+      "date": 1553258223389
+    },
+    {
+      "type": "move",
+      "order": [
+        "95c7fb77e2c4875c",
+        "a61707baa1e20f0d",
+        "1b5b4bf4f2aadb8e",
+        "a1b7ca105c559eb3",
+        "e89a3a53163d48e9",
+        "534357a684eee094",
+        "ab732ae81550712b",
+        "2c0f56ad25c3bfcc",
+        "9f769326322f4b69",
+        "f0a29680127f73b5",
+        "16f1b6a84eec44d7",
+        "6a7c5d6b9e6c9b5a",
+        "3c47699d00df2b18",
+        "5d3cb40fa5a82515",
+        "f0bc70ddac8f88ea"
+      ],
+      "id": "f0bc70ddac8f88ea",
+      "date": 1553258226468
+    },
+    {
+      "type": "edit",
+      "id": "f0bc70ddac8f88ea",
+      "item": {
+        "type": "markdown",
+        "id": "f0bc70ddac8f88ea",
+        "text": "Now you can login into the first server and from there check you can ssh to the second server. A cooler way to do the same thing is to proxy to the second server:\n"
+      },
+      "date": 1553258252313
+    },
+    {
+      "type": "edit",
+      "id": "3c47699d00df2b18",
+      "item": {
+        "type": "markdown",
+        "id": "3c47699d00df2b18",
+        "text": "The issue here is that [[ssh-copy-id]] requires both the public and private key to do it's checking. That's all right - simply use the `- f` option to override checking - [https://superuser.com/questions/874406/to-use-ssh-id-copy-do-you-need-both-id-rsa-pub-and-id-rsa superuser.com]\n"
+      },
+      "date": 1553258298451
+    },
+    {
+      "type": "edit",
+      "id": "3c47699d00df2b18",
+      "item": {
+        "type": "markdown",
+        "id": "3c47699d00df2b18",
+        "text": "The issue here is that [[ssh-copy-id]] requires both the public and private key to do it's checking. That's all right - simply use the `- f` option to override checking - [https://superuser.com/questions/874406/to-use-ssh-id-copy-do-you-need-both-id-rsa-pub-and-id-rsa superuser]\n"
+      },
+      "date": 1553258316547
+    },
+    {
+      "type": "edit",
+      "id": "f0a29680127f73b5",
+      "item": {
+        "type": "markdown",
+        "id": "f0a29680127f73b5",
+        "text": "You only need to copy the new public key to your laptop if you don't have [[ssh-copy-id]] on the remote server. Otherwise you could stay logged into the remote server and issue a simple [[ssh-copy-id]] command there.\n"
+      },
+      "date": 1553258424132
+    },
+    {
+      "type": "add",
+      "id": "8da51eb48bf36784",
+      "item": {
+        "type": "markdown",
+        "id": "8da51eb48bf36784",
+        "text": "You can look at these links to figure out how to copy these files without using [[cch-copy-di]]:\n"
+      },
+      "after": "f0a29680127f73b5",
+      "date": 1553258453648
+    },
+    {
+      "type": "add",
+      "id": "f8063fac5d22d0bb",
+      "item": {
+        "type": "markdown",
+        "id": "f8063fac5d22d0bb",
+        "text": "- https://unix.stackexchange.com/questions/255883/cat-file-pipe-another-cat-command\n- https://unix.stackexchange.com/questions/255883/cat-file-pipe-another-cat-command"
+      },
+      "after": "8da51eb48bf36784",
+      "date": 1553258457556
+    },
+    {
+      "type": "edit",
+      "id": "f8063fac5d22d0bb",
+      "item": {
+        "type": "markdown",
+        "id": "f8063fac5d22d0bb",
+        "text": "- https://unix.stackexchange.com/questions/255883/cat-file-pipe-another-cat-command\n- https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/to-existing-droplet/#with-ssh"
+      },
+      "date": 1553258486109
+    },
+    {
+      "type": "add",
+      "id": "63b3a6d69f675c25",
+      "item": {
+        "type": "markdown",
+        "id": "63b3a6d69f675c25",
+        "text": "- https://www.cyberciti.biz/faq/linux-unix-ssh-proxycommand-passing-through-one-host-gateway-server/"
+      },
+      "after": "f0bc70ddac8f88ea",
+      "date": 1553258536158
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d13bf1e84e919fd9"
+      },
+      "id": "d13bf1e84e919fd9",
+      "type": "add",
+      "after": "63b3a6d69f675c25",
+      "date": 1553258574246
+    },
+    {
+      "type": "edit",
+      "id": "d13bf1e84e919fd9",
+      "item": {
+        "type": "code",
+        "id": "d13bf1e84e919fd9",
+        "text": "ssh -tt fortyfoxes@rest.livecode.world ssh -tt user@fedwiki.org ls -la\n"
+      },
+      "date": 1553258632745
+    },
+    {
+      "type": "move",
+      "order": [
+        "95c7fb77e2c4875c",
+        "a61707baa1e20f0d",
+        "1b5b4bf4f2aadb8e",
+        "a1b7ca105c559eb3",
+        "e89a3a53163d48e9",
+        "534357a684eee094",
+        "ab732ae81550712b",
+        "2c0f56ad25c3bfcc",
+        "9f769326322f4b69",
+        "f0a29680127f73b5",
+        "8da51eb48bf36784",
+        "f8063fac5d22d0bb",
+        "16f1b6a84eec44d7",
+        "6a7c5d6b9e6c9b5a",
+        "3c47699d00df2b18",
+        "5d3cb40fa5a82515",
+        "f0bc70ddac8f88ea",
+        "d13bf1e84e919fd9",
+        "63b3a6d69f675c25"
+      ],
+      "id": "d13bf1e84e919fd9",
+      "date": 1553258652910
+    },
+    {
+      "type": "add",
+      "id": "90e3c07f51d6a235",
+      "item": {
+        "type": "markdown",
+        "id": "90e3c07f51d6a235",
+        "text": "Neater still is to use the `-J` or jump syntax:"
+      },
+      "after": "f0bc70ddac8f88ea",
+      "date": 1553258966200
+    },
+    {
+      "type": "move",
+      "order": [
+        "95c7fb77e2c4875c",
+        "a61707baa1e20f0d",
+        "1b5b4bf4f2aadb8e",
+        "a1b7ca105c559eb3",
+        "e89a3a53163d48e9",
+        "534357a684eee094",
+        "ab732ae81550712b",
+        "2c0f56ad25c3bfcc",
+        "9f769326322f4b69",
+        "f0a29680127f73b5",
+        "8da51eb48bf36784",
+        "f8063fac5d22d0bb",
+        "16f1b6a84eec44d7",
+        "6a7c5d6b9e6c9b5a",
+        "3c47699d00df2b18",
+        "5d3cb40fa5a82515",
+        "f0bc70ddac8f88ea",
+        "d13bf1e84e919fd9",
+        "90e3c07f51d6a235",
+        "63b3a6d69f675c25"
+      ],
+      "id": "90e3c07f51d6a235",
+      "date": 1553258968674
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "27da533255084f65"
+      },
+      "id": "27da533255084f65",
+      "type": "add",
+      "after": "63b3a6d69f675c25",
+      "date": 1553258969825
+    },
+    {
+      "type": "edit",
+      "id": "27da533255084f65",
+      "item": {
+        "type": "code",
+        "id": "27da533255084f65",
+        "text": "ssh -J fortyfoxes@rest.livecode.world user@fedwiki.org ls -la"
+      },
+      "date": 1553258976296
+    },
+    {
+      "type": "move",
+      "order": [
+        "95c7fb77e2c4875c",
+        "a61707baa1e20f0d",
+        "1b5b4bf4f2aadb8e",
+        "a1b7ca105c559eb3",
+        "e89a3a53163d48e9",
+        "534357a684eee094",
+        "ab732ae81550712b",
+        "2c0f56ad25c3bfcc",
+        "9f769326322f4b69",
+        "f0a29680127f73b5",
+        "8da51eb48bf36784",
+        "f8063fac5d22d0bb",
+        "16f1b6a84eec44d7",
+        "6a7c5d6b9e6c9b5a",
+        "3c47699d00df2b18",
+        "5d3cb40fa5a82515",
+        "f0bc70ddac8f88ea",
+        "d13bf1e84e919fd9",
+        "90e3c07f51d6a235",
+        "27da533255084f65",
+        "63b3a6d69f675c25"
+      ],
+      "id": "27da533255084f65",
+      "date": 1553258978072
+    },
+    {
+      "type": "edit",
+      "id": "63b3a6d69f675c25",
+      "item": {
+        "type": "markdown",
+        "id": "63b3a6d69f675c25",
+        "text": "- https://www.cyberciti.biz/faq/linux-unix-ssh-proxycommand-passing-through-one-host-gateway-server/\n- https://en.wikibooks.org/wiki/OpenSSH/Cookbook/Proxies_and_Jump_Hosts"
+      },
+      "date": 1553259010552
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "268a61ffc267f033"
+      },
+      "id": "268a61ffc267f033",
+      "type": "add",
+      "after": "63b3a6d69f675c25",
+      "date": 1553273990639
+    },
+    {
+      "type": "edit",
+      "id": "268a61ffc267f033",
+      "item": {
+        "type": "markdown",
+        "id": "268a61ffc267f033",
+        "text": "# Enabling access to www-data\n"
+      },
+      "date": 1553274011083
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "92dbb6433263f7a7"
+      },
+      "id": "92dbb6433263f7a7",
+      "type": "add",
+      "after": "b70cc2a1664d1719",
+      "date": 1553274012635
+    },
+    {
+      "type": "edit",
+      "id": "92dbb6433263f7a7",
+      "item": {
+        "type": "markdown",
+        "id": "92dbb6433263f7a7",
+        "text": "su - www-data -c 'ssh user@fedwiki.org ls /user/.wiki/'"
+      },
+      "date": 1553274031745
+    },
+    {
+      "type": "remove",
+      "id": "92dbb6433263f7a7",
+      "date": 1553274035042
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "03cd9572b5b67787"
+      },
+      "id": "03cd9572b5b67787",
+      "type": "add",
+      "after": "268a61ffc267f033",
+      "date": 1553274036276
+    },
+    {
+      "type": "edit",
+      "id": "03cd9572b5b67787",
+      "item": {
+        "type": "code",
+        "id": "03cd9572b5b67787",
+        "text": "su - www-data -c 'ssh user@fedwiki.org ls /user/.wiki/'"
+      },
+      "date": 1553274038675
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "638112eecc79287c"
+      },
+      "id": "638112eecc79287c",
+      "type": "add",
+      "after": "03cd9572b5b67787",
+      "date": 1553274282700
+    },
+    {
+      "type": "edit",
+      "id": "638112eecc79287c",
+      "item": {
+        "type": "markdown",
+        "id": "638112eecc79287c",
+        "text": "- https://serverfault.com/questions/260756/allow-scp-ssh-for-www-data-user"
+      },
+      "date": 1553274293262
+    },
+    {
+      "type": "edit",
+      "id": "638112eecc79287c",
+      "item": {
+        "type": "markdown",
+        "id": "638112eecc79287c",
+        "text": "- https://serverfault.com/questions/260756/allow-scp-ssh-for-www-data-user\n- https://askubuntu.com/questions/702060/how-to-give-permissions-to-www-data-to-log-in-with-ssh"
+      },
+      "date": 1553274409854
+    },
+    {
+      "type": "fork",
+      "site": "admin.fedwiki.org",
+      "date": 1629091609220
+    }
+  ]
+}

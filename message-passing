@@ -1,0 +1,492 @@
+{
+  "title": "Message Passing",
+  "story": [
+    {
+      "type": "html",
+      "text": "What is message passing?",
+      "id": "b937b771e96078733d9f7b60866859a0"
+    },
+    {
+      "type": "html",
+      "text": "\nThere are two definitions in widespread use, which refer to two completely different things.",
+      "id": "a9f62d705a570237dde306a055d4dc1f"
+    },
+    {
+      "type": "html",
+      "text": "<b>The definition from [[Smalltalk Language]]:</b>  A <i>message</i> is simply a method call on an object.  Smalltalk messages are perfectly synchronous (the caller waits for the callee to return a value), and not terribly different then function/method calls in other languages.  A few key points about Smalltalk message passing:",
+      "id": "61849a90621c6b118ea33048c68802e3"
+    },
+    {
+      "type": "html",
+      "text": " Like C/C++/Java/ML/Lisp/Scheme, and <i>unlike</i> Haskell, Smalltalk messages are <i>strict</i>--all arguments are evaluated <i>before</i> the message is sent.  ",
+      "id": "6ca42e066dd8bead147c57a21bb1de08"
+    },
+    {
+      "type": "html",
+      "text": " <b>However</b>, Smalltalk blocks make it very easy to implement [[Lazy Evaluation]] or [[Normal Order Evaluation]] semantics (see [[Smalltalk Blocks Are Thunks In Disguise]]).  Simply pass a block as an argument, and the contents of the block won't be evaluated until someone passes the block the \"value\" message (or value: or value: value:, etc.)  [[Scheme Language]] has a similar mechansim with delay and force.  (See [[Explicit Lazy Evaluation]])",
+      "id": "7645d88643cb54e7dc8c232113b8874b"
+    },
+    {
+      "type": "html",
+      "text": " Like C++ and Java (and unlike [[Common Lisp Object System]], [[Dylan Language]], etc.), Smalltalk messages are [[Single Dispatch]].  The types of the arguments have no say in what method is selected to receive the message), though Smalltalk makes delegation easy.",
+      "id": "44fc654a73b696e937162e71b5f402e0"
+    },
+    {
+      "type": "html",
+      "text": " The syntax of Smalltalk message invocations is somewhat unusual, though highly readable once you get used to it.",
+      "id": "e51cd0bbcc0e3a57c1d3900f1b11a596"
+    },
+    {
+      "type": "html",
+      "text": "<b>The definition from many concurrent programming paradigms:</b>  A <i>message</i> is a method for <i>asynchronous</i> dispatch, and used to communicate between different processes (which may run on different machines).    Different concurrent models have different semantics regarding messages, such as whether or not the receiver and sender must rendezvous, whether or not the receiver must name the sender, etc.  See [[Message Passing Concurrency]] and [[Process Calculi]] for more information.",
+      "id": "b5855fffe1f60e6089994ab85062cf4c"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "c680227b6b641d8de5f8ba885a287650"
+    },
+    {
+      "type": "html",
+      "text": "\nThe [[Message Passing]] story arises entirely out of a tragic confusion engendered by [[Alan Kay]]'s research group. The initial variants of the [[Smalltalk Language]] family of languages were strongly inspired by [[Alan Kay]]'s knowledge of [[Carl Hewitt]]'s research on the [[Actor System]] model of computation.",
+      "id": "a62c98ea0b60c153eb21eccd558c5b29"
+    },
+    {
+      "type": "html",
+      "text": " No.  [[Carl Hewitt]]'s [[Actor System]] model did be strongly influenced by [[Alan Kay]]'s Smalltalk-72 implementation that already had existed.  see ref. acknowledgements by [[Carl Hewitt]] in [https://www.cypherpunks.to/erights/history/actors/actor-induction.pdf www.cypherpunks.to] [https://web.archive.org/web/20170809093741/http://www.cypherpunks.to/erights/history/actors/actor-induction.pdf wayback pdf]",
+      "id": "385222b1a382f2f91e7cbba63b7624f9"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Actor System]] research was based on the assumption that massively parallel, distributed, computer systems could become prevalent, and therefore a convenient and efficient way to structure a <b>computation</b> was as a large number of self contained processes, called <i>actors</i>, communicating by sending messages to each other.",
+      "id": "3bab744a0936cb91110dd061fe721bf8"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Alan Kay]] had also been exposed to the [[Object Oriented]] ideas in SIMULA-67, which were about a program decomposition paradigm, a way to structure <b>programs</b>, not computations. It was however easy to see that in general [[Actor System]] computations are naturally [[Object Oriented]] too, even if most [[Object Oriented]] languages are based on the procedural model of computation, and a few even on the logic model of computation.",
+      "id": "da9a0c15a1de3a2424808c20b290ad91"
+    },
+    {
+      "type": "html",
+      "text": "\nTherefore the first few languages in the [[Smalltalk Language]] family were <i>not</i> procedural, and did not have procedure calls, but variants of message sending in the [[Actor System]] sense. In particular this applied to Smalltalk-76, which is the language described in the first famous article about the Smalltalk family of languages in Scientific American.",
+      "id": "1b8bce9601d30374f53d8d026fccf750"
+    },
+    {
+      "type": "html",
+      "text": "\nWith Smalltalk-80 any trace of [[Actor System]] orientation were removed, in part because [[Actor System]] computations are very expensive to simulate on conventional workstations, in part because [[Alan Kay]]'s group were influenced by the Lisp research being performed on the same workstations at [[Xerox Parc]].",
+      "id": "7a9dbdd4f1b2498196364db5b3372e3a"
+    },
+    {
+      "type": "html",
+      "text": "\nUnfortunately even if Smalltalk-80 is a thoroughly conventional procedural language (and a fairly close variant of Lisp, even if with different syntax and details) [[Alan Kay]] and his group and the Smalltalk-80 community continued to use [[Actor System]] terminology, retaining the <i>message passing</i> nomenclature for what had become conventional procedure calls (there is a single, hard to spot, note in one of the Smalltalk-80 book where it is stated clearly that <i>message passing</i> in that language really means the same as <i>procedure calls</i>).",
+      "id": "1112fc6f378e8e7cbaf1f7e43fce008f"
+    },
+    {
+      "type": "html",
+      "text": "\nThis unfortunate terminological issue has created endless confusion as to a large extent the mythical relevance of Smalltalk-80 and the conflation of [[Actor System]] terminology with procedural semantics and [[Object Oriented]] concepts have muddle considerably the difference between these very different categories.",
+      "id": "094ad805c7ff14576d13d0f17c8c73da"
+    },
+    {
+      "type": "html",
+      "text": "\nMany years after Smalltalk-80 was released [[Alan Kay]] seems to have come to regret the switch to procedural languages, arguing that the performance driven switch to a procedural computational model had been a mistake as increases in hardware performance would have made the simulation of [[Actor System]] based computations on procedural hardware feasible, and that the [[Actor System]] model of computation is preferable in his view to the procedural one.",
+      "id": "bb0a742d5ca5d89f4304da5be46a7c13"
+    },
+    {
+      "type": "html",
+      "text": "\nHowever he has also stated that one of the most important recent books is <i>The art of the metaobject protocol</i> which is entirely about advanced techniques related to procedural OO languages, which raises the possibility that he himself suffers from some confusion.",
+      "id": "6fc6739fd146be874230d8c0a2c3a223"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "c680227b6b641d8de5f8ba885a287650"
+    },
+    {
+      "type": "html",
+      "text": "Most C programmers seem to be moving to [[Object Oriented Programming]] in the [[Cee Language]]:  They define structs and have functions for creating and destroying the structs.  They implement some form of reference counting for garbage collection.  However, they never seem to implement message passing.  Is message passing an important part of object oriented programming or is it really not necessary?",
+      "id": "1cb59c899eb7e4c7b07a3680b5905f63"
+    },
+    {
+      "type": "html",
+      "text": " <i>Do you mean the Smalltalk definition, or the concurrent-programming definition?</i>",
+      "id": "d922d6f93df61fdd5a34e472def5c082"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "c680227b6b641d8de5f8ba885a287650"
+    },
+    {
+      "type": "html",
+      "text": "\nMessage passing is really unrelated to [[Object Oriented Programming]], although usually a \"message\" is created as an object.",
+      "id": "9d1b00e97bdcc4878b1613e99006d3dd"
+    },
+    {
+      "type": "html",
+      "text": "\nI use the term \"message passing\" to mean \"queuing of communication between a source (sender) and a destination (receiver)\", without regard to technology used (usually asynchronous is implied however). JMS is one technology to do this, but I've also used a simple event queue/dispatcher to do message passing within a single [[Java Virtual Machine]].  Other examples of tools are given in the [[Message Bus]] topic. The [[Multi Caster]] pattern is the way to go if things are complex enough to need many processes. -- [[Stanley Knutson]]",
+      "id": "903c303ea0858b50e42d8ef56b6bc536"
+    },
+    {
+      "type": "html",
+      "text": "<b>A great definition</b>",
+      "id": "1839704f7898473d30d0ea3444fb274c"
+    },
+    {
+      "type": "html",
+      "text": "\nJerry Smith on [http://www.jguru.com/faq/view.jsp?EID=773 www.jguru.com] posted a nice summary:",
+      "id": "093ff9af8f2b91665148cbdf51b0cb85"
+    },
+    {
+      "type": "html",
+      "text": "Message passing is a general term for a variety of strategies for high-level, structured interclient communication. For example, a mobile agent framework could provide classes and methods with which two agents (on two different computers) send each other messages. The steps required to send and receive messages are specific to the framework. JMS supports two common message passing strategies, namely, point-to-point and publish/subscribe. JMS can be utilized by any (Java-based) distributed software components; of course, the JMS middleware must be available.",
+      "id": "91fde4b0f531bdee8e791f9fb01148a7"
+    },
+    {
+      "type": "html",
+      "text": "--",
+      "id": "d6106d29c5089bbc29e3f43c11456c4f"
+    },
+    {
+      "type": "html",
+      "text": "<i>Most C programmers seem to be moving to [[Object Oriented Programming]] ...  However, they never seem to implement message passing.</i>",
+      "id": "004123f9cb8a026fe386a3898abe9061"
+    },
+    {
+      "type": "html",
+      "text": "\nAs a [[Cee Language]] programmer, I don't quite understand the point. \"message passing\" seems to mean two very different things.",
+      "id": "a0c20aa02c308391a35e0f745ae36dca"
+    },
+    {
+      "type": "html",
+      "text": " In a object-oriented context, as far as I can tell, \"message passing\" is a fancy way of saying \"function call\". Say someone writes <i>animal.talk(\"Hello!\")</i> or <i>anAnimal talk:'Hello!' </i> and says \"I'm sending this animal the 'talk' message\". But the computer acts just the same as if a [[Cee Language]] programmer writes \"talk(animal,\"Hello\");\" and says \"I'm calling the talk() function with this 'animal' structure.\".  <i>Not even close, the C implementation doesn't change its behavior based on the type of \"animal\".</i>",
+      "id": "8b151cd490b32da13397e410f8b93236"
+    },
+    {
+      "type": "html",
+      "text": "<i>No, that's merely a commonly appropriate optimization of a more general mechanism. Activation records in Smalltalk and in Scheme need not follow a strict LIFO ordering, even though that is the most common in any language, and is why they are usually optimized as simple LIFO stack-based function calls. There was some strong communication between Parc and MIT in the 1970s that lead up to all this, but anyway, once you're doing non-LIFO function calls, you start getting things that instead could be viewed as messages between threads.</i>",
+      "id": "c7d25f39ad77561c73017271a9257be8"
+    },
+    {
+      "type": "html",
+      "text": "\nIs this [[Cee Language]] programmer implementing message passing ? If not, what do you mean by \"message passing\" ?",
+      "id": "1856f3022163cae892a835a6ed92cf26"
+    },
+    {
+      "type": "html",
+      "text": " In a networking application, \"message passing\" means \"sending a message over the wire from a program on this computer to a program on that computer\". For example, in X windows, sending a message from an application running on one of the campus Sun boxes \"draw a white rectangle\" to the Linux box on my desk at home. There's usually a buffer at both ends that can hold several messages. Occasionally the 2 programs run on the *same* computer -- then the OS simulates a \"virtual wire\" by directly copying from the out buffer into the in buffer.",
+      "id": "1ebe55423fd9dd1823e7a9026395332a"
+    },
+    {
+      "type": "html",
+      "text": "\nI think of them as completely different things, because: What happens when a program is in the middle of handling one message, and then a second message come in ? In the OO case (a recursive call), the machine puts the first message on hold, takes care of the second message, then returns to processing the first message. In the networking case, the machine leaves the second message in the buffer until it's good and ready for it.",
+      "id": "5228e599cf897aa1f12fa9cc07868082"
+    },
+    {
+      "type": "html",
+      "text": "<i>Common, but certainly not necessarily true. Input queues can be priority ordered, for instance.</i>",
+      "id": "a395c6207eec7aa5c6264dc1cfd23452"
+    },
+    {
+      "type": "html",
+      "text": "-- [[David Cary]]",
+      "id": "4a260ddd0916a3014829cef5e18bab83"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "c680227b6b641d8de5f8ba885a287650"
+    },
+    {
+      "type": "html",
+      "text": "\nI am implementing the \"non-function call\" kind of message passing between Objects in my language that are virtually all running independently of all others (green threads). Data is passed by a MAP that I call a \"bag of variables\" to \"interface\" functions on the Object that can accept only \"MAP messages\". My messages can be synchronous or asynchronous and they can be passed on (forwarded) to other Objects easily. All messages are queued and once an Object receives a message, any new messages have to wait until the current message has completed. One last thing, an Object can send and wait for messages that bypass the input message queue if it wants to.",
+      "id": "60c0eecdd089f727db71d59f0e7b7e89"
+    },
+    {
+      "type": "html",
+      "text": "\nThe advantage of using a MAP (set of any group of variables or collections) is that input to interfaces can be drastically changed without invalidating (or re-compiling) other calls, as the MAP can contain any group of objects, unlike an object. Functions have a set number of parameters, in a specific order, with specific types. Maps on the other hand can contain any group of variables in no specific order, of any type. Maps aren't as efficient as functions but are significantly more flexible. In my system, messages are used at the higher level and functions are used at the local level.",
+      "id": "dc48621cfb37a48f1046481b736ef1d7"
+    },
+    {
+      "type": "html",
+      "text": "-- [[David Clarkd]]",
+      "id": "f59e5b9b67bee2f1595e2235d4d8e620"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "c680227b6b641d8de5f8ba885a287650"
+    },
+    {
+      "type": "html",
+      "text": "See also: [[Message Oriented Programming]], [[Smalltalk Language]], [[Alan Kay On Objects]], [[Alan Kay On Messaging]].",
+      "id": "04397332d72d0ea8b6a752d11be7ccac"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?MessagePassing c2.com]",
+      "id": "914faf012ade7e8d030283f463861010"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1416549130000,
+      "id": "e76e9fc45228cd5c382e802f1c2aaa81",
+      "type": "create",
+      "item": {
+        "title": "Message Passing",
+        "story": [
+          {
+            "type": "html",
+            "text": "What is message passing?",
+            "id": "b937b771e96078733d9f7b60866859a0"
+          },
+          {
+            "type": "html",
+            "text": "\nThere are two definitions in widespread use, which refer to two completely different things.",
+            "id": "a9f62d705a570237dde306a055d4dc1f"
+          },
+          {
+            "type": "html",
+            "text": "<b>The definition from [[Smalltalk Language]]:</b>  A <i>message</i> is simply a method call on an object.  Smalltalk messages are perfectly synchronous (the caller waits for the callee to return a value), and not terribly different then function/method calls in other languages.  A few key points about Smalltalk message passing:",
+            "id": "61849a90621c6b118ea33048c68802e3"
+          },
+          {
+            "type": "html",
+            "text": " Like C/C++/Java/ML/Lisp/Scheme, and <i>unlike</i> Haskell, Smalltalk messages are <i>strict</i>--all arguments are evaluated <i>before</i> the message is sent.  ",
+            "id": "6ca42e066dd8bead147c57a21bb1de08"
+          },
+          {
+            "type": "html",
+            "text": " <b>However</b>, Smalltalk blocks make it very easy to implement [[Lazy Evaluation]] or [[Normal Order Evaluation]] semantics (see [[Smalltalk Blocks Are Thunks In Disguise]]).  Simply pass a block as an argument, and the contents of the block won't be evaluated until someone passes the block the \"value\" message (or value: or value: value:, etc.)  [[Scheme Language]] has a similar mechansim with delay and force.  (See [[Explicit Lazy Evaluation]])",
+            "id": "7645d88643cb54e7dc8c232113b8874b"
+          },
+          {
+            "type": "html",
+            "text": " Like C++ and Java (and unlike [[Common Lisp Object System]], [[Dylan Language]], etc.), Smalltalk messages are [[Single Dispatch]].  The types of the arguments have no say in what method is selected to receive the message), though Smalltalk makes delegation easy.",
+            "id": "44fc654a73b696e937162e71b5f402e0"
+          },
+          {
+            "type": "html",
+            "text": " The syntax of Smalltalk message invocations is somewhat unusual, though highly readable once you get used to it.",
+            "id": "e51cd0bbcc0e3a57c1d3900f1b11a596"
+          },
+          {
+            "type": "html",
+            "text": "<b>The definition from many concurrent programming paradigms:</b>  A <i>message</i> is a method for <i>asynchronous</i> dispatch, and used to communicate between different processes (which may run on different machines).    Different concurrent models have different semantics regarding messages, such as whether or not the receiver and sender must rendezvous, whether or not the receiver must name the sender, etc.  See [[Message Passing Concurrency]] and [[Process Calculi]] for more information.",
+            "id": "b5855fffe1f60e6089994ab85062cf4c"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "c680227b6b641d8de5f8ba885a287650"
+          },
+          {
+            "type": "html",
+            "text": "\nThe [[Message Passing]] story arises entirely out of a tragic confusion engendered by [[Alan Kay]]'s research group. The initial variants of the [[Smalltalk Language]] family of languages were strongly inspired by [[Alan Kay]]'s knowledge of [[Carl Hewitt]]'s research on the [[Actor System]] model of computation.",
+            "id": "a62c98ea0b60c153eb21eccd558c5b29"
+          },
+          {
+            "type": "html",
+            "text": " No.  [[Carl Hewitt]]'s [[Actor System]] model did be strongly influenced by [[Alan Kay]]'s Smalltalk-72 implementation that already had existed.  see ref. acknowledgements by [[Carl Hewitt]] in [https://www.cypherpunks.to/erights/history/actors/actor-induction.pdf www.cypherpunks.to]",
+            "id": "385222b1a382f2f91e7cbba63b7624f9"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Actor System]] research was based on the assumption that massively parallel, distributed, computer systems could become prevalent, and therefore a convenient and efficient way to structure a <b>computation</b> was as a large number of self contained processes, called <i>actors</i>, communicating by sending messages to each other.",
+            "id": "3bab744a0936cb91110dd061fe721bf8"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Alan Kay]] had also been exposed to the [[Object Oriented]] ideas in SIMULA-67, which were about a program decomposition paradigm, a way to structure <b>programs</b>, not computations. It was however easy to see that in general [[Actor System]] computations are naturally [[Object Oriented]] too, even if most [[Object Oriented]] languages are based on the procedural model of computation, and a few even on the logic model of computation.",
+            "id": "da9a0c15a1de3a2424808c20b290ad91"
+          },
+          {
+            "type": "html",
+            "text": "\nTherefore the first few languages in the [[Smalltalk Language]] family were <i>not</i> procedural, and did not have procedure calls, but variants of message sending in the [[Actor System]] sense. In particular this applied to Smalltalk-76, which is the language described in the first famous article about the Smalltalk family of languages in Scientific American.",
+            "id": "1b8bce9601d30374f53d8d026fccf750"
+          },
+          {
+            "type": "html",
+            "text": "\nWith Smalltalk-80 any trace of [[Actor System]] orientation were removed, in part because [[Actor System]] computations are very expensive to simulate on conventional workstations, in part because [[Alan Kay]]'s group were influenced by the Lisp research being performed on the same workstations at [[Xerox Parc]].",
+            "id": "7a9dbdd4f1b2498196364db5b3372e3a"
+          },
+          {
+            "type": "html",
+            "text": "\nUnfortunately even if Smalltalk-80 is a thoroughly conventional procedural language (and a fairly close variant of Lisp, even if with different syntax and details) [[Alan Kay]] and his group and the Smalltalk-80 community continued to use [[Actor System]] terminology, retaining the <i>message passing</i> nomenclature for what had become conventional procedure calls (there is a single, hard to spot, note in one of the Smalltalk-80 book where it is stated clearly that <i>message passing</i> in that language really means the same as <i>procedure calls</i>).",
+            "id": "1112fc6f378e8e7cbaf1f7e43fce008f"
+          },
+          {
+            "type": "html",
+            "text": "\nThis unfortunate terminological issue has created endless confusion as to a large extent the mythical relevance of Smalltalk-80 and the conflation of [[Actor System]] terminology with procedural semantics and [[Object Oriented]] concepts have muddle considerably the difference between these very different categories.",
+            "id": "094ad805c7ff14576d13d0f17c8c73da"
+          },
+          {
+            "type": "html",
+            "text": "\nMany years after Smalltalk-80 was released [[Alan Kay]] seems to have come to regret the switch to procedural languages, arguing that the performance driven switch to a procedural computational model had been a mistake as increases in hardware performance would have made the simulation of [[Actor System]] based computations on procedural hardware feasible, and that the [[Actor System]] model of computation is preferable in his view to the procedural one.",
+            "id": "bb0a742d5ca5d89f4304da5be46a7c13"
+          },
+          {
+            "type": "html",
+            "text": "\nHowever he has also stated that one of the most important recent books is <i>The art of the metaobject protocol</i> which is entirely about advanced techniques related to procedural OO languages, which raises the possibility that he himself suffers from some confusion.",
+            "id": "6fc6739fd146be874230d8c0a2c3a223"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "c680227b6b641d8de5f8ba885a287650"
+          },
+          {
+            "type": "html",
+            "text": "Most C programmers seem to be moving to [[Object Oriented Programming]] in the [[Cee Language]]:  They define structs and have functions for creating and destroying the structs.  They implement some form of reference counting for garbage collection.  However, they never seem to implement message passing.  Is message passing an important part of object oriented programming or is it really not necessary?",
+            "id": "1cb59c899eb7e4c7b07a3680b5905f63"
+          },
+          {
+            "type": "html",
+            "text": " <i>Do you mean the Smalltalk definition, or the concurrent-programming definition?</i>",
+            "id": "d922d6f93df61fdd5a34e472def5c082"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "c680227b6b641d8de5f8ba885a287650"
+          },
+          {
+            "type": "html",
+            "text": "\nMessage passing is really unrelated to [[Object Oriented Programming]], although usually a \"message\" is created as an object.",
+            "id": "9d1b00e97bdcc4878b1613e99006d3dd"
+          },
+          {
+            "type": "html",
+            "text": "\nI use the term \"message passing\" to mean \"queuing of communication between a source (sender) and a destination (receiver)\", without regard to technology used (usually asynchronous is implied however). JMS is one technology to do this, but I've also used a simple event queue/dispatcher to do message passing within a single [[Java Virtual Machine]].  Other examples of tools are given in the [[Message Bus]] topic. The [[Multi Caster]] pattern is the way to go if things are complex enough to need many processes. -- [[Stanley Knutson]]",
+            "id": "903c303ea0858b50e42d8ef56b6bc536"
+          },
+          {
+            "type": "html",
+            "text": "<b>A great definition</b>",
+            "id": "1839704f7898473d30d0ea3444fb274c"
+          },
+          {
+            "type": "html",
+            "text": "\nJerry Smith on [http://www.jguru.com/faq/view.jsp?EID=773 www.jguru.com] posted a nice summary:",
+            "id": "093ff9af8f2b91665148cbdf51b0cb85"
+          },
+          {
+            "type": "html",
+            "text": "Message passing is a general term for a variety of strategies for high-level, structured interclient communication. For example, a mobile agent framework could provide classes and methods with which two agents (on two different computers) send each other messages. The steps required to send and receive messages are specific to the framework. JMS supports two common message passing strategies, namely, point-to-point and publish/subscribe. JMS can be utilized by any (Java-based) distributed software components; of course, the JMS middleware must be available.",
+            "id": "91fde4b0f531bdee8e791f9fb01148a7"
+          },
+          {
+            "type": "html",
+            "text": "--",
+            "id": "d6106d29c5089bbc29e3f43c11456c4f"
+          },
+          {
+            "type": "html",
+            "text": "<i>Most C programmers seem to be moving to [[Object Oriented Programming]] ...  However, they never seem to implement message passing.</i>",
+            "id": "004123f9cb8a026fe386a3898abe9061"
+          },
+          {
+            "type": "html",
+            "text": "\nAs a [[Cee Language]] programmer, I don't quite understand the point. \"message passing\" seems to mean two very different things.",
+            "id": "a0c20aa02c308391a35e0f745ae36dca"
+          },
+          {
+            "type": "html",
+            "text": " In a object-oriented context, as far as I can tell, \"message passing\" is a fancy way of saying \"function call\". Say someone writes <i>animal.talk(\"Hello!\")</i> or <i>anAnimal talk:'Hello!' </i> and says \"I'm sending this animal the 'talk' message\". But the computer acts just the same as if a [[Cee Language]] programmer writes \"talk(animal,\"Hello\");\" and says \"I'm calling the talk() function with this 'animal' structure.\".  <i>Not even close, the C implementation doesn't change its behavior based on the type of \"animal\".</i>",
+            "id": "8b151cd490b32da13397e410f8b93236"
+          },
+          {
+            "type": "html",
+            "text": "<i>No, that's merely a commonly appropriate optimization of a more general mechanism. Activation records in Smalltalk and in Scheme need not follow a strict LIFO ordering, even though that is the most common in any language, and is why they are usually optimized as simple LIFO stack-based function calls. There was some strong communication between Parc and MIT in the 1970s that lead up to all this, but anyway, once you're doing non-LIFO function calls, you start getting things that instead could be viewed as messages between threads.</i>",
+            "id": "c7d25f39ad77561c73017271a9257be8"
+          },
+          {
+            "type": "html",
+            "text": "\nIs this [[Cee Language]] programmer implementing message passing ? If not, what do you mean by \"message passing\" ?",
+            "id": "1856f3022163cae892a835a6ed92cf26"
+          },
+          {
+            "type": "html",
+            "text": " In a networking application, \"message passing\" means \"sending a message over the wire from a program on this computer to a program on that computer\". For example, in X windows, sending a message from an application running on one of the campus Sun boxes \"draw a white rectangle\" to the Linux box on my desk at home. There's usually a buffer at both ends that can hold several messages. Occasionally the 2 programs run on the *same* computer -- then the OS simulates a \"virtual wire\" by directly copying from the out buffer into the in buffer.",
+            "id": "1ebe55423fd9dd1823e7a9026395332a"
+          },
+          {
+            "type": "html",
+            "text": "\nI think of them as completely different things, because: What happens when a program is in the middle of handling one message, and then a second message come in ? In the OO case (a recursive call), the machine puts the first message on hold, takes care of the second message, then returns to processing the first message. In the networking case, the machine leaves the second message in the buffer until it's good and ready for it.",
+            "id": "5228e599cf897aa1f12fa9cc07868082"
+          },
+          {
+            "type": "html",
+            "text": "<i>Common, but certainly not necessarily true. Input queues can be priority ordered, for instance.</i>",
+            "id": "a395c6207eec7aa5c6264dc1cfd23452"
+          },
+          {
+            "type": "html",
+            "text": "-- [[David Cary]]",
+            "id": "4a260ddd0916a3014829cef5e18bab83"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "c680227b6b641d8de5f8ba885a287650"
+          },
+          {
+            "type": "html",
+            "text": "\nI am implementing the \"non-function call\" kind of message passing between Objects in my language that are virtually all running independently of all others (green threads). Data is passed by a MAP that I call a \"bag of variables\" to \"interface\" functions on the Object that can accept only \"MAP messages\". My messages can be synchronous or asynchronous and they can be passed on (forwarded) to other Objects easily. All messages are queued and once an Object receives a message, any new messages have to wait until the current message has completed. One last thing, an Object can send and wait for messages that bypass the input message queue if it wants to.",
+            "id": "60c0eecdd089f727db71d59f0e7b7e89"
+          },
+          {
+            "type": "html",
+            "text": "\nThe advantage of using a MAP (set of any group of variables or collections) is that input to interfaces can be drastically changed without invalidating (or re-compiling) other calls, as the MAP can contain any group of objects, unlike an object. Functions have a set number of parameters, in a specific order, with specific types. Maps on the other hand can contain any group of variables in no specific order, of any type. Maps aren't as efficient as functions but are significantly more flexible. In my system, messages are used at the higher level and functions are used at the local level.",
+            "id": "dc48621cfb37a48f1046481b736ef1d7"
+          },
+          {
+            "type": "html",
+            "text": "-- [[David Clarkd]]",
+            "id": "f59e5b9b67bee2f1595e2235d4d8e620"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "c680227b6b641d8de5f8ba885a287650"
+          },
+          {
+            "type": "html",
+            "text": "See also: [[Message Oriented Programming]], [[Smalltalk Language]], [[Alan Kay On Objects]], [[Alan Kay On Messaging]].",
+            "id": "04397332d72d0ea8b6a752d11be7ccac"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?MessagePassing c2.com]",
+            "id": "914faf012ade7e8d030283f463861010"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1645024436646
+    },
+    {
+      "type": "edit",
+      "id": "385222b1a382f2f91e7cbba63b7624f9",
+      "item": {
+        "type": "html",
+        "text": " No.  [[Carl Hewitt]]'s [[Actor System]] model did be strongly influenced by [[Alan Kay]]'s Smalltalk-72 implementation that already had existed.  see ref. acknowledgements by [[Carl Hewitt]] in [https://www.cypherpunks.to/erights/history/actors/actor-induction.pdf www.cypherpunks.to] [wayback]",
+        "id": "385222b1a382f2f91e7cbba63b7624f9"
+      },
+      "date": 1645352941203
+    },
+    {
+      "type": "edit",
+      "id": "385222b1a382f2f91e7cbba63b7624f9",
+      "item": {
+        "type": "html",
+        "text": " No.  [[Carl Hewitt]]'s [[Actor System]] model did be strongly influenced by [[Alan Kay]]'s Smalltalk-72 implementation that already had existed.  see ref. acknowledgements by [[Carl Hewitt]] in [https://www.cypherpunks.to/erights/history/actors/actor-induction.pdf www.cypherpunks.to] [https://web.archive.org/web/20170809093741/http://www.cypherpunks.to/erights/history/actors/actor-induction.pdf wayback pdf]",
+        "id": "385222b1a382f2f91e7cbba63b7624f9"
+      },
+      "date": 1645352965144
+    }
+  ]
+}

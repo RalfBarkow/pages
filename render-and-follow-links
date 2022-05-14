@@ -1,0 +1,946 @@
+{
+  "title": "Render and Follow Links",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "af2eb041282edd42",
+      "text": "Federated wiki collects context for links based on sites mentioned on the page. This context is consulted when a link is clicked."
+    },
+    {
+      "type": "paragraph",
+      "id": "5fe08d38a1daa02d",
+      "text": "We redefine the meaning of clicking a link from what is expected in hypertext as defined by html or even earlier dialects of wiki. We'll follow linking from one refresh cycle through to the same cycle of the next page."
+    },
+    {
+      "type": "markdown",
+      "id": "b12835eb6f39e228",
+      "text": "* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/refresh.coffee#L239-L244 refresh.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/page.coffee#L37-L44 page.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/paragraph.coffee#L14-L26 paragraph.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/resolve.coffee#L38-L42 resolve.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/legacy.coffee#L97-L104 legacy.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/link.coffee#L23-L33 link.coffee]"
+    },
+    {
+      "type": "paragraph",
+      "id": "b9bf2c467ad29a81",
+      "text": "We assemble from page content a list of sites to be probed to find the best version of an internal link. We probe because the most desirable site might not be online or might not have the desired page. In this case we try the next most desirable site, and so on."
+    },
+    {
+      "type": "markdown",
+      "id": "1985477a5504a747",
+      "text": "# Context"
+    },
+    {
+      "type": "paragraph",
+      "id": "f3cd00911595d3fb",
+      "text": "We embed the page fetching resolution context in each link as a title that can be viewed with hover."
+    },
+    {
+      "type": "code",
+      "id": "8cfa597a65f06259",
+      "text": "view => ward.asia.wiki.org => ward.fed.wiki.org"
+    },
+    {
+      "type": "paragraph",
+      "id": "0877bf06b1a42629",
+      "text": "See [[Storage Name]] for words that appear in place of sites."
+    },
+    {
+      "type": "paragraph",
+      "id": "2ce6d573f75ac9b3",
+      "text": "The refresh.cycle defers this embedding to each plugin that might render links. Plugins can create well formatted links by further delegating to the core resolve module. You can see this in the paragraph module that resolves the most ordinary of items."
+    },
+    {
+      "type": "code",
+      "id": "72b443d0ed7951ba",
+      "text": "$item.append \"<p>#{resolve.resolveLinks(text)}</p>\""
+    },
+    {
+      "type": "paragraph",
+      "id": "f6bb62827f945f26",
+      "text": "Dynamically loaded plugins have access to the resolve module through the wiki global. The wiki-plugin-markdown still performs a similar append."
+    },
+    {
+      "type": "code",
+      "id": "1a302362fc5410c9",
+      "text": "  $item.append \"\n    <p>\n      #{wiki.resolveLinks item.text, expand}\n    </p>\n  \"\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "28ae2acfbea1c99f",
+      "text": "We say links are resolved when we decide exactly which sites should be probed should a link be clicked.  Resolving depends on the resolution context assembled in the refresh.cycle and passed quietly to the resolve module."
+    },
+    {
+      "type": "paragraph",
+      "id": "c96d90a0765aefc2",
+      "text": "Try finding links with interesting hovers. Inspect their representation in the dom to see how resolution has treated them."
+    },
+    {
+      "type": "paragraph",
+      "id": "216ccb84303fc362",
+      "text": "The resolveLinks function operates in three steps. First, links are found using both the single and double square bracket notation. Second, the caller can transform the remaining text by whatever markup rules it might have. Third, the resolved links are inserted back into the expanded text."
+    },
+    {
+      "type": "paragraph",
+      "id": "3e78a84e1f6e7e97",
+      "text": "Try adding console.log statements to resolve in order to see each of these steps applied."
+    },
+    {
+      "type": "markdown",
+      "id": "9f94d78c4a71bdb2",
+      "text": "# Click"
+    },
+    {
+      "type": "paragraph",
+      "id": "53aa8dfabe95e4b2",
+      "text": "The user is free to click any link no matter when it was rendered. We have more options now than we once did for recovering the proper context. A quick hack that persists is to parse the context out of the link title."
+    },
+    {
+      "type": "code",
+      "id": "36d6d91f9b4f1f30",
+      "text": ".delegate '.internal', 'click', (e) ->\n  name = $(e.target).data 'pageName'\n  pageHandler.context =\n    $(e.target).attr('title').split(' => ')\n  page = $(e.target).parents('.page')\n  link.doInternalLink name, page\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "dcc8d71fff990bbb",
+      "text": "This slightly simplified delegate definition is found with many more in the legacy module bootstrap code.  The link module assumes responsibility for completing the click once the important parameters have been identified."
+    },
+    {
+      "type": "paragraph",
+      "id": "071c7ba361602938",
+      "text": "Try single stepping link processing from this handler until refresh.cycle is called to render the new page."
+    },
+    {
+      "type": "paragraph",
+      "id": "abe45e4a3176ebae",
+      "text": "Other callers to doInternalLink include visualizations which find their particulars from very different data structures that they manage."
+    },
+    {
+      "type": "paragraph",
+      "id": "428dfd46c7514084",
+      "text": "Common code in link ensures common linking behavior among plugins that choose to use it. It also provides one more sneak path to pass a resolution context between modules, in this case to the pageHandler that is about to be asked to find the desired page."
+    },
+    {
+      "type": "markdown",
+      "id": "bdb7b6da6b120bbf",
+      "text": "# Reflection"
+    },
+    {
+      "type": "paragraph",
+      "id": "9c72a9cbf7812f8d",
+      "text": "Internal links are made complicated by the need to search in very specific places for the loosely linked json from which the new page can be rendered."
+    },
+    {
+      "type": "paragraph",
+      "id": "2223b1ee065f504d",
+      "text": "All plugins are expected to respect the same square bracket notation. Various core modules cooperate to make this easy to do if not easy to understand."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Render and Follow Links",
+        "story": []
+      },
+      "date": 1446343525662
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "af2eb041282edd42"
+      },
+      "id": "af2eb041282edd42",
+      "type": "add",
+      "date": 1446343531205
+    },
+    {
+      "type": "edit",
+      "id": "af2eb041282edd42",
+      "item": {
+        "type": "paragraph",
+        "id": "af2eb041282edd42",
+        "text": "Federated wiki collects context for links based on sites mentioned on the page. This context is consulted when a link is clicked."
+      },
+      "date": 1446344459453
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5fe08d38a1daa02d"
+      },
+      "id": "5fe08d38a1daa02d",
+      "type": "add",
+      "after": "af2eb041282edd42",
+      "date": 1446420932937
+    },
+    {
+      "type": "edit",
+      "id": "5fe08d38a1daa02d",
+      "item": {
+        "type": "paragraph",
+        "id": "5fe08d38a1daa02d",
+        "text": "We redefine the meaning of clicking a link from what is expected in hypertext as defined by html or even earlier dialects of wiki. We assemble from page content a list of sites to be probed to find the best version of an internal link. We probe because the most desirable site might not be online or might not have the desired page. In this case we try the next most desirable site."
+      },
+      "date": 1446421312672
+    },
+    {
+      "type": "edit",
+      "id": "5fe08d38a1daa02d",
+      "item": {
+        "type": "paragraph",
+        "id": "5fe08d38a1daa02d",
+        "text": "We redefine the meaning of clicking a link from what is expected in hypertext as defined by html or even earlier dialects of wiki. "
+      },
+      "date": 1446421330196
+    },
+    {
+      "type": "add",
+      "id": "b9bf2c467ad29a81",
+      "item": {
+        "type": "paragraph",
+        "id": "b9bf2c467ad29a81",
+        "text": "We assemble from page content a list of sites to be probed to find the best version of an internal link. We probe because the most desirable site might not be online or might not have the desired page. In this case we try the next most desirable site."
+      },
+      "after": "5fe08d38a1daa02d",
+      "date": 1446421343374
+    },
+    {
+      "type": "edit",
+      "id": "5fe08d38a1daa02d",
+      "item": {
+        "type": "paragraph",
+        "id": "5fe08d38a1daa02d",
+        "text": "We redefine the meaning of clicking a link from what is expected in hypertext as defined by html or even earlier dialects of wiki."
+      },
+      "date": 1446421391269
+    },
+    {
+      "type": "edit",
+      "id": "b9bf2c467ad29a81",
+      "item": {
+        "type": "paragraph",
+        "id": "b9bf2c467ad29a81",
+        "text": "We assemble from page content a list of sites to be probed to find the best version of an internal link. We probe because the most desirable site might not be online or might not have the desired page. In this case we try the next most desirable site, and so on."
+      },
+      "date": 1446421418544
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1985477a5504a747"
+      },
+      "id": "1985477a5504a747",
+      "type": "add",
+      "after": "b9bf2c467ad29a81",
+      "date": 1446421478509
+    },
+    {
+      "type": "edit",
+      "id": "1985477a5504a747",
+      "item": {
+        "type": "paragraph",
+        "id": "1985477a5504a747",
+        "text": "# Context"
+      },
+      "date": 1446421485629
+    },
+    {
+      "type": "add",
+      "id": "f3cd00911595d3fb",
+      "item": {
+        "type": "paragraph",
+        "id": "f3cd00911595d3fb",
+        "text": "We embed the page fetching resolution context in each link as a title that can be viewed with hover."
+      },
+      "after": "1985477a5504a747",
+      "date": 1446421600752
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8cfa597a65f06259"
+      },
+      "id": "8cfa597a65f06259",
+      "type": "add",
+      "after": "f3cd00911595d3fb",
+      "date": 1446421603619
+    },
+    {
+      "type": "edit",
+      "id": "8cfa597a65f06259",
+      "item": {
+        "type": "code",
+        "id": "8cfa597a65f06259",
+        "text": "view => ward.asia.wiki.org => ward.fed.wiki.org"
+      },
+      "date": 1446421657305
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2ce6d573f75ac9b3"
+      },
+      "id": "2ce6d573f75ac9b3",
+      "type": "add",
+      "after": "8cfa597a65f06259",
+      "date": 1446421680033
+    },
+    {
+      "type": "edit",
+      "id": "2ce6d573f75ac9b3",
+      "item": {
+        "type": "paragraph",
+        "id": "2ce6d573f75ac9b3",
+        "text": "The refresh.cycle defers this embedding to each plugin that might render links. Plugins can create well formatted links by further delegating to the "
+      },
+      "date": 1446421908194
+    },
+    {
+      "type": "edit",
+      "id": "2ce6d573f75ac9b3",
+      "item": {
+        "type": "paragraph",
+        "id": "2ce6d573f75ac9b3",
+        "text": "The refresh.cycle defers this embedding to each plugin that might render links. Plugins can create well formatted links by further delegating to the core resolve module."
+      },
+      "date": 1446421976674
+    },
+    {
+      "type": "edit",
+      "id": "2ce6d573f75ac9b3",
+      "item": {
+        "type": "paragraph",
+        "id": "2ce6d573f75ac9b3",
+        "text": "The refresh.cycle defers this embedding to each plugin that might render links. Plugins can create well formatted links by further delegating to the core resolve module. You can see this in the paragraph plugin that resolves the most ordinary of items."
+      },
+      "date": 1446422059558
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "72b443d0ed7951ba"
+      },
+      "id": "72b443d0ed7951ba",
+      "type": "add",
+      "after": "2ce6d573f75ac9b3",
+      "date": 1446422062762
+    },
+    {
+      "type": "edit",
+      "id": "72b443d0ed7951ba",
+      "item": {
+        "type": "code",
+        "id": "72b443d0ed7951ba",
+        "text": "$item.append \"<p>#{resolve.resolveLinks(text)}</p>\""
+      },
+      "date": 1446422070957
+    },
+    {
+      "type": "edit",
+      "id": "2ce6d573f75ac9b3",
+      "item": {
+        "type": "paragraph",
+        "id": "2ce6d573f75ac9b3",
+        "text": "The refresh.cycle defers this embedding to each plugin that might render links. Plugins can create well formatted links by further delegating to the core resolve module. You can see this in the paragraph module that resolves the most ordinary of items."
+      },
+      "date": 1446422115399
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f6bb62827f945f26"
+      },
+      "id": "f6bb62827f945f26",
+      "type": "add",
+      "after": "72b443d0ed7951ba",
+      "date": 1446422325655
+    },
+    {
+      "type": "edit",
+      "id": "f6bb62827f945f26",
+      "item": {
+        "type": "paragraph",
+        "id": "f6bb62827f945f26",
+        "text": "Dynamically loaded plugins have access to the resolve module through the wiki global. The wiki-plugin-markdown still performs a similar append."
+      },
+      "date": 1446422428569
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1a302362fc5410c9"
+      },
+      "id": "1a302362fc5410c9",
+      "type": "add",
+      "after": "f6bb62827f945f26",
+      "date": 1446422430836
+    },
+    {
+      "type": "edit",
+      "id": "1a302362fc5410c9",
+      "item": {
+        "type": "code",
+        "id": "1a302362fc5410c9",
+        "text": "  $item.append \"\n    <p>\n      #{wiki.resolveLinks item.text, expand}\n    </p>\n  \"\n"
+      },
+      "date": 1446422458706
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "cf9974ac2a4ec948"
+      },
+      "id": "cf9974ac2a4ec948",
+      "type": "add",
+      "after": "1a302362fc5410c9",
+      "date": 1446422615521
+    },
+    {
+      "type": "remove",
+      "id": "cf9974ac2a4ec948",
+      "date": 1446422680183
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "28ae2acfbea1c99f"
+      },
+      "id": "28ae2acfbea1c99f",
+      "type": "add",
+      "after": "1a302362fc5410c9",
+      "date": 1446422844695
+    },
+    {
+      "type": "edit",
+      "id": "28ae2acfbea1c99f",
+      "item": {
+        "type": "paragraph",
+        "id": "28ae2acfbea1c99f",
+        "text": "We say links are resolved when we decide exactly which sites should be probed should a link be clicked.  Resolving depends on the resolution context assembled in the refresh.cycle and passed quietly to the resolve module."
+      },
+      "date": 1446423304058
+    },
+    {
+      "type": "add",
+      "id": "216ccb84303fc362",
+      "item": {
+        "type": "paragraph",
+        "id": "216ccb84303fc362",
+        "text": "The resolveLinks function operates in three steps. First, links are found using both the single and double square bracket notation. Second, the caller can transform the remaining text by whatever markup rules it might have. Third, the resolved links are inserted back into the expanded text."
+      },
+      "after": "28ae2acfbea1c99f",
+      "date": 1446423606587
+    },
+    {
+      "type": "add",
+      "id": "3e78a84e1f6e7e97",
+      "item": {
+        "type": "paragraph",
+        "id": "3e78a84e1f6e7e97",
+        "text": "Try adding console.log statements to resolve in order to see each of these steps applied."
+      },
+      "after": "216ccb84303fc362",
+      "date": 1446423646662
+    },
+    {
+      "type": "edit",
+      "id": "1985477a5504a747",
+      "item": {
+        "type": "markdown",
+        "id": "1985477a5504a747",
+        "text": "# Context"
+      },
+      "date": 1446423682312
+    },
+    {
+      "type": "add",
+      "id": "c96d90a0765aefc2",
+      "item": {
+        "type": "paragraph",
+        "id": "c96d90a0765aefc2",
+        "text": "Try finding links with interesting hovers. Inspect their representation in the dom to see how resolution has treated them."
+      },
+      "after": "28ae2acfbea1c99f",
+      "date": 1446423842509
+    },
+    {
+      "type": "add",
+      "id": "9f94d78c4a71bdb2",
+      "item": {
+        "type": "paragraph",
+        "id": "9f94d78c4a71bdb2",
+        "text": "# Click"
+      },
+      "after": "3e78a84e1f6e7e97",
+      "date": 1446423907918
+    },
+    {
+      "type": "add",
+      "id": "53aa8dfabe95e4b2",
+      "item": {
+        "type": "paragraph",
+        "id": "53aa8dfabe95e4b2",
+        "text": "The user is free to click any link no matter when it was rendered. We have more options now than we once did for recovering the proper context. A quick hack that persists is to parse the context out of the link title."
+      },
+      "after": "9f94d78c4a71bdb2",
+      "date": 1446424158501
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7379247321615996"
+      },
+      "id": "7379247321615996",
+      "type": "add",
+      "after": "53aa8dfabe95e4b2",
+      "date": 1446424162311
+    },
+    {
+      "type": "edit",
+      "id": "7379247321615996",
+      "item": {
+        "type": "paragraph",
+        "id": "7379247321615996",
+        "text": "    .delegate '.internal', 'click', (e) ->\n      pageHandler.context = $(e.target).attr('title').split(' => ')\n      finishClick e, name\n"
+      },
+      "date": 1446424216337
+    },
+    {
+      "type": "remove",
+      "id": "7379247321615996",
+      "date": 1446424259362
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "36d6d91f9b4f1f30"
+      },
+      "id": "36d6d91f9b4f1f30",
+      "type": "add",
+      "after": "53aa8dfabe95e4b2",
+      "date": 1446424261717
+    },
+    {
+      "type": "edit",
+      "id": "36d6d91f9b4f1f30",
+      "item": {
+        "type": "code",
+        "id": "36d6d91f9b4f1f30",
+        "text": "    .delegate '.internal', 'click', (e) ->\n      pageHandler.context = $(e.target).attr('title').split(' => ')\n      finishClick e, name\n"
+      },
+      "date": 1446424267462
+    },
+    {
+      "type": "edit",
+      "id": "36d6d91f9b4f1f30",
+      "item": {
+        "type": "code",
+        "id": "36d6d91f9b4f1f30",
+        "text": "    .delegate '.internal', 'click', (e) ->\n      pageHandler.context = $(e.target)\n         .attr('title').split(' => ')\n      finishClick e, name\n"
+      },
+      "date": 1446424304691
+    },
+    {
+      "type": "edit",
+      "id": "36d6d91f9b4f1f30",
+      "item": {
+        "type": "code",
+        "id": "36d6d91f9b4f1f30",
+        "text": ".delegate '.internal', 'click', (e) ->\n  pageHandler.context = $(e.target).attr('title').split(' => ')\n"
+      },
+      "date": 1446424330082
+    },
+    {
+      "type": "edit",
+      "id": "36d6d91f9b4f1f30",
+      "item": {
+        "type": "code",
+        "id": "36d6d91f9b4f1f30",
+        "text": ".delegate '.internal', 'click', (e) ->\n  pageHandler.context = $(e.target)\n    .attr('title')\n    .split(' => ')\n"
+      },
+      "date": 1446424378780
+    },
+    {
+      "type": "edit",
+      "id": "36d6d91f9b4f1f30",
+      "item": {
+        "type": "code",
+        "id": "36d6d91f9b4f1f30",
+        "text": ".delegate '.internal', 'click', (e) ->\n  pageHandler.context =\n    $(e.target).attr('title').split(' => ')\n"
+      },
+      "date": 1446424405266
+    },
+    {
+      "type": "edit",
+      "id": "36d6d91f9b4f1f30",
+      "item": {
+        "type": "code",
+        "id": "36d6d91f9b4f1f30",
+        "text": ".delegate '.internal', 'click', (e) ->\n  name = $(e.target).data 'pageName'\n  pageHandler.context =\n    $(e.target).attr('title').split(' => ')\n"
+      },
+      "date": 1446424467120
+    },
+    {
+      "type": "edit",
+      "id": "36d6d91f9b4f1f30",
+      "item": {
+        "type": "code",
+        "id": "36d6d91f9b4f1f30",
+        "text": ".delegate '.internal', 'click', (e) ->\n  name = $(e.target).data 'pageName'\n  pageHandler.context =\n    $(e.target).attr('title').split(' => ')\n    page = $(e.target).parents('.page')\n    link.doInternalLink name, page\n\n"
+      },
+      "date": 1446424568234
+    },
+    {
+      "type": "edit",
+      "id": "9f94d78c4a71bdb2",
+      "item": {
+        "type": "markdown",
+        "id": "9f94d78c4a71bdb2",
+        "text": "# Click"
+      },
+      "date": 1446424615697
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dcc8d71fff990bbb"
+      },
+      "id": "dcc8d71fff990bbb",
+      "type": "add",
+      "after": "36d6d91f9b4f1f30",
+      "date": 1446424694497
+    },
+    {
+      "type": "edit",
+      "id": "dcc8d71fff990bbb",
+      "item": {
+        "type": "paragraph",
+        "id": "dcc8d71fff990bbb",
+        "text": "This slightly simplified delegate definition is found with many more in the legacy module bootstrap code.  The link module assumes responsibility for completing the click once the important parameters have been identified. "
+      },
+      "date": 1446424851037
+    },
+    {
+      "type": "add",
+      "id": "abe45e4a3176ebae",
+      "item": {
+        "type": "paragraph",
+        "id": "abe45e4a3176ebae",
+        "text": "Other callers to doInternalLink include visualizations which find their particulars from very different data structures that they manage. The common code in link ensures common linking behavior among plugins that choose to use it. It also provides one more sneak path to pass a resolution context between modules."
+      },
+      "after": "dcc8d71fff990bbb",
+      "date": 1446425032978
+    },
+    {
+      "type": "edit",
+      "id": "36d6d91f9b4f1f30",
+      "item": {
+        "type": "code",
+        "id": "36d6d91f9b4f1f30",
+        "text": ".delegate '.internal', 'click', (e) ->\n  name = $(e.target).data 'pageName'\n  pageHandler.context =\n    $(e.target).attr('title').split(' => ')\n  page = $(e.target).parents('.page')\n  link.doInternalLink name, page\n\n"
+      },
+      "date": 1446425054698
+    },
+    {
+      "type": "edit",
+      "id": "abe45e4a3176ebae",
+      "item": {
+        "type": "paragraph",
+        "id": "abe45e4a3176ebae",
+        "text": "Other callers to doInternalLink include visualizations which find their particulars from very different data structures that they manage. The common code in link ensures common linking behavior among plugins that choose to use it. It also provides one more sneak path to pass a resolution context between modules, in this case to the pageHandler that is about to be asked to find the desired page."
+      },
+      "date": 1446425097485
+    },
+    {
+      "type": "edit",
+      "id": "abe45e4a3176ebae",
+      "item": {
+        "type": "paragraph",
+        "id": "abe45e4a3176ebae",
+        "text": "Other callers to doInternalLink include visualizations which find their particulars from very different data structures that they manage. The common code in link ensures common linking behavior among plugins that choose to use it."
+      },
+      "date": 1446425116109
+    },
+    {
+      "type": "edit",
+      "id": "abe45e4a3176ebae",
+      "item": {
+        "type": "paragraph",
+        "id": "abe45e4a3176ebae",
+        "text": "Other callers to doInternalLink include visualizations which find their particulars from very different data structures that they manage. The common code in link ensures common linking behavior among plugins that choose to use it. It also provides one more sneak path to pass a resolution context between modules, in this case to the pageHandler that is about to be asked to find the desired page."
+      },
+      "date": 1446425155008
+    },
+    {
+      "type": "edit",
+      "id": "abe45e4a3176ebae",
+      "item": {
+        "type": "paragraph",
+        "id": "abe45e4a3176ebae",
+        "text": "Other callers to doInternalLink include visualizations which find their particulars from very different data structures that they manage."
+      },
+      "date": 1446425166418
+    },
+    {
+      "type": "add",
+      "id": "428dfd46c7514084",
+      "item": {
+        "type": "paragraph",
+        "id": "428dfd46c7514084",
+        "text": "Common code in link ensures common linking behavior among plugins that choose to use it. It also provides one more sneak path to pass a resolution context between modules, in this case to the pageHandler that is about to be asked to find the desired page."
+      },
+      "after": "abe45e4a3176ebae",
+      "date": 1446425178990
+    },
+    {
+      "type": "edit",
+      "id": "dcc8d71fff990bbb",
+      "item": {
+        "type": "paragraph",
+        "id": "dcc8d71fff990bbb",
+        "text": "This slightly simplified delegate definition is found with many more in the legacy module bootstrap code.  The link module assumes responsibility for completing the click once the important parameters have been identified."
+      },
+      "date": 1446425268536
+    },
+    {
+      "type": "add",
+      "id": "071c7ba361602938",
+      "item": {
+        "type": "paragraph",
+        "id": "071c7ba361602938",
+        "text": "Try single stepping link processing from this handler until refresh.cycle is called to render the new page."
+      },
+      "after": "dcc8d71fff990bbb",
+      "date": 1446425306965
+    },
+    {
+      "type": "add",
+      "id": "bdb7b6da6b120bbf",
+      "item": {
+        "type": "paragraph",
+        "id": "bdb7b6da6b120bbf",
+        "text": "# Reflection"
+      },
+      "after": "428dfd46c7514084",
+      "date": 1446425655744
+    },
+    {
+      "type": "add",
+      "id": "9c72a9cbf7812f8d",
+      "item": {
+        "type": "paragraph",
+        "id": "9c72a9cbf7812f8d",
+        "text": "Internal links are made complicated by the need to search in very specific places for the loosely linked json from which the new page can be rendered."
+      },
+      "after": "bdb7b6da6b120bbf",
+      "date": 1446425804308
+    },
+    {
+      "type": "add",
+      "id": "2223b1ee065f504d",
+      "item": {
+        "type": "paragraph",
+        "id": "2223b1ee065f504d",
+        "text": "All plugins are expected to respect the same square bracket notation. Various core modules cooperate to make this easy to do if not easy to understand."
+      },
+      "after": "9c72a9cbf7812f8d",
+      "date": 1446425997590
+    },
+    {
+      "type": "edit",
+      "id": "bdb7b6da6b120bbf",
+      "item": {
+        "type": "markdown",
+        "id": "bdb7b6da6b120bbf",
+        "text": "# Reflection"
+      },
+      "date": 1446425999965
+    },
+    {
+      "type": "edit",
+      "id": "8cfa597a65f06259",
+      "item": {
+        "type": "code",
+        "id": "8cfa597a65f06259",
+        "text": "view => dev.asia.wiki.org => ward.fed.wiki.org"
+      },
+      "date": 1446426314798
+    },
+    {
+      "type": "edit",
+      "id": "8cfa597a65f06259",
+      "item": {
+        "type": "code",
+        "id": "8cfa597a65f06259",
+        "text": "view => ward.asia.wiki.org => ward.fed.wiki.org"
+      },
+      "date": 1446426344673
+    },
+    {
+      "type": "add",
+      "id": "0877bf06b1a42629",
+      "item": {
+        "type": "paragraph",
+        "id": "0877bf06b1a42629",
+        "text": "See [[Storage Names]] for words that stand for sites."
+      },
+      "after": "f3cd00911595d3fb",
+      "date": 1446426578575
+    },
+    {
+      "type": "move",
+      "order": [
+        "af2eb041282edd42",
+        "5fe08d38a1daa02d",
+        "b9bf2c467ad29a81",
+        "1985477a5504a747",
+        "f3cd00911595d3fb",
+        "8cfa597a65f06259",
+        "0877bf06b1a42629",
+        "2ce6d573f75ac9b3",
+        "72b443d0ed7951ba",
+        "f6bb62827f945f26",
+        "1a302362fc5410c9",
+        "28ae2acfbea1c99f",
+        "c96d90a0765aefc2",
+        "216ccb84303fc362",
+        "3e78a84e1f6e7e97",
+        "9f94d78c4a71bdb2",
+        "53aa8dfabe95e4b2",
+        "36d6d91f9b4f1f30",
+        "dcc8d71fff990bbb",
+        "071c7ba361602938",
+        "abe45e4a3176ebae",
+        "428dfd46c7514084",
+        "bdb7b6da6b120bbf",
+        "9c72a9cbf7812f8d",
+        "2223b1ee065f504d"
+      ],
+      "id": "0877bf06b1a42629",
+      "date": 1446426582381
+    },
+    {
+      "type": "edit",
+      "id": "0877bf06b1a42629",
+      "item": {
+        "type": "paragraph",
+        "id": "0877bf06b1a42629",
+        "text": "See [[Storage Name]] for words that stand for sites."
+      },
+      "date": 1446426936069
+    },
+    {
+      "type": "edit",
+      "id": "0877bf06b1a42629",
+      "item": {
+        "type": "paragraph",
+        "id": "0877bf06b1a42629",
+        "text": "See [[Storage Name]] for words that appear in place of sites."
+      },
+      "date": 1446426977181
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "b12835eb6f39e228",
+        "text": "* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/refresh.coffee#L239-L244 refresh.coffee]\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/page.coffee#L105-L111 page.coffee]\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/plugin.coffee#L82-L100 plugin.coffee]\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/paragraph.coffee#L14-L26 paragraph.coffee]\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/resolve.coffee#L23-L58 resolve.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/legacy.coffee#L97-L104 legacy.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/link.coffee#L23-L33 link.coffee]"
+      },
+      "after": "5fe08d38a1daa02d",
+      "id": "b12835eb6f39e228",
+      "date": 1446858739892
+    },
+    {
+      "type": "edit",
+      "id": "5fe08d38a1daa02d",
+      "item": {
+        "type": "paragraph",
+        "id": "5fe08d38a1daa02d",
+        "text": "We redefine the meaning of clicking a link from what is expected in hypertext as defined by html or even earlier dialects of wiki. We'll follow this through from the refresh cycle in one page through to the refresh cycle of a linked one."
+      },
+      "date": 1446858870334
+    },
+    {
+      "type": "edit",
+      "id": "5fe08d38a1daa02d",
+      "item": {
+        "type": "paragraph",
+        "id": "5fe08d38a1daa02d",
+        "text": "We redefine the meaning of clicking a link from what is expected in hypertext as defined by html or even earlier dialects of wiki. We'll follow a link through from the refresh cycle through to the refresh cycle of a clicked link."
+      },
+      "date": 1446858922548
+    },
+    {
+      "type": "edit",
+      "id": "5fe08d38a1daa02d",
+      "item": {
+        "type": "paragraph",
+        "id": "5fe08d38a1daa02d",
+        "text": "We redefine the meaning of clicking a link from what is expected in hypertext as defined by html or even earlier dialects of wiki. We'll follow internal linking through from the refresh cycle through to the refresh cycle of a clicked link."
+      },
+      "date": 1446858942562
+    },
+    {
+      "type": "edit",
+      "id": "5fe08d38a1daa02d",
+      "item": {
+        "type": "paragraph",
+        "id": "5fe08d38a1daa02d",
+        "text": "We redefine the meaning of clicking a link from what is expected in hypertext as defined by html or even earlier dialects of wiki. We'll follow linking through from the refresh cycle through to the refresh cycle of a clicked link."
+      },
+      "date": 1446858949946
+    },
+    {
+      "type": "edit",
+      "id": "5fe08d38a1daa02d",
+      "item": {
+        "type": "paragraph",
+        "id": "5fe08d38a1daa02d",
+        "text": "We redefine the meaning of clicking a link from what is expected in hypertext as defined by html or even earlier dialects of wiki. We'll follow linking from one refresh cycle through to the refresh cycle of a clicked link."
+      },
+      "date": 1446858999362
+    },
+    {
+      "type": "edit",
+      "id": "5fe08d38a1daa02d",
+      "item": {
+        "type": "paragraph",
+        "id": "5fe08d38a1daa02d",
+        "text": "We redefine the meaning of clicking a link from what is expected in hypertext as defined by html or even earlier dialects of wiki. We'll follow linking from one refresh cycle through to the same cycle of the next page."
+      },
+      "date": 1446859058273
+    },
+    {
+      "type": "edit",
+      "id": "b12835eb6f39e228",
+      "item": {
+        "type": "markdown",
+        "id": "b12835eb6f39e228",
+        "text": "* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/refresh.coffee#L239-L244 refresh.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/page.coffee#L37-L44 page.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/plugin.coffee#L82-L100 plugin.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/paragraph.coffee#L14-L26 paragraph.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/resolve.coffee#L23-L58 resolve.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/legacy.coffee#L97-L104 legacy.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/link.coffee#L23-L33 link.coffee]"
+      },
+      "date": 1446859157885
+    },
+    {
+      "type": "edit",
+      "id": "b12835eb6f39e228",
+      "item": {
+        "type": "markdown",
+        "id": "b12835eb6f39e228",
+        "text": "* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/refresh.coffee#L239-L244 refresh.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/page.coffee#L37-L44 page.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/plugin.coffee#L82-L100 plugin.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/paragraph.coffee#L14-L26 paragraph.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/resolve.coffee#L38-L42 resolve.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/legacy.coffee#L97-L104 legacy.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/link.coffee#L23-L33 link.coffee]"
+      },
+      "date": 1446859394877
+    },
+    {
+      "type": "edit",
+      "id": "b12835eb6f39e228",
+      "item": {
+        "type": "markdown",
+        "id": "b12835eb6f39e228",
+        "text": "* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/refresh.coffee#L239-L244 refresh.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/page.coffee#L37-L44 page.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/paragraph.coffee#L14-L26 paragraph.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/resolve.coffee#L38-L42 resolve.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/legacy.coffee#L97-L104 legacy.coffee]\n\n* [https://github.com/fedwiki/wiki-client/blob/adfe0d75499b6401b7c9e600d2bc21ab686a7b36/lib/link.coffee#L23-L33 link.coffee]"
+      },
+      "date": 1446859481767
+    },
+    {
+      "type": "fork",
+      "site": "dev.asia.wiki.org",
+      "date": 1644565240193
+    }
+  ]
+}

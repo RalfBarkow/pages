@@ -1,0 +1,442 @@
+{
+  "title": "Observers Should Never Throw Exceptions",
+  "story": [
+    {
+      "type": "html",
+      "text": "<i>On [[Observers Throw Local Exceptions]], [[William Grosso]] asked:</i> How do we throw exceptions in an Observer?",
+      "id": "4352d6968697790758c1083ef12beee1"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "85b3039d72cc8dfcf460c44cccbc926e"
+    },
+    {
+      "type": "html",
+      "text": "The Observer shouldn't throw exceptions. There is no-one to catch them. The protocol could catch and ignore them, but that's dangerous. The Observable doesn't know anything about the Observers - that's the point of the pattern - so is not interested in their failure. -- [[Dave Harris]]",
+      "id": "6805e4a97486363a0892c54c55869656"
+    },
+    {
+      "type": "html",
+      "text": "\nAgreed. In [[Cee Plus Plus]] terms, Observers should provide a Nofail [[Exception Guarantee]]. -- [[Tim Lesher]]",
+      "id": "d333945c508c6bc3a110d2870b1d81d0"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "85b3039d72cc8dfcf460c44cccbc926e"
+    },
+    {
+      "type": "html",
+      "text": "You need to use a two-phase protocol between the Observable and Observers. In phase one, the Observable proposes the change to the Observables; they can agree to the change or veto it. In the second phase, the Observable updates its state and informs the Observers of the change. This protocol is used in the [[Java Beans]] framework as \"veto-able properties\" and \"bound properties\".",
+      "id": "34389bb6b748baae71feaa74dc897805"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Nat Pryce]]",
+      "id": "199d4b3c7fa52ab56f529dc4fa1eefc7"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "85b3039d72cc8dfcf460c44cccbc926e"
+    },
+    {
+      "type": "html",
+      "text": "<i>[[William Grosso]] said, (with some paraphrasing): </i> This is related to [[Observables Need To Be Consistent]], because when an observer throws an exception, it flows right through the observable and we wind up with the same problem as on [[Observables Need To Be Consistent]].",
+      "id": "5ee82a0d7670bde42fdd2c9d4790cc12"
+    },
+    {
+      "type": "html",
+      "text": "The question is: is this entirely theoretical? Have people actually enforced this stricture? Does it not bite us because exceptions rarely happen in an Observable context? And does the need to guarantee this constitute a huge limitation on exceptions?",
+      "id": "4a8bb4ca1c3963c3bcace0f60bebb784"
+    },
+    {
+      "type": "html",
+      "text": "-- [[William Grosso]]",
+      "id": "9217df5fc984c1d74ff4dd9788f29006"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "85b3039d72cc8dfcf460c44cccbc926e"
+    },
+    {
+      "type": "html",
+      "text": "In the Java world, this stricture is habitually enforced by default. That language requires exceptions to be declared by routines which throw them. When you design your Observer protocol, you naturally don't mention exceptions in it and so they cannot be thrown. For example, in the standard library we have:",
+      "id": "330561ff98729ddf93e05d19de4802d3"
+    },
+    {
+      "type": "code",
+      "text": "  interface java.util.Observer {\n  public abstract void update( Observable o, Object arg );\n  }",
+      "id": "3f83bafcea6f6bce25734a667cd057d9"
+    },
+    {
+      "type": "html",
+      "text": "Classes conforming to this interface cannot throw exceptions from the update() method. So it's not theoretical, it's standard practice.",
+      "id": "fb567ffc6143aa8adf92c72624c6ab8d"
+    },
+    {
+      "type": "html",
+      "text": "(Actually, there are two groups of exception that don't need to be declared. They are for handling bugs and other catastrophic errors. I don't believe this weakens the case.) -- [[Dave Harris]]",
+      "id": "73a5ec9452c652efbfaa1f49ee5faa91"
+    },
+    {
+      "type": "html",
+      "text": "\nThose two cases can break a lot of code if not handled properly.\nIf you're implementing an event firing mechanism you should consider",
+      "id": "fdbb388d1da6284b6f54232a9a260ab8"
+    },
+    {
+      "type": "html",
+      "text": " catching Throwable whenever you hand an event to another object. Who knows what stupid things it will do, and one [[Null Pointer Exception]] can ruin your whole Thread.",
+      "id": "39837150a164f106957bc177826fdd53"
+    },
+    {
+      "type": "html",
+      "text": " Firing off a new Thread to do the handoff to the object. The object may do take an awful long time to respond, or get into a deadlock.",
+      "id": "345c8481e0d9613715d540aa33adf58c"
+    },
+    {
+      "type": "html",
+      "text": "\nThe AWT event thread seems to handle the first of these but not the second. Most naive implementations of event dispatchers don't handle either.",
+      "id": "bd195a619941790907a594b2a2364b3a"
+    },
+    {
+      "type": "html",
+      "text": "-- [[John Farrell]]",
+      "id": "fdfb407f80ce7cfa6349027ffc938927"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "85b3039d72cc8dfcf460c44cccbc926e"
+    },
+    {
+      "type": "html",
+      "text": "\nLeading us to the idiom [[Dont Throw Generic Exceptions]]. A reasonable stricture and one that I frequently observe in the breach. :-)",
+      "id": "8982fd2d1b42b292fea53e9188ea0e8e"
+    },
+    {
+      "type": "html",
+      "text": "-- [[William Grosso]]",
+      "id": "9217df5fc984c1d74ff4dd9788f29006"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "85b3039d72cc8dfcf460c44cccbc926e"
+    },
+    {
+      "type": "html",
+      "text": "The way I see this is that the message from the Subject to Observer needs to be a \"one way\" message - it notifies the observer but doesn't return anything to the subject: no result or exceptions. Starting a new thread in java is one implementation of this. One way messages are useful for lots of things, see [[Doug Lea]]'s [[Concurrent Programming In Java]].",
+      "id": "c69b0f00d4aeb36be4573baee6e09eee"
+    },
+    {
+      "type": "html",
+      "text": "\nTwo phase check & act protocols, like [[Java Beans]] and Smalltalk's changeRequest are a different and more difficult case.",
+      "id": "d50151df2a921c1a3b7526df456eea49"
+    },
+    {
+      "type": "html",
+      "text": "-- [[James Noble]]",
+      "id": "5e08710612dbcba0c2afd9af1de196c3"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "85b3039d72cc8dfcf460c44cccbc926e"
+    },
+    {
+      "type": "html",
+      "text": "\nThe main issue is what happens when an Observer is coded incorrectly and throws a [[Runtime Exception]]. \nIf the Observable is not coded defensively (i.e. does not catch ([[Runtime Exception]] rte) around each call to the observer's interface), its event delivery loop will halt (and perhaps the [[Runtime Exception]] propagates). This means that the other Observers do not get the event notifications. By following [[Observers Should Never Throw Exceptions]], you assume the Observer is not coded defensively, as well as violating the [[Throw Dont Catch]] pattern.",
+      "id": "dfa2b46248d43543f4cd76b0f7a1adac"
+    },
+    {
+      "type": "html",
+      "text": "\nI prefer to code the Observable defensively - you never know if your Observer obeys [[Observers Should Never Throw Exceptions]] or not. If you do this, it is not necessary to catch [[Runtime Exception]] in each Observer's/listener's method.",
+      "id": "72ab27eff841136c79257a5625d755c6"
+    },
+    {
+      "type": "html",
+      "text": "\nPerhaps we need a [[Collect Exceptions]] pattern, as a special case of [[Nested Exception]], to collect the exceptions caught by all the observers.",
+      "id": "0fb2721fb65ebe57233f25e125d8e9b5"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "85b3039d72cc8dfcf460c44cccbc926e"
+    },
+    {
+      "type": "html",
+      "text": "[[Observers Should Never Throw Exceptions]] does not mix with [[Somebody Elses Framework]] (and neither does [[Checked Exceptions]] for that matter). More than once, I needed to build a new control based on an existing control. Sometimes I can do GUI event interception and translation, sometimes I cannot. However, there is often an observer for a property of the original control that in some manner reflects the event that needs to be translated. So, I derive from the base class, add an observer in the constructor (thus ensuring that I see it first), and mutate properties of the object at will.",
+      "id": "ee95259a78d5fe8f83fa30eb84c9174b"
+    },
+    {
+      "type": "html",
+      "text": "\nIf the change is not valid, I set it back to what it was. It would be nice to throw an exception sometimes to describe why (if some code causes that particular change and not a GUI event).",
+      "id": "9bdd38eadd1849c8bb608b18b37fe550"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "85b3039d72cc8dfcf460c44cccbc926e"
+    },
+    {
+      "type": "html",
+      "text": "-- [[David Biesack]]",
+      "id": "b16e03a73e68adbcd528e9eae54dfb77"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "85b3039d72cc8dfcf460c44cccbc926e"
+    },
+    {
+      "type": "html",
+      "text": "See also [[Observer Pattern]]",
+      "id": "0ffb3d10a35e4691565a514428da64ed"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "85b3039d72cc8dfcf460c44cccbc926e"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Exception]] [[Category Pattern]]",
+      "id": "84d4307b13287e5c6a03f614a81766f4"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?ObserversShouldNeverThrowExceptions c2.com]",
+      "id": "821be74c188674d7f0a314b310f0945f"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1271155686000,
+      "id": "ef6cb1bcdb8f5bb91c528ffc2d709653",
+      "type": "create",
+      "item": {
+        "title": "Observers Should Never Throw Exceptions",
+        "story": [
+          {
+            "type": "html",
+            "text": "<i>On [[Observers Throw Local Exceptions]], [[William Grosso]] asked:</i> How do we throw exceptions in an Observer?",
+            "id": "4352d6968697790758c1083ef12beee1"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "85b3039d72cc8dfcf460c44cccbc926e"
+          },
+          {
+            "type": "html",
+            "text": "The Observer shouldn't throw exceptions. There is no-one to catch them. The protocol could catch and ignore them, but that's dangerous. The Observable doesn't know anything about the Observers - that's the point of the pattern - so is not interested in their failure. -- [[Dave Harris]]",
+            "id": "6805e4a97486363a0892c54c55869656"
+          },
+          {
+            "type": "html",
+            "text": "\nAgreed. In [[Cee Plus Plus]] terms, Observers should provide a Nofail [[Exception Guarantee]]. -- [[Tim Lesher]]",
+            "id": "d333945c508c6bc3a110d2870b1d81d0"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "85b3039d72cc8dfcf460c44cccbc926e"
+          },
+          {
+            "type": "html",
+            "text": "You need to use a two-phase protocol between the Observable and Observers. In phase one, the Observable proposes the change to the Observables; they can agree to the change or veto it. In the second phase, the Observable updates its state and informs the Observers of the change. This protocol is used in the [[Java Beans]] framework as \"veto-able properties\" and \"bound properties\".",
+            "id": "34389bb6b748baae71feaa74dc897805"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Nat Pryce]]",
+            "id": "199d4b3c7fa52ab56f529dc4fa1eefc7"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "85b3039d72cc8dfcf460c44cccbc926e"
+          },
+          {
+            "type": "html",
+            "text": "<i>[[William Grosso]] said, (with some paraphrasing): </i> This is related to [[Observables Need To Be Consistent]], because when an observer throws an exception, it flows right through the observable and we wind up with the same problem as on [[Observables Need To Be Consistent]].",
+            "id": "5ee82a0d7670bde42fdd2c9d4790cc12"
+          },
+          {
+            "type": "html",
+            "text": "The question is: is this entirely theoretical? Have people actually enforced this stricture? Does it not bite us because exceptions rarely happen in an Observable context? And does the need to guarantee this constitute a huge limitation on exceptions?",
+            "id": "4a8bb4ca1c3963c3bcace0f60bebb784"
+          },
+          {
+            "type": "html",
+            "text": "-- [[William Grosso]]",
+            "id": "9217df5fc984c1d74ff4dd9788f29006"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "85b3039d72cc8dfcf460c44cccbc926e"
+          },
+          {
+            "type": "html",
+            "text": "In the Java world, this stricture is habitually enforced by default. That language requires exceptions to be declared by routines which throw them. When you design your Observer protocol, you naturally don't mention exceptions in it and so they cannot be thrown. For example, in the standard library we have:",
+            "id": "330561ff98729ddf93e05d19de4802d3"
+          },
+          {
+            "type": "code",
+            "text": "  interface java.util.Observer {\n  public abstract void update( Observable o, Object arg );\n  }",
+            "id": "3f83bafcea6f6bce25734a667cd057d9"
+          },
+          {
+            "type": "html",
+            "text": "Classes conforming to this interface cannot throw exceptions from the update() method. So it's not theoretical, it's standard practice.",
+            "id": "fb567ffc6143aa8adf92c72624c6ab8d"
+          },
+          {
+            "type": "html",
+            "text": "(Actually, there are two groups of exception that don't need to be declared. They are for handling bugs and other catastrophic errors. I don't believe this weakens the case.) -- [[Dave Harris]]",
+            "id": "73a5ec9452c652efbfaa1f49ee5faa91"
+          },
+          {
+            "type": "html",
+            "text": "\nThose two cases can break a lot of code if not handled properly.\nIf you're implementing an event firing mechanism you should consider",
+            "id": "fdbb388d1da6284b6f54232a9a260ab8"
+          },
+          {
+            "type": "html",
+            "text": " catching Throwable whenever you hand an event to another object. Who knows what stupid things it will do, and one [[Null Pointer Exception]] can ruin your whole Thread.",
+            "id": "39837150a164f106957bc177826fdd53"
+          },
+          {
+            "type": "html",
+            "text": " Firing off a new Thread to do the handoff to the object. The object may do take an awful long time to respond, or get into a deadlock.",
+            "id": "345c8481e0d9613715d540aa33adf58c"
+          },
+          {
+            "type": "html",
+            "text": "\nThe AWT event thread seems to handle the first of these but not the second. Most naive implementations of event dispatchers don't handle either.",
+            "id": "bd195a619941790907a594b2a2364b3a"
+          },
+          {
+            "type": "html",
+            "text": "-- [[John Farrell]]",
+            "id": "fdfb407f80ce7cfa6349027ffc938927"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "85b3039d72cc8dfcf460c44cccbc926e"
+          },
+          {
+            "type": "html",
+            "text": "\nLeading us to the idiom [[Dont Throw Generic Exceptions]]. A reasonable stricture and one that I frequently observe in the breach. :-)",
+            "id": "8982fd2d1b42b292fea53e9188ea0e8e"
+          },
+          {
+            "type": "html",
+            "text": "-- [[William Grosso]]",
+            "id": "9217df5fc984c1d74ff4dd9788f29006"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "85b3039d72cc8dfcf460c44cccbc926e"
+          },
+          {
+            "type": "html",
+            "text": "The way I see this is that the message from the Subject to Observer needs to be a \"one way\" message - it notifies the observer but doesn't return anything to the subject: no result or exceptions. Starting a new thread in java is one implementation of this. One way messages are useful for lots of things, see [[Doug Lea]]'s [[Concurrent Programming In Java]].",
+            "id": "c69b0f00d4aeb36be4573baee6e09eee"
+          },
+          {
+            "type": "html",
+            "text": "\nTwo phase check & act protocols, like [[Java Beans]] and Smalltalk's changeRequest are a different and more difficult case.",
+            "id": "d50151df2a921c1a3b7526df456eea49"
+          },
+          {
+            "type": "html",
+            "text": "-- [[James Noble]]",
+            "id": "5e08710612dbcba0c2afd9af1de196c3"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "85b3039d72cc8dfcf460c44cccbc926e"
+          },
+          {
+            "type": "html",
+            "text": "\nThe main issue is what happens when an Observer is coded incorrectly and throws a [[Runtime Exception]]. \nIf the Observable is not coded defensively (i.e. does not catch ([[Runtime Exception]] rte) around each call to the observer's interface), its event delivery loop will halt (and perhaps the [[Runtime Exception]] propagates). This means that the other Observers do not get the event notifications. By following [[Observers Should Never Throw Exceptions]], you assume the Observer is not coded defensively, as well as violating the [[Throw Dont Catch]] pattern.",
+            "id": "dfa2b46248d43543f4cd76b0f7a1adac"
+          },
+          {
+            "type": "html",
+            "text": "\nI prefer to code the Observable defensively - you never know if your Observer obeys [[Observers Should Never Throw Exceptions]] or not. If you do this, it is not necessary to catch [[Runtime Exception]] in each Observer's/listener's method.",
+            "id": "72ab27eff841136c79257a5625d755c6"
+          },
+          {
+            "type": "html",
+            "text": "\nPerhaps we need a [[Collect Exceptions]] pattern, as a special case of [[Nested Exception]], to collect the exceptions caught by all the observers.",
+            "id": "0fb2721fb65ebe57233f25e125d8e9b5"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "85b3039d72cc8dfcf460c44cccbc926e"
+          },
+          {
+            "type": "html",
+            "text": "[[Observers Should Never Throw Exceptions]] does not mix with [[Somebody Elses Framework]] (and neither does [[Checked Exceptions]] for that matter). More than once, I needed to build a new control based on an existing control. Sometimes I can do GUI event interception and translation, sometimes I cannot. However, there is often an observer for a property of the original control that in some manner reflects the event that needs to be translated. So, I derive from the base class, add an observer in the constructor (thus ensuring that I see it first), and mutate properties of the object at will.",
+            "id": "ee95259a78d5fe8f83fa30eb84c9174b"
+          },
+          {
+            "type": "html",
+            "text": "\nIf the change is not valid, I set it back to what it was. It would be nice to throw an exception sometimes to describe why (if some code causes that particular change and not a GUI event).",
+            "id": "9bdd38eadd1849c8bb608b18b37fe550"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "85b3039d72cc8dfcf460c44cccbc926e"
+          },
+          {
+            "type": "html",
+            "text": "-- [[David Biesack]]",
+            "id": "b16e03a73e68adbcd528e9eae54dfb77"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "85b3039d72cc8dfcf460c44cccbc926e"
+          },
+          {
+            "type": "html",
+            "text": "See also [[Observer Pattern]]",
+            "id": "0ffb3d10a35e4691565a514428da64ed"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "85b3039d72cc8dfcf460c44cccbc926e"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Exception]] [[Category Pattern]]",
+            "id": "84d4307b13287e5c6a03f614a81766f4"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?ObserversShouldNeverThrowExceptions c2.com]",
+            "id": "821be74c188674d7f0a314b310f0945f"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1651574178934
+    }
+  ]
+}

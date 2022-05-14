@@ -1,0 +1,317 @@
+{
+  "title": "Github Example",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "bc4d04b9b07f2db8",
+      "text": "We use Github Enterprise (GHE) and find it convenient to extract user information from within it that is easily adjusted by users. "
+    },
+    {
+      "type": "paragraph",
+      "id": "a5d62cc1d88182a6",
+      "text": "We extract user information using the api wrapped with the octokit ruby gem. Here we preserve api terminology to maintain correspondence with docs. See [[Extract to Files]]"
+    },
+    {
+      "type": "code",
+      "id": "59ddb1b165cfe8f3",
+      "text": "require 'octokit'\nrequire 'json'\n\nOctokit.auto_paginate = true\n\nOctokit.configure do |c|\n  c.access_token = '0501 ...'\n  c.api_endpoint = \"https://source.datanerd.us/api/v3\"\n  c.web_endpoint = \"https://source.datanerd.us/api/v3\"\n end\n\nusers = Octokit.all_users().map { |e|\n  STDERR.print '.'\n  u = Octokit.user(e.login)\n  {\n    login: e.login,\n    id: e.id,\n    type: e.type,\n    site_admin: e.site_admin,\n    name: u.name,\n    blog: u.blog,\n    location: u.location,\n    email: u.email,\n    bio: u.bio\n  }\n}\n\nputs JSON.pretty_generate users\nSTDERR.puts"
+    },
+    {
+      "type": "paragraph",
+      "id": "be5b4f85dafb2581",
+      "text": "This runs from a bash script that saves standard out and then writes an explain.yml file in the same directory with source details of the extraction."
+    },
+    {
+      "type": "paragraph",
+      "id": "89fb79094fc0f40d",
+      "text": "We merge this with other sources of employee information using a for-purpose written helper that transforms available user information into a unique employee identifier. The api mixes user and org information which we choose to represent distinctly. See [[Merge and Transform]]"
+    },
+    {
+      "type": "code",
+      "id": "4566ddf6e2094ec1",
+      "text": "json('github-users/users.json').each do |user|\n  props = {\n    ghe_id: user['id'],\n    ghe_blog: user['blog'],\n    ghe_location: user['location']\n    ghe_bio: user['bio']\n  }\n  if user['type'] == 'User'\n    props[:name] = user['name']\n    props[:id] = find_employee_id user\n    node 'EMPLOYEE', props\n  else\n    props[:name] = user['login']\n    node 'ORG', props\n  end\nend\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "13665b55c8368c74",
+      "text": "The find_employee_id has become rather complex in our implementation. We are careful to read and merge more authoritative sources first and then use a variety of heuristics to match other sources to the identities already found."
+    },
+    {
+      "type": "paragraph",
+      "id": "7e3d446dc3e417ee",
+      "text": "We record in the database what heuristics worked including no_match_found when all fail. The create or retrieve logic of the node helper then makes a node that doesn't relate well but can be further explored with queries to understand better what has gone wrong."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Github Example",
+        "story": []
+      },
+      "date": 1508434199227
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bc4d04b9b07f2db8"
+      },
+      "id": "bc4d04b9b07f2db8",
+      "type": "add",
+      "date": 1508434201385
+    },
+    {
+      "type": "edit",
+      "id": "bc4d04b9b07f2db8",
+      "item": {
+        "type": "paragraph",
+        "id": "bc4d04b9b07f2db8",
+        "text": "We use Github Enterprise (GHE) and find it convenient to extract user information from within it that is easily adjusted by users. "
+      },
+      "date": 1508434292292
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a5d62cc1d88182a6"
+      },
+      "id": "a5d62cc1d88182a6",
+      "type": "add",
+      "after": "bc4d04b9b07f2db8",
+      "date": 1508434295193
+    },
+    {
+      "type": "edit",
+      "id": "a5d62cc1d88182a6",
+      "item": {
+        "type": "paragraph",
+        "id": "a5d62cc1d88182a6",
+        "text": "We extract user information using the api wrapped with the octokit ruby gem."
+      },
+      "date": 1508434357254
+    },
+    {
+      "type": "add",
+      "id": "89fb79094fc0f40d",
+      "item": {
+        "type": "paragraph",
+        "id": "89fb79094fc0f40d",
+        "text": "We merge this with other sources of employee information using a for-purpose written helper that transforms available user information into a unique employee identifier."
+      },
+      "after": "a5d62cc1d88182a6",
+      "date": 1508434497878
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4566ddf6e2094ec1"
+      },
+      "id": "4566ddf6e2094ec1",
+      "type": "add",
+      "after": "89fb79094fc0f40d",
+      "date": 1508434499824
+    },
+    {
+      "type": "edit",
+      "id": "4566ddf6e2094ec1",
+      "item": {
+        "type": "code",
+        "id": "4566ddf6e2094ec1",
+        "text": "json('github-users/users.json').each do |user|\n  props = {\n    ghe_id: user['id'],\n    ghe_blog: user['blog'],\n    ghe_location: user['location']\n    ghe_bio: user['bio']\n  }\n  if user['type'] == 'User'\n    props[:name] = user['name']\n    props[:id] = find_employee_id user\n    node 'EMPLOYEE', props\n  else\n    props[:name] = user['login']\n    node 'ORG', props\n  end\nend\n"
+      },
+      "date": 1508434505031
+    },
+    {
+      "type": "edit",
+      "id": "89fb79094fc0f40d",
+      "item": {
+        "type": "paragraph",
+        "id": "89fb79094fc0f40d",
+        "text": "We merge this with other sources of employee information using a for-purpose written helper that transforms available user information into a unique employee identifier. The api mixes user and org information which we choose to represent distinctly."
+      },
+      "date": 1508434572336
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "59ddb1b165cfe8f3"
+      },
+      "id": "59ddb1b165cfe8f3",
+      "type": "add",
+      "after": "4566ddf6e2094ec1",
+      "date": 1508434616836
+    },
+    {
+      "type": "move",
+      "order": [
+        "bc4d04b9b07f2db8",
+        "a5d62cc1d88182a6",
+        "59ddb1b165cfe8f3",
+        "89fb79094fc0f40d",
+        "4566ddf6e2094ec1"
+      ],
+      "id": "59ddb1b165cfe8f3",
+      "date": 1508434623305
+    },
+    {
+      "type": "edit",
+      "id": "59ddb1b165cfe8f3",
+      "item": {
+        "type": "code",
+        "id": "59ddb1b165cfe8f3",
+        "text": "require 'octokit'\nrequire 'json'\n\nOctokit.auto_paginate = true\n\nOctokit.configure do |c|\n  c.access_token = '0501 ...'\n  c.api_endpoint = \"https://source.datanerd.us/api/v3\"\n  c.web_endpoint = \"https://source.datanerd.us/api/v3\"\n end\n\nputs JSON.pretty_generate Octokit.all_users().map { |e|\n  STDERR.print '.'\n  u = Octokit.user(e.login)\n  {\n    login: e.login,\n    id: e.id,\n    type: e.type,\n    site_admin: e.site_admin,\n    name: u.name,\n    blog: u.blog,\n    location: u.location,\n    email: u.email,\n    bio: u.bio\n  }\n}\nSTDERR.puts"
+      },
+      "date": 1508434666696
+    },
+    {
+      "type": "edit",
+      "id": "a5d62cc1d88182a6",
+      "item": {
+        "type": "paragraph",
+        "id": "a5d62cc1d88182a6",
+        "text": "We extract user information using the api wrapped with the octokit ruby gem. Here we preserve api terminology to maintain correspondence with github documentation."
+      },
+      "date": 1508434847947
+    },
+    {
+      "type": "edit",
+      "id": "89fb79094fc0f40d",
+      "item": {
+        "type": "paragraph",
+        "id": "89fb79094fc0f40d",
+        "text": "We merge this with other sources of employee information using a for-purpose written helper that transforms available user information into a unique employee identifier. The api mixes user and org information which we choose to represent distinctly. See [[Merge and Transform]]"
+      },
+      "date": 1508434979292
+    },
+    {
+      "type": "edit",
+      "id": "a5d62cc1d88182a6",
+      "item": {
+        "type": "paragraph",
+        "id": "a5d62cc1d88182a6",
+        "text": "We extract user information using the api wrapped with the octokit ruby gem. Here we preserve api terminology to maintain correspondence with github documentation. See [[Extract to Files]]"
+      },
+      "date": 1508434998707
+    },
+    {
+      "type": "edit",
+      "id": "a5d62cc1d88182a6",
+      "item": {
+        "type": "paragraph",
+        "id": "a5d62cc1d88182a6",
+        "text": "We extract user information using the api wrapped with the octokit ruby gem. Here we preserve api terminology to maintain correspondence with api docs. See [[Extract to Files]]"
+      },
+      "date": 1508435024985
+    },
+    {
+      "type": "edit",
+      "id": "a5d62cc1d88182a6",
+      "item": {
+        "type": "paragraph",
+        "id": "a5d62cc1d88182a6",
+        "text": "We extract user information using the api wrapped with the octokit ruby gem. Here we preserve api terminology to maintain correspondence with docs. See [[Extract to Files]]"
+      },
+      "date": 1508435037600
+    },
+    {
+      "type": "add",
+      "id": "be5b4f85dafb2581",
+      "item": {
+        "type": "paragraph",
+        "id": "be5b4f85dafb2581",
+        "text": "This runs from a bash script that saves standard out and then writes an explain.yml file in the same directory with source details of the extraction."
+      },
+      "after": "a5d62cc1d88182a6",
+      "date": 1508435691262
+    },
+    {
+      "type": "move",
+      "order": [
+        "bc4d04b9b07f2db8",
+        "a5d62cc1d88182a6",
+        "59ddb1b165cfe8f3",
+        "be5b4f85dafb2581",
+        "89fb79094fc0f40d",
+        "4566ddf6e2094ec1"
+      ],
+      "id": "be5b4f85dafb2581",
+      "date": 1508435704340
+    },
+    {
+      "type": "edit",
+      "id": "59ddb1b165cfe8f3",
+      "item": {
+        "type": "code",
+        "id": "59ddb1b165cfe8f3",
+        "text": "require 'octokit'\nrequire 'json'\n\nOctokit.auto_paginate = true\n\nOctokit.configure do |c|\n  c.access_token = '0501 ...'\n  c.api_endpoint = \"https://source.datanerd.us/api/v3\"\n  c.web_endpoint = \"https://source.datanerd.us/api/v3\"\n end\n\nusers = Octokit.all_users().map { |e|\n  STDERR.print '.'\n  u = Octokit.user(e.login)\n  {\n    login: e.login,\n    id: e.id,\n    type: e.type,\n    site_admin: e.site_admin,\n    name: u.name,\n    blog: u.blog,\n    location: u.location,\n    email: u.email,\n    bio: u.bio\n  }\n}\n\nputs JSON.pretty_generate users\nSTDERR.puts"
+      },
+      "date": 1508436104195
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "13665b55c8368c74"
+      },
+      "id": "13665b55c8368c74",
+      "type": "add",
+      "after": "4566ddf6e2094ec1",
+      "date": 1508436998635
+    },
+    {
+      "type": "edit",
+      "id": "13665b55c8368c74",
+      "item": {
+        "type": "paragraph",
+        "id": "13665b55c8368c74",
+        "text": "The find_employee_id has become rather complex in our implementation. We are careful to read and merge more authoritative sources first and then use a variety of heuristics to match other sources to the identities already found."
+      },
+      "date": 1508437193317
+    },
+    {
+      "type": "edit",
+      "id": "13665b55c8368c74",
+      "item": {
+        "type": "paragraph",
+        "id": "13665b55c8368c74",
+        "text": "The find_employee_id has become rather complex in our implementation. We are careful to read and merge more authoritative sources first and then use a variety of heuristics to match other sources to the identities already found. We r "
+      },
+      "date": 1508437209532
+    },
+    {
+      "type": "edit",
+      "id": "13665b55c8368c74",
+      "item": {
+        "type": "paragraph",
+        "id": "13665b55c8368c74",
+        "text": "The find_employee_id has become rather complex in our implementation. We are careful to read and merge more authoritative sources first and then use a variety of heuristics to match other sources to the identities already found. We record in the database what heuristics worked including no_match_found when all fail. The create or retrieve logic of the node helper then makes a node that doesn't relate well but can be further explored with queries to understand better what has gone wrong."
+      },
+      "date": 1508437354644
+    },
+    {
+      "type": "edit",
+      "id": "13665b55c8368c74",
+      "item": {
+        "type": "paragraph",
+        "id": "13665b55c8368c74",
+        "text": "The find_employee_id has become rather complex in our implementation. We are careful to read and merge more authoritative sources first and then use a variety of heuristics to match other sources to the identities already found."
+      },
+      "date": 1508437365126
+    },
+    {
+      "type": "add",
+      "id": "7e3d446dc3e417ee",
+      "item": {
+        "type": "paragraph",
+        "id": "7e3d446dc3e417ee",
+        "text": "We record in the database what heuristics worked including no_match_found when all fail. The create or retrieve logic of the node helper then makes a node that doesn't relate well but can be further explored with queries to understand better what has gone wrong."
+      },
+      "after": "13665b55c8368c74",
+      "date": 1508437366214
+    },
+    {
+      "type": "fork",
+      "site": "ddd.ward.wiki.org",
+      "date": 1627665509796
+    }
+  ]
+}

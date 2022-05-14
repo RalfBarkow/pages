@@ -1,0 +1,190 @@
+{
+  "title": "Pharo, GraphET2 and Interactions",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "d2c9f21f5365be4e",
+      "text": "Smalltalk, [[Pharo, GraphET2 and Interactions]]. [https://rwilcox.tumblr.com/post/151888608489/smalltalk-pharo-graphet2-and-interactions post]"
+    },
+    {
+      "type": "markdown",
+      "id": "f75322aa4a9e13ed",
+      "text": "> [[Pharo]] gave me a unified environment to gather, save and analyze the data for my research. I created a simple graph and - since I stored data in an array - can use [[Smalltalk]] to further query the data. I could even run that data through the graph, or gather up the data into an aggregate object and write a custom [[GTInspetor]] presentation mode for it in a couple lines of code."
+    },
+    {
+      "type": "markdown",
+      "id": "beda791d0db41ec4",
+      "text": "## Step 1: Gathering data\n\nI’m interested in how the price of an individual stock moves hour to hour. Pharo’s up to the task, even though it’s a non-traditional choice.\n\nI found an API to retrieve a stock price, and wired it up with [[ZnClient]].\n\nI wired this up to run every hour, cron style, with a method like so:"
+    },
+    {
+      "type": "code",
+      "id": "d80b970b77355d07",
+      "text": "runChecker\n    | info delay |\n    [ [ true ]\n        whileTrue: [ delay := Delay forSeconds: 60 * 60.\n            info := CheckPrice new checkPrice.\n            PriceSnapshotStore addItem: (PriceSnapshot snapshotFromAPIResult: info).\n            delay wait ] ] fork"
+    },
+    {
+      "type": "markdown",
+      "id": "2df8f692b9a6cd85",
+      "text": "`fork` creates a new Smalltalk background process for this code to live in, we create an infinite loop which checks the api price then sleeps for an hour.\n\nPriceSnapshotStore is the simplest store you can have in Smalltalk - a slightly dangerous but should-be-ok singleton. Because this [[singleton]] (always) exists, its contents are automatically serialized. The singleton has only one instance variable: an array.\n\nIn this array I put PriceSnapshot objects. PriceSnapshot has the following instance variables:\n\n* price\n* date"
+    },
+    {
+      "type": "markdown",
+      "id": "edef63bbbdb63ede",
+      "text": "## Step 2: Inspecting the data\n\nAfter a week of running this on my home desktop, I had 150ish records built up. Now, I want to eyeball these records, to refine or invalidate my hypothesis. Easiest way to do that is to build a graph: we have points on time series data."
+    },
+    {
+      "type": "markdown",
+      "id": "be3334596e6f357b",
+      "text": "### Inspecting the data with GraphET2\n\nThere’s a couple graphing libraries in Smalltalk: the barely documented [[GraphET]] and the not documented [[GraphET2]].\n\nI wrote some code using GraphET, but couldn’t zoom in on my graph. I heard whispers about GraphET2, so downloaded it and tried it out. I ended up with the following code:\n\n"
+    },
+    {
+      "type": "code",
+      "id": "0491db30c6bf1b5a",
+      "text": "buildGraph: arrayOfStockSnapshots\n    \"Requires GraphET2: http://smalltalkhub.com/#!/~ObjectProfile/GraphET2/\"\n\n    | diagram |\n\n    diagram := GET2Line data: arrayOfStockSnapshots.\n    diagram\n        y: [ :snapshot | snapshot price asNumber ];\n        x: [ :snapshot | snapshot date asSeconds ];\n        dotColor: Color red;\n        dotSize: 4;  \" make the dots obvious, so can click on them\"\n        color: Color blue.\n    diagram xAxis\n        formatInteger;\n        title: 'Date (Relative)'.\n    diagram yAxis title: 'Price'.\n\n    \"set up the interactions. GraphET2 lets us set up a tooltip / popup style\n     interaction very easily... and a drill-in-on-click interaction too\"\n\n    diagram interaction\n        popupText: [ :snapshot | snapshot printSnapshot ];\n        on: TRMouseClick\n            do: [ :evt | GTInspector inspect: evt element model ].\n    diagram open.\n    diagram"
+    },
+    {
+      "type": "paragraph",
+      "id": "010d47409cf66568",
+      "text": "GraphET2 gave me zoomablitiy, drawability, and I could export my graph to a couple-three formats (HTML, PDF, SVG).\n\nGraphET2 also renders has scatterplots, bar charts, and union bar charts. The methods for all these charts are close-to-identical: I was able to flip out my line chart for a scatterplot my changing one line of code. (Line chart showed my data better).\n\nSomething that took a bit of work was the interactions. I wanted to be able to click on a point in my GET2Line chart and examine the underlaying snapshot object closer. Took some experimentation and reasonably hard digging, but I did get it to work. Click opens the GTInspector on the snapshot object.\n\nThe GTInspector is pretty awesome, although I’m not using it for anything super special in this code. Learn more about the GTInspector. [http://gtoolkit.org/#playinspector page]"
+    },
+    {
+      "type": "markdown",
+      "id": "904f0ad08564cf8d",
+      "text": "### UPDATE: Alternate: Inspecting the data with Roassal2\n\nIt was suggested I try out Roassal2, part of the Agile Visualization / Moose package for Pharo.\n\nRoassal 2 is documented (Part II.6 in the Agile Visualization Book.\n\nIt also has many examples on the web, on every graph type imaginable plus bigger picture stuff like, “how do I build a calendar”, or, “show me how to build a UML diagram”. (Roassal2 examples)[http://objectprofile.com/examples/] (As of this writing, Oct 2016, best viewed in Chrome).\n\nMy Roassal code is very very similar to my GraphET2 code\n\n"
+    },
+    {
+      "type": "code",
+      "id": "8750e2e33bdf9e6d",
+      "text": "buildGraph: arrayOfStockSnapshots\n    \"Requires Roassal: http://agilevisualization.com/\"\n\n    | grapher data first graphView |\n    first := arrayOfStockSnapshots at: 1.\n\n    grapher := RTGrapher new.\n    data := RTDataSet new.\n    data connectColor: Color red.\n    data points: arrayOfStockSnapshots.\n    data x: [ :snapshot | snapshot date asSeconds - first date asSeconds ].\n    data y: [ :snapshot | snapshot price asNumber ].\n    data interaction popupText: [ :attr | attr value printSnapshot ].\n    data interaction\n        when: TRMouseClick\n        do: [ :evt | GTInspector inspect: evt shape element model value ].\n    grapher add: data.\n    grapher build.\n    graphView := grapher view.\n    graphView\n        setDefaultMenu;   \"gives us the zoom / export menu\"\n        openInWindowSized: 800 @ 600\n"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Pharo, GraphET2 and Interactions",
+        "story": []
+      },
+      "date": 1651392000326
+    },
+    {
+      "id": "8750e2e33bdf9e6d",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "8750e2e33bdf9e6d",
+        "text": "buildGraph: arrayOfStockSnapshots\n    \"Requires Roassal: http://agilevisualization.com/\"\n\n    | grapher data first graphView |\n    first := arrayOfStockSnapshots at: 1.\n\n    grapher := RTGrapher new.\n    data := RTDataSet new.\n    data connectColor: Color red.\n    data points: arrayOfStockSnapshots.\n    data x: [ :snapshot | snapshot date asSeconds - first date asSeconds ].\n    data y: [ :snapshot | snapshot price asNumber ].\n    data interaction popupText: [ :attr | attr value printSnapshot ].\n    data interaction\n        when: TRMouseClick\n        do: [ :evt | GTInspector inspect: evt shape element model value ].\n    grapher add: data.\n    grapher build.\n    graphView := grapher view.\n    graphView\n        setDefaultMenu;   \"gives us the zoom / export menu\"\n        openInWindowSized: 800 @ 600\n"
+      },
+      "date": 1651392038071
+    },
+    {
+      "id": "904f0ad08564cf8d",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "904f0ad08564cf8d",
+        "text": "### UPDATE: Alternate: Inspecting the data with Roassal2\n\nIt was suggested I try out Roassal2, part of the Agile Visualization / Moose package for Pharo.\n\nRoassal 2 is documented (Part II.6 in the Agile Visualization Book.\n\nIt also has many examples on the web, on every graph type imaginable plus bigger picture stuff like, “how do I build a calendar”, or, “show me how to build a UML diagram”. (Roassal2 examples)[http://objectprofile.com/examples/] (As of this writing, Oct 2016, best viewed in Chrome).\n\nMy Roassal code is very very similar to my GraphET2 code\n\n"
+      },
+      "date": 1651392044794
+    },
+    {
+      "id": "010d47409cf66568",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "010d47409cf66568",
+        "text": "GraphET2 gave me zoomablitiy, drawability, and I could export my graph to a couple-three formats (HTML, PDF, SVG).\n\nGraphET2 also renders has scatterplots, bar charts, and union bar charts. The methods for all these charts are close-to-identical: I was able to flip out my line chart for a scatterplot my changing one line of code. (Line chart showed my data better).\n\nSomething that took a bit of work was the interactions. I wanted to be able to click on a point in my GET2Line chart and examine the underlaying snapshot object closer. Took some experimentation and reasonably hard digging, but I did get it to work. Click opens the GTInspector on the snapshot object.\n\nThe GTInspector is pretty awesome, although I’m not using it for anything super special in this code. Learn more about the GTInspector. [http://gtoolkit.org/#playinspector page]"
+      },
+      "date": 1651392055820
+    },
+    {
+      "id": "0491db30c6bf1b5a",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "0491db30c6bf1b5a",
+        "text": "buildGraph: arrayOfStockSnapshots\n    \"Requires GraphET2: http://smalltalkhub.com/#!/~ObjectProfile/GraphET2/\"\n\n    | diagram |\n\n    diagram := GET2Line data: arrayOfStockSnapshots.\n    diagram\n        y: [ :snapshot | snapshot price asNumber ];\n        x: [ :snapshot | snapshot date asSeconds ];\n        dotColor: Color red;\n        dotSize: 4;  \" make the dots obvious, so can click on them\"\n        color: Color blue.\n    diagram xAxis\n        formatInteger;\n        title: 'Date (Relative)'.\n    diagram yAxis title: 'Price'.\n\n    \"set up the interactions. GraphET2 lets us set up a tooltip / popup style\n     interaction very easily... and a drill-in-on-click interaction too\"\n\n    diagram interaction\n        popupText: [ :snapshot | snapshot printSnapshot ];\n        on: TRMouseClick\n            do: [ :evt | GTInspector inspect: evt element model ].\n    diagram open.\n    diagram"
+      },
+      "date": 1651392064566
+    },
+    {
+      "id": "be3334596e6f357b",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "be3334596e6f357b",
+        "text": "### Inspecting the data with GraphET2\n\nThere’s a couple graphing libraries in Smalltalk: the barely documented [[GraphET]] and the not documented [[GraphET2]].\n\nI wrote some code using GraphET, but couldn’t zoom in on my graph. I heard whispers about GraphET2, so downloaded it and tried it out. I ended up with the following code:\n\n"
+      },
+      "date": 1651392071589
+    },
+    {
+      "id": "edef63bbbdb63ede",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "edef63bbbdb63ede",
+        "text": "## Step 2: Inspecting the data\n\nAfter a week of running this on my home desktop, I had 150ish records built up. Now, I want to eyeball these records, to refine or invalidate my hypothesis. Easiest way to do that is to build a graph: we have points on time series data."
+      },
+      "date": 1651392076061
+    },
+    {
+      "id": "2df8f692b9a6cd85",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "2df8f692b9a6cd85",
+        "text": "fork creates a new Smalltalk background process for this code to live in, we create an infinite loop which checks the api price then sleeps for an hour.\n\nPriceSnapshotStore is the simplest store you can have in Smalltalk - a slightly dangerous but should-be-ok singleton. Because this [[singleton]] (always) exists, its contents are automatically serialized. The singleton has only one instance variable: an array.\n\nIn this array I put PriceSnapshot objects. PriceSnapshot has the following instance variables:\n\n* price\n* date"
+      },
+      "date": 1651392079596
+    },
+    {
+      "id": "d80b970b77355d07",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "d80b970b77355d07",
+        "text": "runChecker\n    | info delay |\n    [ [ true ]\n        whileTrue: [ delay := Delay forSeconds: 60 * 60.\n            info := CheckPrice new checkPrice.\n            PriceSnapshotStore addItem: (PriceSnapshot snapshotFromAPIResult: info).\n            delay wait ] ] fork"
+      },
+      "date": 1651392087995
+    },
+    {
+      "id": "beda791d0db41ec4",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "beda791d0db41ec4",
+        "text": "## Step 1: Gathering data\n\nI’m interested in how the price of an individual stock moves hour to hour. Pharo’s up to the task, even though it’s a non-traditional choice.\n\nI found an API to retrieve a stock price, and wired it up with [[ZnClient]].\n\nI wired this up to run every hour, cron style, with a method like so:"
+      },
+      "date": 1651392094019
+    },
+    {
+      "id": "f75322aa4a9e13ed",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "f75322aa4a9e13ed",
+        "text": "> [[Pharo]] gave me a unified environment to gather, save and analyze the data for my research. I created a simple graph and - since I stored data in an array - can use [[Smalltalk]] to further query the data. I could even run that data through the graph, or gather up the data into an aggregate object and write a custom [[GTInspetor]] presentation mode for it in a couple lines of code."
+      },
+      "date": 1651392100008
+    },
+    {
+      "id": "d2c9f21f5365be4e",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "d2c9f21f5365be4e",
+        "text": "Smalltalk, [[Pharo, GraphET2 and Interactions]]. [https://rwilcox.tumblr.com/post/151888608489/smalltalk-pharo-graphet2-and-interactions post]"
+      },
+      "date": 1651392103725
+    },
+    {
+      "type": "edit",
+      "id": "2df8f692b9a6cd85",
+      "item": {
+        "type": "markdown",
+        "id": "2df8f692b9a6cd85",
+        "text": "`fork` creates a new Smalltalk background process for this code to live in, we create an infinite loop which checks the api price then sleeps for an hour.\n\nPriceSnapshotStore is the simplest store you can have in Smalltalk - a slightly dangerous but should-be-ok singleton. Because this [[singleton]] (always) exists, its contents are automatically serialized. The singleton has only one instance variable: an array.\n\nIn this array I put PriceSnapshot objects. PriceSnapshot has the following instance variables:\n\n* price\n* date"
+      },
+      "date": 1651392144610
+    }
+  ]
+}

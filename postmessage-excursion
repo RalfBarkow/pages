@@ -1,0 +1,983 @@
+{
+  "title": "postMessage Excursion",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "db950f0f7dcbd55d",
+      "text": "We collect here a few javascript libraries which build on top of the postMessage API to enable cross-origin communication. Be begin this journey with experiments to enable wiki integrations via the Frame Plugin. What we found along the way invite other design questions."
+    },
+    {
+      "type": "paragraph",
+      "id": "41746c9e3ea0d74a",
+      "text": "See [[About Frame Integrations]] and [[Embrace Event Sourcing]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "2b0c83a502ca92a2",
+      "text": "We began by comparing postmate and penpal whose names are largely synonymous and whose APIs are quite similar."
+    },
+    {
+      "type": "paragraph",
+      "id": "8ea39bda86fc7c0f",
+      "text": "We will show penpal's examples. [https://github.com/Aaronius/penpal github] [https://unpkg.com/browse/penpal@5.3.0/dist/ unpkg]"
+    },
+    {
+      "type": "paragraph",
+      "id": "71856fc31113f89b",
+      "text": "Compare postmate [https://github.com/dollarshaveclub/postmate github] [https://unpkg.com/browse/postmate@1.5.2/build/ unpkg]"
+    },
+    {
+      "type": "paragraph",
+      "id": "979065e898796663",
+      "text": "In both the parent window and the child frame, there are initial calls to create a connection, for postmate, or a handshake, for penpal. Each can describe a collection of methods offered to the other side of the communication. Not shown in our example below, the parent connection offered addition to the child, and the child connection offered multiplication and division to the parent. Both libraries use promises to manage the asynchronous communication."
+    },
+    {
+      "type": "code",
+      "id": "a7e97525b5b0bb68",
+      "text": "# Parent page\nlet child = await connectionToChild.promise\nchild.multiply(2, 6).then(console.log);\nchild.divide(12, 4).then(console.log);\n"
+    },
+    {
+      "type": "code",
+      "id": "dd7c144f2832693a",
+      "text": "# Child frame \nlet parent = await connectionToParent.promise\nparent.add(3, 1).then(console.log)"
+    },
+    {
+      "type": "paragraph",
+      "id": "42b46c9ae99756dc",
+      "text": "Self Addressed continues the mail and letter metaphor for wrapping the postMessage api. [https://github.com/bahmutov/self-addressed github] [https://unpkg.com/browse/self-addressed@0.3.0/dist/ unpkg]"
+    },
+    {
+      "type": "paragraph",
+      "id": "24f3473cb2b4743d",
+      "text": "Example of self addressed paraphrased from [https://github.com/bahmutov/self-addressed#typical-workflow workflow]"
+    },
+    {
+      "type": "code",
+      "id": "b4225850ed189821",
+      "text": "# Parent page\nfunction mailman(address, msg) {\n  address.postMessage(msg, '*');\n}\nwindow.onmessage = function (event) {\n  var letter = selfAddressed(event.data);\n  // if letter === undefined => not an envelope,\n  //   handle differently!\n  var returnAddress = event.source;\n  // places the letter into the same envelope\n  selfAddressed(event.data, 'bar'); \n  selfAddressed(mailman, returnAddress, event.data);\n};"
+    },
+    {
+      "type": "code",
+      "id": "fd2d339dbe4f6337",
+      "text": "# Child frame\nfunction mailman(address, msg) {\n  address.postMessage(msg, '*');\n}\nwindow.onmessage = function (event) {\n  selfAddressed(event.data);\n};\nselfAddressed(mailman, parent, 'foo')\n  .then(console.log);"
+    },
+    {
+      "type": "paragraph",
+      "id": "efe31f2973f03160",
+      "text": "At another extreme, endpoint.js. Endpoint.js enables modules within a web application to discover and use each other, whether that be on the same web page, other browser windows and tabs, iframes, servers, web workers and processes in a reactive way by providing discovery, execution and streaming interfaces. [https://github.com/ngageoint/endpoint.js github] [https://unpkg.com/browse/endpointjs@0.4.1/dist/ unpkg]"
+    },
+    {
+      "type": "paragraph",
+      "id": "44a5aee2020b72f7",
+      "text": "Endpoint.js aims to empower a plugin model for constructing applications. [https://github.com/ngageoint/endpoint.js/blob/master/docs/integration.md doc]"
+    },
+    {
+      "type": "image",
+      "id": "76aeef08cc6b6842",
+      "text": "endpoint.js application architecture diagram [https://github.com/ngageoint/endpoint.js/blob/master/docs/images/longterm.png source]",
+      "url": "data:image/jpeg;base64,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",
+      "caption": "Uploaded image"
+    },
+    {
+      "type": "paragraph",
+      "id": "a5057858a5e68597",
+      "text": "Future webapps will be composed of data spouts, sinks, and streaming enrichment engines on the server side. This architecture will feed into a client-side application comprised of published APIs. These APIs cover data movement to simple UI features, such as a Grid API (similar to bootstrap's grid capability for displaying UI elements), a Window API to access events or perform global actions, and a sidebar API to manipulate visible components. A plugin manager allows the user to compose their application and view by enabling plugins, which live in hidden iframes and/or web workers. These plugins communicate with the main client window through an OAuth-like permissions framework created specifically for inter-browser communication between cross-origin websites."
+    },
+    {
+      "type": "paragraph",
+      "id": "3ea082c215a49603",
+      "text": "N.B. Can't get the demos of endpoint.js running. The code was basically abandoned at the end of 2016. At this point useful only as inspiration."
+    },
+    {
+      "type": "pagefold",
+      "id": "9817d78bd0705519",
+      "text": "wiki mechanism"
+    },
+    {
+      "type": "paragraph",
+      "id": "4a4e164b2b8f40a6",
+      "text": "We've included some links to unpkg above. If we choose to use one of these libraries, rather than importing all the dependencies into our project, we could either use unpkg as a CDN, or vendor the compiled javascript libraries."
+    },
+    {
+      "type": "pagefold",
+      "id": "e08af660bda54fc8",
+      "text": "."
+    },
+    {
+      "type": "paragraph",
+      "id": "bf3ec81e52eb47f4",
+      "text": "The author of selfAddressed library, Dr Gleb Bahmutov, looked familiar, but turned out to be someone different than we thought. Nevertheless, sampling some of his vast collection of javascript libraries reminds us of previous excursions into events, functional, and reactive programming. [https://glebbahmutov.com/ site]"
+    },
+    {
+      "type": "paragraph",
+      "id": "abf0a178a6e1b4ee",
+      "text": "Our first live cross-origin experiment with selfAddressed is over in glich.com: [https://lilac-wind-worm.glitch.me/ glitch]"
+    },
+    {
+      "type": "frame",
+      "id": "de28973a31ad87b9",
+      "text": "https://lilac-wind-worm.glitch.me/self-addressed.html\nHEIGHT 270"
+    },
+    {
+      "type": "paragraph",
+      "id": "41bb9f7344d8a157",
+      "text": "Instant Web Application presents bottle-service, a tool using a Service Worker to cache rendered pages to eliminate a jumpy UX common to several single-page app frameworks. \"Like server-side rendering in your browser.\" Especially interested to look more closely at bottle-service for offline wiki usecases. [https://glebbahmutov.com/blog/instant-web-application/ article] [https://github.com/bahmutov/bottle-service github]"
+    },
+    {
+      "type": "paragraph",
+      "id": "9336eac8158bfad2",
+      "text": "Journey from procedural to reactive JavaScript with stops [https://glebbahmutov.com/blog/journey-from-procedural-to-reactive-javascript-with-stops/ article]"
+    },
+    {
+      "type": "paragraph",
+      "id": "55f304bb5c734e0f",
+      "text": "Compare André Staltz' Intro to Reactive Programming You've Been Missing: [https://gist.github.com/staltz/868e7e9bc2a7b8c1f754 gist]"
+    },
+    {
+      "type": "reference",
+      "id": "e28fb0ea4f2174d2",
+      "site": "wiki.dbbs.co",
+      "slug": "async-code-in-a-nutshell",
+      "title": "Async Code In A Nutshell",
+      "text": "A fairly succinct journey through the many ways javascript developers have learned to cope with asynchrony. Callbacks vs Promises vs RxJS vs async/await [https://www.academind.com/learn/javascript/callbacks-vs-promises-vs-rxjs-vs-async-awaits/ link]"
+    },
+    {
+      "type": "frame",
+      "id": "044dba73e6cf5804",
+      "text": "https://www.npmtrends.com/jschannel-vs-penpal-vs-postmate\ncompare popularity of penpal, postmate, and jschannel\nHEIGHT 1000"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "postMessage Excursion",
+        "story": []
+      },
+      "date": 1604851703901
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "db950f0f7dcbd55d"
+      },
+      "id": "db950f0f7dcbd55d",
+      "type": "add",
+      "date": 1604851707775
+    },
+    {
+      "type": "edit",
+      "id": "db950f0f7dcbd55d",
+      "item": {
+        "type": "paragraph",
+        "id": "db950f0f7dcbd55d",
+        "text": "We collect here a few javascript libraries which build on top of the postMessage API to enable cross-origin communication. Be begin this journey with experiments to enable wiki integrations via the Frame Plugin. What we found along the way invite other design questions."
+      },
+      "date": 1604852002265
+    },
+    {
+      "type": "add",
+      "id": "41746c9e3ea0d74a",
+      "item": {
+        "type": "paragraph",
+        "id": "41746c9e3ea0d74a",
+        "text": "See [[About Frame Integrations]] and [[Embrace Event Sourcing]]"
+      },
+      "after": "db950f0f7dcbd55d",
+      "date": 1604852013518
+    },
+    {
+      "type": "add",
+      "id": "2b0c83a502ca92a2",
+      "item": {
+        "type": "paragraph",
+        "id": "2b0c83a502ca92a2",
+        "text": "We began by comparing postmate and penpal whose names and APIs are largely synonymous. [ postmate] and [ penpal]"
+      },
+      "after": "41746c9e3ea0d74a",
+      "date": 1604852963187
+    },
+    {
+      "type": "edit",
+      "id": "2b0c83a502ca92a2",
+      "item": {
+        "type": "paragraph",
+        "id": "2b0c83a502ca92a2",
+        "text": "We began by comparing postmate and penpal whose names and APIs are largely synonymous. [https://github.com/dollarshaveclub/postmate postmate] and [ penpal]"
+      },
+      "date": 1604852986034
+    },
+    {
+      "type": "edit",
+      "id": "2b0c83a502ca92a2",
+      "item": {
+        "type": "paragraph",
+        "id": "2b0c83a502ca92a2",
+        "text": "We began by comparing postmate and penpal whose names and APIs are largely synonymous. [https://github.com/dollarshaveclub/postmate postmate] and [https://github.com/Aaronius/penpal penpal]"
+      },
+      "date": 1604852998914
+    },
+    {
+      "type": "edit",
+      "id": "2b0c83a502ca92a2",
+      "item": {
+        "type": "paragraph",
+        "id": "2b0c83a502ca92a2",
+        "text": "We began by comparing postmate and penpal whose names are largely synonymous and whose APIs are quite similar. [https://github.com/dollarshaveclub/postmate postmate] and [https://github.com/Aaronius/penpal penpal]"
+      },
+      "date": 1604853437666
+    },
+    {
+      "type": "edit",
+      "id": "2b0c83a502ca92a2",
+      "item": {
+        "type": "paragraph",
+        "id": "2b0c83a502ca92a2",
+        "text": "We began by comparing postmate and penpal whose names are largely synonymous and whose APIs are quite similar. We will show penpal's examples. [https://github.com/dollarshaveclub/postmate postmate] and [https://github.com/Aaronius/penpal penpal]"
+      },
+      "date": 1604853462529
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a7e97525b5b0bb68"
+      },
+      "id": "a7e97525b5b0bb68",
+      "type": "add",
+      "after": "2b0c83a502ca92a2",
+      "date": 1604853582449
+    },
+    {
+      "type": "edit",
+      "id": "a7e97525b5b0bb68",
+      "item": {
+        "type": "code",
+        "id": "a7e97525b5b0bb68",
+        "text": "let child = await connectionToParent.promise\nchild.multiply(2, 6).then(console.log);\nchild.divide(12, 4).then(console.log);\n"
+      },
+      "date": 1604853680294
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dd7c144f2832693a"
+      },
+      "id": "dd7c144f2832693a",
+      "type": "add",
+      "after": "a7e97525b5b0bb68",
+      "date": 1604853699076
+    },
+    {
+      "type": "edit",
+      "id": "dd7c144f2832693a",
+      "item": {
+        "type": "code",
+        "id": "dd7c144f2832693a",
+        "text": "let parent = await connectionToParent.promise\nparent.add(3, 1).then(console.log)"
+      },
+      "date": 1604853737865
+    },
+    {
+      "type": "edit",
+      "id": "a7e97525b5b0bb68",
+      "item": {
+        "type": "code",
+        "id": "a7e97525b5b0bb68",
+        "text": "let child = await connectionToChild.promise\nchild.multiply(2, 6).then(console.log);\nchild.divide(12, 4).then(console.log);\n"
+      },
+      "date": 1604853743925
+    },
+    {
+      "type": "add",
+      "id": "979065e898796663",
+      "item": {
+        "type": "paragraph",
+        "id": "979065e898796663",
+        "text": "In both the parent window and the child frame, there are initial calls to create a connection, for postmate, or a handshake, for penpal. Each can describe a collection of methods offered to the other side of the communication. Not shown in our example below, the parent connection offered addition to the child, and the child connection offered multiplication and division to the parent. Both libraries use promises to manage the asynchronous communication."
+      },
+      "after": "2b0c83a502ca92a2",
+      "date": 1604854116262
+    },
+    {
+      "type": "edit",
+      "id": "2b0c83a502ca92a2",
+      "item": {
+        "type": "paragraph",
+        "id": "2b0c83a502ca92a2",
+        "text": "We began by comparing postmate and penpal whose names are largely synonymous and whose APIs are quite similar."
+      },
+      "date": 1604855608075
+    },
+    {
+      "type": "add",
+      "id": "8ea39bda86fc7c0f",
+      "item": {
+        "type": "paragraph",
+        "id": "8ea39bda86fc7c0f",
+        "text": "We will show penpal's examples. [https://github.com/Aaronius/penpal github] [https://unpkg.com/browse/penpal@5.3.0/dist/ unpkg]"
+      },
+      "after": "2b0c83a502ca92a2",
+      "date": 1604855666965
+    },
+    {
+      "type": "add",
+      "id": "71856fc31113f89b",
+      "item": {
+        "type": "paragraph",
+        "id": "71856fc31113f89b",
+        "text": "Compare postmate [https://github.com/dollarshaveclub/postmate github] [ unpkg]"
+      },
+      "after": "8ea39bda86fc7c0f",
+      "date": 1604855696414
+    },
+    {
+      "type": "edit",
+      "id": "71856fc31113f89b",
+      "item": {
+        "type": "paragraph",
+        "id": "71856fc31113f89b",
+        "text": "Compare postmate [https://github.com/dollarshaveclub/postmate github] [https://unpkg.com/browse/postmate@1.5.2/build/ unpkg]"
+      },
+      "date": 1604855720024
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9817d78bd0705519"
+      },
+      "id": "9817d78bd0705519",
+      "type": "add",
+      "after": "dd7c144f2832693a",
+      "date": 1604857066275
+    },
+    {
+      "type": "edit",
+      "id": "9817d78bd0705519",
+      "item": {
+        "type": "pagefold",
+        "id": "9817d78bd0705519",
+        "text": "wiki mechanism"
+      },
+      "date": 1604857080391
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4a4e164b2b8f40a6"
+      },
+      "id": "4a4e164b2b8f40a6",
+      "type": "add",
+      "after": "9817d78bd0705519",
+      "date": 1604857082167
+    },
+    {
+      "type": "edit",
+      "id": "4a4e164b2b8f40a6",
+      "item": {
+        "type": "paragraph",
+        "id": "4a4e164b2b8f40a6",
+        "text": "We've included some links to unpkg above. If we choose to use one of these libraries, rather than importing all the dependencies into our project, we could either use unpkg as a CDN, "
+      },
+      "date": 1604857173299
+    },
+    {
+      "type": "edit",
+      "id": "4a4e164b2b8f40a6",
+      "item": {
+        "type": "paragraph",
+        "id": "4a4e164b2b8f40a6",
+        "text": "We've included some links to unpkg above. If we choose to use one of these libraries, rather than importing all the dependencies into our project, we could either use unpkg as a CDN, or vendor the compiled javascript libraries."
+      },
+      "date": 1604857478263
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "42b46c9ae99756dc"
+      },
+      "id": "42b46c9ae99756dc",
+      "type": "add",
+      "after": "4a4e164b2b8f40a6",
+      "date": 1604859390741
+    },
+    {
+      "id": "42b46c9ae99756dc",
+      "type": "move",
+      "order": [
+        "db950f0f7dcbd55d",
+        "41746c9e3ea0d74a",
+        "2b0c83a502ca92a2",
+        "8ea39bda86fc7c0f",
+        "71856fc31113f89b",
+        "979065e898796663",
+        "a7e97525b5b0bb68",
+        "dd7c144f2832693a",
+        "42b46c9ae99756dc",
+        "9817d78bd0705519",
+        "4a4e164b2b8f40a6"
+      ],
+      "date": 1604859395050
+    },
+    {
+      "type": "edit",
+      "id": "42b46c9ae99756dc",
+      "item": {
+        "type": "paragraph",
+        "id": "42b46c9ae99756dc",
+        "text": "At another extreme, endpoint.js looks to be a general purpose event bus for coordinating between web components. [https://github.com/ngageoint/endpoint.js github]"
+      },
+      "date": 1604859492711
+    },
+    {
+      "type": "edit",
+      "id": "42b46c9ae99756dc",
+      "item": {
+        "type": "paragraph",
+        "id": "42b46c9ae99756dc",
+        "text": "At another extreme, endpoint.js. Endpoint.js enables modules within a web application to discover and use each other, whether that be on the same web page, other browser windows and tabs, iframes, servers, web workers and processes in a reactive way by providing discovery, execution and streaming interfaces. [https://github.com/ngageoint/endpoint.js github]"
+      },
+      "date": 1604870795797
+    },
+    {
+      "type": "edit",
+      "id": "42b46c9ae99756dc",
+      "item": {
+        "type": "paragraph",
+        "id": "42b46c9ae99756dc",
+        "text": "At another extreme, endpoint.js. Endpoint.js enables modules within a web application to discover and use each other, whether that be on the same web page, other browser windows and tabs, iframes, servers, web workers and processes in a reactive way by providing discovery, execution and streaming interfaces. [https://github.com/ngageoint/endpoint.js github] "
+      },
+      "date": 1604872289238
+    },
+    {
+      "type": "add",
+      "id": "44a5aee2020b72f7",
+      "item": {
+        "type": "paragraph",
+        "id": "44a5aee2020b72f7",
+        "text": "Endpoint.js aims to empower a plugin model for constructing applications. [https://github.com/ngageoint/endpoint.js/blob/master/docs/integration.md doc]"
+      },
+      "after": "42b46c9ae99756dc",
+      "date": 1604872319664
+    },
+    {
+      "type": "edit",
+      "id": "42b46c9ae99756dc",
+      "item": {
+        "type": "paragraph",
+        "id": "42b46c9ae99756dc",
+        "text": "At another extreme, endpoint.js. Endpoint.js enables modules within a web application to discover and use each other, whether that be on the same web page, other browser windows and tabs, iframes, servers, web workers and processes in a reactive way by providing discovery, execution and streaming interfaces. [https://github.com/ngageoint/endpoint.js github] [https://unpkg.com/browse/endpointjs@0.4.1/dist/ unpkg]"
+      },
+      "date": 1604872369675
+    },
+    {
+      "type": "edit",
+      "id": "42b46c9ae99756dc",
+      "item": {
+        "type": "paragraph",
+        "id": "42b46c9ae99756dc",
+        "text": "https://github.com/bahmutov/self-addressed"
+      },
+      "date": 1604872421342
+    },
+    {
+      "type": "add",
+      "id": "fd2d339dbe4f6337",
+      "item": {
+        "type": "paragraph",
+        "id": "fd2d339dbe4f6337",
+        "text": "At another extreme, endpoint.js. Endpoint.js enables modules within a web application to discover and use each other, whether that be on the same web page, other browser windows and tabs, iframes, servers, web workers and processes in a reactive way by providing discovery, execution and streaming interfaces. [https://github.com/ngageoint/endpoint.js github] [https://unpkg.com/browse/endpointjs@0.4.1/dist/ unpkg]"
+      },
+      "after": "42b46c9ae99756dc",
+      "date": 1604872422357
+    },
+    {
+      "type": "edit",
+      "id": "42b46c9ae99756dc",
+      "item": {
+        "type": "paragraph",
+        "id": "42b46c9ae99756dc",
+        "text": "Self Addressed continues the mail and letter metaphor for wrapping the postMessage api. [https://github.com/bahmutov/self-addressed github] [ unpkg]"
+      },
+      "date": 1604872462882
+    },
+    {
+      "type": "edit",
+      "id": "42b46c9ae99756dc",
+      "item": {
+        "type": "paragraph",
+        "id": "42b46c9ae99756dc",
+        "text": "Self Addressed continues the mail and letter metaphor for wrapping the postMessage api. [https://github.com/bahmutov/self-addressed github] [https://unpkg.com/browse/self-addressed@0.3.0/dist/ unpkg]"
+      },
+      "date": 1604872481934
+    },
+    {
+      "type": "add",
+      "id": "24f3473cb2b4743d",
+      "item": {
+        "type": "paragraph",
+        "id": "24f3473cb2b4743d",
+        "text": "Example of self addressed paraphrased from [https://github.com/bahmutov/self-addressed#typical-workflow workflow]"
+      },
+      "after": "42b46c9ae99756dc",
+      "date": 1604872743645
+    },
+    {
+      "type": "add",
+      "id": "b4225850ed189821",
+      "item": {
+        "type": "factory",
+        "id": "b4225850ed189821",
+        "text": "function mailman(address, msg) {\n  address.postMessage(msg, '*');\n}\nwindow.onmessage = function (event) {\n  var letter = selfAddressed(event.data);\n  // if letter === undefined => not an envelope, handle differently!\n  var returnAddress = event.source;\n  selfAddressed(event.data, 'bar'); // places the letter into the same envelope\n  selfAddressed(mailman, returnAddress, event.data);\n};"
+      },
+      "after": "24f3473cb2b4743d",
+      "date": 1604872793045
+    },
+    {
+      "type": "edit",
+      "id": "b4225850ed189821",
+      "item": {
+        "type": "code",
+        "id": "b4225850ed189821",
+        "text": "function mailman(address, msg) {\n  address.postMessage(msg, '*');\n}\nwindow.onmessage = function (event) {\n  var letter = selfAddressed(event.data);\n  // if letter === undefined => not an envelope,\n  //   handle differently!\n  var returnAddress = event.source;\n  // places the letter into the same envelope\n  selfAddressed(event.data, 'bar'); \n  selfAddressed(mailman, returnAddress, event.data);\n};"
+      },
+      "date": 1604872830705
+    },
+    {
+      "type": "edit",
+      "id": "b4225850ed189821",
+      "item": {
+        "type": "code",
+        "id": "b4225850ed189821",
+        "text": "# Parent page\nfunction mailman(address, msg) {\n  address.postMessage(msg, '*');\n}\nwindow.onmessage = function (event) {\n  var letter = selfAddressed(event.data);\n  // if letter === undefined => not an envelope,\n  //   handle differently!\n  var returnAddress = event.source;\n  // places the letter into the same envelope\n  selfAddressed(event.data, 'bar'); \n  selfAddressed(mailman, returnAddress, event.data);\n};"
+      },
+      "date": 1604872853969
+    },
+    {
+      "type": "edit",
+      "id": "a7e97525b5b0bb68",
+      "item": {
+        "type": "code",
+        "id": "a7e97525b5b0bb68",
+        "text": "# Parent page\nlet child = await connectionToChild.promise\nchild.multiply(2, 6).then(console.log);\nchild.divide(12, 4).then(console.log);\n"
+      },
+      "date": 1604872862312
+    },
+    {
+      "type": "edit",
+      "id": "dd7c144f2832693a",
+      "item": {
+        "type": "code",
+        "id": "dd7c144f2832693a",
+        "text": "# Child frame \nlet parent = await connectionToParent.promise\nparent.add(3, 1).then(console.log)"
+      },
+      "date": 1604872871132
+    },
+    {
+      "type": "edit",
+      "id": "fd2d339dbe4f6337",
+      "item": {
+        "type": "paragraph",
+        "id": "fd2d339dbe4f6337",
+        "text": "function mailman(address, msg) {\n  address.postMessage(msg, '*');\n}\nwindow.onmessage = function (event) {\n  selfAddressed(event.data);\n};\nselfAddressed(mailman, parent, 'foo')\n  .then(function (response) {\n    console.log(response); // \"bar\"\n  });"
+      },
+      "date": 1604872893592
+    },
+    {
+      "type": "add",
+      "id": "efe31f2973f03160",
+      "item": {
+        "type": "paragraph",
+        "id": "efe31f2973f03160",
+        "text": "At another extreme, endpoint.js. Endpoint.js enables modules within a web application to discover and use each other, whether that be on the same web page, other browser windows and tabs, iframes, servers, web workers and processes in a reactive way by providing discovery, execution and streaming interfaces. [https://github.com/ngageoint/endpoint.js github] [https://unpkg.com/browse/endpointjs@0.4.1/dist/ unpkg]"
+      },
+      "after": "fd2d339dbe4f6337",
+      "date": 1604872894611
+    },
+    {
+      "type": "edit",
+      "id": "fd2d339dbe4f6337",
+      "item": {
+        "type": "code",
+        "id": "fd2d339dbe4f6337",
+        "text": "# Child frame\nfunction mailman(address, msg) {\n  address.postMessage(msg, '*');\n}\nwindow.onmessage = function (event) {\n  selfAddressed(event.data);\n};\nselfAddressed(mailman, parent, 'foo')\n  .then(console.log);"
+      },
+      "date": 1604872945395
+    },
+    {
+      "type": "add",
+      "id": "a5057858a5e68597",
+      "item": {
+        "type": "paragraph",
+        "id": "a5057858a5e68597",
+        "text": "Future webapps will be composed of data spouts, sinks, and streaming enrichment engines on the server side. This architecture will feed into a client-side application comprised of published APIs. These APIs cover data movement to simple UI features, such as a Grid API (similar to bootstrap's grid capability for displaying UI elements), a Window API to access events or perform global actions, and a sidebar API to manipulate visible components. A plugin manager allows the user to compose their application and view by enabling plugins, which live in hidden iframes and/or web workers. These plugins communicate with the main client window through an OAuth-like permissions framework created specifically for inter-browser communication between cross-origin websites."
+      },
+      "after": "44a5aee2020b72f7",
+      "date": 1604873634958
+    },
+    {
+      "type": "fork",
+      "date": 1604873760563
+    },
+    {
+      "type": "add",
+      "id": "76aeef08cc6b6842",
+      "item": {
+        "type": "paragraph",
+        "id": "76aeef08cc6b6842",
+        "text": "endpoint.js application architecture diagram [ source]"
+      },
+      "after": "a5057858a5e68597",
+      "date": 1604873809017
+    },
+    {
+      "type": "fork",
+      "date": 1604873844479
+    },
+    {
+      "type": "edit",
+      "id": "76aeef08cc6b6842",
+      "item": {
+        "type": "paragraph",
+        "id": "76aeef08cc6b6842",
+        "text": "endpoint.js application architecture diagram [https://github.com/ngageoint/endpoint.js/blob/master/docs/images/longterm.png source]"
+      },
+      "date": 1604873851693
+    },
+    {
+      "id": "76aeef08cc6b6842",
+      "type": "move",
+      "order": [
+        "db950f0f7dcbd55d",
+        "41746c9e3ea0d74a",
+        "2b0c83a502ca92a2",
+        "8ea39bda86fc7c0f",
+        "71856fc31113f89b",
+        "979065e898796663",
+        "a7e97525b5b0bb68",
+        "dd7c144f2832693a",
+        "42b46c9ae99756dc",
+        "24f3473cb2b4743d",
+        "b4225850ed189821",
+        "fd2d339dbe4f6337",
+        "efe31f2973f03160",
+        "44a5aee2020b72f7",
+        "76aeef08cc6b6842",
+        "a5057858a5e68597",
+        "9817d78bd0705519",
+        "4a4e164b2b8f40a6"
+      ],
+      "date": 1604873868296
+    },
+    {
+      "type": "edit",
+      "id": "76aeef08cc6b6842",
+      "item": {
+        "type": "image",
+        "id": "76aeef08cc6b6842",
+        "text": "endpoint.js application architecture diagram [https://github.com/ngageoint/endpoint.js/blob/master/docs/images/longterm.png source]",
+        "url": "data:image/jpeg;base64,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",
+        "caption": "Uploaded image"
+      },
+      "date": 1604873872909
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e08af660bda54fc8"
+      },
+      "id": "e08af660bda54fc8",
+      "type": "add",
+      "after": "4a4e164b2b8f40a6",
+      "date": 1604874928797
+    },
+    {
+      "type": "edit",
+      "id": "e08af660bda54fc8",
+      "item": {
+        "type": "pagefold",
+        "id": "e08af660bda54fc8",
+        "text": "."
+      },
+      "date": 1604874931997
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bf3ec81e52eb47f4"
+      },
+      "id": "bf3ec81e52eb47f4",
+      "type": "add",
+      "after": "e08af660bda54fc8",
+      "date": 1604874943404
+    },
+    {
+      "type": "edit",
+      "id": "bf3ec81e52eb47f4",
+      "item": {
+        "type": "paragraph",
+        "id": "bf3ec81e52eb47f4",
+        "text": "The author of selfAddressed library looked familiar, but turned out to be someone different than we thought. Nevertheless, sampling some of his vast collection of javascript libraries reminds us of previous excursions into events, functional and reactive programming."
+      },
+      "date": 1604875057147
+    },
+    {
+      "type": "edit",
+      "id": "bf3ec81e52eb47f4",
+      "item": {
+        "type": "paragraph",
+        "id": "bf3ec81e52eb47f4",
+        "text": "The author of selfAddressed library, Dr Gleb Bahmutov, looked familiar, but turned out to be someone different than we thought. Nevertheless, sampling some of his vast collection of javascript libraries reminds us of previous excursions into events, functional, and reactive programming. [https://glebbahmutov.com/ site]"
+      },
+      "date": 1604877022184
+    },
+    {
+      "type": "add",
+      "id": "41bb9f7344d8a157",
+      "item": {
+        "type": "paragraph",
+        "id": "41bb9f7344d8a157",
+        "text": "Instant Web Application presents bottle-service, a tool using a Service Worker to cache rendered pages to eliminate a jumpy UX common to several single-page app frameworks. \"Like server-side rendering in your browser.\" Especially interested to look more closely at bottle-service for offline wiki usecases. [https://glebbahmutov.com/blog/instant-web-application/ article]"
+      },
+      "after": "bf3ec81e52eb47f4",
+      "date": 1604877279729
+    },
+    {
+      "type": "edit",
+      "id": "41bb9f7344d8a157",
+      "item": {
+        "type": "paragraph",
+        "id": "41bb9f7344d8a157",
+        "text": "Instant Web Application presents bottle-service, a tool using a Service Worker to cache rendered pages to eliminate a jumpy UX common to several single-page app frameworks. \"Like server-side rendering in your browser.\" Especially interested to look more closely at bottle-service for offline wiki usecases. [https://glebbahmutov.com/blog/instant-web-application/ article] [https://github.com/bahmutov/bottle-service github]"
+      },
+      "date": 1604877359023
+    },
+    {
+      "type": "add",
+      "id": "9336eac8158bfad2",
+      "item": {
+        "type": "paragraph",
+        "id": "9336eac8158bfad2",
+        "text": "Journey from procedural to reactive JavaScript with stops [ article]"
+      },
+      "after": "41bb9f7344d8a157",
+      "date": 1604877405362
+    },
+    {
+      "type": "edit",
+      "id": "9336eac8158bfad2",
+      "item": {
+        "type": "paragraph",
+        "id": "9336eac8158bfad2",
+        "text": "Journey from procedural to reactive JavaScript with stops [https://glebbahmutov.com/blog/journey-from-procedural-to-reactive-javascript-with-stops/ article]"
+      },
+      "date": 1604877423979
+    },
+    {
+      "type": "add",
+      "id": "55f304bb5c734e0f",
+      "item": {
+        "type": "paragraph",
+        "id": "55f304bb5c734e0f",
+        "text": "André Staltz' Intro to Reactive Programming You've Been Missing: [https://gist.github.com/staltz/868e7e9bc2a7b8c1f754 gist]"
+      },
+      "after": "9336eac8158bfad2",
+      "date": 1604877517937
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e28fb0ea4f2174d2"
+      },
+      "id": "e28fb0ea4f2174d2",
+      "type": "add",
+      "after": "55f304bb5c734e0f",
+      "date": 1604877523313
+    },
+    {
+      "type": "edit",
+      "id": "e28fb0ea4f2174d2",
+      "item": {
+        "type": "reference",
+        "id": "e28fb0ea4f2174d2",
+        "site": "wiki.dbbs.co",
+        "slug": "async-code-in-a-nutshell",
+        "title": "Async Code In A Nutshell",
+        "text": "A fairly succinct journey through the many ways javascript developers have learned to cope with asynchrony. Callbacks vs Promises vs RxJS vs async/await [https://www.academind.com/learn/javascript/callbacks-vs-promises-vs-rxjs-vs-async-awaits/ link]"
+      },
+      "date": 1604877534862
+    },
+    {
+      "type": "edit",
+      "id": "55f304bb5c734e0f",
+      "item": {
+        "type": "paragraph",
+        "id": "55f304bb5c734e0f",
+        "text": "Compare André Staltz' Intro to Reactive Programming You've Been Missing: [https://gist.github.com/staltz/868e7e9bc2a7b8c1f754 gist]"
+      },
+      "date": 1604877550549
+    },
+    {
+      "type": "add",
+      "id": "3ea082c215a49603",
+      "item": {
+        "type": "paragraph",
+        "id": "3ea082c215a49603",
+        "text": "N.B. Can't get the demos of endpoint.js running. The code was basically abandoned in 2016."
+      },
+      "after": "a5057858a5e68597",
+      "date": 1604888079630
+    },
+    {
+      "type": "edit",
+      "id": "3ea082c215a49603",
+      "item": {
+        "type": "paragraph",
+        "id": "3ea082c215a49603",
+        "text": "N.B. Can't get the demos of endpoint.js running. The code was basically abandoned at the end of 2016. At this point useful only as inspiration."
+      },
+      "date": 1604888177973
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "de28973a31ad87b9"
+      },
+      "id": "de28973a31ad87b9",
+      "type": "add",
+      "after": "e28fb0ea4f2174d2",
+      "date": 1605021788328
+    },
+    {
+      "id": "de28973a31ad87b9",
+      "type": "move",
+      "order": [
+        "db950f0f7dcbd55d",
+        "41746c9e3ea0d74a",
+        "2b0c83a502ca92a2",
+        "8ea39bda86fc7c0f",
+        "71856fc31113f89b",
+        "979065e898796663",
+        "a7e97525b5b0bb68",
+        "dd7c144f2832693a",
+        "42b46c9ae99756dc",
+        "24f3473cb2b4743d",
+        "b4225850ed189821",
+        "fd2d339dbe4f6337",
+        "efe31f2973f03160",
+        "44a5aee2020b72f7",
+        "76aeef08cc6b6842",
+        "a5057858a5e68597",
+        "3ea082c215a49603",
+        "9817d78bd0705519",
+        "4a4e164b2b8f40a6",
+        "e08af660bda54fc8",
+        "bf3ec81e52eb47f4",
+        "41bb9f7344d8a157",
+        "de28973a31ad87b9",
+        "9336eac8158bfad2",
+        "55f304bb5c734e0f",
+        "e28fb0ea4f2174d2"
+      ],
+      "date": 1605021792193
+    },
+    {
+      "id": "de28973a31ad87b9",
+      "type": "move",
+      "order": [
+        "db950f0f7dcbd55d",
+        "41746c9e3ea0d74a",
+        "2b0c83a502ca92a2",
+        "8ea39bda86fc7c0f",
+        "71856fc31113f89b",
+        "979065e898796663",
+        "a7e97525b5b0bb68",
+        "dd7c144f2832693a",
+        "42b46c9ae99756dc",
+        "24f3473cb2b4743d",
+        "b4225850ed189821",
+        "fd2d339dbe4f6337",
+        "efe31f2973f03160",
+        "44a5aee2020b72f7",
+        "76aeef08cc6b6842",
+        "a5057858a5e68597",
+        "3ea082c215a49603",
+        "9817d78bd0705519",
+        "4a4e164b2b8f40a6",
+        "e08af660bda54fc8",
+        "bf3ec81e52eb47f4",
+        "de28973a31ad87b9",
+        "41bb9f7344d8a157",
+        "9336eac8158bfad2",
+        "55f304bb5c734e0f",
+        "e28fb0ea4f2174d2"
+      ],
+      "date": 1605021798052
+    },
+    {
+      "type": "edit",
+      "id": "de28973a31ad87b9",
+      "item": {
+        "type": "frame",
+        "id": "de28973a31ad87b9",
+        "text": "https://lilac-wind-worm.glitch.me/self-addressed.html\nHEIGHT 270"
+      },
+      "date": 1605021873435
+    },
+    {
+      "type": "add",
+      "id": "abf0a178a6e1b4ee",
+      "item": {
+        "type": "paragraph",
+        "id": "abf0a178a6e1b4ee",
+        "text": "Our first live cross-origin experiment with selfAddressed is over in glich.com: [https://lilac-wind-worm.glitch.me/ glitch]"
+      },
+      "after": "bf3ec81e52eb47f4",
+      "date": 1605021975483
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "044dba73e6cf5804"
+      },
+      "id": "044dba73e6cf5804",
+      "type": "add",
+      "after": "e28fb0ea4f2174d2",
+      "date": 1622402273984
+    },
+    {
+      "type": "edit",
+      "id": "044dba73e6cf5804",
+      "item": {
+        "type": "frame",
+        "id": "044dba73e6cf5804",
+        "text": "https://www.npmtrends.com/jschannel-vs-penpal-vs-postmate\ncompare popularity of penpal, postmate, and jschannel"
+      },
+      "date": 1622402311520
+    },
+    {
+      "type": "edit",
+      "id": "044dba73e6cf5804",
+      "item": {
+        "type": "frame",
+        "id": "044dba73e6cf5804",
+        "text": "https://www.npmtrends.com/jschannel-vs-penpal-vs-postmate\ncompare popularity of penpal, postmate, and jschannel\nHEIGHT 600"
+      },
+      "date": 1622402345012
+    },
+    {
+      "type": "edit",
+      "id": "044dba73e6cf5804",
+      "item": {
+        "type": "frame",
+        "id": "044dba73e6cf5804",
+        "text": "https://www.npmtrends.com/jschannel-vs-penpal-vs-postmate\ncompare popularity of penpal, postmate, and jschannel\nHEIGHT 1000"
+      },
+      "date": 1622402360050
+    },
+    {
+      "type": "fork",
+      "site": "goals.pods.wiki.dbbs.co",
+      "date": 1640898457146
+    }
+  ]
+}

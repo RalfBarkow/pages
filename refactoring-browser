@@ -1,0 +1,832 @@
+{
+  "title": "Refactoring Browser",
+  "story": [
+    {
+      "type": "html",
+      "text": "The [[Refactoring Browser]] is a tool that automates some [[Re Factoring]]s for Smalltalk. See [http://st-www.cs.uiuc.edu/users/brant/Refactory/RefactoringBrowser.html st-www.cs.uiuc.edu]",
+      "id": "ebe92bf0b08f8dbdf2d496d05b28469b"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "This is absolutely the greatest piece of programming software to come out since the original Smalltalk browser. It completely changes the way you think about programming. All those niggling little \"well, I should change this name but...\" thoughts go away, because you just change the name because there is always a single menu item to just change the name.",
+      "id": "e34be36535faba3da367b3d594b59f93"
+    },
+    {
+      "type": "html",
+      "text": "\nWhen I started using it, I spent about two hours refactoring at my old pace. I would do a refactoring, then just kind of stare off into space for the five minutes it would have taken me to do the refactoring by hand, then do another, stare into space again. After a while, I caught myself and realized that I had to learn to think [[Bigger Refactoring Thoughts]], and think them faster. Now I use probably half and half refactoring and entering new code, all at the same speed (I should instrument to measure this). -- [[Kent Beck]]",
+      "id": "fc306f25fa1bed6c0aaced7e03d41c88"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "<i>Discussion about using shell tools to rename symbols moved to [[Read Write Grep]]</i>",
+      "id": "44752bb0e19cad19c89417f58d5e64b0"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "Changing names is the least of its tricks. Some others are:",
+      "id": "089c9ffc44c1d656f1bcf1af4d6f3ffa"
+    },
+    {
+      "type": "html",
+      "text": " [[Extract Method]] -- make a submethod out of the selected text. If there is already an equivalent method, optionally invoke that instead.",
+      "id": "0861033e14c53515599cafe6afea490c"
+    },
+    {
+      "type": "html",
+      "text": " Inline method -- put the invoked code in place of the invocation. This even works for methods in other classes.",
+      "id": "104ae3db4f4f5815b56bafe648f7d1cd"
+    },
+    {
+      "type": "html",
+      "text": " Move to component -- move the code for a method to another class and invoke it",
+      "id": "d5e5ed3938735de7ad8295bb1bd5ac1a"
+    },
+    {
+      "type": "html",
+      "text": "\nThese three together are extremely powerful. For example, if I notice",
+      "id": "7ff9cb8f96417b4b06e1e518043aba83"
+    },
+    {
+      "type": "code",
+      "text": " area := aRectangle right - aRectangle left * (aRectangle bottom - aRectangle top).\n  ....",
+      "id": "8c95f09d439e164c640b021d855ccaf3"
+    },
+    {
+      "type": "html",
+      "text": "\nI select the statement to the right of the assignment and \"extract method\", naming the new method areaOf:. Now I have:",
+      "id": "c52b6ea483c4dbb5aaeef1a39509b267"
+    },
+    {
+      "type": "html",
+      "text": "area := self areaOf:<br>aRectangle.",
+      "id": "8cb56e64c55970b5e369281875571779"
+    },
+    {
+      "type": "code",
+      "text": "  ...",
+      "id": "4e37855c4ec361af5ac97261928e16fa"
+    },
+    {
+      "type": "html",
+      "text": "areaOf:<br>aRectangle",
+      "id": "f5335ad31c493dcd1f8f4c8d978d231e"
+    },
+    {
+      "type": "code",
+      "text": "  ^aRectangle right - aRectangle left * (aRectangle bottom - aRectangle top)",
+      "id": "1fa73b0b18074297af434a76cdcac6e6"
+    },
+    {
+      "type": "html",
+      "text": "\nNow I notice that aRectangle cares a lot more about this message than I do, so I \"move to component\" and choose aRectangle (other possible choices are my instance variables). The type inference stuff generally does a great job of determining the class or classes of aRectangle, or I can type the classes in. I choose \"Rectangle\", and name the new method \"area\". Now I have:",
+      "id": "ca07375e15b99476a9e14f7e727b6266"
+    },
+    {
+      "type": "html",
+      "text": "area := self areaOf:<br>aRectangle.",
+      "id": "8cb56e64c55970b5e369281875571779"
+    },
+    {
+      "type": "code",
+      "text": "  ...",
+      "id": "4e37855c4ec361af5ac97261928e16fa"
+    },
+    {
+      "type": "html",
+      "text": "areaOf:<br>aRectangle",
+      "id": "f5335ad31c493dcd1f8f4c8d978d231e"
+    },
+    {
+      "type": "code",
+      "text": "  ^aRectangle area",
+      "id": "f8323c926186ceb451e70116d33241e7"
+    },
+    {
+      "type": "code",
+      "text": " Rectangle>>area\n  ^self right - self left * (self bottom - self top)",
+      "id": "96de73f622e66198e234e4d5a26a4c46"
+    },
+    {
+      "type": "html",
+      "text": "\nNow, areaOf: isn't doing me much good, so I go to the original method, select \"areaOf:\" and \"inline method\". Now I have:",
+      "id": "1a644d544ecb6574925c6bbcd5e0e143"
+    },
+    {
+      "type": "code",
+      "text": "  area := aRectangle area.\n  ...",
+      "id": "e7a231b1faee72414ec500c759c8365d"
+    },
+    {
+      "type": "code",
+      "text": " Rectangle>>area\n  ^self right - self left * (self bottom - self top)",
+      "id": "96de73f622e66198e234e4d5a26a4c46"
+    },
+    {
+      "type": "html",
+      "text": "\nNow I can imagine extracting \"self right - self left\" into \"width\", etc.",
+      "id": "1533aa246063e97a9c409aaa5036ba3f"
+    },
+    {
+      "type": "html",
+      "text": "\nThe best thing about Refactory is how safe it is. As long as you don't manually edit the source code, you are nearly guaranteed (modulo things like choosing the wrong class for a \"move to component\") that you won't change the semantics of the program. The more I use it, the more aggressive I am slamming logic around until it makes sense.",
+      "id": "f5c0de1cfba3ee7e9f1b49cefaeb3138"
+    },
+    {
+      "type": "html",
+      "text": "\nSome other cool tricks:",
+      "id": "875826a6dd192828b82aa2af353a5c81"
+    },
+    {
+      "type": "html",
+      "text": " Add parameter -- add a parameter to every implementor of a message, and to every invocation of the message (with a Default value)",
+      "id": "5395e4d620783da0da639db1eddc1a0a"
+    },
+    {
+      "type": "html",
+      "text": " Remove parameter -- if no implementor of the message uses the parameter, remove it from the methods and the invocations",
+      "id": "a0b2e623eb164815f19245c14d56013d"
+    },
+    {
+      "type": "html",
+      "text": " Cross referencing from inside the source code -- select any program element in the text and you get a choice of several specialized browsers - senders/implementors of a message, readers/writers of a variable",
+      "id": "7319d4fa06e0ab991214efffd6278428"
+    },
+    {
+      "type": "html",
+      "text": " Rename -- you can rename classes, variables (all types), and messages",
+      "id": "f6d3e72bf28a99459aa45f213939f300"
+    },
+    {
+      "type": "html",
+      "text": " Abstract/concrete instance variables -- make all references to an instance variable go through a message, or make all references direct",
+      "id": "d12361a13d9400841f9a17e6452ba1cb"
+    },
+    {
+      "type": "html",
+      "text": "\nWith unlimited undo, you can bravely try experiments that might not pan out.",
+      "id": "97cf182281e27ef3fb46c4df0a1d853b"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Kent Beck]]",
+      "id": "c90f5e0d29f5159194bb0e34018708df"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "Using search/replace to perform renaming refactorings ignores the fact that every place the name occurs shouldn't always be renamed (the syntax of the methods). This is especially true for badly named variables. For example, one person might have named a variable \"i\" instead of a more descriptive name such as \"minimalElementIndex\". Now if you were to replace \"i\" with \"minimalElementIndex\" using search/replace, your program would no longer work since you probably refer to some type such as \"minimalElementIndexnt\" instead of \"int\". -- [[John Brant]]",
+      "id": "87a57c4bf6cf59b44d3f9d1e520b0906"
+    },
+    {
+      "type": "html",
+      "text": "'' I found myself with a lot of longerfaces once when I did this. ",
+      "id": "a3678a8f2d20e417adacea2be9b1180e"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Anonymous Coward]] ''",
+      "id": "98f623a8f884575cdccf6f0b3397fb04"
+    },
+    {
+      "type": "html",
+      "text": "... and if the \"i\" being replaced above were in a quoted string e.g",
+      "id": "5ca398edb69febde855e8b44ccbd4b4d"
+    },
+    {
+      "type": "code",
+      "text": "    String name = String(\"Brat Simpson\");",
+      "id": "cdc6286c0aeecbc14c9a29b9c229f258"
+    },
+    {
+      "type": "html",
+      "text": "you'd get",
+      "id": "4b284c4cf7dfd6682c6980c52c5ba0f6"
+    },
+    {
+      "type": "code",
+      "text": "    Str''''''minimalElementIndexng name = Str''''''minimalElementIndexng(\"Brat S''''''minimalElementIndexntmpson\");",
+      "id": "15c772c7ed114747f1ac17636af2bb98"
+    },
+    {
+      "type": "html",
+      "text": "\nYou'd at least need to do lexical analysis to work out which lexemes need to be renamed (and apply the correct kind of substitution.)",
+      "id": "4a06673cbeab0f6452c346381f2aec7e"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "My understanding with the refactoring browser is that, unlike any script you will write in an editor, it guarantees that the code won't change its meaning. I got this message from one of the browser authors when I was asking why it didn't let me tune the accessor code that it generates when changing from raw instance variables to accessors. His answer was, \"well that changes the meaning of the code, so it is not <i>refactoring</i>, even if it is useful.\"  Ahhh, I thought, and understood something about refactoring. -- [[Alistair Cockburn]]",
+      "id": "3a57ea2a7583ef37614ebe166f27b073"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "Don Roberts, John Brant, and Ralph Johnson, A Refactoring Tool for Smalltalk, \"The Theory and Practice of Object Systems\", (3) 4, 1997.",
+      "id": "cda8dc8704861b852e7236627b386390"
+    },
+    {
+      "type": "html",
+      "text": " [http://st-www.cs.uiuc.edu/~droberts/tapos/TAPOS.htm st-www.cs.uiuc.edu]",
+      "id": "11607f4ec58a3ae1d6e58ff0d82d2d9b"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "How does the [[Refactoring Browser]] safely refactor without type information? For example, doesn't it need to know what objects are of a particular class in order to rename a method of that class? Does it just guess? -- [[Ka Ping Yee]]",
+      "id": "52c4191855f65aab8669abfa68429ae1"
+    },
+    {
+      "type": "html",
+      "text": "\nIt does not just guess. It looks for special cases. Almost always one of the special cases applies. But sometimes it will tell you that it cannot perform a refactoring.",
+      "id": "f9671e1259a251e4ca83f1094ecbff31"
+    },
+    {
+      "type": "html",
+      "text": "\nWe originally thought that the lack of static type-checking would make it hard to build a refactoring browser for Smalltalk. Lack of type information is a disadvantage, but the advantages of Smalltalk made it a lot easier to make a refactoring browser for Smalltalk than it would have have been for C++ or Java.",
+      "id": "8d04745bba9d6e8f45a50fffc63449c8"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Ralph Johnson]]",
+      "id": "58d07cce610814814e9d601fd0b84dc1"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "Has any work been done on generalizing this, or making a C/C++/Java Refactoring Browser?  Naive optimism would lead me to think that this would not be an overwhelming effort. -- Pete Hardie",
+      "id": "f99207470adb38ef4bcdd63f1698586d"
+    },
+    {
+      "type": "html",
+      "text": "<i>I think it would be doable for Java. A Refactoring Browser that would work for the whole C++ language, and not some sane subset, would probably be [[Ai Complete]]. Just think of all the possibilities for creative use of macros and templates. -- [[Stephan Houben]]</i>",
+      "id": "d92e72d068feae5d25d9d72b98430cab"
+    },
+    {
+      "type": "html",
+      "text": "\nI use emacs and JDE quite a lot for writing Java code. Maybe it would be possible to use [[Emacs Lisp]] to write refactoring utilities. I might have a go at it when (if) I have the time. -- [[Bernard Michael Hurley]]",
+      "id": "9d5a6141be3abc077f3ab9081a57c755"
+    },
+    {
+      "type": "html",
+      "text": "\nActually, there are a few refactoring tools available for Java... see [[Refactoring Browser For Java]]. However, these tools support only a small portion of the refactorings available in the original [[Refactoring Browser]] for Smalltalk.",
+      "id": "3e90e34fbab38f513700fca3a093240e"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "I've never used the [[Refactoring Browser]] (I don't know [[Small Talk]]). I am familiar with JRefactory. JRefactory integrates into various IDEs. Is the [[Refactoring Browser]] a stand-alone tool?",
+      "id": "03d34b38940470d374526bfbc84125b0"
+    },
+    {
+      "type": "html",
+      "text": "<i>I'm quite new to Smalltalk myself (downloaded [[Visual Works]] just last week), but as I understand it, any implementation of Smalltalk includes a complete development environment in which all code is edited, and the [[Refactoring Browser]] runs inside this environment. There are some interesting technical reasons for this, but I'm afraid I don't understand them well enough to explain at all coherently - perhaps some more experienced Smalltalker could help?</i>",
+      "id": "fe946b48d9877ed05a17f33813a22f66"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "Has there been any work in refactoring browsers for [[Functional Programming]] languages such as [[Common Lisp]]? It seems that the existence of closures would make operations like add/remove parameter quite difficult to perform safely in the general case, and difficult even to be sure of the safety of.",
+      "id": "3475659d308ce82136f09fe4ec436391"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "[[There Is No Refactoring Browser For Cpp]]",
+      "id": "c253ce525a190c18f42f1e6ef16c1b92"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "Check out [[Eclipse Ide]] [http://www.eclipse.org www.eclipse.org], [[Intellij Idea]] [http://www.intellij.com/idea www.intellij.com].",
+      "id": "9abf54dd2657c33817869ca0f9271605"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "Speaking of which, how do the refactoring capabilities of [[Eclipse Ide]] and [[Intellij Idea]] compare to [[Refactoring Browser]]?",
+      "id": "6422ecd8ea7d075a44fb1f226055edf5"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "If the code-units (routines, methods, classes) were stored in a database, then renaming would be a simple query. [[Greencodds Tenth Rule Of Programming]] again. Something else to explore: if auto-generated unit ID's were used instead of names by the software-engine, perhaps propagation-based renaming would not be needed. Propagation renaming leans toward a [[Once And Only Once]] violation. If you change/rename your primary key often, auto-ID's may be the better approach. See [[Table Oriented Code Management]]. -- top",
+      "id": "ba606352c82114fda35cf3385edc88ea"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "Python has a [[Refactoring Browser]], [[Bicycle Repair Man]].",
+      "id": "892b8105f293a5266e72d2544dd4ce7a"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "Prolog also has a [[Refactoring Browser]], called ViPReSS, integrated with the VIM editor.",
+      "id": "6f51eec120f8e8e5d8f45e801123aa65"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a978670ed73166276206907c2a0fb3b8"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Refactoring Browser]]",
+      "id": "ea7377283289e1d76faa7dbd8058e865"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?RefactoringBrowser c2.com]",
+      "id": "d28a9c248c5080950ccc4e09adb32c63"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1334106736000,
+      "id": "4083633965f50cba7953a6dc8eff7ddc",
+      "type": "create",
+      "item": {
+        "title": "Refactoring Browser",
+        "story": [
+          {
+            "type": "html",
+            "text": "The [[Refactoring Browser]] is a tool that automates some [[Re Factoring]]s for Smalltalk. See [http://st-www.cs.uiuc.edu/users/brant/Refactory/RefactoringBrowser.html st-www.cs.uiuc.edu]",
+            "id": "ebe92bf0b08f8dbdf2d496d05b28469b"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "This is absolutely the greatest piece of programming software to come out since the original Smalltalk browser. It completely changes the way you think about programming. All those niggling little \"well, I should change this name but...\" thoughts go away, because you just change the name because there is always a single menu item to just change the name.",
+            "id": "e34be36535faba3da367b3d594b59f93"
+          },
+          {
+            "type": "html",
+            "text": "\nWhen I started using it, I spent about two hours refactoring at my old pace. I would do a refactoring, then just kind of stare off into space for the five minutes it would have taken me to do the refactoring by hand, then do another, stare into space again. After a while, I caught myself and realized that I had to learn to think [[Bigger Refactoring Thoughts]], and think them faster. Now I use probably half and half refactoring and entering new code, all at the same speed (I should instrument to measure this). -- [[Kent Beck]]",
+            "id": "fc306f25fa1bed6c0aaced7e03d41c88"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "<i>Discussion about using shell tools to rename symbols moved to [[Read Write Grep]]</i>",
+            "id": "44752bb0e19cad19c89417f58d5e64b0"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "Changing names is the least of its tricks. Some others are:",
+            "id": "089c9ffc44c1d656f1bcf1af4d6f3ffa"
+          },
+          {
+            "type": "html",
+            "text": " [[Extract Method]] -- make a submethod out of the selected text. If there is already an equivalent method, optionally invoke that instead.",
+            "id": "0861033e14c53515599cafe6afea490c"
+          },
+          {
+            "type": "html",
+            "text": " Inline method -- put the invoked code in place of the invocation. This even works for methods in other classes.",
+            "id": "104ae3db4f4f5815b56bafe648f7d1cd"
+          },
+          {
+            "type": "html",
+            "text": " Move to component -- move the code for a method to another class and invoke it",
+            "id": "d5e5ed3938735de7ad8295bb1bd5ac1a"
+          },
+          {
+            "type": "html",
+            "text": "\nThese three together are extremely powerful. For example, if I notice",
+            "id": "7ff9cb8f96417b4b06e1e518043aba83"
+          },
+          {
+            "type": "code",
+            "text": " area := aRectangle right - aRectangle left * (aRectangle bottom - aRectangle top).\n  ....",
+            "id": "8c95f09d439e164c640b021d855ccaf3"
+          },
+          {
+            "type": "html",
+            "text": "\nI select the statement to the right of the assignment and \"extract method\", naming the new method areaOf:. Now I have:",
+            "id": "c52b6ea483c4dbb5aaeef1a39509b267"
+          },
+          {
+            "type": "html",
+            "text": "area := self areaOf:<br>aRectangle.",
+            "id": "8cb56e64c55970b5e369281875571779"
+          },
+          {
+            "type": "code",
+            "text": "  ...",
+            "id": "4e37855c4ec361af5ac97261928e16fa"
+          },
+          {
+            "type": "html",
+            "text": "areaOf:<br>aRectangle",
+            "id": "f5335ad31c493dcd1f8f4c8d978d231e"
+          },
+          {
+            "type": "code",
+            "text": "  ^aRectangle right - aRectangle left * (aRectangle bottom - aRectangle top)",
+            "id": "1fa73b0b18074297af434a76cdcac6e6"
+          },
+          {
+            "type": "html",
+            "text": "\nNow I notice that aRectangle cares a lot more about this message than I do, so I \"move to component\" and choose aRectangle (other possible choices are my instance variables). The type inference stuff generally does a great job of determining the class or classes of aRectangle, or I can type the classes in. I choose \"Rectangle\", and name the new method \"area\". Now I have:",
+            "id": "ca07375e15b99476a9e14f7e727b6266"
+          },
+          {
+            "type": "html",
+            "text": "area := self areaOf:<br>aRectangle.",
+            "id": "8cb56e64c55970b5e369281875571779"
+          },
+          {
+            "type": "code",
+            "text": "  ...",
+            "id": "4e37855c4ec361af5ac97261928e16fa"
+          },
+          {
+            "type": "html",
+            "text": "areaOf:<br>aRectangle",
+            "id": "f5335ad31c493dcd1f8f4c8d978d231e"
+          },
+          {
+            "type": "code",
+            "text": "  ^aRectangle area",
+            "id": "f8323c926186ceb451e70116d33241e7"
+          },
+          {
+            "type": "code",
+            "text": " Rectangle>>area\n  ^self right - self left * (self bottom - self top)",
+            "id": "96de73f622e66198e234e4d5a26a4c46"
+          },
+          {
+            "type": "html",
+            "text": "\nNow, areaOf: isn't doing me much good, so I go to the original method, select \"areaOf:\" and \"inline method\". Now I have:",
+            "id": "1a644d544ecb6574925c6bbcd5e0e143"
+          },
+          {
+            "type": "code",
+            "text": "  area := aRectangle area.\n  ...",
+            "id": "e7a231b1faee72414ec500c759c8365d"
+          },
+          {
+            "type": "code",
+            "text": " Rectangle>>area\n  ^self right - self left * (self bottom - self top)",
+            "id": "96de73f622e66198e234e4d5a26a4c46"
+          },
+          {
+            "type": "html",
+            "text": "\nNow I can imagine extracting \"self right - self left\" into \"width\", etc.",
+            "id": "1533aa246063e97a9c409aaa5036ba3f"
+          },
+          {
+            "type": "html",
+            "text": "\nThe best thing about Refactory is how safe it is. As long as you don't manually edit the source code, you are nearly guaranteed (modulo things like choosing the wrong class for a \"move to component\") that you won't change the semantics of the program. The more I use it, the more aggressive I am slamming logic around until it makes sense.",
+            "id": "f5c0de1cfba3ee7e9f1b49cefaeb3138"
+          },
+          {
+            "type": "html",
+            "text": "\nSome other cool tricks:",
+            "id": "875826a6dd192828b82aa2af353a5c81"
+          },
+          {
+            "type": "html",
+            "text": " Add parameter -- add a parameter to every implementor of a message, and to every invocation of the message (with a Default value)",
+            "id": "5395e4d620783da0da639db1eddc1a0a"
+          },
+          {
+            "type": "html",
+            "text": " Remove parameter -- if no implementor of the message uses the parameter, remove it from the methods and the invocations",
+            "id": "a0b2e623eb164815f19245c14d56013d"
+          },
+          {
+            "type": "html",
+            "text": " Cross referencing from inside the source code -- select any program element in the text and you get a choice of several specialized browsers - senders/implementors of a message, readers/writers of a variable",
+            "id": "7319d4fa06e0ab991214efffd6278428"
+          },
+          {
+            "type": "html",
+            "text": " Rename -- you can rename classes, variables (all types), and messages",
+            "id": "f6d3e72bf28a99459aa45f213939f300"
+          },
+          {
+            "type": "html",
+            "text": " Abstract/concrete instance variables -- make all references to an instance variable go through a message, or make all references direct",
+            "id": "d12361a13d9400841f9a17e6452ba1cb"
+          },
+          {
+            "type": "html",
+            "text": "\nWith unlimited undo, you can bravely try experiments that might not pan out.",
+            "id": "97cf182281e27ef3fb46c4df0a1d853b"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Kent Beck]]",
+            "id": "c90f5e0d29f5159194bb0e34018708df"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "Using search/replace to perform renaming refactorings ignores the fact that every place the name occurs shouldn't always be renamed (the syntax of the methods). This is especially true for badly named variables. For example, one person might have named a variable \"i\" instead of a more descriptive name such as \"minimalElementIndex\". Now if you were to replace \"i\" with \"minimalElementIndex\" using search/replace, your program would no longer work since you probably refer to some type such as \"minimalElementIndexnt\" instead of \"int\". -- [[John Brant]]",
+            "id": "87a57c4bf6cf59b44d3f9d1e520b0906"
+          },
+          {
+            "type": "html",
+            "text": "'' I found myself with a lot of longerfaces once when I did this. ",
+            "id": "a3678a8f2d20e417adacea2be9b1180e"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Anonymous Coward]] ''",
+            "id": "98f623a8f884575cdccf6f0b3397fb04"
+          },
+          {
+            "type": "html",
+            "text": "... and if the \"i\" being replaced above were in a quoted string e.g",
+            "id": "5ca398edb69febde855e8b44ccbd4b4d"
+          },
+          {
+            "type": "code",
+            "text": "    String name = String(\"Brat Simpson\");",
+            "id": "cdc6286c0aeecbc14c9a29b9c229f258"
+          },
+          {
+            "type": "html",
+            "text": "you'd get",
+            "id": "4b284c4cf7dfd6682c6980c52c5ba0f6"
+          },
+          {
+            "type": "code",
+            "text": "    Str''''''minimalElementIndexng name = Str''''''minimalElementIndexng(\"Brat S''''''minimalElementIndexntmpson\");",
+            "id": "15c772c7ed114747f1ac17636af2bb98"
+          },
+          {
+            "type": "html",
+            "text": "\nYou'd at least need to do lexical analysis to work out which lexemes need to be renamed (and apply the correct kind of substitution.)",
+            "id": "4a06673cbeab0f6452c346381f2aec7e"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "My understanding with the refactoring browser is that, unlike any script you will write in an editor, it guarantees that the code won't change its meaning. I got this message from one of the browser authors when I was asking why it didn't let me tune the accessor code that it generates when changing from raw instance variables to accessors. His answer was, \"well that changes the meaning of the code, so it is not <i>refactoring</i>, even if it is useful.\"  Ahhh, I thought, and understood something about refactoring. -- [[Alistair Cockburn]]",
+            "id": "3a57ea2a7583ef37614ebe166f27b073"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "Don Roberts, John Brant, and Ralph Johnson, A Refactoring Tool for Smalltalk, \"The Theory and Practice of Object Systems\", (3) 4, 1997.",
+            "id": "cda8dc8704861b852e7236627b386390"
+          },
+          {
+            "type": "html",
+            "text": " [http://st-www.cs.uiuc.edu/~droberts/tapos/TAPOS.htm st-www.cs.uiuc.edu]",
+            "id": "11607f4ec58a3ae1d6e58ff0d82d2d9b"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "How does the [[Refactoring Browser]] safely refactor without type information? For example, doesn't it need to know what objects are of a particular class in order to rename a method of that class? Does it just guess? -- [[Ka Ping Yee]]",
+            "id": "52c4191855f65aab8669abfa68429ae1"
+          },
+          {
+            "type": "html",
+            "text": "\nIt does not just guess. It looks for special cases. Almost always one of the special cases applies. But sometimes it will tell you that it cannot perform a refactoring.",
+            "id": "f9671e1259a251e4ca83f1094ecbff31"
+          },
+          {
+            "type": "html",
+            "text": "\nWe originally thought that the lack of static type-checking would make it hard to build a refactoring browser for Smalltalk. Lack of type information is a disadvantage, but the advantages of Smalltalk made it a lot easier to make a refactoring browser for Smalltalk than it would have have been for C++ or Java.",
+            "id": "8d04745bba9d6e8f45a50fffc63449c8"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Ralph Johnson]]",
+            "id": "58d07cce610814814e9d601fd0b84dc1"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "Has any work been done on generalizing this, or making a C/C++/Java Refactoring Browser?  Naive optimism would lead me to think that this would not be an overwhelming effort. -- Pete Hardie",
+            "id": "f99207470adb38ef4bcdd63f1698586d"
+          },
+          {
+            "type": "html",
+            "text": "<i>I think it would be doable for Java. A Refactoring Browser that would work for the whole C++ language, and not some sane subset, would probably be [[Ai Complete]]. Just think of all the possibilities for creative use of macros and templates. -- [[Stephan Houben]]</i>",
+            "id": "d92e72d068feae5d25d9d72b98430cab"
+          },
+          {
+            "type": "html",
+            "text": "\nI use emacs and JDE quite a lot for writing Java code. Maybe it would be possible to use [[Emacs Lisp]] to write refactoring utilities. I might have a go at it when (if) I have the time. -- [[Bernard Michael Hurley]]",
+            "id": "9d5a6141be3abc077f3ab9081a57c755"
+          },
+          {
+            "type": "html",
+            "text": "\nActually, there are a few refactoring tools available for Java... see [[Refactoring Browser For Java]]. However, these tools support only a small portion of the refactorings available in the original [[Refactoring Browser]] for Smalltalk.",
+            "id": "3e90e34fbab38f513700fca3a093240e"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "I've never used the [[Refactoring Browser]] (I don't know [[Small Talk]]). I am familiar with JRefactory. JRefactory integrates into various IDEs. Is the [[Refactoring Browser]] a stand-alone tool?",
+            "id": "03d34b38940470d374526bfbc84125b0"
+          },
+          {
+            "type": "html",
+            "text": "<i>I'm quite new to Smalltalk myself (downloaded [[Visual Works]] just last week), but as I understand it, any implementation of Smalltalk includes a complete development environment in which all code is edited, and the [[Refactoring Browser]] runs inside this environment. There are some interesting technical reasons for this, but I'm afraid I don't understand them well enough to explain at all coherently - perhaps some more experienced Smalltalker could help?</i>",
+            "id": "fe946b48d9877ed05a17f33813a22f66"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "Has there been any work in refactoring browsers for [[Functional Programming]] languages such as [[Common Lisp]]? It seems that the existence of closures would make operations like add/remove parameter quite difficult to perform safely in the general case, and difficult even to be sure of the safety of.",
+            "id": "3475659d308ce82136f09fe4ec436391"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "[[There Is No Refactoring Browser For Cpp]]",
+            "id": "c253ce525a190c18f42f1e6ef16c1b92"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "Check out [[Eclipse Ide]] [http://www.eclipse.org www.eclipse.org], [[Intellij Idea]] [http://www.intellij.com/idea www.intellij.com].",
+            "id": "9abf54dd2657c33817869ca0f9271605"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "Speaking of which, how do the refactoring capabilities of [[Eclipse Ide]] and [[Intellij Idea]] compare to [[Refactoring Browser]]?",
+            "id": "6422ecd8ea7d075a44fb1f226055edf5"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "If the code-units (routines, methods, classes) were stored in a database, then renaming would be a simple query. [[Greencodds Tenth Rule Of Programming]] again. Something else to explore: if auto-generated unit ID's were used instead of names by the software-engine, perhaps propagation-based renaming would not be needed. Propagation renaming leans toward a [[Once And Only Once]] violation. If you change/rename your primary key often, auto-ID's may be the better approach. See [[Table Oriented Code Management]]. -- top",
+            "id": "ba606352c82114fda35cf3385edc88ea"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "Python has a [[Refactoring Browser]], [[Bicycle Repair Man]].",
+            "id": "892b8105f293a5266e72d2544dd4ce7a"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "Prolog also has a [[Refactoring Browser]], called ViPReSS, integrated with the VIM editor.",
+            "id": "6f51eec120f8e8e5d8f45e801123aa65"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a978670ed73166276206907c2a0fb3b8"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Refactoring Browser]]",
+            "id": "ea7377283289e1d76faa7dbd8058e865"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?RefactoringBrowser c2.com]",
+            "id": "d28a9c248c5080950ccc4e09adb32c63"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1628087541271
+    }
+  ]
+}

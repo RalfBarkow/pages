@@ -1,0 +1,1079 @@
+{
+  "title": "Spawn or Not",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "42574843386d6bae",
+      "text": "Separate concerns of code structure from runtime structure in Elixir.  Use functional decomposition for the former, and processes for the latter. [http://theerlangelist.com/article/spawn_or_not link] "
+    },
+    {
+      "type": "markdown",
+      "id": "381708319d3f364c",
+      "text": "my main points:\n\n* Use functions and modules to separate thought concerns.\n* Use processes to separate runtime concerns.\n* Do not use processes (not even agents) to separate thought concerns.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "316b4028ced02e88",
+      "text": "The construct “thought concern” here refers to ideas which exist in our mind, such as order, order item, and product for example. If those concepts are more complex, it’s worth implementing them in separate modules and functions to separate different concerns and keep each part of our code focused and concise."
+    },
+    {
+      "type": "paragraph",
+      "id": "b64e9d5bf8f84abd",
+      "text": "Using processes (e.g. agents) for this is a mistake I see people make frequently. Such approach essentially sidesteps the functional part of Elixir, and instead attempts to simulate objects with processes. The implementation will very likely be inferior to the plain FP approach (or even an equivalent in an OO language). Keep in mind that there is a price associated with processes (memory and communication overhead). Therefore, reach for processes when there are some tangible benefits which justify that price. Code organization is not among those benefits, so that’s not a good reason for using processes."
+    },
+    {
+      "type": "paragraph",
+      "id": "be0b4331d29fbfb1",
+      "text": "Processes are used to address runtime concerns - properties which can be observed in a running system. For example, you’ll want to reach for multiple processes when you want to prevent a failure of one job to affect other activities in the system. Another motivation is when you want to introduce a potential for parallelism, allowing multiple jobs to run simultaneously. This can improve your performance, and open up potential for scaling in both directions. There are some other, less common cases for using processes, but again - separation of thought "
+    },
+    {
+      "type": "markdown",
+      "id": "10c4f87a51975299",
+      "text": "# Blackjack"
+    },
+    {
+      "type": "paragraph",
+      "id": "4aad8758952bb698",
+      "text": "we need to keep track of different types of states which change over time: a deck of cards, hands of each player, and the state of the round. A naive take on this, would be use multiple processes. We could have one process per each hand, another process for the deck of cards, and the “master” process that drives the entire round."
+    },
+    {
+      "type": "paragraph",
+      "id": "25db43067a2d289c",
+      "text": "[Choosing processes to model this is a mistake.]  The game is in its nature highly synchronized. Things happen one by one in a well defined order: I get my cards, I make one or more moves, and when I’m done, you’re next. At any point in time, there’s only one activity happening in a single round."
+    },
+    {
+      "type": "paragraph",
+      "id": "4b408e949c9bca60",
+      "text": "Using multiple processes to power a single round is therefore going to do more harm than good. With multiple processes, everything is concurrent, so you need to make additional effort to synchronize all the actions. You’ll also need to pay attention to proper process termination and cleanup. If you stop the round process, you need to stop all the associated processes as well. The same should hold in the case of a crash: an exception in a round, or a deck process should likely terminate everything (because the state is corrupt beyond repair). Maybe a crash of a single hand could be isolated, and that might improve fault-tolerance a bit, but I think this is a too fine level to be concerned about fault isolation.\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "68bc2818e1cef27d",
+      "text": "(Here, the author shows a nice example of functional decomposition for separation of concerns.  We skip ahead to capture details about the round.)"
+    },
+    {
+      "type": "markdown",
+      "id": "831d337188b88c84",
+      "text": "# Blackjack round"
+    },
+    {
+      "type": "markdown",
+      "id": "3400656e188b07d8",
+      "text": "This abstraction, powered by the Blackjack.Round module, ties everything together. It has following responsibilities:\n\n* keeping the state of the deck\n* keeping the state of all the hands in a round\n* deciding who’s the next player to move\n* accepting and interpreting player moves (hit/stand)\n* taking cards from the deck and passing them to current hand\n* computing the winner, once all the hands are resolved\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "05ff0b7396794c12",
+      "text": "The round abstraction will follow the same functional approach as deck and hand. However, there’s an additional twist here, which concerns separation of the temporal logic. A round takes some time and requires interaction with players. For example, when the round starts, the first player needs to be informed about the first two card they got, and then they need to be informed that it’s their turn to make a move. The round then needs to wait until the player makes the move, and only then can it step forward."
+    },
+    {
+      "type": "paragraph",
+      "id": "3c2e5e7507572644",
+      "text": "My impression is that many people, experienced Erlangers/Elixorians included, would implement the concept of a round directly in a GenServer or :gen_statem. This would allow them to manage the round state and temporal logic (such as communicating with players) in the same place."
+    },
+    {
+      "type": "paragraph",
+      "id": "9af18233d375aaaf",
+      "text": "However, I believe that these two aspects need to be separated, since they are both potentially complex. The logic of a single round is already somewhat involved, and it can only get worse if we want to support additional aspects of the game, such as betting, splitting, or dealer player. Communicating with players has its own challenges if we want to deal with netsplits, crashes, slow or unresponsive clients. In these cases we might need to support retries, maybe add some persistence, event sourcing, or whatnot."
+    },
+    {
+      "type": "paragraph",
+      "id": "d7ed0265c38bb452",
+      "text": "I don’t want to combine these two complex concerns together, because they’ll become entangled, and it will be harder to work with the code. I want to move temporal concerns somewhere else, and have a pure domain model of a blackjack round."
+    },
+    {
+      "type": "paragraph",
+      "id": "9781187eb5eb3833",
+      "text": "So instead I opted for an approach I don’t see that often. I captured the concept of a round in a plain functional abstraction."
+    },
+    {
+      "type": "paragraph",
+      "id": "793638a4a48c3ede",
+      "text": "(Here we skip ahead again.  If you enjoy reading code, dear Reader, we recommend the full article.)"
+    },
+    {
+      "type": "markdown",
+      "id": "cb95851612743c28",
+      "text": "# Sending notifications"
+    },
+    {
+      "type": "markdown",
+      "id": "ade920cd0df26139",
+      "text": "When functions from the `Round` module return the instruction list to the server process, it will walk through them, and interpret them.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "3dfaab17da0b5562",
+      "text": "The notifications themselves are sent from separate processes. This is an example where we can profit from extra concurrency. Sending notifications is a task which is separate from the task of managing the state of the round. The notifications logic might be burdened by issues such as slow or disconnected clients, so it’s worth doing this outside of the round process. Moreover, notifications to different players have nothing in common, so they can be sent from separate processes. However, we need to preserve the order of notifications for each player, so we need a dedicated notification process per each player."
+    },
+    {
+      "type": "paragraph",
+      "id": "d794bb5f7e030227",
+      "text": "When the round server plays a move, it will get a list of instructions from the round abstraction. The server will then forward each instruction to the corresponding notifier server which will interpret the instruction and invoke a corresponding M/F/A to notify the player."
+    },
+    {
+      "type": "paragraph",
+      "id": "68000cdb064b8207",
+      "text": "Hence, if we need to notify multiple players, we’ll do it separately (and possibly in parallel). As a consequence, the total ordering of messages is not preserved. "
+    },
+    {
+      "type": "markdown",
+      "id": "de948f511d6ec9de",
+      "text": "It might happen that `player_2` messages arrives before `player_1` is informed that it’s busted. But that’s fine, since those are two different players. The ordering of messages per each player is of course preserved, courtesy of player-specific notifier server process.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "58c8152b2adf3155",
+      "text": "Before parting, I want to drive my point again: owing to the design and functional nature of the `Round` module, all this notifications complexity is kept outside of the domain model. Likewise, notification part is not concerned with the domain logic."
+    },
+    {
+      "type": "markdown",
+      "id": "c96a7f0ca9fc1d64",
+      "text": "# Conclusion\n"
+    },
+    {
+      "type": "markdown",
+      "id": "2cadb1b165c31ff7",
+      "text": "Simple functional abstractions such as `Deck` and `Hand` allowed me to separate concerns of a more complex round state without needing to resort to agents.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "84f1d5a85dc9b142",
+      "text": "That doesn’t mean we need to be conservative with processes though. Use processes wherever they make sense and bring some clear benefits. Running different rounds in separate processes improves scalability, fault-tolerance, and the overall performance of the system. The same thing applies for notification processes. These are different runtime concerns, so there’s no need to run them in the same runtime context.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "41c61fb56a12f16e",
+      "text": "If temporal and/or domain logic are complex, consider separating them. The approach I took allowed me to implement a more involved runtime behaviour (concurrent notifications) without complicating the business flow of the round. This separation also puts me in a nice spot, since I can now evolve both aspects separately. Adding the support for dealer, split, insurance, and other business concepts should not affect the runtime aspect significantly. Likewise, supporting netsplits, reconnects, player crashes, or timeouts should not require the changes in the domain logic."
+    },
+    {
+      "type": "pagefold",
+      "id": "9968b75771417a57",
+      "text": "."
+    },
+    {
+      "type": "markdown",
+      "id": "d7431aeacf452ce0",
+      "text": "I'm super excited to see _code structure_ delineated from _runtime structure_.  The software industry needs language and good examples to discuss those things separately.\n\nSee [[BEAMs of Insight]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Spawn or Not",
+        "story": []
+      },
+      "date": 1512751119822
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "42574843386d6bae",
+        "text": "Separate concerns of code structure from runtime structure in Elixir.  Use functional decomposition for the former, and processes for the latter. [http://theerlangelist.com/article/spawn_or_not link] "
+      },
+      "id": "42574843386d6bae",
+      "type": "add",
+      "date": 1512751122432
+    },
+    {
+      "type": "edit",
+      "id": "42574843386d6bae",
+      "item": {
+        "type": "paragraph",
+        "id": "42574843386d6bae",
+        "text": "Separate concerns of code structure from runtime structure in Elixir.  Use functional decomposition for the former, and processes for the latter. [http://theerlangelist.com/article/spawn_or_not link] "
+      },
+      "date": 1512751212086
+    },
+    {
+      "item": {
+        "type": "markdown",
+        "id": "381708319d3f364c",
+        "text": "my main points:\n\n* Use functions and modules to separate thought concerns.\n* Use processes to separate runtime concerns.\n* Do not use processes (not even agents) to separate thought concerns.\n"
+      },
+      "id": "381708319d3f364c",
+      "type": "add",
+      "after": "42574843386d6bae",
+      "date": 1512751267422
+    },
+    {
+      "type": "edit",
+      "id": "381708319d3f364c",
+      "item": {
+        "type": "markdown",
+        "id": "381708319d3f364c",
+        "text": "my main points:\n\n* Use functions and modules to separate thought concerns.\n* Use processes to separate runtime concerns.\n* Do not use processes (not even agents) to separate thought concerns.\n"
+      },
+      "date": 1512751288918
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "316b4028ced02e88",
+        "text": "The construct “thought concern” here refers to ideas which exist in our mind, such as order, order item, and product for example. If those concepts are more complex, it’s worth implementing them in separate modules and functions to separate different concerns and keep each part of our code focused and concise."
+      },
+      "id": "316b4028ced02e88",
+      "type": "add",
+      "after": "381708319d3f364c",
+      "date": 1512751328813
+    },
+    {
+      "type": "edit",
+      "id": "316b4028ced02e88",
+      "item": {
+        "type": "paragraph",
+        "id": "316b4028ced02e88",
+        "text": "The construct “thought concern” here refers to ideas which exist in our mind, such as order, order item, and product for example. If those concepts are more complex, it’s worth implementing them in separate modules and functions to separate different concerns and keep each part of our code focused and concise."
+      },
+      "date": 1512751333605
+    },
+    {
+      "type": "add",
+      "id": "b64e9d5bf8f84abd",
+      "item": {
+        "type": "paragraph",
+        "id": "b64e9d5bf8f84abd",
+        "text": "Using processes (e.g. agents) for this is a mistake I see people make frequently. Such approach essentially sidesteps the functional part of Elixir, and instead attempts to simulate objects with processes. The implementation will very likely be inferior to the plain FP approach (or even an equivalent in an OO language). Keep in mind that there is a price associated with processes (memory and communication overhead). Therefore, reach for processes when there are some tangible benefits which justify that price. Code organization is not among those benefits, so that’s not a good reason for using processes."
+      },
+      "after": "316b4028ced02e88",
+      "date": 1512751344013
+    },
+    {
+      "type": "add",
+      "id": "be0b4331d29fbfb1",
+      "item": {
+        "type": "paragraph",
+        "id": "be0b4331d29fbfb1",
+        "text": "Processes are used to address runtime concerns - properties which can be observed in a running system. For example, you’ll want to reach for multiple processes when you want to prevent a failure of one job to affect other activities in the system. Another motivation is when you want to introduce a potential for parallelism, allowing multiple jobs to run simultaneously. This can improve your performance, and open up potential for scaling in both directions. There are some other, less common cases for using processes, but again - separation of thought "
+      },
+      "after": "b64e9d5bf8f84abd",
+      "date": 1512751350101
+    },
+    {
+      "type": "edit",
+      "id": "42574843386d6bae",
+      "item": {
+        "type": "paragraph",
+        "id": "42574843386d6bae",
+        "text": "Separate concerns of code structure from runtime structure in Elixir.  Use functional decomposition for the former, and processes for the latter. [http://theerlangelist.com/article/spawn_or_not link] "
+      },
+      "date": 1512751378935
+    },
+    {
+      "item": {
+        "type": "markdown",
+        "id": "10c4f87a51975299",
+        "text": "# Blackjack"
+      },
+      "id": "10c4f87a51975299",
+      "type": "add",
+      "after": "be0b4331d29fbfb1",
+      "date": 1512751539424
+    },
+    {
+      "type": "edit",
+      "id": "10c4f87a51975299",
+      "item": {
+        "type": "markdown",
+        "id": "10c4f87a51975299",
+        "text": "# Blackjack"
+      },
+      "date": 1512751553666
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "4aad8758952bb698",
+        "text": "we need to keep track of different types of states which change over time: a deck of cards, hands of each player, and the state of the round. A naive take on this, would be use multiple processes. We could have one process per each hand, another process for the deck of cards, and the “master” process that drives the entire round."
+      },
+      "id": "4aad8758952bb698",
+      "type": "add",
+      "after": "10c4f87a51975299",
+      "date": 1512751555849
+    },
+    {
+      "type": "edit",
+      "id": "4aad8758952bb698",
+      "item": {
+        "type": "paragraph",
+        "id": "4aad8758952bb698",
+        "text": "we need to keep track of different types of states which change over time: a deck of cards, hands of each player, and the state of the round. A naive take on this, would be use multiple processes. We could have one process per each hand, another process for the deck of cards, and the “master” process that drives the entire round."
+      },
+      "date": 1512751564307
+    },
+    {
+      "type": "edit",
+      "id": "10c4f87a51975299",
+      "item": {
+        "type": "markdown",
+        "id": "10c4f87a51975299",
+        "text": "# Blackjack"
+      },
+      "date": 1512751570140
+    },
+    {
+      "type": "add",
+      "id": "25db43067a2d289c",
+      "item": {
+        "type": "paragraph",
+        "id": "25db43067a2d289c",
+        "text": "[Choosing processes to model this is a mistake.]  The game is in its nature highly synchronized. Things happen one by one in a well defined order: I get my cards, I make one or more moves, and when I’m done, you’re next. At any point in time, there’s only one activity happening in a single round."
+      },
+      "after": "4aad8758952bb698",
+      "date": 1512751643658
+    },
+    {
+      "type": "edit",
+      "id": "25db43067a2d289c",
+      "item": {
+        "type": "paragraph",
+        "id": "25db43067a2d289c",
+        "text": "[Choosing processes to model this is a mistake.]  The game is in its nature highly synchronized. Things happen one by one in a well defined order: I get my cards, I make one or more moves, and when I’m done, you’re next. At any point in time, there’s only one activity happening in a single round."
+      },
+      "date": 1512751657852
+    },
+    {
+      "type": "add",
+      "id": "4b408e949c9bca60",
+      "item": {
+        "type": "paragraph",
+        "id": "4b408e949c9bca60",
+        "text": "Using multiple processes to power a single round is therefore going to do more harm than good. With multiple processes, everything is concurrent, so you need to make additional effort to synchronize all the actions. You’ll also need to pay attention to proper process termination and cleanup. If you stop the round process, you need to stop all the associated processes as well. The same should hold in the case of a crash: an exception in a round, or a deck process should likely terminate everything (because the state is corrupt beyond repair). Maybe a crash of a single hand could be isolated, and that might improve fault-tolerance a bit, but I think this is a too fine level to be concerned about fault isolation.\n\n"
+      },
+      "after": "25db43067a2d289c",
+      "date": 1512751702928
+    },
+    {
+      "item": {
+        "type": "markdown",
+        "id": "3400656e188b07d8",
+        "text": "This abstraction, powered by the Blackjack.Round module, ties everything together. It has following responsibilities:\n\n* keeping the state of the deck\n* keeping the state of all the hands in a round\n* deciding who’s the next player to move\n* accepting and interpreting player moves (hit/stand)\n* taking cards from the deck and passing them to current hand\n* computing the winner, once all the hands are resolved\n"
+      },
+      "id": "3400656e188b07d8",
+      "type": "add",
+      "after": "4b408e949c9bca60",
+      "date": 1512751774020
+    },
+    {
+      "type": "edit",
+      "id": "3400656e188b07d8",
+      "item": {
+        "type": "markdown",
+        "id": "3400656e188b07d8",
+        "text": "This abstraction, powered by the Blackjack.Round module, ties everything together. It has following responsibilities:\n\n* keeping the state of the deck\n* keeping the state of all the hands in a round\n* deciding who’s the next player to move\n* accepting and interpreting player moves (hit/stand)\n* taking cards from the deck and passing them to current hand\n* computing the winner, once all the hands are resolved\n"
+      },
+      "date": 1512751801660
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "68bc2818e1cef27d",
+        "text": "(here, the author shows a nice example of functional decomposition for separation of concerns)"
+      },
+      "id": "68bc2818e1cef27d",
+      "type": "add",
+      "after": "3400656e188b07d8",
+      "date": 1512751889726
+    },
+    {
+      "type": "edit",
+      "id": "68bc2818e1cef27d",
+      "item": {
+        "type": "paragraph",
+        "id": "68bc2818e1cef27d",
+        "text": "(here, the author shows a nice example of functional decomposition for separation of concerns)"
+      },
+      "date": 1512751938330
+    },
+    {
+      "type": "move",
+      "order": [
+        "42574843386d6bae",
+        "381708319d3f364c",
+        "316b4028ced02e88",
+        "b64e9d5bf8f84abd",
+        "be0b4331d29fbfb1",
+        "10c4f87a51975299",
+        "4aad8758952bb698",
+        "25db43067a2d289c",
+        "4b408e949c9bca60",
+        "68bc2818e1cef27d",
+        "3400656e188b07d8",
+        "0d70eca7714f9c53"
+      ],
+      "id": "68bc2818e1cef27d",
+      "date": 1512751941003,
+      "error": {
+        "type": "error",
+        "msg": "",
+        "response": "Server Ignoring move. Try reload."
+      }
+    },
+    {
+      "item": {
+        "type": "markdown",
+        "id": "831d337188b88c84",
+        "text": "# Blackjack round"
+      },
+      "id": "831d337188b88c84",
+      "type": "add",
+      "after": "3400656e188b07d8",
+      "date": 1512751953807
+    },
+    {
+      "type": "edit",
+      "id": "831d337188b88c84",
+      "item": {
+        "type": "markdown",
+        "id": "831d337188b88c84",
+        "text": "# Blackjack round"
+      },
+      "date": 1512751962044
+    },
+    {
+      "type": "move",
+      "order": [
+        "42574843386d6bae",
+        "381708319d3f364c",
+        "316b4028ced02e88",
+        "b64e9d5bf8f84abd",
+        "be0b4331d29fbfb1",
+        "10c4f87a51975299",
+        "4aad8758952bb698",
+        "25db43067a2d289c",
+        "4b408e949c9bca60",
+        "68bc2818e1cef27d",
+        "831d337188b88c84",
+        "3400656e188b07d8"
+      ],
+      "id": "831d337188b88c84",
+      "date": 1512751965335
+    },
+    {
+      "type": "fork",
+      "date": 1512752067475
+    },
+    {
+      "type": "edit",
+      "id": "68bc2818e1cef27d",
+      "item": {
+        "type": "paragraph",
+        "id": "68bc2818e1cef27d",
+        "text": "(Here, the author shows a nice example of functional decomposition for separation of concerns.  We skip ahead to capture details about the round.)"
+      },
+      "date": 1512752107691
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "05ff0b7396794c12"
+      },
+      "id": "05ff0b7396794c12",
+      "type": "add",
+      "after": "3400656e188b07d8",
+      "date": 1512752120678
+    },
+    {
+      "type": "edit",
+      "id": "05ff0b7396794c12",
+      "item": {
+        "type": "paragraph",
+        "id": "05ff0b7396794c12",
+        "text": "The round abstraction will follow the same functional approach as deck and hand. However, there’s an additional twist here, which concerns separation of the temporal logic. A round takes some time and requires interaction with players. For example, when the round starts, the first player needs to be informed about the first two card they got, and then they need to be informed that it’s their turn to make a move. The round then needs to wait until the player makes the move, and only then can it step forward."
+      },
+      "date": 1512752127359
+    },
+    {
+      "type": "add",
+      "id": "3c2e5e7507572644",
+      "item": {
+        "type": "paragraph",
+        "id": "3c2e5e7507572644",
+        "text": "My impression is that many people, experienced Erlangers/Elixorians included, would implement the concept of a round directly in a GenServer or :gen_statem. This would allow them to manage the round state and temporal logic (such as communicating with players) in the same place."
+      },
+      "after": "05ff0b7396794c12",
+      "date": 1512752130302
+    },
+    {
+      "type": "add",
+      "id": "9af18233d375aaaf",
+      "item": {
+        "type": "paragraph",
+        "id": "9af18233d375aaaf",
+        "text": "However, I believe that these two aspects need to be separated, since they are both potentially complex. The logic of a single round is already somewhat involved, and it can only get worse if we want to support additional aspects of the game, such as betting, splitting, or dealer player. Communicating with players has its own challenges if we want to deal with netsplits, crashes, slow or unresponsive clients. In these cases we might need to support retries, maybe add some persistence, event sourcing, or whatnot."
+      },
+      "after": "3c2e5e7507572644",
+      "date": 1512752133199
+    },
+    {
+      "type": "add",
+      "id": "d7ed0265c38bb452",
+      "item": {
+        "type": "paragraph",
+        "id": "d7ed0265c38bb452",
+        "text": "I don’t want to combine these two complex concerns together, because they’ll become entangled, and it will be harder to work with the code. I want to move temporal concerns somewhere else, and have a pure domain model of a blackjack round."
+      },
+      "after": "9af18233d375aaaf",
+      "date": 1512752137408
+    },
+    {
+      "type": "add",
+      "id": "9781187eb5eb3833",
+      "item": {
+        "type": "paragraph",
+        "id": "9781187eb5eb3833",
+        "text": "So instead I opted for an approach I don’t see that often. I captured the concept of a round in a plain functional abstraction.\n\n"
+      },
+      "after": "d7ed0265c38bb452",
+      "date": 1512752143375
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "cb95851612743c28"
+      },
+      "id": "cb95851612743c28",
+      "type": "add",
+      "after": "9781187eb5eb3833",
+      "date": 1512752320441
+    },
+    {
+      "type": "edit",
+      "id": "cb95851612743c28",
+      "item": {
+        "type": "markdown",
+        "id": "cb95851612743c28",
+        "text": "# Sending notifications"
+      },
+      "date": 1512752330867
+    },
+    {
+      "type": "edit",
+      "id": "9781187eb5eb3833",
+      "item": {
+        "type": "paragraph",
+        "id": "9781187eb5eb3833",
+        "text": "So instead I opted for an approach I don’t see that often. I captured the concept of a round in a plain functional abstraction."
+      },
+      "date": 1512752336748
+    },
+    {
+      "type": "add",
+      "id": "793638a4a48c3ede",
+      "item": {
+        "type": "paragraph",
+        "id": "793638a4a48c3ede",
+        "text": "(Here we skip ahead again.  If you enjoy reading code, dear Reader, we recommend the full article.)"
+      },
+      "after": "9781187eb5eb3833",
+      "date": 1512752403178
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ade920cd0df26139"
+      },
+      "id": "ade920cd0df26139",
+      "type": "add",
+      "after": "cb95851612743c28",
+      "date": 1512752407339
+    },
+    {
+      "type": "edit",
+      "id": "ade920cd0df26139",
+      "item": {
+        "type": "markdown",
+        "id": "ade920cd0df26139",
+        "text": "When functions from the `Round` module return the instruction list to the server process, it will walk through them, and interpret them."
+      },
+      "date": 1512752439230
+    },
+    {
+      "type": "edit",
+      "id": "ade920cd0df26139",
+      "item": {
+        "type": "markdown",
+        "id": "ade920cd0df26139",
+        "text": "When functions from the `Round` module return the instruction list to the server process, it will walk through them, and interpret them.\n"
+      },
+      "date": 1512752466722
+    },
+    {
+      "type": "add",
+      "id": "3dfaab17da0b5562",
+      "item": {
+        "type": "markdown",
+        "id": "3dfaab17da0b5562",
+        "text": "The notifications themselves are sent from separate processes. This is an example where we can profit from extra concurrency. Sending notifications is a task which is separate from the task of managing the state of the round. The notifications logic might be burdened by issues such as slow or disconnected clients, so it’s worth doing this outside of the round process. Moreover, notifications to different players have nothing in common, so they can be sent from separate processes. However, we need to preserve the order of notifications for each player, so we need a dedicated notification process per each player."
+      },
+      "after": "ade920cd0df26139",
+      "date": 1512752469025
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d794bb5f7e030227"
+      },
+      "id": "d794bb5f7e030227",
+      "type": "add",
+      "after": "3dfaab17da0b5562",
+      "date": 1512752552217
+    },
+    {
+      "type": "edit",
+      "id": "d794bb5f7e030227",
+      "item": {
+        "type": "paragraph",
+        "id": "d794bb5f7e030227",
+        "text": "When the round server plays a move, it will get a list of instructions from the round abstraction. The server will then forward each instruction to the corresponding notifier server which will interpret the instruction and invoke a corresponding M/F/A to notify the player."
+      },
+      "date": 1512752557252
+    },
+    {
+      "type": "add",
+      "id": "68000cdb064b8207",
+      "item": {
+        "type": "paragraph",
+        "id": "68000cdb064b8207",
+        "text": "Hence, if we need to notify multiple players, we’ll do it separately (and possibly in parallel). As a consequence, the total ordering of messages is not preserved. "
+      },
+      "after": "d794bb5f7e030227",
+      "date": 1512752558914
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "de948f511d6ec9de"
+      },
+      "id": "de948f511d6ec9de",
+      "type": "add",
+      "after": "68000cdb064b8207",
+      "date": 1512752590947
+    },
+    {
+      "type": "edit",
+      "id": "de948f511d6ec9de",
+      "item": {
+        "type": "markdown",
+        "id": "de948f511d6ec9de",
+        "text": "It might happen that `player_2` messages arrives before `player_1` is informed that it’s busted. But that’s fine, since those are two different players. The ordering of messages per each player is of course preserved, courtesy of player-specific notifier server process.\n"
+      },
+      "date": 1512752632372
+    },
+    {
+      "type": "add",
+      "id": "58c8152b2adf3155",
+      "item": {
+        "type": "markdown",
+        "id": "58c8152b2adf3155",
+        "text": "Before parting, I want to drive my point again: owing to the design and functional nature of the `Round` module, all this notifications complexity is kept outside of the domain model. Likewise, notification part is not concerned with the domain logic."
+      },
+      "after": "de948f511d6ec9de",
+      "date": 1512752637371
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c96a7f0ca9fc1d64"
+      },
+      "id": "c96a7f0ca9fc1d64",
+      "type": "add",
+      "after": "58c8152b2adf3155",
+      "date": 1512752683065
+    },
+    {
+      "type": "edit",
+      "id": "c96a7f0ca9fc1d64",
+      "item": {
+        "type": "markdown",
+        "id": "c96a7f0ca9fc1d64",
+        "text": "# Conclusion"
+      },
+      "date": 1512752688496
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f5143cbc2845bb9f"
+      },
+      "id": "f5143cbc2845bb9f",
+      "type": "add",
+      "after": "c96a7f0ca9fc1d64",
+      "date": 1512752775350
+    },
+    {
+      "type": "remove",
+      "id": "f5143cbc2845bb9f",
+      "date": 1512752787681
+    },
+    {
+      "type": "edit",
+      "id": "c96a7f0ca9fc1d64",
+      "item": {
+        "type": "markdown",
+        "id": "c96a7f0ca9fc1d64",
+        "text": "# Conclusion\n"
+      },
+      "date": 1512752792372
+    },
+    {
+      "type": "add",
+      "id": "2cadb1b165c31ff7",
+      "item": {
+        "type": "markdown",
+        "id": "2cadb1b165c31ff7",
+        "text": "Simple functional abstractions such as `Deck` and `Hand` allowed me to separate concerns of a more complex round state without needing to resort to agents.\n"
+      },
+      "after": "c96a7f0ca9fc1d64",
+      "date": 1512752802213
+    },
+    {
+      "type": "add",
+      "id": "84f1d5a85dc9b142",
+      "item": {
+        "type": "markdown",
+        "id": "84f1d5a85dc9b142",
+        "text": "That doesn’t mean we need to be conservative with processes though. Use processes wherever they make sense and bring some clear benefits. Running different rounds in separate processes improves scalability, fault-tolerance, and the overall performance of the system. The same thing applies for notification processes. These are different runtime concerns, so there’s no need to run them in the same runtime context.\n"
+      },
+      "after": "2cadb1b165c31ff7",
+      "date": 1512752812503
+    },
+    {
+      "type": "add",
+      "id": "41c61fb56a12f16e",
+      "item": {
+        "type": "markdown",
+        "id": "41c61fb56a12f16e",
+        "text": "If temporal and/or domain logic are complex, consider separating them. The approach I took allowed me to implement a more involved runtime behaviour (concurrent notifications) without complicating the business flow of the round. This separation also puts me in a nice spot, since I can now evolve both aspects separately. Adding the support for dealer, split, insurance, and other business concepts should not affect the runtime aspect significantly. Likewise, supporting netsplits, reconnects, player crashes, or timeouts should not require the changes in the domain logic."
+      },
+      "after": "84f1d5a85dc9b142",
+      "date": 1512752823077
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9968b75771417a57"
+      },
+      "id": "9968b75771417a57",
+      "type": "add",
+      "after": "41c61fb56a12f16e",
+      "date": 1512752825850
+    },
+    {
+      "type": "edit",
+      "id": "9968b75771417a57",
+      "item": {
+        "type": "pagefold",
+        "id": "9968b75771417a57",
+        "text": "."
+      },
+      "date": 1512752830047
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "988c3c1d9474816e"
+      },
+      "id": "988c3c1d9474816e",
+      "type": "add",
+      "after": "9968b75771417a57",
+      "date": 1512752832307
+    },
+    {
+      "type": "edit",
+      "id": "988c3c1d9474816e",
+      "item": {
+        "type": "paragraph",
+        "id": "988c3c1d9474816e",
+        "text": "I am reminded of advice from LISP: use macros only when nothing else will do; reach first for simple functions."
+      },
+      "date": 1512752890159
+    },
+    {
+      "type": "edit",
+      "id": "988c3c1d9474816e",
+      "item": {
+        "type": "paragraph",
+        "id": "988c3c1d9474816e",
+        "text": "code structure delineated from runtime structure.  We (as an industry) need language to discuss those things separately."
+      },
+      "date": 1512752937651
+    },
+    {
+      "type": "add",
+      "id": "6ee802d0be423405",
+      "item": {
+        "type": "paragraph",
+        "id": "6ee802d0be423405",
+        "text": "I am reminded of advice from LISP: use macros only when nothing else will do; reach first for simple functions."
+      },
+      "after": "988c3c1d9474816e",
+      "date": 1512752940352
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d7431aeacf452ce0"
+      },
+      "id": "d7431aeacf452ce0",
+      "type": "add",
+      "after": "6ee802d0be423405",
+      "date": 1512752956148
+    },
+    {
+      "type": "remove",
+      "id": "988c3c1d9474816e",
+      "date": 1512752957555
+    },
+    {
+      "type": "edit",
+      "id": "d7431aeacf452ce0",
+      "item": {
+        "type": "markdown",
+        "id": "d7431aeacf452ce0",
+        "text": "I'm super excited to see _code structure_ delineated from _runtime structure_.  The software industry needs language and good examples to discuss those things separately."
+      },
+      "date": 1512752989056
+    },
+    {
+      "type": "move",
+      "order": [
+        "42574843386d6bae",
+        "381708319d3f364c",
+        "316b4028ced02e88",
+        "b64e9d5bf8f84abd",
+        "be0b4331d29fbfb1",
+        "10c4f87a51975299",
+        "4aad8758952bb698",
+        "25db43067a2d289c",
+        "4b408e949c9bca60",
+        "68bc2818e1cef27d",
+        "831d337188b88c84",
+        "3400656e188b07d8",
+        "05ff0b7396794c12",
+        "3c2e5e7507572644",
+        "9af18233d375aaaf",
+        "d7ed0265c38bb452",
+        "9781187eb5eb3833",
+        "793638a4a48c3ede",
+        "cb95851612743c28",
+        "ade920cd0df26139",
+        "3dfaab17da0b5562",
+        "d794bb5f7e030227",
+        "68000cdb064b8207",
+        "de948f511d6ec9de",
+        "58c8152b2adf3155",
+        "c96a7f0ca9fc1d64",
+        "2cadb1b165c31ff7",
+        "84f1d5a85dc9b142",
+        "41c61fb56a12f16e",
+        "9968b75771417a57",
+        "d7431aeacf452ce0",
+        "6ee802d0be423405"
+      ],
+      "id": "d7431aeacf452ce0",
+      "date": 1512752992540
+    },
+    {
+      "type": "edit",
+      "id": "d7431aeacf452ce0",
+      "item": {
+        "type": "markdown",
+        "id": "d7431aeacf452ce0",
+        "text": "I'm super excited to see _code structure_ delineated from _runtime structure_.  The software industry needs language and good examples to discuss those things separately.\n"
+      },
+      "date": 1512753002625
+    },
+    {
+      "type": "add",
+      "id": "f4f18342e81162bf",
+      "item": {
+        "type": "markdown",
+        "id": "f4f18342e81162bf",
+        "text": "One of the best programmers I have worked with never draws class diagrams when object modeling at a whiteboard.  He always draws object _instances_.  His mental model, what he chooses to communicate to others with at the white board with [[Boxes and Arrows]] is what is happening at runtime.\n"
+      },
+      "after": "d7431aeacf452ce0",
+      "date": 1512753195014
+    },
+    {
+      "type": "add",
+      "id": "3f94793848d955c7",
+      "item": {
+        "type": "markdown",
+        "id": "3f94793848d955c7",
+        "text": "Similarly, Sandi Metz draws sequence diagrams... also drawing attention to how messages flow between object _instances_ at runtime.  And here using a diagram that explicitly includes the passage of time in the image.\n"
+      },
+      "after": "f4f18342e81162bf",
+      "date": 1512753328299
+    },
+    {
+      "type": "edit",
+      "id": "3f94793848d955c7",
+      "item": {
+        "type": "markdown",
+        "id": "3f94793848d955c7",
+        "text": "Similarly, Sandi Metz draws sequence diagrams... also drawing attention to how messages flow between object _instances_ at runtime; using a diagram organized around the passage of time.\n"
+      },
+      "date": 1512753367464
+    },
+    {
+      "type": "add",
+      "id": "6227a33abd6e8fce",
+      "item": {
+        "type": "paragraph",
+        "id": "6227a33abd6e8fce",
+        "text": "See also [[Visualizing Concurrency in Go]]."
+      },
+      "after": "6ee802d0be423405",
+      "date": 1512753463906
+    },
+    {
+      "type": "add",
+      "id": "6b7b471f28fb75a7",
+      "item": {
+        "type": "paragraph",
+        "id": "6b7b471f28fb75a7",
+        "text": "I am also reminded that I have heard both LISP and Smalltalk developers talk (or even brag) about modifying code at runtime.  I have seen non-LISP and non-Smalltalk devs react in horror at the very idea."
+      },
+      "after": "6227a33abd6e8fce",
+      "date": 1512753718283
+    },
+    {
+      "type": "add",
+      "id": "eae5dd2787a325ec",
+      "item": {
+        "type": "paragraph",
+        "id": "eae5dd2787a325ec",
+        "text": "Runtime is when software is delighting or frustrating its customers.  It is essential for us to learn how to think about what happens at runtime."
+      },
+      "after": "6b7b471f28fb75a7",
+      "date": 1512753797098
+    },
+    {
+      "type": "move",
+      "order": [
+        "42574843386d6bae",
+        "381708319d3f364c",
+        "316b4028ced02e88",
+        "b64e9d5bf8f84abd",
+        "be0b4331d29fbfb1",
+        "10c4f87a51975299",
+        "4aad8758952bb698",
+        "25db43067a2d289c",
+        "4b408e949c9bca60",
+        "68bc2818e1cef27d",
+        "831d337188b88c84",
+        "3400656e188b07d8",
+        "05ff0b7396794c12",
+        "3c2e5e7507572644",
+        "9af18233d375aaaf",
+        "d7ed0265c38bb452",
+        "9781187eb5eb3833",
+        "793638a4a48c3ede",
+        "cb95851612743c28",
+        "ade920cd0df26139",
+        "3dfaab17da0b5562",
+        "d794bb5f7e030227",
+        "68000cdb064b8207",
+        "de948f511d6ec9de",
+        "58c8152b2adf3155",
+        "c96a7f0ca9fc1d64",
+        "2cadb1b165c31ff7",
+        "84f1d5a85dc9b142",
+        "41c61fb56a12f16e",
+        "9968b75771417a57",
+        "d7431aeacf452ce0",
+        "f4f18342e81162bf",
+        "3f94793848d955c7",
+        "6227a33abd6e8fce",
+        "6ee802d0be423405",
+        "6b7b471f28fb75a7",
+        "eae5dd2787a325ec"
+      ],
+      "id": "6227a33abd6e8fce",
+      "date": 1512753811370
+    },
+    {
+      "type": "edit",
+      "id": "3f94793848d955c7",
+      "item": {
+        "type": "markdown",
+        "id": "3f94793848d955c7",
+        "text": "Similarly, Sandi Metz draws sequence diagrams... also drawing attention to how messages flow between object _instances_ at runtime; using a diagram organized around the passage of time."
+      },
+      "date": 1512754188105
+    },
+    {
+      "type": "edit",
+      "id": "6227a33abd6e8fce",
+      "item": {
+        "type": "paragraph",
+        "id": "6227a33abd6e8fce",
+        "text": "See also [[xkcd 1883 supervillain plan]] for other thoughts about time."
+      },
+      "date": 1512754227190
+    },
+    {
+      "type": "add",
+      "id": "83ac5b4ea9838d32",
+      "item": {
+        "type": "paragraph",
+        "id": "83ac5b4ea9838d32",
+        "text": "See also [[Visualizing Concurrency in Go]]."
+      },
+      "after": "6227a33abd6e8fce",
+      "date": 1512754228892
+    },
+    {
+      "id": "f4f18342e81162bf",
+      "type": "remove",
+      "date": 1610238228959
+    },
+    {
+      "id": "3f94793848d955c7",
+      "type": "remove",
+      "date": 1610238233051
+    },
+    {
+      "id": "6227a33abd6e8fce",
+      "type": "remove",
+      "date": 1610238243085
+    },
+    {
+      "id": "6ee802d0be423405",
+      "type": "remove",
+      "date": 1610238253688
+    },
+    {
+      "id": "6b7b471f28fb75a7",
+      "type": "remove",
+      "date": 1610238257446
+    },
+    {
+      "id": "eae5dd2787a325ec",
+      "type": "remove",
+      "date": 1610238262305
+    },
+    {
+      "id": "83ac5b4ea9838d32",
+      "type": "remove",
+      "date": 1610238265128
+    },
+    {
+      "type": "edit",
+      "id": "d7431aeacf452ce0",
+      "item": {
+        "type": "markdown",
+        "id": "d7431aeacf452ce0",
+        "text": "I'm super excited to see _code structure_ delineated from _runtime structure_.  The software industry needs language and good examples to discuss those things separately.\n\nSee [[BEAMs of Insight]]"
+      },
+      "date": 1610238287952
+    },
+    {
+      "type": "fork",
+      "site": "wiki.dbbs.co",
+      "date": 1651125807968
+    }
+  ]
+}

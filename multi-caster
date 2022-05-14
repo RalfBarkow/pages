@@ -1,0 +1,1052 @@
+{
+  "title": "Multi Caster",
+  "story": [
+    {
+      "type": "html",
+      "text": "[[Category Pattern]]",
+      "id": "4d3ff1d5f197eaba7e37e6774b582663"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9d62a1940ab929358d5b0fc801fd0070"
+    },
+    {
+      "type": "html",
+      "text": "The [[Observer Pattern]] family is too damned useful. We see countless variants and extensions of it in the literature - [[Mediator Pattern]], [[Event Notifier]], Reactor, [[Event Channel]], Broker, [[Try Throw Catch]], the various agent architectures, GUI callbacks, comms handlers and so on. Almost all hark back to the concepts in craggy old visicalc, and no doubt that's derived from someone's woodpulpware system - nothing new under the sun.",
+      "id": "451834e473131b8a35dcb40261d69170"
+    },
+    {
+      "type": "html",
+      "text": "\nThe problem is that we often see more than one observer-variant in the same development. This raises a number of issues:",
+      "id": "cbe5094e02097dbbc2061ad90a2b106e"
+    },
+    {
+      "type": "html",
+      "text": " maintenance; tracking code flow through multiple observer variants is no fun, especially when some kind of multitasking is involved",
+      "id": "207100b77f30255aa4cfec65b414f6b9"
+    },
+    {
+      "type": "html",
+      "text": " visibility; people hide bits of design in all those observer registrations. Often we'd like to be able to visualize, document, report and reconfigure them just like we could with [[Visi Calc]]",
+      "id": "fa7f41e71596c4a5e3a8ea64d8aac2e8"
+    },
+    {
+      "type": "html",
+      "text": " granularity; we often end up putting conditional code in the observer's callbacks because we don't have a way of specifying what granularity of events we're interested in",
+      "id": "a9b42d541c5e3ebf33a8deff0ac4b8c3"
+    },
+    {
+      "type": "html",
+      "text": " livelock; If A observes B and B observes A, the two may whizz around notifying themselves in perpetuity",
+      "id": "04b6c414f94ce8b41ed93e4ea4259460"
+    },
+    {
+      "type": "html",
+      "text": " multiplication of classes; do we really need more than one mediator/broker class? Do we really need more than one abstract subject/observer class? Aren't these classes most often just pattern artifacts - useless for factoring purposes?",
+      "id": "6432375605d3ed894b7f0917e0a46ec7"
+    },
+    {
+      "type": "html",
+      "text": "<b>Therefore,</b>",
+      "id": "584ec824ff020774a66960f823bfbef2"
+    },
+    {
+      "type": "html",
+      "text": "\nWe define five generic participants that will take part in ongoing processes of observation. These are",
+      "id": "cc0db431a096fccabe733c0cf521d655"
+    },
+    {
+      "type": "html",
+      "text": " An Address class. This could be a simple symbolic tag. More usefully, it's a slash delimited path; I've built a variant in which it was an arbitrarily dimensional closed surface indexing into a geometric database.",
+      "id": "ffe44d16b912ad9b93179297db30a897"
+    },
+    {
+      "type": "html",
+      "text": " A Value class. This could be a simple scalar. More usefully it's a structured value related to some reflective architecture. In the variant with the geometric database, it was a variety of smart iterator.",
+      "id": "82d5cdbba04ac252e8670036f86bfffc"
+    },
+    {
+      "type": "html",
+      "text": " An Agent class. Agents are peers - a particular agent can be a subject for some observations and an observer of others. Agents subscribe (attach) member functions to Addresses, and publish (notify) Values on other Addresses. ",
+      "id": "0a53e26d1ee43571c83b2cecb38c82db"
+    },
+    {
+      "type": "html",
+      "text": " A [[Multi Caster]] singleton. This encapsulates a multimap from subscribed Addresses to their accompanying callbacks. Most usefully, this will understand the Address space sufficiently to perform set arithmetic when matching up publications and subscriptions. For example, if the Addresses are slash delimited paths, subscribing to the base of a tree of paths on which publications occur is equivalent to subscribing to all of the sub-paths.",
+      "id": "96ea67895647152a88a1eb80ef8ca5a2"
+    },
+    {
+      "type": "html",
+      "text": " A Proxy class. Proxies, as per GoF, encapsulate connection classes. Their function here is to represent all of the Agents from one process within another process. They do this simply by mapping publication and subscription events - so comms become purely demand-driven.",
+      "id": "63ec7c89f294d79c0d2dfc7c351a8bf8"
+    },
+    {
+      "type": "html",
+      "text": "\nTo summarize this, Agents communicate by subscribing to Addresses in a space managed by [[Multi Caster]] and distributed via Proxy, and publishing Values on Addresses in this space. A subscription associates a callback (an object and one of its member functions, whose signature accepts a Value) with an Address. Like observer/mediator/broker, when a Value is published on an Address, all the subscribing Agents receive it via their callbacks.",
+      "id": "8b1644504412c8499278a14d737d7eef"
+    },
+    {
+      "type": "html",
+      "text": "\nThis is obviously similar to [[Doug Schmidt]]'s [[Reactor Pattern]]. The difference is the explicit definition of Address, which models the problem domain rather than the process architecture. By making explicit the map between this Address space and the process architecture, the various issues identified before the <b>Therefore</b> are resolved:",
+      "id": "5135756f3e92805a544eb6dcba209f11"
+    },
+    {
+      "type": "html",
+      "text": " the linkage between problem domain events and agent callbacks can be explicitly configured and traced",
+      "id": "3e794b6f9084486632ef23b7a19aba22"
+    },
+    {
+      "type": "html",
+      "text": " the granularity of observation can be made arbitrarily fine",
+      "id": "ffde0b8becd92e2c6d64ad9b89e428d7"
+    },
+    {
+      "type": "html",
+      "text": " it becomes more likely that deadly embraces will be spotted at configuration time",
+      "id": "d9f988b99a625b771aedcddb99024f4b"
+    },
+    {
+      "type": "html",
+      "text": " there is no multiplication of classes - only Agent is sub-classed.",
+      "id": "76d656101fa455584b5f5372e7d36036"
+    },
+    {
+      "type": "html",
+      "text": "<b>Notes:</b>",
+      "id": "dbe4a4b92a05907754b44df7892478b5"
+    },
+    {
+      "type": "html",
+      "text": " Both synchronous and asynchronous semantics can be supported this way. If synchronous, callbacks also return a Value, and publishers are blocked until they receive all the subscribers' return Values. More commonly the semantics are asynchronous - publication is non-blocking and no return Value is communicated from it.",
+      "id": "2ccd71c04dc089e4b6d3447a2b89e3b2"
+    },
+    {
+      "type": "html",
+      "text": " There is overhead in doing the [[Multi Caster]] set arithmetic when matching up publishers and subscribers. In most cases this arithmetic only needs to be done occasionally; a [[Forwarder And Receiver]] pattern ([[Po Sa]]) can be used to maintain the results until the availability of publishers/subscribers changes, and exceptions can be generated to notify Agents that they need to refresh their Forwarders. This cuts the overhead way down, but it makes testing a little more involved.",
+      "id": "13908008533a86a32cc7412a4185b409"
+    },
+    {
+      "type": "html",
+      "text": " I've been extending this pattern recently by adding a transaction concept; a publication generates a transaction that completes when all the subscribers' callbacks have been notified. Return values from the callbacks are marshalled and delivered to the publisher. The publisher can either block until the return values are ready, specify a callback for the return values, or elect not to receive return values at all. This is a neat way to mate [[Multi Caster]] onto a more traditional polling model. -- [[Peter Merel]]",
+      "id": "8c187aa344b2b40ce71d84b90a9250e4"
+    },
+    {
+      "type": "html",
+      "text": "<b>Examples:</b> [[Object Space Voyager]] (addresses modelled as adornments), [[Use Net]], Teknekron [[Information Bus]], [[Linda Tuple Spaces]], spreadsheets, windowing systems ...",
+      "id": "90fcf3f5409b274b3a78fdfeaf66519e"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9d62a1940ab929358d5b0fc801fd0070"
+    },
+    {
+      "type": "html",
+      "text": "It sounds good. I've been thinking for a while about alternate paradigms of computing. One of them is massively event-based. In [[Designing Object Systems]] by [[Cook And Daniels]] (the book outlines the Syntropy approach) they make the point that reality is really event based, so OO conceptual models are really a slight mismatch.",
+      "id": "bdc1576813dadf575e2eee27d195f6f4"
+    },
+    {
+      "type": "html",
+      "text": "<i>Hmm. Off topic, but \"reality is event-based\" seems to ignore quantum SpookyActionAtADistance. A much better case can be made for the idea that reality is transaction-based - see [http://www.npl.washington.edu/AV/altvw16.html www.npl.washington.edu]</i>",
+      "id": "3dfafcad2e1ec02354e688e40f92c790"
+    },
+    {
+      "type": "html",
+      "text": "<i>Just to set the record straight: In [[Designing Object Systems]] we didn't say that reality is event based, just that it might be simpler to create models of the world using events rather than point-to-point messages (as has been the trend in OO methods, following along from OOPLs) -- John Daniels</i>",
+      "id": "e13b697ec2a0ec89e97c6ce07f2f8ef9"
+    },
+    {
+      "type": "html",
+      "text": "<i>And [[Multi Caster]] isn't really any alternate computing paradigm - it's just adding two old concepts together. Address spaces aren't new, and neither are Reactors. The reason I like putting them together is that this way you can think about the Space of the problem domain a la [[Organic Architecture]].</i>",
+      "id": "873cc8dcf0431d955405f07328df4682"
+    },
+    {
+      "type": "html",
+      "text": "\nI have this intuition that another way of going would be to allow all objects to broadcast to no one in particular, and receive from anyone. Systems could be progressively grown by adding software where the newer bits get first crack at the messages. Sure enough, there are performance issues.",
+      "id": "03e1a503d19f9a42c5ea731fcce7d68c"
+    },
+    {
+      "type": "html",
+      "text": "<i>A lot of the performance issues then have to do with your communications/database architecture. The traditional TCPish arrangements of DAGs of domains work quite well with this approach.</i>",
+      "id": "8e487eb86fdb75c3803813ed86df0dfb"
+    },
+    {
+      "type": "html",
+      "text": "\nThis is a beehive style of computing. I'm really interested in getting past the limitations inherent in type systems. The kind of ossification that occurs when systems get to be too specialized because no one had the time or knowledge to refactor effectively.",
+      "id": "5cbc4a42f5f2e3e894e17c5b76558cce"
+    },
+    {
+      "type": "html",
+      "text": "<i>Yah. I look at the marvels of CPAN and wonder what the hell I'm doing wasting my time with a strongly typed language like C++. [[Composite Types]] - what other types do you need? I can't think of anything I can do with STL (or JGL) that I can't do better with Perl's builtin types.</i>",
+      "id": "087234d00ba6c1da38d0d49894673e58"
+    },
+    {
+      "type": "html",
+      "text": "\nDoubtless, there is some theoretical reason why this is nuts, but I make a habit of thinking about the impossible. -- [[Michael Feathers]] (Man of La Mancha).",
+      "id": "273d551e5a0af7a98474c528c8b0e6bf"
+    },
+    {
+      "type": "html",
+      "text": "<i>I've got a number of systems in the field based on this pattern, so I can say it's far from impossible. It may not be optimal - I'm very interested in alternatives - but so far it's served me very well. -- [[Peter Merel]]</i>",
+      "id": "58aa63c24d45db1f50c471789176c883"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9d62a1940ab929358d5b0fc801fd0070"
+    },
+    {
+      "type": "html",
+      "text": "It reminds me of [[Black Board]] models (although it's different). The [[Multi Caster]] is like the blackboard that everyone can read or write to.",
+      "id": "dad21c281067ae8409e9ce3576c3beff"
+    },
+    {
+      "type": "html",
+      "text": "<i>You can do a [[Black Board]] this way. Depends on whether you cache publications or not. More commonly, in my experience at least, you don't.</i>",
+      "id": "874942118eb46bc6cc64689758adf463"
+    },
+    {
+      "type": "html",
+      "text": "\nWhat are the Values used for?",
+      "id": "959c648900d922cc5966eaf43d793305"
+    },
+    {
+      "type": "html",
+      "text": "<i>They encapsulate whatever parameters make sense for a Path. For example, an Address is often associated with some particular device, and published Values there may represent its state. If the device is a sensor, a camera perhaps, then the Value may be a reference to an image it has captured. If the device is an actuator, then it might only publish there only if it strikes an exceptional condition.</i>",
+      "id": "dd177545cf96a63fc96ebdd82def1f72"
+    },
+    {
+      "type": "html",
+      "text": "\nThe notion of explicitly defining the address is interesting. Do addresses usually mean something in real-world terms; is that a pre-condition for successful use of the pattern?",
+      "id": "26495864584fc4bc7a5c84d2a30a169d"
+    },
+    {
+      "type": "html",
+      "text": "<i>Seems natural for them to do so. They generally seem to match up with analysis-level classes, though I wouldn't call that a precondition.</i>",
+      "id": "19472dcc864805adaf6939cf20ebf17e"
+    },
+    {
+      "type": "html",
+      "text": "\nAre addresses too useful - is there a temptation to encode other things into the address space, and/or is this a good thing? ",
+      "id": "ea81c6a696bb4af3d4ad91fc80bb1e91"
+    },
+    {
+      "type": "html",
+      "text": "<i>Seems like a good thing. For example, you can cause otherwise uncaught exceptions to appear as publications on some distinctive path. Diagnostic traces of particular agents (qua device drivers) can be done the same way.</i>",
+      "id": "3dd9ba6fb5d83c94e8ba399cd7197d68"
+    },
+    {
+      "type": "html",
+      "text": "\nBy \"other things\", I mean that incrementing a variable could have a different address from decrementing the same variable. Using the space to describe what has happened as well as to which object. ",
+      "id": "b802ede987b2e4f09928c968eaed1a54"
+    },
+    {
+      "type": "html",
+      "text": "<i>'Yes, that's doable too. Constructing the semantics of the Address space becomes the significant design process once you employ a [[Multi Caster]]. So I guess I think of this as an architectural rather than a design pattern. Actually, one early example of [[Multi Caster]] that occurs to me is usenet nntp; given the excellent scaling properties of that, I think calling the pattern architectural is fair.</i> ",
+      "id": "e1e6e69b91f485823fe6477b2f10e890"
+    },
+    {
+      "type": "html",
+      "text": "\nIt seems to me that the border between Addresses and Values could be blurred.",
+      "id": "1748925f81aaf601cb392bc9ff7aa43a"
+    },
+    {
+      "type": "html",
+      "text": "<i>You're right, especially when Values assume the form of, say, associative arrays and you cache the publications. But the blurring goes away if you restrict Values to be either scalar or iterator types, or if you don't cache. --[[Peter Merel]]</i>",
+      "id": "cfacff54bf7ddb9a074c2e8b7b2fee97"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9d62a1940ab929358d5b0fc801fd0070"
+    },
+    {
+      "type": "html",
+      "text": "I appear to have independently (re)invented this in a few projects. I agree that the border between Address and Value can be blurred - initially I didn't separate Address from Value at all. I used hierarchical objects that were simultaneously Address and Value. Processing an outgoing object starts at a common root (or a distributed emulation of one) and at each level of the hierarchy a few parameters are removed and used to route the remainder of the object toward its destination. This seemed like a good idea at the time, but recently I've explicitly separated the two because it seems more natural that way. One problem with having no distinction at all is that it makes protocol analysis more difficult, as you don't really know (without knowledge of every object in the system) where the address stops and the value begins.",
+      "id": "5e60e7b9f852523d6034ae75d0bb4d31"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Zygo Blaxell]]",
+      "id": "d44081dbbad58457505a4ac269dea226"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9d62a1940ab929358d5b0fc801fd0070"
+    },
+    {
+      "type": "html",
+      "text": "[[Peter Merel]] has the temerity to suggest this pattern meets Wright's [[Organic Architecture]] criteria. Here's why:",
+      "id": "b75bd07eccd9e66150d799c1bfc80103"
+    },
+    {
+      "type": "html",
+      "text": "\"NATURE\" is transaction-based - cf [http://www.npl.washington.edu/AV/altvw16.html www.npl.washington.edu] . By defining the Address space in terms of Fields, this pattern can emulate natural systems. ",
+      "id": "b42c2c21e9c02c3ad9b492263ea80326"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Part To Whole As Whole Is To Part]] - fair enough, [[Multi Caster]](s) can be composited into multicast domains.",
+      "id": "c2e5574b26fcc778cda11a607f51f785"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Form And Function Are One]] - this pattern serves a central architectural purpose but there's no excess baggage in it; compare with great reflective brutes like CORBA and COM.",
+      "id": "0f24b464f5b28d40fb3513855470711f"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Multi Caster]] is creative (Alexander's generative) - it enables rather than dictates a great array of diverse forms, serving Wright's \"ROMANCE\"",
+      "id": "f3b25e776cc8ee36324ef565562cec42"
+    },
+    {
+      "type": "html",
+      "text": "\nThe pattern does not document a tradition or habit but a fundamental basis for a space of development - a \"TRUTH\"",
+      "id": "8b1a519c75551db5164d7a21cf0cd82f"
+    },
+    {
+      "type": "html",
+      "text": "\nIf the pattern is to be successful the Agent and Proxy semantics must mirror the [[Multi Caster]] semantics in terms of the Address space - so these are all [[Of The Thing And Not On It]]",
+      "id": "ed7abe5e1925d0f63b4a70d24c1bdd4e"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Multi Caster]] does not constrain the forms of the Address, Value and Agent classes, but enables them <i>from below</i>, meeting Wright's \"SPIRIT\".",
+      "id": "390f6d47b896990a29fbfbeaf2fa7ed2"
+    },
+    {
+      "type": "html",
+      "text": "\nThis pattern scales well, so it has Wright's \"THIRD DIMENSION\"",
+      "id": "d69747f77d90765895b38f9875337b90"
+    },
+    {
+      "type": "html",
+      "text": "\nWright-style SPACE is really the point of the pattern. By shifting design concerns away from functional dependency and on to provision of service, the pattern creates an open development space within which designers and administrators can interact. Compare with the various layered and hierarchical architectural patterns that work to separate designers and administrators, reducing cooperation between them. The history of usenet exemplifies this - checkout [http://www.danenet.wicip.org/bcp/history_of_usenet.html www.danenet.wicip.org].",
+      "id": "0f2a2e398f4efb57960f2c055e7f865f"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9d62a1940ab929358d5b0fc801fd0070"
+    },
+    {
+      "type": "html",
+      "text": "Peter, when implementing this, have you done anything to detect cycles? It seems that a topological sort can be used to make sure they don't occur, but it is also true that notifications you send which come back to you need not spur other notifications.",
+      "id": "d94363045e0b1b3983096e08c32f46ae"
+    },
+    {
+      "type": "html",
+      "text": "<i>publish() takes a flag which says whether or not to propagate a publication outside the local process. When proxies publish they set this flag false. Or you can include the domain/host/pid as an argument to the callbacks and have the proxies make a decision on that basis. Or both. Usually the [[Multi Caster]] doesn't propagate an agent's publications back to itself either, figuring that the agent can manage its own state without assistance.</i>",
+      "id": "4e3e45c57cc983f2972d365ff852676f"
+    },
+    {
+      "type": "html",
+      "text": "\nIn the synchronous case, have you done this so that the order of notification is implied by the order of subscription, or is it a bad thing to start depending on that?",
+      "id": "ecd1726a9a9c3ef009c0174314652267"
+    },
+    {
+      "type": "html",
+      "text": "<i>I'd say that's not very reliable, and gets less reliable the more things are distributed. About all you should rely on here is that a subscriber will receive events from a particular publisher in the same order that their generated by that publisher. You might be able to add other guarantees if you implement this over a [[Real Time]] OS - QNX say - but I'm not certain what that buys you.</i>",
+      "id": "ce4627241e2742ed24e9b7eb878e2530"
+    },
+    {
+      "type": "html",
+      "text": "\nWhen you speak of iterators are you talking about iterating over the address space?",
+      "id": "685eb4921b674d0ac9aad6265d30a528"
+    },
+    {
+      "type": "html",
+      "text": "<i>Not really - they were ways of iterating over particular datasets. The application in that case was a very high-dimension, high-volume, geographically distributed data warehouse. The question was more about whether to send a concrete dataset from site to site or whether to iterate; the solutions that are presently being investigated for resolving that are mainly market-based - check out [http://s2k-ftp.cs.berkeley.edu:8000/mariposa/ s2k-ftp.cs.berkeley.edu:8000]</i>",
+      "id": "2b2391cccd8e52b527980d6c13f65c3d"
+    },
+    {
+      "type": "html",
+      "text": "\nRegarding the use of the proxies, you said that they make things demand driven but isn't this all push?",
+      "id": "5616056d6211d5934ad2a5805b3e426b"
+    },
+    {
+      "type": "html",
+      "text": "<i>Not to my thinking. Subscriptions get broadcast to all processes (if that's too costly, then all within a domain ...) but publications only get sent to subscribers. If no agent in process A is subscribed to some Address published by an agent in process B, then A's proxy in B isn't subscribed to that Address and its publication is never communicated to A. If one or more of A's agents have subscribed that address then the publication will go. Because multiple agents in one process may subscribe a path in another, the [[Multi Caster]] should be smart enough to ignore duplicate subscriptions.</i>",
+      "id": "b23f58ece31f38a01c98e33a2ba1d711"
+    },
+    {
+      "type": "html",
+      "text": "<i>As you can probably see, error recovery could get messy with this, especially if you permit unsubscription on the fly. But it's doable either via mementoes per proxy or per agent ... probably plenty of other ways too. How hairy it gets depends on how bumpless you want it to be.</i>",
+      "id": "e012a4cf6782bb77951ff37a4b81f315"
+    },
+    {
+      "type": "html",
+      "text": "\nDo agents typically hardcode addresses, leave them to configuration, dynamically create them, or it just depends on the problem?",
+      "id": "c4a62ec6cd13306656cd9f7dcff4d807"
+    },
+    {
+      "type": "html",
+      "text": "<i>Depends on the problem. I generally like to let configuration be dynamic because if I find there's some performance bottleneck in [[Multi Caster]] for comms between two particular agents it generally means I've badly factored the agents - so it's not the Address hash that's the problem.</i>",
+      "id": "638bd832c1fdc270d378d366b7a54cea"
+    },
+    {
+      "type": "html",
+      "text": "\nWas taking a crack at coding a [[Multi Caster]] today to ferment the ideas. -- [[Michael Feathers]]",
+      "id": "f8a2a04bff1afe65ae60a37a8170adbc"
+    },
+    {
+      "type": "html",
+      "text": "<i>Good luck with it. An area I'm still playing with has to do with event queues. You need at least one - in the MC. If you're doing this with preemptive threads then that's a critical section, and if not you still want to prevent a functional deadly embrace. But with preemptive threads what about having one event queue per agent?</i> -- [[Peter Merel]]",
+      "id": "10544c036b3b8e6d0ceb5a6c32070856"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9d62a1940ab929358d5b0fc801fd0070"
+    },
+    {
+      "type": "html",
+      "text": "Regarding the \"countless variants of observer patterns\". Maybe this is just an incarnation/application of the [[Construction Principle For Design Patterns]]?",
+      "id": "a3bcd1a5b8d55132773519cf108c4c73"
+    },
+    {
+      "type": "html",
+      "text": "\nThe basic for all the different Observer patterns is a common semantic: Inform dependent objects about changes. The implementation, however, is driven by the actual context (the requirements on this part of the system) - and this results \"just\" in a different combination of [[Template Class]](es) and [[Hook Class]](es) as sketched in [[Construction Principle For Design Patterns]].",
+      "id": "87bee6fd4c74db32c32ef47e3ab4375d"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Thomas Weidenfeller]]",
+      "id": "19fcee575aef5a39892fb7deecb3cbd1"
+    },
+    {
+      "type": "html",
+      "text": "<i>The problem being solved here is not the countless observer pattern variants that exist but the patchwork combination of several variants, or several instances of the same variant, in the same development. The difficulties that result are detailed at the top of this page.</i>",
+      "id": "4dbfefd8822c9e583beafae4194ceb73"
+    },
+    {
+      "type": "html",
+      "text": "<i>The countless pattern variants, imho, are partly due to folk coming to patterns from different backgrounds, and partly the [[Pattern Of Babel]]. But I'm not certain of the use of the [[Construction Principle For Design Patterns]] so will ask further questions there.</i> -- [[Peter Merel]]",
+      "id": "4ae99378f34e30ec0409141cc019689e"
+    },
+    {
+      "type": "html",
+      "text": "\nYou are right, I am digressing from the original problem. I was just trying to identify a root cause of the problem, leaving the problem solving to others.",
+      "id": "e27480725da56379277fb7e31b7bc815"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Thomas Weidenfeller]]",
+      "id": "19fcee575aef5a39892fb7deecb3cbd1"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9d62a1940ab929358d5b0fc801fd0070"
+    },
+    {
+      "type": "html",
+      "text": "\nTo me, it looks like [[Multi Caster]] uses a variety of GOF design patterns in a particular set of configurations. I wonder if [[Architectural Pattern]] would be a good word for large-scale patterns which are singly instanced in systems or subsystems, and are composed from lower level patterns? Or, is this just creating a new word for no good reason? -- [[Michael Feathers]]",
+      "id": "8e49d9ceda868363c99bbe530d69090e"
+    },
+    {
+      "type": "html",
+      "text": "<i>[[Architectural Pattern]] is a [[Party Of Five]] concept, and not a bad one.</i>",
+      "id": "fba9d22239240b951bd2b8ae5c18e165"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9d62a1940ab929358d5b0fc801fd0070"
+    },
+    {
+      "type": "html",
+      "text": "\nHow is this different from [[Publish And Subscribe]]? - [[Gabriel Wachob]]",
+      "id": "4a1732bdde1a7f535614a390765000aa"
+    },
+    {
+      "type": "html",
+      "text": "\nJust as the original [[Observer Pattern]], it's not different from, it's underpinning for.",
+      "id": "90850d7c65a6fa91e0130d09537b7be0"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9d62a1940ab929358d5b0fc801fd0070"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Multi Caster]] has a separate meaning in TCP/IP used to refer to software which broadcasts UDP packets using IGMP (ftp://ftp.rfc-editor.org/in-notes/rfc3376.txt) into the Multicast address space as defined by RFC2375 (ftp://ftp.rfc-editor.org/in-notes/rfc3307.txt).",
+      "id": "2546b8fd49ffad31a78a77039287aed4"
+    },
+    {
+      "type": "html",
+      "text": "-- Martin Spamer",
+      "id": "f0a8a20cfe318ba58d14f3850b023ed7"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9d62a1940ab929358d5b0fc801fd0070"
+    },
+    {
+      "type": "html",
+      "text": "\nIve been working in this area and am struck with how much this observer-type pattern looks like forward-chaining expert-systems.",
+      "id": "a5960cb5dc1176fd8b918da8d64031bb"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Damien Morton]]",
+      "id": "0333a0de1686324dda57d6ff22f51817"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9d62a1940ab929358d5b0fc801fd0070"
+    },
+    {
+      "type": "html",
+      "text": "See also: [[Event Notifier]], [[Observer Pattern]], [[Mediator Pattern]], [[Objects In Groups]], [[Tuple Space]]s, [[Organic Threads]], [[Stale Events]]",
+      "id": "b05251fe4044aff7970d2ccb41a29db9"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9d62a1940ab929358d5b0fc801fd0070"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?MultiCaster c2.com]",
+      "id": "549f3c7fca17d233561903ecce5a4892"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1416680782000,
+      "id": "e0649d1f8e9d0699b3abdfce61a9811c",
+      "type": "create",
+      "item": {
+        "title": "Multi Caster",
+        "story": [
+          {
+            "type": "html",
+            "text": "[[Category Pattern]]",
+            "id": "4d3ff1d5f197eaba7e37e6774b582663"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9d62a1940ab929358d5b0fc801fd0070"
+          },
+          {
+            "type": "html",
+            "text": "The [[Observer Pattern]] family is too damned useful. We see countless variants and extensions of it in the literature - [[Mediator Pattern]], [[Event Notifier]], Reactor, [[Event Channel]], Broker, [[Try Throw Catch]], the various agent architectures, GUI callbacks, comms handlers and so on. Almost all hark back to the concepts in craggy old visicalc, and no doubt that's derived from someone's woodpulpware system - nothing new under the sun.",
+            "id": "451834e473131b8a35dcb40261d69170"
+          },
+          {
+            "type": "html",
+            "text": "\nThe problem is that we often see more than one observer-variant in the same development. This raises a number of issues:",
+            "id": "cbe5094e02097dbbc2061ad90a2b106e"
+          },
+          {
+            "type": "html",
+            "text": " maintenance; tracking code flow through multiple observer variants is no fun, especially when some kind of multitasking is involved",
+            "id": "207100b77f30255aa4cfec65b414f6b9"
+          },
+          {
+            "type": "html",
+            "text": " visibility; people hide bits of design in all those observer registrations. Often we'd like to be able to visualize, document, report and reconfigure them just like we could with [[Visi Calc]]",
+            "id": "fa7f41e71596c4a5e3a8ea64d8aac2e8"
+          },
+          {
+            "type": "html",
+            "text": " granularity; we often end up putting conditional code in the observer's callbacks because we don't have a way of specifying what granularity of events we're interested in",
+            "id": "a9b42d541c5e3ebf33a8deff0ac4b8c3"
+          },
+          {
+            "type": "html",
+            "text": " livelock; If A observes B and B observes A, the two may whizz around notifying themselves in perpetuity",
+            "id": "04b6c414f94ce8b41ed93e4ea4259460"
+          },
+          {
+            "type": "html",
+            "text": " multiplication of classes; do we really need more than one mediator/broker class? Do we really need more than one abstract subject/observer class? Aren't these classes most often just pattern artifacts - useless for factoring purposes?",
+            "id": "6432375605d3ed894b7f0917e0a46ec7"
+          },
+          {
+            "type": "html",
+            "text": "<b>Therefore,</b>",
+            "id": "584ec824ff020774a66960f823bfbef2"
+          },
+          {
+            "type": "html",
+            "text": "\nWe define five generic participants that will take part in ongoing processes of observation. These are",
+            "id": "cc0db431a096fccabe733c0cf521d655"
+          },
+          {
+            "type": "html",
+            "text": " An Address class. This could be a simple symbolic tag. More usefully, it's a slash delimited path; I've built a variant in which it was an arbitrarily dimensional closed surface indexing into a geometric database.",
+            "id": "ffe44d16b912ad9b93179297db30a897"
+          },
+          {
+            "type": "html",
+            "text": " A Value class. This could be a simple scalar. More usefully it's a structured value related to some reflective architecture. In the variant with the geometric database, it was a variety of smart iterator.",
+            "id": "82d5cdbba04ac252e8670036f86bfffc"
+          },
+          {
+            "type": "html",
+            "text": " An Agent class. Agents are peers - a particular agent can be a subject for some observations and an observer of others. Agents subscribe (attach) member functions to Addresses, and publish (notify) Values on other Addresses. ",
+            "id": "0a53e26d1ee43571c83b2cecb38c82db"
+          },
+          {
+            "type": "html",
+            "text": " A [[Multi Caster]] singleton. This encapsulates a multimap from subscribed Addresses to their accompanying callbacks. Most usefully, this will understand the Address space sufficiently to perform set arithmetic when matching up publications and subscriptions. For example, if the Addresses are slash delimited paths, subscribing to the base of a tree of paths on which publications occur is equivalent to subscribing to all of the sub-paths.",
+            "id": "96ea67895647152a88a1eb80ef8ca5a2"
+          },
+          {
+            "type": "html",
+            "text": " A Proxy class. Proxies, as per GoF, encapsulate connection classes. Their function here is to represent all of the Agents from one process within another process. They do this simply by mapping publication and subscription events - so comms become purely demand-driven.",
+            "id": "63ec7c89f294d79c0d2dfc7c351a8bf8"
+          },
+          {
+            "type": "html",
+            "text": "\nTo summarize this, Agents communicate by subscribing to Addresses in a space managed by [[Multi Caster]] and distributed via Proxy, and publishing Values on Addresses in this space. A subscription associates a callback (an object and one of its member functions, whose signature accepts a Value) with an Address. Like observer/mediator/broker, when a Value is published on an Address, all the subscribing Agents receive it via their callbacks.",
+            "id": "8b1644504412c8499278a14d737d7eef"
+          },
+          {
+            "type": "html",
+            "text": "\nThis is obviously similar to [[Doug Schmidt]]'s [[Reactor Pattern]]. The difference is the explicit definition of Address, which models the problem domain rather than the process architecture. By making explicit the map between this Address space and the process architecture, the various issues identified before the <b>Therefore</b> are resolved:",
+            "id": "5135756f3e92805a544eb6dcba209f11"
+          },
+          {
+            "type": "html",
+            "text": " the linkage between problem domain events and agent callbacks can be explicitly configured and traced",
+            "id": "3e794b6f9084486632ef23b7a19aba22"
+          },
+          {
+            "type": "html",
+            "text": " the granularity of observation can be made arbitrarily fine",
+            "id": "ffde0b8becd92e2c6d64ad9b89e428d7"
+          },
+          {
+            "type": "html",
+            "text": " it becomes more likely that deadly embraces will be spotted at configuration time",
+            "id": "d9f988b99a625b771aedcddb99024f4b"
+          },
+          {
+            "type": "html",
+            "text": " there is no multiplication of classes - only Agent is sub-classed.",
+            "id": "76d656101fa455584b5f5372e7d36036"
+          },
+          {
+            "type": "html",
+            "text": "<b>Notes:</b>",
+            "id": "dbe4a4b92a05907754b44df7892478b5"
+          },
+          {
+            "type": "html",
+            "text": " Both synchronous and asynchronous semantics can be supported this way. If synchronous, callbacks also return a Value, and publishers are blocked until they receive all the subscribers' return Values. More commonly the semantics are asynchronous - publication is non-blocking and no return Value is communicated from it.",
+            "id": "2ccd71c04dc089e4b6d3447a2b89e3b2"
+          },
+          {
+            "type": "html",
+            "text": " There is overhead in doing the [[Multi Caster]] set arithmetic when matching up publishers and subscribers. In most cases this arithmetic only needs to be done occasionally; a [[Forwarder And Receiver]] pattern ([[Po Sa]]) can be used to maintain the results until the availability of publishers/subscribers changes, and exceptions can be generated to notify Agents that they need to refresh their Forwarders. This cuts the overhead way down, but it makes testing a little more involved.",
+            "id": "13908008533a86a32cc7412a4185b409"
+          },
+          {
+            "type": "html",
+            "text": " I've been extending this pattern recently by adding a transaction concept; a publication generates a transaction that completes when all the subscribers' callbacks have been notified. Return values from the callbacks are marshalled and delivered to the publisher. The publisher can either block until the return values are ready, specify a callback for the return values, or elect not to receive return values at all. This is a neat way to mate [[Multi Caster]] onto a more traditional polling model. -- [[Peter Merel]]",
+            "id": "8c187aa344b2b40ce71d84b90a9250e4"
+          },
+          {
+            "type": "html",
+            "text": "<b>Examples:</b> [[Object Space Voyager]] (addresses modelled as adornments), [[Use Net]], Teknekron [[Information Bus]], [[Linda Tuple Spaces]], spreadsheets, windowing systems ...",
+            "id": "90fcf3f5409b274b3a78fdfeaf66519e"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9d62a1940ab929358d5b0fc801fd0070"
+          },
+          {
+            "type": "html",
+            "text": "It sounds good. I've been thinking for a while about alternate paradigms of computing. One of them is massively event-based. In [[Designing Object Systems]] by [[Cook And Daniels]] (the book outlines the Syntropy approach) they make the point that reality is really event based, so OO conceptual models are really a slight mismatch.",
+            "id": "bdc1576813dadf575e2eee27d195f6f4"
+          },
+          {
+            "type": "html",
+            "text": "<i>Hmm. Off topic, but \"reality is event-based\" seems to ignore quantum SpookyActionAtADistance. A much better case can be made for the idea that reality is transaction-based - see [http://www.npl.washington.edu/AV/altvw16.html www.npl.washington.edu]</i>",
+            "id": "3dfafcad2e1ec02354e688e40f92c790"
+          },
+          {
+            "type": "html",
+            "text": "<i>Just to set the record straight: In [[Designing Object Systems]] we didn't say that reality is event based, just that it might be simpler to create models of the world using events rather than point-to-point messages (as has been the trend in OO methods, following along from OOPLs) -- John Daniels</i>",
+            "id": "e13b697ec2a0ec89e97c6ce07f2f8ef9"
+          },
+          {
+            "type": "html",
+            "text": "<i>And [[Multi Caster]] isn't really any alternate computing paradigm - it's just adding two old concepts together. Address spaces aren't new, and neither are Reactors. The reason I like putting them together is that this way you can think about the Space of the problem domain a la [[Organic Architecture]].</i>",
+            "id": "873cc8dcf0431d955405f07328df4682"
+          },
+          {
+            "type": "html",
+            "text": "\nI have this intuition that another way of going would be to allow all objects to broadcast to no one in particular, and receive from anyone. Systems could be progressively grown by adding software where the newer bits get first crack at the messages. Sure enough, there are performance issues.",
+            "id": "03e1a503d19f9a42c5ea731fcce7d68c"
+          },
+          {
+            "type": "html",
+            "text": "<i>A lot of the performance issues then have to do with your communications/database architecture. The traditional TCPish arrangements of DAGs of domains work quite well with this approach.</i>",
+            "id": "8e487eb86fdb75c3803813ed86df0dfb"
+          },
+          {
+            "type": "html",
+            "text": "\nThis is a beehive style of computing. I'm really interested in getting past the limitations inherent in type systems. The kind of ossification that occurs when systems get to be too specialized because no one had the time or knowledge to refactor effectively.",
+            "id": "5cbc4a42f5f2e3e894e17c5b76558cce"
+          },
+          {
+            "type": "html",
+            "text": "<i>Yah. I look at the marvels of CPAN and wonder what the hell I'm doing wasting my time with a strongly typed language like C++. [[Composite Types]] - what other types do you need? I can't think of anything I can do with STL (or JGL) that I can't do better with Perl's builtin types.</i>",
+            "id": "087234d00ba6c1da38d0d49894673e58"
+          },
+          {
+            "type": "html",
+            "text": "\nDoubtless, there is some theoretical reason why this is nuts, but I make a habit of thinking about the impossible. -- [[Michael Feathers]] (Man of La Mancha).",
+            "id": "273d551e5a0af7a98474c528c8b0e6bf"
+          },
+          {
+            "type": "html",
+            "text": "<i>I've got a number of systems in the field based on this pattern, so I can say it's far from impossible. It may not be optimal - I'm very interested in alternatives - but so far it's served me very well. -- [[Peter Merel]]</i>",
+            "id": "58aa63c24d45db1f50c471789176c883"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9d62a1940ab929358d5b0fc801fd0070"
+          },
+          {
+            "type": "html",
+            "text": "It reminds me of [[Black Board]] models (although it's different). The [[Multi Caster]] is like the blackboard that everyone can read or write to.",
+            "id": "dad21c281067ae8409e9ce3576c3beff"
+          },
+          {
+            "type": "html",
+            "text": "<i>You can do a [[Black Board]] this way. Depends on whether you cache publications or not. More commonly, in my experience at least, you don't.</i>",
+            "id": "874942118eb46bc6cc64689758adf463"
+          },
+          {
+            "type": "html",
+            "text": "\nWhat are the Values used for?",
+            "id": "959c648900d922cc5966eaf43d793305"
+          },
+          {
+            "type": "html",
+            "text": "<i>They encapsulate whatever parameters make sense for a Path. For example, an Address is often associated with some particular device, and published Values there may represent its state. If the device is a sensor, a camera perhaps, then the Value may be a reference to an image it has captured. If the device is an actuator, then it might only publish there only if it strikes an exceptional condition.</i>",
+            "id": "dd177545cf96a63fc96ebdd82def1f72"
+          },
+          {
+            "type": "html",
+            "text": "\nThe notion of explicitly defining the address is interesting. Do addresses usually mean something in real-world terms; is that a pre-condition for successful use of the pattern?",
+            "id": "26495864584fc4bc7a5c84d2a30a169d"
+          },
+          {
+            "type": "html",
+            "text": "<i>Seems natural for them to do so. They generally seem to match up with analysis-level classes, though I wouldn't call that a precondition.</i>",
+            "id": "19472dcc864805adaf6939cf20ebf17e"
+          },
+          {
+            "type": "html",
+            "text": "\nAre addresses too useful - is there a temptation to encode other things into the address space, and/or is this a good thing? ",
+            "id": "ea81c6a696bb4af3d4ad91fc80bb1e91"
+          },
+          {
+            "type": "html",
+            "text": "<i>Seems like a good thing. For example, you can cause otherwise uncaught exceptions to appear as publications on some distinctive path. Diagnostic traces of particular agents (qua device drivers) can be done the same way.</i>",
+            "id": "3dd9ba6fb5d83c94e8ba399cd7197d68"
+          },
+          {
+            "type": "html",
+            "text": "\nBy \"other things\", I mean that incrementing a variable could have a different address from decrementing the same variable. Using the space to describe what has happened as well as to which object. ",
+            "id": "b802ede987b2e4f09928c968eaed1a54"
+          },
+          {
+            "type": "html",
+            "text": "<i>'Yes, that's doable too. Constructing the semantics of the Address space becomes the significant design process once you employ a [[Multi Caster]]. So I guess I think of this as an architectural rather than a design pattern. Actually, one early example of [[Multi Caster]] that occurs to me is usenet nntp; given the excellent scaling properties of that, I think calling the pattern architectural is fair.</i> ",
+            "id": "e1e6e69b91f485823fe6477b2f10e890"
+          },
+          {
+            "type": "html",
+            "text": "\nIt seems to me that the border between Addresses and Values could be blurred.",
+            "id": "1748925f81aaf601cb392bc9ff7aa43a"
+          },
+          {
+            "type": "html",
+            "text": "<i>You're right, especially when Values assume the form of, say, associative arrays and you cache the publications. But the blurring goes away if you restrict Values to be either scalar or iterator types, or if you don't cache. --[[Peter Merel]]</i>",
+            "id": "cfacff54bf7ddb9a074c2e8b7b2fee97"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9d62a1940ab929358d5b0fc801fd0070"
+          },
+          {
+            "type": "html",
+            "text": "I appear to have independently (re)invented this in a few projects. I agree that the border between Address and Value can be blurred - initially I didn't separate Address from Value at all. I used hierarchical objects that were simultaneously Address and Value. Processing an outgoing object starts at a common root (or a distributed emulation of one) and at each level of the hierarchy a few parameters are removed and used to route the remainder of the object toward its destination. This seemed like a good idea at the time, but recently I've explicitly separated the two because it seems more natural that way. One problem with having no distinction at all is that it makes protocol analysis more difficult, as you don't really know (without knowledge of every object in the system) where the address stops and the value begins.",
+            "id": "5e60e7b9f852523d6034ae75d0bb4d31"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Zygo Blaxell]]",
+            "id": "d44081dbbad58457505a4ac269dea226"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9d62a1940ab929358d5b0fc801fd0070"
+          },
+          {
+            "type": "html",
+            "text": "[[Peter Merel]] has the temerity to suggest this pattern meets Wright's [[Organic Architecture]] criteria. Here's why:",
+            "id": "b75bd07eccd9e66150d799c1bfc80103"
+          },
+          {
+            "type": "html",
+            "text": "\"NATURE\" is transaction-based - cf [http://www.npl.washington.edu/AV/altvw16.html www.npl.washington.edu] . By defining the Address space in terms of Fields, this pattern can emulate natural systems. ",
+            "id": "b42c2c21e9c02c3ad9b492263ea80326"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Part To Whole As Whole Is To Part]] - fair enough, [[Multi Caster]](s) can be composited into multicast domains.",
+            "id": "c2e5574b26fcc778cda11a607f51f785"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Form And Function Are One]] - this pattern serves a central architectural purpose but there's no excess baggage in it; compare with great reflective brutes like CORBA and COM.",
+            "id": "0f24b464f5b28d40fb3513855470711f"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Multi Caster]] is creative (Alexander's generative) - it enables rather than dictates a great array of diverse forms, serving Wright's \"ROMANCE\"",
+            "id": "f3b25e776cc8ee36324ef565562cec42"
+          },
+          {
+            "type": "html",
+            "text": "\nThe pattern does not document a tradition or habit but a fundamental basis for a space of development - a \"TRUTH\"",
+            "id": "8b1a519c75551db5164d7a21cf0cd82f"
+          },
+          {
+            "type": "html",
+            "text": "\nIf the pattern is to be successful the Agent and Proxy semantics must mirror the [[Multi Caster]] semantics in terms of the Address space - so these are all [[Of The Thing And Not On It]]",
+            "id": "ed7abe5e1925d0f63b4a70d24c1bdd4e"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Multi Caster]] does not constrain the forms of the Address, Value and Agent classes, but enables them <i>from below</i>, meeting Wright's \"SPIRIT\".",
+            "id": "390f6d47b896990a29fbfbeaf2fa7ed2"
+          },
+          {
+            "type": "html",
+            "text": "\nThis pattern scales well, so it has Wright's \"THIRD DIMENSION\"",
+            "id": "d69747f77d90765895b38f9875337b90"
+          },
+          {
+            "type": "html",
+            "text": "\nWright-style SPACE is really the point of the pattern. By shifting design concerns away from functional dependency and on to provision of service, the pattern creates an open development space within which designers and administrators can interact. Compare with the various layered and hierarchical architectural patterns that work to separate designers and administrators, reducing cooperation between them. The history of usenet exemplifies this - checkout [http://www.danenet.wicip.org/bcp/history_of_usenet.html www.danenet.wicip.org].",
+            "id": "0f2a2e398f4efb57960f2c055e7f865f"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9d62a1940ab929358d5b0fc801fd0070"
+          },
+          {
+            "type": "html",
+            "text": "Peter, when implementing this, have you done anything to detect cycles? It seems that a topological sort can be used to make sure they don't occur, but it is also true that notifications you send which come back to you need not spur other notifications.",
+            "id": "d94363045e0b1b3983096e08c32f46ae"
+          },
+          {
+            "type": "html",
+            "text": "<i>publish() takes a flag which says whether or not to propagate a publication outside the local process. When proxies publish they set this flag false. Or you can include the domain/host/pid as an argument to the callbacks and have the proxies make a decision on that basis. Or both. Usually the [[Multi Caster]] doesn't propagate an agent's publications back to itself either, figuring that the agent can manage its own state without assistance.</i>",
+            "id": "4e3e45c57cc983f2972d365ff852676f"
+          },
+          {
+            "type": "html",
+            "text": "\nIn the synchronous case, have you done this so that the order of notification is implied by the order of subscription, or is it a bad thing to start depending on that?",
+            "id": "ecd1726a9a9c3ef009c0174314652267"
+          },
+          {
+            "type": "html",
+            "text": "<i>I'd say that's not very reliable, and gets less reliable the more things are distributed. About all you should rely on here is that a subscriber will receive events from a particular publisher in the same order that their generated by that publisher. You might be able to add other guarantees if you implement this over a [[Real Time]] OS - QNX say - but I'm not certain what that buys you.</i>",
+            "id": "ce4627241e2742ed24e9b7eb878e2530"
+          },
+          {
+            "type": "html",
+            "text": "\nWhen you speak of iterators are you talking about iterating over the address space?",
+            "id": "685eb4921b674d0ac9aad6265d30a528"
+          },
+          {
+            "type": "html",
+            "text": "<i>Not really - they were ways of iterating over particular datasets. The application in that case was a very high-dimension, high-volume, geographically distributed data warehouse. The question was more about whether to send a concrete dataset from site to site or whether to iterate; the solutions that are presently being investigated for resolving that are mainly market-based - check out [http://s2k-ftp.cs.berkeley.edu:8000/mariposa/ s2k-ftp.cs.berkeley.edu:8000]</i>",
+            "id": "2b2391cccd8e52b527980d6c13f65c3d"
+          },
+          {
+            "type": "html",
+            "text": "\nRegarding the use of the proxies, you said that they make things demand driven but isn't this all push?",
+            "id": "5616056d6211d5934ad2a5805b3e426b"
+          },
+          {
+            "type": "html",
+            "text": "<i>Not to my thinking. Subscriptions get broadcast to all processes (if that's too costly, then all within a domain ...) but publications only get sent to subscribers. If no agent in process A is subscribed to some Address published by an agent in process B, then A's proxy in B isn't subscribed to that Address and its publication is never communicated to A. If one or more of A's agents have subscribed that address then the publication will go. Because multiple agents in one process may subscribe a path in another, the [[Multi Caster]] should be smart enough to ignore duplicate subscriptions.</i>",
+            "id": "b23f58ece31f38a01c98e33a2ba1d711"
+          },
+          {
+            "type": "html",
+            "text": "<i>As you can probably see, error recovery could get messy with this, especially if you permit unsubscription on the fly. But it's doable either via mementoes per proxy or per agent ... probably plenty of other ways too. How hairy it gets depends on how bumpless you want it to be.</i>",
+            "id": "e012a4cf6782bb77951ff37a4b81f315"
+          },
+          {
+            "type": "html",
+            "text": "\nDo agents typically hardcode addresses, leave them to configuration, dynamically create them, or it just depends on the problem?",
+            "id": "c4a62ec6cd13306656cd9f7dcff4d807"
+          },
+          {
+            "type": "html",
+            "text": "<i>Depends on the problem. I generally like to let configuration be dynamic because if I find there's some performance bottleneck in [[Multi Caster]] for comms between two particular agents it generally means I've badly factored the agents - so it's not the Address hash that's the problem.</i>",
+            "id": "638bd832c1fdc270d378d366b7a54cea"
+          },
+          {
+            "type": "html",
+            "text": "\nWas taking a crack at coding a [[Multi Caster]] today to ferment the ideas. -- [[Michael Feathers]]",
+            "id": "f8a2a04bff1afe65ae60a37a8170adbc"
+          },
+          {
+            "type": "html",
+            "text": "<i>Good luck with it. An area I'm still playing with has to do with event queues. You need at least one - in the MC. If you're doing this with preemptive threads then that's a critical section, and if not you still want to prevent a functional deadly embrace. But with preemptive threads what about having one event queue per agent?</i> -- [[Peter Merel]]",
+            "id": "10544c036b3b8e6d0ceb5a6c32070856"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9d62a1940ab929358d5b0fc801fd0070"
+          },
+          {
+            "type": "html",
+            "text": "Regarding the \"countless variants of observer patterns\". Maybe this is just an incarnation/application of the [[Construction Principle For Design Patterns]]?",
+            "id": "a3bcd1a5b8d55132773519cf108c4c73"
+          },
+          {
+            "type": "html",
+            "text": "\nThe basic for all the different Observer patterns is a common semantic: Inform dependent objects about changes. The implementation, however, is driven by the actual context (the requirements on this part of the system) - and this results \"just\" in a different combination of [[Template Class]](es) and [[Hook Class]](es) as sketched in [[Construction Principle For Design Patterns]].",
+            "id": "87bee6fd4c74db32c32ef47e3ab4375d"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Thomas Weidenfeller]]",
+            "id": "19fcee575aef5a39892fb7deecb3cbd1"
+          },
+          {
+            "type": "html",
+            "text": "<i>The problem being solved here is not the countless observer pattern variants that exist but the patchwork combination of several variants, or several instances of the same variant, in the same development. The difficulties that result are detailed at the top of this page.</i>",
+            "id": "4dbfefd8822c9e583beafae4194ceb73"
+          },
+          {
+            "type": "html",
+            "text": "<i>The countless pattern variants, imho, are partly due to folk coming to patterns from different backgrounds, and partly the [[Pattern Of Babel]]. But I'm not certain of the use of the [[Construction Principle For Design Patterns]] so will ask further questions there.</i> -- [[Peter Merel]]",
+            "id": "4ae99378f34e30ec0409141cc019689e"
+          },
+          {
+            "type": "html",
+            "text": "\nYou are right, I am digressing from the original problem. I was just trying to identify a root cause of the problem, leaving the problem solving to others.",
+            "id": "e27480725da56379277fb7e31b7bc815"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Thomas Weidenfeller]]",
+            "id": "19fcee575aef5a39892fb7deecb3cbd1"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9d62a1940ab929358d5b0fc801fd0070"
+          },
+          {
+            "type": "html",
+            "text": "\nTo me, it looks like [[Multi Caster]] uses a variety of GOF design patterns in a particular set of configurations. I wonder if [[Architectural Pattern]] would be a good word for large-scale patterns which are singly instanced in systems or subsystems, and are composed from lower level patterns? Or, is this just creating a new word for no good reason? -- [[Michael Feathers]]",
+            "id": "8e49d9ceda868363c99bbe530d69090e"
+          },
+          {
+            "type": "html",
+            "text": "<i>[[Architectural Pattern]] is a [[Party Of Five]] concept, and not a bad one.</i>",
+            "id": "fba9d22239240b951bd2b8ae5c18e165"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9d62a1940ab929358d5b0fc801fd0070"
+          },
+          {
+            "type": "html",
+            "text": "\nHow is this different from [[Publish And Subscribe]]? - [[Gabriel Wachob]]",
+            "id": "4a1732bdde1a7f535614a390765000aa"
+          },
+          {
+            "type": "html",
+            "text": "\nJust as the original [[Observer Pattern]], it's not different from, it's underpinning for.",
+            "id": "90850d7c65a6fa91e0130d09537b7be0"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9d62a1940ab929358d5b0fc801fd0070"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Multi Caster]] has a separate meaning in TCP/IP used to refer to software which broadcasts UDP packets using IGMP (ftp://ftp.rfc-editor.org/in-notes/rfc3376.txt) into the Multicast address space as defined by RFC2375 (ftp://ftp.rfc-editor.org/in-notes/rfc3307.txt).",
+            "id": "2546b8fd49ffad31a78a77039287aed4"
+          },
+          {
+            "type": "html",
+            "text": "-- Martin Spamer",
+            "id": "f0a8a20cfe318ba58d14f3850b023ed7"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9d62a1940ab929358d5b0fc801fd0070"
+          },
+          {
+            "type": "html",
+            "text": "\nIve been working in this area and am struck with how much this observer-type pattern looks like forward-chaining expert-systems.",
+            "id": "a5960cb5dc1176fd8b918da8d64031bb"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Damien Morton]]",
+            "id": "0333a0de1686324dda57d6ff22f51817"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9d62a1940ab929358d5b0fc801fd0070"
+          },
+          {
+            "type": "html",
+            "text": "See also: [[Event Notifier]], [[Observer Pattern]], [[Mediator Pattern]], [[Objects In Groups]], [[Tuple Space]]s, [[Organic Threads]], [[Stale Events]]",
+            "id": "b05251fe4044aff7970d2ccb41a29db9"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9d62a1940ab929358d5b0fc801fd0070"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?MultiCaster c2.com]",
+            "id": "549f3c7fca17d233561903ecce5a4892"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1651574243344
+    }
+  ]
+}

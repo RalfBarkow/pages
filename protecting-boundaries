@@ -1,0 +1,492 @@
+{
+  "title": "Protecting Boundaries",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "94373efdbc586ae0",
+      "text": "# Protecting Boundaries between Elm and JavaScript"
+    },
+    {
+      "type": "paragraph",
+      "id": "ac398dd6f05ed8aa",
+      "text": "What happens if we send a number instead of a string from JavaScript to our Elm app? [https://elmprogramming.com/protecting-boundaries.html page]"
+    },
+    {
+      "type": "assets",
+      "id": "44780bf8390cd02a",
+      "text": "protecting-boundaries"
+    },
+    {
+      "type": "code",
+      "id": "2f2088b4d8fe4d80",
+      "text": "<!DOCTYPE html>\n<html>\n<body>\n    <div id=\"elm-code-is-loaded-here\"></div>\n\t\t\n    <script src=\"elm.js\"></script>\n    <script>\n      var app = Elm.PortExamples.init({\n        node: document.getElementById(\"elm-code-is-loaded-here\")\n      });\n\n      app.ports.sendData.subscribe(function(data) {\n        console.log(\"Data from Elm: \", JSON.stringify(data));\n        app.ports.receiveData.send(\"Hey Elm!\");\n      });\n    </script>\n</body>\n</html>\n"
+    },
+    {
+      "type": "frame",
+      "id": "cc5ee5ba506804d7",
+      "text": "https://wiki.ralfbarkow.ch/assets/protecting-boundaries/index.html"
+    },
+    {
+      "type": "markdown",
+      "id": "057ead3f8623b3cd",
+      "text": "Click the `Send Data to JavaScript` button.  Open the browser console."
+    },
+    {
+      "type": "code",
+      "id": "78928bbdbfcc2e6a",
+      "text": "Data from Elm:  {\"comments\":[{\"body\":\"some comment\",\"id\":1,\"postId\":1}],\"posts\":[{\"author\":{\"name\":\"typicode\",\"url\":\"https://github.com/typicode\"},\"id\":1,\"title\":\"json-server\"},{\"author\":{\"name\":\"indexzero\",\"url\":\"https://github.com/indexzero\"},\"id\":2,\"title\":\"http-server\"}],\"profile\":{\"name\":\"typicode\"}}"
+    },
+    {
+      "type": "pagefold",
+      "id": "50d9a17293cb2515",
+      "text": "PortExamples.elm"
+    },
+    {
+      "type": "code",
+      "id": "ed1e4fe13f16f17f",
+      "text": "port module PortExamples exposing (main)\n\nimport Browser\nimport Html exposing (..)\nimport Html.Events exposing (onClick)\nimport Json.Decode exposing (Error(..), Value, decodeValue, string)\n\n\ntype alias ComplexData =\n    { posts : List Post\n    , comments : List Comment\n    , profile : Profile\n    }\n\n\ntype alias Post =\n    { id : Int\n    , title : String\n    , author : Author\n    }\n\n\ntype alias Author =\n    { name : String\n    , url : String\n    }\n\n\ntype alias Comment =\n    { id : Int\n    , body : String\n    , postId : Int\n    }\n\n\ntype alias Profile =\n    { name : String }\n\n\ntype alias Model =\n    { dataFromJS : String\n    , dataToJS : ComplexData\n    , jsonError : Maybe Error\n    }\n\n\nview : Model -> Html Msg\nview model =\n    div []\n        [ button [ onClick SendDataToJS ]\n            [ text \"Send Data to JavaScript\" ]\n        , viewDataFromJSOrError model\n        ]\n\n\nviewDataFromJSOrError : Model -> Html Msg\nviewDataFromJSOrError model =\n    case model.jsonError of\n        Just error ->\n            viewError error\n\n        Nothing ->\n            viewDataFromJS model.dataFromJS\n\n\nviewError : Error -> Html Msg\nviewError jsonError =\n    let\n        errorHeading =\n            \"Couldn't receive data from JavaScript\"\n\n        errorMessage =\n            case jsonError of\n                Failure message _ ->\n                    message\n\n                _ ->\n                    \"Error: Invalid JSON\"\n    in\n    div []\n        [ h3 [] [ text errorHeading ]\n        , text (\"Error: \" ++ errorMessage)\n        ]\n\n\nviewDataFromJS : String -> Html msg\nviewDataFromJS data =\n    div []\n        [ br [] []\n        , strong [] [ text \"Data received from JavaScript: \" ]\n        , text data\n        ]\n\n\ntype Msg\n    = SendDataToJS\n    | ReceivedDataFromJS Value\n\n\nupdate : Msg -> Model -> ( Model, Cmd Msg )\nupdate msg model =\n    case msg of\n        SendDataToJS ->\n            ( model, sendData model.dataToJS )\n\n        ReceivedDataFromJS value ->\n            case decodeValue string value of\n                Ok data ->\n                    ( { model | dataFromJS = data }, Cmd.none )\n\n                Err error ->\n                    ( { model | jsonError = Just error }, Cmd.none )\n\n\nsubscriptions : Model -> Sub Msg\nsubscriptions _ =\n    receiveData ReceivedDataFromJS\n\n\nport sendData : ComplexData -> Cmd msg\n\n\nport receiveData : (Value -> msg) -> Sub msg\n\n\ninit : () -> ( Model, Cmd Msg )\ninit _ =\n    ( initialModel, Cmd.none )\n\n\ninitialModel : Model\ninitialModel =\n    { dataFromJS = \"\"\n    , dataToJS = complexData\n    , jsonError = Nothing\n    }\n\n\ncomplexData : ComplexData\ncomplexData =\n    let\n        post1 =\n            Author \"typicode\" \"https://github.com/typicode\"\n                |> Post 1 \"json-server\"\n\n        post2 =\n            Author \"indexzero\" \"https://github.com/indexzero\"\n                |> Post 2 \"http-server\"\n    in\n    { posts = [ post1, post2 ]\n    , comments = [ Comment 1 \"some comment\" 1 ]\n    , profile = { name = \"typicode\" }\n    }\n\n\nmain : Program () Model Msg\nmain =\n    Browser.element\n        { init = init\n        , view = view\n        , update = update\n        , subscriptions = subscriptions\n        }\n"
+    },
+    {
+      "type": "pagefold",
+      "id": "75bfa77f5c812581",
+      "text": "make"
+    },
+    {
+      "type": "code",
+      "id": "890c9064048b2225",
+      "text": "$ elm make src/PortExamples.elm --output elm.js"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Protecting Boundaries",
+        "story": []
+      },
+      "date": 1638016558687
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "94373efdbc586ae0"
+      },
+      "id": "94373efdbc586ae0",
+      "type": "add",
+      "date": 1638016571048
+    },
+    {
+      "type": "edit",
+      "id": "94373efdbc586ae0",
+      "item": {
+        "type": "paragraph",
+        "id": "94373efdbc586ae0",
+        "text": "What happens if we send a number instead of a string from JavaScript to our Elm app? "
+      },
+      "date": 1638016572723
+    },
+    {
+      "type": "edit",
+      "id": "94373efdbc586ae0",
+      "item": {
+        "type": "paragraph",
+        "id": "94373efdbc586ae0",
+        "text": "# Protecting Boundaries between Elm and JavaScript"
+      },
+      "date": 1638016584589
+    },
+    {
+      "type": "add",
+      "id": "ac398dd6f05ed8aa",
+      "item": {
+        "type": "paragraph",
+        "id": "ac398dd6f05ed8aa",
+        "text": "What happens if we send a number instead of a string from JavaScript to our Elm app? "
+      },
+      "after": "94373efdbc586ae0",
+      "date": 1638016585008
+    },
+    {
+      "type": "edit",
+      "id": "94373efdbc586ae0",
+      "item": {
+        "type": "markdown",
+        "id": "94373efdbc586ae0",
+        "text": "# Protecting Boundaries between Elm and JavaScript"
+      },
+      "date": 1638016586427
+    },
+    {
+      "type": "edit",
+      "id": "ac398dd6f05ed8aa",
+      "item": {
+        "type": "paragraph",
+        "id": "ac398dd6f05ed8aa",
+        "text": "What happens if we send a number instead of a string from JavaScript to our Elm app? [https://elmprogramming.com/protecting-boundaries.html page]"
+      },
+      "date": 1638016604711
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "44780bf8390cd02a"
+      },
+      "id": "44780bf8390cd02a",
+      "type": "add",
+      "after": "ac398dd6f05ed8aa",
+      "date": 1638030591438
+    },
+    {
+      "type": "edit",
+      "id": "44780bf8390cd02a",
+      "item": {
+        "type": "assets",
+        "id": "44780bf8390cd02a",
+        "text": "8.5-protecting-boundaries"
+      },
+      "date": 1638030594810
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "cc5ee5ba506804d7"
+      },
+      "id": "cc5ee5ba506804d7",
+      "type": "add",
+      "after": "44780bf8390cd02a",
+      "date": 1638030647669
+    },
+    {
+      "type": "edit",
+      "id": "cc5ee5ba506804d7",
+      "item": {
+        "type": "frame",
+        "id": "cc5ee5ba506804d7",
+        "text": "https://wiki.ralfbarkow.ch/assets/8/index.html"
+      },
+      "date": 1638030654957
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2b7854af09fa7c33"
+      },
+      "id": "2b7854af09fa7c33",
+      "type": "add",
+      "after": "cc5ee5ba506804d7",
+      "date": 1638030671758
+    },
+    {
+      "type": "remove",
+      "id": "2b7854af09fa7c33",
+      "date": 1638030675805
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ed1e4fe13f16f17f"
+      },
+      "id": "ed1e4fe13f16f17f",
+      "type": "add",
+      "after": "cc5ee5ba506804d7",
+      "date": 1638030686460
+    },
+    {
+      "type": "edit",
+      "id": "ed1e4fe13f16f17f",
+      "item": {
+        "type": "code",
+        "id": "ed1e4fe13f16f17f",
+        "text": "port module PortExamples exposing (main)\n\nimport Browser\nimport Html exposing (..)\nimport Html.Events exposing (onClick)\nimport Json.Decode exposing (Error(..), Value, decodeValue, string)\n\n\ntype alias ComplexData =\n    { posts : List Post\n    , comments : List Comment\n    , profile : Profile\n    }\n\n\ntype alias Post =\n    { id : Int\n    , title : String\n    , author : Author\n    }\n\n\ntype alias Author =\n    { name : String\n    , url : String\n    }\n\n\ntype alias Comment =\n    { id : Int\n    , body : String\n    , postId : Int\n    }\n\n\ntype alias Profile =\n    { name : String }\n\n\ntype alias Model =\n    { dataFromJS : String\n    , dataToJS : ComplexData\n    , jsonError : Maybe Error\n    }\n\n\nview : Model -> Html Msg\nview model =\n    div []\n        [ button [ onClick SendDataToJS ]\n            [ text \"Send Data to JavaScript\" ]\n        , viewDataFromJSOrError model\n        ]\n\n\nviewDataFromJSOrError : Model -> Html Msg\nviewDataFromJSOrError model =\n    case model.jsonError of\n        Just error ->\n            viewError error\n\n        Nothing ->\n            viewDataFromJS model.dataFromJS\n\n\nviewError : Error -> Html Msg\nviewError jsonError =\n    let\n        errorHeading =\n            \"Couldn't receive data from JavaScript\"\n\n        errorMessage =\n            case jsonError of\n                Failure message _ ->\n                    message\n\n                _ ->\n                    \"Error: Invalid JSON\"\n    in\n    div []\n        [ h3 [] [ text errorHeading ]\n        , text (\"Error: \" ++ errorMessage)\n        ]\n\n\nviewDataFromJS : String -> Html msg\nviewDataFromJS data =\n    div []\n        [ br [] []\n        , strong [] [ text \"Data received from JavaScript: \" ]\n        , text data\n        ]\n\n\ntype Msg\n    = SendDataToJS\n    | ReceivedDataFromJS Value\n\n\nupdate : Msg -> Model -> ( Model, Cmd Msg )\nupdate msg model =\n    case msg of\n        SendDataToJS ->\n            ( model, sendData model.dataToJS )\n\n        ReceivedDataFromJS value ->\n            case decodeValue string value of\n                Ok data ->\n                    ( { model | dataFromJS = data }, Cmd.none )\n\n                Err error ->\n                    ( { model | jsonError = Just error }, Cmd.none )\n\n\nsubscriptions : Model -> Sub Msg\nsubscriptions _ =\n    receiveData ReceivedDataFromJS\n\n\nport sendData : ComplexData -> Cmd msg\n\n\nport receiveData : (Value -> msg) -> Sub msg\n\n\ninit : () -> ( Model, Cmd Msg )\ninit _ =\n    ( initialModel, Cmd.none )\n\n\ninitialModel : Model\ninitialModel =\n    { dataFromJS = \"\"\n    , dataToJS = complexData\n    , jsonError = Nothing\n    }\n\n\ncomplexData : ComplexData\ncomplexData =\n    let\n        post1 =\n            Author \"typicode\" \"https://github.com/typicode\"\n                |> Post 1 \"json-server\"\n\n        post2 =\n            Author \"indexzero\" \"https://github.com/indexzero\"\n                |> Post 2 \"http-server\"\n    in\n    { posts = [ post1, post2 ]\n    , comments = [ Comment 1 \"some comment\" 1 ]\n    , profile = { name = \"typicode\" }\n    }\n\n\nmain : Program () Model Msg\nmain =\n    Browser.element\n        { init = init\n        , view = view\n        , update = update\n        , subscriptions = subscriptions\n        }\n"
+      },
+      "date": 1638030689813
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2f2088b4d8fe4d80"
+      },
+      "id": "2f2088b4d8fe4d80",
+      "type": "add",
+      "after": "ed1e4fe13f16f17f",
+      "date": 1638030744300
+    },
+    {
+      "type": "edit",
+      "id": "2f2088b4d8fe4d80",
+      "item": {
+        "type": "code",
+        "id": "2f2088b4d8fe4d80",
+        "text": "<!DOCTYPE html>\n<html>\n<body>\n    <div id=\"elm-code-is-loaded-here\"></div>\n\t\t\n    <script src=\"elm.js\"></script>\n    <script>\n      var app = Elm.PortExamples.init({\n        node: document.getElementById(\"elm-code-is-loaded-here\")\n      });\n\n      app.ports.sendData.subscribe(function(data) {\n        console.log(\"Data from Elm: \", JSON.stringify(data));\n        app.ports.receiveData.send(\"Hey Elm!\");\n      });\n    </script>\n</body>\n</html>\n"
+      },
+      "date": 1638030746337
+    },
+    {
+      "id": "2f2088b4d8fe4d80",
+      "type": "move",
+      "order": [
+        "94373efdbc586ae0",
+        "ac398dd6f05ed8aa",
+        "44780bf8390cd02a",
+        "2f2088b4d8fe4d80",
+        "cc5ee5ba506804d7",
+        "ed1e4fe13f16f17f"
+      ],
+      "date": 1638030781231
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "057ead3f8623b3cd"
+      },
+      "id": "057ead3f8623b3cd",
+      "type": "add",
+      "after": "ed1e4fe13f16f17f",
+      "date": 1638031010422
+    },
+    {
+      "type": "edit",
+      "id": "057ead3f8623b3cd",
+      "item": {
+        "type": "paragraph",
+        "id": "057ead3f8623b3cd",
+        "text": "Reload index.html in a browser and click the Send Data to JavaScript button."
+      },
+      "date": 1638031011932
+    },
+    {
+      "id": "057ead3f8623b3cd",
+      "type": "move",
+      "order": [
+        "94373efdbc586ae0",
+        "ac398dd6f05ed8aa",
+        "44780bf8390cd02a",
+        "2f2088b4d8fe4d80",
+        "057ead3f8623b3cd",
+        "cc5ee5ba506804d7",
+        "ed1e4fe13f16f17f"
+      ],
+      "date": 1638031097827
+    },
+    {
+      "id": "057ead3f8623b3cd",
+      "type": "move",
+      "order": [
+        "94373efdbc586ae0",
+        "ac398dd6f05ed8aa",
+        "44780bf8390cd02a",
+        "2f2088b4d8fe4d80",
+        "cc5ee5ba506804d7",
+        "057ead3f8623b3cd",
+        "ed1e4fe13f16f17f"
+      ],
+      "date": 1638031110937
+    },
+    {
+      "type": "edit",
+      "id": "057ead3f8623b3cd",
+      "item": {
+        "type": "paragraph",
+        "id": "057ead3f8623b3cd",
+        "text": "Click the Send Data to JavaScript button."
+      },
+      "date": 1638031118429
+    },
+    {
+      "type": "edit",
+      "id": "057ead3f8623b3cd",
+      "item": {
+        "type": "paragraph",
+        "id": "057ead3f8623b3cd",
+        "text": "Click the `Send Data to JavaScript` button."
+      },
+      "date": 1638031134659
+    },
+    {
+      "type": "edit",
+      "id": "057ead3f8623b3cd",
+      "item": {
+        "type": "markdown",
+        "id": "057ead3f8623b3cd",
+        "text": "Click the `Send Data to JavaScript` button."
+      },
+      "date": 1638031442235
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "78928bbdbfcc2e6a"
+      },
+      "id": "78928bbdbfcc2e6a",
+      "type": "add",
+      "after": "ed1e4fe13f16f17f",
+      "date": 1638031573204
+    },
+    {
+      "type": "edit",
+      "id": "78928bbdbfcc2e6a",
+      "item": {
+        "type": "code",
+        "id": "78928bbdbfcc2e6a",
+        "text": "Data from Elm:  {\"comments\":[{\"body\":\"some comment\",\"id\":1,\"postId\":1}],\"posts\":[{\"author\":{\"name\":\"typicode\",\"url\":\"https://github.com/typicode\"},\"id\":1,\"title\":\"json-server\"},{\"author\":{\"name\":\"indexzero\",\"url\":\"https://github.com/indexzero\"},\"id\":2,\"title\":\"http-server\"}],\"profile\":{\"name\":\"typicode\"}}"
+      },
+      "date": 1638031577776
+    },
+    {
+      "id": "ed1e4fe13f16f17f",
+      "type": "move",
+      "order": [
+        "94373efdbc586ae0",
+        "ac398dd6f05ed8aa",
+        "44780bf8390cd02a",
+        "2f2088b4d8fe4d80",
+        "cc5ee5ba506804d7",
+        "057ead3f8623b3cd",
+        "78928bbdbfcc2e6a",
+        "ed1e4fe13f16f17f"
+      ],
+      "date": 1638031611178
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d8d020f86b139df2"
+      },
+      "id": "d8d020f86b139df2",
+      "type": "add",
+      "after": "ed1e4fe13f16f17f",
+      "date": 1638031622923
+    },
+    {
+      "type": "remove",
+      "id": "d8d020f86b139df2",
+      "date": 1638031627371
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "50d9a17293cb2515"
+      },
+      "id": "50d9a17293cb2515",
+      "type": "add",
+      "after": "ed1e4fe13f16f17f",
+      "date": 1638031641313
+    },
+    {
+      "type": "edit",
+      "id": "50d9a17293cb2515",
+      "item": {
+        "type": "pagefold",
+        "id": "50d9a17293cb2515",
+        "text": "PortExamples.elm"
+      },
+      "date": 1638031645942
+    },
+    {
+      "type": "fork",
+      "date": 1638031837086
+    },
+    {
+      "id": "50d9a17293cb2515",
+      "type": "move",
+      "order": [
+        "94373efdbc586ae0",
+        "ac398dd6f05ed8aa",
+        "44780bf8390cd02a",
+        "2f2088b4d8fe4d80",
+        "50d9a17293cb2515",
+        "cc5ee5ba506804d7",
+        "057ead3f8623b3cd",
+        "78928bbdbfcc2e6a",
+        "ed1e4fe13f16f17f"
+      ],
+      "date": 1638031863609
+    },
+    {
+      "id": "50d9a17293cb2515",
+      "type": "move",
+      "order": [
+        "94373efdbc586ae0",
+        "ac398dd6f05ed8aa",
+        "44780bf8390cd02a",
+        "2f2088b4d8fe4d80",
+        "cc5ee5ba506804d7",
+        "057ead3f8623b3cd",
+        "78928bbdbfcc2e6a",
+        "50d9a17293cb2515",
+        "ed1e4fe13f16f17f"
+      ],
+      "date": 1638031869773
+    },
+    {
+      "type": "edit",
+      "id": "057ead3f8623b3cd",
+      "item": {
+        "type": "markdown",
+        "id": "057ead3f8623b3cd",
+        "text": "Click the `Send Data to JavaScript` button.  Open the browser console."
+      },
+      "date": 1638031929712
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "75bfa77f5c812581"
+      },
+      "id": "75bfa77f5c812581",
+      "type": "add",
+      "after": "ed1e4fe13f16f17f",
+      "date": 1638700888944
+    },
+    {
+      "type": "edit",
+      "id": "75bfa77f5c812581",
+      "item": {
+        "type": "pagefold",
+        "id": "75bfa77f5c812581",
+        "text": "make"
+      },
+      "date": 1638700894165
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "890c9064048b2225"
+      },
+      "id": "890c9064048b2225",
+      "type": "add",
+      "after": "75bfa77f5c812581",
+      "date": 1638700895484
+    },
+    {
+      "type": "edit",
+      "id": "890c9064048b2225",
+      "item": {
+        "type": "code",
+        "id": "890c9064048b2225",
+        "text": "$ elm make src/PortExamples.elm --output elm.js"
+      },
+      "date": 1638700898142
+    },
+    {
+      "type": "edit",
+      "id": "44780bf8390cd02a",
+      "item": {
+        "type": "assets",
+        "id": "44780bf8390cd02a",
+        "text": "protecting-boundaries"
+      },
+      "date": 1639082962223
+    },
+    {
+      "type": "edit",
+      "id": "cc5ee5ba506804d7",
+      "item": {
+        "type": "frame",
+        "id": "cc5ee5ba506804d7",
+        "text": "https://wiki.ralfbarkow.ch/assets/protecting-boundaries/index.html"
+      },
+      "date": 1639082996652
+    }
+  ]
+}

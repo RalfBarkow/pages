@@ -1,0 +1,735 @@
+{
+  "title": "Shell Programming with Txtzyme",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "642368f6c4e1df4a",
+      "text": "An interpreter need not be more than a case statement with a loop around it. I've written just such an interpreter for Teensy starting with a variation of Paul's [http://www.pjrc.com/teensy/usb_serial.html USB Serial example]. I'm finding it very handy. If I need a 1.5 millisecond pulse I would type:\n"
+    },
+    {
+      "type": "code",
+      "id": "c5376b14314d07ba",
+      "text": "echo 1o 1500u 0o >/dev/cu.usbmodem"
+    },
+    {
+      "type": "paragraph",
+      "id": "ee00c15bdb696b17",
+      "text": "This example uses three single letter commands, each proceeded by a sequence of digits that loads data that any command can use or modify. Here is what the commands above mean:"
+    },
+    {
+      "type": "html",
+      "id": "f56471b728c9fbd1",
+      "text": "<pre>1o -- output high on the selected pin (LED pin by default)\n1500u -- delay for 1500 microseconds\n0o -- output low to finish the pulse"
+    },
+    {
+      "type": "paragraph",
+      "id": "554027589e785803",
+      "text": "Other commands include:"
+    },
+    {
+      "type": "html",
+      "id": "ec65ac50e8a0e0a9",
+      "text": "<pre>200m -- delay 200 milliseconds\n4a -- select pin 4 of port A\ni -- input from the selected pin\np -- print data that the host can read\n100{} -- repeat commands within braces 100 times\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "658ac5289357d964",
+      "text": "Putting these all together we get a program that samples pin A4 at 5 Hz and writes what it finds to standard out:"
+    },
+    {
+      "type": "html",
+      "id": "8c886e140fe0f90f",
+      "text": "<pre>echo 4a100{ip200m} >/dev/cu.usbmodem\ncat /dev/cu.usbmodem"
+    },
+    {
+      "type": "paragraph",
+      "id": "87647b2fdcaabe92",
+      "text": "I've put the project up on [[GitHub]]. Look for Txtzyme which means \"text that catalyzes action\". My fork there will be accumulating operations I find handy in my sensor network and, of course, as a utility device on my workbench."
+    },
+    {
+      "type": "paragraph",
+      "id": "2ed10df95d34003a",
+      "text": "Mon, 06/07/2010 - 21:02"
+    },
+    {
+      "type": "html",
+      "id": "b0ed72df185bc0ba",
+      "text": "<h3>Comments\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "f625156f251b534c",
+      "text": "An improved version of my second example would open the USB device once for read and write, rather than opening it separately on the two commands. The rarely used shell syntax would look like this:\n"
+    },
+    {
+      "type": "code",
+      "id": "0b027dfd09e3c655",
+      "text": "echo 4a100{ip200m} >/dev/cu.usbmodem\ncat /dev/cu.usbmodem"
+    },
+    {
+      "type": "paragraph",
+      "id": "ba0593559ede7ac2",
+      "text": "This opens the device as file descriptor 3 then runs the two commands in turn, first writing to 3, then reading from 3.  — WardCunningham\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "4ea8ac7af2dea143",
+      "text": "I woke up this morning thinking about the end-of-file issue! Remember how only the \"cu\" device works, but not the \"tty\", because it requires modem-like control signals? Maybe if you made the device act more like a modem.... maybe (a big maybe) dropping the carrier detect or DSR or some other handshake signal might cause the \"tty\" device to generate an end-of-file indication which might work for \"cat\"... ??\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "c726b9be76d17805",
+      "text": "Truth is, I haven't really explored that. All I know is the \"tty\" device is really problematic if the Teensy isn't generating those handshake protocols, which nobody does, and the main problem is it will stall during open() without the proper handshake signal from the device, unless you specifically set non-blocking mode when calling open(), which is easy in C but pretty much impossible from the shell.  — paul\n"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "id": "002ed9a079a12c94",
+      "item": {
+        "title": "Shell Programming with Txtzyme"
+      },
+      "date": 1342388738637
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "642368f6c4e1df4a"
+      },
+      "id": "642368f6c4e1df4a",
+      "type": "add",
+      "date": 1342388761014
+    },
+    {
+      "type": "edit",
+      "id": "642368f6c4e1df4a",
+      "item": {
+        "type": "paragraph",
+        "id": "642368f6c4e1df4a",
+        "text": "An interpreter need not be more than a case statement with a loop around it. I've written just such an interpreter for Teensy starting with a variation of Paul's USB Serial example. I'm finding it very handy. If I need a 1.5 millisecond pulse I would type:\n"
+      },
+      "date": 1342388774772
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "89fd8ef927fe9265",
+        "text": "echo 1o1500u0o >/dev/cu.usbmodem\nThis example uses three single letter commands, each proceeded by a sequence of digits that loads data that any command can use or modify. Here is what the commands above mean:\n\n1o -- output high on the selected pin (LED pin by default)\n1500u -- delay for 1500 microseconds\n0o -- output low to finish the pulse\nOther commands include:\n\n200m -- delay 200 milliseconds\n4a -- select pin 4 of port A\ni -- input from the selected pin\np -- print data that the host can read\n100{} -- repeat commands within braces 100 times\nPutting these all together we get a program that samples pin A4 at 5 Hz and writes what it finds to standard out:\n\necho 4a100{ip200m} >/dev/cu.usbmodem\ncat /dev/cu.usbmodem\nI've put the project up on GitHub. Look for Txtzyme which means \"text that catalyzes action\". My fork there will be accumulating operations I find handy in my sensor network and, of course, as a utility device on my workbench."
+      },
+      "id": "89fd8ef927fe9265",
+      "type": "add",
+      "after": "642368f6c4e1df4a",
+      "date": 1342388775281
+    },
+    {
+      "type": "edit",
+      "id": "89fd8ef927fe9265",
+      "item": {
+        "type": "paragraph",
+        "id": "89fd8ef927fe9265",
+        "text": "<pre>echo 1o1500u0o >/dev/cu.usbmodem"
+      },
+      "date": 1342388782723
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "ee00c15bdb696b17",
+        "text": "\nThis example uses three single letter commands, each proceeded by a sequence of digits that loads data that any command can use or modify. Here is what the commands above mean:\n\n1o -- output high on the selected pin (LED pin by default)\n1500u -- delay for 1500 microseconds\n0o -- output low to finish the pulse\nOther commands include:\n\n200m -- delay 200 milliseconds\n4a -- select pin 4 of port A\ni -- input from the selected pin\np -- print data that the host can read\n100{} -- repeat commands within braces 100 times\nPutting these all together we get a program that samples pin A4 at 5 Hz and writes what it finds to standard out:\n\necho 4a100{ip200m} >/dev/cu.usbmodem\ncat /dev/cu.usbmodem\nI've put the project up on GitHub. Look for Txtzyme which means \"text that catalyzes action\". My fork there will be accumulating operations I find handy in my sensor network and, of course, as a utility device on my workbench."
+      },
+      "id": "ee00c15bdb696b17",
+      "type": "add",
+      "after": "89fd8ef927fe9265",
+      "date": 1342388783238
+    },
+    {
+      "type": "edit",
+      "id": "ee00c15bdb696b17",
+      "item": {
+        "type": "paragraph",
+        "id": "ee00c15bdb696b17",
+        "text": "This example uses three single letter commands, each proceeded by a sequence of digits that loads data that any command can use or modify. Here is what the commands above mean:"
+      },
+      "date": 1342388789153
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "f56471b728c9fbd1",
+        "text": "1o -- output high on the selected pin (LED pin by default)\n1500u -- delay for 1500 microseconds\n0o -- output low to finish the pulse\nOther commands include:\n\n200m -- delay 200 milliseconds\n4a -- select pin 4 of port A\ni -- input from the selected pin\np -- print data that the host can read\n100{} -- repeat commands within braces 100 times\nPutting these all together we get a program that samples pin A4 at 5 Hz and writes what it finds to standard out:\n\necho 4a100{ip200m} >/dev/cu.usbmodem\ncat /dev/cu.usbmodem\nI've put the project up on GitHub. Look for Txtzyme which means \"text that catalyzes action\". My fork there will be accumulating operations I find handy in my sensor network and, of course, as a utility device on my workbench."
+      },
+      "id": "f56471b728c9fbd1",
+      "type": "add",
+      "after": "ee00c15bdb696b17",
+      "date": 1342388789658
+    },
+    {
+      "type": "edit",
+      "id": "f56471b728c9fbd1",
+      "item": {
+        "type": "paragraph",
+        "id": "f56471b728c9fbd1",
+        "text": "<pre>1o -- output high on the selected pin (LED pin by default)\n1500u -- delay for 1500 microseconds\n0o -- output low to finish the pulse"
+      },
+      "date": 1342388799281
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "554027589e785803",
+        "text": "\nOther commands include:\n\n200m -- delay 200 milliseconds\n4a -- select pin 4 of port A\ni -- input from the selected pin\np -- print data that the host can read\n100{} -- repeat commands within braces 100 times\nPutting these all together we get a program that samples pin A4 at 5 Hz and writes what it finds to standard out:\n\necho 4a100{ip200m} >/dev/cu.usbmodem\ncat /dev/cu.usbmodem\nI've put the project up on GitHub. Look for Txtzyme which means \"text that catalyzes action\". My fork there will be accumulating operations I find handy in my sensor network and, of course, as a utility device on my workbench."
+      },
+      "id": "554027589e785803",
+      "type": "add",
+      "after": "f56471b728c9fbd1",
+      "date": 1342388799786
+    },
+    {
+      "type": "edit",
+      "id": "554027589e785803",
+      "item": {
+        "type": "paragraph",
+        "id": "554027589e785803",
+        "text": "Other commands include:"
+      },
+      "date": 1342388809442
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "ec65ac50e8a0e0a9",
+        "text": "200m -- delay 200 milliseconds\n4a -- select pin 4 of port A\ni -- input from the selected pin\np -- print data that the host can read\n100{} -- repeat commands within braces 100 times\nPutting these all together we get a program that samples pin A4 at 5 Hz and writes what it finds to standard out:\n\necho 4a100{ip200m} >/dev/cu.usbmodem\ncat /dev/cu.usbmodem\nI've put the project up on GitHub. Look for Txtzyme which means \"text that catalyzes action\". My fork there will be accumulating operations I find handy in my sensor network and, of course, as a utility device on my workbench."
+      },
+      "id": "ec65ac50e8a0e0a9",
+      "type": "add",
+      "after": "554027589e785803",
+      "date": 1342388809947
+    },
+    {
+      "type": "edit",
+      "id": "ec65ac50e8a0e0a9",
+      "item": {
+        "type": "paragraph",
+        "id": "ec65ac50e8a0e0a9",
+        "text": "<pre>200m -- delay 200 milliseconds\n4a -- select pin 4 of port A\ni -- input from the selected pin\np -- print data that the host can read\n100{} -- repeat commands within braces 100 times\n"
+      },
+      "date": 1342388819728
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "658ac5289357d964",
+        "text": "Putting these all together we get a program that samples pin A4 at 5 Hz and writes what it finds to standard out:\n\necho 4a100{ip200m} >/dev/cu.usbmodem\ncat /dev/cu.usbmodem\nI've put the project up on GitHub. Look for Txtzyme which means \"text that catalyzes action\". My fork there will be accumulating operations I find handy in my sensor network and, of course, as a utility device on my workbench."
+      },
+      "id": "658ac5289357d964",
+      "type": "add",
+      "after": "ec65ac50e8a0e0a9",
+      "date": 1342388820233
+    },
+    {
+      "type": "edit",
+      "id": "658ac5289357d964",
+      "item": {
+        "type": "paragraph",
+        "id": "658ac5289357d964",
+        "text": "Putting these all together we get a program that samples pin A4 at 5 Hz and writes what it finds to standard out:"
+      },
+      "date": 1342388829354
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "8c886e140fe0f90f",
+        "text": "echo 4a100{ip200m} >/dev/cu.usbmodem\ncat /dev/cu.usbmodem\nI've put the project up on GitHub. Look for Txtzyme which means \"text that catalyzes action\". My fork there will be accumulating operations I find handy in my sensor network and, of course, as a utility device on my workbench."
+      },
+      "id": "8c886e140fe0f90f",
+      "type": "add",
+      "after": "658ac5289357d964",
+      "date": 1342388829859
+    },
+    {
+      "type": "edit",
+      "id": "8c886e140fe0f90f",
+      "item": {
+        "type": "paragraph",
+        "id": "8c886e140fe0f90f",
+        "text": "<pre>echo 4a100{ip200m} >/dev/cu.usbmodem\ncat /dev/cu.usbmodem"
+      },
+      "date": 1342388837552
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "87647b2fdcaabe92",
+        "text": "\nI've put the project up on GitHub. Look for Txtzyme which means \"text that catalyzes action\". My fork there will be accumulating operations I find handy in my sensor network and, of course, as a utility device on my workbench."
+      },
+      "id": "87647b2fdcaabe92",
+      "type": "add",
+      "after": "8c886e140fe0f90f",
+      "date": 1342388838057
+    },
+    {
+      "type": "edit",
+      "id": "87647b2fdcaabe92",
+      "item": {
+        "type": "paragraph",
+        "id": "87647b2fdcaabe92",
+        "text": "I've put the project up on [[GitHub]]. Look for Txtzyme which means \"text that catalyzes action\". My fork there will be accumulating operations I find handy in my sensor network and, of course, as a utility device on my workbench."
+      },
+      "date": 1342388858887
+    },
+    {
+      "type": "edit",
+      "id": "642368f6c4e1df4a",
+      "item": {
+        "type": "paragraph",
+        "id": "642368f6c4e1df4a",
+        "text": "An interpreter need not be more than a case statement with a loop around it. I've written just such an interpreter for Teensy starting with a variation of Paul's [http://www.pjrc.com/teensy/usb_serial.html USB Serial example]. I'm finding it very handy. If I need a 1.5 millisecond pulse I would type:\n"
+      },
+      "date": 1342388903860
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2ed10df95d34003a"
+      },
+      "id": "2ed10df95d34003a",
+      "type": "add",
+      "after": "87647b2fdcaabe92",
+      "date": 1342388932259
+    },
+    {
+      "type": "edit",
+      "id": "2ed10df95d34003a",
+      "item": {
+        "type": "paragraph",
+        "id": "2ed10df95d34003a",
+        "text": "Mon, 06/07/2010 - 21:02"
+      },
+      "date": 1342388936509
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "b0ed72df185bc0ba",
+        "text": ""
+      },
+      "id": "b0ed72df185bc0ba",
+      "type": "add",
+      "after": "2ed10df95d34003a",
+      "date": 1342388974949
+    },
+    {
+      "type": "edit",
+      "id": "b0ed72df185bc0ba",
+      "item": {
+        "type": "paragraph",
+        "id": "b0ed72df185bc0ba",
+        "text": "<h3>Comments\n"
+      },
+      "date": 1342388997570
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "f625156f251b534c",
+        "text": "Tue, 06/08/2010 - 13:35 — WardCunningham\nOpen the USB Device for Read/Write\nAn improved version of my second example would open the USB device once for read and write, rather than opening it separately on the two commands. The rarely used shell syntax would look like this:\n\n(echo 4a100{ip200m} >&3; cat <&3) 3<>/dev/cu.usbmodem\nThis opens the device as file descriptor 3 then runs the two commands in turn, first writing to 3, then reading from 3.\n\n\nLogin or register to post comments\nTue, 06/08/2010 - 13:49 — paul\nend of file\nHi Ward,\n\nI woke up this morning thinking about the end-of-file issue! Remember how only the \"cu\" device works, but not the \"tty\", because it requires modem-like control signals? Maybe if you made the device act more like a modem.... maybe (a big maybe) dropping the carrier detect or DSR or some other handshake signal might cause the \"tty\" device to generate an end-of-file indication which might work for \"cat\"... ??\n\nTruth is, I haven't really explored that. All I know is the \"tty\" device is really problematic if the Teensy isn't generating those handshake protocols, which nobody does, and the main problem is it will stall during open() without the proper handshake signal from the device, unless you specifically set non-blocking mode when calling open(), which is easy in C but pretty much impossible from the shell.\n"
+      },
+      "id": "f625156f251b534c",
+      "type": "add",
+      "after": "b0ed72df185bc0ba",
+      "date": 1342388998078
+    },
+    {
+      "type": "edit",
+      "id": "f625156f251b534c",
+      "item": {
+        "type": "paragraph",
+        "id": "f625156f251b534c",
+        "text": "Tue, 06/08/2010 - 13:35 — WardCunningham\n"
+      },
+      "date": 1342389003836
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "55dadd19dccf3da5",
+        "text": "Open the USB Device for Read/Write\nAn improved version of my second example would open the USB device once for read and write, rather than opening it separately on the two commands. The rarely used shell syntax would look like this:\n\n(echo 4a100{ip200m} >&3; cat <&3) 3<>/dev/cu.usbmodem\nThis opens the device as file descriptor 3 then runs the two commands in turn, first writing to 3, then reading from 3.\n\n\nLogin or register to post comments\nTue, 06/08/2010 - 13:49 — paul\nend of file\nHi Ward,\n\nI woke up this morning thinking about the end-of-file issue! Remember how only the \"cu\" device works, but not the \"tty\", because it requires modem-like control signals? Maybe if you made the device act more like a modem.... maybe (a big maybe) dropping the carrier detect or DSR or some other handshake signal might cause the \"tty\" device to generate an end-of-file indication which might work for \"cat\"... ??\n\nTruth is, I haven't really explored that. All I know is the \"tty\" device is really problematic if the Teensy isn't generating those handshake protocols, which nobody does, and the main problem is it will stall during open() without the proper handshake signal from the device, unless you specifically set non-blocking mode when calling open(), which is easy in C but pretty much impossible from the shell.\n"
+      },
+      "id": "55dadd19dccf3da5",
+      "type": "add",
+      "after": "f625156f251b534c",
+      "date": 1342389004343
+    },
+    {
+      "type": "edit",
+      "id": "55dadd19dccf3da5",
+      "item": {
+        "type": "paragraph",
+        "id": "55dadd19dccf3da5",
+        "text": "Open the USB Device for Read/Write\nAn improved version of my second example would open the USB device once for read and write, rather than opening it separately on the two commands. The rarely used shell syntax would look like this:\n"
+      },
+      "date": 1342389011483
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "757fb3e14ba260d8",
+        "text": "(echo 4a100{ip200m} >&3; cat <&3) 3<>/dev/cu.usbmodem\nThis opens the device as file descriptor 3 then runs the two commands in turn, first writing to 3, then reading from 3.\n\n\nLogin or register to post comments\nTue, 06/08/2010 - 13:49 — paul\nend of file\nHi Ward,\n\nI woke up this morning thinking about the end-of-file issue! Remember how only the \"cu\" device works, but not the \"tty\", because it requires modem-like control signals? Maybe if you made the device act more like a modem.... maybe (a big maybe) dropping the carrier detect or DSR or some other handshake signal might cause the \"tty\" device to generate an end-of-file indication which might work for \"cat\"... ??\n\nTruth is, I haven't really explored that. All I know is the \"tty\" device is really problematic if the Teensy isn't generating those handshake protocols, which nobody does, and the main problem is it will stall during open() without the proper handshake signal from the device, unless you specifically set non-blocking mode when calling open(), which is easy in C but pretty much impossible from the shell.\n"
+      },
+      "id": "757fb3e14ba260d8",
+      "type": "add",
+      "after": "55dadd19dccf3da5",
+      "date": 1342389011990
+    },
+    {
+      "type": "edit",
+      "id": "757fb3e14ba260d8",
+      "item": {
+        "type": "paragraph",
+        "id": "757fb3e14ba260d8",
+        "text": "<pre>(echo 4a100{ip200m} >&3; cat <&3) 3<>/dev/cu.usbmodem"
+      },
+      "date": 1342389022379
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "ba0593559ede7ac2",
+        "text": "\nThis opens the device as file descriptor 3 then runs the two commands in turn, first writing to 3, then reading from 3.\n\n\nLogin or register to post comments\nTue, 06/08/2010 - 13:49 — paul\nend of file\nHi Ward,\n\nI woke up this morning thinking about the end-of-file issue! Remember how only the \"cu\" device works, but not the \"tty\", because it requires modem-like control signals? Maybe if you made the device act more like a modem.... maybe (a big maybe) dropping the carrier detect or DSR or some other handshake signal might cause the \"tty\" device to generate an end-of-file indication which might work for \"cat\"... ??\n\nTruth is, I haven't really explored that. All I know is the \"tty\" device is really problematic if the Teensy isn't generating those handshake protocols, which nobody does, and the main problem is it will stall during open() without the proper handshake signal from the device, unless you specifically set non-blocking mode when calling open(), which is easy in C but pretty much impossible from the shell.\n"
+      },
+      "id": "ba0593559ede7ac2",
+      "type": "add",
+      "after": "757fb3e14ba260d8",
+      "date": 1342389022886
+    },
+    {
+      "type": "edit",
+      "id": "ba0593559ede7ac2",
+      "item": {
+        "type": "paragraph",
+        "id": "ba0593559ede7ac2",
+        "text": "This opens the device as file descriptor 3 then runs the two commands in turn, first writing to 3, then reading from 3.\n\nTue, 06/08/2010 - 13:49 — paul\nend of file\nHi Ward,\n\nI woke up this morning thinking about the end-of-file issue! Remember how only the \"cu\" device works, but not the \"tty\", because it requires modem-like control signals? Maybe if you made the device act more like a modem.... maybe (a big maybe) dropping the carrier detect or DSR or some other handshake signal might cause the \"tty\" device to generate an end-of-file indication which might work for \"cat\"... ??\n\nTruth is, I haven't really explored that. All I know is the \"tty\" device is really problematic if the Teensy isn't generating those handshake protocols, which nobody does, and the main problem is it will stall during open() without the proper handshake signal from the device, unless you specifically set non-blocking mode when calling open(), which is easy in C but pretty much impossible from the shell.\n"
+      },
+      "date": 1342389059092
+    },
+    {
+      "type": "edit",
+      "id": "55dadd19dccf3da5",
+      "item": {
+        "type": "paragraph",
+        "id": "55dadd19dccf3da5",
+        "text": "Open the USB Device for Read/Write\n"
+      },
+      "date": 1342389078789
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "8182d05563ab9f97",
+        "text": "An improved version of my second example would open the USB device once for read and write, rather than opening it separately on the two commands. The rarely used shell syntax would look like this:\n"
+      },
+      "id": "8182d05563ab9f97",
+      "type": "add",
+      "after": "55dadd19dccf3da5",
+      "date": 1342389079295
+    },
+    {
+      "type": "edit",
+      "id": "ba0593559ede7ac2",
+      "item": {
+        "type": "paragraph",
+        "id": "ba0593559ede7ac2",
+        "text": "This opens the device as file descriptor 3 then runs the two commands in turn, first writing to 3, then reading from 3.\n\nTue, 06/08/2010 - 13:49 — paul\n"
+      },
+      "date": 1342389096401
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "ca8c76ee706560f4",
+        "text": "end of file\nHi Ward,\n\nI woke up this morning thinking about the end-of-file issue! Remember how only the \"cu\" device works, but not the \"tty\", because it requires modem-like control signals? Maybe if you made the device act more like a modem.... maybe (a big maybe) dropping the carrier detect or DSR or some other handshake signal might cause the \"tty\" device to generate an end-of-file indication which might work for \"cat\"... ??\n\nTruth is, I haven't really explored that. All I know is the \"tty\" device is really problematic if the Teensy isn't generating those handshake protocols, which nobody does, and the main problem is it will stall during open() without the proper handshake signal from the device, unless you specifically set non-blocking mode when calling open(), which is easy in C but pretty much impossible from the shell.\n"
+      },
+      "id": "ca8c76ee706560f4",
+      "type": "add",
+      "after": "ba0593559ede7ac2",
+      "date": 1342389096909
+    },
+    {
+      "type": "edit",
+      "id": "ca8c76ee706560f4",
+      "item": {
+        "type": "paragraph",
+        "id": "ca8c76ee706560f4",
+        "text": "end of file\n"
+      },
+      "date": 1342389098913
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "4ea8ac7af2dea143",
+        "text": "Hi Ward,\n\nI woke up this morning thinking about the end-of-file issue! Remember how only the \"cu\" device works, but not the \"tty\", because it requires modem-like control signals? Maybe if you made the device act more like a modem.... maybe (a big maybe) dropping the carrier detect or DSR or some other handshake signal might cause the \"tty\" device to generate an end-of-file indication which might work for \"cat\"... ??\n\nTruth is, I haven't really explored that. All I know is the \"tty\" device is really problematic if the Teensy isn't generating those handshake protocols, which nobody does, and the main problem is it will stall during open() without the proper handshake signal from the device, unless you specifically set non-blocking mode when calling open(), which is easy in C but pretty much impossible from the shell.\n"
+      },
+      "id": "4ea8ac7af2dea143",
+      "type": "add",
+      "after": "ca8c76ee706560f4",
+      "date": 1342389099418
+    },
+    {
+      "type": "edit",
+      "id": "4ea8ac7af2dea143",
+      "item": {
+        "type": "paragraph",
+        "id": "4ea8ac7af2dea143",
+        "text": "I woke up this morning thinking about the end-of-file issue! Remember how only the \"cu\" device works, but not the \"tty\", because it requires modem-like control signals? Maybe if you made the device act more like a modem.... maybe (a big maybe) dropping the carrier detect or DSR or some other handshake signal might cause the \"tty\" device to generate an end-of-file indication which might work for \"cat\"... ??\n"
+      },
+      "date": 1342389107799
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "c726b9be76d17805",
+        "text": "\nTruth is, I haven't really explored that. All I know is the \"tty\" device is really problematic if the Teensy isn't generating those handshake protocols, which nobody does, and the main problem is it will stall during open() without the proper handshake signal from the device, unless you specifically set non-blocking mode when calling open(), which is easy in C but pretty much impossible from the shell.\n"
+      },
+      "id": "c726b9be76d17805",
+      "type": "add",
+      "after": "4ea8ac7af2dea143",
+      "date": 1342389108307
+    },
+    {
+      "type": "edit",
+      "id": "c726b9be76d17805",
+      "item": {
+        "type": "paragraph",
+        "id": "c726b9be76d17805",
+        "text": "Truth is, I haven't really explored that. All I know is the \"tty\" device is really problematic if the Teensy isn't generating those handshake protocols, which nobody does, and the main problem is it will stall during open() without the proper handshake signal from the device, unless you specifically set non-blocking mode when calling open(), which is easy in C but pretty much impossible from the shell.\n"
+      },
+      "date": 1342389114142
+    },
+    {
+      "type": "edit",
+      "id": "ba0593559ede7ac2",
+      "item": {
+        "type": "paragraph",
+        "id": "ba0593559ede7ac2",
+        "text": "This opens the device as file descriptor 3 then runs the two commands in turn, first writing to 3, then reading from 3.\n"
+      },
+      "date": 1342389125509
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "3829ba4b49820693",
+        "text": "Tue, 06/08/2010 - 13:49 — paul\n"
+      },
+      "id": "3829ba4b49820693",
+      "type": "add",
+      "after": "ba0593559ede7ac2",
+      "date": 1342389126014
+    },
+    {
+      "type": "remove",
+      "id": "8182d05563ab9f97",
+      "date": 1342404334546
+    },
+    {
+      "type": "remove",
+      "id": "55dadd19dccf3da5",
+      "date": 1342404343017
+    },
+    {
+      "type": "edit",
+      "id": "f625156f251b534c",
+      "item": {
+        "type": "paragraph",
+        "id": "f625156f251b534c",
+        "text": "An improved version of my second example would open the USB device once for read and write, rather than opening it separately on the two commands. The rarely used shell syntax would look like this:\n"
+      },
+      "date": 1342404357055
+    },
+    {
+      "type": "edit",
+      "id": "ba0593559ede7ac2",
+      "item": {
+        "type": "paragraph",
+        "id": "ba0593559ede7ac2",
+        "text": "This opens the device as file descriptor 3 then runs the two commands in turn, first writing to 3, then reading from 3.  — WardCunningham\n"
+      },
+      "date": 1342404367639
+    },
+    {
+      "type": "remove",
+      "id": "ca8c76ee706560f4",
+      "date": 1342404383751
+    },
+    {
+      "type": "remove",
+      "id": "3829ba4b49820693",
+      "date": 1342404396478
+    },
+    {
+      "type": "edit",
+      "id": "c726b9be76d17805",
+      "item": {
+        "type": "paragraph",
+        "id": "c726b9be76d17805",
+        "text": "Truth is, I haven't really explored that. All I know is the \"tty\" device is really problematic if the Teensy isn't generating those handshake protocols, which nobody does, and the main problem is it will stall during open() without the proper handshake signal from the device, unless you specifically set non-blocking mode when calling open(), which is easy in C but pretty much impossible from the shell.  — paul\n"
+      },
+      "date": 1342404406144
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c5376b14314d07ba"
+      },
+      "id": "c5376b14314d07ba",
+      "type": "add",
+      "after": "c726b9be76d17805",
+      "date": 1345396164935
+    },
+    {
+      "type": "edit",
+      "id": "c5376b14314d07ba",
+      "item": {
+        "type": "code",
+        "id": "c5376b14314d07ba",
+        "text": "echo 1o1500u0o >/dev/cu.usbmodem"
+      },
+      "date": 1345396173553
+    },
+    {
+      "type": "move",
+      "order": [
+        "642368f6c4e1df4a",
+        "c5376b14314d07ba",
+        "89fd8ef927fe9265",
+        "ee00c15bdb696b17",
+        "f56471b728c9fbd1",
+        "554027589e785803",
+        "ec65ac50e8a0e0a9",
+        "658ac5289357d964",
+        "8c886e140fe0f90f",
+        "87647b2fdcaabe92",
+        "2ed10df95d34003a",
+        "b0ed72df185bc0ba",
+        "f625156f251b534c",
+        "757fb3e14ba260d8",
+        "ba0593559ede7ac2",
+        "4ea8ac7af2dea143",
+        "c726b9be76d17805"
+      ],
+      "id": "c5376b14314d07ba",
+      "date": 1345396183927
+    },
+    {
+      "type": "remove",
+      "id": "89fd8ef927fe9265",
+      "date": 1345396192004
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0b027dfd09e3c655"
+      },
+      "id": "0b027dfd09e3c655",
+      "type": "add",
+      "after": "c726b9be76d17805",
+      "date": 1345396215101
+    },
+    {
+      "type": "edit",
+      "id": "0b027dfd09e3c655",
+      "item": {
+        "type": "code",
+        "id": "0b027dfd09e3c655",
+        "text": "echo 4a100{ip200m} >/dev/cu.usbmodem\ncat /dev/cu.usbmodem"
+      },
+      "date": 1345396220010
+    },
+    {
+      "type": "move",
+      "order": [
+        "642368f6c4e1df4a",
+        "c5376b14314d07ba",
+        "ee00c15bdb696b17",
+        "f56471b728c9fbd1",
+        "554027589e785803",
+        "ec65ac50e8a0e0a9",
+        "658ac5289357d964",
+        "8c886e140fe0f90f",
+        "87647b2fdcaabe92",
+        "2ed10df95d34003a",
+        "b0ed72df185bc0ba",
+        "f625156f251b534c",
+        "757fb3e14ba260d8",
+        "0b027dfd09e3c655",
+        "ba0593559ede7ac2",
+        "4ea8ac7af2dea143",
+        "c726b9be76d17805"
+      ],
+      "id": "0b027dfd09e3c655",
+      "date": 1345396227247
+    },
+    {
+      "type": "remove",
+      "id": "757fb3e14ba260d8",
+      "date": 1345396238523
+    },
+    {
+      "type": "edit",
+      "id": "c5376b14314d07ba",
+      "item": {
+        "type": "code",
+        "id": "c5376b14314d07ba",
+        "text": "echo 1o 1500u 0o >/dev/cu.usbmodem"
+      },
+      "date": 1362179975911
+    },
+    {
+      "type": "edit",
+      "id": "f56471b728c9fbd1",
+      "item": {
+        "type": "html",
+        "id": "f56471b728c9fbd1",
+        "text": "<pre>1o -- output high on the selected pin (LED pin by default)\n1500u -- delay for 1500 microseconds\n0o -- output low to finish the pulse"
+      },
+      "date": 1420954112125
+    },
+    {
+      "type": "edit",
+      "id": "ec65ac50e8a0e0a9",
+      "item": {
+        "type": "html",
+        "id": "ec65ac50e8a0e0a9",
+        "text": "<pre>200m -- delay 200 milliseconds\n4a -- select pin 4 of port A\ni -- input from the selected pin\np -- print data that the host can read\n100{} -- repeat commands within braces 100 times\n"
+      },
+      "date": 1420954113658
+    },
+    {
+      "type": "edit",
+      "id": "8c886e140fe0f90f",
+      "item": {
+        "type": "html",
+        "id": "8c886e140fe0f90f",
+        "text": "<pre>echo 4a100{ip200m} >/dev/cu.usbmodem\ncat /dev/cu.usbmodem"
+      },
+      "date": 1420954115388
+    },
+    {
+      "type": "edit",
+      "id": "b0ed72df185bc0ba",
+      "item": {
+        "type": "html",
+        "id": "b0ed72df185bc0ba",
+        "text": "<h3>Comments\n"
+      },
+      "date": 1420954118356
+    },
+    {
+      "type": "fork",
+      "site": "txtzyme.com",
+      "date": 1627296287953
+    }
+  ]
+}

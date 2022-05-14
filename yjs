@@ -1,0 +1,151 @@
+{
+  "title": "Yjs",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "2b8834ac1f481b33",
+      "text": "# Yjs CRDT Algorithm"
+    },
+    {
+      "type": "paragraph",
+      "id": "f05b6028f968a11b",
+      "text": "Conflict-free replicated data types (CRDT) for collaborative editing are an alternative approach to operational transformation (OT). A very simple differenciation between the two approaches is that OT attempts to transform index positions to ensure convergence (all clients end up with the same content), while CRDTs use mathematical models that usually do not involve index transformations, like linked lists. OT is currently the de-facto standard for shared editing on text. OT approaches that support shared editing without a central source of truth (a central server) require too much bookkeeping to be viable in practice. CRDTs are better suited for distributed systems, provide additional guarantees that the document can be synced with remote clients, and do not require a central source of truth."
+    },
+    {
+      "type": "paragraph",
+      "id": "5beeb674562d7b47",
+      "text": "\nYjs implements a modified version of the algorithm described in this paper. This article explains a simple optimization on the CRDT model and gives more insight about the performance characteristics in Yjs. More information about the specific implementation is available in INTERNALS.md and in this walkthrough of the Yjs codebase.\n\nCRDTs that suitable for shared text editing suffer from the fact that they only grow in size. There are CRDTs that do not grow in size, but they do not have the characteristics that are benificial for shared text editing (like intention preservation). Yjs implements many improvements to the original algorithm that diminish the trade-off that the document only grows in size. We can't garbage collect deleted structs (tombstones) while ensuring a unique order of the structs. But we can 1. merge preceeding structs into a single struct to reduce the amount of meta information, 2. we can delete content from the struct if it is deleted, and 3. we can garbage collect tombstones if we don't care about the order of the structs anymore (e.g. if the parent was deleted).\n\nExamples:\n\n    If a user inserts elements in sequence, the struct will be merged into a single struct. E.g. array.insert(0, ['a']), array.insert(0, ['b']); is first represented as two structs ([{id: {client, clock: 0}, content: 'a'}, {id: {client, clock: 1}, content: 'b'}) and then merged into a single struct: [{id: {client, clock: 0}, content: 'ab'}].\n    When a struct that contains content (e.g. ItemString) is deleted, the struct will be replaced with an ItemDeleted that does not contain content anymore."
+    },
+    {
+      "type": "paragraph",
+      "id": "d8ae2656b9b203ef",
+      "text": "    When a type is deleted, all child elements are transformed to GC structs. A GC struct only denotes the existence of a struct and that it is deleted. GC structs can always be merged with other GC structs if the id's are adjacent."
+    },
+    {
+      "type": "paragraph",
+      "id": "a9294d79444f9c99",
+      "text": "Especially when working on structured content (e.g. shared editing on ProseMirror), these improvements yield very good results when benchmarking random document edits. In practice they show even better results, because users usually edit text in sequence, resulting in structs that can easily be merged. The benchmarks show that even in the worst case scenario that a user edits text from right to left, Yjs achieves good performance even for huge documents.\nState Vector\n\nYjs has the ability to exchange only the differences when syncing two clients. We use lamport timestamps to identify structs and to track in which order a client created them. Each struct has an struct.id = { client: number, clock: number} that uniquely identifies a struct. We define the next expected clock by each client as the state vector. This data structure is similar to the version vectors data structure. But we use state vectors only to describe the state of the local document, so we can compute the missing struct of the remote client. We do not use it to track causality."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Yjs",
+        "story": []
+      },
+      "date": 1640814182821
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2b8834ac1f481b33"
+      },
+      "id": "2b8834ac1f481b33",
+      "type": "add",
+      "date": 1640814204885
+    },
+    {
+      "type": "edit",
+      "id": "2b8834ac1f481b33",
+      "item": {
+        "type": "paragraph",
+        "id": "2b8834ac1f481b33",
+        "text": "# Yjs CRDT Algorithm"
+      },
+      "date": 1640814211167
+    },
+    {
+      "type": "edit",
+      "id": "2b8834ac1f481b33",
+      "item": {
+        "type": "markdown",
+        "id": "2b8834ac1f481b33",
+        "text": "# Yjs CRDT Algorithm"
+      },
+      "date": 1640814214191
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f05b6028f968a11b"
+      },
+      "id": "f05b6028f968a11b",
+      "type": "add",
+      "after": "2b8834ac1f481b33",
+      "date": 1640814231509
+    },
+    {
+      "type": "edit",
+      "id": "f05b6028f968a11b",
+      "item": {
+        "type": "paragraph",
+        "id": "f05b6028f968a11b",
+        "text": "Conflict-free replicated data types (CRDT) for collaborative editing are an alternative approach to operational transformation (OT). A very simple differenciation between the two approaches is that OT attempts to transform index positions to ensure convergence (all clients end up with the same content), while CRDTs use mathematical models that usually do not involve index transformations, like linked lists. OT is currently the de-facto standard for shared editing on text. OT approaches that support shared editing without a central source of truth (a central server) require too much bookkeeping to be viable in practice. CRDTs are better suited for distributed systems, provide additional guarantees that the document can be synced with remote clients, and do not require a central source of truth.\n\nYjs implements a modified version of the algorithm described in this paper. This article explains a simple optimization on the CRDT model and gives more insight about the performance characteristics in Yjs. More information about the specific implementation is available in INTERNALS.md and in this walkthrough of the Yjs codebase.\n\nCRDTs that suitable for shared text editing suffer from the fact that they only grow in size. There are CRDTs that do not grow in size, but they do not have the characteristics that are benificial for shared text editing (like intention preservation). Yjs implements many improvements to the original algorithm that diminish the trade-off that the document only grows in size. We can't garbage collect deleted structs (tombstones) while ensuring a unique order of the structs. But we can 1. merge preceeding structs into a single struct to reduce the amount of meta information, 2. we can delete content from the struct if it is deleted, and 3. we can garbage collect tombstones if we don't care about the order of the structs anymore (e.g. if the parent was deleted).\n\nExamples:\n\n    If a user inserts elements in sequence, the struct will be merged into a single struct. E.g. array.insert(0, ['a']), array.insert(0, ['b']); is first represented as two structs ([{id: {client, clock: 0}, content: 'a'}, {id: {client, clock: 1}, content: 'b'}) and then merged into a single struct: [{id: {client, clock: 0}, content: 'ab'}].\n    When a struct that contains content (e.g. ItemString) is deleted, the struct will be replaced with an ItemDeleted that does not contain content anymore.\n    When a type is deleted, all child elements are transformed to GC structs. A GC struct only denotes the existence of a struct and that it is deleted. GC structs can always be merged with other GC structs if the id's are adjacent."
+      },
+      "date": 1640814234545
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a9294d79444f9c99"
+      },
+      "id": "a9294d79444f9c99",
+      "type": "add",
+      "after": "f05b6028f968a11b",
+      "date": 1640814243476
+    },
+    {
+      "type": "edit",
+      "id": "a9294d79444f9c99",
+      "item": {
+        "type": "paragraph",
+        "id": "a9294d79444f9c99",
+        "text": "Especially when working on structured content (e.g. shared editing on ProseMirror), these improvements yield very good results when benchmarking random document edits. In practice they show even better results, because users usually edit text in sequence, resulting in structs that can easily be merged. The benchmarks show that even in the worst case scenario that a user edits text from right to left, Yjs achieves good performance even for huge documents.\nState Vector\n\nYjs has the ability to exchange only the differences when syncing two clients. We use lamport timestamps to identify structs and to track in which order a client created them. Each struct has an struct.id = { client: number, clock: number} that uniquely identifies a struct. We define the next expected clock by each client as the state vector. This data structure is similar to the version vectors data structure. But we use state vectors only to describe the state of the local document, so we can compute the missing struct of the remote client. We do not use it to track causality."
+      },
+      "date": 1640814245098
+    },
+    {
+      "type": "edit",
+      "id": "f05b6028f968a11b",
+      "item": {
+        "type": "paragraph",
+        "id": "f05b6028f968a11b",
+        "text": "Conflict-free replicated data types (CRDT) for collaborative editing are an alternative approach to operational transformation (OT). A very simple differenciation between the two approaches is that OT attempts to transform index positions to ensure convergence (all clients end up with the same content), while CRDTs use mathematical models that usually do not involve index transformations, like linked lists. OT is currently the de-facto standard for shared editing on text. OT approaches that support shared editing without a central source of truth (a central server) require too much bookkeeping to be viable in practice. CRDTs are better suited for distributed systems, provide additional guarantees that the document can be synced with remote clients, and do not require a central source of truth.\n\nYjs implements a modified version of the algorithm described in this paper. This article explains a simple optimization on the CRDT model and gives more insight about the performance characteristics in Yjs. More information about the specific implementation is available in INTERNALS.md and in this walkthrough of the Yjs codebase.\n\nCRDTs that suitable for shared text editing suffer from the fact that they only grow in size. There are CRDTs that do not grow in size, but they do not have the characteristics that are benificial for shared text editing (like intention preservation). Yjs implements many improvements to the original algorithm that diminish the trade-off that the document only grows in size. We can't garbage collect deleted structs (tombstones) while ensuring a unique order of the structs. But we can 1. merge preceeding structs into a single struct to reduce the amount of meta information, 2. we can delete content from the struct if it is deleted, and 3. we can garbage collect tombstones if we don't care about the order of the structs anymore (e.g. if the parent was deleted).\n\nExamples:\n\n    If a user inserts elements in sequence, the struct will be merged into a single struct. E.g. array.insert(0, ['a']), array.insert(0, ['b']); is first represented as two structs ([{id: {client, clock: 0}, content: 'a'}, {id: {client, clock: 1}, content: 'b'}) and then merged into a single struct: [{id: {client, clock: 0}, content: 'ab'}].\n    When a struct that contains content (e.g. ItemString) is deleted, the struct will be replaced with an ItemDeleted that does not contain content anymore."
+      },
+      "date": 1641800302784
+    },
+    {
+      "type": "add",
+      "id": "d8ae2656b9b203ef",
+      "item": {
+        "type": "paragraph",
+        "id": "d8ae2656b9b203ef",
+        "text": "    When a type is deleted, all child elements are transformed to GC structs. A GC struct only denotes the existence of a struct and that it is deleted. GC structs can always be merged with other GC structs if the id's are adjacent."
+      },
+      "after": "f05b6028f968a11b",
+      "date": 1641800311582
+    },
+    {
+      "type": "edit",
+      "id": "f05b6028f968a11b",
+      "item": {
+        "type": "paragraph",
+        "id": "f05b6028f968a11b",
+        "text": "Conflict-free replicated data types (CRDT) for collaborative editing are an alternative approach to operational transformation (OT). A very simple differenciation between the two approaches is that OT attempts to transform index positions to ensure convergence (all clients end up with the same content), while CRDTs use mathematical models that usually do not involve index transformations, like linked lists. OT is currently the de-facto standard for shared editing on text. OT approaches that support shared editing without a central source of truth (a central server) require too much bookkeeping to be viable in practice. CRDTs are better suited for distributed systems, provide additional guarantees that the document can be synced with remote clients, and do not require a central source of truth."
+      },
+      "date": 1641800325404
+    },
+    {
+      "type": "add",
+      "id": "5beeb674562d7b47",
+      "item": {
+        "type": "paragraph",
+        "id": "5beeb674562d7b47",
+        "text": "\nYjs implements a modified version of the algorithm described in this paper. This article explains a simple optimization on the CRDT model and gives more insight about the performance characteristics in Yjs. More information about the specific implementation is available in INTERNALS.md and in this walkthrough of the Yjs codebase.\n\nCRDTs that suitable for shared text editing suffer from the fact that they only grow in size. There are CRDTs that do not grow in size, but they do not have the characteristics that are benificial for shared text editing (like intention preservation). Yjs implements many improvements to the original algorithm that diminish the trade-off that the document only grows in size. We can't garbage collect deleted structs (tombstones) while ensuring a unique order of the structs. But we can 1. merge preceeding structs into a single struct to reduce the amount of meta information, 2. we can delete content from the struct if it is deleted, and 3. we can garbage collect tombstones if we don't care about the order of the structs anymore (e.g. if the parent was deleted).\n\nExamples:\n\n    If a user inserts elements in sequence, the struct will be merged into a single struct. E.g. array.insert(0, ['a']), array.insert(0, ['b']); is first represented as two structs ([{id: {client, clock: 0}, content: 'a'}, {id: {client, clock: 1}, content: 'b'}) and then merged into a single struct: [{id: {client, clock: 0}, content: 'ab'}].\n    When a struct that contains content (e.g. ItemString) is deleted, the struct will be replaced with an ItemDeleted that does not contain content anymore."
+      },
+      "after": "f05b6028f968a11b",
+      "date": 1641800327703
+    }
+  ]
+}

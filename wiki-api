@@ -1,0 +1,2002 @@
+{
+  "title": "Wiki API",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "4288d0d48267b9d7",
+      "text": "Here we look at some useful javascript calls that the [[wiki-client]] can interpret. The examples on this page can be experimented with by typing them as is into your browsers javascript console."
+    },
+    {
+      "type": "paragraph",
+      "id": "f7816a62d7921929",
+      "text": "Not an API yet perhaps. But in a federation of decentralised components some sort of API is needed. here we can start to ask this question."
+    },
+    {
+      "type": "markdown",
+      "id": "abd2cd56e976b858",
+      "text": "# Web messaging"
+    },
+    {
+      "type": "paragraph",
+      "id": "e08187dbe04e9506",
+      "text": "[[Web messaging]] is a way for documents in separate browsing contexts to share data without the DOM being exposed to malicious cross-origin scripting. Unlike other forms of cross-site communication, web messaging never directly exposes the DOM - [https://dzone.com/articles/html5-web-messaging dzone.com]"
+    },
+    {
+      "type": "markdown",
+      "id": "c0d0203024c36ecb",
+      "text": "- [[Web3 Messaging]]"
+    },
+    {
+      "type": "markdown",
+      "id": "8b0c8ee2a9fec634",
+      "text": "# My wiki talks to your wiki"
+    },
+    {
+      "type": "paragraph",
+      "id": "33fc3f71b24c1bcf",
+      "text": "We anticipate creating an api for the wiki-client using [[window.postmessage]]. This would require defining the following type of event listener in the client:"
+    },
+    {
+      "type": "code",
+      "id": "a3586b5a238a6154",
+      "text": "//respond to events\nwindow.addEventListener('message',function(event) {\n if(event.origin !== 'https://davidwalsh.name') return;\n console.log('message received:  ' + event.data,event);\n event.source.postMessage('holla back youngin!',event.origin);\n},false);"
+    },
+    {
+      "type": "paragraph",
+      "id": "9bf531f44e83a197",
+      "text": "This would enable web pages to embed wiki as an iFrame, or wiki to communicate to or be communicated with other apps in browser tabs or wasm components."
+    },
+    {
+      "type": "markdown",
+      "id": "9bf41248002ff260",
+      "text": "# Avoiding being pushy"
+    },
+    {
+      "type": "paragraph",
+      "id": "32a454a8d480fab2",
+      "text": "The federation looks to avoid push. This causes us a great deal of problems. It prevents wiki becoming famous or rich. But it achieves an invaluable form of protection from the most common forms of malware. It provides us an affordable harbour."
+    },
+    {
+      "type": "markdown",
+      "id": "9350ec7607fae5d1",
+      "text": "# Navigation\n"
+    },
+    {
+      "type": "markdown",
+      "id": "9ce6133f43c86bb2",
+      "text": "Let's navigate to an internal page on the site:\n"
+    },
+    {
+      "type": "code",
+      "id": "d3f6ac5b2221882e",
+      "text": "wiki.doInternalLink('welcome-visitors')"
+    },
+    {
+      "type": "markdown",
+      "id": "2f3857bea029a9e4",
+      "text": "[[Remote Link]]s can be navigated to using the same syntax with additional parameters:\n"
+    },
+    {
+      "type": "code",
+      "id": "70e6f7de38b7f5d1",
+      "text": "wiki.doInternalLink('folder', null, 'fedwiki.org')"
+    },
+    {
+      "type": "markdown",
+      "id": "1524de098ad302af",
+      "text": "The external link is handled in wiki.resolveLinks which handles both internal and external links in a block of text. The code is in [https://github.com/fedwiki/wiki-plugin-reference github]"
+    },
+    {
+      "type": "markdown",
+      "id": "9da5e6fecdf07581",
+      "text": "# Creating Ghost Pages\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "4f244283e93e81a2",
+      "text": "Let's display a \"hello world\" [[ghost-page]]:"
+    },
+    {
+      "type": "code",
+      "id": "cd5ae1b99f6dc195",
+      "text": "wiki.showResult(wiki.newPage({title:'hello world'}))"
+    },
+    {
+      "type": "paragraph",
+      "id": "29aca4ba0c452573",
+      "text": "Should we wish to accept json from an external source:"
+    },
+    {
+      "type": "code",
+      "id": "b1c769647b1598d1",
+      "text": "var pageJson = '{\"title\":\"Ghost Page\"}';\nvar pageArray = JSON.parse(pageJson);\nwiki.showResult(wiki.newPage(pageArray));"
+    },
+    {
+      "type": "markdown",
+      "id": "6d5656ed6d3ecb83",
+      "text": "# Fetching Pages"
+    },
+    {
+      "type": "paragraph",
+      "id": "935315a50b6fdab3",
+      "text": "Let's fetch a page with javascript and display it as a ghost-page:"
+    },
+    {
+      "type": "code",
+      "id": "d6527503e67009e2",
+      "text": "let page = await fetch('https://wiki.dbbs.co/welcome-visitors.json').then(res => res.json())\nwiki.showResult(wiki.newPage(page))"
+    },
+    {
+      "type": "markdown",
+      "id": "aad3ce6f72844818",
+      "text": "Alternatively without using `await`:"
+    },
+    {
+      "type": "code",
+      "id": "3140898343933873",
+      "text": "fetch('https://wiki.dbbs.co/welcome-visitors.json')\n  .then(res => res.json())\n  .then(json => wiki.showResult(wiki.newPage(json)))"
+    },
+    {
+      "type": "paragraph",
+      "id": "f538e8aa628aa0c2",
+      "text": "Let's fetch a page with wiki-client javascript. You need to construct some javascript of the form:"
+    },
+    {
+      "type": "code",
+      "id": "e12bf61d73fea365",
+      "text": "wiki.site('site').get('page', cb())"
+    },
+    {
+      "type": "markdown",
+      "id": "956378e61d06bf22",
+      "text": "An example with a callback that calls `console.log`:\n"
+    },
+    {
+      "type": "code",
+      "id": "ca3e9b136639247c",
+      "text": "wiki.site('fedwiki.org').get('welcome-visitors.json', (page) => console.log(page))"
+    },
+    {
+      "type": "markdown",
+      "id": "0560bd14583b7dde",
+      "text": "There are actually two callback parameters:"
+    },
+    {
+      "type": "code",
+      "id": "7f2ca51e9fe9a7fb",
+      "text": "wiki.site('wiki.dbbs.co').get('welcome-visitors.json',(err,page)=>wiki.showResult(wiki.newPage(page)))"
+    },
+    {
+      "type": "markdown",
+      "id": "01de263bd9fafbe4",
+      "text": "# Search\n"
+    },
+    {
+      "type": "markdown",
+      "id": "5dc3e77ef504d736",
+      "text": "let's use [[wiki-client]] to construct an array based on searching the [[neighborhood]]:"
+    },
+    {
+      "type": "code",
+      "id": "efd07df1da9fdefb",
+      "text": "wiki.neighborhoodObject.search('how to')"
+    },
+    {
+      "type": "markdown",
+      "id": "a23e3fa88872ad64",
+      "text": "Here is the code we use to format a search result as a ghost page:\n\n- https://github.com/fedwiki/wiki-client/blob/master/lib/search.coffee#L14-L27"
+    },
+    {
+      "type": "markdown",
+      "id": "b06fee2ca08d29e1",
+      "text": "# Info\n"
+    },
+    {
+      "type": "markdown",
+      "id": "a1b2b22cc5ba34e8",
+      "text": "Let's find out what wiki-client nows about the wiki-site:\n"
+    },
+    {
+      "type": "markdown",
+      "id": "6c572aad34af7dfe",
+      "text": "Let's identify the first roster in the lineup:"
+    },
+    {
+      "type": "code",
+      "id": "16e240173a70edba",
+      "text": "wiki.site('fedwiki.org')"
+    },
+    {
+      "type": "code",
+      "id": "168c95070e8a6393",
+      "text": "$('.roster-source').get(0).getRoster()"
+    },
+    {
+      "type": "markdown",
+      "id": "05c4ee35264acf59",
+      "text": "# See also\n"
+    },
+    {
+      "text": "- [[Coordinated Viewing]]\n- [[Map Wiki]]\n- [[Framed]]\n- [[SVG Image Map]]\n\n",
+      "id": "6dfd1b0d-7795-4e93-99fa-9c0d6ea133dd",
+      "type": "markdown"
+    },
+    {
+      "type": "markdown",
+      "id": "6e75f72552e77142",
+      "text": "- [[Web Messaging]]\n- [[Channel Messaging API]]\n- [[Window.postMessage]]"
+    },
+    {
+      "type": "markdown",
+      "id": "861d200ca291bf05",
+      "text": "- [[Web3 Messaging]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Wiki API",
+        "story": []
+      },
+      "date": 1548606149043
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4288d0d48267b9d7"
+      },
+      "id": "4288d0d48267b9d7",
+      "type": "add",
+      "date": 1548606150199
+    },
+    {
+      "type": "edit",
+      "id": "4288d0d48267b9d7",
+      "item": {
+        "type": "paragraph",
+        "id": "4288d0d48267b9d7",
+        "text": "Here we look at some useful javascript calls that the [[wiki-client]] can interpret. The examples on this page can be experimented with by typing them as is into your browsers javascript console."
+      },
+      "date": 1548606241690
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d6527503e67009e2"
+      },
+      "id": "d6527503e67009e2",
+      "type": "add",
+      "after": "4288d0d48267b9d7",
+      "date": 1548606242663
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3140898343933873"
+      },
+      "id": "3140898343933873",
+      "type": "add",
+      "after": "d6527503e67009e2",
+      "date": 1548606245044
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "efd07df1da9fdefb"
+      },
+      "id": "efd07df1da9fdefb",
+      "type": "add",
+      "after": "3140898343933873",
+      "date": 1548606246188
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e12bf61d73fea365"
+      },
+      "id": "e12bf61d73fea365",
+      "type": "add",
+      "after": "efd07df1da9fdefb",
+      "date": 1548606247534
+    },
+    {
+      "type": "edit",
+      "id": "d6527503e67009e2",
+      "item": {
+        "type": "code",
+        "id": "d6527503e67009e2",
+        "text": "let page = await fetch('https://wiki.dbbs.co/welcome-visitors.json').then(res => res.json())\nwiki.showResult(wiki.newPage(page))"
+      },
+      "date": 1548606295605
+    },
+    {
+      "type": "add",
+      "id": "935315a50b6fdab3",
+      "item": {
+        "type": "paragraph",
+        "id": "935315a50b6fdab3",
+        "text": "Let's fetch a page with javascript and display it as a ghost-page:"
+      },
+      "after": "4288d0d48267b9d7",
+      "date": 1548606343248
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "3140898343933873",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "efd07df1da9fdefb",
+        "e12bf61d73fea365"
+      ],
+      "id": "3140898343933873",
+      "date": 1548606346427
+    },
+    {
+      "type": "edit",
+      "id": "e12bf61d73fea365",
+      "item": {
+        "type": "code",
+        "id": "e12bf61d73fea365",
+        "text": "wiki.site('site').get('page', cb())"
+      },
+      "date": 1548606430203
+    },
+    {
+      "type": "add",
+      "id": "f538e8aa628aa0c2",
+      "item": {
+        "type": "paragraph",
+        "id": "f538e8aa628aa0c2",
+        "text": "Let's fetch a page with javascript and display it as a ghost-page:"
+      },
+      "after": "935315a50b6fdab3",
+      "date": 1548606438687
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "3140898343933873",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "efd07df1da9fdefb",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365"
+      ],
+      "id": "f538e8aa628aa0c2",
+      "date": 1548606444289
+    },
+    {
+      "type": "edit",
+      "id": "f538e8aa628aa0c2",
+      "item": {
+        "type": "paragraph",
+        "id": "f538e8aa628aa0c2",
+        "text": "Let's fetch a page with wiki-client javascript"
+      },
+      "date": 1548606463266
+    },
+    {
+      "type": "edit",
+      "id": "3140898343933873",
+      "item": {
+        "type": "code",
+        "id": "3140898343933873",
+        "text": "fetch('https://wiki.dbbs.co/welcome-visitors.json')\n  .then(res => res.json())\n  .then(json => wiki.showResult(wiki.newPage(json)))"
+      },
+      "date": 1548606493870
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "3140898343933873",
+        "efd07df1da9fdefb",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365"
+      ],
+      "id": "3140898343933873",
+      "date": 1548606496047
+    },
+    {
+      "type": "add",
+      "id": "aad3ce6f72844818",
+      "item": {
+        "type": "paragraph",
+        "id": "aad3ce6f72844818",
+        "text": "Alternatively without using `await`:"
+      },
+      "after": "935315a50b6fdab3",
+      "date": 1548606513668
+    },
+    {
+      "type": "edit",
+      "id": "aad3ce6f72844818",
+      "item": {
+        "type": "markdown",
+        "id": "aad3ce6f72844818",
+        "text": "Alternatively without using `await`:"
+      },
+      "date": 1548606515608
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "efd07df1da9fdefb",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365"
+      ],
+      "id": "aad3ce6f72844818",
+      "date": 1548606517427
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d3f6ac5b2221882e"
+      },
+      "id": "d3f6ac5b2221882e",
+      "type": "add",
+      "after": "e12bf61d73fea365",
+      "date": 1548606519060
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "d3f6ac5b2221882e",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "efd07df1da9fdefb",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365"
+      ],
+      "id": "d3f6ac5b2221882e",
+      "date": 1548606523337
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "cd5ae1b99f6dc195"
+      },
+      "id": "cd5ae1b99f6dc195",
+      "type": "add",
+      "after": "e12bf61d73fea365",
+      "date": 1548606524791
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "d3f6ac5b2221882e",
+        "cd5ae1b99f6dc195",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "efd07df1da9fdefb",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365"
+      ],
+      "id": "cd5ae1b99f6dc195",
+      "date": 1548606527011
+    },
+    {
+      "type": "edit",
+      "id": "cd5ae1b99f6dc195",
+      "item": {
+        "type": "code",
+        "id": "cd5ae1b99f6dc195",
+        "text": "wiki.showResult(wiki.newPage({title:'hello world'}))"
+      },
+      "date": 1548606606714
+    },
+    {
+      "type": "add",
+      "id": "4f244283e93e81a2",
+      "item": {
+        "type": "paragraph",
+        "id": "4f244283e93e81a2",
+        "text": "Let's display a \"hello world\" [[ghost-page]]:"
+      },
+      "after": "4288d0d48267b9d7",
+      "date": 1548606654340
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "d3f6ac5b2221882e",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "efd07df1da9fdefb",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365"
+      ],
+      "id": "4f244283e93e81a2",
+      "date": 1548606656776
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a23e3fa88872ad64"
+      },
+      "id": "a23e3fa88872ad64",
+      "type": "add",
+      "after": "e12bf61d73fea365",
+      "date": 1548606677049
+    },
+    {
+      "type": "edit",
+      "id": "a23e3fa88872ad64",
+      "item": {
+        "type": "markdown",
+        "id": "a23e3fa88872ad64",
+        "text": "Here is the code we use to format a search result as a ghost page:\n\n- https://github.com/fedwiki/wiki-client/blob/master/lib/search.coffee#L14-L27"
+      },
+      "date": 1548606688080
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "01de263bd9fafbe4"
+      },
+      "id": "01de263bd9fafbe4",
+      "type": "add",
+      "after": "a23e3fa88872ad64",
+      "date": 1548606692046
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "d3f6ac5b2221882e",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "efd07df1da9fdefb",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "01de263bd9fafbe4",
+        "a23e3fa88872ad64"
+      ],
+      "id": "01de263bd9fafbe4",
+      "date": 1548606693912
+    },
+    {
+      "type": "edit",
+      "id": "01de263bd9fafbe4",
+      "item": {
+        "type": "markdown",
+        "id": "01de263bd9fafbe4",
+        "text": "# Search"
+      },
+      "date": 1548606698846
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9da5e6fecdf07581"
+      },
+      "id": "9da5e6fecdf07581",
+      "type": "add",
+      "after": "a23e3fa88872ad64",
+      "date": 1548606700611
+    },
+    {
+      "type": "edit",
+      "id": "9da5e6fecdf07581",
+      "item": {
+        "type": "markdown",
+        "id": "9da5e6fecdf07581",
+        "text": "# Creating Ghost Pages"
+      },
+      "date": 1548606714639
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "d3f6ac5b2221882e",
+        "9da5e6fecdf07581",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "efd07df1da9fdefb",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "01de263bd9fafbe4",
+        "a23e3fa88872ad64"
+      ],
+      "id": "9da5e6fecdf07581",
+      "date": 1548606719127
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8aef766d99bbad04"
+      },
+      "id": "8aef766d99bbad04",
+      "type": "add",
+      "after": "a23e3fa88872ad64",
+      "date": 1548606723706
+    },
+    {
+      "type": "edit",
+      "id": "8aef766d99bbad04",
+      "item": {
+        "type": "pagefold",
+        "id": "8aef766d99bbad04",
+        "text": "# Fetching Pages"
+      },
+      "date": 1548606730816
+    },
+    {
+      "type": "remove",
+      "id": "8aef766d99bbad04",
+      "date": 1548606735661
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6d5656ed6d3ecb83"
+      },
+      "id": "6d5656ed6d3ecb83",
+      "type": "add",
+      "after": "a23e3fa88872ad64",
+      "date": 1548606736834
+    },
+    {
+      "type": "edit",
+      "id": "6d5656ed6d3ecb83",
+      "item": {
+        "type": "markdown",
+        "id": "6d5656ed6d3ecb83",
+        "text": "# Fetching Pages"
+      },
+      "date": 1548606739304
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "d3f6ac5b2221882e",
+        "9da5e6fecdf07581",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "6d5656ed6d3ecb83",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "efd07df1da9fdefb",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "01de263bd9fafbe4",
+        "a23e3fa88872ad64"
+      ],
+      "id": "6d5656ed6d3ecb83",
+      "date": 1548606744447
+    },
+    {
+      "type": "edit",
+      "id": "d3f6ac5b2221882e",
+      "item": {
+        "type": "code",
+        "id": "d3f6ac5b2221882e",
+        "text": "wiki.showResult(resultPage)"
+      },
+      "date": 1548606797396
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ca3e9b136639247c"
+      },
+      "id": "ca3e9b136639247c",
+      "type": "add",
+      "after": "a23e3fa88872ad64",
+      "date": 1548607269989
+    },
+    {
+      "type": "edit",
+      "id": "ca3e9b136639247c",
+      "item": {
+        "type": "code",
+        "id": "ca3e9b136639247c",
+        "text": "wiki.site('fedwiki.org').get('welcome-visitors.json', (page) => console.log(page))"
+      },
+      "date": 1548607272437
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "d3f6ac5b2221882e",
+        "9da5e6fecdf07581",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "6d5656ed6d3ecb83",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "efd07df1da9fdefb",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "ca3e9b136639247c",
+        "01de263bd9fafbe4",
+        "a23e3fa88872ad64"
+      ],
+      "id": "ca3e9b136639247c",
+      "date": 1548607275609
+    },
+    {
+      "type": "edit",
+      "id": "f538e8aa628aa0c2",
+      "item": {
+        "type": "paragraph",
+        "id": "f538e8aa628aa0c2",
+        "text": "Let's fetch a page with wiki-client javascript. You need to construct some javascript of the form:"
+      },
+      "date": 1548607294249
+    },
+    {
+      "type": "add",
+      "id": "956378e61d06bf22",
+      "item": {
+        "type": "paragraph",
+        "id": "956378e61d06bf22",
+        "text": "An example with a callback that calls console.log`:"
+      },
+      "after": "f538e8aa628aa0c2",
+      "date": 1548607318590
+    },
+    {
+      "type": "edit",
+      "id": "956378e61d06bf22",
+      "item": {
+        "type": "markdown",
+        "id": "956378e61d06bf22",
+        "text": "An example with a callback that calls console.log`:"
+      },
+      "date": 1548607321160
+    },
+    {
+      "type": "edit",
+      "id": "956378e61d06bf22",
+      "item": {
+        "type": "markdown",
+        "id": "956378e61d06bf22",
+        "text": "An example with a callback that calls `console.log`:"
+      },
+      "date": 1548607326263
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "d3f6ac5b2221882e",
+        "9da5e6fecdf07581",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "6d5656ed6d3ecb83",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "efd07df1da9fdefb",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "956378e61d06bf22",
+        "ca3e9b136639247c",
+        "01de263bd9fafbe4",
+        "a23e3fa88872ad64"
+      ],
+      "id": "956378e61d06bf22",
+      "date": 1548607328610
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b06fee2ca08d29e1"
+      },
+      "id": "b06fee2ca08d29e1",
+      "type": "add",
+      "after": "a23e3fa88872ad64",
+      "date": 1548607382098
+    },
+    {
+      "type": "edit",
+      "id": "b06fee2ca08d29e1",
+      "item": {
+        "type": "markdown",
+        "id": "b06fee2ca08d29e1",
+        "text": "# Info\n"
+      },
+      "date": 1548607391358
+    },
+    {
+      "type": "add",
+      "id": "a1b2b22cc5ba34e8",
+      "item": {
+        "type": "markdown",
+        "id": "a1b2b22cc5ba34e8",
+        "text": "Let's find out what wiki-client nows about the wiki-site:"
+      },
+      "after": "b06fee2ca08d29e1",
+      "date": 1548607409542
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "16e240173a70edba"
+      },
+      "id": "16e240173a70edba",
+      "type": "add",
+      "after": "a1b2b22cc5ba34e8",
+      "date": 1548607410952
+    },
+    {
+      "type": "edit",
+      "id": "16e240173a70edba",
+      "item": {
+        "type": "code",
+        "id": "16e240173a70edba",
+        "text": "wiki.site('fedwiki.org')"
+      },
+      "date": 1548607413758
+    },
+    {
+      "type": "edit",
+      "id": "efd07df1da9fdefb",
+      "item": {
+        "type": "code",
+        "id": "efd07df1da9fdefb",
+        "text": "resultPage = wiki.neighborhoodObject.search('how to')"
+      },
+      "date": 1548607483197
+    },
+    {
+      "type": "edit",
+      "id": "efd07df1da9fdefb",
+      "item": {
+        "type": "code",
+        "id": "efd07df1da9fdefb",
+        "text": "wiki.neighborhoodObject.search('how to')"
+      },
+      "date": 1548607493370
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "d3f6ac5b2221882e",
+        "9da5e6fecdf07581",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "6d5656ed6d3ecb83",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "956378e61d06bf22",
+        "ca3e9b136639247c",
+        "01de263bd9fafbe4",
+        "efd07df1da9fdefb",
+        "a23e3fa88872ad64",
+        "b06fee2ca08d29e1",
+        "a1b2b22cc5ba34e8",
+        "16e240173a70edba"
+      ],
+      "id": "efd07df1da9fdefb",
+      "date": 1548607498335
+    },
+    {
+      "type": "edit",
+      "id": "01de263bd9fafbe4",
+      "item": {
+        "type": "markdown",
+        "id": "01de263bd9fafbe4",
+        "text": "# Search\n"
+      },
+      "date": 1548607502599
+    },
+    {
+      "type": "add",
+      "id": "5dc3e77ef504d736",
+      "item": {
+        "type": "markdown",
+        "id": "5dc3e77ef504d736",
+        "text": "let's use [[wiki-client]] to construct an array based on searching the [[neighborhood]]:"
+      },
+      "after": "01de263bd9fafbe4",
+      "date": 1548607543392
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "168c95070e8a6393"
+      },
+      "id": "168c95070e8a6393",
+      "type": "add",
+      "after": "16e240173a70edba",
+      "date": 1548607625268
+    },
+    {
+      "type": "edit",
+      "id": "168c95070e8a6393",
+      "item": {
+        "type": "code",
+        "id": "168c95070e8a6393",
+        "text": "$('.roster-source').get(0).getRoster()"
+      },
+      "date": 1548607629771
+    },
+    {
+      "type": "edit",
+      "id": "a1b2b22cc5ba34e8",
+      "item": {
+        "type": "markdown",
+        "id": "a1b2b22cc5ba34e8",
+        "text": "Let's find out what wiki-client nows about the wiki-site:\n"
+      },
+      "date": 1548607634441
+    },
+    {
+      "type": "add",
+      "id": "6c572aad34af7dfe",
+      "item": {
+        "type": "markdown",
+        "id": "6c572aad34af7dfe",
+        "text": "Let's identify the first roster in the lineup:"
+      },
+      "after": "a1b2b22cc5ba34e8",
+      "date": 1548607662343
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b1c769647b1598d1"
+      },
+      "id": "b1c769647b1598d1",
+      "type": "add",
+      "after": "168c95070e8a6393",
+      "date": 1548608575030
+    },
+    {
+      "type": "edit",
+      "id": "b1c769647b1598d1",
+      "item": {
+        "type": "code",
+        "id": "b1c769647b1598d1",
+        "text": "var pageJson = '{\"title\":\"hello world\"}'"
+      },
+      "date": 1548608579465
+    },
+    {
+      "type": "edit",
+      "id": "b1c769647b1598d1",
+      "item": {
+        "type": "code",
+        "id": "b1c769647b1598d1",
+        "text": "var pageJson = '{\"title\":\"hello world\"}';\nvar pageArray = JSON.parse(pageJson);"
+      },
+      "date": 1548608606167
+    },
+    {
+      "type": "edit",
+      "id": "b1c769647b1598d1",
+      "item": {
+        "type": "code",
+        "id": "b1c769647b1598d1",
+        "text": "var pageJson = '{\"title\":\"Ghost Page\"}';\nvar pageArray = JSON.parse(pageJson);\nwiki.showResult(wiki.newPage(pageArray));"
+      },
+      "date": 1548608647771
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "d3f6ac5b2221882e",
+        "9da5e6fecdf07581",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "b1c769647b1598d1",
+        "6d5656ed6d3ecb83",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "956378e61d06bf22",
+        "ca3e9b136639247c",
+        "01de263bd9fafbe4",
+        "5dc3e77ef504d736",
+        "efd07df1da9fdefb",
+        "a23e3fa88872ad64",
+        "b06fee2ca08d29e1",
+        "a1b2b22cc5ba34e8",
+        "6c572aad34af7dfe",
+        "16e240173a70edba",
+        "168c95070e8a6393"
+      ],
+      "id": "b1c769647b1598d1",
+      "date": 1548608717230
+    },
+    {
+      "type": "add",
+      "id": "29aca4ba0c452573",
+      "item": {
+        "type": "paragraph",
+        "id": "29aca4ba0c452573",
+        "text": "Should we wish to accept json from an external source:"
+      },
+      "after": "4f244283e93e81a2",
+      "date": 1548608739430
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "d3f6ac5b2221882e",
+        "9da5e6fecdf07581",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "29aca4ba0c452573",
+        "b1c769647b1598d1",
+        "6d5656ed6d3ecb83",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "956378e61d06bf22",
+        "ca3e9b136639247c",
+        "01de263bd9fafbe4",
+        "5dc3e77ef504d736",
+        "efd07df1da9fdefb",
+        "a23e3fa88872ad64",
+        "b06fee2ca08d29e1",
+        "a1b2b22cc5ba34e8",
+        "6c572aad34af7dfe",
+        "16e240173a70edba",
+        "168c95070e8a6393"
+      ],
+      "id": "29aca4ba0c452573",
+      "date": 1548608742131
+    },
+    {
+      "type": "edit",
+      "id": "d3f6ac5b2221882e",
+      "item": {
+        "type": "code",
+        "id": "d3f6ac5b2221882e",
+        "text": "wiki.doInternalLink('welcome-visitors')"
+      },
+      "date": 1548608858384
+    },
+    {
+      "type": "edit",
+      "id": "9da5e6fecdf07581",
+      "item": {
+        "type": "markdown",
+        "id": "9da5e6fecdf07581",
+        "text": "# Creating Ghost Pages\n"
+      },
+      "date": 1548608862229
+    },
+    {
+      "type": "add",
+      "id": "9350ec7607fae5d1",
+      "item": {
+        "type": "markdown",
+        "id": "9350ec7607fae5d1",
+        "text": "# Navigation"
+      },
+      "after": "9da5e6fecdf07581",
+      "date": 1548608866729
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "9350ec7607fae5d1",
+        "d3f6ac5b2221882e",
+        "9da5e6fecdf07581",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "29aca4ba0c452573",
+        "b1c769647b1598d1",
+        "6d5656ed6d3ecb83",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "956378e61d06bf22",
+        "ca3e9b136639247c",
+        "01de263bd9fafbe4",
+        "5dc3e77ef504d736",
+        "efd07df1da9fdefb",
+        "a23e3fa88872ad64",
+        "b06fee2ca08d29e1",
+        "a1b2b22cc5ba34e8",
+        "6c572aad34af7dfe",
+        "16e240173a70edba",
+        "168c95070e8a6393"
+      ],
+      "id": "9350ec7607fae5d1",
+      "date": 1548608868482
+    },
+    {
+      "type": "edit",
+      "id": "9350ec7607fae5d1",
+      "item": {
+        "type": "markdown",
+        "id": "9350ec7607fae5d1",
+        "text": "# Navigation\n"
+      },
+      "date": 1548608871665
+    },
+    {
+      "type": "add",
+      "id": "9ce6133f43c86bb2",
+      "item": {
+        "type": "markdown",
+        "id": "9ce6133f43c86bb2",
+        "text": "Let's navigate to an internal page on the site:"
+      },
+      "after": "9350ec7607fae5d1",
+      "date": 1548608888834
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7f2ca51e9fe9a7fb"
+      },
+      "id": "7f2ca51e9fe9a7fb",
+      "type": "add",
+      "after": "168c95070e8a6393",
+      "date": 1548609067759
+    },
+    {
+      "type": "edit",
+      "id": "7f2ca51e9fe9a7fb",
+      "item": {
+        "type": "code",
+        "id": "7f2ca51e9fe9a7fb",
+        "text": "wiki.site('wiki.dbbs.co').get('welcome-visitors.json',(err,page)=>wiki.showResult(wiki.newPage(page)))"
+      },
+      "date": 1548609081637
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "9350ec7607fae5d1",
+        "9ce6133f43c86bb2",
+        "d3f6ac5b2221882e",
+        "9da5e6fecdf07581",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "29aca4ba0c452573",
+        "b1c769647b1598d1",
+        "6d5656ed6d3ecb83",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "956378e61d06bf22",
+        "ca3e9b136639247c",
+        "7f2ca51e9fe9a7fb",
+        "01de263bd9fafbe4",
+        "5dc3e77ef504d736",
+        "efd07df1da9fdefb",
+        "a23e3fa88872ad64",
+        "b06fee2ca08d29e1",
+        "a1b2b22cc5ba34e8",
+        "6c572aad34af7dfe",
+        "16e240173a70edba",
+        "168c95070e8a6393"
+      ],
+      "id": "7f2ca51e9fe9a7fb",
+      "date": 1548609093103
+    },
+    {
+      "type": "edit",
+      "id": "956378e61d06bf22",
+      "item": {
+        "type": "markdown",
+        "id": "956378e61d06bf22",
+        "text": "An example with a callback that calls `console.log`:\n"
+      },
+      "date": 1548609127567
+    },
+    {
+      "type": "add",
+      "id": "0560bd14583b7dde",
+      "item": {
+        "type": "markdown",
+        "id": "0560bd14583b7dde",
+        "text": "There are actually two callback parameters:"
+      },
+      "after": "956378e61d06bf22",
+      "date": 1548609144239
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "9350ec7607fae5d1",
+        "9ce6133f43c86bb2",
+        "d3f6ac5b2221882e",
+        "9da5e6fecdf07581",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "29aca4ba0c452573",
+        "b1c769647b1598d1",
+        "6d5656ed6d3ecb83",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "956378e61d06bf22",
+        "ca3e9b136639247c",
+        "0560bd14583b7dde",
+        "7f2ca51e9fe9a7fb",
+        "01de263bd9fafbe4",
+        "5dc3e77ef504d736",
+        "efd07df1da9fdefb",
+        "a23e3fa88872ad64",
+        "b06fee2ca08d29e1",
+        "a1b2b22cc5ba34e8",
+        "6c572aad34af7dfe",
+        "16e240173a70edba",
+        "168c95070e8a6393"
+      ],
+      "id": "0560bd14583b7dde",
+      "date": 1548609146436
+    },
+    {
+      "type": "add",
+      "id": "abd2cd56e976b858",
+      "item": {
+        "type": "paragraph",
+        "id": "abd2cd56e976b858",
+        "text": "# Window.postmessage"
+      },
+      "after": "4288d0d48267b9d7",
+      "date": 1548614526367
+    },
+    {
+      "type": "edit",
+      "id": "abd2cd56e976b858",
+      "item": {
+        "type": "markdown",
+        "id": "abd2cd56e976b858",
+        "text": "# Window.postmessage"
+      },
+      "date": 1548614528640
+    },
+    {
+      "type": "add",
+      "id": "e08187dbe04e9506",
+      "item": {
+        "type": "paragraph",
+        "id": "e08187dbe04e9506",
+        "text": "We anticipate creating an api for the wiki-client using [[window.postmessage]]:"
+      },
+      "after": "abd2cd56e976b858",
+      "date": 1548614556002
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a3586b5a238a6154"
+      },
+      "id": "a3586b5a238a6154",
+      "type": "add",
+      "after": "168c95070e8a6393",
+      "date": 1548614561333
+    },
+    {
+      "type": "edit",
+      "id": "a3586b5a238a6154",
+      "item": {
+        "type": "code",
+        "id": "a3586b5a238a6154",
+        "text": "//respond to events\nwindow.addEventListener('message',function(event) {\n\tif(event.origin !== 'https://davidwalsh.name') return;\n\tconsole.log('message received:  ' + event.data,event);\n\tevent.source.postMessage('holla back youngin!',event.origin);\n},false);"
+      },
+      "date": 1548614563643
+    },
+    {
+      "type": "edit",
+      "id": "a3586b5a238a6154",
+      "item": {
+        "type": "code",
+        "id": "a3586b5a238a6154",
+        "text": "//respond to events\nwindow.addEventListener('message',function(event) {\n if(event.origin !== 'https://davidwalsh.name') return;\n console.log('message received:  ' + event.data,event);\n event.source.postMessage('holla back youngin!',event.origin);\n},false);"
+      },
+      "date": 1548614577618
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "abd2cd56e976b858",
+        "e08187dbe04e9506",
+        "a3586b5a238a6154",
+        "9350ec7607fae5d1",
+        "9ce6133f43c86bb2",
+        "d3f6ac5b2221882e",
+        "9da5e6fecdf07581",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "29aca4ba0c452573",
+        "b1c769647b1598d1",
+        "6d5656ed6d3ecb83",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "956378e61d06bf22",
+        "ca3e9b136639247c",
+        "0560bd14583b7dde",
+        "7f2ca51e9fe9a7fb",
+        "01de263bd9fafbe4",
+        "5dc3e77ef504d736",
+        "efd07df1da9fdefb",
+        "a23e3fa88872ad64",
+        "b06fee2ca08d29e1",
+        "a1b2b22cc5ba34e8",
+        "6c572aad34af7dfe",
+        "16e240173a70edba",
+        "168c95070e8a6393"
+      ],
+      "id": "a3586b5a238a6154",
+      "date": 1548614599638
+    },
+    {
+      "type": "edit",
+      "id": "e08187dbe04e9506",
+      "item": {
+        "type": "paragraph",
+        "id": "e08187dbe04e9506",
+        "text": "We anticipate creating an api for the wiki-client using [[window.postmessage]]. This would require defining the following type of event listener in the client:"
+      },
+      "date": 1548614656222
+    },
+    {
+      "type": "add",
+      "id": "9bf531f44e83a197",
+      "item": {
+        "type": "paragraph",
+        "id": "9bf531f44e83a197",
+        "text": "This would enable"
+      },
+      "after": "e08187dbe04e9506",
+      "date": 1548614717222
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "abd2cd56e976b858",
+        "e08187dbe04e9506",
+        "a3586b5a238a6154",
+        "9bf531f44e83a197",
+        "9350ec7607fae5d1",
+        "9ce6133f43c86bb2",
+        "d3f6ac5b2221882e",
+        "9da5e6fecdf07581",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "29aca4ba0c452573",
+        "b1c769647b1598d1",
+        "6d5656ed6d3ecb83",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "956378e61d06bf22",
+        "ca3e9b136639247c",
+        "0560bd14583b7dde",
+        "7f2ca51e9fe9a7fb",
+        "01de263bd9fafbe4",
+        "5dc3e77ef504d736",
+        "efd07df1da9fdefb",
+        "a23e3fa88872ad64",
+        "b06fee2ca08d29e1",
+        "a1b2b22cc5ba34e8",
+        "6c572aad34af7dfe",
+        "16e240173a70edba",
+        "168c95070e8a6393"
+      ],
+      "id": "9bf531f44e83a197",
+      "date": 1548614719339
+    },
+    {
+      "type": "edit",
+      "id": "9bf531f44e83a197",
+      "item": {
+        "type": "paragraph",
+        "id": "9bf531f44e83a197",
+        "text": "This would enable web pages to embed wiki as an iFrame, or wiki to communicate to or be communicated with other apps in browser tabs or wasm components."
+      },
+      "date": 1548614785279
+    },
+    {
+      "type": "add",
+      "id": "f7816a62d7921929",
+      "item": {
+        "type": "paragraph",
+        "id": "f7816a62d7921929",
+        "text": "Not an API yet perhaps. But in a federation of decentralised components some sort of API is needed. here we can start to ask this question."
+      },
+      "after": "4288d0d48267b9d7",
+      "date": 1548618089234
+    },
+    {
+      "type": "edit",
+      "id": "abd2cd56e976b858",
+      "item": {
+        "type": "markdown",
+        "id": "abd2cd56e976b858",
+        "text": "# Web messaging"
+      },
+      "date": 1548618173829
+    },
+    {
+      "type": "edit",
+      "id": "e08187dbe04e9506",
+      "item": {
+        "type": "paragraph",
+        "id": "e08187dbe04e9506",
+        "text": "Web messaging is a way for documents in separate browsing contexts to share data without the DOM being exposed to malicious cross-origin scripting. Unlike other forms of cross-site communication (cross-domain XMLHttpRequest, or dynamic script insertion), web messaging never directly exposes the DOM."
+      },
+      "date": 1548618177486
+    },
+    {
+      "type": "add",
+      "id": "8b0c8ee2a9fec634",
+      "item": {
+        "type": "paragraph",
+        "id": "8b0c8ee2a9fec634",
+        "text": "We anticipate creating an api for the wiki-client using [[window.postmessage]]. This would require defining the following type of event listener in the client:"
+      },
+      "after": "e08187dbe04e9506",
+      "date": 1548618180227
+    },
+    {
+      "type": "edit",
+      "id": "e08187dbe04e9506",
+      "item": {
+        "type": "paragraph",
+        "id": "e08187dbe04e9506",
+        "text": "[[Web messaging]] is a way for documents in separate browsing contexts to share data without the DOM being exposed to malicious cross-origin scripting. Unlike other forms of cross-site communication (cross-domain XMLHttpRequest, or dynamic script insertion), web messaging never directly exposes the DOM."
+      },
+      "date": 1548618185263
+    },
+    {
+      "type": "edit",
+      "id": "e08187dbe04e9506",
+      "item": {
+        "type": "paragraph",
+        "id": "e08187dbe04e9506",
+        "text": "[[Web messaging]] is a way for documents in separate browsing contexts to share data without the DOM being exposed to malicious cross-origin scripting. Unlike other forms of cross-site communication, web messaging never directly exposes the DOM."
+      },
+      "date": 1548618340431
+    },
+    {
+      "type": "edit",
+      "id": "e08187dbe04e9506",
+      "item": {
+        "type": "paragraph",
+        "id": "e08187dbe04e9506",
+        "text": "[[Web messaging]] is a way for documents in separate browsing contexts to share data without the DOM being exposed to malicious cross-origin scripting. Unlike other forms of cross-site communication, web messaging never directly exposes the DOM - [https://dzone.com/articles/html5-web-messaging dzone]"
+      },
+      "date": 1548619268712
+    },
+    {
+      "type": "edit",
+      "id": "e08187dbe04e9506",
+      "item": {
+        "type": "paragraph",
+        "id": "e08187dbe04e9506",
+        "text": "[[Web messaging]] is a way for documents in separate browsing contexts to share data without the DOM being exposed to malicious cross-origin scripting. Unlike other forms of cross-site communication, web messaging never directly exposes the DOM - [https://dzone.com/articles/html5-web-messaging dzone.com]"
+      },
+      "date": 1548619274970
+    },
+    {
+      "type": "add",
+      "id": "c0d0203024c36ecb",
+      "item": {
+        "type": "paragraph",
+        "id": "c0d0203024c36ecb",
+        "text": "- Web 3.0 messaging - [http://brianyang.com/your-guide-to-messaging-apis-for-enabling-web-3-0-internet-communication/ brianyang.com]"
+      },
+      "after": "e08187dbe04e9506",
+      "date": 1548619327953
+    },
+    {
+      "type": "edit",
+      "id": "c0d0203024c36ecb",
+      "item": {
+        "type": "markdown",
+        "id": "c0d0203024c36ecb",
+        "text": "- Web 3.0 messaging - [http://brianyang.com/your-guide-to-messaging-apis-for-enabling-web-3-0-internet-communication/ brianyang.com]"
+      },
+      "date": 1548619329232
+    },
+    {
+      "type": "edit",
+      "id": "8b0c8ee2a9fec634",
+      "item": {
+        "type": "paragraph",
+        "id": "8b0c8ee2a9fec634",
+        "text": "# My wiki talks to your wiki"
+      },
+      "date": 1548619371389
+    },
+    {
+      "type": "add",
+      "id": "33fc3f71b24c1bcf",
+      "item": {
+        "type": "paragraph",
+        "id": "33fc3f71b24c1bcf",
+        "text": "We anticipate creating an api for the wiki-client using [[window.postmessage]]. This would require defining the following type of event listener in the client:"
+      },
+      "after": "8b0c8ee2a9fec634",
+      "date": 1548619372164
+    },
+    {
+      "type": "edit",
+      "id": "8b0c8ee2a9fec634",
+      "item": {
+        "type": "markdown",
+        "id": "8b0c8ee2a9fec634",
+        "text": "# My wiki talks to your wiki"
+      },
+      "date": 1548619374019
+    },
+    {
+      "type": "edit",
+      "id": "c0d0203024c36ecb",
+      "item": {
+        "type": "markdown",
+        "id": "c0d0203024c36ecb",
+        "text": "- [[Web 3.0 messaging]] - [http://brianyang.com/your-guide-to-messaging-apis-for-enabling-web-3-0-internet-communication/ brianyang.com]"
+      },
+      "date": 1548620054346
+    },
+    {
+      "type": "edit",
+      "id": "c0d0203024c36ecb",
+      "item": {
+        "type": "markdown",
+        "id": "c0d0203024c36ecb",
+        "text": "- [[Web 3.0 Messaging]] - [http://brianyang.com/your-guide-to-messaging-apis-for-enabling-web-3-0-internet-communication/ brianyang.com]"
+      },
+      "date": 1548620060871
+    },
+    {
+      "type": "edit",
+      "id": "c0d0203024c36ecb",
+      "item": {
+        "type": "markdown",
+        "id": "c0d0203024c36ecb",
+        "text": "- [[Web3 Messaging]] - [http://brianyang.com/your-guide-to-messaging-apis-for-enabling-web-3-0-internet-communication/ brianyang.com]"
+      },
+      "date": 1548620073588
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "05c4ee35264acf59",
+        "text": "# See also\n\n- [[Wiki API]]"
+      },
+      "after": "168c95070e8a6393",
+      "id": "05c4ee35264acf59",
+      "date": 1548620589607
+    },
+    {
+      "type": "edit",
+      "id": "05c4ee35264acf59",
+      "item": {
+        "type": "markdown",
+        "id": "05c4ee35264acf59",
+        "text": "# See also\n\n- [[Web3 Messaging]]"
+      },
+      "date": 1548620599687
+    },
+    {
+      "type": "add",
+      "id": "9bf41248002ff260",
+      "item": {
+        "type": "paragraph",
+        "id": "9bf41248002ff260",
+        "text": "# Avoiding being pushy"
+      },
+      "after": "9bf531f44e83a197",
+      "date": 1548627395510
+    },
+    {
+      "type": "edit",
+      "id": "9bf41248002ff260",
+      "item": {
+        "type": "markdown",
+        "id": "9bf41248002ff260",
+        "text": "# Avoiding being pushy"
+      },
+      "date": 1548627397232
+    },
+    {
+      "type": "add",
+      "id": "32a454a8d480fab2",
+      "item": {
+        "type": "paragraph",
+        "id": "32a454a8d480fab2",
+        "text": "The federation looks to avoid push. This causes us a great deal of problems. It prevents wiki becoming famous or rich. But it achieves an invaluable form of protection from the most common forms of malware. It provides us an affordable harbour."
+      },
+      "after": "9bf41248002ff260",
+      "date": 1548627538865
+    },
+    {
+      "type": "edit",
+      "id": "c0d0203024c36ecb",
+      "item": {
+        "type": "markdown",
+        "id": "c0d0203024c36ecb",
+        "text": "- [[Web3 Messaging]]"
+      },
+      "date": 1548637762776
+    },
+    {
+      "type": "edit",
+      "id": "c0d0203024c36ecb",
+      "item": {
+        "type": "markdown",
+        "id": "c0d0203024c36ecb",
+        "text": "- [[Web3 Messaging]]"
+      },
+      "date": 1548637802624
+    },
+    {
+      "type": "edit",
+      "id": "9ce6133f43c86bb2",
+      "item": {
+        "type": "markdown",
+        "id": "9ce6133f43c86bb2",
+        "text": "Let's navigate to an internal page on the site:\n"
+      },
+      "date": 1548776022943
+    },
+    {
+      "type": "add",
+      "id": "2f3857bea029a9e4",
+      "item": {
+        "type": "markdown",
+        "id": "2f3857bea029a9e4",
+        "text": "External links can be navigated to using the same syntax with additional parameters:\n"
+      },
+      "after": "9ce6133f43c86bb2",
+      "date": 1548776046648
+    },
+    {
+      "type": "add",
+      "id": "1524de098ad302af",
+      "item": {
+        "type": "markdown",
+        "id": "1524de098ad302af",
+        "text": "The external link is handled in wiki.resolveLinks which handles both internal and external links in a block of text. The code is in resolve.coffee"
+      },
+      "after": "2f3857bea029a9e4",
+      "date": 1548776056783
+    },
+    {
+      "type": "edit",
+      "id": "1524de098ad302af",
+      "item": {
+        "type": "markdown",
+        "id": "1524de098ad302af",
+        "text": "The external link is handled in wiki.resolveLinks which handles both internal and external links in a block of text. The code is in [https://github.com/fedwiki/wiki-plugin-reference github]"
+      },
+      "date": 1548776174361
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "f7816a62d7921929",
+        "abd2cd56e976b858",
+        "e08187dbe04e9506",
+        "c0d0203024c36ecb",
+        "8b0c8ee2a9fec634",
+        "33fc3f71b24c1bcf",
+        "a3586b5a238a6154",
+        "9bf531f44e83a197",
+        "9bf41248002ff260",
+        "32a454a8d480fab2",
+        "9350ec7607fae5d1",
+        "9ce6133f43c86bb2",
+        "d3f6ac5b2221882e",
+        "2f3857bea029a9e4",
+        "1524de098ad302af",
+        "9da5e6fecdf07581",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "29aca4ba0c452573",
+        "b1c769647b1598d1",
+        "6d5656ed6d3ecb83",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "956378e61d06bf22",
+        "ca3e9b136639247c",
+        "0560bd14583b7dde",
+        "7f2ca51e9fe9a7fb",
+        "01de263bd9fafbe4",
+        "5dc3e77ef504d736",
+        "efd07df1da9fdefb",
+        "a23e3fa88872ad64",
+        "b06fee2ca08d29e1",
+        "a1b2b22cc5ba34e8",
+        "6c572aad34af7dfe",
+        "16e240173a70edba",
+        "168c95070e8a6393",
+        "05c4ee35264acf59"
+      ],
+      "id": "d3f6ac5b2221882e",
+      "date": 1548776178627
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "70e6f7de38b7f5d1"
+      },
+      "id": "70e6f7de38b7f5d1",
+      "type": "add",
+      "after": "05c4ee35264acf59",
+      "date": 1548776433974
+    },
+    {
+      "type": "edit",
+      "id": "70e6f7de38b7f5d1",
+      "item": {
+        "type": "code",
+        "id": "70e6f7de38b7f5d1",
+        "text": ", null, '[[remoteDomain]]"
+      },
+      "date": 1548776437125
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "f7816a62d7921929",
+        "abd2cd56e976b858",
+        "e08187dbe04e9506",
+        "c0d0203024c36ecb",
+        "8b0c8ee2a9fec634",
+        "33fc3f71b24c1bcf",
+        "a3586b5a238a6154",
+        "9bf531f44e83a197",
+        "9bf41248002ff260",
+        "32a454a8d480fab2",
+        "9350ec7607fae5d1",
+        "9ce6133f43c86bb2",
+        "d3f6ac5b2221882e",
+        "2f3857bea029a9e4",
+        "70e6f7de38b7f5d1",
+        "1524de098ad302af",
+        "9da5e6fecdf07581",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "29aca4ba0c452573",
+        "b1c769647b1598d1",
+        "6d5656ed6d3ecb83",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "956378e61d06bf22",
+        "ca3e9b136639247c",
+        "0560bd14583b7dde",
+        "7f2ca51e9fe9a7fb",
+        "01de263bd9fafbe4",
+        "5dc3e77ef504d736",
+        "efd07df1da9fdefb",
+        "a23e3fa88872ad64",
+        "b06fee2ca08d29e1",
+        "a1b2b22cc5ba34e8",
+        "6c572aad34af7dfe",
+        "16e240173a70edba",
+        "168c95070e8a6393",
+        "05c4ee35264acf59"
+      ],
+      "id": "70e6f7de38b7f5d1",
+      "date": 1548776446397
+    },
+    {
+      "type": "edit",
+      "id": "70e6f7de38b7f5d1",
+      "item": {
+        "type": "code",
+        "id": "70e6f7de38b7f5d1",
+        "text": "wiki.doInternalLink('welcome-visitors', null, 'fedwiki.org')"
+      },
+      "date": 1548776474982
+    },
+    {
+      "type": "edit",
+      "id": "70e6f7de38b7f5d1",
+      "item": {
+        "type": "code",
+        "id": "70e6f7de38b7f5d1",
+        "text": "wiki.doInternalLink('folder', null, 'fedwiki.org')"
+      },
+      "date": 1548776518781
+    },
+    {
+      "type": "edit",
+      "id": "2f3857bea029a9e4",
+      "item": {
+        "type": "markdown",
+        "id": "2f3857bea029a9e4",
+        "text": "[[Remote Link]]s can be navigated to using the same syntax with additional parameters:\n"
+      },
+      "date": 1548776554455
+    },
+    {
+      "type": "fork",
+      "site": "fedwiki.org"
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "6e75f72552e77142",
+        "text": "- [[Web Messaging]]\n- [[Channel Messaging API]]\n- [[Window.postMessage]]"
+      },
+      "after": "05c4ee35264acf59",
+      "id": "6e75f72552e77142",
+      "date": 1550597843284
+    },
+    {
+      "type": "edit",
+      "id": "05c4ee35264acf59",
+      "item": {
+        "type": "markdown",
+        "id": "05c4ee35264acf59",
+        "text": "# See also\n"
+      },
+      "date": 1550597846060
+    },
+    {
+      "type": "add",
+      "id": "861d200ca291bf05",
+      "item": {
+        "type": "markdown",
+        "id": "861d200ca291bf05",
+        "text": "- [[Web3 Messaging]]"
+      },
+      "after": "05c4ee35264acf59",
+      "date": 1550597851313
+    },
+    {
+      "type": "add",
+      "item": {
+        "text": "- [[Coordinated Viewing]]\n- [[Map Wiki]]\n- [[Framed]]\n- [[SVG Image Map]]\n\n",
+        "id": "6dfd1b0d-7795-4e93-99fa-9c0d6ea133dd",
+        "type": "markdown"
+      },
+      "after": "861d200ca291bf05",
+      "id": "6dfd1b0d-7795-4e93-99fa-9c0d6ea133dd",
+      "date": 1550597854010
+    },
+    {
+      "type": "move",
+      "order": [
+        "4288d0d48267b9d7",
+        "f7816a62d7921929",
+        "abd2cd56e976b858",
+        "e08187dbe04e9506",
+        "c0d0203024c36ecb",
+        "8b0c8ee2a9fec634",
+        "33fc3f71b24c1bcf",
+        "a3586b5a238a6154",
+        "9bf531f44e83a197",
+        "9bf41248002ff260",
+        "32a454a8d480fab2",
+        "9350ec7607fae5d1",
+        "9ce6133f43c86bb2",
+        "d3f6ac5b2221882e",
+        "2f3857bea029a9e4",
+        "70e6f7de38b7f5d1",
+        "1524de098ad302af",
+        "9da5e6fecdf07581",
+        "4f244283e93e81a2",
+        "cd5ae1b99f6dc195",
+        "29aca4ba0c452573",
+        "b1c769647b1598d1",
+        "6d5656ed6d3ecb83",
+        "935315a50b6fdab3",
+        "d6527503e67009e2",
+        "aad3ce6f72844818",
+        "3140898343933873",
+        "f538e8aa628aa0c2",
+        "e12bf61d73fea365",
+        "956378e61d06bf22",
+        "ca3e9b136639247c",
+        "0560bd14583b7dde",
+        "7f2ca51e9fe9a7fb",
+        "01de263bd9fafbe4",
+        "5dc3e77ef504d736",
+        "efd07df1da9fdefb",
+        "a23e3fa88872ad64",
+        "b06fee2ca08d29e1",
+        "a1b2b22cc5ba34e8",
+        "6c572aad34af7dfe",
+        "16e240173a70edba",
+        "168c95070e8a6393",
+        "05c4ee35264acf59",
+        "6dfd1b0d-7795-4e93-99fa-9c0d6ea133dd",
+        "6e75f72552e77142",
+        "861d200ca291bf05"
+      ],
+      "id": "861d200ca291bf05",
+      "date": 1550597856598
+    },
+    {
+      "type": "fork",
+      "site": "future.fedwiki.org",
+      "date": 1550597866188
+    },
+    {
+      "type": "fork",
+      "site": "fedwiki.org",
+      "date": 1637589796242
+    }
+  ]
+}

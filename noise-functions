@@ -1,0 +1,474 @@
+{
+  "title": "Noise Functions",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "46ebb45c0fe02464",
+      "text": "Noise Functions and Map Generation. [https://www.redblobgames.com/articles/noise/introduction.html page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e403d21b02968ad7",
+      "text": "As I was studying audio signal processing, my brain started making connections back to [[procedural map generation]]. So here are some notes on how signal processing concepts relate to map generation. I don’t think any of this is new but some of it is new to me, so I wanted to write it down and share. I only cover simple topics (frequency, amplitude, colors of noise, uses of noise) and not related topics (discrete vs continuous functions, FIR/IIR filters, FFT, complex numbers). The math on this page is mostly sine waves."
+    },
+    {
+      "type": "paragraph",
+      "id": "4746865b4d62e7b2",
+      "text": "This page is about the concepts starting from the simplest ideas and working up. If you want to skip ahead to terrain generation using noise functions, see my other article. (Making maps with noise functions. [https://www.redblobgames.com/maps/terrain-from-noise/ page] ⇒ [[Terrain from Noise]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "694144e809e3e957",
+      "text": "I’m going to start with the basics of using random numbers and work my way up to explaining how 1D landscapes work. The same concepts work for 2D (see [https://www.redblobgames.com/articles/noise/2d/ demo]) and 3D. Try moving this slider to see how a single parameter can describe many different styles of noise:"
+    },
+    {
+      "type": "html",
+      "id": "14b10e939f2a9462",
+      "text": "<figure>0 <svg id=\"ift-0-a\" width=\"550\" height=\"17\"><path d=\"M 1 15.5 L 1 14.296254009250266 l 9 0 L 10 14.657516644068087 l 9 0 L 19 15.49459091734579 l 9 0 L 28 15.5 l 9 0 L 37 14.095313759246629 l 9 0 L 46 14.105789305618286 l 9 0 L 55 13.461966195220295 l 9 0 L 64 11.765052936414582 l 9 0 L 73 10.833556389125805 l 9 0 L 82 9.69928893027679 l 9 0 L 91 8.57843612295465 l 9 0 L 100 6.592307834261505 l 9 0 L 109 6.019423604898639 l 9 0 L 118 5.312865812604486 l 9 0 L 127 3.302666573868568 l 9 0 L 136 3.435409347404306 l 9 0 L 145 3.7688649041383506 l 9 0 L 154 3.0110194905858583 l 9 0 L 163 2.127538948373539 l 9 0 L 172 1.5000000000000018 l 9 0 L 181 3.482451362037046 l 9 0 L 190 4.430373037028325 l 9 0 L 199 4.7710077577490395 l 9 0 L 208 5.138039973309516 l 9 0 L 217 7.067292612974513 l 9 0 L 226 8.988007887216895 l 9 0 L 235 8.62052115071236 l 9 0 L 244 8.006298324746586 l 9 0 L 253 6.754423804064624 l 9 0 L 262 6.124885751405939 l 9 0 L 271 6.266441394772532 l 9 0 L 280 6.394969934827483 l 9 0 L 289 7.287824420936441 l 9 0 L 298 7.2718536592693965 l 9 0 L 307 7.316836872750594 l 9 0 L 316 8.255334479247546 l 9 0 L 325 8.262183503701024 l 9 0 L 334 7.171671027555124 l 9 0 L 343 7.495282198378552 l 9 0 L 352 7.969843878541888 l 9 0 L 361 7.621542355565584 l 9 0 L 370 9.748569120130538 l 9 0 L 379 9.950278866198811 l 9 0 L 388 10.403304783647588 l 9 0 L 397 9.461428361397017 l 9 0 L 406 8.663672711733298 l 9 0 L 415 8.917182806093027 l 9 0 L 424 11.20415761965329 l 9 0 L 433 12.581604757415493 l 9 0 L 442 13.856435429917756 l 9 0 L 451 14.458682427135809 l 9 0 L 460 14.292955874151394 l 9 0 L 469 15.244095653129552 l 9 0 L 478 15.243753166639344 l 9 0 L 487 15.008063887422367 l 9 0 L 496 14.553353477599984 l 9 0 L 505 14.422907109515583 l 9 0 L 514 13.05781922325221 l 9 0 L 523 12.111283450457966 l 9 0 L 532 12.72539651572243 l 9 0 L 541 15.5\"></path></svg><br> 1 <svg id=\"ift-1-a\" width=\"550\" height=\"17\"><path d=\"M 1 15.5 L 1 7.78496547276701 l 9 0 L 10 7.306929658293658 l 9 0 L 19 6.717969662821673 l 9 0 L 28 6.551364783039604 l 9 0 L 37 5.656874789269795 l 9 0 L 46 5.325861138335893 l 9 0 L 55 3.9126636194954045 l 9 0 L 64 1.6946134124717753 l 9 0 L 73 1.7199230527039102 l 9 0 L 82 1.636699533974233 l 9 0 L 91 1.5000000000000009 l 9 0 L 100 1.9522612902875416 l 9 0 L 109 2.034883750798583 l 9 0 L 118 2.119709239171031 l 9 0 L 127 2.3101172872370794 l 9 0 L 136 4.127996392068181 l 9 0 L 145 5.921139383013812 l 9 0 L 154 6.597196303215092 l 9 0 L 163 6.611787497466907 l 9 0 L 172 7.550994652938858 l 9 0 L 181 8.654447596039104 l 9 0 L 190 10.122743606287452 l 9 0 L 199 11.921401461673874 l 9 0 L 208 12.881485390864352 l 9 0 L 217 12.244750669999204 l 9 0 L 226 12.744446566633954 l 9 0 L 235 13.269202227949783 l 9 0 L 244 12.468604765855144 l 9 0 L 253 12.608491915432968 l 9 0 L 262 11.927244067215678 l 9 0 L 271 11.848966794525445 l 9 0 L 280 12.054434936662524 l 9 0 L 289 11.971776413329321 l 9 0 L 298 13.592240183487629 l 9 0 L 307 13.075088250242453 l 9 0 L 316 13.055577115618757 l 9 0 L 325 14.56652157149987 l 9 0 L 334 15.5 l 9 0 L 343 14.93239247349433 l 9 0 L 352 13.01663389943288 l 9 0 L 361 12.460149854740964 l 9 0 L 370 12.852328126321948 l 9 0 L 379 12.595174301071278 l 9 0 L 388 10.609247525821926 l 9 0 L 397 10.847171499470356 l 9 0 L 406 9.671695204103823 l 9 0 L 415 9.121700407462493 l 9 0 L 424 7.868824423705064 l 9 0 L 433 7.003192924962968 l 9 0 L 442 7.987164121861216 l 9 0 L 451 9.882574431836735 l 9 0 L 460 11.051339307508279 l 9 0 L 469 11.753540282804948 l 9 0 L 478 11.626532127983378 l 9 0 L 487 10.2212211591869 l 9 0 L 496 8.582155614218923 l 9 0 L 505 8.228091688396088 l 9 0 L 514 7.53183545124656 l 9 0 L 523 7.160690178950736 l 9 0 L 532 8.528711780018622 l 9 0 L 541 15.5\"></path></svg><br> 2 <svg id=\"ift-2-a\" width=\"550\" height=\"17\"><path d=\"M 1 15.5 L 1 10.400140574277916 l 9 0 L 10 9.910482906722184 l 9 0 L 19 7.491812964246055 l 9 0 L 28 4.918762175771159 l 9 0 L 37 2.803968255798279 l 9 0 L 46 2.1123406903000976 l 9 0 L 55 2.5375772462224377 l 9 0 L 64 4.205796965303663 l 9 0 L 73 4.239627184768676 l 9 0 L 82 4.416202029460768 l 9 0 L 91 5.425709578474898 l 9 0 L 100 6.079368215348427 l 9 0 L 109 4.1702341479221365 l 9 0 L 118 4.4794243150911965 l 9 0 L 127 3.43493273233638 l 9 0 L 136 1.5 l 9 0 L 145 2.392217876561503 l 9 0 L 154 2.8824438252415243 l 9 0 L 163 3.930822617422871 l 9 0 L 172 4.396994038536705 l 9 0 L 181 4.865668596439253 l 9 0 L 190 4.539499286546148 l 9 0 L 199 4.7846479336362915 l 9 0 L 208 5.551272272777063 l 9 0 L 217 6.497046305141597 l 9 0 L 226 6.420578813708593 l 9 0 L 235 6.461161853008415 l 9 0 L 244 7.2981469496231615 l 9 0 L 253 7.579952746053664 l 9 0 L 262 6.919417541055689 l 9 0 L 271 6.333714326410847 l 9 0 L 280 6.565480031613163 l 9 0 L 289 8.377007791135101 l 9 0 L 298 8.695208635814245 l 9 0 L 307 9.739718311581594 l 9 0 L 316 9.212342058929924 l 9 0 L 325 9.043091011595429 l 9 0 L 334 9.324035993183704 l 9 0 L 343 9.106411227468538 l 9 0 L 352 9.596516730583401 l 9 0 L 361 9.892345755888469 l 9 0 L 370 10.08226376999781 l 9 0 L 379 9.839337760229133 l 9 0 L 388 10.377326496890287 l 9 0 L 397 10.406296149754533 l 9 0 L 406 10.08654392706528 l 9 0 L 415 9.910793444663007 l 9 0 L 424 11.656183743594175 l 9 0 L 433 14.369259766367133 l 9 0 L 442 14.592767231171015 l 9 0 L 451 13.901925134485854 l 9 0 L 460 14.753957526639509 l 9 0 L 469 15.147452580394935 l 9 0 L 478 15.5 l 9 0 L 487 15.30588638104361 l 9 0 L 496 14.950102574026303 l 9 0 L 505 15.034393101224882 l 9 0 L 514 13.264483478645005 l 9 0 L 523 12.204781839559903 l 9 0 L 532 11.339992970473153 l 9 0 L 541 15.5\"></path></svg><br> 3 <svg id=\"ift-3-a\" width=\"550\" height=\"17\"><path d=\"M 1 15.5 L 1 5.46254496853588 l 9 0 L 10 5.344031946059779 l 9 0 L 19 5.865041846118155 l 9 0 L 28 7.087570382599075 l 9 0 L 37 7.9335992204914225 l 9 0 L 46 8.188186413237945 l 9 0 L 55 8.451120370789326 l 9 0 L 64 7.897316286074174 l 9 0 L 73 8.035335444408277 l 9 0 L 82 8.152478592101849 l 9 0 L 91 7.7440578069280575 l 9 0 L 100 6.913709604998605 l 9 0 L 109 6.462553670407979 l 9 0 L 118 8.338121889446022 l 9 0 L 127 8.612809296603595 l 9 0 L 136 9.541555479867704 l 9 0 L 145 9.26412716580449 l 9 0 L 154 8.334043115962164 l 9 0 L 163 7.841139690189089 l 9 0 L 172 6.356625713065604 l 9 0 L 181 7.6323518827016645 l 9 0 L 190 8.710390694456278 l 9 0 L 199 9.519537302807088 l 9 0 L 208 10.416607657631696 l 9 0 L 217 10.680204184804138 l 9 0 L 226 11.619925687605711 l 9 0 L 235 13.044644097971178 l 9 0 L 244 13.675092040426595 l 9 0 L 253 13.907728170132003 l 9 0 L 262 14.595626084938916 l 9 0 L 271 14.224578843049454 l 9 0 L 280 14.966247932631923 l 9 0 L 289 15.5 l 9 0 L 298 14.454050384476968 l 9 0 L 307 13.02011045090099 l 9 0 L 316 14.200905580937768 l 9 0 L 325 15.018760759140743 l 9 0 L 334 14.448263465548834 l 9 0 L 343 12.475005787966461 l 9 0 L 352 12.02990562427572 l 9 0 L 361 11.29214332473287 l 9 0 L 370 10.127589569613484 l 9 0 L 379 9.917749658709676 l 9 0 L 388 9.920409282882936 l 9 0 L 397 9.6784317639675 l 9 0 L 406 9.808135551932253 l 9 0 L 415 9.812493375586303 l 9 0 L 424 9.173495027423584 l 9 0 L 433 9.100279250963418 l 9 0 L 442 8.121581711491414 l 9 0 L 451 7.333271146264798 l 9 0 L 460 6.233858662252685 l 9 0 L 469 4.6274010917806745 l 9 0 L 478 2.6249525689794693 l 9 0 L 487 1.8293151799663958 l 9 0 L 496 1.5000000000000009 l 9 0 L 505 2.639112969693688 l 9 0 L 514 4.095141435508584 l 9 0 L 523 4.201868853618169 l 9 0 L 532 4.251499188605719 l 9 0 L 541 15.5\"></path></svg><br> 4 <svg id=\"ift-4-a\" width=\"550\" height=\"17\"><path d=\"M 1 15.5 L 1 2.6853871600055585 l 9 0 L 10 1.4999999999999991 l 9 0 L 19 2.543243700371969 l 9 0 L 28 3.002551796065017 l 9 0 L 37 2.6914699118252567 l 9 0 L 46 3.6640262502118546 l 9 0 L 55 6.119851354676687 l 9 0 L 64 8.200141575407082 l 9 0 L 73 7.142414043948827 l 9 0 L 82 6.706046494613421 l 9 0 L 91 6.858834594913017 l 9 0 L 100 7.3919244350714095 l 9 0 L 109 7.35263992936828 l 9 0 L 118 8.485947478526507 l 9 0 L 127 8.526877725509923 l 9 0 L 136 8.72040119378757 l 9 0 L 145 9.101705341335771 l 9 0 L 154 9.541650024271462 l 9 0 L 163 9.762721019956697 l 9 0 L 172 10.67150860462503 l 9 0 L 181 12.0139366673293 l 9 0 L 190 13.941149711714973 l 9 0 L 199 15.5 l 9 0 L 208 15.334953908212768 l 9 0 L 217 14.941724770286616 l 9 0 L 226 14.891882795168486 l 9 0 L 235 14.453157019194183 l 9 0 L 244 13.977549394188678 l 9 0 L 253 13.239229478901798 l 9 0 L 262 12.791357416386983 l 9 0 L 271 12.049841957007636 l 9 0 L 280 12.00048455972274 l 9 0 L 289 12.538051668890468 l 9 0 L 298 12.62526758635773 l 9 0 L 307 12.11810662518607 l 9 0 L 316 10.485967562490616 l 9 0 L 325 9.648406673336689 l 9 0 L 334 9.25398462413422 l 9 0 L 343 10.25368440413324 l 9 0 L 352 10.312234594292429 l 9 0 L 361 10.80612708193567 l 9 0 L 370 11.522358277367262 l 9 0 L 379 11.404542110781376 l 9 0 L 388 11.789889786667331 l 9 0 L 397 12.388769673643251 l 9 0 L 406 12.278498240337298 l 9 0 L 415 11.28218290798292 l 9 0 L 424 10.647876954723506 l 9 0 L 433 8.89292664125701 l 9 0 L 442 9.120580666968266 l 9 0 L 451 10.064862201184363 l 9 0 L 460 8.762393643333288 l 9 0 L 469 9.545590282374814 l 9 0 L 478 8.900285006111446 l 9 0 L 487 7.428827177331053 l 9 0 L 496 6.328561939864583 l 9 0 L 505 5.326598255340366 l 9 0 L 514 4.746235053829516 l 9 0 L 523 4.231119774251387 l 9 0 L 532 3.317120577808713 l 9 0 L 541 15.5\"></path></svg><br> Exponent: <input id=\"ift-input-a\" type=\"range\" min=\"-2.5\" max=\"2.5\" value=\"0.0\" step=\"0.1\" oninput=\"random_ift('-a')\" onchange=\"random_ift('-a')\"> = <span id=\"ift-output-a\">-2.50 (-2 = red noise)</span></figure>"
+    },
+    {
+      "type": "paragraph",
+      "id": "dacd4b7474e59694",
+      "text": "See [[Slider]]. [https://wiki.ralfbarkow.ch/assets/pages/noise-functions/May-08-2022%2017-45-11.gif enlarge]"
+    },
+    {
+      "type": "html",
+      "id": "fd509a8ce0abcd05",
+      "text": "<center>\n  <img\n    width=\"100%\"\n    src=\"https://wiki.ralfbarkow.ch/assets/pages/noise-functions/May-08-2022%2017-45-11.gif\"\n  >\n</center>\n\n"
+    },
+    {
+      "type": "pagefold",
+      "id": "8e532500c79a25d6",
+      "text": "~"
+    },
+    {
+      "type": "graphviz",
+      "id": "3f637be7ed778b9e",
+      "text": "DOT strict digraph\n  \nrankdir=LR\n\n  node [style=filled fillcolor=lightyellow penwidth=3 color=black fontname=\"Helvetica\"]\n  HERE NODE\n\n    node [style=filled fillcolor=lightblue]\n    WHERE /^Next/\n      LINKS HERE -> NODE\n          node [style=filled fillcolor=white]\n          HERE NODE\n            WHERE /^Next/\n              LINKS HERE -> NODE\n\n    node [style=filled fillcolor=white penwidth=3 color=black]\n    LINKS HERE -> NODE\n       node [style=filled fillcolor=white penwidth=1 color=black]\n       HERE NODE\n         LINKS HERE -> NODE\n\n   node [style=\"filled,rounded,dotted\" fillcolor=white]\n   edge [style=dotted]\n   HERE NODE\n      BACKLINKS NODE -> HERE"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Noise Functions",
+        "story": []
+      },
+      "date": 1651992643210
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "46ebb45c0fe02464"
+      },
+      "id": "46ebb45c0fe02464",
+      "type": "add",
+      "date": 1651992644826
+    },
+    {
+      "type": "edit",
+      "id": "46ebb45c0fe02464",
+      "item": {
+        "type": "paragraph",
+        "id": "46ebb45c0fe02464",
+        "text": "Noise Functions and Map Generation"
+      },
+      "date": 1651992648641
+    },
+    {
+      "type": "edit",
+      "id": "46ebb45c0fe02464",
+      "item": {
+        "type": "paragraph",
+        "id": "46ebb45c0fe02464",
+        "text": "Noise Functions and Map Generation. [https://www.redblobgames.com/articles/noise/introduction.html page]"
+      },
+      "date": 1651992662104
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e403d21b02968ad7"
+      },
+      "id": "e403d21b02968ad7",
+      "type": "add",
+      "after": "46ebb45c0fe02464",
+      "date": 1651992682876
+    },
+    {
+      "type": "edit",
+      "id": "e403d21b02968ad7",
+      "item": {
+        "type": "paragraph",
+        "id": "e403d21b02968ad7",
+        "text": "As I was studying audio signal processing, my brain started making connections back to procedural map generation. So here are some notes on how signal processing concepts relate to map generation. I don’t think any of this is new but some of it is new to me, so I wanted to write it down and share. I only cover simple topics (frequency, amplitude, colors of noise, uses of noise) and not related topics (discrete vs continuous functions, FIR/IIR filters, FFT, complex numbers). The math on this page is mostly sine waves."
+      },
+      "date": 1651992684288
+    },
+    {
+      "type": "edit",
+      "id": "e403d21b02968ad7",
+      "item": {
+        "type": "paragraph",
+        "id": "e403d21b02968ad7",
+        "text": "As I was studying audio signal processing, my brain started making connections back to [[procedural map generation]]. So here are some notes on how signal processing concepts relate to map generation. I don’t think any of this is new but some of it is new to me, so I wanted to write it down and share. I only cover simple topics (frequency, amplitude, colors of noise, uses of noise) and not related topics (discrete vs continuous functions, FIR/IIR filters, FFT, complex numbers). The math on this page is mostly sine waves."
+      },
+      "date": 1651992723725
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4746865b4d62e7b2"
+      },
+      "id": "4746865b4d62e7b2",
+      "type": "add",
+      "after": "e403d21b02968ad7",
+      "date": 1651992760855
+    },
+    {
+      "type": "edit",
+      "id": "4746865b4d62e7b2",
+      "item": {
+        "type": "paragraph",
+        "id": "4746865b4d62e7b2",
+        "text": "This page is about the concepts starting from the simplest ideas and working up. If you want to skip ahead to terrain generation using noise functions, see my other article."
+      },
+      "date": 1651992763938
+    },
+    {
+      "type": "edit",
+      "id": "4746865b4d62e7b2",
+      "item": {
+        "type": "paragraph",
+        "id": "4746865b4d62e7b2",
+        "text": "This page is about the concepts starting from the simplest ideas and working up. If you want to skip ahead to terrain generation using noise functions, see my other article. Making maps with noise functions"
+      },
+      "date": 1651992776471
+    },
+    {
+      "type": "edit",
+      "id": "4746865b4d62e7b2",
+      "item": {
+        "type": "paragraph",
+        "id": "4746865b4d62e7b2",
+        "text": "This page is about the concepts starting from the simplest ideas and working up. If you want to skip ahead to terrain generation using noise functions, see my other article. Making maps with noise functions [https://www.redblobgames.com/maps/terrain-from-noise/ page] "
+      },
+      "date": 1651992790177
+    },
+    {
+      "type": "edit",
+      "id": "4746865b4d62e7b2",
+      "item": {
+        "type": "paragraph",
+        "id": "4746865b4d62e7b2",
+        "text": "This page is about the concepts starting from the simplest ideas and working up. If you want to skip ahead to terrain generation using noise functions, see my other article. Making maps with noise functions [https://www.redblobgames.com/maps/terrain-from-noise/ page] ⇒ [Terrain from Noise]"
+      },
+      "date": 1651992822468
+    },
+    {
+      "type": "edit",
+      "id": "4746865b4d62e7b2",
+      "item": {
+        "type": "paragraph",
+        "id": "4746865b4d62e7b2",
+        "text": "This page is about the concepts starting from the simplest ideas and working up. If you want to skip ahead to terrain generation using noise functions, see my other article. (Making maps with noise functions [https://www.redblobgames.com/maps/terrain-from-noise/ page] ⇒ [[Terrain from Noise]])"
+      },
+      "date": 1651992839388
+    },
+    {
+      "type": "edit",
+      "id": "4746865b4d62e7b2",
+      "item": {
+        "type": "paragraph",
+        "id": "4746865b4d62e7b2",
+        "text": "This page is about the concepts starting from the simplest ideas and working up. If you want to skip ahead to terrain generation using noise functions, see my other article. (Making maps with noise functions. [https://www.redblobgames.com/maps/terrain-from-noise/ page] ⇒ [[Terrain from Noise]])"
+      },
+      "date": 1651992848198
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "694144e809e3e957"
+      },
+      "id": "694144e809e3e957",
+      "type": "add",
+      "after": "4746865b4d62e7b2",
+      "date": 1651992871823
+    },
+    {
+      "type": "edit",
+      "id": "694144e809e3e957",
+      "item": {
+        "type": "paragraph",
+        "id": "694144e809e3e957",
+        "text": "I’m going to start with the basics of using random numbers and work my way up to explaining how 1D landscapes work. The same concepts work for 2D (see demo) and 3D. Try moving this slider to see how a single parameter can describe many different styles of noise:"
+      },
+      "date": 1651992873244
+    },
+    {
+      "type": "edit",
+      "id": "694144e809e3e957",
+      "item": {
+        "type": "paragraph",
+        "id": "694144e809e3e957",
+        "text": "I’m going to start with the basics of using random numbers and work my way up to explaining how 1D landscapes work. The same concepts work for 2D (see [https://www.redblobgames.com/articles/noise/2d/ demo]) and 3D. Try moving this slider to see how a single parameter can describe many different styles of noise:"
+      },
+      "date": 1651992893599
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "14b10e939f2a9462"
+      },
+      "id": "14b10e939f2a9462",
+      "type": "add",
+      "after": "694144e809e3e957",
+      "date": 1651993000959
+    },
+    {
+      "type": "edit",
+      "id": "14b10e939f2a9462",
+      "item": {
+        "type": "html",
+        "id": "14b10e939f2a9462",
+        "text": "<figure>0 <svg id=\"ift-0-a\" width=\"550\" height=\"17\"><path d=\"M 1 15.5 L 1 14.296254009250266 l 9 0 L 10 14.657516644068087 l 9 0 L 19 15.49459091734579 l 9 0 L 28 15.5 l 9 0 L 37 14.095313759246629 l 9 0 L 46 14.105789305618286 l 9 0 L 55 13.461966195220295 l 9 0 L 64 11.765052936414582 l 9 0 L 73 10.833556389125805 l 9 0 L 82 9.69928893027679 l 9 0 L 91 8.57843612295465 l 9 0 L 100 6.592307834261505 l 9 0 L 109 6.019423604898639 l 9 0 L 118 5.312865812604486 l 9 0 L 127 3.302666573868568 l 9 0 L 136 3.435409347404306 l 9 0 L 145 3.7688649041383506 l 9 0 L 154 3.0110194905858583 l 9 0 L 163 2.127538948373539 l 9 0 L 172 1.5000000000000018 l 9 0 L 181 3.482451362037046 l 9 0 L 190 4.430373037028325 l 9 0 L 199 4.7710077577490395 l 9 0 L 208 5.138039973309516 l 9 0 L 217 7.067292612974513 l 9 0 L 226 8.988007887216895 l 9 0 L 235 8.62052115071236 l 9 0 L 244 8.006298324746586 l 9 0 L 253 6.754423804064624 l 9 0 L 262 6.124885751405939 l 9 0 L 271 6.266441394772532 l 9 0 L 280 6.394969934827483 l 9 0 L 289 7.287824420936441 l 9 0 L 298 7.2718536592693965 l 9 0 L 307 7.316836872750594 l 9 0 L 316 8.255334479247546 l 9 0 L 325 8.262183503701024 l 9 0 L 334 7.171671027555124 l 9 0 L 343 7.495282198378552 l 9 0 L 352 7.969843878541888 l 9 0 L 361 7.621542355565584 l 9 0 L 370 9.748569120130538 l 9 0 L 379 9.950278866198811 l 9 0 L 388 10.403304783647588 l 9 0 L 397 9.461428361397017 l 9 0 L 406 8.663672711733298 l 9 0 L 415 8.917182806093027 l 9 0 L 424 11.20415761965329 l 9 0 L 433 12.581604757415493 l 9 0 L 442 13.856435429917756 l 9 0 L 451 14.458682427135809 l 9 0 L 460 14.292955874151394 l 9 0 L 469 15.244095653129552 l 9 0 L 478 15.243753166639344 l 9 0 L 487 15.008063887422367 l 9 0 L 496 14.553353477599984 l 9 0 L 505 14.422907109515583 l 9 0 L 514 13.05781922325221 l 9 0 L 523 12.111283450457966 l 9 0 L 532 12.72539651572243 l 9 0 L 541 15.5\"></path></svg><br> 1 <svg id=\"ift-1-a\" width=\"550\" height=\"17\"><path d=\"M 1 15.5 L 1 7.78496547276701 l 9 0 L 10 7.306929658293658 l 9 0 L 19 6.717969662821673 l 9 0 L 28 6.551364783039604 l 9 0 L 37 5.656874789269795 l 9 0 L 46 5.325861138335893 l 9 0 L 55 3.9126636194954045 l 9 0 L 64 1.6946134124717753 l 9 0 L 73 1.7199230527039102 l 9 0 L 82 1.636699533974233 l 9 0 L 91 1.5000000000000009 l 9 0 L 100 1.9522612902875416 l 9 0 L 109 2.034883750798583 l 9 0 L 118 2.119709239171031 l 9 0 L 127 2.3101172872370794 l 9 0 L 136 4.127996392068181 l 9 0 L 145 5.921139383013812 l 9 0 L 154 6.597196303215092 l 9 0 L 163 6.611787497466907 l 9 0 L 172 7.550994652938858 l 9 0 L 181 8.654447596039104 l 9 0 L 190 10.122743606287452 l 9 0 L 199 11.921401461673874 l 9 0 L 208 12.881485390864352 l 9 0 L 217 12.244750669999204 l 9 0 L 226 12.744446566633954 l 9 0 L 235 13.269202227949783 l 9 0 L 244 12.468604765855144 l 9 0 L 253 12.608491915432968 l 9 0 L 262 11.927244067215678 l 9 0 L 271 11.848966794525445 l 9 0 L 280 12.054434936662524 l 9 0 L 289 11.971776413329321 l 9 0 L 298 13.592240183487629 l 9 0 L 307 13.075088250242453 l 9 0 L 316 13.055577115618757 l 9 0 L 325 14.56652157149987 l 9 0 L 334 15.5 l 9 0 L 343 14.93239247349433 l 9 0 L 352 13.01663389943288 l 9 0 L 361 12.460149854740964 l 9 0 L 370 12.852328126321948 l 9 0 L 379 12.595174301071278 l 9 0 L 388 10.609247525821926 l 9 0 L 397 10.847171499470356 l 9 0 L 406 9.671695204103823 l 9 0 L 415 9.121700407462493 l 9 0 L 424 7.868824423705064 l 9 0 L 433 7.003192924962968 l 9 0 L 442 7.987164121861216 l 9 0 L 451 9.882574431836735 l 9 0 L 460 11.051339307508279 l 9 0 L 469 11.753540282804948 l 9 0 L 478 11.626532127983378 l 9 0 L 487 10.2212211591869 l 9 0 L 496 8.582155614218923 l 9 0 L 505 8.228091688396088 l 9 0 L 514 7.53183545124656 l 9 0 L 523 7.160690178950736 l 9 0 L 532 8.528711780018622 l 9 0 L 541 15.5\"></path></svg><br> 2 <svg id=\"ift-2-a\" width=\"550\" height=\"17\"><path d=\"M 1 15.5 L 1 10.400140574277916 l 9 0 L 10 9.910482906722184 l 9 0 L 19 7.491812964246055 l 9 0 L 28 4.918762175771159 l 9 0 L 37 2.803968255798279 l 9 0 L 46 2.1123406903000976 l 9 0 L 55 2.5375772462224377 l 9 0 L 64 4.205796965303663 l 9 0 L 73 4.239627184768676 l 9 0 L 82 4.416202029460768 l 9 0 L 91 5.425709578474898 l 9 0 L 100 6.079368215348427 l 9 0 L 109 4.1702341479221365 l 9 0 L 118 4.4794243150911965 l 9 0 L 127 3.43493273233638 l 9 0 L 136 1.5 l 9 0 L 145 2.392217876561503 l 9 0 L 154 2.8824438252415243 l 9 0 L 163 3.930822617422871 l 9 0 L 172 4.396994038536705 l 9 0 L 181 4.865668596439253 l 9 0 L 190 4.539499286546148 l 9 0 L 199 4.7846479336362915 l 9 0 L 208 5.551272272777063 l 9 0 L 217 6.497046305141597 l 9 0 L 226 6.420578813708593 l 9 0 L 235 6.461161853008415 l 9 0 L 244 7.2981469496231615 l 9 0 L 253 7.579952746053664 l 9 0 L 262 6.919417541055689 l 9 0 L 271 6.333714326410847 l 9 0 L 280 6.565480031613163 l 9 0 L 289 8.377007791135101 l 9 0 L 298 8.695208635814245 l 9 0 L 307 9.739718311581594 l 9 0 L 316 9.212342058929924 l 9 0 L 325 9.043091011595429 l 9 0 L 334 9.324035993183704 l 9 0 L 343 9.106411227468538 l 9 0 L 352 9.596516730583401 l 9 0 L 361 9.892345755888469 l 9 0 L 370 10.08226376999781 l 9 0 L 379 9.839337760229133 l 9 0 L 388 10.377326496890287 l 9 0 L 397 10.406296149754533 l 9 0 L 406 10.08654392706528 l 9 0 L 415 9.910793444663007 l 9 0 L 424 11.656183743594175 l 9 0 L 433 14.369259766367133 l 9 0 L 442 14.592767231171015 l 9 0 L 451 13.901925134485854 l 9 0 L 460 14.753957526639509 l 9 0 L 469 15.147452580394935 l 9 0 L 478 15.5 l 9 0 L 487 15.30588638104361 l 9 0 L 496 14.950102574026303 l 9 0 L 505 15.034393101224882 l 9 0 L 514 13.264483478645005 l 9 0 L 523 12.204781839559903 l 9 0 L 532 11.339992970473153 l 9 0 L 541 15.5\"></path></svg><br> 3 <svg id=\"ift-3-a\" width=\"550\" height=\"17\"><path d=\"M 1 15.5 L 1 5.46254496853588 l 9 0 L 10 5.344031946059779 l 9 0 L 19 5.865041846118155 l 9 0 L 28 7.087570382599075 l 9 0 L 37 7.9335992204914225 l 9 0 L 46 8.188186413237945 l 9 0 L 55 8.451120370789326 l 9 0 L 64 7.897316286074174 l 9 0 L 73 8.035335444408277 l 9 0 L 82 8.152478592101849 l 9 0 L 91 7.7440578069280575 l 9 0 L 100 6.913709604998605 l 9 0 L 109 6.462553670407979 l 9 0 L 118 8.338121889446022 l 9 0 L 127 8.612809296603595 l 9 0 L 136 9.541555479867704 l 9 0 L 145 9.26412716580449 l 9 0 L 154 8.334043115962164 l 9 0 L 163 7.841139690189089 l 9 0 L 172 6.356625713065604 l 9 0 L 181 7.6323518827016645 l 9 0 L 190 8.710390694456278 l 9 0 L 199 9.519537302807088 l 9 0 L 208 10.416607657631696 l 9 0 L 217 10.680204184804138 l 9 0 L 226 11.619925687605711 l 9 0 L 235 13.044644097971178 l 9 0 L 244 13.675092040426595 l 9 0 L 253 13.907728170132003 l 9 0 L 262 14.595626084938916 l 9 0 L 271 14.224578843049454 l 9 0 L 280 14.966247932631923 l 9 0 L 289 15.5 l 9 0 L 298 14.454050384476968 l 9 0 L 307 13.02011045090099 l 9 0 L 316 14.200905580937768 l 9 0 L 325 15.018760759140743 l 9 0 L 334 14.448263465548834 l 9 0 L 343 12.475005787966461 l 9 0 L 352 12.02990562427572 l 9 0 L 361 11.29214332473287 l 9 0 L 370 10.127589569613484 l 9 0 L 379 9.917749658709676 l 9 0 L 388 9.920409282882936 l 9 0 L 397 9.6784317639675 l 9 0 L 406 9.808135551932253 l 9 0 L 415 9.812493375586303 l 9 0 L 424 9.173495027423584 l 9 0 L 433 9.100279250963418 l 9 0 L 442 8.121581711491414 l 9 0 L 451 7.333271146264798 l 9 0 L 460 6.233858662252685 l 9 0 L 469 4.6274010917806745 l 9 0 L 478 2.6249525689794693 l 9 0 L 487 1.8293151799663958 l 9 0 L 496 1.5000000000000009 l 9 0 L 505 2.639112969693688 l 9 0 L 514 4.095141435508584 l 9 0 L 523 4.201868853618169 l 9 0 L 532 4.251499188605719 l 9 0 L 541 15.5\"></path></svg><br> 4 <svg id=\"ift-4-a\" width=\"550\" height=\"17\"><path d=\"M 1 15.5 L 1 2.6853871600055585 l 9 0 L 10 1.4999999999999991 l 9 0 L 19 2.543243700371969 l 9 0 L 28 3.002551796065017 l 9 0 L 37 2.6914699118252567 l 9 0 L 46 3.6640262502118546 l 9 0 L 55 6.119851354676687 l 9 0 L 64 8.200141575407082 l 9 0 L 73 7.142414043948827 l 9 0 L 82 6.706046494613421 l 9 0 L 91 6.858834594913017 l 9 0 L 100 7.3919244350714095 l 9 0 L 109 7.35263992936828 l 9 0 L 118 8.485947478526507 l 9 0 L 127 8.526877725509923 l 9 0 L 136 8.72040119378757 l 9 0 L 145 9.101705341335771 l 9 0 L 154 9.541650024271462 l 9 0 L 163 9.762721019956697 l 9 0 L 172 10.67150860462503 l 9 0 L 181 12.0139366673293 l 9 0 L 190 13.941149711714973 l 9 0 L 199 15.5 l 9 0 L 208 15.334953908212768 l 9 0 L 217 14.941724770286616 l 9 0 L 226 14.891882795168486 l 9 0 L 235 14.453157019194183 l 9 0 L 244 13.977549394188678 l 9 0 L 253 13.239229478901798 l 9 0 L 262 12.791357416386983 l 9 0 L 271 12.049841957007636 l 9 0 L 280 12.00048455972274 l 9 0 L 289 12.538051668890468 l 9 0 L 298 12.62526758635773 l 9 0 L 307 12.11810662518607 l 9 0 L 316 10.485967562490616 l 9 0 L 325 9.648406673336689 l 9 0 L 334 9.25398462413422 l 9 0 L 343 10.25368440413324 l 9 0 L 352 10.312234594292429 l 9 0 L 361 10.80612708193567 l 9 0 L 370 11.522358277367262 l 9 0 L 379 11.404542110781376 l 9 0 L 388 11.789889786667331 l 9 0 L 397 12.388769673643251 l 9 0 L 406 12.278498240337298 l 9 0 L 415 11.28218290798292 l 9 0 L 424 10.647876954723506 l 9 0 L 433 8.89292664125701 l 9 0 L 442 9.120580666968266 l 9 0 L 451 10.064862201184363 l 9 0 L 460 8.762393643333288 l 9 0 L 469 9.545590282374814 l 9 0 L 478 8.900285006111446 l 9 0 L 487 7.428827177331053 l 9 0 L 496 6.328561939864583 l 9 0 L 505 5.326598255340366 l 9 0 L 514 4.746235053829516 l 9 0 L 523 4.231119774251387 l 9 0 L 532 3.317120577808713 l 9 0 L 541 15.5\"></path></svg><br> Exponent: <input id=\"ift-input-a\" type=\"range\" min=\"-2.5\" max=\"2.5\" value=\"0.0\" step=\"0.1\" oninput=\"random_ift('-a')\" onchange=\"random_ift('-a')\"> = <span id=\"ift-output-a\">-2.50 (-2 = red noise)</span></figure>"
+      },
+      "date": 1651993003359
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dacd4b7474e59694"
+      },
+      "id": "dacd4b7474e59694",
+      "type": "add",
+      "after": "14b10e939f2a9462",
+      "date": 1651993034380
+    },
+    {
+      "type": "edit",
+      "id": "dacd4b7474e59694",
+      "item": {
+        "type": "paragraph",
+        "id": "dacd4b7474e59694",
+        "text": "See [Slider]."
+      },
+      "date": 1651993042126
+    },
+    {
+      "type": "edit",
+      "id": "dacd4b7474e59694",
+      "item": {
+        "type": "paragraph",
+        "id": "dacd4b7474e59694",
+        "text": "See [[Slider]]."
+      },
+      "date": 1651993058028
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b351e81134c991fd"
+      },
+      "id": "b351e81134c991fd",
+      "type": "add",
+      "after": "dacd4b7474e59694",
+      "date": 1652024313688
+    },
+    {
+      "type": "remove",
+      "id": "b351e81134c991fd",
+      "date": 1652024332704
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "799503a0619ac397"
+      },
+      "id": "799503a0619ac397",
+      "type": "add",
+      "after": "dacd4b7474e59694",
+      "date": 1652024340021
+    },
+    {
+      "type": "edit",
+      "id": "799503a0619ac397",
+      "item": {
+        "type": "assets",
+        "id": "799503a0619ac397",
+        "text": "pages/noise-functions"
+      },
+      "date": 1652024345108
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fd509a8ce0abcd05"
+      },
+      "id": "fd509a8ce0abcd05",
+      "type": "add",
+      "after": "799503a0619ac397",
+      "date": 1652024971297
+    },
+    {
+      "type": "edit",
+      "id": "fd509a8ce0abcd05",
+      "item": {
+        "type": "html",
+        "id": "fd509a8ce0abcd05",
+        "text": "https://wiki.ralfbarkow.ch/assets/pages/noise-functions/May-08-2022%2017-45-11.gif"
+      },
+      "date": 1652024980521
+    },
+    {
+      "type": "edit",
+      "id": "fd509a8ce0abcd05",
+      "item": {
+        "type": "html",
+        "id": "fd509a8ce0abcd05",
+        "text": "<center>\n  <img\n    width=\"100%\"\n    src=\"https://wiki.ralfbarkow.ch/assets/pages/noise-functions/May-08-2022%2017-45-11.gif\"\n  >\n</center>\n\n"
+      },
+      "date": 1652025027181
+    },
+    {
+      "id": "fd509a8ce0abcd05",
+      "type": "move",
+      "order": [
+        "46ebb45c0fe02464",
+        "e403d21b02968ad7",
+        "4746865b4d62e7b2",
+        "694144e809e3e957",
+        "14b10e939f2a9462",
+        "fd509a8ce0abcd05",
+        "dacd4b7474e59694",
+        "799503a0619ac397"
+      ],
+      "date": 1652025039421
+    },
+    {
+      "type": "remove",
+      "id": "799503a0619ac397",
+      "date": 1652025095379
+    },
+    {
+      "id": "dacd4b7474e59694",
+      "type": "move",
+      "order": [
+        "46ebb45c0fe02464",
+        "e403d21b02968ad7",
+        "4746865b4d62e7b2",
+        "694144e809e3e957",
+        "14b10e939f2a9462",
+        "dacd4b7474e59694",
+        "fd509a8ce0abcd05"
+      ],
+      "date": 1652025109622
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "cb4018d191527ee2"
+      },
+      "id": "cb4018d191527ee2",
+      "type": "add",
+      "after": "fd509a8ce0abcd05",
+      "date": 1652025148559
+    },
+    {
+      "type": "edit",
+      "id": "cb4018d191527ee2",
+      "item": {
+        "type": "paragraph",
+        "id": "cb4018d191527ee2",
+        "text": "[https://wiki.ralfbarkow.ch/assets/pages/noise-functions/May-08-2022%2017-45-11.gif enlarge]"
+      },
+      "date": 1652025159833
+    },
+    {
+      "type": "remove",
+      "id": "cb4018d191527ee2",
+      "date": 1652025173185
+    },
+    {
+      "type": "edit",
+      "id": "dacd4b7474e59694",
+      "item": {
+        "type": "paragraph",
+        "id": "dacd4b7474e59694",
+        "text": "See [[Slider]]. [https://wiki.ralfbarkow.ch/assets/pages/noise-functions/May-08-2022%2017-45-11.gif enlarge]"
+      },
+      "date": 1652025174433
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3f637be7ed778b9e"
+      },
+      "id": "3f637be7ed778b9e",
+      "type": "add",
+      "after": "fd509a8ce0abcd05",
+      "date": 1652028502182
+    },
+    {
+      "type": "edit",
+      "id": "3f637be7ed778b9e",
+      "item": {
+        "type": "graphviz",
+        "id": "3f637be7ed778b9e",
+        "text": "DOT strict digraph\n  \nrankdir=LR\n\n  node [style=filled fillcolor=lightyellow penwidth=3 color=black fontname=\"Helvetica\"]\n  HERE NODE\n\n    node [style=filled fillcolor=lightblue]\n    WHERE /^Next/\n      LINKS HERE -> NODE\n          node [style=filled fillcolor=white]\n          HERE NODE\n            WHERE /^Next/\n              LINKS HERE -> NODE\n\n    node [style=filled fillcolor=white penwidth=3 color=black]\n    LINKS HERE -> NODE\n       node [style=filled fillcolor=white penwidth=1 color=black]\n       HERE NODE\n         LINKS HERE -> NODE\n\n   node [style=\"filled,rounded,dotted\" fillcolor=white]\n   edge [style=dotted]\n   HERE NODE\n      BACKLINKS NODE -> HERE"
+      },
+      "date": 1652028505439
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "66e655b4841076b0"
+      },
+      "id": "66e655b4841076b0",
+      "type": "add",
+      "after": "3f637be7ed778b9e",
+      "date": 1652028508382
+    },
+    {
+      "type": "remove",
+      "id": "66e655b4841076b0",
+      "date": 1652028511744
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8e532500c79a25d6"
+      },
+      "id": "8e532500c79a25d6",
+      "type": "add",
+      "after": "3f637be7ed778b9e",
+      "date": 1652028515814
+    },
+    {
+      "type": "edit",
+      "id": "8e532500c79a25d6",
+      "item": {
+        "type": "pagefold",
+        "id": "8e532500c79a25d6",
+        "text": "~"
+      },
+      "date": 1652028519677
+    },
+    {
+      "id": "8e532500c79a25d6",
+      "type": "move",
+      "order": [
+        "46ebb45c0fe02464",
+        "e403d21b02968ad7",
+        "4746865b4d62e7b2",
+        "694144e809e3e957",
+        "14b10e939f2a9462",
+        "dacd4b7474e59694",
+        "fd509a8ce0abcd05",
+        "8e532500c79a25d6",
+        "3f637be7ed778b9e"
+      ],
+      "date": 1652028523643
+    }
+  ]
+}

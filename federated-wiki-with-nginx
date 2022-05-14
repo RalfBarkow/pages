@@ -1,0 +1,382 @@
+{
+  "title": "Federated Wiki with Nginx",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "72bc73f43aaa4ebf",
+      "text": "Here are some historic notes on installing and configuring Nginx as a reverse proxy in front of Federated Wiki. These notes are from installing [[Federated Wiki on Digital Ocean]]."
+    },
+    {
+      "type": "paragraph",
+      "id": "a62f0a6325daa588",
+      "text": "These notes do not include details on setting up TLS, or getting certificates from [[Let's Encrypt]]. It is suggested that you will want to do both. How to do this can be found in the Nginx and Let's Encrypt documentation."
+    },
+    {
+      "type": "markdown",
+      "id": "81886ecc9e55eeee",
+      "text": "## Nginx Install"
+    },
+    {
+      "type": "paragraph",
+      "id": "4a4e8cb2f1b45db5",
+      "text": "We will use Nginx as a reverse proxy in front of the Federated Wiki server. "
+    },
+    {
+      "type": "markdown",
+      "id": "434e8ef08c44f954",
+      "text": "* How to Install Nginx on Ubuntu 14.04 LTS [https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-14-04-lts tutorial]"
+    },
+    {
+      "type": "paragraph",
+      "id": "46bcbf2c4d0accbe",
+      "text": "The tutorial walks you though installing Nginx, and the basics of managing the Nginx process."
+    },
+    {
+      "type": "paragraph",
+      "id": "04583e7d0f3507b1",
+      "text": "We now need to configure Nginx to pass requests to the federated wiki software. [https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-14-04#set-up-reverse-proxy-server tutorial]"
+    },
+    {
+      "type": "markdown",
+      "id": "13049c7a8324909f",
+      "text": "In `/etc/nginx/sites-available/default` we add"
+    },
+    {
+      "type": "code",
+      "id": "c40af8cd1ca8f59c",
+      "text": "map $http_upgrade $connection_upgrade {\n\tdefault upgrade;\n\t''\tclose;\n}"
+    },
+    {
+      "type": "markdown",
+      "id": "d70917e6169e68e8",
+      "text": "before the `server` definition."
+    },
+    {
+      "type": "markdown",
+      "id": "7456fd9dd30ca90d",
+      "text": "Following the tutorial, replace `example.com` with your domain name. This can contain a list, or wildcard, so that multiple names can be passed to the Wiki Farm. If for example I had registered the domain `example.wiki`, and wanted Federated Wiki sites to be any domain ending `example.wiki` I would use"
+    },
+    {
+      "type": "code",
+      "id": "79cbf5000c8b47e2",
+      "text": "server_name *.example.wiki;"
+    },
+    {
+      "type": "paragraph",
+      "id": "e4d6e8e7c5d86f13",
+      "text": "if I also wanted a wiki site at `example.wiki` I would need to use"
+    },
+    {
+      "type": "code",
+      "id": "7d81d65b6f4b1154",
+      "text": "server_name example.wiki *.example.wiki;"
+    },
+    {
+      "type": "paragraph",
+      "id": "1959daf7f50604b1",
+      "text": "We also need to use a slightly different location than that shown in the tutorial. Our modified server definition will look like that below:"
+    },
+    {
+      "type": "code",
+      "id": "874459be727e1697",
+      "text": "server {\n  listen 80;\n  server_name example.wiki *.example.wiki;\n\n  location / {\n    proxy_set_header X-Real-IP $remote_addr;\n    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n    proxy_set_header Host $host;\n    proxy_set_header X-NginX-Proxy true;\n\n    proxy_pass http://127.0.0.1:3000;\n    proxy_redirect off;\n\n    proxy_http_version 1.1;\n    proxy_set_header Upgrade $http_upgrade;\n    proxy_set_header Connection $connection_upgrade;\n  }\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "e91b30890bfacbe4",
+      "text": "We also add a default route, to catch any requests for HOSTs we do not recognise."
+    },
+    {
+      "type": "code",
+      "id": "6f4c9c678d78e126",
+      "text": "server {\n  listen 80 default_server;\n  listen [::]:80 default_server ipv6only=on;\n  server_name _;\n  return 444;\n}\n"
+    },
+    {
+      "type": "markdown",
+      "id": "8a9e3db8d1428486",
+      "text": "It is also good practice to not advertise which version of Nginx we are running. This is done by turning off server tokens. In `/etc/nginx/nginx.conf` uncomment the line `server_tokens off;`.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "fcdefc91616bcb98",
+      "text": "Restart Nginx:"
+    },
+    {
+      "type": "code",
+      "id": "b76c33217bf4f44f",
+      "text": "sudo service nginx restart"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Federated Wiki with Nginx",
+        "story": []
+      },
+      "date": 1499697125477
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "72bc73f43aaa4ebf"
+      },
+      "id": "72bc73f43aaa4ebf",
+      "type": "add",
+      "date": 1499697133349
+    },
+    {
+      "type": "edit",
+      "id": "72bc73f43aaa4ebf",
+      "item": {
+        "type": "paragraph",
+        "id": "72bc73f43aaa4ebf",
+        "text": "Here are some historic notes on installing and configuring Nginx as a reverse proxy in front of Federated Wiki. These notes are from installing [[Federated Wiki on Digital Ocean]]."
+      },
+      "date": 1499697269421
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "81886ecc9e55eeee",
+        "text": "## Nginx Install"
+      },
+      "after": "72bc73f43aaa4ebf",
+      "id": "81886ecc9e55eeee",
+      "date": 1499697288553
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "4a4e8cb2f1b45db5",
+        "text": "We will use Nginx as a reverse proxy in front of the Federated Wiki server. "
+      },
+      "after": "81886ecc9e55eeee",
+      "id": "4a4e8cb2f1b45db5",
+      "date": 1499697291022
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "434e8ef08c44f954",
+        "text": "* How to Install Nginx on Ubuntu 14.04 LTS [https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-14-04-lts tutorial]"
+      },
+      "after": "4a4e8cb2f1b45db5",
+      "id": "434e8ef08c44f954",
+      "date": 1499697293869
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "46bcbf2c4d0accbe",
+        "text": "The tutorial walks you though installing Nginx, and the basics of managing the Nginx process."
+      },
+      "after": "434e8ef08c44f954",
+      "id": "46bcbf2c4d0accbe",
+      "date": 1499697298412
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "04583e7d0f3507b1",
+        "text": "We now need to configure Nginx to pass requests to the federated wiki software."
+      },
+      "after": "46bcbf2c4d0accbe",
+      "id": "04583e7d0f3507b1",
+      "date": 1499697771503
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "13049c7a8324909f",
+        "text": "In `/etc/nginx/sites-available/default` we add"
+      },
+      "after": "04583e7d0f3507b1",
+      "id": "13049c7a8324909f",
+      "date": 1499697773054
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "c40af8cd1ca8f59c",
+        "text": "map $http_upgrade $connection_upgrade {\n\tdefault upgrade;\n\t''\tclose;\n}"
+      },
+      "after": "13049c7a8324909f",
+      "id": "c40af8cd1ca8f59c",
+      "date": 1499697775348
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "d70917e6169e68e8",
+        "text": "before the `server` definition."
+      },
+      "after": "c40af8cd1ca8f59c",
+      "id": "d70917e6169e68e8",
+      "date": 1499697778851
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "7456fd9dd30ca90d",
+        "text": "Following the tutorial, replace `example.com` with your domain name. This can contain a list, or wildcard, so that multiple names can be passed to the Wiki Farm. If for example I had registered the domain `example.wiki`, and wanted Federated Wiki sites to be any domain ending `example.wiki` I would use"
+      },
+      "after": "d70917e6169e68e8",
+      "id": "7456fd9dd30ca90d",
+      "date": 1499697784206
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "79cbf5000c8b47e2",
+        "text": "server_name *.example.wiki;"
+      },
+      "after": "7456fd9dd30ca90d",
+      "id": "79cbf5000c8b47e2",
+      "date": 1499697802155
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "e4d6e8e7c5d86f13",
+        "text": "if I also wanted a wiki site at `example.wiki` I would need to use"
+      },
+      "after": "79cbf5000c8b47e2",
+      "id": "e4d6e8e7c5d86f13",
+      "date": 1499697806496
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "7d81d65b6f4b1154",
+        "text": "server_name example.wiki *.example.wiki;"
+      },
+      "after": "e4d6e8e7c5d86f13",
+      "id": "7d81d65b6f4b1154",
+      "date": 1499697808713
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "1959daf7f50604b1",
+        "text": "We also need to use a slightly different location than that shown in the tutorial. Our modified server definition will look like that below:"
+      },
+      "after": "7d81d65b6f4b1154",
+      "id": "1959daf7f50604b1",
+      "date": 1499697816680
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "874459be727e1697",
+        "text": "server {\n  listen 80;\n  server_name example.wiki *.example.wiki;\n\n  location / {\n    proxy_set_header X-Real-IP $remote_addr;\n    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n    proxy_set_header Host $host;\n    proxy_set_header X-NginX-Proxy true;\n\n    proxy_pass http://127.0.0.1:3000;\n    proxy_redirect off;\n\n    proxy_http_version 1.1;\n    proxy_set_header Upgrade $http_upgrade;\n    proxy_set_header Connection $connection_upgrade;\n  }\n}\n"
+      },
+      "after": "1959daf7f50604b1",
+      "id": "874459be727e1697",
+      "date": 1499697826088
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "e91b30890bfacbe4",
+        "text": "We also add a default route, to catch any requests for HOSTs we do not recognise."
+      },
+      "after": "874459be727e1697",
+      "id": "e91b30890bfacbe4",
+      "date": 1499697839239
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "6f4c9c678d78e126",
+        "text": "server {\n  listen 80 default_server;\n  listen [::]:80 default_server ipv6only=on;\n  server_name _;\n  return 444;\n}\n"
+      },
+      "after": "e91b30890bfacbe4",
+      "id": "6f4c9c678d78e126",
+      "date": 1499697847329
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "8a9e3db8d1428486",
+        "text": "It is also good practice to not advertise which version of Nginx we are running. This is done by turning off server tokens. In `/etc/nginx/nginx.conf` uncomment the line `server_tokens off;`.\n"
+      },
+      "after": "6f4c9c678d78e126",
+      "id": "8a9e3db8d1428486",
+      "date": 1499697853734
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "fcdefc91616bcb98",
+        "text": "Restart Nginx:"
+      },
+      "after": "8a9e3db8d1428486",
+      "id": "fcdefc91616bcb98",
+      "date": 1499697867549
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "b76c33217bf4f44f",
+        "text": "sudo service nginx restart"
+      },
+      "after": "fcdefc91616bcb98",
+      "id": "b76c33217bf4f44f",
+      "date": 1499697871629
+    },
+    {
+      "type": "edit",
+      "id": "04583e7d0f3507b1",
+      "item": {
+        "type": "paragraph",
+        "id": "04583e7d0f3507b1",
+        "text": "We now need to configure Nginx to pass requests to the federated wiki software. [https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-14-04#set-up-reverse-proxy-server tutorial]"
+      },
+      "date": 1499697956384
+    },
+    {
+      "type": "add",
+      "id": "a62f0a6325daa588",
+      "item": {
+        "type": "paragraph",
+        "id": "a62f0a6325daa588",
+        "text": "These notes do not include details on setting up TLS, or getting certificates from [[Let's Encrypt]]. It is suggested that you will want to do both. How to do this can be found in the Nginx and Let's Encrypt documentation."
+      },
+      "after": "72bc73f43aaa4ebf",
+      "date": 1499698282425
+    },
+    {
+      "type": "fork",
+      "date": 1499705510019
+    },
+    {
+      "type": "fork",
+      "site": "goals.pod.rodwell.me",
+      "date": 1627053547444
+    },
+    {
+      "type": "fork",
+      "date": 1627053549386
+    }
+  ]
+}

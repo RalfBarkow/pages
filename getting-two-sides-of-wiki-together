@@ -1,0 +1,278 @@
+{
+  "title": "Getting Two sides of wiki together",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "6c36e95dc727a57a",
+      "text": "Someone wrote in [[Two sides of wiki]] about the seemingly opposite purpose of _Wikipedia_ and _Fedwiki_:\n\n> Thinking about this leads us to the conclusion that there are two sides to wiki (any wiki), both of which are equally important:\n> - multi-tenanted [[consensus based writing]]\n> - solipsistic [[federated writing]]\n\nThe original example was mentioning a huge problem with the fediwiki approach:\n"
+    },
+    {
+      "type": "markdown",
+      "id": "6e54501ef275ead7",
+      "text": "> When you have multiple copies of a piece of information across many folders or domains (they are effectively the same in federated wiki), it becomes unmanageable when you have to keep multiple copies updated."
+    },
+    {
+      "type": "markdown",
+      "id": "94ef58be49fd5f3e",
+      "text": "\nThe article then explored _transclusion_, which is just a fancy way of saying \"inclusion\" or \"pointer to the original\", and that it's not the good solution for the purpose of Fediwiki.\n\nHowever I disagree with the observations and the conclusions.\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "f12d96ea51d6d30d",
+      "text": "## The problems\n\nIn my view, Fedwiki is built around the idea of __forking__, or creating a copy of a page and start working on it independently, then showing it to the peers. I may not completely understand the motives (even [[ Federated Writing]] can't define what it is), but probably it is the total independence of others in the creative writing process.\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "8a8a12813f702634",
+      "text": "### What might have been the main reasons behind using forking technique?\n\n- Working on an independent copy?\n- Same title - different content?\n- Adding content/updating to original? With the intent of merging back?\n- Segmentation of content? (To support or create [[Information Bubbles]]?)\n\nThe first reason nicely fits the solution.\n\nThe second could use a __common page reference__ (central or shared) which would contain infinite amount of forks, but this way they would be all collected in one place (and would offer much better merging possibilities than the scattered unconnected forks version). \n\nThe third would require a __fast, easy, painless way to merge back__, supported by code not manual labour. It would need multiple things, I'll detail later.\n\nThe fourth aspect would require controlled forks within specific areas, and may require \"same title\" pages covering \"different topics\". This could be solved by organising pages not by _title_ but by _meaning_ (by idea, by theory, by object), and controlling tightly how merges happen, and how links prefer the specific bubble sites first.\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "39bea65e6812a992",
+      "text": "\n### Problem of the current method\n\nThe original idea was implemented as `wiki` `npm` module. This implementation - while containing extremely good features in large amounts - have a few problems in my opninion:\n\n- creates infinite amount of copies of the same material (violating _normalisation_ principles),\n- creates unorganised copies,\n- create unsearchable copies (same title on infinite sites need full-text searched to be distinguished),\n- creates wildly disconnected and diverging copies.\n\nAlso there are other, implementational problems:\n- hard (or impossible) to get full history of a page with authors, timestamps and full change history\n- backward (origin) pointers seem to be more-or-less available, but may be easily broken by sites removing specific Items or their versions\n- there seem to be no forward pointers, which would be essential to maintain updates of forks\n  - this also cause no forward notification possible, so forks can't be notified of changes (but forks could still ping origins backwards)\n* working state of links is highly dependent on the neighbourhood state of the moment, and can change from session to session.\n\nAnd the largest problem is\n- __there is no merging back.__\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "10b15c3dbca35cf7",
+      "text": "### Response from the Fedwiki community about these problems\n\nThe mainstream answer were along the line of:\n- we wanted it this way (maximal independence of pages),\n- we already got used to it,\n- we can do it manually,\n- we discuss it in person/video chat (out of band),\n- we care way more about the writer than the readers,\n- some of those *can* be done in a hidden/non-trivial way,\n- we like surprises (instead of consistence/reliability).\n\n## Mergeback\n\nI believe my two most important missing features of the _current_ Fedwiki are\n1. fully connected forks with source, author and timestamp, and\n2. easy merging back.\n\nFor the first, I would imagine:\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "915681cd3a1eabab",
+      "text": "### Every page with the same title would be somehow connected. \n\nBoth \"same title\" and \"somehow\" is open question. \n\n_Same title_ should rather mean __same object__ or __idea__, much similar to [[Wikidata]] entities, which are not connected to _words_ but _ideas_, like \"Kingdom of Hungary\" (1840) is a different object from \"Hungarian Republic\" (1995), which is also different from \"Hungary\" (2011); like \"Hungarian\" (language) is different from \"Hungarian\" (person) or \"Hungarian\" (attribute). Maybe that's too much added complexity, but a possible way to unify across languages and imperfect words/language. (Not to mention that Pages optionally could _actually reference Wikidata entities_ to connect to very precisely defined theories, objects, ideas.)\n\n_Somehow_ is preferably also federated, like every origin and every fork maintaining its First Origin (as an universal object indicator [think like [[GUID]] ]) and immediate parent and descendants (basically a [[DAG]]), so the fork tree always could be created and view. \n\nAlso it can be one central server recording all the forks of a page.\n\nSo anyone interested in __X__ would pull up the Tree of __X__ and be able to browse the forks, or do whatever they please to do with them.\nAlso it would be obvious how the forks are related, so if anyone looks for the most recent version of any given object it would be easy to find leaves, and find the one with the most recent timestamp. (Forks could be grouped by domains, or tags, or anything if one needs to actually mark the Information Bubbles, though I don't think it'd be necessary.)\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "8d8da1464cb68d68",
+      "text": "### Easy merging back\n\nTo prevent information explosion there should be an automated, simple, machine-assisted way of merge-back.\n\nMerges require some well-known practical functions:\n- finding the original-fork relation (that's zeroth step, or call it pre-requisite)\n- seeing exactly the difference, clearly showing what and how changed\n- offering the possibility to merge whole document automatically if possible\n- when whole merge isn't possible due to conflicting changes, offering merging changed _Items_ in whole if it's possible \n- if that's not possible, offering merge strategies assisted with machine help as much as possible (while Wikipedia for example only offers \"merge the text manually\" at this stage, but it isn't good enough)\n- also offering the possibility to not to merge but _append_ the Items, or the Document to the original, preserving original state for example.\n\nMerging back would \"destroy\" the fork, or rather unify again it with its origin, lowering fragmentation and divergence.\n\nThere is two (non mutually exclusive) way to start a merge:\n1. Merge happens when original author gets notified (or become aware in any way) that their page was updated. It provides complete independence in the merging process but requires the author to thoroughly examine and manage the merging.\n2. Merge gets created when the fork author decides to merge back, knowing their own changes; they prepare a merge and notify the origin; the origin still decides whether to merge but the merging is already prepared, only have to be accepted, rejected or manually modified if the author wished so. (This is basically describing the _pull request model_.)\n\nThis would preserve independence of the original authors: they decide whether they merge or not, and what and how to merge. \n\nIt may pose a risk of malevolent forking notices or malevolent merging offers, but software could handle this gently, using unobtrusive hints, for example, as that someone have requested a merge on a page the author wishes to modify. And on a separate page provide a _waiting merges/PRs_ list which can be seen as the author feels fit (or ignored at will), without disturbing creative processes.\n\nSame goes, naturally, for the fork authors' protection. They would be notified if they want to work on a fork which was modified since in the original. \n\n(And all these \"realtime\" unotrusive notifications could be clicked away and ignored forever for that specific fork (or all forks for that page).)\n\nOrigin authors would have the option to set a page, or a whole site to \"independent\", meaning they do not want to know about the forks and usually do not intend to merge anything back. They would not get fork-changed page notifications and they wouldn't look at the _changed forks_ status page anyway.\n\nFork authors also have the possibility to mark the page as \"Not For Merging\", signaling that they do not intend to merge back, they intend to create a \"hard fork\" or an independent page, so all the warnings - both ways - would be silenced. These pages could be merged as any else, but there would be no origin-changed (and possibly fork-changed) notifications.\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "81c2aeca29c9a6cb",
+      "text": "## Why not \"transclude\" or \"fork-protect\"?\n\nTransclusion means I have a document where parts are not mine. Its is working well with a frame already (and indeed there could be a transclusion Factory much like than a proxy now), but I believe it is against the original Fedwiki theory of owning the whole copy.\n\nFork protect would mean that parts of the text are not forkable but can only be edited locally. Since local editing is almost always forbidden (and creating a globally managed local edit frameworks seems like a lot of work for little gain) I do not think it would be better than having a fork actually phone home and tell that a merge (_pull request?_) is waiting.\n"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Getting Two sides of wiki together",
+        "story": []
+      },
+      "date": 1644252510292
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6c36e95dc727a57a"
+      },
+      "id": "6c36e95dc727a57a",
+      "type": "add",
+      "date": 1644252511947
+    },
+    {
+      "type": "edit",
+      "id": "6c36e95dc727a57a",
+      "item": {
+        "type": "markdown",
+        "id": "6c36e95dc727a57a",
+        "text": "_(This piece was written by me, [[grin]], on or about 2022-02-07)_\n\nSomeone (I cannot tell who wrote the original piece) wrote in [[Two sides of wiki]] about the seemingly opposite purpose of _Wikipedia_ and _Fedwiki_:\n\n> Thinking about this leads us to the conclusion that there are two sides to wiki (any wiki), both of which are equally important:\n> - multi-tenanted [[consensus based writing]]\n> - solipsistic [[federated writing]]\n\nThe original example was mentioning a huge problem with the fediwiki approach:\n\n>When you have multiple copies of a piece of information across many folders or domains (they are effectively the same in federated wiki), it becomes unmanageable when you have to keep multiple copies updated.\n\nThe article then explored _transclusion_, which is just a fancy way of saying \"inclusion\" or \"pointer to the original\", and that it's not the good solution for the purpose of Fediwiki.\n\nHowever I disagree with the observations and the conclusions.\n\n## The problems\n\nIn my view, Fedwiki is built around the idea of __forking__, or creating a copy of a page and start working on it independently, then showing it to the peers. I may not completely understand the motives (even [[ Federated Writing]] can't define what it is), but probably it is the total independence of others in the creative writing process.\n\n### What might have been the main reasons behind using forking technique?\n\n- Working on an independent copy?\n- Same title - different content?\n- Adding content/updating to original? With the intent of merging back?\n- Segmentation of content? (To support or create [[Information Bubbles]]?)\n\nThe first reason nicely fits the solution.\n\nThe second could use a __common page reference__ (central or shared) which would contain infinite amount of forks, but this way they would be all collected in one place (and would offer much better merging possibilities than the scattered unconnected forks version). \n\nThe third would require a __fast, easy, painless way to merge back__, supported by code not manual labour. It would need multiple things, I'll detail later.\n\nThe fourth aspect would require controlled forks within specific areas, and may require \"same title\" pages covering \"different topics\". This could be solved by organising pages not by _title_ but by _meaning_ (by idea, by theory, by object), and controlling tightly how merges happen, and how links prefer the specific bubble sites first.\n\n\n### Problem of the current method\n\nThe original idea was implemented as `wiki` `npm` module. This implementation - while containing extremely good features in large amounts - have a few problems in my opninion:\n\n- creates infinite amount of copies of the same material (violating _normalisation_ principles),\n- creates unorganised copies,\n- create unsearchable copies (same title on infinite sites need full-text searched to be distinguished),\n- creates wildly disconnected and diverging copies.\n\nAlso there are other, implementational problems:\n- hard (or impossible) to get full history of a page with authors, timestamps and full change history\n- backward (origin) pointers seem to be more-or-less available, but may be easily broken by sites removing specific Items or their versions\n- there seem to be no forward pointers, which would be essential to maintain updates of forks\n  - this also cause no forward notification possible, so forks can't be notified of changes (but forks could still ping origins backwards)\n* working state of links is highly dependent on the neighbourhood state of the moment, and can change from session to session.\n\nAnd the largest problem is\n- __there is no merging back.__\n\n### Response from the Fedwiki community about these problems\n\nThe mainstream answer were along the line of:\n- we wanted it this was (maximal independence of pages),\n- we already got used to it,\n- we can do it manually,\n- we discuss it in person/video chat (out of band),\n- we care way more about the writer than the readers,\n- some of those *can* be done in a hidden/non-trivial way,\n- we like surprises (instead of consistence/reliability).\n\n## Mergeback\n\nI believe my two most important missing features of the _current_ Fedwiki are\n1. fully connected forks with source, author and timestamp, and\n2. easy merging back.\n\nFor the first, I would imagine:\n\n### Every page with the same title would be somehow connected. \n\nBoth \"same title\" and \"somehow\" is open question. \n\n_Same title_ should rather mean __same object__ or __idea__, much similar to [[Wikidata]] entities, which are not connected to _words_ but _ideas_, like \"Kingdom of Hungary\" (1840) is a different object from \"Hungarian Republic\" (1995), which is also different from \"Hungary\" (2011); like \"Hungarian\" (language) is different from \"Hungarian\" (person) or \"Hungarian\" (attribute). Maybe that's too much added complexity, but a possible way to unify across languages and imperfect words/language. (Not to mention that Pages optionally could _actually reference Wikidata entities_ to connect to very precisely defined theories, objects, ideas.)\n\n_Somehow_ is preferably also federated, like every origin and every fork maintaining its First Origin (as an universal object indicator [think like [[GUID]] ]) and immediate parent and descendants (basically a [[DAG]]), so the fork tree always could be created and view. \n\nAlso it can be one central server recording all the forks of a page.\n\nSo anyone interested in __X__ would pull up the Tree of __X__ and be able to browse the forks, or do whatever they please to do with them.\nAlso it would be obvious how the forks are related, so if anyone looks for the most recent version of any given object it would be easy to find leaves, and find the one with the most recent timestamp. (Forks could be grouped by domains, or tags, or anything if one needs to actually mark the Information Bubbles, though I don't think it'd be necessary.)\n\n### Easy merging back\n\nTo prevent information explosion there should be an automated, simple, machine-assisted way of merge-back.\n\nMerges require some well-known practical functions:\n- finding the original-fork relation (that's zeroth step, or call it pre-requisite)\n- seeing exactly the difference, clearly showing what and how changed\n- offering the possibility to merge whole document automatically if possible\n- when whole merge isn't possible due to conflicting changes, offering merging changed _Items_ in whole if it's possible \n- if that's not possible, offering merge strategies assisted with machine help as much as possible (while Wikipedia for example only offers \"merge the text manually\" at this stage, but it isn't good enough)\n- also offering the possibility to not to merge but _append_ the Items, or the Document to the original, preserving original state for example.\n\nMerging back would \"destroy\" the fork, or rather unify again it with its origin, lowering fragmentation and divergence.\n\nThere is two (non mutually exclusive) way to start a merge:\n1. Merge happens when original author gets notified (or become aware in any way) that their page was updated. It provides complete independence in the merging process but requires the author to thoroughly examine and manage the merging.\n2. Merge gets created when the fork author decides to merge back, knowing their own changes; they prepare a merge and notify the origin; the origin still decides whether to merge but the merging is already prepared, only have to be accepted, rejected or manually modified if the author wished so. (This is basically describing the _pull request model_.)\n\nThis would preserve independence of the original authors: they decide whether they merge or not, and what and how to merge. \n\nIt may pose a risk of malevolent forking notices or malevolent merging offers, but software could handle this gently, using unobtrusive hints, for example, as that someone have requested a merge on a page the author wishes to modify. And on a separate page provide a _waiting merges/PRs_ list which can be seen as the author feels fit (or ignored at will), without disturbing creative processes.\n\nSame goes, naturally, for the fork authors' protection. They would be notified if they want to work on a fork which was modified since in the original. \n\n(And all these \"realtime\" unotrusive notifications could be clicked away and ignored forever for that specific fork (or all forks for that page).)\n\nOrigin authors would have the option to set a page, or a whole site to \"independent\", meaning they do not want to know about the forks and usually do not intend to merge anything back. They would not get fork-changed page notifications and they wouldn't look at the _changed forks_ status page anyway.\n\nFork authors also have the possibility to mark the page as \"Not For Merging\", signaling that they do not intend to merge back, they intend to create a \"hard fork\" or an independent page, so all the warnings - both ways - would be silenced. These pages could be merged as any else, but there would be no origin-changed (and possibly fork-changed) notifications.\n\n## Why not \"transclude\" or \"fork-protect\"?\n\nTransclusion means I have a document where parts are not mine. Its is working well with a frame already (and indeed there could be a transclusion Factory much like than a proxy now), but I believe it is against the original Fedwiki theory of owning the whole copy.\n\nFork protect would mean that parts of the text are not forkable but can only be edited locally. Since local editing is almost always forbidden (and creating a globally managed local edit frameworks seems like a lot of work for little gain) I do not think it would be better than having a fork actually phone home and tell that a merge (_pull request?_) is waiting.\n"
+      },
+      "date": 1644252515879
+    },
+    {
+      "type": "edit",
+      "id": "6c36e95dc727a57a",
+      "item": {
+        "type": "markdown",
+        "id": "6c36e95dc727a57a",
+        "text": "_(This piece was written by me, [[grin]], on or about 2022-02-07)_\n\nSomeone (I cannot tell who wrote the original piece) wrote in [[Two sides of wiki]] about the seemingly opposite purpose of _Wikipedia_ and _Fedwiki_:\n\n> Thinking about this leads us to the conclusion that there are two sides to wiki (any wiki), both of which are equally important:\n> - multi-tenanted [[consensus based writing]]\n> - solipsistic [[federated writing]]\n\nThe original example was mentioning a huge problem with the fediwiki approach:\n\n>When you have multiple copies of a piece of information across many folders or domains (they are effectively the same in federated wiki), it becomes unmanageable when you have to keep multiple copies updated.\n\nThe article then explored _transclusion_, which is just a fancy way of saying \"inclusion\" or \"pointer to the original\", and that it's not the good solution for the purpose of Fediwiki.\n\nHowever I disagree with the observations and the conclusions.\n\n"
+      },
+      "date": 1644252534319
+    },
+    {
+      "type": "add",
+      "id": "f12d96ea51d6d30d",
+      "item": {
+        "type": "markdown",
+        "id": "f12d96ea51d6d30d",
+        "text": "## The problems\n\nIn my view, Fedwiki is built around the idea of __forking__, or creating a copy of a page and start working on it independently, then showing it to the peers. I may not completely understand the motives (even [[ Federated Writing]] can't define what it is), but probably it is the total independence of others in the creative writing process.\n\n"
+      },
+      "after": "6c36e95dc727a57a",
+      "date": 1644252544702
+    },
+    {
+      "type": "add",
+      "id": "8a8a12813f702634",
+      "item": {
+        "type": "markdown",
+        "id": "8a8a12813f702634",
+        "text": "### What might have been the main reasons behind using forking technique?\n\n- Working on an independent copy?\n- Same title - different content?\n- Adding content/updating to original? With the intent of merging back?\n- Segmentation of content? (To support or create [[Information Bubbles]]?)\n\nThe first reason nicely fits the solution.\n\nThe second could use a __common page reference__ (central or shared) which would contain infinite amount of forks, but this way they would be all collected in one place (and would offer much better merging possibilities than the scattered unconnected forks version). \n\nThe third would require a __fast, easy, painless way to merge back__, supported by code not manual labour. It would need multiple things, I'll detail later.\n\nThe fourth aspect would require controlled forks within specific areas, and may require \"same title\" pages covering \"different topics\". This could be solved by organising pages not by _title_ but by _meaning_ (by idea, by theory, by object), and controlling tightly how merges happen, and how links prefer the specific bubble sites first.\n\n"
+      },
+      "after": "f12d96ea51d6d30d",
+      "date": 1644252550599
+    },
+    {
+      "type": "add",
+      "id": "39bea65e6812a992",
+      "item": {
+        "type": "markdown",
+        "id": "39bea65e6812a992",
+        "text": "\n### Problem of the current method\n\nThe original idea was implemented as `wiki` `npm` module. This implementation - while containing extremely good features in large amounts - have a few problems in my opninion:\n\n- creates infinite amount of copies of the same material (violating _normalisation_ principles),\n- creates unorganised copies,\n- create unsearchable copies (same title on infinite sites need full-text searched to be distinguished),\n- creates wildly disconnected and diverging copies.\n\nAlso there are other, implementational problems:\n- hard (or impossible) to get full history of a page with authors, timestamps and full change history\n- backward (origin) pointers seem to be more-or-less available, but may be easily broken by sites removing specific Items or their versions\n- there seem to be no forward pointers, which would be essential to maintain updates of forks\n  - this also cause no forward notification possible, so forks can't be notified of changes (but forks could still ping origins backwards)\n* working state of links is highly dependent on the neighbourhood state of the moment, and can change from session to session.\n\nAnd the largest problem is\n- __there is no merging back.__\n\n"
+      },
+      "after": "8a8a12813f702634",
+      "date": 1644252556038
+    },
+    {
+      "type": "add",
+      "id": "10b15c3dbca35cf7",
+      "item": {
+        "type": "markdown",
+        "id": "10b15c3dbca35cf7",
+        "text": "### Response from the Fedwiki community about these problems\n\nThe mainstream answer were along the line of:\n- we wanted it this was (maximal independence of pages),\n- we already got used to it,\n- we can do it manually,\n- we discuss it in person/video chat (out of band),\n- we care way more about the writer than the readers,\n- some of those *can* be done in a hidden/non-trivial way,\n- we like surprises (instead of consistence/reliability).\n\n## Mergeback\n\nI believe my two most important missing features of the _current_ Fedwiki are\n1. fully connected forks with source, author and timestamp, and\n2. easy merging back.\n\nFor the first, I would imagine:\n\n"
+      },
+      "after": "39bea65e6812a992",
+      "date": 1644252561414
+    },
+    {
+      "type": "add",
+      "id": "915681cd3a1eabab",
+      "item": {
+        "type": "markdown",
+        "id": "915681cd3a1eabab",
+        "text": "### Every page with the same title would be somehow connected. \n\nBoth \"same title\" and \"somehow\" is open question. \n\n_Same title_ should rather mean __same object__ or __idea__, much similar to [[Wikidata]] entities, which are not connected to _words_ but _ideas_, like \"Kingdom of Hungary\" (1840) is a different object from \"Hungarian Republic\" (1995), which is also different from \"Hungary\" (2011); like \"Hungarian\" (language) is different from \"Hungarian\" (person) or \"Hungarian\" (attribute). Maybe that's too much added complexity, but a possible way to unify across languages and imperfect words/language. (Not to mention that Pages optionally could _actually reference Wikidata entities_ to connect to very precisely defined theories, objects, ideas.)\n\n_Somehow_ is preferably also federated, like every origin and every fork maintaining its First Origin (as an universal object indicator [think like [[GUID]] ]) and immediate parent and descendants (basically a [[DAG]]), so the fork tree always could be created and view. \n\nAlso it can be one central server recording all the forks of a page.\n\nSo anyone interested in __X__ would pull up the Tree of __X__ and be able to browse the forks, or do whatever they please to do with them.\nAlso it would be obvious how the forks are related, so if anyone looks for the most recent version of any given object it would be easy to find leaves, and find the one with the most recent timestamp. (Forks could be grouped by domains, or tags, or anything if one needs to actually mark the Information Bubbles, though I don't think it'd be necessary.)\n\n"
+      },
+      "after": "10b15c3dbca35cf7",
+      "date": 1644252567437
+    },
+    {
+      "type": "add",
+      "id": "8d8da1464cb68d68",
+      "item": {
+        "type": "markdown",
+        "id": "8d8da1464cb68d68",
+        "text": "### Easy merging back\n\nTo prevent information explosion there should be an automated, simple, machine-assisted way of merge-back.\n\nMerges require some well-known practical functions:\n- finding the original-fork relation (that's zeroth step, or call it pre-requisite)\n- seeing exactly the difference, clearly showing what and how changed\n- offering the possibility to merge whole document automatically if possible\n- when whole merge isn't possible due to conflicting changes, offering merging changed _Items_ in whole if it's possible \n- if that's not possible, offering merge strategies assisted with machine help as much as possible (while Wikipedia for example only offers \"merge the text manually\" at this stage, but it isn't good enough)\n- also offering the possibility to not to merge but _append_ the Items, or the Document to the original, preserving original state for example.\n\nMerging back would \"destroy\" the fork, or rather unify again it with its origin, lowering fragmentation and divergence.\n\nThere is two (non mutually exclusive) way to start a merge:\n1. Merge happens when original author gets notified (or become aware in any way) that their page was updated. It provides complete independence in the merging process but requires the author to thoroughly examine and manage the merging.\n2. Merge gets created when the fork author decides to merge back, knowing their own changes; they prepare a merge and notify the origin; the origin still decides whether to merge but the merging is already prepared, only have to be accepted, rejected or manually modified if the author wished so. (This is basically describing the _pull request model_.)\n\nThis would preserve independence of the original authors: they decide whether they merge or not, and what and how to merge. \n\nIt may pose a risk of malevolent forking notices or malevolent merging offers, but software could handle this gently, using unobtrusive hints, for example, as that someone have requested a merge on a page the author wishes to modify. And on a separate page provide a _waiting merges/PRs_ list which can be seen as the author feels fit (or ignored at will), without disturbing creative processes.\n\nSame goes, naturally, for the fork authors' protection. They would be notified if they want to work on a fork which was modified since in the original. \n\n(And all these \"realtime\" unotrusive notifications could be clicked away and ignored forever for that specific fork (or all forks for that page).)\n\nOrigin authors would have the option to set a page, or a whole site to \"independent\", meaning they do not want to know about the forks and usually do not intend to merge anything back. They would not get fork-changed page notifications and they wouldn't look at the _changed forks_ status page anyway.\n\nFork authors also have the possibility to mark the page as \"Not For Merging\", signaling that they do not intend to merge back, they intend to create a \"hard fork\" or an independent page, so all the warnings - both ways - would be silenced. These pages could be merged as any else, but there would be no origin-changed (and possibly fork-changed) notifications.\n\n"
+      },
+      "after": "915681cd3a1eabab",
+      "date": 1644252577021
+    },
+    {
+      "type": "add",
+      "id": "81c2aeca29c9a6cb",
+      "item": {
+        "type": "markdown",
+        "id": "81c2aeca29c9a6cb",
+        "text": "## Why not \"transclude\" or \"fork-protect\"?\n\nTransclusion means I have a document where parts are not mine. Its is working well with a frame already (and indeed there could be a transclusion Factory much like than a proxy now), but I believe it is against the original Fedwiki theory of owning the whole copy.\n\nFork protect would mean that parts of the text are not forkable but can only be edited locally. Since local editing is almost always forbidden (and creating a globally managed local edit frameworks seems like a lot of work for little gain) I do not think it would be better than having a fork actually phone home and tell that a merge (_pull request?_) is waiting.\n"
+      },
+      "after": "8d8da1464cb68d68",
+      "date": 1644252579135
+    },
+    {
+      "type": "fork",
+      "site": "fedwiki.grin.hu",
+      "date": 1644253065809
+    },
+    {
+      "type": "edit",
+      "id": "6c36e95dc727a57a",
+      "item": {
+        "type": "markdown",
+        "id": "6c36e95dc727a57a",
+        "text": "Someone wrote in [[Two sides of wiki]] about the seemingly opposite purpose of _Wikipedia_ and _Fedwiki_:\n\n> Thinking about this leads us to the conclusion that there are two sides to wiki (any wiki), both of which are equally important:\n> - multi-tenanted [[consensus based writing]]\n> - solipsistic [[federated writing]]\n\nThe original example was mentioning a huge problem with the fediwiki approach:\n"
+      },
+      "date": 1644253273059
+    },
+    {
+      "type": "add",
+      "id": "60cb5edb8f681951",
+      "item": {
+        "type": "markdown",
+        "id": "60cb5edb8f681951",
+        "text": ""
+      },
+      "after": "6c36e95dc727a57a",
+      "date": 1644253279344
+    },
+    {
+      "type": "add",
+      "id": "94ef58be49fd5f3e",
+      "item": {
+        "type": "markdown",
+        "id": "94ef58be49fd5f3e",
+        "text": "\nThe article then explored _transclusion_, which is just a fancy way of saying \"inclusion\" or \"pointer to the original\", and that it's not the good solution for the purpose of Fediwiki.\n\nHowever I disagree with the observations and the conclusions.\n\n"
+      },
+      "after": "60cb5edb8f681951",
+      "date": 1644253282826
+    },
+    {
+      "id": "6e54501ef275ead7",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "6e54501ef275ead7",
+        "text": "When you have multiple copies of a piece of information across many folders or domains (they are effectively the same in federated wiki), it becomes unmanageable when you have to keep multiple copies updated."
+      },
+      "after": "6c36e95dc727a57a",
+      "date": 1644253285111
+    },
+    {
+      "type": "remove",
+      "id": "60cb5edb8f681951",
+      "date": 1644253289023
+    },
+    {
+      "type": "edit",
+      "id": "6e54501ef275ead7",
+      "item": {
+        "type": "markdown",
+        "id": "6e54501ef275ead7",
+        "text": "> When you have multiple copies of a piece of information across many folders or domains (they are effectively the same in federated wiki), it becomes unmanageable when you have to keep multiple copies updated."
+      },
+      "date": 1644253293601
+    },
+    {
+      "type": "edit",
+      "id": "6e54501ef275ead7",
+      "item": {
+        "type": "markdown",
+        "id": "6e54501ef275ead7",
+        "text": "> When you have multiple copies of a piece of information across many folders or domains (they are effectively the same in federated wiki), it becomes unmanageable when you have to keep multiple copies updated."
+      },
+      "date": 1644253295833
+    },
+    {
+      "type": "edit",
+      "id": "6c36e95dc727a57a",
+      "item": {
+        "type": "markdown",
+        "id": "6c36e95dc727a57a",
+        "text": "Someone wrote in [[Two sides of wiki]] about the seemingly opposite purpose of _Wikipedia_ and _Fedwiki_:\n\n> Thinking about this leads us to the conclusion that there are two sides to wiki (any wiki), both of which are equally important:\n> - multi-tenanted [[consensus based writing]]\n> - solipsistic [[federated writing]]\n\nThe original example was mentioning a huge problem with the fediwiki approach:\n"
+      },
+      "date": 1644253968802
+    },
+    {
+      "type": "edit",
+      "id": "6c36e95dc727a57a",
+      "item": {
+        "type": "markdown",
+        "id": "6c36e95dc727a57a",
+        "text": "Someone wrote in [[Two sides of wiki]] about the seemingly opposite purpose of _Wikipedia_ and _Fedwiki_:\n\n> Thinking about this leads us to the conclusion that there are two sides to wiki (any wiki), both of which are equally important:\n> - multi-tenanted [[consensus based writing]]\n> - solipsistic [[federated writing]]\n\nThe original example was mentioning a huge problem with the fediwiki approach:\n"
+      },
+      "date": 1644254028151
+    },
+    {
+      "type": "fork",
+      "date": 1644254035892
+    },
+    {
+      "type": "edit",
+      "id": "10b15c3dbca35cf7",
+      "item": {
+        "type": "markdown",
+        "id": "10b15c3dbca35cf7",
+        "text": "### Response from the Fedwiki community about these problems\n\nThe mainstream answer were along the line of:\n- we wanted it this way (maximal independence of pages),\n- we already got used to it,\n- we can do it manually,\n- we discuss it in person/video chat (out of band),\n- we care way more about the writer than the readers,\n- some of those *can* be done in a hidden/non-trivial way,\n- we like surprises (instead of consistence/reliability).\n\n## Mergeback\n\nI believe my two most important missing features of the _current_ Fedwiki are\n1. fully connected forks with source, author and timestamp, and\n2. easy merging back.\n\nFor the first, I would imagine:\n\n"
+      },
+      "date": 1644254502758
+    }
+  ]
+}

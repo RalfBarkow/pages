@@ -1,0 +1,617 @@
+{
+  "title": "PetitParser",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "14ba9280c4ce679c",
+      "text": "[https://www.lukas-renggli.ch/blog/petitparser-1 Writing Parsers with PetitParser] – [[Lukas Renggli]]"
+    },
+    {
+      "type": "video",
+      "id": "00a139a08d8a8606",
+      "text": "YOUTUBE vgiJG3Vd6KU\nPetitParser Tutorial (Part 1)"
+    },
+    {
+      "type": "markdown",
+      "id": "2be50ca292d9b5d1",
+      "text": "Originally Lukas has written PetitParser as part of his work on the Helvetia system. PetitParser is a parsing framework different to many other popular parser generators. For example, it is not table based such as [[SmaCC]] or [[ANTLR]]. Instead it uses a unique combination of four alternative parser methodologies: scannerless parsers, parser combinators, [[parsing expression grammar]]s and packrat parsers. As such [[PetitParser]] is more powerful in what it can parse and it arguably fits better the dynamic nature of Smalltalk. Let’s have a quick look at these four parser methodologies:"
+    },
+    {
+      "type": "markdown",
+      "id": "31f98b1f1c3577a2",
+      "text": "1. *Scannerless Parsers* combine what is usually done by two independent tools (scanner and parser) into one. This makes writing a grammar much simpler and avoids common problems when grammars are composed.\n1. *Parser Combinators* are building blocks for parsers modeled as a graph of composable objects; they are modular and maintainable, and can be changed, recomposed, transformed and reflected upon.\n1. *Parsing Expression Grammars* (PEGs) provide ordered choice. Unlike in parser combinators, the ordered choice of PEGs always follows the first matching alternative and ignores other alternatives. Valid input always results in exactly one parse-tree, the result of a parse is never ambiguous.\n1. *Packrat Parsers* give linear parse time guarantees and avoid common problems with left-recursion in PEGs."
+    },
+    {
+      "type": "pagefold",
+      "id": "0710cd9f04b72bfc",
+      "text": "~"
+    },
+    {
+      "type": "markdown",
+      "id": "d4fb4add2a43fa76",
+      "text": "botwhytho\n — \n30.11.2020\nI just want to have some generic interfaces (to be sub-classed) defined for how to fetch from external sources and for how to parse them. My current source is trello cards in a specific list so a couple of api calls away, rather trivial. My formatting is very freeform but when I started I made sure I could at least parse it easily with some regex (or probably PetitParser). One line per time entry and a format similar to [Time - Range][space][description]\nObviously this is not an ideal way to keep the data but figured it would be better to start collecting it somehow, and later analyze it. Gt seems like a pretty good platform for the analysis\n"
+    },
+    {
+      "type": "markdown",
+      "id": "7bda18a92cf790e2",
+      "text": "tudor girba\n — \n30.11.2020\nYes, PetitParser would likely be a good fit here\nyou likely want:\n- an importer of Trello export (I guess they can export to something standard like JSON)\n- a model made out entities like: TimeRange, Space, Activity. This model is populated by the importer. \n- a parser that specializes the entries based on your notation (this is where PetitParser would work well). Based on this, the importer enriches the model.\n- views on the model\n"
+    },
+    {
+      "type": "pagefold",
+      "id": "f73a34efd9985354",
+      "text": "~"
+    },
+    {
+      "type": "markdown",
+      "id": "99e73319d802e8c4",
+      "text": "# Link Detection "
+    },
+    {
+      "type": "paragraph",
+      "id": "1cbe08ea8908e1c2",
+      "text": "Basic link detection using PetitParser. We need to add full support for the complete WikiText syntax, as we understand parsers better."
+    },
+    {
+      "type": "pagefold",
+      "id": "d572ed8956af841f",
+      "text": "~"
+    },
+    {
+      "type": "image",
+      "id": "d7780cd339ec7768",
+      "url": "data:image/jpeg;base64,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",
+      "caption": "Uploaded image",
+      "text": "Tutorial de PetitParser2 con WikiText"
+    },
+    {
+      "type": "markdown",
+      "id": "38c2f5a57f204cb2",
+      "text": "We reorganized the PetitParser2 links. If you download the LepiterDocs repository (you can download it without Fossil as a zip file from https://mutabit.com/repos.fossil/LepiterDocs/zip) and load the \"[[Libreta Base]]\" note and run the \"Create table of content\" function in the page inspector [click (1) and then run (2) in the screenshot], we could share our PetitParser links. And yes, at some point we need a more fluid workflow for sharing our Lepiter/Web notes/documents."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "PetitParser",
+        "story": []
+      },
+      "date": 1631094310981
+    },
+    {
+      "item": {
+        "type": "markdown",
+        "id": "14ba9280c4ce679c",
+        "text": "[https://www.lukas-renggli.ch/blog/petitparser-1 Writing Parsers with PetitParser] – [[Lukas Renggli]]"
+      },
+      "id": "14ba9280c4ce679c",
+      "type": "add",
+      "date": 1631094332290
+    },
+    {
+      "type": "edit",
+      "id": "14ba9280c4ce679c",
+      "item": {
+        "type": "markdown",
+        "id": "14ba9280c4ce679c",
+        "text": "[https://www.lukas-renggli.ch/blog/petitparser-1 Writing Parsers with PetitParser] – [[Lukas Renggli]]"
+      },
+      "date": 1631094337111
+    },
+    {
+      "type": "edit",
+      "id": "14ba9280c4ce679c",
+      "item": {
+        "type": "markdown",
+        "id": "14ba9280c4ce679c",
+        "text": "[https://www.lukas-renggli.ch/blog/petitparser-1 Writing Parsers with PetitParser] – [[Lukas Renggli]]"
+      },
+      "date": 1631094350175
+    },
+    {
+      "type": "edit",
+      "id": "14ba9280c4ce679c",
+      "item": {
+        "type": "markdown",
+        "id": "14ba9280c4ce679c",
+        "text": "[https://www.lukas-renggli.ch/blog/petitparser-1 Writing Parsers with PetitParser] – [[Lukas Renggli]]"
+      },
+      "date": 1631094373651
+    },
+    {
+      "item": {
+        "type": "markdown",
+        "id": "2be50ca292d9b5d1",
+        "text": "Originally Lukas has written PetitParser as part of his work on the Helvetia system. PetitParser is a parsing framework different to many other popular parser generators. For example, it is not table based such as [[SmaCC]] or [[ANTLR]]. Instead it uses a unique combination of four alternative parser methodologies: scannerless parsers, parser combinators, parsing expression grammars and packrat parsers. As such PetitParser is more powerful in what it can parse and it arguably fits better the dynamic nature of Smalltalk. Let’s have a quick look at these four parser methodologies:"
+      },
+      "id": "2be50ca292d9b5d1",
+      "type": "add",
+      "after": "14ba9280c4ce679c",
+      "date": 1631094410852
+    },
+    {
+      "type": "edit",
+      "id": "2be50ca292d9b5d1",
+      "item": {
+        "type": "markdown",
+        "id": "2be50ca292d9b5d1",
+        "text": "Originally Lukas has written PetitParser as part of his work on the Helvetia system. PetitParser is a parsing framework different to many other popular parser generators. For example, it is not table based such as [[SmaCC]] or [[ANTLR]]. Instead it uses a unique combination of four alternative parser methodologies: scannerless parsers, parser combinators, parsing expression grammars and packrat parsers. As such PetitParser is more powerful in what it can parse and it arguably fits better the dynamic nature of Smalltalk. Let’s have a quick look at these four parser methodologies:"
+      },
+      "date": 1631094420740
+    },
+    {
+      "type": "edit",
+      "id": "2be50ca292d9b5d1",
+      "item": {
+        "type": "markdown",
+        "id": "2be50ca292d9b5d1",
+        "text": "Originally Lukas has written PetitParser as part of his work on the Helvetia system. PetitParser is a parsing framework different to many other popular parser generators. For example, it is not table based such as [[SmaCC]] or [[ANTLR]]. Instead it uses a unique combination of four alternative parser methodologies: scannerless parsers, parser combinators, parsing expression grammars and packrat parsers. As such PetitParser is more powerful in what it can parse and it arguably fits better the dynamic nature of Smalltalk. Let’s have a quick look at these four parser methodologies:"
+      },
+      "date": 1631094428765
+    },
+    {
+      "type": "edit",
+      "id": "2be50ca292d9b5d1",
+      "item": {
+        "type": "markdown",
+        "id": "2be50ca292d9b5d1",
+        "text": "Originally Lukas has written PetitParser as part of his work on the Helvetia system. PetitParser is a parsing framework different to many other popular parser generators. For example, it is not table based such as [[SmaCC]] or [[ANTLR]]. Instead it uses a unique combination of four alternative parser methodologies: scannerless parsers, parser combinators, parsing expression grammars and packrat parsers. As such PetitParser is more powerful in what it can parse and it arguably fits better the dynamic nature of Smalltalk. Let’s have a quick look at these four parser methodologies:"
+      },
+      "date": 1631094453166
+    },
+    {
+      "item": {
+        "type": "markdown",
+        "id": "31f98b1f1c3577a2",
+        "text": "1. *Scannerless Parsers* combine what is usually done by two independent tools (scanner and parser) into one. This makes writing a grammar much simpler and avoids common problems when grammars are composed.\n1. *Parser Combinators* are building blocks for parsers modeled as a graph of composable objects; they are modular and maintainable, and can be changed, recomposed, transformed and reflected upon.\n1. *Parsing Expression Grammars* (PEGs) provide ordered choice. Unlike in parser combinators, the ordered choice of PEGs always follows the first matching alternative and ignores other alternatives. Valid input always results in exactly one parse-tree, the result of a parse is never ambiguous.\n1. *Packrat Parsers* give linear parse time guarantees and avoid common problems with left-recursion in PEGs."
+      },
+      "id": "31f98b1f1c3577a2",
+      "type": "add",
+      "after": "2be50ca292d9b5d1",
+      "date": 1631094478434
+    },
+    {
+      "type": "edit",
+      "id": "31f98b1f1c3577a2",
+      "item": {
+        "type": "markdown",
+        "id": "31f98b1f1c3577a2",
+        "text": "1. *Scannerless Parsers* combine what is usually done by two independent tools (scanner and parser) into one. This makes writing a grammar much simpler and avoids common problems when grammars are composed.\n1. *Parser Combinators* are building blocks for parsers modeled as a graph of composable objects; they are modular and maintainable, and can be changed, recomposed, transformed and reflected upon.\n1. *Parsing Expression Grammars* (PEGs) provide ordered choice. Unlike in parser combinators, the ordered choice of PEGs always follows the first matching alternative and ignores other alternatives. Valid input always results in exactly one parse-tree, the result of a parse is never ambiguous.\n1. *Packrat Parsers* give linear parse time guarantees and avoid common problems with left-recursion in PEGs."
+      },
+      "date": 1631094540108
+    },
+    {
+      "item": {
+        "type": "pagefold",
+        "id": "0710cd9f04b72bfc",
+        "text": "~"
+      },
+      "id": "0710cd9f04b72bfc",
+      "type": "add",
+      "after": "31f98b1f1c3577a2",
+      "date": 1631095100384
+    },
+    {
+      "type": "edit",
+      "id": "0710cd9f04b72bfc",
+      "item": {
+        "type": "pagefold",
+        "id": "0710cd9f04b72bfc",
+        "text": "~"
+      },
+      "date": 1631095107574
+    },
+    {
+      "type": "edit",
+      "id": "0710cd9f04b72bfc",
+      "item": {
+        "type": "pagefold",
+        "id": "0710cd9f04b72bfc",
+        "text": "~"
+      },
+      "date": 1631095112946
+    },
+    {
+      "item": {
+        "type": "markdown",
+        "id": "d4fb4add2a43fa76",
+        "text": "botwhytho\n — \n30.11.2020\nI just want to have some generic interfaces (to be sub-classed) defined for how to fetch from external sources and for how to parse them. My current source is trello cards in a specific list so a couple of api calls away, rather trivial. My formatting is very freeform but when I started I made sure I could at least parse it easily with some regex (or probably PetitParser). One line per time entry and a format similar to [Time - Range][space][description]\nObviously this is not an ideal way to keep the data but figured it would be better to start collecting it somehow, and later analyze it. Gt seems like a pretty good platform for the analysis\ntudor girba\n — \n30.11.2020\nYes, PetitParser would likely a good fit here\nyou likely want:\n- an importer of Trello export (I guess they can export to something standard like JSON)\n- a model made out entities like: TimeRange, Space, Activity. This model is populated by the importer. \n- a parser that specializes the entries based on your notation (this is where PetitParser would work well). Based on this, the importer enriches the model.\n- views on the model\n"
+      },
+      "id": "d4fb4add2a43fa76",
+      "type": "add",
+      "after": "0710cd9f04b72bfc",
+      "date": 1631095114245
+    },
+    {
+      "type": "edit",
+      "id": "d4fb4add2a43fa76",
+      "item": {
+        "type": "markdown",
+        "id": "d4fb4add2a43fa76",
+        "text": "botwhytho\n — \n30.11.2020\nI just want to have some generic interfaces (to be sub-classed) defined for how to fetch from external sources and for how to parse them. My current source is trello cards in a specific list so a couple of api calls away, rather trivial. My formatting is very freeform but when I started I made sure I could at least parse it easily with some regex (or probably PetitParser). One line per time entry and a format similar to [Time - Range][space][description]\nObviously this is not an ideal way to keep the data but figured it would be better to start collecting it somehow, and later analyze it. Gt seems like a pretty good platform for the analysis\ntudor girba\n — \n30.11.2020\nYes, PetitParser would likely a good fit here\nyou likely want:\n- an importer of Trello export (I guess they can export to something standard like JSON)\n- a model made out entities like: TimeRange, Space, Activity. This model is populated by the importer. \n- a parser that specializes the entries based on your notation (this is where PetitParser would work well). Based on this, the importer enriches the model.\n- views on the model\n"
+      },
+      "date": 1631095117392
+    },
+    {
+      "type": "fork",
+      "date": 1631095129465
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f73a34efd9985354"
+      },
+      "id": "f73a34efd9985354",
+      "type": "add",
+      "after": "d4fb4add2a43fa76",
+      "date": 1631095131998
+    },
+    {
+      "type": "edit",
+      "id": "f73a34efd9985354",
+      "item": {
+        "type": "pagefold",
+        "id": "f73a34efd9985354",
+        "text": "~"
+      },
+      "date": 1631095140705
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3fc450bbce8285db"
+      },
+      "id": "3fc450bbce8285db",
+      "type": "add",
+      "after": "f73a34efd9985354",
+      "date": 1631095150465
+    },
+    {
+      "type": "edit",
+      "id": "3fc450bbce8285db",
+      "item": {
+        "type": "paragraph",
+        "id": "3fc450bbce8285db",
+        "text": " basic link detection using Pettit Parser. I need to add full support for the complete WikiText syntax, as I understand parsers better."
+      },
+      "date": 1631095152721
+    },
+    {
+      "type": "edit",
+      "id": "3fc450bbce8285db",
+      "item": {
+        "type": "paragraph",
+        "id": "3fc450bbce8285db",
+        "text": " basic link detection using PetitParser. I need to add full support for the complete WikiText syntax, as I understand parsers better."
+      },
+      "date": 1631095164152
+    },
+    {
+      "type": "edit",
+      "id": "3fc450bbce8285db",
+      "item": {
+        "type": "paragraph",
+        "id": "3fc450bbce8285db",
+        "text": " basic link detection using PetitParser. We need to add full support for the complete WikiText syntax, as we understand parsers better."
+      },
+      "date": 1631095178235
+    },
+    {
+      "type": "edit",
+      "id": "2be50ca292d9b5d1",
+      "item": {
+        "type": "markdown",
+        "id": "2be50ca292d9b5d1",
+        "text": "Originally Lukas has written PetitParser as part of his work on the Helvetia system. PetitParser is a parsing framework different to many other popular parser generators. For example, it is not table based such as [[SmaCC]] or [[ANTLR]]. Instead it uses a unique combination of four alternative parser methodologies: scannerless parsers, parser combinators, parsing expression grammars and packrat parsers. As such [[PetitParser]] is more powerful in what it can parse and it arguably fits better the dynamic nature of Smalltalk. Let’s have a quick look at these four parser methodologies:"
+      },
+      "date": 1631095351756
+    },
+    {
+      "type": "edit",
+      "id": "d4fb4add2a43fa76",
+      "item": {
+        "type": "markdown",
+        "id": "d4fb4add2a43fa76",
+        "text": "botwhytho\n — \n30.11.2020\nI just want to have some generic interfaces (to be sub-classed) defined for how to fetch from external sources and for how to parse them. My current source is trello cards in a specific list so a couple of api calls away, rather trivial. My formatting is very freeform but when I started I made sure I could at least parse it easily with some regex (or probably PetitParser). One line per time entry and a format similar to [Time - Range][space][description]\nObviously this is not an ideal way to keep the data but figured it would be better to start collecting it somehow, and later analyze it. Gt seems like a pretty good platform for the analysis\n"
+      },
+      "date": 1631095434471
+    },
+    {
+      "type": "add",
+      "id": "7bda18a92cf790e2",
+      "item": {
+        "type": "markdown",
+        "id": "7bda18a92cf790e2",
+        "text": "tudor girba\n — \n30.11.2020\nYes, PetitParser would likely a good fit here\nyou likely want:\n- an importer of Trello export (I guess they can export to something standard like JSON)\n- a model made out entities like: TimeRange, Space, Activity. This model is populated by the importer. \n- a parser that specializes the entries based on your notation (this is where PetitParser would work well). Based on this, the importer enriches the model.\n- views on the model\n"
+      },
+      "after": "d4fb4add2a43fa76",
+      "date": 1631095435508
+    },
+    {
+      "type": "edit",
+      "id": "3fc450bbce8285db",
+      "item": {
+        "type": "paragraph",
+        "id": "3fc450bbce8285db",
+        "text": "# Link Detection "
+      },
+      "date": 1631095490653
+    },
+    {
+      "type": "add",
+      "id": "1cbe08ea8908e1c2",
+      "item": {
+        "type": "paragraph",
+        "id": "1cbe08ea8908e1c2",
+        "text": "Basic link detection using PetitParser. We need to add full support for the complete WikiText syntax, as we understand parsers better."
+      },
+      "after": "3fc450bbce8285db",
+      "date": 1631095493923
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "99e73319d802e8c4"
+      },
+      "id": "99e73319d802e8c4",
+      "type": "add",
+      "after": "1cbe08ea8908e1c2",
+      "date": 1631095506132
+    },
+    {
+      "id": "99e73319d802e8c4",
+      "type": "move",
+      "order": [
+        "14ba9280c4ce679c",
+        "2be50ca292d9b5d1",
+        "31f98b1f1c3577a2",
+        "0710cd9f04b72bfc",
+        "d4fb4add2a43fa76",
+        "7bda18a92cf790e2",
+        "f73a34efd9985354",
+        "99e73319d802e8c4",
+        "3fc450bbce8285db",
+        "1cbe08ea8908e1c2"
+      ],
+      "date": 1631095508981
+    },
+    {
+      "type": "remove",
+      "id": "3fc450bbce8285db",
+      "date": 1631095510241
+    },
+    {
+      "type": "edit",
+      "id": "99e73319d802e8c4",
+      "item": {
+        "type": "markdown",
+        "id": "99e73319d802e8c4",
+        "text": "# Link Detection "
+      },
+      "date": 1631095511248
+    },
+    {
+      "type": "edit",
+      "id": "7bda18a92cf790e2",
+      "item": {
+        "type": "markdown",
+        "id": "7bda18a92cf790e2",
+        "text": "tudor girba\n — \n30.11.2020\nYes, PetitParser would likely be a good fit here\nyou likely want:\n- an importer of Trello export (I guess they can export to something standard like JSON)\n- a model made out entities like: TimeRange, Space, Activity. This model is populated by the importer. \n- a parser that specializes the entries based on your notation (this is where PetitParser would work well). Based on this, the importer enriches the model.\n- views on the model\n"
+      },
+      "date": 1631109948700
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d572ed8956af841f"
+      },
+      "id": "d572ed8956af841f",
+      "type": "add",
+      "after": "1cbe08ea8908e1c2",
+      "date": 1631109998960
+    },
+    {
+      "type": "edit",
+      "id": "d572ed8956af841f",
+      "item": {
+        "type": "pagefold",
+        "id": "d572ed8956af841f",
+        "text": "~"
+      },
+      "date": 1631110007684
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "38c2f5a57f204cb2"
+      },
+      "id": "38c2f5a57f204cb2",
+      "type": "add",
+      "after": "d572ed8956af841f",
+      "date": 1631110057583
+    },
+    {
+      "type": "edit",
+      "id": "38c2f5a57f204cb2",
+      "item": {
+        "type": "paragraph",
+        "id": "38c2f5a57f204cb2",
+        "text": "We reorganized the PetitParser2 links. If you download the LepiterDocs repository (you can download it without Fossil as a zip file from https://mutabit.com/repos.fossil/LepiterDocs/zip) and load the \"Libreta Base\" note and run the \"Create table of content\" function in the page inspector [click (1) and then run (2) in the screenshot], we could share our PetitParser links. And yes, at some point we need a more fluid workflow for sharing our Lepiter/Web notes/documents."
+      },
+      "date": 1631110059609
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d7780cd339ec7768"
+      },
+      "id": "d7780cd339ec7768",
+      "type": "add",
+      "after": "38c2f5a57f204cb2",
+      "date": 1631110082694
+    },
+    {
+      "type": "edit",
+      "id": "d7780cd339ec7768",
+      "item": {
+        "type": "image",
+        "id": "d7780cd339ec7768",
+        "url": "data:image/jpeg;base64,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",
+        "caption": "Uploaded image"
+      },
+      "date": 1631110087666
+    },
+    {
+      "id": "d7780cd339ec7768",
+      "type": "move",
+      "order": [
+        "14ba9280c4ce679c",
+        "2be50ca292d9b5d1",
+        "31f98b1f1c3577a2",
+        "0710cd9f04b72bfc",
+        "d4fb4add2a43fa76",
+        "7bda18a92cf790e2",
+        "f73a34efd9985354",
+        "99e73319d802e8c4",
+        "1cbe08ea8908e1c2",
+        "d572ed8956af841f",
+        "d7780cd339ec7768",
+        "38c2f5a57f204cb2"
+      ],
+      "date": 1631110090141
+    },
+    {
+      "type": "add",
+      "id": "922d1671d000695c",
+      "item": {
+        "type": "paragraph",
+        "id": "922d1671d000695c",
+        "text": "# Lepiter Docs\n\nA repository of public [Lepiter][lepiter] interactive documents.\n\n[lepiter]: https://lepiter.io/feenk/introducing-lepiter--knowledge-management--e2p6apqsz5npq7m4xte0kkywn/"
+      },
+      "after": "38c2f5a57f204cb2",
+      "date": 1631110161951
+    },
+    {
+      "type": "remove",
+      "id": "922d1671d000695c",
+      "date": 1631110170225
+    },
+    {
+      "type": "edit",
+      "id": "2be50ca292d9b5d1",
+      "item": {
+        "type": "markdown",
+        "id": "2be50ca292d9b5d1",
+        "text": "Originally Lukas has written PetitParser as part of his work on the Helvetia system. PetitParser is a parsing framework different to many other popular parser generators. For example, it is not table based such as [[SmaCC]] or [[ANTLR]]. Instead it uses a unique combination of four alternative parser methodologies: scannerless parsers, parser combinators, [[parsing expression grammars]] and packrat parsers. As such [[PetitParser]] is more powerful in what it can parse and it arguably fits better the dynamic nature of Smalltalk. Let’s have a quick look at these four parser methodologies:"
+      },
+      "date": 1639148894920
+    },
+    {
+      "type": "edit",
+      "id": "2be50ca292d9b5d1",
+      "item": {
+        "type": "markdown",
+        "id": "2be50ca292d9b5d1",
+        "text": "Originally Lukas has written PetitParser as part of his work on the Helvetia system. PetitParser is a parsing framework different to many other popular parser generators. For example, it is not table based such as [[SmaCC]] or [[ANTLR]]. Instead it uses a unique combination of four alternative parser methodologies: scannerless parsers, parser combinators, [[parsing expression grammar]]s and packrat parsers. As such [[PetitParser]] is more powerful in what it can parse and it arguably fits better the dynamic nature of Smalltalk. Let’s have a quick look at these four parser methodologies:"
+      },
+      "date": 1639148906653
+    },
+    {
+      "type": "edit",
+      "id": "d7780cd339ec7768",
+      "item": {
+        "type": "image",
+        "id": "d7780cd339ec7768",
+        "url": "data:image/jpeg;base64,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",
+        "caption": "Uploaded image",
+        "text": "Tutorial de PetitParser2 con WikiText"
+      },
+      "date": 1639149144530
+    },
+    {
+      "type": "edit",
+      "id": "38c2f5a57f204cb2",
+      "item": {
+        "type": "markdown",
+        "id": "38c2f5a57f204cb2",
+        "text": "We reorganized the PetitParser2 links. If you download the LepiterDocs repository (you can download it without Fossil as a zip file from https://mutabit.com/repos.fossil/LepiterDocs/zip) and load the \"Libreta Base\" note and run the \"Create table of content\" function in the page inspector [click (1) and then run (2) in the screenshot], we could share our PetitParser links. And yes, at some point we need a more fluid workflow for sharing our Lepiter/Web notes/documents."
+      },
+      "date": 1639149157200
+    },
+    {
+      "type": "edit",
+      "id": "38c2f5a57f204cb2",
+      "item": {
+        "type": "markdown",
+        "id": "38c2f5a57f204cb2",
+        "text": "We reorganized the PetitParser2 links. If you download the LepiterDocs repository (you can download it without Fossil as a zip file from https://mutabit.com/repos.fossil/LepiterDocs/zip) and load the \"[[Libreta Base]]\" note and run the \"Create table of content\" function in the page inspector [click (1) and then run (2) in the screenshot], we could share our PetitParser links. And yes, at some point we need a more fluid workflow for sharing our Lepiter/Web notes/documents."
+      },
+      "date": 1639150407017
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2d785e44cad1bc54"
+      },
+      "id": "2d785e44cad1bc54",
+      "type": "add",
+      "after": "38c2f5a57f204cb2",
+      "date": 1639151542586
+    },
+    {
+      "type": "remove",
+      "id": "2d785e44cad1bc54",
+      "date": 1639151545479
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "00a139a08d8a8606"
+      },
+      "id": "00a139a08d8a8606",
+      "type": "add",
+      "after": "38c2f5a57f204cb2",
+      "date": 1639151548614
+    },
+    {
+      "type": "edit",
+      "id": "00a139a08d8a8606",
+      "item": {
+        "type": "video",
+        "id": "00a139a08d8a8606",
+        "text": "YOUTUBE vgiJG3Vd6KU"
+      },
+      "date": 1639151558320
+    },
+    {
+      "type": "edit",
+      "id": "00a139a08d8a8606",
+      "item": {
+        "type": "video",
+        "id": "00a139a08d8a8606",
+        "text": "YOUTUBE vgiJG3Vd6KU\nPetitParser Tutorial (Part 1)"
+      },
+      "date": 1639151663799
+    },
+    {
+      "id": "00a139a08d8a8606",
+      "type": "move",
+      "order": [
+        "14ba9280c4ce679c",
+        "00a139a08d8a8606",
+        "2be50ca292d9b5d1",
+        "31f98b1f1c3577a2",
+        "0710cd9f04b72bfc",
+        "d4fb4add2a43fa76",
+        "7bda18a92cf790e2",
+        "f73a34efd9985354",
+        "99e73319d802e8c4",
+        "1cbe08ea8908e1c2",
+        "d572ed8956af841f",
+        "d7780cd339ec7768",
+        "38c2f5a57f204cb2"
+      ],
+      "date": 1639151676388
+    }
+  ]
+}

@@ -1,0 +1,672 @@
+{
+  "title": "Async Polymorphic Fetch",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "ca7d67b2d9f0c612",
+      "text": "Modern client-side javascript offers a function, fetch, which returns a [[Promise]] to the response of an http request. I've launched as many as 450 simultaneous fetches and gotten good results. Amazing. Now we generalize fetch to operate as a federation citizen where the history of one page offers good advice as to where to find another. We call this searching \"[[polymorphism]]\" because of the similarity to object-oriented [[polymorphic]] message dispatch."
+    },
+    {
+      "type": "markdown",
+      "id": "20e02f645103ad39",
+      "text": "> @nrn found my last bug. I forgot to share the site where I found the page. That can't possibly work. Now we call polyget which returns {site, page}."
+    },
+    {
+      "type": "paragraph",
+      "id": "de3946432387529f",
+      "text": "The implementation has multiple moving parts."
+    },
+    {
+      "type": "markdown",
+      "id": "d7d67a608ab38866",
+      "text": "We call `collaborators (journal, implicit)` to find and prioritize possible locations where a page may be found."
+    },
+    {
+      "type": "markdown",
+      "id": "0d811dfb73654bda",
+      "text": "We call `probe (site, slug)` to engage all necessary machinery to asynchronously fetch a slug from a site."
+    },
+    {
+      "type": "markdown",
+      "id": "8352164c1b6140c8",
+      "text": "It calls `wiki.site(site)` to retrieve or construct a suitable SiteAdapter based on discovered network protocols."
+    },
+    {
+      "type": "markdown",
+      "id": "3bf7ad6d3096abd2",
+      "text": "It calls `get(${slug}.json, (err, page) => page)` to asynchronously fetch a page using the node.js callback conventions which will automatically resolve the async function's implicit promise."
+    },
+    {
+      "type": "code",
+      "id": "1e646ad817d6f764",
+      "text": "    async function probe (site, slug) {\n      return wiki.site(site)\n        .get(`${slug}.json`, () => null)\n    }\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "5264c317c06858f6",
+      "text": "From this we compose an outer wrapper of a second async function and its implicit promise."
+    },
+    {
+      "type": "code",
+      "id": "17d6506eb89179d0",
+      "text": "    async function polyget (context) {\n      let slug = asSlug(context.name)\n      let sites = collaborators(\n        context.page.journal,\n        [context.site, location.host]\n      )\n      for (let site of sites) {\n        try {\n          return {\n            site,\n            page: await probe(site,slug)\n          }\n        } catch (err) {\n          // 404\n        }\n      }\n      return null\n    }"
+    },
+    {
+      "type": "paragraph",
+      "id": "f707698a88af0c50",
+      "text": "In this case polyget has been customized to advance a visitor from page to page following a breadth-first traversal where the state at each step is held in context. [https://en.wikipedia.org/wiki/Visitor_pattern wikipedia]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e4506955dbce9cff",
+      "text": "The async behavior is valuable here because the visitor logic can launch a flotilla of sequential searches, each using the lazy logic of returning from the first success, before recursing to traverse the next deeper layer."
+    },
+    {
+      "type": "paragraph",
+      "id": "dd60bbb8f7b4519d",
+      "text": "We have yet to exhaustively test all possible failures in all combinations. We have reason to believe one try-catch but not both are optional.  See improvements. [https://github.com/dobbs/wiki-plugin-graphviz/blob/02a0cb1648215e6a48a05e1c35a958b790a42aaa/client/graphviz.js#L92-L123 github]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6bb7864356883822",
+      "text": "See [[Collaborative Link]] for operational motivation."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Async Polymorphic Fetch",
+        "story": []
+      },
+      "date": 1555002020872
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ca7d67b2d9f0c612"
+      },
+      "id": "ca7d67b2d9f0c612",
+      "type": "add",
+      "date": 1555002026308
+    },
+    {
+      "type": "edit",
+      "id": "ca7d67b2d9f0c612",
+      "item": {
+        "type": "paragraph",
+        "id": "ca7d67b2d9f0c612",
+        "text": "Modern client-side javascript offers a function, fetch, which returns a Promise to the response of an http request. I've launched as many as 450 simultaneous fetches and gotten good results. Amazing. Now we generalize fetch to operate as a federation citizen where the history of one page offers good advice as to where to find another. "
+      },
+      "date": 1555002348989
+    },
+    {
+      "type": "edit",
+      "id": "ca7d67b2d9f0c612",
+      "item": {
+        "type": "paragraph",
+        "id": "ca7d67b2d9f0c612",
+        "text": "Modern client-side javascript offers a function, fetch, which returns a Promise to the response of an http request. I've launched as many as 450 simultaneous fetches and gotten good results. Amazing. Now we generalize fetch to operate as a federation citizen where the history of one page offers good advice as to where to find another. We call this searching \"polymorphism\" because if the similarity to object-oriented polymorphic message dispatch."
+      },
+      "date": 1555002434501
+    },
+    {
+      "type": "edit",
+      "id": "ca7d67b2d9f0c612",
+      "item": {
+        "type": "paragraph",
+        "id": "ca7d67b2d9f0c612",
+        "text": "Modern client-side javascript offers a function, fetch, which returns a Promise to the response of an http request. I've launched as many as 450 simultaneous fetches and gotten good results. Amazing. Now we generalize fetch to operate as a federation citizen where the history of one page offers good advice as to where to find another. We call this searching \"polymorphism\" because of the similarity to object-oriented polymorphic message dispatch."
+      },
+      "date": 1555002451813
+    },
+    {
+      "type": "add",
+      "id": "20e02f645103ad39",
+      "item": {
+        "type": "factory",
+        "id": "20e02f645103ad39",
+        "text": "@nrn found my last bug. I forget to remember the site where I found the page. That can't possibly work. Now we call polyget which returns {site, page}."
+      },
+      "after": "ca7d67b2d9f0c612",
+      "date": 1555002587617
+    },
+    {
+      "type": "edit",
+      "id": "20e02f645103ad39",
+      "item": {
+        "type": "markdown",
+        "id": "20e02f645103ad39",
+        "text": "> @nrn found my last bug. I forget to remember the site where I found the page. That can't possibly work. Now we call polyget which returns {site, page}."
+      },
+      "date": 1555002594910
+    },
+    {
+      "type": "edit",
+      "id": "20e02f645103ad39",
+      "item": {
+        "type": "markdown",
+        "id": "20e02f645103ad39",
+        "text": "> @nrn found my last bug. I forget to remember the site where I found the page. That can't possibly work. Now we call polyget which returns {site, page}. [https://github.com/dobbs/wiki-plugin-graphviz/pull/7#issuecomment-481936413 github]"
+      },
+      "date": 1555002678340
+    },
+    {
+      "type": "edit",
+      "id": "20e02f645103ad39",
+      "item": {
+        "type": "markdown",
+        "id": "20e02f645103ad39",
+        "text": "> @nrn found my last bug. I forgot to share the site where I found the page. That can't possibly work. Now we call the new polyget which returns {site, page}. [https://github.com/dobbs/wiki-plugin-graphviz/pull/7#issuecomment-481936413 github]"
+      },
+      "date": 1555002752067
+    },
+    {
+      "type": "edit",
+      "id": "20e02f645103ad39",
+      "item": {
+        "type": "markdown",
+        "id": "20e02f645103ad39",
+        "text": "> @nrn found my last bug. I forgot to share the site where I found the page. That can't possibly work. Now we call polyget which returns {site, page}. [https://github.com/dobbs/wiki-plugin-graphviz/pull/7#issuecomment-481936413 github]"
+      },
+      "date": 1555002767815
+    },
+    {
+      "type": "edit",
+      "id": "20e02f645103ad39",
+      "item": {
+        "type": "markdown",
+        "id": "20e02f645103ad39",
+        "text": "> @nrn found my last bug. I forgot to share the site where I found the page. That can't possibly work. Now we call polyget which returns {site, page}."
+      },
+      "date": 1555002787223
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "de3946432387529f"
+      },
+      "id": "de3946432387529f",
+      "type": "add",
+      "after": "20e02f645103ad39",
+      "date": 1555002822320
+    },
+    {
+      "type": "edit",
+      "id": "de3946432387529f",
+      "item": {
+        "type": "paragraph",
+        "id": "de3946432387529f",
+        "text": "The implementation has multiple moving parts."
+      },
+      "date": 1555002854593
+    },
+    {
+      "type": "add",
+      "id": "d7d67a608ab38866",
+      "item": {
+        "type": "factory",
+        "id": "d7d67a608ab38866",
+        "text": "We call collaborators (journal, implicit) "
+      },
+      "after": "de3946432387529f",
+      "date": 1555002975256
+    },
+    {
+      "type": "edit",
+      "id": "d7d67a608ab38866",
+      "item": {
+        "type": "markdown",
+        "id": "d7d67a608ab38866",
+        "text": "We call `collaborators (journal, implicit)` to find and prioritize possible locations where a page may be found."
+      },
+      "date": 1555003033399
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0d811dfb73654bda"
+      },
+      "id": "0d811dfb73654bda",
+      "type": "add",
+      "after": "d7d67a608ab38866",
+      "date": 1555003116925
+    },
+    {
+      "type": "edit",
+      "id": "0d811dfb73654bda",
+      "item": {
+        "type": "markdown",
+        "id": "0d811dfb73654bda",
+        "text": "We call `probe (site, slug)` to engage all necessary machinery to asynchronously fetch a slug from a site."
+      },
+      "date": 1555003213746
+    },
+    {
+      "type": "fork",
+      "date": 1555003492589
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8352164c1b6140c8"
+      },
+      "id": "8352164c1b6140c8",
+      "type": "add",
+      "after": "0d811dfb73654bda",
+      "date": 1555003496102
+    },
+    {
+      "type": "edit",
+      "id": "8352164c1b6140c8",
+      "item": {
+        "type": "markdown",
+        "id": "8352164c1b6140c8",
+        "text": "It calls `wiki.site(site)` to retrieve or construct a suitable SiteAdapter based on discovered network protocols."
+      },
+      "date": 1555003602300
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3bf7ad6d3096abd2"
+      },
+      "id": "3bf7ad6d3096abd2",
+      "type": "add",
+      "after": "8352164c1b6140c8",
+      "date": 1555003696162
+    },
+    {
+      "type": "edit",
+      "id": "3bf7ad6d3096abd2",
+      "item": {
+        "type": "markdown",
+        "id": "3bf7ad6d3096abd2",
+        "text": "If calls `get(`${slug}.json`, (err, page) => page)` to asynchronously fetch a page using the node.js callback conventions."
+      },
+      "date": 1555003768657
+    },
+    {
+      "type": "edit",
+      "id": "3bf7ad6d3096abd2",
+      "item": {
+        "type": "markdown",
+        "id": "3bf7ad6d3096abd2",
+        "text": "If calls `get(\\`${slug}.json\\`, (err, page) => page)` to asynchronously fetch a page using the node.js callback conventions."
+      },
+      "date": 1555003811367
+    },
+    {
+      "type": "edit",
+      "id": "3bf7ad6d3096abd2",
+      "item": {
+        "type": "markdown",
+        "id": "3bf7ad6d3096abd2",
+        "text": "If calls `get(${slug}.json, (err, page) => page)` to asynchronously fetch a page using the node.js callback conventions."
+      },
+      "date": 1555003821119
+    },
+    {
+      "type": "edit",
+      "id": "3bf7ad6d3096abd2",
+      "item": {
+        "type": "markdown",
+        "id": "3bf7ad6d3096abd2",
+        "text": "If calls `get(${slug}.json, (err, page) => page)` to asynchronously fetch a page using the node.js callback conventions which automatically resolve the implicit promise."
+      },
+      "date": 1555003870046
+    },
+    {
+      "type": "edit",
+      "id": "3bf7ad6d3096abd2",
+      "item": {
+        "type": "markdown",
+        "id": "3bf7ad6d3096abd2",
+        "text": "If calls `get(${slug}.json, (err, page) => page)` to asynchronously fetch a page using the node.js callback conventions which will automatically resolve the async function's implicit promise."
+      },
+      "date": 1555003891910
+    },
+    {
+      "type": "fork",
+      "date": 1555003925253
+    },
+    {
+      "type": "edit",
+      "id": "3bf7ad6d3096abd2",
+      "item": {
+        "type": "markdown",
+        "id": "3bf7ad6d3096abd2",
+        "text": "It calls `get(${slug}.json, (err, page) => page)` to asynchronously fetch a page using the node.js callback conventions which will automatically resolve the async function's implicit promise."
+      },
+      "date": 1555003932458
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5264c317c06858f6"
+      },
+      "id": "5264c317c06858f6",
+      "type": "add",
+      "after": "3bf7ad6d3096abd2",
+      "date": 1555003988356
+    },
+    {
+      "type": "edit",
+      "id": "5264c317c06858f6",
+      "item": {
+        "type": "paragraph",
+        "id": "5264c317c06858f6",
+        "text": "From this we compose an outer wrapper of a second async function and its implicit promise."
+      },
+      "date": 1555004028305
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "17d6506eb89179d0"
+      },
+      "id": "17d6506eb89179d0",
+      "type": "add",
+      "after": "5264c317c06858f6",
+      "date": 1555004060277
+    },
+    {
+      "type": "edit",
+      "id": "17d6506eb89179d0",
+      "item": {
+        "type": "code",
+        "id": "17d6506eb89179d0",
+        "text": "    async function polyget (context) {\n      let slug = asSlug(context.name)\n      let sites = collaborators(context.page.journal, [context.site, location.host])\n      console.log('resolution', slug, sites)\n      for (let site of sites) {\n        try {\n          return {site, page: await probe(site,slug)}\n        } catch (err) {\n          // 404\n        }\n      }\n      return null\n    }\n  }"
+      },
+      "date": 1555004106089
+    },
+    {
+      "type": "edit",
+      "id": "17d6506eb89179d0",
+      "item": {
+        "type": "code",
+        "id": "17d6506eb89179d0",
+        "text": "    async function polyget (context) {\n      let slug = asSlug(context.name)\n      let sites = collaborators(\n        context.page.journal,\n        [context.site, location.host]\n      )\n      for (let site of sites) {\n        try {\n          return {site, page: await probe(site,slug)}\n        } catch (err) {\n          // 404\n        }\n      }\n      return null\n    }\n  }"
+      },
+      "date": 1555004165284
+    },
+    {
+      "type": "edit",
+      "id": "17d6506eb89179d0",
+      "item": {
+        "type": "code",
+        "id": "17d6506eb89179d0",
+        "text": "    async function polyget (context) {\n      let slug = asSlug(context.name)\n      let sites = collaborators(\n        context.page.journal,\n        [context.site, location.host]\n      )\n      for (let site of sites) {\n        try {\n          return {\n            site,\n            page: await probe(site,slug)\n          }\n        } catch (err) {\n          // 404\n        }\n      }\n      return null\n    }\n  }"
+      },
+      "date": 1555004224991
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f707698a88af0c50"
+      },
+      "id": "f707698a88af0c50",
+      "type": "add",
+      "after": "17d6506eb89179d0",
+      "date": 1555004772453
+    },
+    {
+      "type": "edit",
+      "id": "f707698a88af0c50",
+      "item": {
+        "type": "paragraph",
+        "id": "f707698a88af0c50",
+        "text": "In this case polyget has been customized to advance a visitor from page to page following a breadth-first traversal where the state at each step is held in context. [https://en.wikipedia.org/wiki/Visitor_pattern wikipedia]"
+      },
+      "date": 1555004893875
+    },
+    {
+      "type": "add",
+      "id": "e4506955dbce9cff",
+      "item": {
+        "type": "paragraph",
+        "id": "e4506955dbce9cff",
+        "text": "The async behavior is valuable here because the visitor logic can launch a flotilla of sequential searches, each using the lazy logic of returning from the first success, before recursing to traverse the next deeper "
+      },
+      "after": "f707698a88af0c50",
+      "date": 1555005204674
+    },
+    {
+      "type": "edit",
+      "id": "e4506955dbce9cff",
+      "item": {
+        "type": "paragraph",
+        "id": "e4506955dbce9cff",
+        "text": "The async behavior is valuable here because the visitor logic can launch a flotilla of sequential searches, each using the lazy logic of returning from the first success, before recursing to traverse the next deeper layer of wiki pages."
+      },
+      "date": 1555005258706
+    },
+    {
+      "type": "edit",
+      "id": "e4506955dbce9cff",
+      "item": {
+        "type": "paragraph",
+        "id": "e4506955dbce9cff",
+        "text": "The async behavior is valuable here because the visitor logic can launch a flotilla of sequential searches, each using the lazy logic of returning from the first success, before recursing to traverse the next deeper layer of pages."
+      },
+      "date": 1555005265736
+    },
+    {
+      "type": "edit",
+      "id": "e4506955dbce9cff",
+      "item": {
+        "type": "paragraph",
+        "id": "e4506955dbce9cff",
+        "text": "The async behavior is valuable here because the visitor logic can launch a flotilla of sequential searches, each using the lazy logic of returning from the first success, before recursing to traverse the next deeper layer."
+      },
+      "date": 1555005276552
+    },
+    {
+      "type": "edit",
+      "id": "17d6506eb89179d0",
+      "item": {
+        "type": "code",
+        "id": "17d6506eb89179d0",
+        "text": "    async function polyget (context) {\n      let slug = asSlug(context.name)\n      let sites = collaborators(\n        context.page.journal,\n        [context.site, location.host]\n      )\n      for (let site of sites) {\n        try {\n          return {\n            site,\n            page: await probe(site,slug)\n          }\n        } catch (err) {\n          // 404\n        }\n      }\n      return null\n    }"
+      },
+      "date": 1555005332144
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1e646ad817d6f764"
+      },
+      "id": "1e646ad817d6f764",
+      "type": "add",
+      "after": "e4506955dbce9cff",
+      "date": 1555005451960
+    },
+    {
+      "type": "edit",
+      "id": "1e646ad817d6f764",
+      "item": {
+        "type": "code",
+        "id": "1e646ad817d6f764",
+        "text": "    async function probe (site, slug) {\n      try {\n        return wiki.site(site)\n          .get(`${slug}.json`, (err, page) => page)\n      } catch (err) {\n        return null\n      }\n    }\n"
+      },
+      "date": 1555005477268
+    },
+    {
+      "type": "edit",
+      "id": "1e646ad817d6f764",
+      "item": {
+        "type": "code",
+        "id": "1e646ad817d6f764",
+        "text": "    async function probe (site, slug) {\n      try {\n        return wiki.site(site)\n          .get(`${slug}.json`,\n            (err, page) => page)\n      } catch (err) {\n        return null\n      }\n    }\n"
+      },
+      "date": 1555005501086
+    },
+    {
+      "type": "move",
+      "order": [
+        "ca7d67b2d9f0c612",
+        "20e02f645103ad39",
+        "de3946432387529f",
+        "d7d67a608ab38866",
+        "0d811dfb73654bda",
+        "1e646ad817d6f764",
+        "8352164c1b6140c8",
+        "3bf7ad6d3096abd2",
+        "5264c317c06858f6",
+        "17d6506eb89179d0",
+        "f707698a88af0c50",
+        "e4506955dbce9cff"
+      ],
+      "id": "1e646ad817d6f764",
+      "date": 1555005532582
+    },
+    {
+      "type": "move",
+      "order": [
+        "ca7d67b2d9f0c612",
+        "20e02f645103ad39",
+        "de3946432387529f",
+        "d7d67a608ab38866",
+        "0d811dfb73654bda",
+        "8352164c1b6140c8",
+        "3bf7ad6d3096abd2",
+        "1e646ad817d6f764",
+        "5264c317c06858f6",
+        "17d6506eb89179d0",
+        "f707698a88af0c50",
+        "e4506955dbce9cff"
+      ],
+      "id": "1e646ad817d6f764",
+      "date": 1555005596254
+    },
+    {
+      "type": "fork",
+      "date": 1555005847189
+    },
+    {
+      "type": "add",
+      "id": "dd60bbb8f7b4519d",
+      "item": {
+        "type": "paragraph",
+        "id": "dd60bbb8f7b4519d",
+        "text": "We have yet to exhaustively test all possible failures in all combinations. We have reason to believe one try-catch but not both are optional."
+      },
+      "after": "e4506955dbce9cff",
+      "date": 1555007215972
+    },
+    {
+      "type": "fork",
+      "date": 1555048400497
+    },
+    {
+      "type": "add",
+      "id": "6bb7864356883822",
+      "item": {
+        "type": "paragraph",
+        "id": "6bb7864356883822",
+        "text": "See [[Collaborative Link]]"
+      },
+      "after": "dd60bbb8f7b4519d",
+      "date": 1555048450253
+    },
+    {
+      "type": "edit",
+      "id": "6bb7864356883822",
+      "item": {
+        "type": "paragraph",
+        "id": "6bb7864356883822",
+        "text": "See [[Collaborative Link]] for operational motivation."
+      },
+      "date": 1555048462591
+    },
+    {
+      "type": "edit",
+      "id": "1e646ad817d6f764",
+      "item": {
+        "type": "code",
+        "id": "1e646ad817d6f764",
+        "text": "    async function probe (site, slug) {\n      return wiki.site(site)\n        .get(`${slug}.json`, () => page)\n    }\n"
+      },
+      "date": 1556859088595
+    },
+    {
+      "type": "edit",
+      "id": "1e646ad817d6f764",
+      "item": {
+        "type": "code",
+        "id": "1e646ad817d6f764",
+        "text": "    async function probe (site, slug) {\n      return wiki.site(site)\n        .get(`${slug}.json`, () => null)\n    }\n"
+      },
+      "date": 1556859100309
+    },
+    {
+      "type": "edit",
+      "id": "3bf7ad6d3096abd2",
+      "item": {
+        "type": "markdown",
+        "id": "3bf7ad6d3096abd2",
+        "text": "It calls `get(${slug}.json, (err, page) => page)` to asynchronously fetch a page using the node.js callback conventions which will automatically resolve the async function's implicit promise. See improvements. [https://github.com/dobbs/wiki-plugin-graphviz/blob/02a0cb1648215e6a48a05e1c35a958b790a42aaa/client/graphviz.js#L92-L123 github]"
+      },
+      "date": 1556859226956
+    },
+    {
+      "type": "edit",
+      "id": "3bf7ad6d3096abd2",
+      "item": {
+        "type": "markdown",
+        "id": "3bf7ad6d3096abd2",
+        "text": "It calls `get(${slug}.json, (err, page) => page)` to asynchronously fetch a page using the node.js callback conventions which will automatically resolve the async function's implicit promise."
+      },
+      "date": 1556859272572
+    },
+    {
+      "type": "edit",
+      "id": "dd60bbb8f7b4519d",
+      "item": {
+        "type": "paragraph",
+        "id": "dd60bbb8f7b4519d",
+        "text": "We have yet to exhaustively test all possible failures in all combinations. We have reason to believe one try-catch but not both are optional.  See improvements. [https://github.com/dobbs/wiki-plugin-graphviz/blob/02a0cb1648215e6a48a05e1c35a958b790a42aaa/client/graphviz.js#L92-L123 github]"
+      },
+      "date": 1556859283190
+    },
+    {
+      "type": "fork",
+      "site": "found.ward.bay.wiki.org",
+      "date": 1627419517248
+    },
+    {
+      "type": "edit",
+      "id": "ca7d67b2d9f0c612",
+      "item": {
+        "type": "paragraph",
+        "id": "ca7d67b2d9f0c612",
+        "text": "Modern client-side javascript offers a function, fetch, which returns a Promise to the response of an http request. I've launched as many as 450 simultaneous fetches and gotten good results. Amazing. Now we generalize fetch to operate as a federation citizen where the history of one page offers good advice as to where to find another. We call this searching \"[[polymorphism]]\" because of the similarity to object-oriented polymorphic message dispatch."
+      },
+      "date": 1651310526323
+    },
+    {
+      "type": "edit",
+      "id": "ca7d67b2d9f0c612",
+      "item": {
+        "type": "paragraph",
+        "id": "ca7d67b2d9f0c612",
+        "text": "Modern client-side javascript offers a function, fetch, which returns a Promise to the response of an http request. I've launched as many as 450 simultaneous fetches and gotten good results. Amazing. Now we generalize fetch to operate as a federation citizen where the history of one page offers good advice as to where to find another. We call this searching \"[[polymorphism]]\" because of the similarity to object-oriented [[polymorphic]] message dispatch."
+      },
+      "date": 1651310694418
+    },
+    {
+      "type": "fork",
+      "date": 1651310718074
+    },
+    {
+      "type": "edit",
+      "id": "ca7d67b2d9f0c612",
+      "item": {
+        "type": "paragraph",
+        "id": "ca7d67b2d9f0c612",
+        "text": "Modern client-side javascript offers a function, fetch, which returns a [[Promise]] to the response of an http request. I've launched as many as 450 simultaneous fetches and gotten good results. Amazing. Now we generalize fetch to operate as a federation citizen where the history of one page offers good advice as to where to find another. We call this searching \"[[polymorphism]]\" because of the similarity to object-oriented [[polymorphic]] message dispatch."
+      },
+      "date": 1651310941623
+    }
+  ]
+}

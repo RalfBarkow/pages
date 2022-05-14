@@ -1,0 +1,326 @@
+{
+  "title": "JSLink",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "ee2a8e29855ad8c6",
+      "text": "# JSLink\n\nJSLink provides a mechanism for [[Pharo]] to communicate with libraries and applications implemented in node.js. [https://github.com/feenkcom/JSLink GitHub]\n"
+    },
+    {
+      "type": "markdown",
+      "id": "4030082ce223da4e",
+      "text": "## Getting Started\n\n\n### Installation\n\nRequirements:\n\nJSLink has been tested with:\n\n- Pharo 8\n- node.js 12.x\n\nTo install JSLink in an existing Gtoolkit image:\n"
+    },
+    {
+      "type": "code",
+      "id": "39a2b97bb510e4f0",
+      "text": "EpMonitor disableDuring: [ \nMetacello new\n\trepository: 'github://feenkcom/gtoolkit-remote/src';\n\tbaseline: 'Gt4JSLink';\n\tload ]"
+    },
+    {
+      "type": "markdown",
+      "id": "7a44f005234da4b9",
+      "text": "To install JSLink in a vanilla Pharo image:\n"
+    },
+    {
+      "type": "code",
+      "id": "2533c0424d3d5b5b",
+      "text": "EpMonitor disableDuring: [ \nMetacello new\n\trepository: 'github://feenkcom/JSlink/src';\n\tbaseline: 'JavaScriptLink';\n\tload ]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "JSLink",
+        "story": []
+      },
+      "date": 1650794968585
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ee2a8e29855ad8c6"
+      },
+      "id": "ee2a8e29855ad8c6",
+      "type": "add",
+      "date": 1650794976857
+    },
+    {
+      "type": "edit",
+      "id": "ee2a8e29855ad8c6",
+      "item": {
+        "type": "markdown",
+        "id": "ee2a8e29855ad8c6",
+        "text": "# JSLink\n\nJSLink provides a mechanism for Pharo to communicate with libraries and applications implemented in node.js.\n\n- [Getting Started](#getting-started)\n\t- [Installation](#installation)\n\t- [First statements](#first-statements)\n\t- [Programmatic Use](#programmatic-use)\n- [Garbage Collection](#garbage-collection)\n- [Callbacks](#callbacks)\n- [Automated Tests](#automated-tests)\n- [ToDo](#todo)\n- [Futures](#futures)\n- [Acknowledgements and Thanks](#acknowledgements-and-thanks)\n\n\n## Getting Started\n\n\n### Installation\n\nRequirements:\n\nJSLink has been tested with:\n\n- Pharo 8\n- node.js 12.x\n\nTo install JSLink in an existing Gtoolkit image:\n\n```smalltalk\nEpMonitor disableDuring: [ \nMetacello new\n\trepository: 'github://feenkcom/gtoolkit-remote/src';\n\tbaseline: 'Gt4JSLink';\n\tload ]\n```\n\n\nTo install JSLink in a vanilla Pharo image:\n\n```smalltalk\nEpMonitor disableDuring: [ \nMetacello new\n\trepository: 'github://feenkcom/JSlink/src';\n\tbaseline: 'JavaScriptLink';\n\tload ]\n```\n\n\n### First statements\n\nWhen first running JSLink it is worthwhile starting Pharo from the command line so you can monitor the output.\n\nOpen a playground in [Gtoolkit](https://gtoolkit.com/) and start the JSLinkApplication:\n\n![Start JSLink](doc/images/Start_JSLink.png)\n\nThis will automatically install all the dependent modules with `npm`:\n\n```\n$ vmgt/gtoolkit Pharo.image eval --interactive --no-quit \"GtWorld open.\"\nGtWorld\n[Glutin] Profile #0 worked\n[Glutin] Profile #0 worked\nloadDep:fsevents → 304    ▌ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nWARN engine fsevents@2.1.2: wanted: {\"node\":\"^8.16.0 || ^10.6.0 || >=11.0.0\"} (current: {\"node\":\"8.10loadDep:react-is → header ▐ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nloadDep:execa → resolveWi ▐ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nWARN engine execa@3.4.0: wanted: {\"node\":\"^8.12.0 || >=9.7.0\"} (current: {\"node\":\"8.10.0\",\"npm\":\"3.5.loadDep:strip-final-newli ▐ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nWARN engine human-signals@1.1.1: wanted: {\"node\":\">=8.12.0\"} (current: {\"node\":\"8.10.0\",\"npm\":\"3.5.2\"\n> sqlite3@4.1.1 install /home/alistair/pharo8/so07/pharo-local/iceberg/feenkcom/JSlink/js/node_modules/sqlite3\n> node-pre-gyp install --fallback-to-build\n...\n```\n\nWe now evaluate our first expression in JavaScript:\n\n![First Object](doc/images/First_Object.png)\n\nAfter typing the code in to the playground it is evaluated by pressing the play & inspect button:\n\n![Play & Inspect button](doc/images/playinspect.png)\n\nFrom here we can navigate through the attributes of the object in the same way as when inspecting pharo objects.\n\nIf the value of the attribute is a non-primitive object, a proxy will be returned, if it is a primitive, it will be returned directly:\n\n![Inspect Primitive](doc/images/Inspect_Primitive.png)\n\nWhen evaluating statements in a proxy object's playground, `this` is bound to the proxy object:\n\n![this bound](doc/images/this_bound.png)\n\nThe node.js server can then be stopped with:\n\n```smalltalk\nJSLinkApplication stop.\n```\n\n\n### Programatic Use\n\nSo far we have been using a global instance of JSLink, however it is possible to have multiple servers running concurrently through the use of private instances.\n\nFor this example we'll create an Excel spreadsheet by installing and using the existing `excel4node` module.\n\nTo install the module:\n\n```smalltalk\njslink := JSLinkApplication withDefaultSettings.\njslink start.\njslink installModule: 'excel4node'.\n```\n\nJSLink allows JavaScript code to be supplied in two ways:\n\n1. Strings of JavaScript code, and\n1. AST objects generated using the [JavaScriptGenerator package](https://github.com/feenkcom/JavaScriptGenerator/)\n\nFirst, using strings:\n\n```smalltalk\n\"Start JSLink\"\njslink := JSLinkApplication withDefaultSettings.\njslink start.\n\n\"Ensure that the 'excel4node' module is installed.\"\njslink installModule: 'excel4node'\n\n\"Create the spreadsheet and worksheet\"\nworksheet := jslink newCommandFactory\n\t<< 'const excel = require(''excel4node'')';\n\t<< 'let workbook = new excel.Workbook()';\n\t<< 'let worksheet = workbook.addWorksheet(''HW'')';\n\t<< 'worksheet';\n\tsendAndWait.\n\n\"Write Hello, World!\"\nworksheet newCommandFactory\n\t<< 'this.cell(2, 2).string(\"Hello, World!\")';\n\tsendAndWait.\n\n\"Save the spreadsheet\"\nworksheet newCommandFactory\n\t<< 'this.wb.write(\"hw.xlsx\")';\n\tsendAndWait.\n\n\"Stop the server\"\njslink stop\n```\n\n![Hello, World! with strings](doc/images/helloworld_strings.png)\n\n\nSecond, using JavaScript generated with `JavaScriptGenerator`:\n\n```smalltalk\n\"Start JSLink\"\njslink := JSLinkApplication withDefaultSettings.\njslink start.\n\n\"Ensure that the 'excel4node' module is installed.\"\njslink installModule: 'excel4node'\n\n\"Create the spreadsheet and worksheet\"\nexcel := #excel asJSGIdentifier.\nwb := #wb asJSGIdentifier.\nws := #ws asJSGIdentifier.\nworksheet := jslink newCommandFactory\n\t<< (excel <- #'excel4node' require) beLetDeclaration;\n\t<< (wb <- (excel => #Workbook) call new) beLetDeclaration;\n\t<< (ws <- ((wb => #addWorksheet) callWith: { 'HW' })) beLetDeclaration;\n\t<< 'ws';\n\tsendAndWait.\n\n\"Write Hello, World!\"\nworksheet newCommandFactory\n\t<< (((#this asJSGI => #cell callWith: { 2. 2. }) => #string) callWith: { 'Hello, World!'});\n\tsendAndWait.\n\n\"Save the spreadsheet\"\nworksheet newCommandFactory\n\t<< ((#this asJSGI => #wb => #write) callWith: { 'hw2.xlsx' });\n\tsendAndWait.\n\n\"Stop the server\"\njslink stop\n```\n\n\n![Hello, World! with JavaScriptGenerator](doc/images/helloworld_jsg.png)\n\n\n## Garbage Collection\n\nProxy objects register them selves for finalisation.  When they are garbage collected in Pharo they are automatically removed from the registry in the node.js server.\n\n\n## Callbacks\n\nCallbacks in to Pharo from node.js are supported through observables.\n\nSee `JSLinkSendCommandTest` for examples of setting up and using callbacks.\n\n\n## Automated Tests\n\nSee the 'JSLink-Tests` package.\n\n## ToDo\n\n`PythonBridge` supports communicating with the server using either HTTP or [MsgPack](https://msgpack.org/).  While the code has been left in the package, MsgPack is not yet supported.\n\n\n## Futures\n\nCurrently JSLink is specific to node.js.  Planned future work includes adding support for the debug port in node.js, to provide better program control, and adding support for browsers, initially Chrome, using their debug port.\n\n\n## Acknowledgements and Thanks\n\nThanks to the team at [ObjectProfile](http://www.objectprofile.com/) for making [PythonBridge](https://github.com/ObjectProfile/PythonBridge), on which JSLink is based, and to [Julien Delplanque](https://github.com/juliendelplanque) for [Python3Generator](https://github.com/juliendelplanque/Python3Generator), on which JavaScriptGenerator is based.\n"
+      },
+      "date": 1650794979107
+    },
+    {
+      "type": "edit",
+      "id": "ee2a8e29855ad8c6",
+      "item": {
+        "type": "markdown",
+        "id": "ee2a8e29855ad8c6",
+        "text": "# JSLink\n\nJSLink provides a mechanism for [[Pharo]] to communicate with libraries and applications implemented in node.js.\n\n- [Getting Started](#getting-started)\n\t- [Installation](#installation)\n\t- [First statements](#first-statements)\n\t- [Programmatic Use](#programmatic-use)\n- [Garbage Collection](#garbage-collection)\n- [Callbacks](#callbacks)\n- [Automated Tests](#automated-tests)\n- [ToDo](#todo)\n- [Futures](#futures)\n- [Acknowledgements and Thanks](#acknowledgements-and-thanks)\n\n\n## Getting Started\n\n\n### Installation\n\nRequirements:\n\nJSLink has been tested with:\n\n- Pharo 8\n- node.js 12.x\n\nTo install JSLink in an existing Gtoolkit image:\n\n```smalltalk\nEpMonitor disableDuring: [ \nMetacello new\n\trepository: 'github://feenkcom/gtoolkit-remote/src';\n\tbaseline: 'Gt4JSLink';\n\tload ]\n```\n\n\nTo install JSLink in a vanilla Pharo image:\n\n```smalltalk\nEpMonitor disableDuring: [ \nMetacello new\n\trepository: 'github://feenkcom/JSlink/src';\n\tbaseline: 'JavaScriptLink';\n\tload ]\n```\n\n\n### First statements\n\nWhen first running JSLink it is worthwhile starting Pharo from the command line so you can monitor the output.\n\nOpen a playground in [Gtoolkit](https://gtoolkit.com/) and start the JSLinkApplication:\n\n![Start JSLink](doc/images/Start_JSLink.png)\n\nThis will automatically install all the dependent modules with `npm`:\n\n```\n$ vmgt/gtoolkit Pharo.image eval --interactive --no-quit \"GtWorld open.\"\nGtWorld\n[Glutin] Profile #0 worked\n[Glutin] Profile #0 worked\nloadDep:fsevents → 304    ▌ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nWARN engine fsevents@2.1.2: wanted: {\"node\":\"^8.16.0 || ^10.6.0 || >=11.0.0\"} (current: {\"node\":\"8.10loadDep:react-is → header ▐ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nloadDep:execa → resolveWi ▐ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nWARN engine execa@3.4.0: wanted: {\"node\":\"^8.12.0 || >=9.7.0\"} (current: {\"node\":\"8.10.0\",\"npm\":\"3.5.loadDep:strip-final-newli ▐ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nWARN engine human-signals@1.1.1: wanted: {\"node\":\">=8.12.0\"} (current: {\"node\":\"8.10.0\",\"npm\":\"3.5.2\"\n> sqlite3@4.1.1 install /home/alistair/pharo8/so07/pharo-local/iceberg/feenkcom/JSlink/js/node_modules/sqlite3\n> node-pre-gyp install --fallback-to-build\n...\n```\n\nWe now evaluate our first expression in JavaScript:\n\n![First Object](doc/images/First_Object.png)\n\nAfter typing the code in to the playground it is evaluated by pressing the play & inspect button:\n\n![Play & Inspect button](doc/images/playinspect.png)\n\nFrom here we can navigate through the attributes of the object in the same way as when inspecting pharo objects.\n\nIf the value of the attribute is a non-primitive object, a proxy will be returned, if it is a primitive, it will be returned directly:\n\n![Inspect Primitive](doc/images/Inspect_Primitive.png)\n\nWhen evaluating statements in a proxy object's playground, `this` is bound to the proxy object:\n\n![this bound](doc/images/this_bound.png)\n\nThe node.js server can then be stopped with:\n\n```smalltalk\nJSLinkApplication stop.\n```\n\n\n### Programatic Use\n\nSo far we have been using a global instance of JSLink, however it is possible to have multiple servers running concurrently through the use of private instances.\n\nFor this example we'll create an Excel spreadsheet by installing and using the existing `excel4node` module.\n\nTo install the module:\n\n```smalltalk\njslink := JSLinkApplication withDefaultSettings.\njslink start.\njslink installModule: 'excel4node'.\n```\n\nJSLink allows JavaScript code to be supplied in two ways:\n\n1. Strings of JavaScript code, and\n1. AST objects generated using the [JavaScriptGenerator package](https://github.com/feenkcom/JavaScriptGenerator/)\n\nFirst, using strings:\n\n```smalltalk\n\"Start JSLink\"\njslink := JSLinkApplication withDefaultSettings.\njslink start.\n\n\"Ensure that the 'excel4node' module is installed.\"\njslink installModule: 'excel4node'\n\n\"Create the spreadsheet and worksheet\"\nworksheet := jslink newCommandFactory\n\t<< 'const excel = require(''excel4node'')';\n\t<< 'let workbook = new excel.Workbook()';\n\t<< 'let worksheet = workbook.addWorksheet(''HW'')';\n\t<< 'worksheet';\n\tsendAndWait.\n\n\"Write Hello, World!\"\nworksheet newCommandFactory\n\t<< 'this.cell(2, 2).string(\"Hello, World!\")';\n\tsendAndWait.\n\n\"Save the spreadsheet\"\nworksheet newCommandFactory\n\t<< 'this.wb.write(\"hw.xlsx\")';\n\tsendAndWait.\n\n\"Stop the server\"\njslink stop\n```\n\n![Hello, World! with strings](doc/images/helloworld_strings.png)\n\n\nSecond, using JavaScript generated with `JavaScriptGenerator`:\n\n```smalltalk\n\"Start JSLink\"\njslink := JSLinkApplication withDefaultSettings.\njslink start.\n\n\"Ensure that the 'excel4node' module is installed.\"\njslink installModule: 'excel4node'\n\n\"Create the spreadsheet and worksheet\"\nexcel := #excel asJSGIdentifier.\nwb := #wb asJSGIdentifier.\nws := #ws asJSGIdentifier.\nworksheet := jslink newCommandFactory\n\t<< (excel <- #'excel4node' require) beLetDeclaration;\n\t<< (wb <- (excel => #Workbook) call new) beLetDeclaration;\n\t<< (ws <- ((wb => #addWorksheet) callWith: { 'HW' })) beLetDeclaration;\n\t<< 'ws';\n\tsendAndWait.\n\n\"Write Hello, World!\"\nworksheet newCommandFactory\n\t<< (((#this asJSGI => #cell callWith: { 2. 2. }) => #string) callWith: { 'Hello, World!'});\n\tsendAndWait.\n\n\"Save the spreadsheet\"\nworksheet newCommandFactory\n\t<< ((#this asJSGI => #wb => #write) callWith: { 'hw2.xlsx' });\n\tsendAndWait.\n\n\"Stop the server\"\njslink stop\n```\n\n\n![Hello, World! with JavaScriptGenerator](doc/images/helloworld_jsg.png)\n\n\n## Garbage Collection\n\nProxy objects register them selves for finalisation.  When they are garbage collected in Pharo they are automatically removed from the registry in the node.js server.\n\n\n## Callbacks\n\nCallbacks in to Pharo from node.js are supported through observables.\n\nSee `JSLinkSendCommandTest` for examples of setting up and using callbacks.\n\n\n## Automated Tests\n\nSee the 'JSLink-Tests` package.\n\n## ToDo\n\n`PythonBridge` supports communicating with the server using either HTTP or [MsgPack](https://msgpack.org/).  While the code has been left in the package, MsgPack is not yet supported.\n\n\n## Futures\n\nCurrently JSLink is specific to node.js.  Planned future work includes adding support for the debug port in node.js, to provide better program control, and adding support for browsers, initially Chrome, using their debug port.\n\n\n## Acknowledgements and Thanks\n\nThanks to the team at [ObjectProfile](http://www.objectprofile.com/) for making [PythonBridge](https://github.com/ObjectProfile/PythonBridge), on which JSLink is based, and to [Julien Delplanque](https://github.com/juliendelplanque) for [Python3Generator](https://github.com/juliendelplanque/Python3Generator), on which JavaScriptGenerator is based.\n"
+      },
+      "date": 1650794992032
+    },
+    {
+      "type": "edit",
+      "id": "ee2a8e29855ad8c6",
+      "item": {
+        "type": "markdown",
+        "id": "ee2a8e29855ad8c6",
+        "text": "# JSLink\n\nJSLink provides a mechanism for [[Pharo]] to communicate with libraries and applications implemented in node.js.\n"
+      },
+      "date": 1650795014318
+    },
+    {
+      "type": "add",
+      "id": "4030082ce223da4e",
+      "item": {
+        "type": "markdown",
+        "id": "4030082ce223da4e",
+        "text": "## Getting Started\n\n\n### Installation\n\nRequirements:\n\nJSLink has been tested with:\n\n- Pharo 8\n- node.js 12.x\n\nTo install JSLink in an existing Gtoolkit image:\n\n```smalltalk\nEpMonitor disableDuring: [ \nMetacello new\n\trepository: 'github://feenkcom/gtoolkit-remote/src';\n\tbaseline: 'Gt4JSLink';\n\tload ]\n```\n\n\nTo install JSLink in a vanilla Pharo image:\n\n```smalltalk\nEpMonitor disableDuring: [ \nMetacello new\n\trepository: 'github://feenkcom/JSlink/src';\n\tbaseline: 'JavaScriptLink';\n\tload ]\n```\n\n\n### First statements\n\nWhen first running JSLink it is worthwhile starting Pharo from the command line so you can monitor the output.\n\nOpen a playground in [Gtoolkit](https://gtoolkit.com/) and start the JSLinkApplication:\n\n![Start JSLink](doc/images/Start_JSLink.png)\n\nThis will automatically install all the dependent modules with `npm`:\n\n```\n$ vmgt/gtoolkit Pharo.image eval --interactive --no-quit \"GtWorld open.\"\nGtWorld\n[Glutin] Profile #0 worked\n[Glutin] Profile #0 worked\nloadDep:fsevents → 304    ▌ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nWARN engine fsevents@2.1.2: wanted: {\"node\":\"^8.16.0 || ^10.6.0 || >=11.0.0\"} (current: {\"node\":\"8.10loadDep:react-is → header ▐ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nloadDep:execa → resolveWi ▐ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nWARN engine execa@3.4.0: wanted: {\"node\":\"^8.12.0 || >=9.7.0\"} (current: {\"node\":\"8.10.0\",\"npm\":\"3.5.loadDep:strip-final-newli ▐ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nWARN engine human-signals@1.1.1: wanted: {\"node\":\">=8.12.0\"} (current: {\"node\":\"8.10.0\",\"npm\":\"3.5.2\"\n> sqlite3@4.1.1 install /home/alistair/pharo8/so07/pharo-local/iceberg/feenkcom/JSlink/js/node_modules/sqlite3\n> node-pre-gyp install --fallback-to-build\n...\n```\n\nWe now evaluate our first expression in JavaScript:\n\n![First Object](doc/images/First_Object.png)\n\nAfter typing the code in to the playground it is evaluated by pressing the play & inspect button:\n\n![Play & Inspect button](doc/images/playinspect.png)\n\nFrom here we can navigate through the attributes of the object in the same way as when inspecting pharo objects.\n\nIf the value of the attribute is a non-primitive object, a proxy will be returned, if it is a primitive, it will be returned directly:\n\n![Inspect Primitive](doc/images/Inspect_Primitive.png)\n\nWhen evaluating statements in a proxy object's playground, `this` is bound to the proxy object:\n\n![this bound](doc/images/this_bound.png)\n\nThe node.js server can then be stopped with:\n\n```smalltalk\nJSLinkApplication stop.\n```\n\n\n### Programatic Use\n\nSo far we have been using a global instance of JSLink, however it is possible to have multiple servers running concurrently through the use of private instances.\n\nFor this example we'll create an Excel spreadsheet by installing and using the existing `excel4node` module.\n\nTo install the module:\n\n```smalltalk\njslink := JSLinkApplication withDefaultSettings.\njslink start.\njslink installModule: 'excel4node'.\n```\n\nJSLink allows JavaScript code to be supplied in two ways:\n\n1. Strings of JavaScript code, and\n1. AST objects generated using the [JavaScriptGenerator package](https://github.com/feenkcom/JavaScriptGenerator/)\n\nFirst, using strings:\n\n```smalltalk\n\"Start JSLink\"\njslink := JSLinkApplication withDefaultSettings.\njslink start.\n\n\"Ensure that the 'excel4node' module is installed.\"\njslink installModule: 'excel4node'\n\n\"Create the spreadsheet and worksheet\"\nworksheet := jslink newCommandFactory\n\t<< 'const excel = require(''excel4node'')';\n\t<< 'let workbook = new excel.Workbook()';\n\t<< 'let worksheet = workbook.addWorksheet(''HW'')';\n\t<< 'worksheet';\n\tsendAndWait.\n\n\"Write Hello, World!\"\nworksheet newCommandFactory\n\t<< 'this.cell(2, 2).string(\"Hello, World!\")';\n\tsendAndWait.\n\n\"Save the spreadsheet\"\nworksheet newCommandFactory\n\t<< 'this.wb.write(\"hw.xlsx\")';\n\tsendAndWait.\n\n\"Stop the server\"\njslink stop\n```\n\n![Hello, World! with strings](doc/images/helloworld_strings.png)\n\n\nSecond, using JavaScript generated with `JavaScriptGenerator`:\n\n```smalltalk\n\"Start JSLink\"\njslink := JSLinkApplication withDefaultSettings.\njslink start.\n\n\"Ensure that the 'excel4node' module is installed.\"\njslink installModule: 'excel4node'\n\n\"Create the spreadsheet and worksheet\"\nexcel := #excel asJSGIdentifier.\nwb := #wb asJSGIdentifier.\nws := #ws asJSGIdentifier.\nworksheet := jslink newCommandFactory\n\t<< (excel <- #'excel4node' require) beLetDeclaration;\n\t<< (wb <- (excel => #Workbook) call new) beLetDeclaration;\n\t<< (ws <- ((wb => #addWorksheet) callWith: { 'HW' })) beLetDeclaration;\n\t<< 'ws';\n\tsendAndWait.\n\n\"Write Hello, World!\"\nworksheet newCommandFactory\n\t<< (((#this asJSGI => #cell callWith: { 2. 2. }) => #string) callWith: { 'Hello, World!'});\n\tsendAndWait.\n\n\"Save the spreadsheet\"\nworksheet newCommandFactory\n\t<< ((#this asJSGI => #wb => #write) callWith: { 'hw2.xlsx' });\n\tsendAndWait.\n\n\"Stop the server\"\njslink stop\n```\n\n\n![Hello, World! with JavaScriptGenerator](doc/images/helloworld_jsg.png)\n\n\n## Garbage Collection\n\nProxy objects register them selves for finalisation.  When they are garbage collected in Pharo they are automatically removed from the registry in the node.js server.\n\n\n## Callbacks\n\nCallbacks in to Pharo from node.js are supported through observables.\n\nSee `JSLinkSendCommandTest` for examples of setting up and using callbacks.\n\n\n## Automated Tests\n\nSee the 'JSLink-Tests` package.\n\n## ToDo\n\n`PythonBridge` supports communicating with the server using either HTTP or [MsgPack](https://msgpack.org/).  While the code has been left in the package, MsgPack is not yet supported.\n\n\n## Futures\n\nCurrently JSLink is specific to node.js.  Planned future work includes adding support for the debug port in node.js, to provide better program control, and adding support for browsers, initially Chrome, using their debug port.\n\n\n## Acknowledgements and Thanks\n\nThanks to the team at [ObjectProfile](http://www.objectprofile.com/) for making [PythonBridge](https://github.com/ObjectProfile/PythonBridge), on which JSLink is based, and to [Julien Delplanque](https://github.com/juliendelplanque) for [Python3Generator](https://github.com/juliendelplanque/Python3Generator), on which JavaScriptGenerator is based.\n"
+      },
+      "after": "ee2a8e29855ad8c6",
+      "date": 1650795016693
+    },
+    {
+      "type": "edit",
+      "id": "ee2a8e29855ad8c6",
+      "item": {
+        "type": "markdown",
+        "id": "ee2a8e29855ad8c6",
+        "text": "# JSLink\n\nJSLink provides a mechanism for [[Pharo]] to communicate with libraries and applications implemented in node.js. [https://github.com/feenkcom/JSLink GitHub]\n"
+      },
+      "date": 1650795189290
+    },
+    {
+      "type": "edit",
+      "id": "4030082ce223da4e",
+      "item": {
+        "type": "markdown",
+        "id": "4030082ce223da4e",
+        "text": "## Getting Started\n\n\n### Installation\n\nRequirements:\n\nJSLink has been tested with:\n\n- Pharo 8\n- node.js 12.x\n\nTo install JSLink in an existing Gtoolkit image:\n"
+      },
+      "date": 1651584394281
+    },
+    {
+      "type": "add",
+      "id": "7c7db2ea731f78da",
+      "item": {
+        "type": "markdown",
+        "id": "7c7db2ea731f78da",
+        "text": "```smalltalk\n\n\n"
+      },
+      "after": "4030082ce223da4e",
+      "date": 1651584397324
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "41555b4118bcdb03",
+        "text": ""
+      },
+      "id": "41555b4118bcdb03",
+      "type": "add",
+      "after": "7a44f005234da4b9",
+      "date": 1651584399413
+    },
+    {
+      "id": "41555b4118bcdb03",
+      "type": "move",
+      "order": [
+        "ee2a8e29855ad8c6",
+        "4030082ce223da4e",
+        "41555b4118bcdb03",
+        "7c7db2ea731f78da",
+        "7a44f005234da4b9"
+      ],
+      "date": 1651584402535,
+      "error": {
+        "type": "error",
+        "msg": "Internal Server Error",
+        "response": "Server Ignoring move. Try reload."
+      }
+    },
+    {
+      "type": "add",
+      "id": "7a44f005234da4b9",
+      "item": {
+        "type": "markdown",
+        "id": "7a44f005234da4b9",
+        "text": "```\n\n\nTo install JSLink in a vanilla Pharo image:\n\n```smalltalk\nEpMonitor disableDuring: [ \nMetacello new\n\trepository: 'github://feenkcom/JSlink/src';\n\tbaseline: 'JavaScriptLink';\n\tload ]\n```\n\n\n### First statements\n\nWhen first running JSLink it is worthwhile starting Pharo from the command line so you can monitor the output.\n\nOpen a playground in [Gtoolkit](https://gtoolkit.com/) and start the JSLinkApplication:\n\n![Start JSLink](doc/images/Start_JSLink.png)\n\nThis will automatically install all the dependent modules with `npm`:\n\n```\n$ vmgt/gtoolkit Pharo.image eval --interactive --no-quit \"GtWorld open.\"\nGtWorld\n[Glutin] Profile #0 worked\n[Glutin] Profile #0 worked\nloadDep:fsevents → 304    ▌ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nWARN engine fsevents@2.1.2: wanted: {\"node\":\"^8.16.0 || ^10.6.0 || >=11.0.0\"} (current: {\"node\":\"8.10loadDep:react-is → header ▐ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nloadDep:execa → resolveWi ▐ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nWARN engine execa@3.4.0: wanted: {\"node\":\"^8.12.0 || >=9.7.0\"} (current: {\"node\":\"8.10.0\",\"npm\":\"3.5.loadDep:strip-final-newli ▐ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nWARN engine human-signals@1.1.1: wanted: {\"node\":\">=8.12.0\"} (current: {\"node\":\"8.10.0\",\"npm\":\"3.5.2\"\n> sqlite3@4.1.1 install /home/alistair/pharo8/so07/pharo-local/iceberg/feenkcom/JSlink/js/node_modules/sqlite3\n> node-pre-gyp install --fallback-to-build\n...\n```\n\nWe now evaluate our first expression in JavaScript:\n\n![First Object](doc/images/First_Object.png)\n\nAfter typing the code in to the playground it is evaluated by pressing the play & inspect button:\n\n![Play & Inspect button](doc/images/playinspect.png)\n\nFrom here we can navigate through the attributes of the object in the same way as when inspecting pharo objects.\n\nIf the value of the attribute is a non-primitive object, a proxy will be returned, if it is a primitive, it will be returned directly:\n\n![Inspect Primitive](doc/images/Inspect_Primitive.png)\n\nWhen evaluating statements in a proxy object's playground, `this` is bound to the proxy object:\n\n![this bound](doc/images/this_bound.png)\n\nThe node.js server can then be stopped with:\n\n```smalltalk\nJSLinkApplication stop.\n```\n\n\n### Programatic Use\n\nSo far we have been using a global instance of JSLink, however it is possible to have multiple servers running concurrently through the use of private instances.\n\nFor this example we'll create an Excel spreadsheet by installing and using the existing `excel4node` module.\n\nTo install the module:\n\n```smalltalk\njslink := JSLinkApplication withDefaultSettings.\njslink start.\njslink installModule: 'excel4node'.\n```\n\nJSLink allows JavaScript code to be supplied in two ways:\n\n1. Strings of JavaScript code, and\n1. AST objects generated using the [JavaScriptGenerator package](https://github.com/feenkcom/JavaScriptGenerator/)\n\nFirst, using strings:\n\n```smalltalk\n\"Start JSLink\"\njslink := JSLinkApplication withDefaultSettings.\njslink start.\n\n\"Ensure that the 'excel4node' module is installed.\"\njslink installModule: 'excel4node'\n\n\"Create the spreadsheet and worksheet\"\nworksheet := jslink newCommandFactory\n\t<< 'const excel = require(''excel4node'')';\n\t<< 'let workbook = new excel.Workbook()';\n\t<< 'let worksheet = workbook.addWorksheet(''HW'')';\n\t<< 'worksheet';\n\tsendAndWait.\n\n\"Write Hello, World!\"\nworksheet newCommandFactory\n\t<< 'this.cell(2, 2).string(\"Hello, World!\")';\n\tsendAndWait.\n\n\"Save the spreadsheet\"\nworksheet newCommandFactory\n\t<< 'this.wb.write(\"hw.xlsx\")';\n\tsendAndWait.\n\n\"Stop the server\"\njslink stop\n```\n\n![Hello, World! with strings](doc/images/helloworld_strings.png)\n\n\nSecond, using JavaScript generated with `JavaScriptGenerator`:\n\n```smalltalk\n\"Start JSLink\"\njslink := JSLinkApplication withDefaultSettings.\njslink start.\n\n\"Ensure that the 'excel4node' module is installed.\"\njslink installModule: 'excel4node'\n\n\"Create the spreadsheet and worksheet\"\nexcel := #excel asJSGIdentifier.\nwb := #wb asJSGIdentifier.\nws := #ws asJSGIdentifier.\nworksheet := jslink newCommandFactory\n\t<< (excel <- #'excel4node' require) beLetDeclaration;\n\t<< (wb <- (excel => #Workbook) call new) beLetDeclaration;\n\t<< (ws <- ((wb => #addWorksheet) callWith: { 'HW' })) beLetDeclaration;\n\t<< 'ws';\n\tsendAndWait.\n\n\"Write Hello, World!\"\nworksheet newCommandFactory\n\t<< (((#this asJSGI => #cell callWith: { 2. 2. }) => #string) callWith: { 'Hello, World!'});\n\tsendAndWait.\n\n\"Save the spreadsheet\"\nworksheet newCommandFactory\n\t<< ((#this asJSGI => #wb => #write) callWith: { 'hw2.xlsx' });\n\tsendAndWait.\n\n\"Stop the server\"\njslink stop\n```\n\n\n![Hello, World! with JavaScriptGenerator](doc/images/helloworld_jsg.png)\n\n\n## Garbage Collection\n\nProxy objects register them selves for finalisation.  When they are garbage collected in Pharo they are automatically removed from the registry in the node.js server.\n\n\n## Callbacks\n\nCallbacks in to Pharo from node.js are supported through observables.\n\nSee `JSLinkSendCommandTest` for examples of setting up and using callbacks.\n\n\n## Automated Tests\n\nSee the 'JSLink-Tests` package.\n\n## ToDo\n\n`PythonBridge` supports communicating with the server using either HTTP or [MsgPack](https://msgpack.org/).  While the code has been left in the package, MsgPack is not yet supported.\n\n\n## Futures\n\nCurrently JSLink is specific to node.js.  Planned future work includes adding support for the debug port in node.js, to provide better program control, and adding support for browsers, initially Chrome, using their debug port.\n\n\n## Acknowledgements and Thanks\n\nThanks to the team at [ObjectProfile](http://www.objectprofile.com/) for making [PythonBridge](https://github.com/ObjectProfile/PythonBridge), on which JSLink is based, and to [Julien Delplanque](https://github.com/juliendelplanque) for [Python3Generator](https://github.com/juliendelplanque/Python3Generator), on which JavaScriptGenerator is based.\n"
+      },
+      "after": "7c7db2ea731f78da",
+      "date": 1651584403844
+    },
+    {
+      "type": "remove",
+      "id": "41555b4118bcdb03",
+      "date": 1651584405429
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "59d6670426e928f1"
+      },
+      "id": "59d6670426e928f1",
+      "type": "add",
+      "after": "7a44f005234da4b9",
+      "date": 1651584422020
+    },
+    {
+      "type": "edit",
+      "id": "7c7db2ea731f78da",
+      "item": {
+        "type": "markdown",
+        "id": "7c7db2ea731f78da",
+        "text": "```smalltalk\n\n\n"
+      },
+      "date": 1651584441180
+    },
+    {
+      "type": "fork",
+      "date": 1651584444043
+    },
+    {
+      "id": "59d6670426e928f1",
+      "type": "move",
+      "order": [
+        "ee2a8e29855ad8c6",
+        "4030082ce223da4e",
+        "7c7db2ea731f78da",
+        "59d6670426e928f1",
+        "7a44f005234da4b9"
+      ],
+      "date": 1651584470609
+    },
+    {
+      "type": "edit",
+      "id": "59d6670426e928f1",
+      "item": {
+        "type": "paragraph",
+        "id": "59d6670426e928f1",
+        "text": "EpMonitor disableDuring: [ \nMetacello new\n\trepository: 'github://feenkcom/JSlink/src';\n\tbaseline: 'JavaScriptLink';\n\tload ]"
+      },
+      "date": 1651584493606
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2533c0424d3d5b5b"
+      },
+      "id": "2533c0424d3d5b5b",
+      "type": "add",
+      "after": "7a44f005234da4b9",
+      "date": 1651584505171
+    },
+    {
+      "type": "edit",
+      "id": "7a44f005234da4b9",
+      "item": {
+        "type": "markdown",
+        "id": "7a44f005234da4b9",
+        "text": "```\n\n\nTo install JSLink in a vanilla Pharo image:\n"
+      },
+      "date": 1651584519303
+    },
+    {
+      "type": "add",
+      "id": "38aedbe23b6cf83d",
+      "item": {
+        "type": "markdown",
+        "id": "38aedbe23b6cf83d",
+        "text": "\n```smalltalk\nEpMonitor disableDuring: [ \nMetacello new\n\trepository: 'github://feenkcom/JSlink/src';\n\tbaseline: 'JavaScriptLink';\n\tload ]\n```\n\n\n### First statements\n\nWhen first running JSLink it is worthwhile starting Pharo from the command line so you can monitor the output.\n\nOpen a playground in [Gtoolkit](https://gtoolkit.com/) and start the JSLinkApplication:\n\n![Start JSLink](doc/images/Start_JSLink.png)\n\nThis will automatically install all the dependent modules with `npm`:\n\n```\n$ vmgt/gtoolkit Pharo.image eval --interactive --no-quit \"GtWorld open.\"\nGtWorld\n[Glutin] Profile #0 worked\n[Glutin] Profile #0 worked\nloadDep:fsevents → 304    ▌ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nWARN engine fsevents@2.1.2: wanted: {\"node\":\"^8.16.0 || ^10.6.0 || >=11.0.0\"} (current: {\"node\":\"8.10loadDep:react-is → header ▐ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nloadDep:execa → resolveWi ▐ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nWARN engine execa@3.4.0: wanted: {\"node\":\"^8.12.0 || >=9.7.0\"} (current: {\"node\":\"8.10.0\",\"npm\":\"3.5.loadDep:strip-final-newli ▐ ╢███████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░╟\nWARN engine human-signals@1.1.1: wanted: {\"node\":\">=8.12.0\"} (current: {\"node\":\"8.10.0\",\"npm\":\"3.5.2\"\n> sqlite3@4.1.1 install /home/alistair/pharo8/so07/pharo-local/iceberg/feenkcom/JSlink/js/node_modules/sqlite3\n> node-pre-gyp install --fallback-to-build\n...\n```\n\nWe now evaluate our first expression in JavaScript:\n\n![First Object](doc/images/First_Object.png)\n\nAfter typing the code in to the playground it is evaluated by pressing the play & inspect button:\n\n![Play & Inspect button](doc/images/playinspect.png)\n\nFrom here we can navigate through the attributes of the object in the same way as when inspecting pharo objects.\n\nIf the value of the attribute is a non-primitive object, a proxy will be returned, if it is a primitive, it will be returned directly:\n\n![Inspect Primitive](doc/images/Inspect_Primitive.png)\n\nWhen evaluating statements in a proxy object's playground, `this` is bound to the proxy object:\n\n![this bound](doc/images/this_bound.png)\n\nThe node.js server can then be stopped with:\n\n```smalltalk\nJSLinkApplication stop.\n```\n\n\n### Programatic Use\n\nSo far we have been using a global instance of JSLink, however it is possible to have multiple servers running concurrently through the use of private instances.\n\nFor this example we'll create an Excel spreadsheet by installing and using the existing `excel4node` module.\n\nTo install the module:\n\n```smalltalk\njslink := JSLinkApplication withDefaultSettings.\njslink start.\njslink installModule: 'excel4node'.\n```\n\nJSLink allows JavaScript code to be supplied in two ways:\n\n1. Strings of JavaScript code, and\n1. AST objects generated using the [JavaScriptGenerator package](https://github.com/feenkcom/JavaScriptGenerator/)\n\nFirst, using strings:\n\n```smalltalk\n\"Start JSLink\"\njslink := JSLinkApplication withDefaultSettings.\njslink start.\n\n\"Ensure that the 'excel4node' module is installed.\"\njslink installModule: 'excel4node'\n\n\"Create the spreadsheet and worksheet\"\nworksheet := jslink newCommandFactory\n\t<< 'const excel = require(''excel4node'')';\n\t<< 'let workbook = new excel.Workbook()';\n\t<< 'let worksheet = workbook.addWorksheet(''HW'')';\n\t<< 'worksheet';\n\tsendAndWait.\n\n\"Write Hello, World!\"\nworksheet newCommandFactory\n\t<< 'this.cell(2, 2).string(\"Hello, World!\")';\n\tsendAndWait.\n\n\"Save the spreadsheet\"\nworksheet newCommandFactory\n\t<< 'this.wb.write(\"hw.xlsx\")';\n\tsendAndWait.\n\n\"Stop the server\"\njslink stop\n```\n\n![Hello, World! with strings](doc/images/helloworld_strings.png)\n\n\nSecond, using JavaScript generated with `JavaScriptGenerator`:\n\n```smalltalk\n\"Start JSLink\"\njslink := JSLinkApplication withDefaultSettings.\njslink start.\n\n\"Ensure that the 'excel4node' module is installed.\"\njslink installModule: 'excel4node'\n\n\"Create the spreadsheet and worksheet\"\nexcel := #excel asJSGIdentifier.\nwb := #wb asJSGIdentifier.\nws := #ws asJSGIdentifier.\nworksheet := jslink newCommandFactory\n\t<< (excel <- #'excel4node' require) beLetDeclaration;\n\t<< (wb <- (excel => #Workbook) call new) beLetDeclaration;\n\t<< (ws <- ((wb => #addWorksheet) callWith: { 'HW' })) beLetDeclaration;\n\t<< 'ws';\n\tsendAndWait.\n\n\"Write Hello, World!\"\nworksheet newCommandFactory\n\t<< (((#this asJSGI => #cell callWith: { 2. 2. }) => #string) callWith: { 'Hello, World!'});\n\tsendAndWait.\n\n\"Save the spreadsheet\"\nworksheet newCommandFactory\n\t<< ((#this asJSGI => #wb => #write) callWith: { 'hw2.xlsx' });\n\tsendAndWait.\n\n\"Stop the server\"\njslink stop\n```\n\n\n![Hello, World! with JavaScriptGenerator](doc/images/helloworld_jsg.png)\n\n\n## Garbage Collection\n\nProxy objects register them selves for finalisation.  When they are garbage collected in Pharo they are automatically removed from the registry in the node.js server.\n\n\n## Callbacks\n\nCallbacks in to Pharo from node.js are supported through observables.\n\nSee `JSLinkSendCommandTest` for examples of setting up and using callbacks.\n\n\n## Automated Tests\n\nSee the 'JSLink-Tests` package.\n\n## ToDo\n\n`PythonBridge` supports communicating with the server using either HTTP or [MsgPack](https://msgpack.org/).  While the code has been left in the package, MsgPack is not yet supported.\n\n\n## Futures\n\nCurrently JSLink is specific to node.js.  Planned future work includes adding support for the debug port in node.js, to provide better program control, and adding support for browsers, initially Chrome, using their debug port.\n\n\n## Acknowledgements and Thanks\n\nThanks to the team at [ObjectProfile](http://www.objectprofile.com/) for making [PythonBridge](https://github.com/ObjectProfile/PythonBridge), on which JSLink is based, and to [Julien Delplanque](https://github.com/juliendelplanque) for [Python3Generator](https://github.com/juliendelplanque/Python3Generator), on which JavaScriptGenerator is based.\n"
+      },
+      "after": "7a44f005234da4b9",
+      "date": 1651584526784
+    },
+    {
+      "type": "edit",
+      "id": "2533c0424d3d5b5b",
+      "item": {
+        "type": "code",
+        "id": "2533c0424d3d5b5b",
+        "text": "EpMonitor disableDuring: [ \nMetacello new\n\trepository: 'github://feenkcom/JSlink/src';\n\tbaseline: 'JavaScriptLink';\n\tload ]"
+      },
+      "date": 1651584529661
+    },
+    {
+      "id": "2533c0424d3d5b5b",
+      "type": "move",
+      "order": [
+        "ee2a8e29855ad8c6",
+        "4030082ce223da4e",
+        "7c7db2ea731f78da",
+        "59d6670426e928f1",
+        "7a44f005234da4b9",
+        "2533c0424d3d5b5b",
+        "38aedbe23b6cf83d"
+      ],
+      "date": 1651584544625
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "39a2b97bb510e4f0"
+      },
+      "id": "39a2b97bb510e4f0",
+      "type": "add",
+      "after": "38aedbe23b6cf83d",
+      "date": 1651584583697
+    },
+    {
+      "type": "edit",
+      "id": "39a2b97bb510e4f0",
+      "item": {
+        "type": "code",
+        "id": "39a2b97bb510e4f0",
+        "text": "EpMonitor disableDuring: [ \nMetacello new\n\trepository: 'github://feenkcom/gtoolkit-remote/src';\n\tbaseline: 'Gt4JSLink';\n\tload ]"
+      },
+      "date": 1651584586217
+    },
+    {
+      "id": "39a2b97bb510e4f0",
+      "type": "move",
+      "order": [
+        "ee2a8e29855ad8c6",
+        "4030082ce223da4e",
+        "39a2b97bb510e4f0",
+        "7c7db2ea731f78da",
+        "59d6670426e928f1",
+        "7a44f005234da4b9",
+        "2533c0424d3d5b5b",
+        "38aedbe23b6cf83d"
+      ],
+      "date": 1651584599011
+    },
+    {
+      "type": "remove",
+      "id": "59d6670426e928f1",
+      "date": 1651584603205
+    },
+    {
+      "type": "remove",
+      "id": "7c7db2ea731f78da",
+      "date": 1651584605506
+    },
+    {
+      "type": "edit",
+      "id": "7a44f005234da4b9",
+      "item": {
+        "type": "markdown",
+        "id": "7a44f005234da4b9",
+        "text": "To install JSLink in a vanilla Pharo image:\n"
+      },
+      "date": 1651584610510
+    },
+    {
+      "type": "remove",
+      "id": "38aedbe23b6cf83d",
+      "date": 1651584614933
+    }
+  ]
+}

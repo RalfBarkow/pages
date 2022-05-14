@@ -1,0 +1,1229 @@
+{
+  "title": "Models for SFW",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "609a6c5190c1c909",
+      "text": "We reflect on possible client-side models developed over a couple of hours of collaboration with [[Pete Hodgson]]. Here I record the CRC Cards we produced and will attempt to describe the dynamics we discussed."
+    },
+    {
+      "type": "paragraph",
+      "id": "0c6d8304b913a2c3",
+      "text": "This is only one possible end state, if there is even ever an end state. There remains order and completeness of implementation to be considered. We both favor an incremental approach. See Pete's [http://blog.thepete.net/blog/2012/06/09/the-birth-of-a-domain-object-in-ruby/ post] on \"birthing\" domain objects."
+    },
+    {
+      "type": "paragraph",
+      "id": "1d6a9035fdbdbc94",
+      "text": "My later thoughts are in italics. Consider skipping these on first reading. Try pulling up rev 61."
+    },
+    {
+      "type": "html",
+      "id": "b1f54bf8f7aab439",
+      "text": "<h3> Objects"
+    },
+    {
+      "type": "paragraph",
+      "id": "848382f2b98b16ec",
+      "text": "[[Page]]. Provides the most portable representation of content and its history. A page can be translated to and from JSON without loss. A page is independent of the site that might host it while the interpretation of its content is not."
+    },
+    {
+      "type": "html",
+      "id": "693650d360d70594",
+      "text": "<i>I think Pete wanted to add location to page but I resisted it. Hence the factoring of name and reference below."
+    },
+    {
+      "type": "paragraph",
+      "id": "8620f4812d3d4384",
+      "text": "[[Display Page]]. Supports viewing and editing. Look to these rather than dom objects to find visible story or journal elements."
+    },
+    {
+      "type": "html",
+      "id": "51883c274a8c07f0",
+      "text": "<i> A display page could be responsible for rendering unresolvable links in red. I decided not to have red links back when the only approach for resolving links involved probing remote sites for 404s."
+    },
+    {
+      "type": "paragraph",
+      "id": "deb9bd3a3a21d8da",
+      "text": "[[Page Name]]. An immutable object that represents a resolvable name that can be interpreted throughout the federation. The double-square-bracket paragraph markup notes characters destine to be page names."
+    },
+    {
+      "type": "paragraph",
+      "id": "9c621d1b6bebe949",
+      "text": "[[Page Reference]]. Refers to a specific page on a specific site in the federation. Could serve as the model behind a Reference plugin. A page name resolves to a page reference through a search within the resolution context. Undecided if a reference might optionally refer to a specific revision."
+    },
+    {
+      "type": "paragraph",
+      "id": "548d42c89d9e83c1",
+      "text": "[[Resolution Context]]. An ordered list of sites that might host a page. Typically constructed from information that travels with a page. The exception is that the origin is often included."
+    },
+    {
+      "type": "html",
+      "id": "735f264c7716df22",
+      "text": "<i> Resolution context can vary from paragraph to paragraph. Among the [[Quirks of History]] context is now constructed while rendering and attached to links as title hover text. "
+    },
+    {
+      "type": "paragraph",
+      "id": "ac54e59356895137",
+      "text": "[[Interpretation Context]]. Provides a scope within which many data retrieval operations take place. The arrangement of display pages implies one interpretation context but others can be constructed for more specialized evaluations. For example, the Rollup plugin evaluates Method plugins from pages that have not been displayed."
+    },
+    {
+      "type": "html",
+      "id": "c93598751f9060a3",
+      "text": "<i> There is much that remains to think through as to how an interpretation shares responsibility with pages and plugins. The current ad-hoc approach does not offer much insight beyond showing that interpretation is possible."
+    },
+    {
+      "type": "paragraph",
+      "id": "ef90aa827dda5486",
+      "text": "[[Neighborhood]]. A collection of sites of interest as inferred by recent browsing behavior. A background process fills in details by retrieving a sitemap from each site."
+    },
+    {
+      "type": "html",
+      "id": "6613c105d2d0c5b2",
+      "text": "<i> A sitemap looks like a collection of page names. This was in the back of my head while we were discussing names. However, sitemap entries also include a synopsis which is both searched and displayed."
+    },
+    {
+      "type": "html",
+      "id": "df49c7fbaceea8e1",
+      "text": "<h3> Scenarios"
+    },
+    {
+      "type": "paragraph",
+      "id": "2d79e5dfbd324bad",
+      "text": "A display page includes a paragraph with an internal link. The resolution context does not lead to a page reference. A ghost page (?) reports the failure and offers to create the page. The ghost page includes page references from the neighborhood that share the page name."
+    },
+    {
+      "type": "paragraph",
+      "id": "d75d5131892e3515",
+      "text": "A Radar plugin consults the interpretation context to find data to be displayed. Rearranging display pages causes the plugin to rebind to possibly different data. "
+    },
+    {
+      "type": "paragraph",
+      "id": "d25a57bc8b0bfc12",
+      "text": "A Method plugin binds to source data and then offers computed quantities that can themselves be bound by a Radar plugin."
+    },
+    {
+      "type": "paragraph",
+      "id": "adb7b694f026d095",
+      "text": "A Rollup plugin consults one interpretation context to find page names which it resolves and retrieves. Then it constructs for each an alternative interpretation context within which Method plugins can be invisibly evaluated. See [[Rollup in Pseudocode]]."
+    },
+    {
+      "type": "paragraph",
+      "id": "51613d78d147d51c",
+      "text": "See [[About Radar Plugin]], [[About Method Plugin]], and soon, [[About Rollup Plugin]]."
+    },
+    {
+      "type": "html",
+      "id": "aa4919b83eeeaf29",
+      "text": "<h3> Sequencing"
+    },
+    {
+      "type": "paragraph",
+      "id": "681e66d2da758ff2",
+      "text": "The Rollup plugin scenario brought up a number of questions regarding interpretations and their contexts."
+    },
+    {
+      "type": "paragraph",
+      "id": "a6ecf5025f713439",
+      "text": "We reviewed the use of tail-recursion in both the Rollup plugin and the Method plugin. Rollup created a bundle of statefull values which it passed to each Method for safe keeping while it managed its own state in a similar way."
+    },
+    {
+      "type": "paragraph",
+      "id": "e1f5b84ac795ef8c",
+      "text": " "
+    },
+    {
+      "type": "paragraph",
+      "id": "59116b832f8cb70e",
+      "text": "We spiked a implementation of a [[Simple Promise]] and showed that it could sequence a calculation without tail-recursion."
+    },
+    {
+      "type": "paragraph",
+      "id": "29fa4ec18bab2f3e",
+      "text": "Kris Kowal has been quietly developing awesome functional javascript for years. Pete recommends his promise implementation called Q. See [https://github.com/kriskowal/q github]."
+    },
+    {
+      "type": "paragraph",
+      "id": "d6f437e71cf634c3",
+      "text": "jQuery has an acceptable implementation of promises since version 1.5 (about two years). [http://api.jquery.com/category/deferred-object/ doc]. Eric Hynds wrote the often cited [http://www.erichynds.com/jquery/using-deferreds-in-jquery/ post] about it. SFW contributor Steve Black is mentioned as editor."
+    },
+    {
+      "type": "pagefold",
+      "id": "f2595983b8d22f49",
+      "text": "."
+    },
+    {
+      "type": "paragraph",
+      "id": "697296a8d4ba9036",
+      "text": "It became hard to find time to work with Pete once he became a father. I notice this page is six years old. No surprise that the kid is that old too. [https://twitter.com/ph1/status/1139721852417216512/photo/1 twitter]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Models for SFW"
+      },
+      "date": 1351278312243
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "609a6c5190c1c909"
+      },
+      "id": "609a6c5190c1c909",
+      "type": "add",
+      "date": 1351278314548
+    },
+    {
+      "type": "edit",
+      "id": "609a6c5190c1c909",
+      "item": {
+        "type": "paragraph",
+        "id": "609a6c5190c1c909",
+        "text": "We reflect on possible client-side models developed over a couple of hours of collaboration with [[Pete Hodgson]]. Here I record the CRC Cards we produced and will attempt to describe the dynamics we discussed."
+      },
+      "date": 1351278481924
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "62c690851eb274fd",
+        "text": ""
+      },
+      "id": "62c690851eb274fd",
+      "type": "add",
+      "after": "609a6c5190c1c909",
+      "date": 1351278482430
+    },
+    {
+      "type": "remove",
+      "id": "62c690851eb274fd",
+      "date": 1351278491951
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8620f4812d3d4384"
+      },
+      "id": "8620f4812d3d4384",
+      "type": "add",
+      "after": "609a6c5190c1c909",
+      "date": 1351278815092
+    },
+    {
+      "type": "edit",
+      "id": "8620f4812d3d4384",
+      "item": {
+        "type": "paragraph",
+        "id": "8620f4812d3d4384",
+        "text": "Display Page. Supports viewing and editing. Refactor so that one looks to these rather than dom objects to find visible story or journal elements."
+      },
+      "date": 1351279009035
+    },
+    {
+      "type": "edit",
+      "id": "8620f4812d3d4384",
+      "item": {
+        "type": "paragraph",
+        "id": "8620f4812d3d4384",
+        "text": "[[Display Page]]. Supports viewing and editing. Refactor so that one looks to these rather than dom objects to find visible story or journal elements."
+      },
+      "date": 1351279019330
+    },
+    {
+      "type": "edit",
+      "id": "8620f4812d3d4384",
+      "item": {
+        "type": "paragraph",
+        "id": "8620f4812d3d4384",
+        "text": "[[Display Page]]. Supports viewing and editing. Look to these rather than dom objects to find visible story or journal elements."
+      },
+      "date": 1351279039705
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "deb9bd3a3a21d8da"
+      },
+      "id": "deb9bd3a3a21d8da",
+      "type": "add",
+      "after": "8620f4812d3d4384",
+      "date": 1351279055501
+    },
+    {
+      "type": "edit",
+      "id": "deb9bd3a3a21d8da",
+      "item": {
+        "type": "paragraph",
+        "id": "deb9bd3a3a21d8da",
+        "text": "[[Page Name]]. An immutable object that represents a resolvable name that can be interpreted throughout the federation. The double-square-bracket paragraph markup notes characters destine to be page names."
+      },
+      "date": 1351279287756
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "9c621d1b6bebe949",
+        "text": ""
+      },
+      "id": "9c621d1b6bebe949",
+      "type": "add",
+      "after": "deb9bd3a3a21d8da",
+      "date": 1351279288262
+    },
+    {
+      "type": "edit",
+      "id": "9c621d1b6bebe949",
+      "item": {
+        "type": "paragraph",
+        "id": "9c621d1b6bebe949",
+        "text": "[[Page Reference]]. Refers to a specific page on a specific site in the federation. Could serve as the model behind a Reference plugin. A page name resolves to a page reference through a search within the resolution context."
+      },
+      "date": 1351279730528
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "548d42c89d9e83c1",
+        "text": ""
+      },
+      "id": "548d42c89d9e83c1",
+      "type": "add",
+      "after": "9c621d1b6bebe949",
+      "date": 1351279731033
+    },
+    {
+      "type": "edit",
+      "id": "548d42c89d9e83c1",
+      "item": {
+        "type": "paragraph",
+        "id": "548d42c89d9e83c1",
+        "text": "[[Resolution Context]]. An ordered list of sites that might host a page. Typically constructed from information that travels with a page. The exception is that the origin is often included."
+      },
+      "date": 1351280050577
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "ef90aa827dda5486",
+        "text": ""
+      },
+      "id": "ef90aa827dda5486",
+      "type": "add",
+      "after": "548d42c89d9e83c1",
+      "date": 1351280051083
+    },
+    {
+      "type": "edit",
+      "id": "ef90aa827dda5486",
+      "item": {
+        "type": "paragraph",
+        "id": "ef90aa827dda5486",
+        "text": "[[Neighborhood]]. A collection of sites of interest as inferred by recent browsing behavior. A background process fills in details by retrieving a sitemap from each site."
+      },
+      "date": 1351280173467
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "ac54e59356895137",
+        "text": ""
+      },
+      "id": "ac54e59356895137",
+      "type": "add",
+      "after": "ef90aa827dda5486",
+      "date": 1351280173972
+    },
+    {
+      "type": "edit",
+      "id": "ac54e59356895137",
+      "item": {
+        "type": "paragraph",
+        "id": "ac54e59356895137",
+        "text": "[[Interpretation Context]]. Provides a scope within which many data retrieval operations take place. The arrangement of diaplay pages implies one interpretation context but others can be constructed for more specialized evaluations. For example, the Rollup plugin evaluates Method plugins from pages that have not been displayed."
+      },
+      "date": 1351280526408
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "848382f2b98b16ec",
+        "text": ""
+      },
+      "id": "848382f2b98b16ec",
+      "type": "add",
+      "after": "ac54e59356895137",
+      "date": 1351280526913
+    },
+    {
+      "type": "edit",
+      "id": "848382f2b98b16ec",
+      "item": {
+        "type": "paragraph",
+        "id": "848382f2b98b16ec",
+        "text": "[[Page]]. Provides the most portable representation of content and its history. A page can be translated to and from JSON without loss. A page is independent of the site that might host it while the interpretation of its content is not. "
+      },
+      "date": 1351280817959
+    },
+    {
+      "type": "edit",
+      "id": "9c621d1b6bebe949",
+      "item": {
+        "type": "paragraph",
+        "id": "9c621d1b6bebe949",
+        "text": "[[Page Reference]]. Refers to a specific page on a specific site in the federation. Could serve as the model behind a Reference plugin. A page name resolves to a page reference through a search within the resolution context. (Open question: can one reference a specific version of a page?)"
+      },
+      "date": 1351280853705
+    },
+    {
+      "type": "edit",
+      "id": "9c621d1b6bebe949",
+      "item": {
+        "type": "paragraph",
+        "id": "9c621d1b6bebe949",
+        "text": "[[Page Reference]]. Refers to a specific page on a specific site in the federation. Could serve as the model behind a Reference plugin. A page name resolves to a page reference through a search within the resolution context. Undecided if a reference might optionally refer to a specific revision."
+      },
+      "date": 1351280953126
+    },
+    {
+      "type": "move",
+      "order": [
+        "609a6c5190c1c909",
+        "8620f4812d3d4384",
+        "848382f2b98b16ec",
+        "deb9bd3a3a21d8da",
+        "9c621d1b6bebe949",
+        "548d42c89d9e83c1",
+        "ef90aa827dda5486",
+        "ac54e59356895137"
+      ],
+      "id": "848382f2b98b16ec",
+      "date": 1351280985742
+    },
+    {
+      "type": "move",
+      "order": [
+        "609a6c5190c1c909",
+        "848382f2b98b16ec",
+        "8620f4812d3d4384",
+        "deb9bd3a3a21d8da",
+        "9c621d1b6bebe949",
+        "548d42c89d9e83c1",
+        "ef90aa827dda5486",
+        "ac54e59356895137"
+      ],
+      "id": "848382f2b98b16ec",
+      "date": 1351280993157
+    },
+    {
+      "type": "move",
+      "order": [
+        "609a6c5190c1c909",
+        "848382f2b98b16ec",
+        "8620f4812d3d4384",
+        "deb9bd3a3a21d8da",
+        "9c621d1b6bebe949",
+        "548d42c89d9e83c1",
+        "ac54e59356895137",
+        "ef90aa827dda5486"
+      ],
+      "id": "ac54e59356895137",
+      "date": 1351281099112
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "df49c7fbaceea8e1",
+        "text": ""
+      },
+      "id": "df49c7fbaceea8e1",
+      "type": "add",
+      "after": "ef90aa827dda5486",
+      "date": 1351281294608
+    },
+    {
+      "type": "edit",
+      "id": "df49c7fbaceea8e1",
+      "item": {
+        "type": "paragraph",
+        "id": "df49c7fbaceea8e1",
+        "text": "<h3> Scenarios"
+      },
+      "date": 1351281306335
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "d75d5131892e3515",
+        "text": ""
+      },
+      "id": "d75d5131892e3515",
+      "type": "add",
+      "after": "df49c7fbaceea8e1",
+      "date": 1351281306841
+    },
+    {
+      "type": "edit",
+      "id": "d75d5131892e3515",
+      "item": {
+        "type": "paragraph",
+        "id": "d75d5131892e3515",
+        "text": "A Radar plugin consults the interpretation context to find data to be displayed. Rearranging display pages causes the plugin to rebind to possibly different data."
+      },
+      "date": 1351281432784
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "d25a57bc8b0bfc12",
+        "text": ""
+      },
+      "id": "d25a57bc8b0bfc12",
+      "type": "add",
+      "after": "d75d5131892e3515",
+      "date": 1351281433290
+    },
+    {
+      "type": "edit",
+      "id": "d25a57bc8b0bfc12",
+      "item": {
+        "type": "paragraph",
+        "id": "d25a57bc8b0bfc12",
+        "text": "A Method plugin binds to source data and then offers computed quantities that can themselves be bound by a Radar plugin."
+      },
+      "date": 1351281742235
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "2d79e5dfbd324bad",
+        "text": ""
+      },
+      "id": "2d79e5dfbd324bad",
+      "type": "add",
+      "after": "d25a57bc8b0bfc12",
+      "date": 1351281742740
+    },
+    {
+      "type": "edit",
+      "id": "2d79e5dfbd324bad",
+      "item": {
+        "type": "paragraph",
+        "id": "2d79e5dfbd324bad",
+        "text": "A display page includes a paragraph with an internal link. The resolution context does not lead to a page reference. A ghost page (?) reports the failure and offers to create the page. The ghost page includes page references from the neighborhood that share the page name."
+      },
+      "date": 1351282177199
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "adb7b694f026d095",
+        "text": ""
+      },
+      "id": "adb7b694f026d095",
+      "type": "add",
+      "after": "2d79e5dfbd324bad",
+      "date": 1351282177704
+    },
+    {
+      "type": "edit",
+      "id": "adb7b694f026d095",
+      "item": {
+        "type": "paragraph",
+        "id": "adb7b694f026d095",
+        "text": "A Rollup plugin consults one interpretation context to find page names which it resolves and retrieves. Then it constructs for each an alternative interpretation context within which Method plugins can be invisibly evaluated."
+      },
+      "date": 1351282390438
+    },
+    {
+      "type": "move",
+      "order": [
+        "609a6c5190c1c909",
+        "848382f2b98b16ec",
+        "8620f4812d3d4384",
+        "deb9bd3a3a21d8da",
+        "9c621d1b6bebe949",
+        "548d42c89d9e83c1",
+        "ac54e59356895137",
+        "ef90aa827dda5486",
+        "df49c7fbaceea8e1",
+        "2d79e5dfbd324bad",
+        "d75d5131892e3515",
+        "d25a57bc8b0bfc12",
+        "adb7b694f026d095"
+      ],
+      "id": "2d79e5dfbd324bad",
+      "date": 1351282395078
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "b1f54bf8f7aab439",
+        "text": ""
+      },
+      "id": "b1f54bf8f7aab439",
+      "type": "add",
+      "after": "609a6c5190c1c909",
+      "date": 1351282405662
+    },
+    {
+      "type": "edit",
+      "id": "b1f54bf8f7aab439",
+      "item": {
+        "type": "paragraph",
+        "id": "b1f54bf8f7aab439",
+        "text": "<h3> Objects"
+      },
+      "date": 1351282417707
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "aa4919b83eeeaf29"
+      },
+      "id": "aa4919b83eeeaf29",
+      "type": "add",
+      "after": "adb7b694f026d095",
+      "date": 1351282443027
+    },
+    {
+      "type": "edit",
+      "id": "aa4919b83eeeaf29",
+      "item": {
+        "type": "paragraph",
+        "id": "aa4919b83eeeaf29",
+        "text": "<h3> Sequencing"
+      },
+      "date": 1351282455771
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "681e66d2da758ff2",
+        "text": ""
+      },
+      "id": "681e66d2da758ff2",
+      "type": "add",
+      "after": "aa4919b83eeeaf29",
+      "date": 1351282456277
+    },
+    {
+      "type": "edit",
+      "id": "681e66d2da758ff2",
+      "item": {
+        "type": "paragraph",
+        "id": "681e66d2da758ff2",
+        "text": "The Rollup plugin scenario brought up a number of questions regarding interpretations and their contexts."
+      },
+      "date": 1351282558711
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "a6ecf5025f713439",
+        "text": ""
+      },
+      "id": "a6ecf5025f713439",
+      "type": "add",
+      "after": "681e66d2da758ff2",
+      "date": 1351282559217
+    },
+    {
+      "type": "edit",
+      "id": "a6ecf5025f713439",
+      "item": {
+        "type": "paragraph",
+        "id": "a6ecf5025f713439",
+        "text": "We reviewed the use of tail-recursion in both the Rollup plugin and the Method plugin. Rollup created a bundle of statefull values which it passed to each Method for safe keeping while it managed its own state in a similar way."
+      },
+      "date": 1351282793870
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "e1f5b84ac795ef8c",
+        "text": " "
+      },
+      "id": "e1f5b84ac795ef8c",
+      "type": "add",
+      "after": "a6ecf5025f713439",
+      "date": 1351282794376
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "59116b832f8cb70e"
+      },
+      "id": "59116b832f8cb70e",
+      "type": "add",
+      "after": "e1f5b84ac795ef8c",
+      "date": 1351282950980
+    },
+    {
+      "type": "edit",
+      "id": "59116b832f8cb70e",
+      "item": {
+        "type": "paragraph",
+        "id": "59116b832f8cb70e",
+        "text": "We spiked a implementation of a [[Simple Promise]] and showed that it could sequence a calculation without tail-recursion."
+      },
+      "date": 1351283051754
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "29fa4ec18bab2f3e",
+        "text": ""
+      },
+      "id": "29fa4ec18bab2f3e",
+      "type": "add",
+      "after": "59116b832f8cb70e",
+      "date": 1351283743328
+    },
+    {
+      "type": "edit",
+      "id": "29fa4ec18bab2f3e",
+      "item": {
+        "type": "paragraph",
+        "id": "29fa4ec18bab2f3e",
+        "text": "Q. [https://github.com/kriskowal/q github]."
+      },
+      "date": 1351283765667
+    },
+    {
+      "type": "edit",
+      "id": "29fa4ec18bab2f3e",
+      "item": {
+        "type": "paragraph",
+        "id": "29fa4ec18bab2f3e",
+        "text": "Kris Kowal has been quietly developing awesome functional javascript for years. Pete recommends his promise implementation called Q. [https://github.com/kriskowal/q github]"
+      },
+      "date": 1351283875167
+    },
+    {
+      "type": "edit",
+      "id": "29fa4ec18bab2f3e",
+      "item": {
+        "type": "paragraph",
+        "id": "29fa4ec18bab2f3e",
+        "text": "Kris Kowal has been quietly developing awesome functional javascript for years. Pete recommends his promise implementation called Q. See [https://github.com/kriskowal/q github]."
+      },
+      "date": 1351283891006
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d6f437e71cf634c3"
+      },
+      "id": "d6f437e71cf634c3",
+      "type": "add",
+      "after": "29fa4ec18bab2f3e",
+      "date": 1351283929990
+    },
+    {
+      "type": "edit",
+      "id": "d6f437e71cf634c3",
+      "item": {
+        "type": "paragraph",
+        "id": "d6f437e71cf634c3",
+        "text": "jQuery has an acceptable implementation of promises since version 1.5 (about two years). "
+      },
+      "date": 1351283993929
+    },
+    {
+      "type": "edit",
+      "id": "d6f437e71cf634c3",
+      "item": {
+        "type": "paragraph",
+        "id": "d6f437e71cf634c3",
+        "text": "jQuery has an acceptable implementation of promises since version 1.5 (about two years). [http://api.jquery.com/category/deferred-object/ doc]."
+      },
+      "date": 1351284018234
+    },
+    {
+      "type": "edit",
+      "id": "d6f437e71cf634c3",
+      "item": {
+        "type": "paragraph",
+        "id": "d6f437e71cf634c3",
+        "text": "jQuery has an acceptable implementation of promises since version 1.5 (about two years). [http://api.jquery.com/category/deferred-object/ doc]. Eric Hynds wrote the often cited [http://www.erichynds.com/jquery/using-deferreds-in-jquery/ post] about it."
+      },
+      "date": 1351284082902
+    },
+    {
+      "type": "edit",
+      "id": "d6f437e71cf634c3",
+      "item": {
+        "type": "paragraph",
+        "id": "d6f437e71cf634c3",
+        "text": "jQuery has an acceptable implementation of promises since version 1.5 (about two years). [http://api.jquery.com/category/deferred-object/ doc]. Eric Hynds wrote the often cited [http://www.erichynds.com/jquery/using-deferreds-in-jquery/ post] about it. WSF contributor Steve Black is mentioned as editor."
+      },
+      "date": 1351284128941
+    },
+    {
+      "type": "edit",
+      "id": "d6f437e71cf634c3",
+      "item": {
+        "type": "paragraph",
+        "id": "d6f437e71cf634c3",
+        "text": "jQuery has an acceptable implementation of promises since version 1.5 (about two years). [http://api.jquery.com/category/deferred-object/ doc]. Eric Hynds wrote the often cited [http://www.erichynds.com/jquery/using-deferreds-in-jquery/ post] about it. SFW contributor Steve Black is mentioned as editor."
+      },
+      "date": 1351284148675
+    },
+    {
+      "type": "edit",
+      "id": "d75d5131892e3515",
+      "item": {
+        "type": "paragraph",
+        "id": "d75d5131892e3515",
+        "text": "A Radar plugin consults the interpretation context to find data to be displayed. Rearranging display pages causes the plugin to rebind to possibly different data. See [[About Radar Plugin]]."
+      },
+      "date": 1351285511556
+    },
+    {
+      "type": "edit",
+      "id": "d75d5131892e3515",
+      "item": {
+        "type": "paragraph",
+        "id": "d75d5131892e3515",
+        "text": "A Radar plugin consults the interpretation context to find data to be displayed. Rearranging display pages causes the plugin to rebind to possibly different data. "
+      },
+      "date": 1351285524051
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "51613d78d147d51c",
+        "text": ""
+      },
+      "id": "51613d78d147d51c",
+      "type": "add",
+      "after": "adb7b694f026d095",
+      "date": 1351285532763
+    },
+    {
+      "type": "edit",
+      "id": "51613d78d147d51c",
+      "item": {
+        "type": "paragraph",
+        "id": "51613d78d147d51c",
+        "text": "See [[About Radar Plugin]], [[About Method Plugin]], and soon, [[About Rollup Plugin]]."
+      },
+      "date": 1351285580176
+    },
+    {
+      "type": "edit",
+      "id": "848382f2b98b16ec",
+      "item": {
+        "type": "paragraph",
+        "id": "848382f2b98b16ec",
+        "text": "[[Page]]. Provides the most portable representation of content and its history. A page can be translated to and from JSON without loss. A page is independent of the site that might host it while the interpretation of its content is not. <i>I think Pete wanted to add location but I resisted it."
+      },
+      "date": 1351348327185
+    },
+    {
+      "type": "edit",
+      "id": "848382f2b98b16ec",
+      "item": {
+        "type": "paragraph",
+        "id": "848382f2b98b16ec",
+        "text": "[[Page]]. Provides the most portable representation of content and its history. A page can be translated to and from JSON without loss. A page is independent of the site that might host it while the interpretation of its content is not."
+      },
+      "date": 1351348340784
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "693650d360d70594",
+        "text": "<i>I think Pete wanted to add location but I resisted it."
+      },
+      "id": "693650d360d70594",
+      "type": "add",
+      "after": "848382f2b98b16ec",
+      "date": 1351348341291
+    },
+    {
+      "type": "edit",
+      "id": "693650d360d70594",
+      "item": {
+        "type": "paragraph",
+        "id": "693650d360d70594",
+        "text": "<i>I think Pete wanted to add location to page but I resisted it."
+      },
+      "date": 1351348349991
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "c93598751f9060a3",
+        "text": ""
+      },
+      "id": "c93598751f9060a3",
+      "type": "add",
+      "after": "ac54e59356895137",
+      "date": 1351348377520
+    },
+    {
+      "type": "edit",
+      "id": "c93598751f9060a3",
+      "item": {
+        "type": "paragraph",
+        "id": "c93598751f9060a3",
+        "text": "<i> There is much that remains to think through as to how an interpretation shares responsibility with pages and plugins."
+      },
+      "date": 1351348472230
+    },
+    {
+      "type": "edit",
+      "id": "c93598751f9060a3",
+      "item": {
+        "type": "paragraph",
+        "id": "c93598751f9060a3",
+        "text": "<i> There is much that remains to think through as to how an interpretation shares responsibility with pages and plugins. The current ad-hoc approach does not offer much insight beyond showing that interpretation is possible."
+      },
+      "date": 1351348520146
+    },
+    {
+      "type": "edit",
+      "id": "693650d360d70594",
+      "item": {
+        "type": "paragraph",
+        "id": "693650d360d70594",
+        "text": "<i>I think Pete wanted to add location to page but I resisted it. Hence the factoring of name and reference below."
+      },
+      "date": 1351348609976
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "6613c105d2d0c5b2",
+        "text": ""
+      },
+      "id": "6613c105d2d0c5b2",
+      "type": "add",
+      "after": "ef90aa827dda5486",
+      "date": 1351348730397
+    },
+    {
+      "type": "edit",
+      "id": "6613c105d2d0c5b2",
+      "item": {
+        "type": "paragraph",
+        "id": "6613c105d2d0c5b2",
+        "text": "<i> A sitemap looks like a collection of page names. This was in the back of my head while we were discussing names. However, it also includes a synopsis which is both searched and displayed."
+      },
+      "date": 1351349018091
+    },
+    {
+      "type": "edit",
+      "id": "6613c105d2d0c5b2",
+      "item": {
+        "type": "paragraph",
+        "id": "6613c105d2d0c5b2",
+        "text": "<i> A sitemap looks like a collection of page names. This was in the back of my head while we were discussing names. However, sitemap entries also include a synopsis which is both searched and displayed."
+      },
+      "date": 1351349073369
+    },
+    {
+      "type": "edit",
+      "id": "609a6c5190c1c909",
+      "item": {
+        "type": "paragraph",
+        "id": "609a6c5190c1c909",
+        "text": "We reflect on possible client-side models developed over a couple of hours of collaboration with [[Pete Hodgson]]. Here I record the CRC Cards we produced and will attempt to describe the dynamics we discussed. Later thoughts are in italics."
+      },
+      "date": 1351349174396
+    },
+    {
+      "type": "edit",
+      "id": "609a6c5190c1c909",
+      "item": {
+        "type": "paragraph",
+        "id": "609a6c5190c1c909",
+        "text": "We reflect on possible client-side models developed over a couple of hours of collaboration with [[Pete Hodgson]]. Here I record the CRC Cards we produced and will attempt to describe the dynamics we discussed."
+      },
+      "date": 1351349688103
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "1d6a9035fdbdbc94",
+        "text": "Later thoughts are in italics."
+      },
+      "id": "1d6a9035fdbdbc94",
+      "type": "add",
+      "after": "609a6c5190c1c909",
+      "date": 1351349688610
+    },
+    {
+      "type": "edit",
+      "id": "1d6a9035fdbdbc94",
+      "item": {
+        "type": "paragraph",
+        "id": "1d6a9035fdbdbc94",
+        "text": "My later thoughts are in italics."
+      },
+      "date": 1351349698260
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "0c6d8304b913a2c3",
+        "text": ""
+      },
+      "id": "0c6d8304b913a2c3",
+      "type": "add",
+      "after": "609a6c5190c1c909",
+      "date": 1351349723988
+    },
+    {
+      "type": "edit",
+      "id": "0c6d8304b913a2c3",
+      "item": {
+        "type": "paragraph",
+        "id": "0c6d8304b913a2c3",
+        "text": "This is only one possible end state, if there is even ever an end state. There remains order and completeness of implementation to be considered. We both favor an incremental approach. See Pete's [http://blog.thepete.net/blog/2012/06/09/the-birth-of-a-domain-object-in-ruby/ post] on \"birthing\" domain objects."
+      },
+      "date": 1351350010034
+    },
+    {
+      "type": "edit",
+      "id": "1d6a9035fdbdbc94",
+      "item": {
+        "type": "paragraph",
+        "id": "1d6a9035fdbdbc94",
+        "text": "My later thoughts are in italics. Consider skipping these on first reading."
+      },
+      "date": 1351350145334
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "51883c274a8c07f0",
+        "text": ""
+      },
+      "id": "51883c274a8c07f0",
+      "type": "add",
+      "after": "8620f4812d3d4384",
+      "date": 1351350260708
+    },
+    {
+      "type": "edit",
+      "id": "51883c274a8c07f0",
+      "item": {
+        "type": "paragraph",
+        "id": "51883c274a8c07f0",
+        "text": "<i> A display page could be responsible for rendering unresolvable links red. I decided not to have red links back when the only approach for resolving links involved probing remote sites for 404s."
+      },
+      "date": 1351350366991
+    },
+    {
+      "type": "edit",
+      "id": "51883c274a8c07f0",
+      "item": {
+        "type": "paragraph",
+        "id": "51883c274a8c07f0",
+        "text": "<i> A display page could be responsible for rendering unresolvable links in red. I decided not to have red links back when the only approach for resolving links involved probing remote sites for 404s."
+      },
+      "date": 1351350435836
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "735f264c7716df22",
+        "text": ""
+      },
+      "id": "735f264c7716df22",
+      "type": "add",
+      "after": "548d42c89d9e83c1",
+      "date": 1351350649305
+    },
+    {
+      "type": "edit",
+      "id": "735f264c7716df22",
+      "item": {
+        "type": "paragraph",
+        "id": "735f264c7716df22",
+        "text": "<i> Resolution context can vary from paragraph to paragraph. "
+      },
+      "date": 1351350748939
+    },
+    {
+      "type": "edit",
+      "id": "735f264c7716df22",
+      "item": {
+        "type": "paragraph",
+        "id": "735f264c7716df22",
+        "text": "<i> Resolution context can vary from paragraph to paragraph. Among the [[Quirks of History]] context is now constructed while rendering and attached to links as title hover text. "
+      },
+      "date": 1351350886438
+    },
+    {
+      "type": "edit",
+      "id": "1d6a9035fdbdbc94",
+      "item": {
+        "type": "paragraph",
+        "id": "1d6a9035fdbdbc94",
+        "text": "My later thoughts are in italics. Consider skipping these on first reading. Try pulling up rev 61."
+      },
+      "date": 1351351989855
+    },
+    {
+      "type": "edit",
+      "id": "adb7b694f026d095",
+      "item": {
+        "type": "paragraph",
+        "id": "adb7b694f026d095",
+        "text": "A Rollup plugin consults one interpretation context to find page names which it resolves and retrieves. Then it constructs for each an alternative interpretation context within which Method plugins can be invisibly evaluated. See Rollup in Pseudo-Code"
+      },
+      "date": 1351364625191
+    },
+    {
+      "type": "edit",
+      "id": "adb7b694f026d095",
+      "item": {
+        "type": "paragraph",
+        "id": "adb7b694f026d095",
+        "text": "A Rollup plugin consults one interpretation context to find page names which it resolves and retrieves. Then it constructs for each an alternative interpretation context within which Method plugins can be invisibly evaluated. See [[Rollup in Pseudocode]]."
+      },
+      "date": 1351364666845
+    },
+    {
+      "type": "edit",
+      "id": "ac54e59356895137",
+      "item": {
+        "type": "paragraph",
+        "id": "ac54e59356895137",
+        "text": "[[Interpretation Context]]. Provides a scope within which many data retrieval operations take place. The arrangement of display pages implies one interpretation context but others can be constructed for more specialized evaluations. For example, the Rollup plugin evaluates Method plugins from pages that have not been displayed."
+      },
+      "date": 1352597851200
+    },
+    {
+      "type": "edit",
+      "id": "b1f54bf8f7aab439",
+      "item": {
+        "type": "html",
+        "id": "b1f54bf8f7aab439",
+        "text": "<h3> Objects"
+      },
+      "date": 1419383194871
+    },
+    {
+      "type": "edit",
+      "id": "693650d360d70594",
+      "item": {
+        "type": "html",
+        "id": "693650d360d70594",
+        "text": "<i>I think Pete wanted to add location to page but I resisted it. Hence the factoring of name and reference below."
+      },
+      "date": 1419383199429
+    },
+    {
+      "type": "edit",
+      "id": "51883c274a8c07f0",
+      "item": {
+        "type": "html",
+        "id": "51883c274a8c07f0",
+        "text": "<i> A display page could be responsible for rendering unresolvable links in red. I decided not to have red links back when the only approach for resolving links involved probing remote sites for 404s."
+      },
+      "date": 1419383202315
+    },
+    {
+      "type": "edit",
+      "id": "735f264c7716df22",
+      "item": {
+        "type": "html",
+        "id": "735f264c7716df22",
+        "text": "<i> Resolution context can vary from paragraph to paragraph. Among the [[Quirks of History]] context is now constructed while rendering and attached to links as title hover text. "
+      },
+      "date": 1419383206393
+    },
+    {
+      "type": "edit",
+      "id": "c93598751f9060a3",
+      "item": {
+        "type": "html",
+        "id": "c93598751f9060a3",
+        "text": "<i> There is much that remains to think through as to how an interpretation shares responsibility with pages and plugins. The current ad-hoc approach does not offer much insight beyond showing that interpretation is possible."
+      },
+      "date": 1419383208917
+    },
+    {
+      "type": "edit",
+      "id": "6613c105d2d0c5b2",
+      "item": {
+        "type": "html",
+        "id": "6613c105d2d0c5b2",
+        "text": "<i> A sitemap looks like a collection of page names. This was in the back of my head while we were discussing names. However, sitemap entries also include a synopsis which is both searched and displayed."
+      },
+      "date": 1419383221696
+    },
+    {
+      "type": "edit",
+      "id": "df49c7fbaceea8e1",
+      "item": {
+        "type": "html",
+        "id": "df49c7fbaceea8e1",
+        "text": "<h3> Scenarios"
+      },
+      "date": 1419383224884
+    },
+    {
+      "type": "edit",
+      "id": "aa4919b83eeeaf29",
+      "item": {
+        "type": "html",
+        "id": "aa4919b83eeeaf29",
+        "text": "<h3> Sequencing"
+      },
+      "date": 1419383229466
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "pagefold",
+        "id": "f2595983b8d22f49",
+        "text": "."
+      },
+      "after": "d6f437e71cf634c3",
+      "id": "f2595983b8d22f49",
+      "date": 1560740229377
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "697296a8d4ba9036",
+        "text": "It became hard to find time to work with Pete once he became a father. As I write here I notice that the page is six years old. No surprise that the kid is that old too."
+      },
+      "after": "f2595983b8d22f49",
+      "id": "697296a8d4ba9036",
+      "date": 1560740237421
+    },
+    {
+      "type": "edit",
+      "id": "697296a8d4ba9036",
+      "item": {
+        "type": "paragraph",
+        "id": "697296a8d4ba9036",
+        "text": "It became hard to find time to work with Pete once he became a father. As I write here I notice that the page is six years old. No surprise that the kid is that old too. [https://twitter.com/ph1/status/1139721852417216512/photo/1 twitter]"
+      },
+      "date": 1560740327924
+    },
+    {
+      "type": "edit",
+      "id": "697296a8d4ba9036",
+      "item": {
+        "type": "paragraph",
+        "id": "697296a8d4ba9036",
+        "text": "It became hard to find time to work with Pete once he became a father. I notice this page is six years old. No surprise that the kid is that old too. [https://twitter.com/ph1/status/1139721852417216512/photo/1 twitter]"
+      },
+      "date": 1560740354783
+    },
+    {
+      "type": "fork",
+      "site": "ward.fed.wiki.org",
+      "date": 1635319776655
+    }
+  ]
+}

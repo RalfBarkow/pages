@@ -1,0 +1,402 @@
+{
+  "title": "Magic Container",
+  "story": [
+    {
+      "type": "html",
+      "text": "<b>Name</b>: Magic Container",
+      "id": "b1205eae9ffb1ef12d6ff2b9e3af058d"
+    },
+    {
+      "type": "html",
+      "text": "<b>Type</b>: Development ",
+      "id": "e4d6ef24a376dbe9f5c7ed9a2e20653c"
+    },
+    {
+      "type": "html",
+      "text": "<b>Problem</b>: Poor design and a non-OO approach has left your application code with lots of simple (primitive or fine-grained) variables. Method calls have lengthy parameter lists. Methods with reference parameters are poorly documented or understood.",
+      "id": "1c38fc61523e07f032ec9f6f0b3de135"
+    },
+    {
+      "type": "html",
+      "text": "<b>Context</b>: any procedural code running in an OO environment.",
+      "id": "d6484c835c13debd6b9b510fbadfa006"
+    },
+    {
+      "type": "html",
+      "text": "<b>Forces</b>:  Passing many primitive parameters to a method call is known to be poor practice and it has been decided to refactor many fine-grained variables into something coarser. Bundling a success flag with several results into a method return object obviates the need for those icky reference params. There is insufficient time or experience to do the analysis and design to discover an appropriate class to own those values. Forget any understanding of encapsulation.",
+      "id": "d89c87146e4728be996f51018165a287"
+    },
+    {
+      "type": "html",
+      "text": "<b>Supposed Solution</b>: Maximize reuse by using a generic container object to hold all variables irrespective of type or context. You could really justify things to one's boss if you used a hashed collection ([[Hash Table]] / Map) as you could then describe the values in the collection as quasi-attributes. Multiple return values combined with a method success code is now a cinch. Method signatures are now nice and compact:",
+      "id": "349c55f2a7fd7d7b5f028eba03803d2f"
+    },
+    {
+      "type": "code",
+      "text": " Map doIt(Map withThis)",
+      "id": "ece9d18b5dc79407a07e9580b5cb7a95"
+    },
+    {
+      "type": "html",
+      "text": "You can even randomly chain the Collection that comes out of one method into the next without that pesky compiler ever complaining:",
+      "id": "75917ce661dedbb8dca8dc109b43f077"
+    },
+    {
+      "type": "code",
+      "text": " Map foo = doThat(andThat(andWhyNotThat(new HashMap())));\n Map bar = doThat(andThat(andThisTimeThat(andWhyNotThat(foo))));",
+      "id": "c628b494d5cc34ddaf177e5f6078e56e"
+    },
+    {
+      "type": "html",
+      "text": "<b>Resulting Context</b>: The understanding of the origins and lifetimes of the objects in the collection is quickly lost. Finding what objects are in the Magic Container, their type, what key an object is stored under, are all a function of good fortune and not doing anything drastic with the existing code. The collection quickly bloats as no-one dares take anything out of the collection in case it might be used elsewhere. In truly horrible cases the same key references different objects in different contexts and the same object (or perhaps a clone) can be in the container several times over with different names.",
+      "id": "a0ce75e1055b75ae5e0c02fdc98f3ab0"
+    },
+    {
+      "type": "html",
+      "text": "<b>Design Rationale</b>: I'm doing reuse.. and encapsulation.. I must be good...",
+      "id": "37e2b1ae19fa47f46b0d1a2b728e6985"
+    },
+    {
+      "type": "html",
+      "text": "<b>Appropriate Usage</b>: not much.",
+      "id": "2fc8fb1e92d3a58ce01c22594ab4afd4"
+    },
+    {
+      "type": "html",
+      "text": "<b>Synonyms</b>: [[Bucket Of Vomit]]",
+      "id": "1ab30bb886385057591ce842f4712fc0"
+    },
+    {
+      "type": "html",
+      "text": "<b>Other Occurrences</b>: (for the J2EE wallahs) The HTTPServletRequest can contain any amount of decontextualized gunk. Stick in a few attributes and pass it wholesale into all your method calls. Chaining servlets gives you *wonderful* flexibility - just sling a few more attributes on the request and forward it on. In no time, you will have absolutely no idea where anything came from or where it might be used.",
+      "id": "f8a0370e6e557e9bebc067d8191e989f"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Re Factor]]ed solution</b>:  Make a class/struct with the parameters to pass in as data members - a [[Parameter Object]]. The default constructor can be used to assign meaningful default parameters. Allows you to simulate named parameters with some ease (though languages that don't allow convenient aggregate initializers might find this approach painful). In a language with [[Static Typing]]; the compiler will make sure that the appropriate [[Parameter Object]] is passed in. ",
+      "id": "648cbb5471bba73a9a3ddfe617f89cbd"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Andy Gray]]",
+      "id": "d1614b71f9d55fe517373bda01c37062"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "de03ef541e79ba1549fc669b8e08f1a3"
+    },
+    {
+      "type": "html",
+      "text": "\nYou can make this even worse by nesting maps.",
+      "id": "3db345e430e90bebfa96647716e62d72"
+    },
+    {
+      "type": "html",
+      "text": "\nAs to the refactored solution above, it's not ideal. Rather than using some [[Parameter Object]] that works only for the method, try to identify clusters of parameters that that make sense and turn those into objects that might be useful across the codebase. In other words - a parameter object is simply a mechanical fix, although it is somewhat better because you have some compile-time safety. Try to engineer a proper solution.",
+      "id": "e6df8edb0e5c4a875d4d8f1d5c58a57c"
+    },
+    {
+      "type": "html",
+      "text": "\nIf it's not doable, at least put a \"verifyme\" method in the parameter object which is called on entry into the method. Its job is to throw an [[Illegal State Exception]] if the object wasn't set up right. You can also move control logic into the parameter object, to determine what combinations of parameters are set (although this is horrible). Alternatively, you can move the method in question into the parameter object, and if different combinations of parameters make different things happen, create subclasses with polymorphic implementations.",
+      "id": "97aef09c2d354fa8362a7f38ebceed35"
+    },
+    {
+      "type": "html",
+      "text": "\nthus mungName(pers1, pers2, pers3, org1, org2, foo1, foo2, foo3)",
+      "id": "7bd4819ef6a6420271886fac8bc9c96f"
+    },
+    {
+      "type": "html",
+      "text": "\nbecomes",
+      "id": "23957230110270035e97cbcc6db2f4d0"
+    },
+    {
+      "type": "code",
+      "text": " abstract class nameMunger {\n   foo1, foo2, foo3;\n   abstract mungit()\n }",
+      "id": "580de224ae1e26979a8b4ebfc47af9bb"
+    },
+    {
+      "type": "code",
+      "text": " class personnamemunger extends namemunger {\n   pers1, pers2;\n   mungIt() { ... }\n }",
+      "id": "503bde6bc10ce67433bf65559b16f1c0"
+    },
+    {
+      "type": "code",
+      "text": " class orgnamemunger extends namemunger {\n   org1, org2;\n   mungIt() { ... }\n }",
+      "id": "e1d0bb6c91687aa6ac7f749d268d5280"
+    },
+    {
+      "type": "html",
+      "text": "\nwith appropriate constructors.",
+      "id": "d42f4da68bc609c14c52b8f937ab8551"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Paul Murray]]",
+      "id": "13a7d360498310f61948ef743c997c6b"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "de03ef541e79ba1549fc669b8e08f1a3"
+    },
+    {
+      "type": "html",
+      "text": "\nThis is a form of [[Stamp Coupling]] (see also [[Coupling And Cohesion]]), and as such, may be an improvement over what had gone before, but is a less than desirable solution.",
+      "id": "0a67f71e7aa8dc6f94bbe1918914bc72"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "de03ef541e79ba1549fc669b8e08f1a3"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Keyword Parameter Passing]] is also a solution to long positional parameter lists. This should be included with the above solutions. Associative arrays can also be used.",
+      "id": "40029cf9b4e6a7c404297966cf32ba24"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "de03ef541e79ba1549fc669b8e08f1a3"
+    },
+    {
+      "type": "html",
+      "text": "\nThe only use I have seen for [[Magic Container]] is remoting. This simplifies the remoting code enormously in comparison to the cost of implementing the calls. It also really helps if the [[Magic Container]] itself validates the objects being added can be transferred through the remoting barrier (by type if possible). --[[Joshua Hudson]]",
+      "id": "a912a9aa54fda56098b943c5c3a5fffb"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "de03ef541e79ba1549fc669b8e08f1a3"
+    },
+    {
+      "type": "html",
+      "text": "See Also: [[Universal Statement]]",
+      "id": "ddd9b39b19c14b8ab0711467fa416213"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "de03ef541e79ba1549fc669b8e08f1a3"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Container]]",
+      "id": "a5bacd2976fb6f8faf7c16aae40cf6a4"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?MagicContainer c2.com]",
+      "id": "8711f1a729df1afc65137e6c1613577c"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1384719415000,
+      "id": "bbac4c819cee938d3fbeb73b0df0d763",
+      "type": "create",
+      "item": {
+        "title": "Magic Container",
+        "story": [
+          {
+            "type": "html",
+            "text": "<b>Name</b>: Magic Container",
+            "id": "b1205eae9ffb1ef12d6ff2b9e3af058d"
+          },
+          {
+            "type": "html",
+            "text": "<b>Type</b>: Development ",
+            "id": "e4d6ef24a376dbe9f5c7ed9a2e20653c"
+          },
+          {
+            "type": "html",
+            "text": "<b>Problem</b>: Poor design and a non-OO approach has left your application code with lots of simple (primitive or fine-grained) variables. Method calls have lengthy parameter lists. Methods with reference parameters are poorly documented or understood.",
+            "id": "1c38fc61523e07f032ec9f6f0b3de135"
+          },
+          {
+            "type": "html",
+            "text": "<b>Context</b>: any procedural code running in an OO environment.",
+            "id": "d6484c835c13debd6b9b510fbadfa006"
+          },
+          {
+            "type": "html",
+            "text": "<b>Forces</b>:  Passing many primitive parameters to a method call is known to be poor practice and it has been decided to refactor many fine-grained variables into something coarser. Bundling a success flag with several results into a method return object obviates the need for those icky reference params. There is insufficient time or experience to do the analysis and design to discover an appropriate class to own those values. Forget any understanding of encapsulation.",
+            "id": "d89c87146e4728be996f51018165a287"
+          },
+          {
+            "type": "html",
+            "text": "<b>Supposed Solution</b>: Maximize reuse by using a generic container object to hold all variables irrespective of type or context. You could really justify things to one's boss if you used a hashed collection ([[Hash Table]] / Map) as you could then describe the values in the collection as quasi-attributes. Multiple return values combined with a method success code is now a cinch. Method signatures are now nice and compact:",
+            "id": "349c55f2a7fd7d7b5f028eba03803d2f"
+          },
+          {
+            "type": "code",
+            "text": " Map doIt(Map withThis)",
+            "id": "ece9d18b5dc79407a07e9580b5cb7a95"
+          },
+          {
+            "type": "html",
+            "text": "You can even randomly chain the Collection that comes out of one method into the next without that pesky compiler ever complaining:",
+            "id": "75917ce661dedbb8dca8dc109b43f077"
+          },
+          {
+            "type": "code",
+            "text": " Map foo = doThat(andThat(andWhyNotThat(new HashMap())));\n Map bar = doThat(andThat(andThisTimeThat(andWhyNotThat(foo))));",
+            "id": "c628b494d5cc34ddaf177e5f6078e56e"
+          },
+          {
+            "type": "html",
+            "text": "<b>Resulting Context</b>: The understanding of the origins and lifetimes of the objects in the collection is quickly lost. Finding what objects are in the Magic Container, their type, what key an object is stored under, are all a function of good fortune and not doing anything drastic with the existing code. The collection quickly bloats as no-one dares take anything out of the collection in case it might be used elsewhere. In truly horrible cases the same key references different objects in different contexts and the same object (or perhaps a clone) can be in the container several times over with different names.",
+            "id": "a0ce75e1055b75ae5e0c02fdc98f3ab0"
+          },
+          {
+            "type": "html",
+            "text": "<b>Design Rationale</b>: I'm doing reuse.. and encapsulation.. I must be good...",
+            "id": "37e2b1ae19fa47f46b0d1a2b728e6985"
+          },
+          {
+            "type": "html",
+            "text": "<b>Appropriate Usage</b>: not much.",
+            "id": "2fc8fb1e92d3a58ce01c22594ab4afd4"
+          },
+          {
+            "type": "html",
+            "text": "<b>Synonyms</b>: [[Bucket Of Vomit]]",
+            "id": "1ab30bb886385057591ce842f4712fc0"
+          },
+          {
+            "type": "html",
+            "text": "<b>Other Occurrences</b>: (for the J2EE wallahs) The HTTPServletRequest can contain any amount of decontextualized gunk. Stick in a few attributes and pass it wholesale into all your method calls. Chaining servlets gives you *wonderful* flexibility - just sling a few more attributes on the request and forward it on. In no time, you will have absolutely no idea where anything came from or where it might be used.",
+            "id": "f8a0370e6e557e9bebc067d8191e989f"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Re Factor]]ed solution</b>:  Make a class/struct with the parameters to pass in as data members - a [[Parameter Object]]. The default constructor can be used to assign meaningful default parameters. Allows you to simulate named parameters with some ease (though languages that don't allow convenient aggregate initializers might find this approach painful). In a language with [[Static Typing]]; the compiler will make sure that the appropriate [[Parameter Object]] is passed in. ",
+            "id": "648cbb5471bba73a9a3ddfe617f89cbd"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Andy Gray]]",
+            "id": "d1614b71f9d55fe517373bda01c37062"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "de03ef541e79ba1549fc669b8e08f1a3"
+          },
+          {
+            "type": "html",
+            "text": "\nYou can make this even worse by nesting maps.",
+            "id": "3db345e430e90bebfa96647716e62d72"
+          },
+          {
+            "type": "html",
+            "text": "\nAs to the refactored solution above, it's not ideal. Rather than using some [[Parameter Object]] that works only for the method, try to identify clusters of parameters that that make sense and turn those into objects that might be useful across the codebase. In other words - a parameter object is simply a mechanical fix, although it is somewhat better because you have some compile-time safety. Try to engineer a proper solution.",
+            "id": "e6df8edb0e5c4a875d4d8f1d5c58a57c"
+          },
+          {
+            "type": "html",
+            "text": "\nIf it's not doable, at least put a \"verifyme\" method in the parameter object which is called on entry into the method. Its job is to throw an [[Illegal State Exception]] if the object wasn't set up right. You can also move control logic into the parameter object, to determine what combinations of parameters are set (although this is horrible). Alternatively, you can move the method in question into the parameter object, and if different combinations of parameters make different things happen, create subclasses with polymorphic implementations.",
+            "id": "97aef09c2d354fa8362a7f38ebceed35"
+          },
+          {
+            "type": "html",
+            "text": "\nthus mungName(pers1, pers2, pers3, org1, org2, foo1, foo2, foo3)",
+            "id": "7bd4819ef6a6420271886fac8bc9c96f"
+          },
+          {
+            "type": "html",
+            "text": "\nbecomes",
+            "id": "23957230110270035e97cbcc6db2f4d0"
+          },
+          {
+            "type": "code",
+            "text": " abstract class nameMunger {\n   foo1, foo2, foo3;\n   abstract mungit()\n }",
+            "id": "580de224ae1e26979a8b4ebfc47af9bb"
+          },
+          {
+            "type": "code",
+            "text": " class personnamemunger extends namemunger {\n   pers1, pers2;\n   mungIt() { ... }\n }",
+            "id": "503bde6bc10ce67433bf65559b16f1c0"
+          },
+          {
+            "type": "code",
+            "text": " class orgnamemunger extends namemunger {\n   org1, org2;\n   mungIt() { ... }\n }",
+            "id": "e1d0bb6c91687aa6ac7f749d268d5280"
+          },
+          {
+            "type": "html",
+            "text": "\nwith appropriate constructors.",
+            "id": "d42f4da68bc609c14c52b8f937ab8551"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Paul Murray]]",
+            "id": "13a7d360498310f61948ef743c997c6b"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "de03ef541e79ba1549fc669b8e08f1a3"
+          },
+          {
+            "type": "html",
+            "text": "\nThis is a form of [[Stamp Coupling]] (see also [[Coupling And Cohesion]]), and as such, may be an improvement over what had gone before, but is a less than desirable solution.",
+            "id": "0a67f71e7aa8dc6f94bbe1918914bc72"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "de03ef541e79ba1549fc669b8e08f1a3"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Keyword Parameter Passing]] is also a solution to long positional parameter lists. This should be included with the above solutions. Associative arrays can also be used.",
+            "id": "40029cf9b4e6a7c404297966cf32ba24"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "de03ef541e79ba1549fc669b8e08f1a3"
+          },
+          {
+            "type": "html",
+            "text": "\nThe only use I have seen for [[Magic Container]] is remoting. This simplifies the remoting code enormously in comparison to the cost of implementing the calls. It also really helps if the [[Magic Container]] itself validates the objects being added can be transferred through the remoting barrier (by type if possible). --[[Joshua Hudson]]",
+            "id": "a912a9aa54fda56098b943c5c3a5fffb"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "de03ef541e79ba1549fc669b8e08f1a3"
+          },
+          {
+            "type": "html",
+            "text": "See Also: [[Universal Statement]]",
+            "id": "ddd9b39b19c14b8ab0711467fa416213"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "de03ef541e79ba1549fc669b8e08f1a3"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Container]]",
+            "id": "a5bacd2976fb6f8faf7c16aae40cf6a4"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?MagicContainer c2.com]",
+            "id": "8711f1a729df1afc65137e6c1613577c"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1628111849502
+    }
+  ]
+}

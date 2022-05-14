@@ -1,0 +1,926 @@
+{
+  "title": "Diff Algorithm",
+  "story": [
+    {
+      "type": "html",
+      "text": "<b>How does a diff algorithm work?</b>",
+      "id": "b9c8f4c14d64f7d5e7e6b82c24ff445a"
+    },
+    {
+      "type": "html",
+      "text": "There isn't one true diff algorithm, but several with different characteristics. The basic idea is to find a 'modification script' that will turn Text A into Text B. They use modification operations such as insertion and deletion. Usually, you'd want the minimal number of changes required, but some application also have to weigh operations depending on how much text each one affects, or other factors.",
+      "id": "30eae680c92e8d713030c3d368875c52"
+    },
+    {
+      "type": "html",
+      "text": "\nWith a bit of further modern literature search (such as anyone at the level of a university student and beyond (which of course not everyone is) should be capable), these comprehensive papers are easy to find:",
+      "id": "5b39d734897b1fbf4497fa7730b3c98b"
+    },
+    {
+      "type": "html",
+      "text": " W. Miller & E. W. Myers. A File Comparison Program. _Software -- Practice and Experience_ 15(11), November 1985, pp. 1025-1040.",
+      "id": "c5d3d8c5e15752f0a32c256705228d3b"
+    },
+    {
+      "type": "html",
+      "text": " W. Tichy. The String-to-String Correction Problem with Block Moves. _ACM Transactions on Computer Systems_ 2(4), November 1984, pp. 309-321.",
+      "id": "d263fe267e8b95f5bf7dc95e48e76dcf"
+    },
+    {
+      "type": "html",
+      "text": " P. Heckel. A technique for Isolating Differences Between Files. _Communications of the ACM_ 21(4), April 1978, pp. 264-268",
+      "id": "6321bf32e7a039c7c6b4f74ab21ebfad"
+    },
+    {
+      "type": "html",
+      "text": "\nSome more recent diff-style algorithms:",
+      "id": "4c974fa4f84ea89f6cbbc45c0fc6aee9"
+    },
+    {
+      "type": "html",
+      "text": " Xdelta, which beautifully diffs binary files - [http://xdelta.org/ xdelta.org]",
+      "id": "1b205cbeb94d8315b6263631fb64ddf6"
+    },
+    {
+      "type": "html",
+      "text": " Rsync efficiently diffs binary files over network links - [http://samba.org/~tridge/phd_thesis.pdf samba.org]",
+      "id": "2625bde21b967f2b58a8674c802871ba"
+    },
+    {
+      "type": "html",
+      "text": " bsdiff, which is optimized for compiled executables - [http://www.daemonology.net/bsdiff/ www.daemonology.net]",
+      "id": "e29c54bfdd7066c9630174f1beac61a7"
+    },
+    {
+      "type": "image",
+      "url": "http://www.cs.dartmouth.edu/~doug/fig1.jpg",
+      "text": "www.cs.dartmouth.edu",
+      "id": "4ba263d14e785a5a01504911b07f6e9a"
+    },
+    {
+      "type": "image",
+      "url": "http://www.cs.dartmouth.edu/~doug/fig2.jpg",
+      "text": "www.cs.dartmouth.edu",
+      "id": "1cc3512ff841492ab4a062c81e2096c8"
+    },
+    {
+      "type": "html",
+      "text": "\nThe original Unix diff paper was Hunt and Mc<i></i>Ilroy Comp. Sci. Tech. Rep. #41, Bell Telephone Laboratories (1976).\nThere's a copy at [http://www.cs.dartmouth.edu/~doug/diff.ps www.cs.dartmouth.edu]. The missing figures are at  and ",
+      "id": "149ac264be0b6cc3c8d99899ebc5a167"
+    },
+    {
+      "type": "html",
+      "text": "\nHunt-Mc<i></i>Ilroy is considerably faster for the line-to-line comparisons than the \"folklore\" dynamic programming algorithm that has been rediscovered too many times to trace the original discoverer, even though it's often called the [[Wagner Fisher Algorithm]]. Further discussion over at [http://wiki.tcl.tk/3108 wiki.tcl.tk].",
+      "id": "bc5dfa410fc562540868d9468e1db4e0"
+    },
+    {
+      "type": "html",
+      "text": "\nApplications for diff algorithms include comparison of amino acid sequences (and the answer to the question of 'how far apart are they?'), Wikis, storage reduction in a version control system, historical analysis of different copies of old texts (say the Magna Carta), and by the \"patch\" command to update source files without needing to replace the whole file.",
+      "id": "1fd96020733e54edaddc55db053f72b1"
+    },
+    {
+      "type": "html",
+      "text": "\nFrom one example of typical diff implementation source used by the cvs program at: [http://cvs.sourceforge.net/viewcvs.py/*checkout*/cvsgui/cvsgui/cvs-1.10/diff/analyze.c?&rev=1.1.1.3 cvs.sourceforge.net]",
+      "id": "1903736916df48ff94b5837128e63d45"
+    },
+    {
+      "type": "html",
+      "text": "\nThe basic algorithm is described in: \"An O(ND) Difference Algorithm and its Variations\", Eugene Myers, Algorithmica Vol. 1 No. 2, 1986, pp. 251-266; see especially section 4.2, which describes the variation used below. Unless the --minimal option is specified, this code uses the TOO_EXPENSIVE heuristic, by Paul Eggert, to limit the cost to O(N**1.5 log N) at the price of producing suboptimal output for large inputs with many differences.",
+      "id": "623eac744b8ceb17e421597e95d9a101"
+    },
+    {
+      "type": "html",
+      "text": "\nThe basic algorithm was independently discovered as described in: \"Algorithms for Approximate String Matching\", E. Ukkonen, Information and Control Vol. 64, 1985, pp. 100-118.",
+      "id": "a33e454b5c4404f279323f634778256c"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "c98ddc05be0ce4345d913d8d7642a418"
+    },
+    {
+      "type": "html",
+      "text": "Note: This Wiki just calls the unix diff command, which implements such an algorithm. For a discussion of how this wiki uses one implementation of this algorithm, the unix diff utility, see [[Quick Diff]]",
+      "id": "a63a522351d702839f8045d22032c1ee"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "c98ddc05be0ce4345d913d8d7642a418"
+    },
+    {
+      "type": "html",
+      "text": "\nThe core of diff algorithms seeks to compare two sequences and to discover how the first can be transformed into the second by a sequence of operations using the primitives <b>delete-subsequence</b>, and <b>insert-subseqence</b>. If a delete and an insert coincide on the same range then it can be labeled as a <b>change-subsequence</b>. The user doesn't always want to be informed as to which subsequences remain identical, but this information is nonetheless typically computed as a by-product of the basic algorithm.",
+      "id": "f7aa3dff4f1d5ae880f9ff4f9008333a"
+    },
+    {
+      "type": "html",
+      "text": "\nThe sophisticated way to find those editing operations is to sort the two sequences in order of the values of the elements of the sequences; for when the basic unit is a text line, usually a hashcode of each line is used to represent the line, and the sequences are sorted by hashcode in order to discover groups of identical elements/lines. Once identical elements are found, they are clumped together into runs which were adjacent in the pre-sorted sequences. One common variant looks for the longest possible such runs, which is an O(N^2) approach, but for N equal to the number of possibilities in each group, <b>not</b> the number of total elements/lines, so this is usually acceptably fast.",
+      "id": "8accb661a6b63c3421774a52beb228c7"
+    },
+    {
+      "type": "html",
+      "text": "\nAt this stage all matching regions between the two sequences/files have been found. Running sequentially through the elements/lines that have not been matched now trivially indicates which regions have been inserted, deleted, or changed. Usually moved regions are indicated as an insert and a delete, but with some extra effort (not typically done by most diff programs) they can be reported as <b>moved</b>.",
+      "id": "6ec2a01892422492fddc9a12124ee026"
+    },
+    {
+      "type": "html",
+      "text": "\nActually source code in C can of course be found in e.g. the GNU version of diff or the one from Version 7 Unix, also available online.",
+      "id": "360c7fad90848dbfc22328519a731f3c"
+    },
+    {
+      "type": "html",
+      "text": "\nThe smallest versions of this algorithm can be implemented in less space than the above text of this article; it's less complicated than it may sound. -- [[Doug Merritt]]",
+      "id": "f3b57a3de435d28258f77978d15aabc7"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "c98ddc05be0ce4345d913d8d7642a418"
+    },
+    {
+      "type": "html",
+      "text": "\nOne aspect of 'diff' is that many times the users of the diff output, is not actually interested in the differences between the two strings/files/text/binaries.   What they are more interested in is how similar the two things are.",
+      "id": "e0a129aed4c03ee2873bdaef3b4b49d3"
+    },
+    {
+      "type": "html",
+      "text": "\nA example of this is attempts to find plagiarism in written text, or code that was re-used in another program.",
+      "id": "2ebf395d09536608363a032bef7b6a00"
+    },
+    {
+      "type": "html",
+      "text": "\nAt this time 'diff' is typically used for this, it probably isn't the right type of algorithm to use.",
+      "id": "3d389cb0688cab67ab0ccae245f644fc"
+    },
+    {
+      "type": "html",
+      "text": "\nThis especially becomes apparent when the two strings/files/text/binaries are typically mostly different, but share a small common, or 'nearly' common part or parts.  The individual parts are usually in block or groups, with only small segments (such as 'identifiers', or people names) changed.",
+      "id": "3cf10db51d15d32ab254b7f30cbdfa39"
+    },
+    {
+      "type": "html",
+      "text": "\nTo add to the the larger blocks of similar text, may not be in the same order, but shuffled in sequence!   And it is when that happens that the normal 'diff' algorithm breaks down.",
+      "id": "87b1859fcc92e2aa3995521c61c84704"
+    },
+    {
+      "type": "html",
+      "text": "'diff' is designed to compare things that are mostly the same, with small amounts of 'modifications'.",
+      "id": "afbea6db7d996461c9ed39f36bf9f0f2"
+    },
+    {
+      "type": "html",
+      "text": "[i]What can you use to deal with strings that has been 'shuffled', or which are 'mostly different'?[/i]",
+      "id": "f3b76a75dbe7a9cdd3e688d5b1fe3c14"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "c98ddc05be0ce4345d913d8d7642a418"
+    },
+    {
+      "type": "html",
+      "text": "\nI'd love to see someone implement diff in a modern language like Haskell.",
+      "id": "5e2c61364a7ae3aae3c7f307eb64b113"
+    },
+    {
+      "type": "html",
+      "text": "\n[http://hackage.haskell.org/package/Diff hackage.haskell.org]",
+      "id": "81f30899a7c6083598181fb8c33090a3"
+    },
+    {
+      "type": "html",
+      "text": "<i>The book that I learned Haskell from uses diff as an example of [[Dynamic Programming]].</i>",
+      "id": "e5826bc7abc6423cb5ee7e65349549a1"
+    },
+    {
+      "type": "html",
+      "text": " Which book was that???",
+      "id": "b5171af86d9f376b66feac84c0e4dc9c"
+    },
+    {
+      "type": "html",
+      "text": "\nDiscussing the application of [[Design Pattern]]s, [[Anti Pattern]]s, etc to diff algorithms might be interesting and a valuable resource. -- [[Doug Merritt]]",
+      "id": "6edf3d1c04eda7c0fcfe59d2bcbb490a"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "c98ddc05be0ce4345d913d8d7642a418"
+    },
+    {
+      "type": "html",
+      "text": "\nMy favorite mode of the diff program I'm currently uses puts these 2 characters in front of each line in the output:",
+      "id": "a7281dadc8f2c1d2712cfebdb42e1a0b"
+    },
+    {
+      "type": "html",
+      "text": " <! only in old file -- deleted",
+      "id": "52b8058485a9145bdff7b16ffd6203aa"
+    },
+    {
+      "type": "html",
+      "text": " !> only in new file -- inserted",
+      "id": "f591ebd7c1c29fb28f8bd1d7ead12f56"
+    },
+    {
+      "type": "html",
+      "text": " <- from old file here -- moved",
+      "id": "fc0009ae7fce020c33a46fe9051eecce"
+    },
+    {
+      "type": "html",
+      "text": " -> to new file here -- moved",
+      "id": "e0b1a1a5ee37d4d2a034a606a870bb3b"
+    },
+    {
+      "type": "html",
+      "text": "(a line starting with \"<-\" can always be paired with an identical line that starts with \"->\").",
+      "id": "c672de16c8e5ff765f83a8bec3ee2265"
+    },
+    {
+      "type": "html",
+      "text": "\nIf I don't see any (non-blank) lines that start \"<!\", then I can be confident that nothing was deleted (shuffled around a bit, perhaps).",
+      "id": "ced4aa81e3c067a01805af75f75eabf2"
+    },
+    {
+      "type": "html",
+      "text": " Out of curiosity, what program is that?  I've looked for programs that report moves, but have never found any.  I ended up writing my own, but am curious to see others. ~Luke",
+      "id": "77babd25cc9a9b45f43cb57a682873b3"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "c98ddc05be0ce4345d913d8d7642a418"
+    },
+    {
+      "type": "html",
+      "text": "<b>Here's a link to the popular GNU diff algorithm written for java - [http://www.bmsi.com/java/#diff www.bmsi.com]. -- [[Robert Di Falco]]</b>",
+      "id": "b6f609922b633b1472c413987e45f063"
+    },
+    {
+      "type": "html",
+      "text": "\nThere is certainly value in sharing that link, but I'm a little disappointed that, by implication, you're going with the notion that diff algorithms should just be a canned black box, like abs() or sqrt().",
+      "id": "798d12a68795e7d1002ddf2666bce957"
+    },
+    {
+      "type": "html",
+      "text": "<i>Do you think every programmer should [[Rewrite Code From Scratch]] rather than use this canned diff implementation?</i>",
+      "id": "7be76676c031b1ab59a819186a263685"
+    },
+    {
+      "type": "html",
+      "text": "\nCertainly. :-) No, that's not the point. Part of the point is, almost no-one looks inside the black box, but almost everyone is at times puzzled by the <b>diff</b> output. Understanding the algorithm allows understanding that quite a few aspects of the output are chosen arbitrarily, relative to the purpose it is used for, and that customization is possible to give output better suited to the task at hand.",
+      "id": "1bbb838a2e0cfcd0904867c940efb414"
+    },
+    {
+      "type": "html",
+      "text": "<i>One of the problems of code reuse and copy/paste programming is propagation and proliferation of bugs and defects. Consider a very popular unix tool that got branched and forked so much that every similar tool is based or uses code from the same ancestry. Now consider what happens when the original code had some hidden bug. Finding another tool might be crucial in some cases. Consider data recovery and or data-centric tools. Having multiple different implementation gives the user choice. And choice counts.</i>",
+      "id": "d2c786521313a0e2eb67decee97d23b4"
+    },
+    {
+      "type": "html",
+      "text": "\nIt's also true that most people are afraid to open up the black box, and so they suffer from a complete lack of an appropriate diff algorithm, when actually it is quite easy to write a custom one that works on the problem at hand.",
+      "id": "7451ac49117a2e3c0681714b065c7980"
+    },
+    {
+      "type": "html",
+      "text": "<i>Another reason would be to learn by example or hands-on experience. Yes you need to write a linked list to know and learn how it works. Simply using one doesn't give you that experience and there is a lot to be learned from (re)implementing and (re)solving problems and already-invented tools/solutions/programs/utilities/etc.</i>",
+      "id": "35debf2ee1ad44051e254a6c69e24637"
+    },
+    {
+      "type": "html",
+      "text": "\nThis comes up all the time; the problem is that the 30 year old <b>diff</b> only operates on units of lines. If you want an XML diff or a binary executable diff, which people do, all the time, then you're out of luck. But it's a scary black box, so that's where it stops. Or if they're lucky, they find some vendor that sells a special <b>diff</b> for that purpose. For Windows. Too bad if you're on a different OS.",
+      "id": "fbcac4d07d38f4c069399f33d9aa463a"
+    },
+    {
+      "type": "html",
+      "text": "\nPeople are so cavalier about acting like [[Once And Only Once]] means it's bad to reinvent the wheel, that once something has been done, it should never be done again. Some people elsewhere on this wiki were speaking contemptuously of anyone who writes a linked list routine. Give me a break; there are over 200 different styles of linked lists. Show me a canned implementation of every flavor.",
+      "id": "c37f56ae330ca48a5592d0fb2288ea27"
+    },
+    {
+      "type": "html",
+      "text": "\nI mentioned sqrt() - actually, I do in fact need to reimplement <b>it</b> once in a while, too, e.g. because I need a fast integer square root, not part of most standard language libraries. Or because I've implemented a new numeric type. Or because, although I'm using floating point, I only want about 3 bits of precision and I need it to be as fast as possible. The people who sneer most contemptuously at reinvention are just lucky that their own careers have been so focused that these needs haven't come up for them, but that doesn't mean such needs don't exist ([[In All My Years Ive Never]]).",
+      "id": "f3a819a5b09979596b3e5400726cfd72"
+    },
+    {
+      "type": "html",
+      "text": "\nWhat I'd really like is a language that assists in reinventing the wheel, so that I waste as little time on it as possible.",
+      "id": "cfff360914bc2c92cfb0ebbb41322334"
+    },
+    {
+      "type": "html",
+      "text": "\nThe point is that you can't pre-can every conceivable kind of algorithm. It's a fine line between avoiding unnecessary wheel reinvention versus being afraid to create a new wheel.",
+      "id": "231f035dead9866a7b466715e29f8c8f"
+    },
+    {
+      "type": "html",
+      "text": "\nIf someone comes to this page because they're interested in <b>diff</b>ing two binary executables, then the algorithm is potentially useful to them; the GNU diff is not.",
+      "id": "964ab8e947779b8c5ae19b50e4ae693b"
+    },
+    {
+      "type": "html",
+      "text": "<i>Notice that I posted code not a library. That is so people could see how a diff algorithm can be coded in Java. -- [[Robert Di Falco]]</i>",
+      "id": "654df0e84f36f496bc9de73eec67418f"
+    },
+    {
+      "type": "html",
+      "text": " Point taken. :-)",
+      "id": "bc4bc764f6558068b49bc157b0d9a383"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "c98ddc05be0ce4345d913d8d7642a418"
+    },
+    {
+      "type": "html",
+      "text": "Diff algorithms are interesting. A lot of current programs even still use the line-by-line variation (go back and forth through each file, finding a line that matches, \"hook\" there, and try to \"hook\" again). The old Hunt Mcillroy algorithm is a lot better and actually finds the LCS of the difference, rather than the line-by-line variation, which approximates it (but is still \"correct\" in the sense that it finds the differences, just not as efficiently).",
+      "id": "19b323984f0dc22b50e13f84153d4987"
+    },
+    {
+      "type": "html",
+      "text": "\nBasically, the old Hunt algorithm is better for files which have a lot of differences in them (and is in current OpenBSD diff and old UNIX ones), while the Myers one with its \"snakes\" is better for files which don't have a lot of differences in them, thus being better for general cases like CVS diff (and is in GNU diff also).",
+      "id": "1d19a5bf7d087ac74c9319c119789ce0"
+    },
+    {
+      "type": "html",
+      "text": "\nBTW those papers, despite being only about 11 pages, are extremely dense reading and will probably take you around a month of study to fully understand the stuff.",
+      "id": "656f5ea72abaf1a065038d322cdafd95"
+    },
+    {
+      "type": "html",
+      "text": "\nThere are several implementations out there:",
+      "id": "d93fd29e3cf910a8ea926639a59a8c5c"
+    },
+    {
+      "type": "html",
+      "text": "\nFor the Myers-GNU Diff variation, there's [http://www.ioplex.com/~miallen/libmba/dl/src/diff.c www.ioplex.com] (BSD licensed) and of course GNU diff itself.",
+      "id": "8d98a2eb30140874e9a8746de8afec2e"
+    },
+    {
+      "type": "html",
+      "text": "\nFor the Hunt version, there's the public domain diff from the comp.sources.misc archive (which I use in [[Wiki Server]]).",
+      "id": "076bc6d4f9629f61e2853c8d08ed1771"
+    },
+    {
+      "type": "html",
+      "text": "\nFor the dynamic programming variations (line-by-line), well, there are countless implementations of this, several at the comp.sources.misc archive.",
+      "id": "4bc47dc84df47d386a9086a5ec973e2b"
+    },
+    {
+      "type": "html",
+      "text": "\nP.S. I've read the Myers paper \"An O(ND) Algorithm and its variations\" (you can see it at [http://www.xmailserver.org/diff2.pdf www.xmailserver.org]) which has the same algorithm, but does anyone know where I can see a copy of \"A file comparison program\" on the net?",
+      "id": "d1c866bec6b49a2e9a583552628a98fd"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Ryan Norton]]",
+      "id": "56263e5910c33f6d84339c2171d3edd5"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "c98ddc05be0ce4345d913d8d7642a418"
+    },
+    {
+      "type": "html",
+      "text": "\nHere's a <b>quick-and-dirty</b> way to do a quick-and-dirty compare. Load text lines or paragraphs of two documents into two database tables with a \"Text\" column with one row per line or paragraph. Then run a query something like this:",
+      "id": "98ec669020a32deff45c5fe3bcfc499e"
+    },
+    {
+      "type": "code",
+      "text": " SELECT Text, count(text) \n FROM\n (\n ....SELECT Text, 1 as Src FROM tableOne\n ....GROUP BY text\n ..UNION ALL\n ....SELECT Text, 2 as Src FROM tableTwo\n ....GROUP BY Text\n )\n GROUP BY Text\n HAVING count(text) <> 2",
+      "id": "88eb1733cdc4c43a85f1207d6e017a88"
+    },
+    {
+      "type": "html",
+      "text": "(Dots to prevent [[Tab Munging]])",
+      "id": "6a6f5bef5ebd413be943fe5e731a932a"
+    },
+    {
+      "type": "html",
+      "text": "\nYou may have to adjust it a bit for different dialects, such as adding explicit aliases.",
+      "id": "152d5c982e06f2f0851da83872732756"
+    },
+    {
+      "type": "html",
+      "text": "\nIt does not give you sequence info and does not distinguish between duplicate lines in the same text. But, it tells you the text of differences.",
+      "id": "4bc7386210084608c5493ee2201f504a"
+    },
+    {
+      "type": "html",
+      "text": "\nReader exercise: Use nested queries and SUM(...) to also factor in line quantity occurrences.",
+      "id": "345865ddee201c8f662fb51aca3073b0"
+    },
+    {
+      "type": "html",
+      "text": "--top",
+      "id": "a512c67e00c69a8e91e93ec389dcfaa5"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "c98ddc05be0ce4345d913d8d7642a418"
+    },
+    {
+      "type": "html",
+      "text": "See also:",
+      "id": "3a57d4617d2ceb5af62377185db6b76d"
+    },
+    {
+      "type": "html",
+      "text": " [[Algorithms Road Map]]",
+      "id": "e1a185b64c681b843d247d801cf3a762"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "c98ddc05be0ce4345d913d8d7642a418"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Algorithm]]",
+      "id": "4a371eb5850cdc14f4936bceace9bbb6"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?DiffAlgorithm c2.com]",
+      "id": "428205a2b4340e94910953e509ea7632"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1326300296000,
+      "id": "49ad737dac4f6df2ac354c829075fec2",
+      "type": "create",
+      "item": {
+        "title": "Diff Algorithm",
+        "story": [
+          {
+            "type": "html",
+            "text": "<b>How does a diff algorithm work?</b>",
+            "id": "b9c8f4c14d64f7d5e7e6b82c24ff445a"
+          },
+          {
+            "type": "html",
+            "text": "\nThere isn't one true diff algorithm, but several with different characteristics. The basic idea is to find a 'modification script' that will turn Text A into Text B. They use modification operations such as insertion and deletion. Usually, you'd want the minimal number of changes required, but some application also have to weigh operations depending on how much text each one affects, or other factors.",
+            "id": "30eae680c92e8d713030c3d368875c52"
+          },
+          {
+            "type": "html",
+            "text": "\nWith a bit of further modern literature search (such as anyone at the level of a university student and beyond (which of course not everyone is) should be capable), these comprehensive papers are easy to find:",
+            "id": "5b39d734897b1fbf4497fa7730b3c98b"
+          },
+          {
+            "type": "html",
+            "text": " W. Miller & E. W. Myers. A File Comparison Program. _Software -- Practice and Experience_ 15(11), November 1985, pp. 1025-1040.",
+            "id": "c5d3d8c5e15752f0a32c256705228d3b"
+          },
+          {
+            "type": "html",
+            "text": " W. Tichy. The String-to-String Correction Problem with Block Moves. _ACM Transactions on Computer Systems_ 2(4), November 1984, pp. 309-321.",
+            "id": "d263fe267e8b95f5bf7dc95e48e76dcf"
+          },
+          {
+            "type": "html",
+            "text": " P. Heckel. A technique for Isolating Differences Between Files. _Communications of the ACM_ 21(4), April 1978, pp. 264-268",
+            "id": "6321bf32e7a039c7c6b4f74ab21ebfad"
+          },
+          {
+            "type": "html",
+            "text": "\nSome more recent diff-style algorithms:",
+            "id": "4c974fa4f84ea89f6cbbc45c0fc6aee9"
+          },
+          {
+            "type": "html",
+            "text": " Xdelta, which beautifully diffs binary files - [http://xdelta.org/ xdelta.org]",
+            "id": "1b205cbeb94d8315b6263631fb64ddf6"
+          },
+          {
+            "type": "html",
+            "text": " Rsync efficiently diffs binary files over network links - [http://samba.org/~tridge/phd_thesis.pdf samba.org]",
+            "id": "2625bde21b967f2b58a8674c802871ba"
+          },
+          {
+            "type": "html",
+            "text": " bsdiff, which is optimized for compiled executables - [http://www.daemonology.net/bsdiff/ www.daemonology.net]",
+            "id": "e29c54bfdd7066c9630174f1beac61a7"
+          },
+          {
+            "type": "image",
+            "url": "http://www.cs.dartmouth.edu/~doug/fig1.jpg",
+            "text": "www.cs.dartmouth.edu",
+            "id": "4ba263d14e785a5a01504911b07f6e9a"
+          },
+          {
+            "type": "image",
+            "url": "http://www.cs.dartmouth.edu/~doug/fig2.jpg",
+            "text": "www.cs.dartmouth.edu",
+            "id": "1cc3512ff841492ab4a062c81e2096c8"
+          },
+          {
+            "type": "html",
+            "text": "\nThe original Unix diff paper was Hunt and Mc<i></i>Ilroy Comp. Sci. Tech. Rep. #41, Bell Telephone Laboratories (1976).\nThere's a copy at [http://www.cs.dartmouth.edu/~doug/diff.ps www.cs.dartmouth.edu]. The missing figures are at  and ",
+            "id": "149ac264be0b6cc3c8d99899ebc5a167"
+          },
+          {
+            "type": "html",
+            "text": "\nHunt-Mc<i></i>Ilroy is considerably faster for the line-to-line comparisons than the \"folklore\" dynamic programming algorithm that has been rediscovered too many times to trace the original discoverer, even though it's often called the [[Wagner Fisher Algorithm]]. Further discussion over at [http://wiki.tcl.tk/3108 wiki.tcl.tk].",
+            "id": "bc5dfa410fc562540868d9468e1db4e0"
+          },
+          {
+            "type": "html",
+            "text": "\nApplications for diff algorithms include comparison of amino acid sequences (and the answer to the question of 'how far apart are they?'), Wikis, storage reduction in a version control system, historical analysis of different copies of old texts (say the Magna Carta), and by the \"patch\" command to update source files without needing to replace the whole file.",
+            "id": "1fd96020733e54edaddc55db053f72b1"
+          },
+          {
+            "type": "html",
+            "text": "\nFrom one example of typical diff implementation source used by the cvs program at: [http://cvs.sourceforge.net/viewcvs.py/*checkout*/cvsgui/cvsgui/cvs-1.10/diff/analyze.c?&rev=1.1.1.3 cvs.sourceforge.net]",
+            "id": "1903736916df48ff94b5837128e63d45"
+          },
+          {
+            "type": "html",
+            "text": "\nThe basic algorithm is described in: \"An O(ND) Difference Algorithm and its Variations\", Eugene Myers, Algorithmica Vol. 1 No. 2, 1986, pp. 251-266; see especially section 4.2, which describes the variation used below. Unless the --minimal option is specified, this code uses the TOO_EXPENSIVE heuristic, by Paul Eggert, to limit the cost to O(N**1.5 log N) at the price of producing suboptimal output for large inputs with many differences.",
+            "id": "623eac744b8ceb17e421597e95d9a101"
+          },
+          {
+            "type": "html",
+            "text": "\nThe basic algorithm was independently discovered as described in: \"Algorithms for Approximate String Matching\", E. Ukkonen, Information and Control Vol. 64, 1985, pp. 100-118.",
+            "id": "a33e454b5c4404f279323f634778256c"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "c98ddc05be0ce4345d913d8d7642a418"
+          },
+          {
+            "type": "html",
+            "text": "Note: This Wiki just calls the unix diff command, which implements such an algorithm. For a discussion of how this wiki uses one implementation of this algorithm, the unix diff utility, see [[Quick Diff]]",
+            "id": "a63a522351d702839f8045d22032c1ee"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "c98ddc05be0ce4345d913d8d7642a418"
+          },
+          {
+            "type": "html",
+            "text": "\nThe core of diff algorithms seeks to compare two sequences and to discover how the first can be transformed into the second by a sequence of operations using the primitives <b>delete-subsequence</b>, and <b>insert-subseqence</b>. If a delete and an insert coincide on the same range then it can be labeled as a <b>change-subsequence</b>. The user doesn't always want to be informed as to which subsequences remain identical, but this information is nonetheless typically computed as a by-product of the basic algorithm.",
+            "id": "f7aa3dff4f1d5ae880f9ff4f9008333a"
+          },
+          {
+            "type": "html",
+            "text": "\nThe sophisticated way to find those editing operations is to sort the two sequences in order of the values of the elements of the sequences; for when the basic unit is a text line, usually a hashcode of each line is used to represent the line, and the sequences are sorted by hashcode in order to discover groups of identical elements/lines. Once identical elements are found, they are clumped together into runs which were adjacent in the pre-sorted sequences. One common variant looks for the longest possible such runs, which is an O(N^2) approach, but for N equal to the number of possibilities in each group, <b>not</b> the number of total elements/lines, so this is usually acceptably fast.",
+            "id": "8accb661a6b63c3421774a52beb228c7"
+          },
+          {
+            "type": "html",
+            "text": "\nAt this stage all matching regions between the two sequences/files have been found. Running sequentially through the elements/lines that have not been matched now trivially indicates which regions have been inserted, deleted, or changed. Usually moved regions are indicated as an insert and a delete, but with some extra effort (not typically done by most diff programs) they can be reported as <b>moved</b>.",
+            "id": "6ec2a01892422492fddc9a12124ee026"
+          },
+          {
+            "type": "html",
+            "text": "\nActually source code in C can of course be found in e.g. the GNU version of diff or the one from Version 7 Unix, also available online.",
+            "id": "360c7fad90848dbfc22328519a731f3c"
+          },
+          {
+            "type": "html",
+            "text": "\nThe smallest versions of this algorithm can be implemented in less space than the above text of this article; it's less complicated than it may sound. -- [[Doug Merritt]]",
+            "id": "f3b57a3de435d28258f77978d15aabc7"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "c98ddc05be0ce4345d913d8d7642a418"
+          },
+          {
+            "type": "html",
+            "text": "\nOne aspect of 'diff' is that many times the users of the diff output, is not actually interested in the differences between the two strings/files/text/binaries.   What they are more interested in is how similar the two things are.",
+            "id": "e0a129aed4c03ee2873bdaef3b4b49d3"
+          },
+          {
+            "type": "html",
+            "text": "\nA example of this is attempts to find plagiarism in written text, or code that was re-used in another program.",
+            "id": "2ebf395d09536608363a032bef7b6a00"
+          },
+          {
+            "type": "html",
+            "text": "\nAt this time 'diff' is typically used for this, it probably isn't the right type of algorithm to use.",
+            "id": "3d389cb0688cab67ab0ccae245f644fc"
+          },
+          {
+            "type": "html",
+            "text": "\nThis especially becomes apparent when the two strings/files/text/binaries are typically mostly different, but share a small common, or 'nearly' common part or parts.  The individual parts are usually in block or groups, with only small segments (such as 'identifiers', or people names) changed.",
+            "id": "3cf10db51d15d32ab254b7f30cbdfa39"
+          },
+          {
+            "type": "html",
+            "text": "\nTo add to the the larger blocks of similar text, may not be in the same order, but shuffled in sequence!   And it is when that happens that the normal 'diff' algorithm breaks down.",
+            "id": "87b1859fcc92e2aa3995521c61c84704"
+          },
+          {
+            "type": "html",
+            "text": "'diff' is designed to compare things that are mostly the same, with small amounts of 'modifications'.",
+            "id": "afbea6db7d996461c9ed39f36bf9f0f2"
+          },
+          {
+            "type": "html",
+            "text": "[i]What can you use to deal with strings that has been 'shuffled', or which are 'mostly different'?[/i]",
+            "id": "f3b76a75dbe7a9cdd3e688d5b1fe3c14"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "c98ddc05be0ce4345d913d8d7642a418"
+          },
+          {
+            "type": "html",
+            "text": "\nI'd love to see someone implement diff in a modern language like Haskell.",
+            "id": "5e2c61364a7ae3aae3c7f307eb64b113"
+          },
+          {
+            "type": "html",
+            "text": "\n[http://hackage.haskell.org/package/Diff hackage.haskell.org]",
+            "id": "81f30899a7c6083598181fb8c33090a3"
+          },
+          {
+            "type": "html",
+            "text": "<i>The book that I learned Haskell from uses diff as an example of [[Dynamic Programming]].</i>",
+            "id": "e5826bc7abc6423cb5ee7e65349549a1"
+          },
+          {
+            "type": "html",
+            "text": " Which book was that???",
+            "id": "b5171af86d9f376b66feac84c0e4dc9c"
+          },
+          {
+            "type": "html",
+            "text": "\nDiscussing the application of [[Design Pattern]]s, [[Anti Pattern]]s, etc to diff algorithms might be interesting and a valuable resource. -- [[Doug Merritt]]",
+            "id": "6edf3d1c04eda7c0fcfe59d2bcbb490a"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "c98ddc05be0ce4345d913d8d7642a418"
+          },
+          {
+            "type": "html",
+            "text": "\nMy favorite mode of the diff program I'm currently uses puts these 2 characters in front of each line in the output:",
+            "id": "a7281dadc8f2c1d2712cfebdb42e1a0b"
+          },
+          {
+            "type": "html",
+            "text": " <! only in old file -- deleted",
+            "id": "52b8058485a9145bdff7b16ffd6203aa"
+          },
+          {
+            "type": "html",
+            "text": " !> only in new file -- inserted",
+            "id": "f591ebd7c1c29fb28f8bd1d7ead12f56"
+          },
+          {
+            "type": "html",
+            "text": " <- from old file here -- moved",
+            "id": "fc0009ae7fce020c33a46fe9051eecce"
+          },
+          {
+            "type": "html",
+            "text": " -> to new file here -- moved",
+            "id": "e0b1a1a5ee37d4d2a034a606a870bb3b"
+          },
+          {
+            "type": "html",
+            "text": "(a line starting with \"<-\" can always be paired with an identical line that starts with \"->\").",
+            "id": "c672de16c8e5ff765f83a8bec3ee2265"
+          },
+          {
+            "type": "html",
+            "text": "\nIf I don't see any (non-blank) lines that start \"<!\", then I can be confident that nothing was deleted (shuffled around a bit, perhaps).",
+            "id": "ced4aa81e3c067a01805af75f75eabf2"
+          },
+          {
+            "type": "html",
+            "text": " Out of curiosity, what program is that?  I've looked for programs that report moves, but have never found any.  I ended up writing my own, but am curious to see others. ~Luke",
+            "id": "77babd25cc9a9b45f43cb57a682873b3"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "c98ddc05be0ce4345d913d8d7642a418"
+          },
+          {
+            "type": "html",
+            "text": "<b>Here's a link to the popular GNU diff algorithm written for java - [http://www.bmsi.com/java/#diff www.bmsi.com]. -- [[Robert Di Falco]]</b>",
+            "id": "b6f609922b633b1472c413987e45f063"
+          },
+          {
+            "type": "html",
+            "text": "\nThere is certainly value in sharing that link, but I'm a little disappointed that, by implication, you're going with the notion that diff algorithms should just be a canned black box, like abs() or sqrt().",
+            "id": "798d12a68795e7d1002ddf2666bce957"
+          },
+          {
+            "type": "html",
+            "text": "<i>Do you think every programmer should [[Rewrite Code From Scratch]] rather than use this canned diff implementation?</i>",
+            "id": "7be76676c031b1ab59a819186a263685"
+          },
+          {
+            "type": "html",
+            "text": "\nCertainly. :-) No, that's not the point. Part of the point is, almost no-one looks inside the black box, but almost everyone is at times puzzled by the <b>diff</b> output. Understanding the algorithm allows understanding that quite a few aspects of the output are chosen arbitrarily, relative to the purpose it is used for, and that customization is possible to give output better suited to the task at hand.",
+            "id": "1bbb838a2e0cfcd0904867c940efb414"
+          },
+          {
+            "type": "html",
+            "text": "<i>One of the problems of code reuse and copy/paste programming is propagation and proliferation of bugs and defects. Consider a very popular unix tool that got branched and forked so much that every similar tool is based or uses code from the same ancestry. Now consider what happens when the original code had some hidden bug. Finding another tool might be crucial in some cases. Consider data recovery and or data-centric tools. Having multiple different implementation gives the user choice. And choice counts.</i>",
+            "id": "d2c786521313a0e2eb67decee97d23b4"
+          },
+          {
+            "type": "html",
+            "text": "\nIt's also true that most people are afraid to open up the black box, and so they suffer from a complete lack of an appropriate diff algorithm, when actually it is quite easy to write a custom one that works on the problem at hand.",
+            "id": "7451ac49117a2e3c0681714b065c7980"
+          },
+          {
+            "type": "html",
+            "text": "<i>Another reason would be to learn by example or hands-on experience. Yes you need to write a linked list to know and learn how it works. Simply using one doesn't give you that experience and there is a lot to be learned from (re)implementing and (re)solving problems and already-invented tools/solutions/programs/utilities/etc.</i>",
+            "id": "35debf2ee1ad44051e254a6c69e24637"
+          },
+          {
+            "type": "html",
+            "text": "\nThis comes up all the time; the problem is that the 30 year old <b>diff</b> only operates on units of lines. If you want an XML diff or a binary executable diff, which people do, all the time, then you're out of luck. But it's a scary black box, so that's where it stops. Or if they're lucky, they find some vendor that sells a special <b>diff</b> for that purpose. For Windows. Too bad if you're on a different OS.",
+            "id": "fbcac4d07d38f4c069399f33d9aa463a"
+          },
+          {
+            "type": "html",
+            "text": "\nPeople are so cavalier about acting like [[Once And Only Once]] means it's bad to reinvent the wheel, that once something has been done, it should never be done again. Some people elsewhere on this wiki were speaking contemptuously of anyone who writes a linked list routine. Give me a break; there are over 200 different styles of linked lists. Show me a canned implementation of every flavor.",
+            "id": "c37f56ae330ca48a5592d0fb2288ea27"
+          },
+          {
+            "type": "html",
+            "text": "\nI mentioned sqrt() - actually, I do in fact need to reimplement <b>it</b> once in a while, too, e.g. because I need a fast integer square root, not part of most standard language libraries. Or because I've implemented a new numeric type. Or because, although I'm using floating point, I only want about 3 bits of precision and I need it to be as fast as possible. The people who sneer most contemptuously at reinvention are just lucky that their own careers have been so focused that these needs haven't come up for them, but that doesn't mean such needs don't exist ([[In All My Years Ive Never]]).",
+            "id": "f3a819a5b09979596b3e5400726cfd72"
+          },
+          {
+            "type": "html",
+            "text": "\nWhat I'd really like is a language that assists in reinventing the wheel, so that I waste as little time on it as possible.",
+            "id": "cfff360914bc2c92cfb0ebbb41322334"
+          },
+          {
+            "type": "html",
+            "text": "\nThe point is that you can't pre-can every conceivable kind of algorithm. It's a fine line between avoiding unnecessary wheel reinvention versus being afraid to create a new wheel.",
+            "id": "231f035dead9866a7b466715e29f8c8f"
+          },
+          {
+            "type": "html",
+            "text": "\nIf someone comes to this page because they're interested in <b>diff</b>ing two binary executables, then the algorithm is potentially useful to them; the GNU diff is not.",
+            "id": "964ab8e947779b8c5ae19b50e4ae693b"
+          },
+          {
+            "type": "html",
+            "text": "<i>Notice that I posted code not a library. That is so people could see how a diff algorithm can be coded in Java. -- [[Robert Di Falco]]</i>",
+            "id": "654df0e84f36f496bc9de73eec67418f"
+          },
+          {
+            "type": "html",
+            "text": " Point taken. :-)",
+            "id": "bc4bc764f6558068b49bc157b0d9a383"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "c98ddc05be0ce4345d913d8d7642a418"
+          },
+          {
+            "type": "html",
+            "text": "Diff algorithms are interesting. A lot of current programs even still use the line-by-line variation (go back and forth through each file, finding a line that matches, \"hook\" there, and try to \"hook\" again). The old Hunt Mcillroy algorithm is a lot better and actually finds the LCS of the difference, rather than the line-by-line variation, which approximates it (but is still \"correct\" in the sense that it finds the differences, just not as efficiently).",
+            "id": "19b323984f0dc22b50e13f84153d4987"
+          },
+          {
+            "type": "html",
+            "text": "\nBasically, the old Hunt algorithm is better for files which have a lot of differences in them (and is in current OpenBSD diff and old UNIX ones), while the Myers one with its \"snakes\" is better for files which don't have a lot of differences in them, thus being better for general cases like CVS diff (and is in GNU diff also).",
+            "id": "1d19a5bf7d087ac74c9319c119789ce0"
+          },
+          {
+            "type": "html",
+            "text": "\nBTW those papers, despite being only about 11 pages, are extremely dense reading and will probably take you around a month of study to fully understand the stuff.",
+            "id": "656f5ea72abaf1a065038d322cdafd95"
+          },
+          {
+            "type": "html",
+            "text": "\nThere are several implementations out there:",
+            "id": "d93fd29e3cf910a8ea926639a59a8c5c"
+          },
+          {
+            "type": "html",
+            "text": "\nFor the Myers-GNU Diff variation, there's [http://www.ioplex.com/~miallen/libmba/dl/src/diff.c www.ioplex.com] (BSD licensed) and of course GNU diff itself.",
+            "id": "8d98a2eb30140874e9a8746de8afec2e"
+          },
+          {
+            "type": "html",
+            "text": "\nFor the Hunt version, there's the public domain diff from the comp.sources.misc archive (which I use in [[Wiki Server]]).",
+            "id": "076bc6d4f9629f61e2853c8d08ed1771"
+          },
+          {
+            "type": "html",
+            "text": "\nFor the dynamic programming variations (line-by-line), well, there are countless implementations of this, several at the comp.sources.misc archive.",
+            "id": "4bc47dc84df47d386a9086a5ec973e2b"
+          },
+          {
+            "type": "html",
+            "text": "\nP.S. I've read the Myers paper \"An O(ND) Algorithm and its variations\" (you can see it at [http://www.xmailserver.org/diff2.pdf www.xmailserver.org]) which has the same algorithm, but does anyone know where I can see a copy of \"A file comparison program\" on the net?",
+            "id": "d1c866bec6b49a2e9a583552628a98fd"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Ryan Norton]]",
+            "id": "56263e5910c33f6d84339c2171d3edd5"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "c98ddc05be0ce4345d913d8d7642a418"
+          },
+          {
+            "type": "html",
+            "text": "\nHere's a <b>quick-and-dirty</b> way to do a quick-and-dirty compare. Load text lines or paragraphs of two documents into two database tables with a \"Text\" column with one row per line or paragraph. Then run a query something like this:",
+            "id": "98ec669020a32deff45c5fe3bcfc499e"
+          },
+          {
+            "type": "code",
+            "text": " SELECT Text, count(text) \n FROM\n (\n ....SELECT Text, 1 as Src FROM tableOne\n ....GROUP BY text\n ..UNION ALL\n ....SELECT Text, 2 as Src FROM tableTwo\n ....GROUP BY Text\n )\n GROUP BY Text\n HAVING count(text) <> 2",
+            "id": "88eb1733cdc4c43a85f1207d6e017a88"
+          },
+          {
+            "type": "html",
+            "text": "(Dots to prevent [[Tab Munging]])",
+            "id": "6a6f5bef5ebd413be943fe5e731a932a"
+          },
+          {
+            "type": "html",
+            "text": "\nYou may have to adjust it a bit for different dialects, such as adding explicit aliases.",
+            "id": "152d5c982e06f2f0851da83872732756"
+          },
+          {
+            "type": "html",
+            "text": "\nIt does not give you sequence info and does not distinguish between duplicate lines in the same text. But, it tells you the text of differences.",
+            "id": "4bc7386210084608c5493ee2201f504a"
+          },
+          {
+            "type": "html",
+            "text": "\nReader exercise: Use nested queries and SUM(...) to also factor in line quantity occurrences.",
+            "id": "345865ddee201c8f662fb51aca3073b0"
+          },
+          {
+            "type": "html",
+            "text": "--top",
+            "id": "a512c67e00c69a8e91e93ec389dcfaa5"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "c98ddc05be0ce4345d913d8d7642a418"
+          },
+          {
+            "type": "html",
+            "text": "See also:",
+            "id": "3a57d4617d2ceb5af62377185db6b76d"
+          },
+          {
+            "type": "html",
+            "text": " [[Algorithms Road Map]]",
+            "id": "e1a185b64c681b843d247d801cf3a762"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "c98ddc05be0ce4345d913d8d7642a418"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Algorithm]]",
+            "id": "4a371eb5850cdc14f4936bceace9bbb6"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?DiffAlgorithm c2.com]",
+            "id": "428205a2b4340e94910953e509ea7632"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1627081907348
+    },
+    {
+      "type": "edit",
+      "id": "30eae680c92e8d713030c3d368875c52",
+      "item": {
+        "type": "html",
+        "text": "There isn't one true diff algorithm, but several with different characteristics. The basic idea is to find a 'modification script' that will turn Text A into Text B. They use modification operations such as insertion and deletion. Usually, you'd want the minimal number of changes required, but some application also have to weigh operations depending on how much text each one affects, or other factors.",
+        "id": "30eae680c92e8d713030c3d368875c52"
+      },
+      "date": 1627081930949
+    }
+  ]
+}

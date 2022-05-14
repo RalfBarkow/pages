@@ -1,0 +1,682 @@
+{
+  "title": "Merge and Transform",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "ac60222e51302b75",
+      "text": "We reconcile differences in terms as we merge information from extracted files and make connections between those elements where important relations exist."
+    },
+    {
+      "type": "paragraph",
+      "id": "5b6fd0e7d4c825ef",
+      "text": "Our strategy will be to build hash tables reading one extracted file after another. When this is complete we write each hash as a csv file, the preferred format for importing nodes and relations into neo4j."
+    },
+    {
+      "type": "markdown",
+      "id": "77718470db9affa0",
+      "text": "# Methods"
+    },
+    {
+      "type": "paragraph",
+      "id": "9deb63cea1281bb8",
+      "text": "We've found it convenient to define and use a handful of helper methods. Our examples are in ruby."
+    },
+    {
+      "type": "code",
+      "id": "f601215e8379b34d",
+      "text": "n = node('LABEL', params)"
+    },
+    {
+      "type": "paragraph",
+      "id": "ae33903e102583f3",
+      "text": "Create or retrieve a node based on 'name' or 'id' in params. Other params will be recorded and merged with params on subsequent retrievals."
+    },
+    {
+      "type": "code",
+      "id": "b3c4a6e85dc0ae7a",
+      "text": "r = rel('TYPE', f, t, params)"
+    },
+    {
+      "type": "paragraph",
+      "id": "fbb07f0482002973",
+      "text": "Create or retrieve a relation from and to nodes f and t. Record params and merge with params on subsequent retrievals. Automatically add 'source' parameter naming explain node managed by file accessing methods below."
+    },
+    {
+      "type": "code",
+      "id": "dd949efeaf592342",
+      "text": "json('dir/file_of_things.json').each do |thing|\n  ...\nend"
+    },
+    {
+      "type": "code",
+      "id": "d66281b9c9d07c6a",
+      "text": "yaml('dir/file_of_things.yaml').each do |thing|\n   ...\nend"
+    },
+    {
+      "type": "paragraph",
+      "id": "e7f94cb58ceb731c",
+      "text": "Open and read a file in json or yaml format. Read source metadata from the same directory and create 'EXPLAIN' nodes describing each source. Establish this as the context to annotate relations created from this source."
+    },
+    {
+      "type": "markdown",
+      "id": "f65858993a19b504",
+      "text": "# Example"
+    },
+    {
+      "type": "paragraph",
+      "id": "46858543c99c58f1",
+      "text": "We consider how we might use these functions to create nodes and relations from an organization chart extracted as json as in our [[Data in Context]] example."
+    },
+    {
+      "type": "code",
+      "id": "dcd1c0270fa8e536",
+      "text": "[\n  {\n    \"name\": \"E. R. Lee\",\n    \"email\": \"erlee@email.com\",\n    \"manager\": null,\n    \"start\": \"2004-6-7\"\n  },\n  {\n    \"name\": \"H. R. Collins\",\n    \"email\": \"hrcollins@email.com\",\n    \"manager\": \"erlee@email.com\",\n    \"start\": \"2002-10-11\"\n  },\n  ...\n]\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "6ab2a2d5c9cff6b7",
+      "text": "We use email as a property and as the foreign key 'id' for subsequent relations. We depend on node merging props so we can process nodes in any order."
+    },
+    {
+      "type": "code",
+      "id": "70789bab618433d6",
+      "text": "json('org-chart/org-data.json').each do |employee|\n  props = {\n    id: employee['email'],\n    name: employee['name'],\n    email: employee['email'],\n    start: employee['start']\n  }\n  e = node('EMPLOYEE', props)\n  m = node('EMPLOYEE', {id: employee['manager']})\n  rel('MANAGER', e, m, {})\nend\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "af22bbae93b9f841",
+      "text": "Notice that some inputs are saved as properties of EMPLOYEE nodes while another, email, is used to identify another node to be joined by a relation."
+    },
+    {
+      "type": "paragraph",
+      "id": "9fef23ee2e4b38e9",
+      "text": "In many cases additional logic will be required to construct consistent ids for nodes found in different sources. Clever defaults for node and rels method will simplify this logic."
+    },
+    {
+      "type": "markdown",
+      "id": "8ced9ab8d2f1571a",
+      "text": "# Output"
+    },
+    {
+      "type": "paragraph",
+      "id": "89617633685370c1",
+      "text": "We write a separate csv file for each node label and relationship type. For each we scan the recorded items to discover how many columns will be required. We then write this as column heads and then write each item's fields in the corresponding order."
+    },
+    {
+      "type": "paragraph",
+      "id": "1505e603f4f16c83",
+      "text": "See [[Github Example]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Merge and Transform",
+        "story": []
+      },
+      "date": 1508383735771
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ac60222e51302b75"
+      },
+      "id": "ac60222e51302b75",
+      "type": "add",
+      "date": 1508383743957
+    },
+    {
+      "type": "edit",
+      "id": "ac60222e51302b75",
+      "item": {
+        "type": "paragraph",
+        "id": "ac60222e51302b75",
+        "text": "We reconcile differences in terms as we merge information from extracted files and make connections between those elements where important relations exist."
+      },
+      "date": 1508383863280
+    },
+    {
+      "type": "add",
+      "id": "5b6fd0e7d4c825ef",
+      "item": {
+        "type": "paragraph",
+        "id": "5b6fd0e7d4c825ef",
+        "text": "Our strategy will be to build hash tables of nodes and relations reading one extracted file after another. When this is complete we write each hash as a csv file, the preferred format for importing nodes and relations into neo4j."
+      },
+      "after": "ac60222e51302b75",
+      "date": 1508383977344
+    },
+    {
+      "type": "edit",
+      "id": "5b6fd0e7d4c825ef",
+      "item": {
+        "type": "paragraph",
+        "id": "5b6fd0e7d4c825ef",
+        "text": "Our strategy will be to build hash tables reading one extracted file after another. When this is complete we write each hash as a csv file, the preferred format for importing nodes and relations into neo4j."
+      },
+      "date": 1508384103531
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f601215e8379b34d"
+      },
+      "id": "f601215e8379b34d",
+      "type": "add",
+      "after": "5b6fd0e7d4c825ef",
+      "date": 1508384178289
+    },
+    {
+      "type": "edit",
+      "id": "f601215e8379b34d",
+      "item": {
+        "type": "code",
+        "id": "f601215e8379b34d",
+        "text": "n = node('LABEL', params)"
+      },
+      "date": 1508384245764
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ae33903e102583f3"
+      },
+      "id": "ae33903e102583f3",
+      "type": "add",
+      "after": "f601215e8379b34d",
+      "date": 1508384252288
+    },
+    {
+      "type": "edit",
+      "id": "ae33903e102583f3",
+      "item": {
+        "type": "paragraph",
+        "id": "ae33903e102583f3",
+        "text": "Create or retrieve a note based on 'name' or 'id' in "
+      },
+      "date": 1508384306064
+    },
+    {
+      "type": "edit",
+      "id": "ae33903e102583f3",
+      "item": {
+        "type": "paragraph",
+        "id": "ae33903e102583f3",
+        "text": "Create or retrieve a note based on 'name' or 'id' in params. Other params will be recorded and merged with params on subsequent retrievals."
+      },
+      "date": 1508384369482
+    },
+    {
+      "type": "add",
+      "id": "77718470db9affa0",
+      "item": {
+        "type": "paragraph",
+        "id": "77718470db9affa0",
+        "text": "# methods"
+      },
+      "after": "5b6fd0e7d4c825ef",
+      "date": 1508384383906
+    },
+    {
+      "type": "edit",
+      "id": "77718470db9affa0",
+      "item": {
+        "type": "paragraph",
+        "id": "77718470db9affa0",
+        "text": "# Methods"
+      },
+      "date": 1508384389369
+    },
+    {
+      "type": "edit",
+      "id": "77718470db9affa0",
+      "item": {
+        "type": "markdown",
+        "id": "77718470db9affa0",
+        "text": "# Methods"
+      },
+      "date": 1508384391903
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b3c4a6e85dc0ae7a"
+      },
+      "id": "b3c4a6e85dc0ae7a",
+      "type": "add",
+      "after": "ae33903e102583f3",
+      "date": 1508384399993
+    },
+    {
+      "type": "edit",
+      "id": "b3c4a6e85dc0ae7a",
+      "item": {
+        "type": "code",
+        "id": "b3c4a6e85dc0ae7a",
+        "text": "r = rel('TYPE', f, t, params)"
+      },
+      "date": 1508384460940
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fbb07f0482002973"
+      },
+      "id": "fbb07f0482002973",
+      "type": "add",
+      "after": "b3c4a6e85dc0ae7a",
+      "date": 1508384462872
+    },
+    {
+      "type": "edit",
+      "id": "fbb07f0482002973",
+      "item": {
+        "type": "paragraph",
+        "id": "fbb07f0482002973",
+        "text": "Create or retrieve a relation based on nodes f and t. Record params and merge with params on subsequent retrievals."
+      },
+      "date": 1508384609072
+    },
+    {
+      "type": "edit",
+      "id": "ae33903e102583f3",
+      "item": {
+        "type": "paragraph",
+        "id": "ae33903e102583f3",
+        "text": "Create or retrieve a node based on 'name' or 'id' in params. Other params will be recorded and merged with params on subsequent retrievals."
+      },
+      "date": 1508384621178
+    },
+    {
+      "type": "edit",
+      "id": "fbb07f0482002973",
+      "item": {
+        "type": "paragraph",
+        "id": "fbb07f0482002973",
+        "text": "Create or retrieve a relation based on nodes f and t. Record params and merge with params on subsequent retrievals. Add 'source' parameters based on file accessing methods below."
+      },
+      "date": 1508384699847
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9202f5de336ed47f"
+      },
+      "id": "9202f5de336ed47f",
+      "type": "add",
+      "after": "fbb07f0482002973",
+      "date": 1508384793096
+    },
+    {
+      "type": "remove",
+      "id": "9202f5de336ed47f",
+      "date": 1508384801838
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dd949efeaf592342"
+      },
+      "id": "dd949efeaf592342",
+      "type": "add",
+      "after": "fbb07f0482002973",
+      "date": 1508384804161
+    },
+    {
+      "type": "edit",
+      "id": "dd949efeaf592342",
+      "item": {
+        "type": "code",
+        "id": "dd949efeaf592342",
+        "text": "json ('dir/file_of_things.json') do |thing|\n  ...\nend"
+      },
+      "date": 1508384948986
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d66281b9c9d07c6a"
+      },
+      "id": "d66281b9c9d07c6a",
+      "type": "add",
+      "after": "dd949efeaf592342",
+      "date": 1508384959975
+    },
+    {
+      "type": "edit",
+      "id": "d66281b9c9d07c6a",
+      "item": {
+        "type": "code",
+        "id": "d66281b9c9d07c6a",
+        "text": "yaml ('dir/file_of_things.yaml') do |thing|\n   ...\nend"
+      },
+      "date": 1508385007712
+    },
+    {
+      "type": "edit",
+      "id": "dd949efeaf592342",
+      "item": {
+        "type": "code",
+        "id": "dd949efeaf592342",
+        "text": "json ('dir/file_of_things.json').each do |thing|\n  ...\nend"
+      },
+      "date": 1508385030855
+    },
+    {
+      "type": "edit",
+      "id": "d66281b9c9d07c6a",
+      "item": {
+        "type": "code",
+        "id": "d66281b9c9d07c6a",
+        "text": "yaml ('dir/file_of_things.yaml').each do |thing|\n   ...\nend"
+      },
+      "date": 1508385038006
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e7f94cb58ceb731c"
+      },
+      "id": "e7f94cb58ceb731c",
+      "type": "add",
+      "after": "d66281b9c9d07c6a",
+      "date": 1508385068038
+    },
+    {
+      "type": "edit",
+      "id": "e7f94cb58ceb731c",
+      "item": {
+        "type": "paragraph",
+        "id": "e7f94cb58ceb731c",
+        "text": "Open and read a file in json or yaml format. Read source metadata from the same directory and create 'EXPLAIN' nodes describing each source. Establish this as the context to annotate relations created from this source."
+      },
+      "date": 1508385340262
+    },
+    {
+      "type": "add",
+      "id": "f65858993a19b504",
+      "item": {
+        "type": "paragraph",
+        "id": "f65858993a19b504",
+        "text": "# Example"
+      },
+      "after": "e7f94cb58ceb731c",
+      "date": 1508385426451
+    },
+    {
+      "type": "add",
+      "id": "46858543c99c58f1",
+      "item": {
+        "type": "paragraph",
+        "id": "46858543c99c58f1",
+        "text": "We consider how we might use these functions to create nodes and relations from an organization chart extracted as json as in [[Data in Context]] example."
+      },
+      "after": "f65858993a19b504",
+      "date": 1508385883839
+    },
+    {
+      "type": "edit",
+      "id": "46858543c99c58f1",
+      "item": {
+        "type": "paragraph",
+        "id": "46858543c99c58f1",
+        "text": "We consider how we might use these functions to create nodes and relations from an organization chart extracted as json as in our [[Data in Context]] example."
+      },
+      "date": 1508385897346
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dcd1c0270fa8e536"
+      },
+      "id": "dcd1c0270fa8e536",
+      "type": "add",
+      "after": "46858543c99c58f1",
+      "date": 1508385899881
+    },
+    {
+      "type": "edit",
+      "id": "dcd1c0270fa8e536",
+      "item": {
+        "type": "code",
+        "id": "dcd1c0270fa8e536",
+        "text": "[\n  {\n    \"name\": \"E. R. Lee\",\n    \"email\": \"erlee@email.com\",\n    \"manager\": null,\n    \"start\": \"2004-6-7\"\n  },\n  {\n    \"name\": \"H. R. Collins\",\n    \"email\": \"hrcollins@email.com\",\n    \"manager\": \"erlee@email.com\",\n    \"start\": \"2002-10-11\"\n  },\n  ...\n]\n"
+      },
+      "date": 1508385904960
+    },
+    {
+      "type": "edit",
+      "id": "f65858993a19b504",
+      "item": {
+        "type": "markdown",
+        "id": "f65858993a19b504",
+        "text": "# Example"
+      },
+      "date": 1508385909602
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6ab2a2d5c9cff6b7"
+      },
+      "id": "6ab2a2d5c9cff6b7",
+      "type": "add",
+      "after": "dcd1c0270fa8e536",
+      "date": 1508385930609
+    },
+    {
+      "type": "edit",
+      "id": "6ab2a2d5c9cff6b7",
+      "item": {
+        "type": "paragraph",
+        "id": "6ab2a2d5c9cff6b7",
+        "text": "We use email as a property and as the foreign key 'id' for subsequent relations. We depend on node merging props so we can process nodes in any order."
+      },
+      "date": 1508386025558
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "70789bab618433d6"
+      },
+      "id": "70789bab618433d6",
+      "type": "add",
+      "after": "6ab2a2d5c9cff6b7",
+      "date": 1508386029484
+    },
+    {
+      "type": "edit",
+      "id": "70789bab618433d6",
+      "item": {
+        "type": "code",
+        "id": "70789bab618433d6",
+        "text": "json('org-chart/org-data.json').each do |employee|\n  props = {\n    id: employee['email'],\n    name: employee['name'],\n    email: employee['email'],\n    start: employee['start']\n  }\n  e = node('EMPLOYEE', props)\n  m = node('EMPLOYEE', {id: employee['manager']})\n  rel('MANAGER', e, m, {})\nend\n"
+      },
+      "date": 1508386341463
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "af22bbae93b9f841"
+      },
+      "id": "af22bbae93b9f841",
+      "type": "add",
+      "after": "70789bab618433d6",
+      "date": 1508386361610
+    },
+    {
+      "type": "edit",
+      "id": "af22bbae93b9f841",
+      "item": {
+        "type": "paragraph",
+        "id": "af22bbae93b9f841",
+        "text": "Notice that some inputs are saved as properties of EMPLOYEE nodes while another, email, is used to identify another node to be joined by a relation."
+      },
+      "date": 1508386710004
+    },
+    {
+      "type": "add",
+      "id": "9deb63cea1281bb8",
+      "item": {
+        "type": "paragraph",
+        "id": "9deb63cea1281bb8",
+        "text": "We've found it convenient to define and use a handful of helper methods for reading json and yaml and writing csv files."
+      },
+      "after": "5b6fd0e7d4c825ef",
+      "date": 1508386781576
+    },
+    {
+      "type": "edit",
+      "id": "9deb63cea1281bb8",
+      "item": {
+        "type": "paragraph",
+        "id": "9deb63cea1281bb8",
+        "text": "We've found it convenient to define and use a handful of helper methods."
+      },
+      "date": 1508386801776
+    },
+    {
+      "type": "move",
+      "order": [
+        "ac60222e51302b75",
+        "5b6fd0e7d4c825ef",
+        "77718470db9affa0",
+        "9deb63cea1281bb8",
+        "f601215e8379b34d",
+        "ae33903e102583f3",
+        "b3c4a6e85dc0ae7a",
+        "fbb07f0482002973",
+        "dd949efeaf592342",
+        "d66281b9c9d07c6a",
+        "e7f94cb58ceb731c",
+        "f65858993a19b504",
+        "46858543c99c58f1",
+        "dcd1c0270fa8e536",
+        "6ab2a2d5c9cff6b7",
+        "70789bab618433d6",
+        "af22bbae93b9f841"
+      ],
+      "id": "9deb63cea1281bb8",
+      "date": 1508386804804
+    },
+    {
+      "type": "edit",
+      "id": "9deb63cea1281bb8",
+      "item": {
+        "type": "paragraph",
+        "id": "9deb63cea1281bb8",
+        "text": "We've found it convenient to define and use a handful of helper methods. Our examples are in ruby."
+      },
+      "date": 1508386880182
+    },
+    {
+      "type": "add",
+      "id": "8ced9ab8d2f1571a",
+      "item": {
+        "type": "paragraph",
+        "id": "8ced9ab8d2f1571a",
+        "text": "# Output"
+      },
+      "after": "af22bbae93b9f841",
+      "date": 1508387139960
+    },
+    {
+      "type": "add",
+      "id": "89617633685370c1",
+      "item": {
+        "type": "paragraph",
+        "id": "89617633685370c1",
+        "text": "We write a separate csv file for each node label and relationship type. For each we scan the recorded items to discover how many columns will be required. We then write this as column heads and then write each item's fields in the corresponding order."
+      },
+      "after": "8ced9ab8d2f1571a",
+      "date": 1508387410674
+    },
+    {
+      "type": "edit",
+      "id": "8ced9ab8d2f1571a",
+      "item": {
+        "type": "markdown",
+        "id": "8ced9ab8d2f1571a",
+        "text": "# Output"
+      },
+      "date": 1508387414065
+    },
+    {
+      "type": "add",
+      "id": "9fef23ee2e4b38e9",
+      "item": {
+        "type": "paragraph",
+        "id": "9fef23ee2e4b38e9",
+        "text": "In many cases additional logic will be required to construct consistent ids for nodes found in different sources. Clever defaults for node and rels method will simplify this logic."
+      },
+      "after": "af22bbae93b9f841",
+      "date": 1508387751429
+    },
+    {
+      "type": "edit",
+      "id": "fbb07f0482002973",
+      "item": {
+        "type": "paragraph",
+        "id": "fbb07f0482002973",
+        "text": "Create or retrieve a relation from and to nodes f and t. Record params and merge with params on subsequent retrievals. Add 'source' parameters based on file accessing methods below."
+      },
+      "date": 1508432863805
+    },
+    {
+      "type": "edit",
+      "id": "fbb07f0482002973",
+      "item": {
+        "type": "paragraph",
+        "id": "fbb07f0482002973",
+        "text": "Create or retrieve a relation from and to nodes f and t. Record params and merge with params on subsequent retrievals. Automatically add 'source' parameter naming explain node managed by file accessing methods json and yaml."
+      },
+      "date": 1508432991821
+    },
+    {
+      "type": "edit",
+      "id": "fbb07f0482002973",
+      "item": {
+        "type": "paragraph",
+        "id": "fbb07f0482002973",
+        "text": "Create or retrieve a relation from and to nodes f and t. Record params and merge with params on subsequent retrievals. Automatically add 'source' parameter naming explain node managed by file accessing methods below."
+      },
+      "date": 1508433012628
+    },
+    {
+      "type": "add",
+      "id": "1505e603f4f16c83",
+      "item": {
+        "type": "paragraph",
+        "id": "1505e603f4f16c83",
+        "text": "See [[Github Example]]"
+      },
+      "after": "89617633685370c1",
+      "date": 1508434902462
+    },
+    {
+      "type": "edit",
+      "id": "dd949efeaf592342",
+      "item": {
+        "type": "code",
+        "id": "dd949efeaf592342",
+        "text": "json('dir/file_of_things.json').each do |thing|\n  ...\nend"
+      },
+      "date": 1508437904048
+    },
+    {
+      "type": "edit",
+      "id": "d66281b9c9d07c6a",
+      "item": {
+        "type": "code",
+        "id": "d66281b9c9d07c6a",
+        "text": "yaml('dir/file_of_things.yaml').each do |thing|\n   ...\nend"
+      },
+      "date": 1508437908585
+    },
+    {
+      "type": "fork",
+      "site": "ddd.ward.wiki.org",
+      "date": 1627665559280
+    }
+  ]
+}

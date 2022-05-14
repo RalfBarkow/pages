@@ -1,0 +1,1260 @@
+{
+  "title": "Event Sourcing",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "40a95637edbe494e",
+      "text": "Design a system by modeling objects as a stream of events.  Instead of saving the current state, save the events that lead up to the current state.  \n"
+    },
+    {
+      "type": "video",
+      "id": "dfd5644dac485776",
+      "text": "YOUTUBE bXm8Cznyb_s\nPaul Rayner - EventStorming, 2016 ;\nEvent Sourcing @ 44:14."
+    },
+    {
+      "type": "frame",
+      "id": "125c519d7f511527",
+      "text": "https://www.youtube.com/embed/bXm8Cznyb_s?start=2656\nHEIGHT 300\nPublished 10 Jul 2016.\nEvent Sourcing @ 44:14.\n[https://www.youtube.com/watch?v=bXm8Cznyb_s&t=44m16s youtube:44:16]\nAlso Martin Fowler's taxonomy of event-driven design: [https://martinfowler.com/articles/201701-event-driven.html#Event-sourcing article]"
+    },
+    {
+      "type": "markdown",
+      "id": "0d0ec4a11019f996",
+      "text": "For an `Order` you might have `BillableAmountCalculated`, `BillableAmountVerified`, `InvoicePrepared`.\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "9791d9a3b427e7de",
+      "text": "Event sourcing leads naturally to Test-Driven and Behavior-Driven Design: _Given_ a series of events, _When_ a command is received, _Then_ emit the correct events.  Or _Arrange_, _Act_, _Assert_.  The path to code is clear.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "f5f35e77af722d97",
+      "text": "An Entity is an Aggregate, for example `ShoppingCart`.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "1da3035df2d7ed56",
+      "text": "* Added item to cart\n* Calculate price\n* Customer enters discount code\n* Customer adds another item\n* Recalculate price\n* Customer performs checkout\n"
+    },
+    {
+      "type": "markdown",
+      "id": "784293fed0001886",
+      "text": "Current State of the object is captured in its most recent event: `checked out` in this case.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "ec6f3b6d0b841a89",
+      "text": "**Natural transition to Distributed Systems**\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "714348e54259cf20",
+      "text": "Stream of events sent from _ecommerce_ context to the _order management_ context which has its own set of aggregates.  _Order management_ can notify _ecommerce_ when the order has been shipped\n"
+    },
+    {
+      "type": "markdown",
+      "id": "c48a16ee423a7bb5",
+      "text": "The event streams become a way to keep the contexts relatively ignorant of each other.  They can be a useful way to identify the boundaries between microservices and how they communicate.  Asynchronous communication between contexts reduces dependencies and allows services to be updated independently.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "7947b482bd6bbf73",
+      "text": "Large scale distributed systems imply embracing eventual consistency.  The item ordered by a customer may be out of stock by the time the order is completed.  Trigger a back-order or allow customer to change or cancel their order."
+    },
+    {
+      "type": "pagefold",
+      "id": "a16ec78d70a1d500",
+      "text": "."
+    },
+    {
+      "type": "markdown",
+      "id": "65cb030c6ebc698c",
+      "text": "Events, Flows and Long-Running Services: A Modern Approach to Workflow Automation: [https://www.infoq.com/articles/events-workflow-automation?utm_campaign=rightbar_v2&utm_source=infoq&utm_medium=articles_link&utm_content=link_text article]\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "f3f8bcd2df58b3b0",
+      "text": "Recent discussions around the microservice architectural style has promoted the idea of event-driven-architectures to effectively decouple your services.\n"
+    },
+    {
+      "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/3fig1-1513668200412.png\">\n\n<p class=caption>\n  Domain-driven design with four bounded contexts.\n  <br>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/3fig1-1513668200412.png source]\n</p>\n</div>\n",
+      "type": "html",
+      "id": "52671d450377ab44"
+    },
+    {
+      "type": "markdown",
+      "id": "1b7af8c7b9f8b60b",
+      "text": "Domain events are great for decentralised data-management, generating read-models or tackling cross-cutting concerns. However, you should not implement complex peer-to-peer event chains.\n"
+    },
+    {
+      "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/6fig3-1513669723708.png\">\n\n<p class=caption>\n  Services chained by events (what not to do).\n  <br>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/6fig3-1513669723708.png source]\n</p>\n</div>\n",
+      "type": "html",
+      "id": "319ff993de414730"
+    },
+    {
+      "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/3fig4-1513669723931.png\">\n\n<p class=caption>\n  Change in one service cascades through the chain.\n  <br>\n  Transported image.  \n  [https://res.infoq.com/articles/events-workflow-management/en/resources/3fig4-1513669723931.png source]\n</p>\n</div>\n",
+      "type": "html",
+      "id": "10687d58f8b49507"
+    },
+    {
+      "type": "markdown",
+      "id": "060c06bd785767f5",
+      "text": "Using commands to coordinate other services will reduce your coupling even further.\n"
+    },
+    {
+      "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/3fig5-1513673353429.png\">\n\n<p class=caption>\n  Command services break the chains.\n  <br>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/3fig5-1513673353429.png source]\n</p>\n</div>\n",
+      "type": "html",
+      "id": "cba1e57ef2fe7cf5"
+    },
+    {
+      "type": "markdown",
+      "id": "9cfb1b4f3a6fab1d",
+      "text": "Centrally managed ESBs don’t fit into a microservices architecture. Smart endpoints and dumb pipes are preferable. However, don’t dismiss coordinating services for fear of introducing central control: important business capabilities need a home.\n"
+    },
+    {
+      "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/3fig6-1513673352616.png\">\n\n<p class=caption>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/3fig6-1513673352616.png source]\n</p>\n</div>\n",
+      "type": "html",
+      "id": "09a6b90b6b58e4ae"
+    },
+    {
+      "type": "markdown",
+      "id": "e22e59b83506113f",
+      "text": "In the past, BPM and workflow engines were very vendor-driven, and so there are many horrible “zero-code” tools in the market scaring away developers. However, lightweight and easy-to-use frameworks now exist, and many of them are open source. \n"
+    },
+    {
+      "type": "markdown",
+      "id": "7368ed997e6bb4a9",
+      "text": "Do not invest time in writing your own state machines, but instead leverage existing workflow tools. This will help you to avoid accidental complexity.\n"
+    },
+    {
+      "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/1fig13-1513673354500.png\">\n\n<p class=caption>\n  Keep workflows inside a bounded context.\n  <br>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/1fig13-1513673354500.png source]\n</p>\n</div>\n",
+      "type": "html",
+      "id": "11083c37453ca9e9"
+    },
+    {
+      "type": "markdown",
+      "id": "a566c1319eaff902",
+      "text": "_several of those points sound like services version of introducing Method Objects in object decomposition to decouple related entity models from the operations which change and connect them. _"
+    },
+    {
+      "type": "pagefold",
+      "id": "4b365d2186853141",
+      "text": "."
+    },
+    {
+      "type": "markdown",
+      "id": "a811e07fddff8b2c",
+      "text": "See Also [[Event Storming]] for business analysis that leads naturally to this architecture.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "dd385c50aa23cef6",
+      "text": "Event oriented architecture matches object oriented design with particular attention to the messages between objects.  Events pass between services as messages pass between objects.  Fractal similarity.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "6a7d3b729bd4caf9",
+      "text": "[[Async Code In A Nutshell]] Javascript grew up with asynchrony to prevent blocking the UI.  Modern patterns apply a lot of event-driven, reactive models for updating the display and communicating with backend servers.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "1c0f22a0fd45b3b8",
+      "text": "[[Events on the wire]] wiki edits, structured as events , are separate from reads.  These resemble Martin Fowler's taxonomy of event-driven systems.  [https://martinfowler.com/articles/201701-event-driven.html post]\n"
+    },
+    {
+      "type": "markdown",
+      "id": "030d5f26df0541d6",
+      "text": "[[Spawn or Not]] Elixir recommendations to prefer functional decomposition for modeling behavior, and apply processes for event notifications and to control event ordering.\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "0b74c2b0e011e3b6",
+      "text": "Reactive programming model is organized around functional transformations of arrays and hashes combined with event streams modeled as collections: [https://reactivex.io/learnrx/ ReactiveX/learnx]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Event Sourcing",
+        "story": []
+      },
+      "date": 1527879904445
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "40a95637edbe494e",
+        "text": "Design a system by modeling objects as a stream of events.\n"
+      },
+      "id": "40a95637edbe494e",
+      "date": 1527879956722
+    },
+    {
+      "type": "edit",
+      "id": "40a95637edbe494e",
+      "item": {
+        "type": "markdown",
+        "id": "40a95637edbe494e",
+        "text": "Design a system by modeling objects as a stream of events.  Instead of saving the current state, save the events that lead up to the current state.\n"
+      },
+      "date": 1527879996129
+    },
+    {
+      "type": "edit",
+      "id": "40a95637edbe494e",
+      "item": {
+        "type": "markdown",
+        "id": "40a95637edbe494e",
+        "text": "Design a system by modeling objects as a stream of events.  Instead of saving the current state, save the events that lead up to the current state.\n\n"
+      },
+      "date": 1527880005163
+    },
+    {
+      "type": "add",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "markdown",
+        "id": "125c519d7f511527",
+        "text": "For an `Order` you might have "
+      },
+      "after": "40a95637edbe494e",
+      "date": 1527880031810
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "0cad29f6190d0cff",
+        "text": "Save the events that lead up to the current state.  `BillableAmountCalculated`, `BillableAmountVerified`, `InvoicePrepared`.\n\n"
+      },
+      "after": "125c519d7f511527",
+      "id": "0cad29f6190d0cff",
+      "date": 1527880035697
+    },
+    {
+      "type": "remove",
+      "id": "0cad29f6190d0cff",
+      "date": 1527880039829
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "markdown",
+        "id": "125c519d7f511527",
+        "text": "For an `Order` you might have `BillableAmountCalculated`, `BillableAmountVerified`, `InvoicePrepared`.\n\n"
+      },
+      "date": 1527880050239
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "9791d9a3b427e7de",
+        "text": "TDD: Given a series of events, When a command is received, Then emit the correct events.  Or Arrange, Act, Assert.  Event sourcing leads naturally to tests.  The path to code is clear.\n"
+      },
+      "after": "125c519d7f511527",
+      "id": "9791d9a3b427e7de",
+      "date": 1527880060641
+    },
+    {
+      "type": "edit",
+      "id": "9791d9a3b427e7de",
+      "item": {
+        "type": "markdown",
+        "id": "9791d9a3b427e7de",
+        "text": "Event sourcing leads naturally to Test-Driven and Behavior-Driven Design: _Given_ a series of events, _When_ a command is received, _Then_ emit the correct events.  Or _Arrange_, _Act_, _Assert_.  The path to code is clear.\n"
+      },
+      "date": 1527880166413
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "f5f35e77af722d97",
+        "text": "An Entity is an Aggregate, for example `ShoppingCart`.\n"
+      },
+      "after": "9791d9a3b427e7de",
+      "id": "f5f35e77af722d97",
+      "date": 1527880178145
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "1da3035df2d7ed56",
+        "text": "* Added item to cart\n* Calculate price\n* Customer enters discount code\n* Customer adds another item\n* Recalculate price\n* Customer performs checkout\n"
+      },
+      "after": "f5f35e77af722d97",
+      "id": "1da3035df2d7ed56",
+      "date": 1527880183030
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "784293fed0001886",
+        "text": "Current State of the object is captured in its most recent event: `checked out` in this case.\n"
+      },
+      "after": "1da3035df2d7ed56",
+      "id": "784293fed0001886",
+      "date": 1527880187314
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "ec6f3b6d0b841a89",
+        "text": "**Natural transition to Distributed Systems**\n\n"
+      },
+      "after": "784293fed0001886",
+      "id": "ec6f3b6d0b841a89",
+      "date": 1527880197429
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "714348e54259cf20",
+        "text": "Stream of events sent from _ecommerce_ context to the _order management_ context which has its own set of aggregates.  _Order management_ can notify _ecommerce_ when the order has been shipped\n"
+      },
+      "after": "ec6f3b6d0b841a89",
+      "id": "714348e54259cf20",
+      "date": 1527880202491
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "c48a16ee423a7bb5",
+        "text": "The event streams become a way to keep the contexts relatively ignorant of each other.  They can be a useful way to identify the boundaries between microservices and how they communicate.  Asynchronous communication between contexts reduces dependencies and allows services to be updated independently.\n"
+      },
+      "after": "714348e54259cf20",
+      "id": "c48a16ee423a7bb5",
+      "date": 1527880207083
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "7947b482bd6bbf73",
+        "text": "Large scale distributed systems imply embracing eventual consistency.  The item ordered by a customer may be out of stock by the time the order is completed.  Trigger a back-order or allow customer to change or cancel their order."
+      },
+      "after": "c48a16ee423a7bb5",
+      "id": "7947b482bd6bbf73",
+      "date": 1527880218847
+    },
+    {
+      "type": "edit",
+      "id": "40a95637edbe494e",
+      "item": {
+        "type": "markdown",
+        "id": "40a95637edbe494e",
+        "text": "Design a system by modeling objects as a stream of events.  Instead of saving the current state, save the events that lead up to the current state.  [https://martinfowler.com/articles/201701-event-driven.html#event-sourcing M.Fowler]\n\n"
+      },
+      "date": 1527880303726
+    },
+    {
+      "type": "edit",
+      "id": "40a95637edbe494e",
+      "item": {
+        "type": "markdown",
+        "id": "40a95637edbe494e",
+        "text": "Design a system by modeling objects as a stream of events.  Instead of saving the current state, save the events that lead up to the current state.  \n"
+      },
+      "date": 1527880318916
+    },
+    {
+      "type": "add",
+      "id": "0120871f26d72374",
+      "item": {
+        "type": "markdown",
+        "id": "0120871f26d72374",
+        "text": "See Martin Fowler's taxonomy of event-driven design: [https://martinfowler.com/articles/201701-event-driven.html#event-sourcing article]\n\n"
+      },
+      "after": "40a95637edbe494e",
+      "date": 1527880337724
+    },
+    {
+      "type": "edit",
+      "id": "0120871f26d72374",
+      "item": {
+        "type": "markdown",
+        "id": "0120871f26d72374",
+        "text": "Martin Fowler's taxonomy of event-driven design: [https://martinfowler.com/articles/201701-event-driven.html#event-sourcing article]\n\n"
+      },
+      "date": 1527880345199
+    },
+    {
+      "type": "edit",
+      "id": "0120871f26d72374",
+      "item": {
+        "type": "markdown",
+        "id": "0120871f26d72374",
+        "text": "Martin Fowler's taxonomy of event-driven design: [https://martinfowler.com/articles/201701-event-driven.html#Event-sourcing article]\n\n"
+      },
+      "date": 1527880379829
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "markdown",
+        "id": "125c519d7f511527",
+        "text": "https://www.youtube.com/watch?v=bXm8Cznyb_s\n"
+      },
+      "date": 1527881149623
+    },
+    {
+      "type": "add",
+      "id": "0d0ec4a11019f996",
+      "item": {
+        "type": "markdown",
+        "id": "0d0ec4a11019f996",
+        "text": "For an `Order` you might have `BillableAmountCalculated`, `BillableAmountVerified`, `InvoicePrepared`.\n\n"
+      },
+      "after": "125c519d7f511527",
+      "date": 1527881151337
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "factory",
+        "id": "125c519d7f511527",
+        "text": "https://youtu.be/bXm8Cznyb_s?t=2600\nPublished on Jul 10, 2016"
+      },
+      "date": 1527881204083
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://youtu.be/bXm8Cznyb_s?t=2600\nPublished on Jul 10, 2016\n"
+      },
+      "date": 1527881213305
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://youtube.com/bXm8Cznyb_s?t=2600\nPublished on Jul 10, 2016\n"
+      },
+      "date": 1527881248713
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://youtube.com/embed/bXm8Cznyb_s?t=2600\nPublished on Jul 10, 2016\n"
+      },
+      "date": 1527881412161
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://youtube.com/embed/bXm8Cznyb_s?t=2600\nPublished on Jul 10, 2016\n\nHEIGHT 320"
+      },
+      "date": 1527881431704
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://youtube.com/embed/bXm8Cznyb_s?t=44:14\nHEIGHT 300\nPublished on Jul 10, 2016"
+      },
+      "date": 1527881489651
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://youtube.com/embed/bXm8Cznyb_s?t=44:18\nHEIGHT 300\nPublished on Jul 10, 2016"
+      },
+      "date": 1527881533046
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://youtube.com/embed/bXm8Cznyb_s?t=2658\nHEIGHT 300\nPublished on Jul 10, 2016"
+      },
+      "date": 1527881627656
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://youtube.com/embed/bXm8Cznyb_s?t=2685\nHEIGHT 300\nPublished on Jul 10, 2016"
+      },
+      "date": 1527881680642
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://www.youtube.com/embed/bXm8Cznyb_s&t=44m16s\nHEIGHT 300\nPublished on Jul 10, 2016"
+      },
+      "date": 1527881822722
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://www.youtube.com/embed/bXm8Cznyb_s?t=44m16s\nHEIGHT 300\nPublished on Jul 10, 2016"
+      },
+      "date": 1527881862601
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://www.youtube.com/embed/bXm8Cznyb_s?start=2656\nHEIGHT 300\nPublished on Jul 10, 2016"
+      },
+      "date": 1527881969585
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://www.youtube.com/embed/bXm8Cznyb_s?start=2656\nHEIGHT 300\nEvent Sourcing starting at 44:14\nPublished on Jul 10, 2016"
+      },
+      "date": 1527882026587
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://www.youtube.com/embed/bXm8Cznyb_s?start=2656\nHEIGHT 300\nEvent Sourcing starting at 44:14\n\nPublished on Jul 10, 2016"
+      },
+      "date": 1527882033315
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://www.youtube.com/embed/bXm8Cznyb_s?start=2656\nHEIGHT 300\nPublished 10 Jul 2016.  Event Sourcing @ 44:14"
+      },
+      "date": 1527882059356
+    },
+    {
+      "type": "remove",
+      "id": "0120871f26d72374",
+      "date": 1527882084452
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://www.youtube.com/embed/bXm8Cznyb_s?start=2656\nHEIGHT 300\nPublished 10 Jul 2016.  Event Sourcing @ 44:14\n\nAlso Martin Fowler's taxonomy of event-driven design: [https://martinfowler.com/articles/201701-event-driven.html#Event-sourcing article]"
+      },
+      "date": 1527882097368
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://www.youtube.com/embed/bXm8Cznyb_s?start=2656\nHEIGHT 300\nPublished 10 Jul 2016.\nEvent Sourcing @ 44:14.\nAlso Martin Fowler's taxonomy of event-driven design: [https://martinfowler.com/articles/201701-event-driven.html#Event-sourcing article]"
+      },
+      "date": 1527882115726
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "pagefold",
+        "id": "a16ec78d70a1d500",
+        "text": "."
+      },
+      "after": "7947b482bd6bbf73",
+      "id": "a16ec78d70a1d500",
+      "date": 1527882274241
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "a811e07fddff8b2c",
+        "text": "Event oriented architecture matches object oriented design with particular attention to the messages between objects.  Events pass between services as messages pass between objects.  Fractal similarity.\n"
+      },
+      "after": "a16ec78d70a1d500",
+      "id": "a811e07fddff8b2c",
+      "date": 1527882282693
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "6a7d3b729bd4caf9",
+        "text": "[[Async Code In A Nutshell]] Javascript grew up with asynchrony to prevent blocking the UI.  Modern patterns apply a lot of event-driven, reactive models for updating the display and communicating with backend servers.\n"
+      },
+      "after": "a811e07fddff8b2c",
+      "id": "6a7d3b729bd4caf9",
+      "date": 1527882285774
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "1c0f22a0fd45b3b8",
+        "text": "[[Events on the wire]] wiki edits, structured as events , are separate from reads.  These resemble Martin Fowler's taxonomy of event-driven systems.  [https://martinfowler.com/articles/201701-event-driven.html post]\n"
+      },
+      "after": "6a7d3b729bd4caf9",
+      "id": "1c0f22a0fd45b3b8",
+      "date": 1527882289059
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "030d5f26df0541d6",
+        "text": "[[Spawn or Not]] Elixir recommendations to prefer functional decomposition for modeling behavior, and apply processes for event notifications and to control event ordering.\n"
+      },
+      "after": "1c0f22a0fd45b3b8",
+      "id": "030d5f26df0541d6",
+      "date": 1527882291658
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "65cb030c6ebc698c",
+        "text": "Events, Flows and Long-Running Services: A Modern Approach to Workflow Automation: [https://www.infoq.com/articles/events-workflow-automation?utm_campaign=rightbar_v2&utm_source=infoq&utm_medium=articles_link&utm_content=link_text article]\n\n> Recent discussions around the microservice architectural style has promoted the idea of event-driven-architectures to effectively decouple your services.\n\n> Domain events are great for decentralised data-management, generating read-models or tackling cross-cutting concerns. However, you should not implement complex peer-to-peer event chains. Using commands to coordinate other services will reduce your coupling even further.\n\n> Centrally managed ESBs don’t fit into a microservices architecture. Smart endpoints and dumb pipes are preferable. However, don’t dismiss coordinating services for fear of introducing central control: important business capabilities need a home.\n\n> In the past, BPM and workflow engines were very vendor-driven, and so there are many horrible “zero-code” tools in the market scaring away developers. However, lightweight and easy-to-use frameworks now exist, and many of them are open source. \n\n> Do not invest time in writing your own state machines, but instead leverage existing workflow tools. This will help you to avoid accidental complexity.\n\n_several of those points sound like services version of introducing Method Objects in object decomposition to decouple related entity models from the operations which change and connect them. _"
+      },
+      "after": "030d5f26df0541d6",
+      "id": "65cb030c6ebc698c",
+      "date": 1527882317153
+    },
+    {
+      "type": "move",
+      "order": [
+        "40a95637edbe494e",
+        "125c519d7f511527",
+        "0d0ec4a11019f996",
+        "9791d9a3b427e7de",
+        "f5f35e77af722d97",
+        "1da3035df2d7ed56",
+        "784293fed0001886",
+        "ec6f3b6d0b841a89",
+        "714348e54259cf20",
+        "c48a16ee423a7bb5",
+        "7947b482bd6bbf73",
+        "a16ec78d70a1d500",
+        "65cb030c6ebc698c",
+        "a811e07fddff8b2c",
+        "6a7d3b729bd4caf9",
+        "1c0f22a0fd45b3b8",
+        "030d5f26df0541d6"
+      ],
+      "id": "65cb030c6ebc698c",
+      "date": 1527882937806
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4b365d2186853141"
+      },
+      "id": "4b365d2186853141",
+      "type": "add",
+      "after": "030d5f26df0541d6",
+      "date": 1527882941494
+    },
+    {
+      "type": "edit",
+      "id": "4b365d2186853141",
+      "item": {
+        "type": "pagefold",
+        "id": "4b365d2186853141",
+        "text": "."
+      },
+      "date": 1527882945465
+    },
+    {
+      "type": "move",
+      "order": [
+        "40a95637edbe494e",
+        "125c519d7f511527",
+        "0d0ec4a11019f996",
+        "9791d9a3b427e7de",
+        "f5f35e77af722d97",
+        "1da3035df2d7ed56",
+        "784293fed0001886",
+        "ec6f3b6d0b841a89",
+        "714348e54259cf20",
+        "c48a16ee423a7bb5",
+        "7947b482bd6bbf73",
+        "a16ec78d70a1d500",
+        "65cb030c6ebc698c",
+        "4b365d2186853141",
+        "a811e07fddff8b2c",
+        "6a7d3b729bd4caf9",
+        "1c0f22a0fd45b3b8",
+        "030d5f26df0541d6"
+      ],
+      "id": "4b365d2186853141",
+      "date": 1527882957329
+    },
+    {
+      "type": "edit",
+      "id": "65cb030c6ebc698c",
+      "item": {
+        "type": "markdown",
+        "id": "65cb030c6ebc698c",
+        "text": "Events, Flows and Long-Running Services: A Modern Approach to Workflow Automation: [https://www.infoq.com/articles/events-workflow-automation?utm_campaign=rightbar_v2&utm_source=infoq&utm_medium=articles_link&utm_content=link_text article]\n\n"
+      },
+      "date": 1527883257299
+    },
+    {
+      "type": "add",
+      "id": "f3f8bcd2df58b3b0",
+      "item": {
+        "type": "markdown",
+        "id": "f3f8bcd2df58b3b0",
+        "text": "> Recent discussions around the microservice architectural style has promoted the idea of event-driven-architectures to effectively decouple your services.\n"
+      },
+      "after": "65cb030c6ebc698c",
+      "date": 1527883261186
+    },
+    {
+      "type": "add",
+      "id": "1b7af8c7b9f8b60b",
+      "item": {
+        "type": "markdown",
+        "id": "1b7af8c7b9f8b60b",
+        "text": "> Domain events are great for decentralised data-management, generating read-models or tackling cross-cutting concerns. However, you should not implement complex peer-to-peer event chains. Using commands to coordinate other services will reduce your coupling even further.\n\n> Centrally managed ESBs don’t fit into a microservices architecture. Smart endpoints and dumb pipes are preferable. However, don’t dismiss coordinating services for fear of introducing central control: important business capabilities need a home.\n\n> In the past, BPM and workflow engines were very vendor-driven, and so there are many horrible “zero-code” tools in the market scaring away developers. However, lightweight and easy-to-use frameworks now exist, and many of them are open source. \n\n> Do not invest time in writing your own state machines, but instead leverage existing workflow tools. This will help you to avoid accidental complexity.\n\n_several of those points sound like services version of introducing Method Objects in object decomposition to decouple related entity models from the operations which change and connect them. _"
+      },
+      "after": "f3f8bcd2df58b3b0",
+      "date": 1527883263444
+    },
+    {
+      "type": "add",
+      "item": {
+        "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/3fig1-1513668200412.png\">\n\n<p class=caption>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/3fig1-1513668200412.png source]\n</p>\n</div>\n",
+        "type": "html",
+        "id": "52671d450377ab44"
+      },
+      "after": "f3f8bcd2df58b3b0",
+      "id": "52671d450377ab44",
+      "date": 1527883268624
+    },
+    {
+      "type": "edit",
+      "id": "1b7af8c7b9f8b60b",
+      "item": {
+        "type": "markdown",
+        "id": "1b7af8c7b9f8b60b",
+        "text": "> Domain events are great for decentralised data-management, generating read-models or tackling cross-cutting concerns. However, you should not implement complex peer-to-peer event chains. Using commands to coordinate other services will reduce your coupling even further.\n"
+      },
+      "date": 1527883372710
+    },
+    {
+      "type": "add",
+      "id": "060c06bd785767f5",
+      "item": {
+        "type": "markdown",
+        "id": "060c06bd785767f5",
+        "text": "> Centrally managed ESBs don’t fit into a microservices architecture. Smart endpoints and dumb pipes are preferable. However, don’t dismiss coordinating services for fear of introducing central control: important business capabilities need a home.\n\n> In the past, BPM and workflow engines were very vendor-driven, and so there are many horrible “zero-code” tools in the market scaring away developers. However, lightweight and easy-to-use frameworks now exist, and many of them are open source. \n\n> Do not invest time in writing your own state machines, but instead leverage existing workflow tools. This will help you to avoid accidental complexity.\n\n_several of those points sound like services version of introducing Method Objects in object decomposition to decouple related entity models from the operations which change and connect them. _"
+      },
+      "after": "1b7af8c7b9f8b60b",
+      "date": 1527883374128
+    },
+    {
+      "type": "add",
+      "item": {
+        "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/6fig3-1513669723708.png\">\n\n<p class=caption>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/6fig3-1513669723708.png source]\n</p>\n</div>\n",
+        "type": "html",
+        "id": "319ff993de414730"
+      },
+      "after": "1b7af8c7b9f8b60b",
+      "id": "319ff993de414730",
+      "date": 1527883378581
+    },
+    {
+      "type": "add",
+      "item": {
+        "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/3fig4-1513669723931.png\">\n\n<p class=caption>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/3fig4-1513669723931.png source]\n</p>\n</div>\n",
+        "type": "html",
+        "id": "10687d58f8b49507"
+      },
+      "after": "319ff993de414730",
+      "id": "10687d58f8b49507",
+      "date": 1527883422420
+    },
+    {
+      "type": "edit",
+      "id": "1b7af8c7b9f8b60b",
+      "item": {
+        "type": "markdown",
+        "id": "1b7af8c7b9f8b60b",
+        "text": "Domain events are great for decentralised data-management, generating read-models or tackling cross-cutting concerns. However, you should not implement complex peer-to-peer event chains.\n"
+      },
+      "date": 1527883471871
+    },
+    {
+      "type": "edit",
+      "id": "060c06bd785767f5",
+      "item": {
+        "type": "markdown",
+        "id": "060c06bd785767f5",
+        "text": "Using commands to coordinate other services will reduce your coupling even further.\n"
+      },
+      "date": 1527883478281
+    },
+    {
+      "type": "add",
+      "id": "9cfb1b4f3a6fab1d",
+      "item": {
+        "type": "markdown",
+        "id": "9cfb1b4f3a6fab1d",
+        "text": "> Centrally managed ESBs don’t fit into a microservices architecture. Smart endpoints and dumb pipes are preferable. However, don’t dismiss coordinating services for fear of introducing central control: important business capabilities need a home.\n\n> In the past, BPM and workflow engines were very vendor-driven, and so there are many horrible “zero-code” tools in the market scaring away developers. However, lightweight and easy-to-use frameworks now exist, and many of them are open source. \n\n> Do not invest time in writing your own state machines, but instead leverage existing workflow tools. This will help you to avoid accidental complexity.\n\n_several of those points sound like services version of introducing Method Objects in object decomposition to decouple related entity models from the operations which change and connect them. _"
+      },
+      "after": "060c06bd785767f5",
+      "date": 1527883479862
+    },
+    {
+      "type": "add",
+      "item": {
+        "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/3fig5-1513673353429.png\">\n\n<p class=caption>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/3fig5-1513673353429.png source]\n</p>\n</div>\n",
+        "type": "html",
+        "id": "cba1e57ef2fe7cf5"
+      },
+      "after": "060c06bd785767f5",
+      "id": "cba1e57ef2fe7cf5",
+      "date": 1527883510528
+    },
+    {
+      "type": "edit",
+      "id": "f3f8bcd2df58b3b0",
+      "item": {
+        "type": "markdown",
+        "id": "f3f8bcd2df58b3b0",
+        "text": "Recent discussions around the microservice architectural style has promoted the idea of event-driven-architectures to effectively decouple your services.\n"
+      },
+      "date": 1527883531328
+    },
+    {
+      "type": "edit",
+      "id": "319ff993de414730",
+      "item": {
+        "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/6fig3-1513669723708.png\">\n\n<p class=caption>\n  Transported image of services chained by events.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/6fig3-1513669723708.png source]\n</p>\n</div>\n",
+        "type": "html",
+        "id": "319ff993de414730"
+      },
+      "date": 1527883575763
+    },
+    {
+      "type": "edit",
+      "id": "10687d58f8b49507",
+      "item": {
+        "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/3fig4-1513669723931.png\">\n\n<p class=caption>\n  Transported image.  Change in one service cascades through the chain. \n  [https://res.infoq.com/articles/events-workflow-management/en/resources/3fig4-1513669723931.png source]\n</p>\n</div>\n",
+        "type": "html",
+        "id": "10687d58f8b49507"
+      },
+      "date": 1527883614724
+    },
+    {
+      "type": "edit",
+      "id": "10687d58f8b49507",
+      "item": {
+        "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/3fig4-1513669723931.png\">\n\n<p class=caption>\n  Change in one service cascades through the chain.\n  <br>\n  Transported image.  \n  [https://res.infoq.com/articles/events-workflow-management/en/resources/3fig4-1513669723931.png source]\n</p>\n</div>\n",
+        "type": "html",
+        "id": "10687d58f8b49507"
+      },
+      "date": 1527883660934
+    },
+    {
+      "type": "edit",
+      "id": "319ff993de414730",
+      "item": {
+        "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/6fig3-1513669723708.png\">\n\n<p class=caption>\n  Services chained by events (what not to do).\n  <br>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/6fig3-1513669723708.png source]\n</p>\n</div>\n",
+        "type": "html",
+        "id": "319ff993de414730"
+      },
+      "date": 1527883696494
+    },
+    {
+      "type": "edit",
+      "id": "52671d450377ab44",
+      "item": {
+        "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/3fig1-1513668200412.png\">\n\n<p class=caption>\n  Domain-driven design with four bounded contexts.\n  <br>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/3fig1-1513668200412.png source]\n</p>\n</div>\n",
+        "type": "html",
+        "id": "52671d450377ab44"
+      },
+      "date": 1527883735347
+    },
+    {
+      "type": "edit",
+      "id": "9cfb1b4f3a6fab1d",
+      "item": {
+        "type": "markdown",
+        "id": "9cfb1b4f3a6fab1d",
+        "text": "Centrally managed ESBs don’t fit into a microservices architecture. Smart endpoints and dumb pipes are preferable. However, don’t dismiss coordinating services for fear of introducing central control: important business capabilities need a home.\n"
+      },
+      "date": 1527883806700
+    },
+    {
+      "type": "add",
+      "id": "e22e59b83506113f",
+      "item": {
+        "type": "markdown",
+        "id": "e22e59b83506113f",
+        "text": "> In the past, BPM and workflow engines were very vendor-driven, and so there are many horrible “zero-code” tools in the market scaring away developers. However, lightweight and easy-to-use frameworks now exist, and many of them are open source. \n\n> Do not invest time in writing your own state machines, but instead leverage existing workflow tools. This will help you to avoid accidental complexity.\n\n_several of those points sound like services version of introducing Method Objects in object decomposition to decouple related entity models from the operations which change and connect them. _"
+      },
+      "after": "9cfb1b4f3a6fab1d",
+      "date": 1527883809014
+    },
+    {
+      "type": "add",
+      "item": {
+        "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/3fig6-1513673352616.png\">\n\n<p class=caption>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/3fig6-1513673352616.png source]\n</p>\n</div>\n",
+        "type": "html",
+        "id": "09a6b90b6b58e4ae"
+      },
+      "after": "9cfb1b4f3a6fab1d",
+      "id": "09a6b90b6b58e4ae",
+      "date": 1527883816437
+    },
+    {
+      "type": "edit",
+      "id": "cba1e57ef2fe7cf5",
+      "item": {
+        "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/3fig5-1513673353429.png\">\n\n<p class=caption>\n  Command services break the chains.\n  <br>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/3fig5-1513673353429.png source]\n</p>\n</div>\n",
+        "type": "html",
+        "id": "cba1e57ef2fe7cf5"
+      },
+      "date": 1527883890591
+    },
+    {
+      "type": "edit",
+      "id": "e22e59b83506113f",
+      "item": {
+        "type": "markdown",
+        "id": "e22e59b83506113f",
+        "text": "In the past, BPM and workflow engines were very vendor-driven, and so there are many horrible “zero-code” tools in the market scaring away developers. However, lightweight and easy-to-use frameworks now exist, and many of them are open source. \n"
+      },
+      "date": 1527883947213
+    },
+    {
+      "type": "add",
+      "id": "7368ed997e6bb4a9",
+      "item": {
+        "type": "markdown",
+        "id": "7368ed997e6bb4a9",
+        "text": "> Do not invest time in writing your own state machines, but instead leverage existing workflow tools. This will help you to avoid accidental complexity.\n\n_several of those points sound like services version of introducing Method Objects in object decomposition to decouple related entity models from the operations which change and connect them. _"
+      },
+      "after": "e22e59b83506113f",
+      "date": 1527883949427
+    },
+    {
+      "type": "edit",
+      "id": "7368ed997e6bb4a9",
+      "item": {
+        "type": "markdown",
+        "id": "7368ed997e6bb4a9",
+        "text": "Do not invest time in writing your own state machines, but instead leverage existing workflow tools. This will help you to avoid accidental complexity.\n"
+      },
+      "date": 1527883965203
+    },
+    {
+      "type": "add",
+      "id": "a566c1319eaff902",
+      "item": {
+        "type": "markdown",
+        "id": "a566c1319eaff902",
+        "text": "\n_several of those points sound like services version of introducing Method Objects in object decomposition to decouple related entity models from the operations which change and connect them. _"
+      },
+      "after": "7368ed997e6bb4a9",
+      "date": 1527883966297
+    },
+    {
+      "type": "add",
+      "item": {
+        "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/3fig7-1513673352872.png\">\n\n<p class=caption>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/3fig7-1513673352872.png source]\n</p>\n</div>\n",
+        "type": "html",
+        "id": "55b6336cbe3455cb"
+      },
+      "after": "7368ed997e6bb4a9",
+      "id": "55b6336cbe3455cb",
+      "date": 1527883971530
+    },
+    {
+      "type": "remove",
+      "id": "55b6336cbe3455cb",
+      "date": 1527884031638
+    },
+    {
+      "type": "add",
+      "item": {
+        "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/1fig13-1513673354500.png\">\n\n<p class=caption>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/1fig13-1513673354500.png source]\n</p>\n</div>\n",
+        "type": "html",
+        "id": "11083c37453ca9e9"
+      },
+      "after": "7368ed997e6bb4a9",
+      "id": "11083c37453ca9e9",
+      "date": 1527884074663
+    },
+    {
+      "type": "edit",
+      "id": "11083c37453ca9e9",
+      "item": {
+        "text": "<div style=\"\n  padding: 12px;\n  background:#eee;\n  width:96%;\n  align=centered;\">\n\n<img style=\"\n  display:block;\n  margin:auto;\n  width:100%;\"\n  src=\"https://res.infoq.com/articles/events-workflow-management/en/resources/1fig13-1513673354500.png\">\n\n<p class=caption>\n  Keep workflows inside a bounded context.\n  <br>\n  Transported image.\n  [https://res.infoq.com/articles/events-workflow-management/en/resources/1fig13-1513673354500.png source]\n</p>\n</div>\n",
+        "type": "html",
+        "id": "11083c37453ca9e9"
+      },
+      "date": 1527884107912
+    },
+    {
+      "type": "edit",
+      "id": "a811e07fddff8b2c",
+      "item": {
+        "type": "markdown",
+        "id": "a811e07fddff8b2c",
+        "text": "See Also [[Event Storming]] for business analysis that leads naturally to this architecture.\n"
+      },
+      "date": 1527884276404
+    },
+    {
+      "type": "add",
+      "id": "dd385c50aa23cef6",
+      "item": {
+        "type": "markdown",
+        "id": "dd385c50aa23cef6",
+        "text": "Event oriented architecture matches object oriented design with particular attention to the messages between objects.  Events pass between services as messages pass between objects.  Fractal similarity.\n"
+      },
+      "after": "a811e07fddff8b2c",
+      "date": 1527884278311
+    },
+    {
+      "type": "edit",
+      "id": "a566c1319eaff902",
+      "item": {
+        "type": "markdown",
+        "id": "a566c1319eaff902",
+        "text": "_several of those points sound like services version of introducing Method Objects in object decomposition to decouple related entity models from the operations which change and connect them. _"
+      },
+      "date": 1527889121098
+    },
+    {
+      "type": "edit",
+      "id": "030d5f26df0541d6",
+      "item": {
+        "type": "markdown",
+        "id": "030d5f26df0541d6",
+        "text": "[[Spawn or Not]] Elixir recommendations to prefer functional decomposition for modeling behavior, and apply processes for event notifications and to control event ordering.\n\n"
+      },
+      "date": 1538078995440
+    },
+    {
+      "type": "add",
+      "id": "0b74c2b0e011e3b6",
+      "item": {
+        "type": "markdown",
+        "id": "0b74c2b0e011e3b6",
+        "text": "Reactive programming model is organized around listening for event streams: [http://reactivex.io/ ReactiveX]"
+      },
+      "after": "030d5f26df0541d6",
+      "date": 1538079035799
+    },
+    {
+      "type": "edit",
+      "id": "0b74c2b0e011e3b6",
+      "item": {
+        "type": "markdown",
+        "id": "0b74c2b0e011e3b6",
+        "text": "Reactive programming model is organized around functional transformations of arrays and hashes combined with event streams modeled as collections: [https://reactivex.io/learnrx/ ReactiveX/learnx]"
+      },
+      "date": 1538079659729
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://www.youtube.com/embed/bXm8Cznyb_s?start=2656\nHEIGHT 300\nPublished 10 Jul 2016.\nEvent Sourcing @ 44:14.\n[https://youtube.com//bXm8Cznyb_s?t=44m14s youtube:44:14]\nAlso Martin Fowler's taxonomy of event-driven design: [https://martinfowler.com/articles/201701-event-driven.html#Event-sourcing article]"
+      },
+      "date": 1581525259847
+    },
+    {
+      "type": "edit",
+      "id": "125c519d7f511527",
+      "item": {
+        "type": "frame",
+        "id": "125c519d7f511527",
+        "text": "https://www.youtube.com/embed/bXm8Cznyb_s?start=2656\nHEIGHT 300\nPublished 10 Jul 2016.\nEvent Sourcing @ 44:14.\n[https://www.youtube.com/watch?v=bXm8Cznyb_s&t=44m16s youtube:44:16]\nAlso Martin Fowler's taxonomy of event-driven design: [https://martinfowler.com/articles/201701-event-driven.html#Event-sourcing article]"
+      },
+      "date": 1581525363038
+    },
+    {
+      "type": "fork",
+      "site": "wiki.dbbs.co",
+      "date": 1629094812862
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dfd5644dac485776"
+      },
+      "id": "dfd5644dac485776",
+      "type": "add",
+      "after": "0b74c2b0e011e3b6",
+      "date": 1629094983938
+    },
+    {
+      "type": "edit",
+      "id": "dfd5644dac485776",
+      "item": {
+        "type": "video",
+        "id": "dfd5644dac485776",
+        "text": "YOUTUBE bXm8Cznyb_s"
+      },
+      "date": 1629094995320
+    },
+    {
+      "type": "edit",
+      "id": "dfd5644dac485776",
+      "item": {
+        "type": "video",
+        "id": "dfd5644dac485776",
+        "text": "YOUTUBE bXm8Cznyb_s\nPaul Rayner - EventStorming, 2016"
+      },
+      "date": 1629095049478
+    },
+    {
+      "id": "dfd5644dac485776",
+      "type": "move",
+      "order": [
+        "40a95637edbe494e",
+        "125c519d7f511527",
+        "dfd5644dac485776",
+        "0d0ec4a11019f996",
+        "9791d9a3b427e7de",
+        "f5f35e77af722d97",
+        "1da3035df2d7ed56",
+        "784293fed0001886",
+        "ec6f3b6d0b841a89",
+        "714348e54259cf20",
+        "c48a16ee423a7bb5",
+        "7947b482bd6bbf73",
+        "a16ec78d70a1d500",
+        "65cb030c6ebc698c",
+        "f3f8bcd2df58b3b0",
+        "52671d450377ab44",
+        "1b7af8c7b9f8b60b",
+        "319ff993de414730",
+        "10687d58f8b49507",
+        "060c06bd785767f5",
+        "cba1e57ef2fe7cf5",
+        "9cfb1b4f3a6fab1d",
+        "09a6b90b6b58e4ae",
+        "e22e59b83506113f",
+        "7368ed997e6bb4a9",
+        "11083c37453ca9e9",
+        "a566c1319eaff902",
+        "4b365d2186853141",
+        "a811e07fddff8b2c",
+        "dd385c50aa23cef6",
+        "6a7d3b729bd4caf9",
+        "1c0f22a0fd45b3b8",
+        "030d5f26df0541d6",
+        "0b74c2b0e011e3b6"
+      ],
+      "date": 1629095059138
+    },
+    {
+      "type": "edit",
+      "id": "dfd5644dac485776",
+      "item": {
+        "type": "video",
+        "id": "dfd5644dac485776",
+        "text": "YOUTUBE bXm8Cznyb_s\nPaul Rayner - EventStorming, 2016\nEvent Sourcing @ 44:14."
+      },
+      "date": 1629095090069
+    },
+    {
+      "type": "edit",
+      "id": "dfd5644dac485776",
+      "item": {
+        "type": "video",
+        "id": "dfd5644dac485776",
+        "text": "YOUTUBE bXm8Cznyb_s\nPaul Rayner - EventStorming, 2016 ;\nEvent Sourcing @ 44:14."
+      },
+      "date": 1629095098806
+    },
+    {
+      "id": "dfd5644dac485776",
+      "type": "move",
+      "order": [
+        "40a95637edbe494e",
+        "dfd5644dac485776",
+        "125c519d7f511527",
+        "0d0ec4a11019f996",
+        "9791d9a3b427e7de",
+        "f5f35e77af722d97",
+        "1da3035df2d7ed56",
+        "784293fed0001886",
+        "ec6f3b6d0b841a89",
+        "714348e54259cf20",
+        "c48a16ee423a7bb5",
+        "7947b482bd6bbf73",
+        "a16ec78d70a1d500",
+        "65cb030c6ebc698c",
+        "f3f8bcd2df58b3b0",
+        "52671d450377ab44",
+        "1b7af8c7b9f8b60b",
+        "319ff993de414730",
+        "10687d58f8b49507",
+        "060c06bd785767f5",
+        "cba1e57ef2fe7cf5",
+        "9cfb1b4f3a6fab1d",
+        "09a6b90b6b58e4ae",
+        "e22e59b83506113f",
+        "7368ed997e6bb4a9",
+        "11083c37453ca9e9",
+        "a566c1319eaff902",
+        "4b365d2186853141",
+        "a811e07fddff8b2c",
+        "dd385c50aa23cef6",
+        "6a7d3b729bd4caf9",
+        "1c0f22a0fd45b3b8",
+        "030d5f26df0541d6",
+        "0b74c2b0e011e3b6"
+      ],
+      "date": 1629095452529
+    }
+  ]
+}

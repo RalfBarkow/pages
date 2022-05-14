@@ -1,0 +1,1464 @@
+{
+  "title": "Soft Wiki",
+  "story": [
+    {
+      "type": "html",
+      "text": "An experimental all-software [[Wiki With Programmable Content]] by [[Zygo Blaxell]] - [http://c2.com/cgi/wiki?SoftWiki c2.com]",
+      "id": "29553228923791e9fbec0d0624d9d265"
+    },
+    {
+      "type": "markdown",
+      "id": "9554884cd15df308",
+      "text": "# General description"
+    },
+    {
+      "type": "html",
+      "text": " Implementation language is a safe subset of Tcl 8.2 or 8.3 (both seem to work) (see [[The Tclers Wiki]] for more information on Tcl) with \"[[Soft Wiki]] extensions\" as described herein.",
+      "id": "a52c801957fc80932f5fcfd0362bee3d"
+    },
+    {
+      "type": "html",
+      "text": " The content of the Wiki is user-editable Tcl scripts which run inside the [[Soft Wiki]] interpreter and produce MIME output, including headers.  This allows [[Soft Wiki]] to host - or generate on the fly - any possible WWW content-type.",
+      "id": "234dcf2252d8af9d1f33b3da3dbea39b"
+    },
+    {
+      "type": "html",
+      "text": " HTTP requests are supported via CGI in the usual way.  SMTP requests should be supported via an auto-reply mailbox ([[Soft Wiki]] generates the reply email headers and text, but cannot alter the source or destination SMTP envelope address), but this isn't implemented yet.",
+      "id": "edbfc07c783e76b9ed7149891b6dc89f"
+    },
+    {
+      "type": "html",
+      "text": " To respond to a request, [[Soft Wiki]] loads a \"boot\" script with a hardcoded name (\"/boot/cgi\") (different scripts for email and web access) from the [[Soft Wiki]] database into the safe Tcl interpreter and evaluates the script.  This \"boot\" script in turn does appropriate input parsing (i.e. CGI parsing if via HTTP) and pass control to another script inside the [[Soft Wiki]] database, based on PATH_INFO, QUERY_STRING, Subject header, etc.",
+      "id": "29d5fc485e30efe3578876e2ace8afe7"
+    },
+    {
+      "type": "html",
+      "text": " [[Soft Wiki]] scripts generally have full access to everything from the client a CGI script would have, including file uploads, access to User-agent and Referrer fields, client IP, ability to generate non-HTML output.",
+      "id": "9f4f537b4f3c9c88105005159d6b3717"
+    },
+    {
+      "type": "html",
+      "text": " [[Soft Wiki]] scripts can themselves create safe interpreters which are even more restricted than themselves, thereby implementing their own secure wrappers for other [[Soft Wiki]] scripts in a hierarchical fashion. This can be used to implement access control within [[Soft Wiki]] itself.",
+      "id": "dd3dab5b5796eb3700084b7def3ddfde"
+    },
+    {
+      "type": "html",
+      "text": "\nThere exist two units of code that are not, and except in unusual circumstances, should not ever be editable through [[Soft Wiki]] itself. Both units of code exist outside of the \"normal\" [[Soft Wiki]] environment:",
+      "id": "1a75c0a42508f6222eb069224c4a746e"
+    },
+    {
+      "type": "html",
+      "text": " Bootstrap code to create the safe interpreter, set up access to the Wiki database, set resource limits, load the boot page, evaluate it, and attempt to provide an intelligible error report if a fatal error is encountered early in a [[Soft Wiki]] script's lifetime. Think of this as a minimal \"kernel\" on top of which everything else runs combined with a \"watchdog\" that prevents it running too long. This kernel is minimalistic, so hopefully there is no reason to want to change it except to set parameters such as resource limits and interpreter safety.",
+      "id": "f03a63a8a770e4ebb0e4e13510af1c6a"
+    },
+    {
+      "type": "html",
+      "text": " The persistent database engine. Having the ability to edit this unit is like having the ability to edit an OS's filesystem code while the OS is still running - not useful in most cases. There are reasons to want to change this, e.g. to use a different database module, or to enhance performance, or to support \"invisible\" features such as backups or replication. Another problem is that the bootstrap code must access this database somehow, and how does one use the database-reading code if it is located inside the database itself?",
+      "id": "dcafa34b709db50e5993b43ff2bc5906"
+    },
+    {
+      "type": "html",
+      "text": "\nThere are two units of code that may or may not be editable by users because of site-specific policy. Both units of code may exist and even be editable inside the [[Soft Wiki]] environment if the [[Wiki Wiki Clone]] operator chooses to allow it:",
+      "id": "b7f4841fbc90961eaf06431c6877589c"
+    },
+    {
+      "type": "html",
+      "text": " \"Unsafe\" Tcl code, which can open socket connections, load Tcl extensions from shared libraries, execute sub-processes, and so forth. Such code can provide proxy services to \"safe\" Tcl code which implement some kind of security policy. As an example, the \"safe\" restriction can be simply removed from the bootstrap code, so that the \"boot\" script in the [[Soft Wiki]] database is not restricted to a subset of Tcl. The \"boot\" script in turn can create its own \"safe\" Tcl interpreter after establishing a new security policy, usually one that restricts write access to itself.",
+      "id": "a6f9fcc5d4dd94cc63bd7d32cf87fdc5"
+    },
+    {
+      "type": "html",
+      "text": " A simple web form and email address for executing Tcl code inside the [[Soft Wiki]] environment. This hardcoded interface bypasses the \"boot\" page, and enables examination and repair of the database even if (when) someone accidentally damages the boot script. A \"secure [[Soft Wiki]]\" would have to remove or restrict access to this unit, since it can read or modify any database entry.  Think of this as the \"debugger\".",
+      "id": "226ea85981e3cccf802913111c35822d"
+    },
+    {
+      "type": "html",
+      "text": " Another simple web form and email address for accessing the most recent global database transaction log. \"Most recent\" means whatever the site administrator has left on the machine - they are not part of the database proper, so they can be removed at any time. This form is capable of re-inserting a continuous set of transactions in reverse, effectively acting as a \"big global undo button\" for reversing fatal changes. [[Soft Wiki]] itself can access this log and use it to produce more sophisticated functionality (e.g. different forms of [[Recent Changes]] or [[Quick Changes]], or restricting the reported set of transactions to those on particular keys).",
+      "id": "eba34e14619ebf0105bce16ca46b8ebf"
+    },
+    {
+      "type": "html",
+      "text": "\nHard resource limits are implemented in [[Soft Wiki]] using a loadable C extension to Tcl which sets limits on a Unix process. These limits cannot be overridden inside the safe Tcl interpreter, but of course are trivial to override inside the boot script. They are:",
+      "id": "b4839dcee4beea6a17187d80c05cf7db"
+    },
+    {
+      "type": "html",
+      "text": " One thread",
+      "id": "32299e5848b3a1a343e8a3840104c04d"
+    },
+    {
+      "type": "html",
+      "text": " 15 real-time seconds (not including HTTP data transfer time)",
+      "id": "907543f155469943d573872c2c1d9a3c"
+    },
+    {
+      "type": "html",
+      "text": " 5 CPU seconds",
+      "id": "3efd8f7499fd6fdc7b3219eee1d19226"
+    },
+    {
+      "type": "html",
+      "text": " 8 megabytes rss/virtual/data/stack memory",
+      "id": "7991f16d526ca569e710ecb6d959f123"
+    },
+    {
+      "type": "html",
+      "text": " 8 megabytes maximum I/O, including database transactions.",
+      "id": "d16a28e0872a5dcf8e432af6ea0de91b"
+    },
+    {
+      "type": "html",
+      "text": " Stock Tcl 8.2 (8.3 in testing) interpreter core with no experimental features (e.g. threads) enabled. For those who don't know Tcl very well, this means:",
+      "id": "3f1d05da3ed71b5afe69a97f33118fef"
+    },
+    {
+      "type": "html",
+      "text": " simple, consistent, yet powerful syntax (Lisp with simpler syntax)",
+      "id": "2382fa49525b9476215d78171961bfcc"
+    },
+    {
+      "type": "html",
+      "text": " namespaces, global and local (lexically and dynamically scoped) variables",
+      "id": "095ee58e863f6089c8fca14a06ed8b6c"
+    },
+    {
+      "type": "html",
+      "text": " Perl-style regular expressions",
+      "id": "a3e8ae533220884b20b02f98e7be8866"
+    },
+    {
+      "type": "html",
+      "text": " Perl-style binary strings (actually Unicode, as I discovered the hard way -- [[Zygo Blaxell]])",
+      "id": "79a8c3556a62f77fbc6037753a92c82a"
+    },
+    {
+      "type": "html",
+      "text": " lists, strings, integers, doubles, booleans, associative arrays, and procedures all convertible to a canonical string representation",
+      "id": "c71cf740a9f9a0b681df57804cf4d980"
+    },
+    {
+      "type": "html",
+      "text": " no reference type (but some reference semantics in the implementations of various types)",
+      "id": "8994a7a5e5a4377ad297b90bf621ce69"
+    },
+    {
+      "type": "html",
+      "text": " sub-interpreters, support for multiple execution contexts",
+      "id": "93359bc87d4b2862736477717333af4f"
+    },
+    {
+      "type": "html",
+      "text": " procedures are transparently byte-compiled at run-time for performance (important when you only get 5 seconds ;-)",
+      "id": "c0e544a818b696323729b95a6cc58155"
+    },
+    {
+      "type": "html",
+      "text": " some introspection capability can examine procedures on call stack)",
+      "id": "741f4ad8234daa936d298fdcc5ac523d"
+    },
+    {
+      "type": "html",
+      "text": " exception handling",
+      "id": "84d7a3adf482c87e6114eb080c743b9a"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Soft Wiki]] visible features of the database server:",
+      "id": "3a00c71cabc185bd327ec1525c7cb945"
+    },
+    {
+      "type": "html",
+      "text": " Simple key-value dictionary storage:<br>\"softwiki get key\" (returns value) and \"softwiki set key value\" (replaces the database entry for \"key\" with \"value\").",
+      "id": "ca314f0e8491f80146a8f4f95d54b1d6"
+    },
+    {
+      "type": "html",
+      "text": " Flat namespace for keys, but arbitrary key structure allowed (so \"foo bar\" and \"/home/myself/scripts/homepage.tcl\" and \"::foo::bar\" are all valid)",
+      "id": "bc60e2df11a8675f35f8b6c6f65d6dde"
+    },
+    {
+      "type": "html",
+      "text": " Sorted key enumeration. Can fetch a list of keys ranging from X to Y (or \"/a/b/c/\" to \"/a/b/d/\")",
+      "id": "f2551247455dcb77b4e4376714f89cdf"
+    },
+    {
+      "type": "html",
+      "text": " Lock-free transaction support. A transaction consists of two lists of (key, value) pairs. The first list is a list of assertions, while the second is a list of assignments. A transaction is processed by acquiring locks on all of the keys, then verifying all of the assertions' actual values match the values specified in the transaction, then (if all assertions are verified) assigning all of the assignments' values to their respective keys. Transactions are atomic from [[Soft Wiki]]'s point of view.",
+      "id": "b1d047d1cdd78da7a56a9f2078ba74af"
+    },
+    {
+      "type": "html",
+      "text": " All keys have metadata in addition to their values (actually, deleted keys have metadata too). The metadata contains:",
+      "id": "f47afe59c4e169ede2792706bcfb5523"
+    },
+    {
+      "type": "html",
+      "text": " A string of audit data (IP address of CGI client, Received header for email, authenticated user ID if authentication is used). This might be stored as a simple index into an audit data database.",
+      "id": "9f425a856f690adea720fcc6165a69b8"
+    },
+    {
+      "type": "html",
+      "text": " The transaction serial number of the transaction that most recently changed the key's value.",
+      "id": "b3777450c47506269b10986e34cf1f1b"
+    },
+    {
+      "type": "html",
+      "text": " The timestamp of the last modification.",
+      "id": "03e19a7183748649da352cd8e4a9b8e7"
+    },
+    {
+      "type": "html",
+      "text": " A transaction log is accessible from within [[Soft Wiki]]. Each transaction is recorded with a serial number, which increases by one on each new transaction. The transaction log records:",
+      "id": "8c2556d8421753ba768a814a5d82ec1c"
+    },
+    {
+      "type": "html",
+      "text": " A string of audit data, as in the metadata database",
+      "id": "5130a9f2812dd718ad4e57ec9c50910a"
+    },
+    {
+      "type": "html",
+      "text": " A timestamp, the time the transaction was committed",
+      "id": "4d1a570b469035add7e5367b9871e1a3"
+    },
+    {
+      "type": "html",
+      "text": " The previous values of all keys in the assignment list",
+      "id": "505468815d10a2752e69a22b6fe0844f"
+    },
+    {
+      "type": "html",
+      "text": " The transaction serial numbers from any keys that were modified. These can be followed as a linked list to find the history of modifications of a key.",
+      "id": "901a50eb6604914b00662565e0161073"
+    },
+    {
+      "type": "html",
+      "text": "\nLess-visible features:",
+      "id": "bc1d4de693ee8e2c37c4278dab159556"
+    },
+    {
+      "type": "html",
+      "text": " Database implementation details are hidden from [[Soft Wiki]].  Actually, they're protected in a separate process, since [[Soft Wiki]] processes are expected to receive a lot of fatal signals from the hard resource limits...",
+      "id": "30311df5228b2fad1b4959d8ffed0332"
+    },
+    {
+      "type": "html",
+      "text": " Flat files in a directory sounds like a good place to start.",
+      "id": "5d2d54753201adaabd156bd6edd41ff9"
+    },
+    {
+      "type": "html",
+      "text": " Sleepycat's Berkeley DB 2.x inside a dedicated Tcl server shared among all [[Soft Wiki]] clients sounds like a good place to go...or perhaps a combination of the above with \"small\" objects in the DB and \"large\" ones in files.",
+      "id": "f3071dcef3afcb3f4f5d4f5a3037d366"
+    },
+    {
+      "type": "html",
+      "text": " Transparent data compression might be nice, especially if it can avoid Berkeley DB overflow pages.",
+      "id": "6984567fed5fe71e5ead16d23c28296e"
+    },
+    {
+      "type": "html",
+      "text": " If a resource limit (e.g. CPU time) is encountered by a [[Soft Wiki]] script during a transaction, it will not violate the atomicity of a transaction, but it may kill the process that initiated the transaction while the transaction is being completed.",
+      "id": "18cc30d61552ace4cac42c673f00e9fd"
+    },
+    {
+      "type": "html",
+      "text": "\nThe following are probably good ideas, but there are issues to be worked out first before they become practical:",
+      "id": "496a3590060accb6eda4f31b4848ab3e"
+    },
+    {
+      "type": "html",
+      "text": " Access to SMTP, HTTP, FTP, NNTP, ...",
+      "id": "d62096adea4ece25560c7eceb6af735a"
+    },
+    {
+      "type": "html",
+      "text": " There's a major potential for abuse here, e.g. port-scanning, email spamming...",
+      "id": "eddc7903757495e19923a582b6d56e2b"
+    },
+    {
+      "type": "html",
+      "text": " Abuse could be mitigated by providing a white-list of URL's that can be accessed via HTTP",
+      "id": "7a7d8a0049e2208419af3e947348e36e"
+    },
+    {
+      "type": "html",
+      "text": " SMTP may only be allowed to people who subscribe (with confirmation) to a mailing list.  The mailing list itself would have no traffic, it would only provide a mechanism whereby people can elect to receive mail from [[Soft Wiki]], and [[Soft Wiki]] scripts would only be able to send mail to subscribers.",
+      "id": "cc9c1736d88abda1e244706ac57c0c3d"
+    },
+    {
+      "type": "html",
+      "text": " HTTP access is useful for implementing middleware.",
+      "id": "6fc560348e6881d9317f672bebfa773d"
+    },
+    {
+      "type": "html",
+      "text": " SMTP access is useful for implementing email notification of changes to [[Soft Wiki]] objects.",
+      "id": "895a0bbc1aa87d654acb624a7accee14"
+    },
+    {
+      "type": "html",
+      "text": " Scheduled/deferred execution (similar to at/cron)",
+      "id": "4bb3f86c0ce34204c4c855c3bec49594"
+    },
+    {
+      "type": "html",
+      "text": " LambdaMOO allows this",
+      "id": "5227dbfeb2f46bdd2eb9f863f94bdd5c"
+    },
+    {
+      "type": "html",
+      "text": " Could be used for garbage collection, regenerating static pages, etc.",
+      "id": "4995c1179e61df291ea3d9ae62fc78f1"
+    },
+    {
+      "type": "html",
+      "text": " Could be implemented by having someone hit a specific URL at regular intervals, i.e. outside [[Soft Wiki]].  ",
+      "id": "8a36c4392d36d7e01ad04fa42cc4fa20"
+    },
+    {
+      "type": "html",
+      "text": " Best implementation is probably another \"boot\" script which would be a [[Soft Wiki]] implementation of 'cron'.",
+      "id": "ec128f78ca9fe10257aeec60da78cb87"
+    },
+    {
+      "type": "html",
+      "text": " Could support queues of commands for \"hourly\", \"daily\", \"weekly\", \"monthly\", which allows the site administrator to pick the time while allowing the [[Soft Wiki]] contributor to pick the frequency.",
+      "id": "5dd923186cbe9716e70f08aebde8474d"
+    },
+    {
+      "type": "html",
+      "text": " Could allow larger resource limits because the request load is better defined (no [[Slashdot Effect]], since there is only one request per hour/day/week/month). This could allow very expensive [[Soft Wiki]] scripts such as building an index for a full-text search engine.",
+      "id": "5061c2f69c5db69ce8b27a340a7ef405"
+    },
+    {
+      "type": "html",
+      "text": " Forking (spawning new processes or threads)",
+      "id": "554a5c74a10877e515de5a8b92d0ec03"
+    },
+    {
+      "type": "html",
+      "text": " LambdaMOO allows this",
+      "id": "5227dbfeb2f46bdd2eb9f863f94bdd5c"
+    },
+    {
+      "type": "html",
+      "text": " Vanilla Tcl doesn't (but there is experimental thread support)",
+      "id": "f450ac04544dc5fb1dbe4db78ec04f27"
+    },
+    {
+      "type": "html",
+      "text": " would probably have to be \"spawn\", not \"fork\" - i.e. evaluate a script in a different process",
+      "id": "952fd54b6f256641412c4cf83824fbd0"
+    },
+    {
+      "type": "html",
+      "text": " Creates all-new resource limit and ownership issues - a script has to be tracked to figure out if it was created by the web server, or by another script. Combine with HTTP client access and you have scripts that can get more resources by requesting themselves over network loopback, possibly indirected through another WWW mediator.  ",
+      "id": "42d91bfbc45e7144ff0ec7e687aa2726"
+    },
+    {
+      "type": "html",
+      "text": " [[Wiki Wiki Essence]] is probably lost when there are \"ownership issues.\"",
+      "id": "e7f8f3fb413b551143b6adcd75f669dd"
+    },
+    {
+      "type": "html",
+      "text": " Perhaps a background priority queue would be useful. A script could specify its priority in the queue in terms of its desired level of resource usage. A script requesting 1 CPU second runs before one requesting 10, and that one runs before a script requesting 100.",
+      "id": "b550b7007d50db393c79be54cc91327b"
+    },
+    {
+      "type": "html",
+      "text": " Access controls and authority structure",
+      "id": "4714234ca4835a01148a9248acaa3031"
+    },
+    {
+      "type": "html",
+      "text": " LambdaMOO has access control per member of objects. You can create an object that you don't entirely own, and you can own parts of objects you didn't create. Workable solution to \"ownership issues\" problem, and they've been doing this much longer than we have.",
+      "id": "54d2bc4b5e2bd84591a0a60b8ca9862b"
+    },
+    {
+      "type": "html",
+      "text": " Can probably be faked with a lot of safe Tcl interpreters and a secure executive. Unfortunately Tcl does not allow safe interpreters to expose and hide commands, not even the safe ones, but it does allow secure command aliases.",
+      "id": "fa4f773fee19d4b61bd23f4e89292361"
+    },
+    {
+      "type": "html",
+      "text": " In particular, access control to the database can be implemented inside of the safe Tcl interpreter.",
+      "id": "22fc66fd83b392b66e716764bc495f67"
+    },
+    {
+      "type": "html",
+      "text": " Tcl \"language\" extensions (distinguished from \"capability\" extensions in that they don't provide new functionality, only new ways to express existing functionality):",
+      "id": "4109b75c1dc400ca6243f7da5c50d5a0"
+    },
+    {
+      "type": "html",
+      "text": " Itcl:<br>object-oriented Tcl extensions - instances, constructors, and destructors.",
+      "id": "8e1398f09ef6c202fa7808e984172555"
+    },
+    {
+      "type": "html",
+      "text": " Expect:<br>features signal handling and an interactive debugger, among other things. Might cause more problems than it solves, though: the ability to set up a signal handler would mean that resource limits could be circumvented.",
+      "id": "a0a8b40b66a417bb7293686284d7fb15"
+    },
+    {
+      "type": "html",
+      "text": " Modify the Tcl core to implement a command count quota similar to LambdaMOO's per-process \"tick\" limit. \"info cmdcount\" in Tcl tells you how many Tcl commands have been evaluated in an interpreter. It should be trivial to implement an extension to the \"interp\" command (\"interp quota\"?) which allows setting a limiting value for \"info cmdcount\" inside a slave interpreter. Once the quota has been reached, any further Tcl commands in that interpreter will return errors, which will unwind the Tcl stack back up to the master interpreter's \"eval\" statement.",
+      "id": "b7d98ece4a0311596a43d8924b04e8b1"
+    },
+    {
+      "type": "html",
+      "text": " Tcl \"capability\" extensions (distinguished from \"language\" extensions in that they give you access to things that cannot be represented otherwise (vastly increased efficiency counts as a capability - LZW compression in pure Tcl is amusing, but [[Soft Wiki]] imposes hard RAM and CPU limits):",
+      "id": "9cdc4c851fc025bd5213ea705184ebf1"
+    },
+    {
+      "type": "html",
+      "text": " gd:<br>image generation (generate GIFs on the fly, popular in CGI scripts)",
+      "id": "85aa210658ab6b709aafead94913a2e0"
+    },
+    {
+      "type": "html",
+      "text": " [[Image Magick]]:<br>more image manipulation",
+      "id": "aa360ab4347ad3cc20cf176d5fd575c0"
+    },
+    {
+      "type": "html",
+      "text": " diff:<br>show differences between revisions of a page (use this to build a [[Quick Diff]] feature inside [[Soft Wiki]] itself)",
+      "id": "eb6b94621201e022074a04050d56ad3b"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "407690b285d7bb7fecd789ad5166b7cb"
+    },
+    {
+      "type": "html",
+      "text": "I've been asked many times \"why Tcl?\", or more about supporting non-Tcl languages in [[Soft Wiki]] (Python, Perl, Java, Guile, Lisp, Scheme...). I'd certainly like to be able to use other languages, but there are some issues to resolve first:",
+      "id": "347e365bc0211700bcf467b3a20761c5"
+    },
+    {
+      "type": "html",
+      "text": " Language implementation must feature a restricted interpreter and must pass a security audit to protect its host machine from accidents or abuse. This virtually always implies an open-source implementation.",
+      "id": "c8ca2f36a3ef1401a715a2fe80b18d79"
+    },
+    {
+      "type": "html",
+      "text": " Language must be available and working on Linux.",
+      "id": "451d4ff6cb58e98ecc1056d153098987"
+    },
+    {
+      "type": "html",
+      "text": " Language should be interpreted (but Java is a good example of a compiled language that would be acceptable).",
+      "id": "850151e8af91a323c75374241e25b19d"
+    },
+    {
+      "type": "html",
+      "text": " Language should be easy to manipulate with a web browser (so if a tab is not syntactically equivalent to 8 spaces, the language may have problems; ditto languages that use non-ASCII-text source code).",
+      "id": "976bfd5a2983a0f9b425a978b290019d"
+    },
+    {
+      "type": "html",
+      "text": " Language should allow writing simple scripts quickly by someone experienced in the language (otherwise it's not very [[Wiki Wiki]], is it?).",
+      "id": "88ca3e9f3b64f2bfe1f3cb157ac9ef3b"
+    },
+    {
+      "type": "html",
+      "text": " Language should be dynamically loadable from a C program.",
+      "id": "81f68ba151811a648d79ec84a0b0698a"
+    },
+    {
+      "type": "html",
+      "text": " Language should be easy to extend (positively, by adding new functionality, and negatively, by removing functionality that exists) in C, or a language accessible from C.",
+      "id": "13c477ffe3ede4bb5c5f0d2a7ff2b888"
+    },
+    {
+      "type": "html",
+      "text": " Language must respect hard CPU, memory, and I/O resource limits.  Unix makes this easy for small interpreters embedded in a single process per client request; however, if the language is something like LambdaMOO, where a big server process handles all client requests, that server will be responsible for resource managements.",
+      "id": "de05b26bc8e009e0068ca66597065c87"
+    },
+    {
+      "type": "html",
+      "text": "\nSo far, Perl and Guile/Scheme are being considered as [[Soft Wiki]]'s second languages.",
+      "id": "51f71ba636e25d9c628630a6334a72d8"
+    },
+    {
+      "type": "html",
+      "text": "\nThe issue of multiple language support raises some interesting (and as yet not entirely resolved) problems:  ",
+      "id": "09b2a4b715d4804afad15e2659c3ebbf"
+    },
+    {
+      "type": "html",
+      "text": " How do you know in advance what language a [[Soft Wiki]] object (all of which are simple text strings) will be written (or interpreted) in?",
+      "id": "fbfbb88fc88c110afff48de57362f26c"
+    },
+    {
+      "type": "html",
+      "text": " Possible answer:<br>A \"loader\" script (of course written inside [[Soft Wiki]]) determines the language using something analogous to \"#!\" Unix syntax, except with names meaningful to [[Soft Wiki]]",
+      "id": "36169453833b47168b38ccf09c9224f6"
+    },
+    {
+      "type": "html",
+      "text": " How do interpreters of language X access interpreters of language Y?",
+      "id": "5a32affa4873d86a4d71bed319d1e722"
+    },
+    {
+      "type": "html",
+      "text": " The apparent Lingua Franca is a function for each language which interprets a string of source code in that language and returns some result as a string. Passing more complex objects around, even when they are supported by both languages involved, is less well-specified.",
+      "id": "bef37f606b015af2e33f5b315587fa1c"
+    },
+    {
+      "type": "html",
+      "text": " One could use a two-step approach:<br>the first step creates an interpreter in the called language as an object in the calling language. The second step is to use the object in the calling language to interpret source code for the called language in that language's interpreter. This would allow control over initialization overhead.",
+      "id": "ad22e4a94e926885463842fe9a88dfad"
+    },
+    {
+      "type": "html",
+      "text": " How often and under what circumstances do languages communicate?",
+      "id": "28cbfa18100d57154f1122607d334b86"
+    },
+    {
+      "type": "html",
+      "text": " The most common case is likely to be a simple case of language X loading a string in language Y, interpreting that string in language Y, and then exiting. Call this the \"bootstrap\" model, where Tcl is used to select a different language, and all the interesting stuff happens in that language.",
+      "id": "faf66c976ea609605cd636286e572e6a"
+    },
+    {
+      "type": "html",
+      "text": " The worst case is two object-oriented languages doing inherited method calls into each other.",
+      "id": "b1412ac3a529b44f173f685303e73c08"
+    },
+    {
+      "type": "html",
+      "text": " How does [[Soft Wiki]] internal security work when multiple languages are available?  Recall that Tcl can implement a hierarchical access control mechanism using nested interpreters. This access control mechanism apparently falls apart when interpreters of other languages are created, unless these other language interpreters have exactly identical access control mechanisms implemented themselves.",
+      "id": "7964b68090d4895fe167130db24d96c0"
+    },
+    {
+      "type": "html",
+      "text": " One solution is to replace \"/boot/cgi\" (the Boot script) with \"/boot/cgi.tcl\", \"/boot/cgi.pl\", \"/boot/cgi.guile\", \"/boot/cgi.py\", \"/boot/cgi.class\", i.e. one boot script for each language. That also implies one debugger for each language, and indeed one complete set of [[Soft Wiki]] infrastructure per language.",
+      "id": "36a91827f00e0550f41c33cac64eaa1a"
+    },
+    {
+      "type": "html",
+      "text": " Another solution is to implement access control inside the database itself, outside of any interpreter. Again, what language do you express such controls in...",
+      "id": "ad64e94945c3a022ec2ebf3516f38620"
+    },
+    {
+      "type": "html",
+      "text": " Perhaps the most elegant solution is to find some way to implement each child interpreter's [[Soft Wiki]] interface in terms of its parent's. This may require N^2 different implementations for N languages. Ouch.",
+      "id": "a250acfa8682a5d55ec03a1e858a0214"
+    },
+    {
+      "type": "html",
+      "text": "\nThanks for the comments so far. They're really helping me to better understand the problem. -- [[Zygo Blaxell]]",
+      "id": "3fe3fd57ec5dc952798cf1b2de691d12"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "407690b285d7bb7fecd789ad5166b7cb"
+    },
+    {
+      "type": "html",
+      "text": "[[Mike Stump]] suggests [[Soft Wiki]] as a first step toward a truly global source code management system. It's a nice idea, but all I designed [[Soft Wiki]] for was to be a maintenance-enhanced [[Wiki Wiki Web]].",
+      "id": "6723d209f6777c4d0f21f200c87f2338"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Programming In Wiki]]?",
+      "id": "a9fc4a18c249fdf9a6cb27b8018fbcae"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "407690b285d7bb7fecd789ad5166b7cb"
+    },
+    {
+      "type": "html",
+      "text": "See [[Xp System]]",
+      "id": "03c30ce1de4effb62a3d176da5e28277"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "407690b285d7bb7fecd789ad5166b7cb"
+    },
+    {
+      "type": "html",
+      "text": "I've made a system like this in Perl, based off [[Use Mod]]. There is a small bootstrap program that runs a community-editable [[Use Mod]]-like script. It's live and is able to accept modifications in its code. See [[Self Programming Wiki]] or [http://purl.net/net/spw purl.net] .",
+      "id": "38ffd8a0e749d9ace27d544372741635"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Bayle Shanks]]",
+      "id": "6f027c3a124c8e9934cff5119dffa3fc"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "407690b285d7bb7fecd789ad5166b7cb"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Wiki Implementation]]",
+      "id": "e1b11a1828b9036257d83bfa2fef1112"
+    },
+    {
+      "type": "markdown",
+      "id": "4d265b900d3cf759",
+      "text": "# See also\n"
+    },
+    {
+      "type": "markdown",
+      "id": "2dfa736f1c31a277",
+      "text": "- [[Literate Wiki]]\n- [[Self Programming Wiki]]\n- [[Programming In Wiki]]\n- [[Wiki With Programmable Content]]\n- [[Wiki Ide]]\n- [[Soft Wiki]]\n- [[Wiki With More Than Pages]]"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1407298759000,
+      "id": "2be34b5a452e6c9d439d1f2e6b737102",
+      "type": "create",
+      "item": {
+        "title": "Soft Wiki",
+        "story": [
+          {
+            "type": "html",
+            "text": "An experimental all-software [[Wiki With Programmable Content]] by [[Zygo Blaxell]].",
+            "id": "29553228923791e9fbec0d0624d9d265"
+          },
+          {
+            "type": "html",
+            "text": "\nCurrently unavailable to the public until a suitable server host can be found.",
+            "id": "6381b6b57f99295662e67f92c25fb72c"
+          },
+          {
+            "type": "html",
+            "text": "\nGeneral description:",
+            "id": "6963a03993491a65de34edf76e0cacb0"
+          },
+          {
+            "type": "html",
+            "text": " Implementation language is a safe subset of Tcl 8.2 or 8.3 (both seem to work) (see [[The Tclers Wiki]] for more information on Tcl) with \"[[Soft Wiki]] extensions\" as described herein.",
+            "id": "a52c801957fc80932f5fcfd0362bee3d"
+          },
+          {
+            "type": "html",
+            "text": " The content of the Wiki is user-editable Tcl scripts which run inside the [[Soft Wiki]] interpreter and produce MIME output, including headers.  This allows [[Soft Wiki]] to host - or generate on the fly - any possible WWW content-type.",
+            "id": "234dcf2252d8af9d1f33b3da3dbea39b"
+          },
+          {
+            "type": "html",
+            "text": " HTTP requests are supported via CGI in the usual way.  SMTP requests should be supported via an auto-reply mailbox ([[Soft Wiki]] generates the reply email headers and text, but cannot alter the source or destination SMTP envelope address), but this isn't implemented yet.",
+            "id": "edbfc07c783e76b9ed7149891b6dc89f"
+          },
+          {
+            "type": "html",
+            "text": " To respond to a request, [[Soft Wiki]] loads a \"boot\" script with a hardcoded name (\"/boot/cgi\") (different scripts for email and web access) from the [[Soft Wiki]] database into the safe Tcl interpreter and evaluates the script.  This \"boot\" script in turn does appropriate input parsing (i.e. CGI parsing if via HTTP) and pass control to another script inside the [[Soft Wiki]] database, based on PATH_INFO, QUERY_STRING, Subject header, etc.",
+            "id": "29d5fc485e30efe3578876e2ace8afe7"
+          },
+          {
+            "type": "html",
+            "text": " [[Soft Wiki]] scripts generally have full access to everything from the client a CGI script would have, including file uploads, access to User-agent and Referrer fields, client IP, ability to generate non-HTML output.",
+            "id": "9f4f537b4f3c9c88105005159d6b3717"
+          },
+          {
+            "type": "html",
+            "text": " [[Soft Wiki]] scripts can themselves create safe interpreters which are even more restricted than themselves, thereby implementing their own secure wrappers for other [[Soft Wiki]] scripts in a hierarchical fashion. This can be used to implement access control within [[Soft Wiki]] itself.",
+            "id": "dd3dab5b5796eb3700084b7def3ddfde"
+          },
+          {
+            "type": "html",
+            "text": "\nThere exist two units of code that are not, and except in unusual circumstances, should not ever be editable through [[Soft Wiki]] itself. Both units of code exist outside of the \"normal\" [[Soft Wiki]] environment:",
+            "id": "1a75c0a42508f6222eb069224c4a746e"
+          },
+          {
+            "type": "html",
+            "text": " Bootstrap code to create the safe interpreter, set up access to the Wiki database, set resource limits, load the boot page, evaluate it, and attempt to provide an intelligible error report if a fatal error is encountered early in a [[Soft Wiki]] script's lifetime. Think of this as a minimal \"kernel\" on top of which everything else runs combined with a \"watchdog\" that prevents it running too long. This kernel is minimalistic, so hopefully there is no reason to want to change it except to set parameters such as resource limits and interpreter safety.",
+            "id": "f03a63a8a770e4ebb0e4e13510af1c6a"
+          },
+          {
+            "type": "html",
+            "text": " The persistent database engine. Having the ability to edit this unit is like having the ability to edit an OS's filesystem code while the OS is still running - not useful in most cases. There are reasons to want to change this, e.g. to use a different database module, or to enhance performance, or to support \"invisible\" features such as backups or replication. Another problem is that the bootstrap code must access this database somehow, and how does one use the database-reading code if it is located inside the database itself?",
+            "id": "dcafa34b709db50e5993b43ff2bc5906"
+          },
+          {
+            "type": "html",
+            "text": "\nThere are two units of code that may or may not be editable by users because of site-specific policy. Both units of code may exist and even be editable inside the [[Soft Wiki]] environment if the [[Wiki Wiki Clone]] operator chooses to allow it:",
+            "id": "b7f4841fbc90961eaf06431c6877589c"
+          },
+          {
+            "type": "html",
+            "text": " \"Unsafe\" Tcl code, which can open socket connections, load Tcl extensions from shared libraries, execute sub-processes, and so forth. Such code can provide proxy services to \"safe\" Tcl code which implement some kind of security policy. As an example, the \"safe\" restriction can be simply removed from the bootstrap code, so that the \"boot\" script in the [[Soft Wiki]] database is not restricted to a subset of Tcl. The \"boot\" script in turn can create its own \"safe\" Tcl interpreter after establishing a new security policy, usually one that restricts write access to itself.",
+            "id": "a6f9fcc5d4dd94cc63bd7d32cf87fdc5"
+          },
+          {
+            "type": "html",
+            "text": " A simple web form and email address for executing Tcl code inside the [[Soft Wiki]] environment. This hardcoded interface bypasses the \"boot\" page, and enables examination and repair of the database even if (when) someone accidentally damages the boot script. A \"secure [[Soft Wiki]]\" would have to remove or restrict access to this unit, since it can read or modify any database entry.  Think of this as the \"debugger\".",
+            "id": "226ea85981e3cccf802913111c35822d"
+          },
+          {
+            "type": "html",
+            "text": " Another simple web form and email address for accessing the most recent global database transaction log. \"Most recent\" means whatever the site administrator has left on the machine - they are not part of the database proper, so they can be removed at any time. This form is capable of re-inserting a continuous set of transactions in reverse, effectively acting as a \"big global undo button\" for reversing fatal changes. [[Soft Wiki]] itself can access this log and use it to produce more sophisticated functionality (e.g. different forms of [[Recent Changes]] or [[Quick Changes]], or restricting the reported set of transactions to those on particular keys).",
+            "id": "eba34e14619ebf0105bce16ca46b8ebf"
+          },
+          {
+            "type": "html",
+            "text": "\nHard resource limits are implemented in [[Soft Wiki]] using a loadable C extension to Tcl which sets limits on a Unix process. These limits cannot be overridden inside the safe Tcl interpreter, but of course are trivial to override inside the boot script. They are:",
+            "id": "b4839dcee4beea6a17187d80c05cf7db"
+          },
+          {
+            "type": "html",
+            "text": " One thread",
+            "id": "32299e5848b3a1a343e8a3840104c04d"
+          },
+          {
+            "type": "html",
+            "text": " 15 real-time seconds (not including HTTP data transfer time)",
+            "id": "907543f155469943d573872c2c1d9a3c"
+          },
+          {
+            "type": "html",
+            "text": " 5 CPU seconds",
+            "id": "3efd8f7499fd6fdc7b3219eee1d19226"
+          },
+          {
+            "type": "html",
+            "text": " 8 megabytes rss/virtual/data/stack memory",
+            "id": "7991f16d526ca569e710ecb6d959f123"
+          },
+          {
+            "type": "html",
+            "text": " 8 megabytes maximum I/O, including database transactions.",
+            "id": "d16a28e0872a5dcf8e432af6ea0de91b"
+          },
+          {
+            "type": "html",
+            "text": " Stock Tcl 8.2 (8.3 in testing) interpreter core with no experimental features (e.g. threads) enabled. For those who don't know Tcl very well, this means:",
+            "id": "3f1d05da3ed71b5afe69a97f33118fef"
+          },
+          {
+            "type": "html",
+            "text": " simple, consistent, yet powerful syntax (Lisp with simpler syntax)",
+            "id": "2382fa49525b9476215d78171961bfcc"
+          },
+          {
+            "type": "html",
+            "text": " namespaces, global and local (lexically and dynamically scoped) variables",
+            "id": "095ee58e863f6089c8fca14a06ed8b6c"
+          },
+          {
+            "type": "html",
+            "text": " Perl-style regular expressions",
+            "id": "a3e8ae533220884b20b02f98e7be8866"
+          },
+          {
+            "type": "html",
+            "text": " Perl-style binary strings (actually Unicode, as I discovered the hard way -- [[Zygo Blaxell]])",
+            "id": "79a8c3556a62f77fbc6037753a92c82a"
+          },
+          {
+            "type": "html",
+            "text": " lists, strings, integers, doubles, booleans, associative arrays, and procedures all convertible to a canonical string representation",
+            "id": "c71cf740a9f9a0b681df57804cf4d980"
+          },
+          {
+            "type": "html",
+            "text": " no reference type (but some reference semantics in the implementations of various types)",
+            "id": "8994a7a5e5a4377ad297b90bf621ce69"
+          },
+          {
+            "type": "html",
+            "text": " sub-interpreters, support for multiple execution contexts",
+            "id": "93359bc87d4b2862736477717333af4f"
+          },
+          {
+            "type": "html",
+            "text": " procedures are transparently byte-compiled at run-time for performance (important when you only get 5 seconds ;-)",
+            "id": "c0e544a818b696323729b95a6cc58155"
+          },
+          {
+            "type": "html",
+            "text": " some introspection capability can examine procedures on call stack)",
+            "id": "741f4ad8234daa936d298fdcc5ac523d"
+          },
+          {
+            "type": "html",
+            "text": " exception handling",
+            "id": "84d7a3adf482c87e6114eb080c743b9a"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Soft Wiki]] visible features of the database server:",
+            "id": "3a00c71cabc185bd327ec1525c7cb945"
+          },
+          {
+            "type": "html",
+            "text": " Simple key-value dictionary storage:<br>\"softwiki get key\" (returns value) and \"softwiki set key value\" (replaces the database entry for \"key\" with \"value\").",
+            "id": "ca314f0e8491f80146a8f4f95d54b1d6"
+          },
+          {
+            "type": "html",
+            "text": " Flat namespace for keys, but arbitrary key structure allowed (so \"foo bar\" and \"/home/myself/scripts/homepage.tcl\" and \"::foo::bar\" are all valid)",
+            "id": "bc60e2df11a8675f35f8b6c6f65d6dde"
+          },
+          {
+            "type": "html",
+            "text": " Sorted key enumeration. Can fetch a list of keys ranging from X to Y (or \"/a/b/c/\" to \"/a/b/d/\")",
+            "id": "f2551247455dcb77b4e4376714f89cdf"
+          },
+          {
+            "type": "html",
+            "text": " Lock-free transaction support. A transaction consists of two lists of (key, value) pairs. The first list is a list of assertions, while the second is a list of assignments. A transaction is processed by acquiring locks on all of the keys, then verifying all of the assertions' actual values match the values specified in the transaction, then (if all assertions are verified) assigning all of the assignments' values to their respective keys. Transactions are atomic from [[Soft Wiki]]'s point of view.",
+            "id": "b1d047d1cdd78da7a56a9f2078ba74af"
+          },
+          {
+            "type": "html",
+            "text": " All keys have metadata in addition to their values (actually, deleted keys have metadata too). The metadata contains:",
+            "id": "f47afe59c4e169ede2792706bcfb5523"
+          },
+          {
+            "type": "html",
+            "text": " A string of audit data (IP address of CGI client, Received header for email, authenticated user ID if authentication is used). This might be stored as a simple index into an audit data database.",
+            "id": "9f425a856f690adea720fcc6165a69b8"
+          },
+          {
+            "type": "html",
+            "text": " The transaction serial number of the transaction that most recently changed the key's value.",
+            "id": "b3777450c47506269b10986e34cf1f1b"
+          },
+          {
+            "type": "html",
+            "text": " The timestamp of the last modification.",
+            "id": "03e19a7183748649da352cd8e4a9b8e7"
+          },
+          {
+            "type": "html",
+            "text": " A transaction log is accessible from within [[Soft Wiki]]. Each transaction is recorded with a serial number, which increases by one on each new transaction. The transaction log records:",
+            "id": "8c2556d8421753ba768a814a5d82ec1c"
+          },
+          {
+            "type": "html",
+            "text": " A string of audit data, as in the metadata database",
+            "id": "5130a9f2812dd718ad4e57ec9c50910a"
+          },
+          {
+            "type": "html",
+            "text": " A timestamp, the time the transaction was committed",
+            "id": "4d1a570b469035add7e5367b9871e1a3"
+          },
+          {
+            "type": "html",
+            "text": " The previous values of all keys in the assignment list",
+            "id": "505468815d10a2752e69a22b6fe0844f"
+          },
+          {
+            "type": "html",
+            "text": " The transaction serial numbers from any keys that were modified. These can be followed as a linked list to find the history of modifications of a key.",
+            "id": "901a50eb6604914b00662565e0161073"
+          },
+          {
+            "type": "html",
+            "text": "\nLess-visible features:",
+            "id": "bc1d4de693ee8e2c37c4278dab159556"
+          },
+          {
+            "type": "html",
+            "text": " Database implementation details are hidden from [[Soft Wiki]].  Actually, they're protected in a separate process, since [[Soft Wiki]] processes are expected to receive a lot of fatal signals from the hard resource limits...",
+            "id": "30311df5228b2fad1b4959d8ffed0332"
+          },
+          {
+            "type": "html",
+            "text": " Flat files in a directory sounds like a good place to start.",
+            "id": "5d2d54753201adaabd156bd6edd41ff9"
+          },
+          {
+            "type": "html",
+            "text": " Sleepycat's Berkeley DB 2.x inside a dedicated Tcl server shared among all [[Soft Wiki]] clients sounds like a good place to go...or perhaps a combination of the above with \"small\" objects in the DB and \"large\" ones in files.",
+            "id": "f3071dcef3afcb3f4f5d4f5a3037d366"
+          },
+          {
+            "type": "html",
+            "text": " Transparent data compression might be nice, especially if it can avoid Berkeley DB overflow pages.",
+            "id": "6984567fed5fe71e5ead16d23c28296e"
+          },
+          {
+            "type": "html",
+            "text": " If a resource limit (e.g. CPU time) is encountered by a [[Soft Wiki]] script during a transaction, it will not violate the atomicity of a transaction, but it may kill the process that initiated the transaction while the transaction is being completed.",
+            "id": "18cc30d61552ace4cac42c673f00e9fd"
+          },
+          {
+            "type": "html",
+            "text": "\nThe following are probably good ideas, but there are issues to be worked out first before they become practical:",
+            "id": "496a3590060accb6eda4f31b4848ab3e"
+          },
+          {
+            "type": "html",
+            "text": " Access to SMTP, HTTP, FTP, NNTP, ...",
+            "id": "d62096adea4ece25560c7eceb6af735a"
+          },
+          {
+            "type": "html",
+            "text": " There's a major potential for abuse here, e.g. port-scanning, email spamming...",
+            "id": "eddc7903757495e19923a582b6d56e2b"
+          },
+          {
+            "type": "html",
+            "text": " Abuse could be mitigated by providing a white-list of URL's that can be accessed via HTTP",
+            "id": "7a7d8a0049e2208419af3e947348e36e"
+          },
+          {
+            "type": "html",
+            "text": " SMTP may only be allowed to people who subscribe (with confirmation) to a mailing list.  The mailing list itself would have no traffic, it would only provide a mechanism whereby people can elect to receive mail from [[Soft Wiki]], and [[Soft Wiki]] scripts would only be able to send mail to subscribers.",
+            "id": "cc9c1736d88abda1e244706ac57c0c3d"
+          },
+          {
+            "type": "html",
+            "text": " HTTP access is useful for implementing middleware.",
+            "id": "6fc560348e6881d9317f672bebfa773d"
+          },
+          {
+            "type": "html",
+            "text": " SMTP access is useful for implementing email notification of changes to [[Soft Wiki]] objects.",
+            "id": "895a0bbc1aa87d654acb624a7accee14"
+          },
+          {
+            "type": "html",
+            "text": " Scheduled/deferred execution (similar to at/cron)",
+            "id": "4bb3f86c0ce34204c4c855c3bec49594"
+          },
+          {
+            "type": "html",
+            "text": " LambdaMOO allows this",
+            "id": "5227dbfeb2f46bdd2eb9f863f94bdd5c"
+          },
+          {
+            "type": "html",
+            "text": " Could be used for garbage collection, regenerating static pages, etc.",
+            "id": "4995c1179e61df291ea3d9ae62fc78f1"
+          },
+          {
+            "type": "html",
+            "text": " Could be implemented by having someone hit a specific URL at regular intervals, i.e. outside [[Soft Wiki]].  ",
+            "id": "8a36c4392d36d7e01ad04fa42cc4fa20"
+          },
+          {
+            "type": "html",
+            "text": " Best implementation is probably another \"boot\" script which would be a [[Soft Wiki]] implementation of 'cron'.",
+            "id": "ec128f78ca9fe10257aeec60da78cb87"
+          },
+          {
+            "type": "html",
+            "text": " Could support queues of commands for \"hourly\", \"daily\", \"weekly\", \"monthly\", which allows the site administrator to pick the time while allowing the [[Soft Wiki]] contributor to pick the frequency.",
+            "id": "5dd923186cbe9716e70f08aebde8474d"
+          },
+          {
+            "type": "html",
+            "text": " Could allow larger resource limits because the request load is better defined (no [[Slashdot Effect]], since there is only one request per hour/day/week/month). This could allow very expensive [[Soft Wiki]] scripts such as building an index for a full-text search engine.",
+            "id": "5061c2f69c5db69ce8b27a340a7ef405"
+          },
+          {
+            "type": "html",
+            "text": " Forking (spawning new processes or threads)",
+            "id": "554a5c74a10877e515de5a8b92d0ec03"
+          },
+          {
+            "type": "html",
+            "text": " LambdaMOO allows this",
+            "id": "5227dbfeb2f46bdd2eb9f863f94bdd5c"
+          },
+          {
+            "type": "html",
+            "text": " Vanilla Tcl doesn't (but there is experimental thread support)",
+            "id": "f450ac04544dc5fb1dbe4db78ec04f27"
+          },
+          {
+            "type": "html",
+            "text": " would probably have to be \"spawn\", not \"fork\" - i.e. evaluate a script in a different process",
+            "id": "952fd54b6f256641412c4cf83824fbd0"
+          },
+          {
+            "type": "html",
+            "text": " Creates all-new resource limit and ownership issues - a script has to be tracked to figure out if it was created by the web server, or by another script. Combine with HTTP client access and you have scripts that can get more resources by requesting themselves over network loopback, possibly indirected through another WWW mediator.  ",
+            "id": "42d91bfbc45e7144ff0ec7e687aa2726"
+          },
+          {
+            "type": "html",
+            "text": " [[Wiki Wiki Essence]] is probably lost when there are \"ownership issues.\"",
+            "id": "e7f8f3fb413b551143b6adcd75f669dd"
+          },
+          {
+            "type": "html",
+            "text": " Perhaps a background priority queue would be useful. A script could specify its priority in the queue in terms of its desired level of resource usage. A script requesting 1 CPU second runs before one requesting 10, and that one runs before a script requesting 100.",
+            "id": "b550b7007d50db393c79be54cc91327b"
+          },
+          {
+            "type": "html",
+            "text": " Access controls and authority structure",
+            "id": "4714234ca4835a01148a9248acaa3031"
+          },
+          {
+            "type": "html",
+            "text": " LambdaMOO has access control per member of objects. You can create an object that you don't entirely own, and you can own parts of objects you didn't create. Workable solution to \"ownership issues\" problem, and they've been doing this much longer than we have.",
+            "id": "54d2bc4b5e2bd84591a0a60b8ca9862b"
+          },
+          {
+            "type": "html",
+            "text": " Can probably be faked with a lot of safe Tcl interpreters and a secure executive. Unfortunately Tcl does not allow safe interpreters to expose and hide commands, not even the safe ones, but it does allow secure command aliases.",
+            "id": "fa4f773fee19d4b61bd23f4e89292361"
+          },
+          {
+            "type": "html",
+            "text": " In particular, access control to the database can be implemented inside of the safe Tcl interpreter.",
+            "id": "22fc66fd83b392b66e716764bc495f67"
+          },
+          {
+            "type": "html",
+            "text": " Tcl \"language\" extensions (distinguished from \"capability\" extensions in that they don't provide new functionality, only new ways to express existing functionality):",
+            "id": "4109b75c1dc400ca6243f7da5c50d5a0"
+          },
+          {
+            "type": "html",
+            "text": " Itcl:<br>object-oriented Tcl extensions - instances, constructors, and destructors.",
+            "id": "8e1398f09ef6c202fa7808e984172555"
+          },
+          {
+            "type": "html",
+            "text": " Expect:<br>features signal handling and an interactive debugger, among other things. Might cause more problems than it solves, though: the ability to set up a signal handler would mean that resource limits could be circumvented.",
+            "id": "a0a8b40b66a417bb7293686284d7fb15"
+          },
+          {
+            "type": "html",
+            "text": " Modify the Tcl core to implement a command count quota similar to LambdaMOO's per-process \"tick\" limit. \"info cmdcount\" in Tcl tells you how many Tcl commands have been evaluated in an interpreter. It should be trivial to implement an extension to the \"interp\" command (\"interp quota\"?) which allows setting a limiting value for \"info cmdcount\" inside a slave interpreter. Once the quota has been reached, any further Tcl commands in that interpreter will return errors, which will unwind the Tcl stack back up to the master interpreter's \"eval\" statement.",
+            "id": "b7d98ece4a0311596a43d8924b04e8b1"
+          },
+          {
+            "type": "html",
+            "text": " Tcl \"capability\" extensions (distinguished from \"language\" extensions in that they give you access to things that cannot be represented otherwise (vastly increased efficiency counts as a capability - LZW compression in pure Tcl is amusing, but [[Soft Wiki]] imposes hard RAM and CPU limits):",
+            "id": "9cdc4c851fc025bd5213ea705184ebf1"
+          },
+          {
+            "type": "html",
+            "text": " gd:<br>image generation (generate GIFs on the fly, popular in CGI scripts)",
+            "id": "85aa210658ab6b709aafead94913a2e0"
+          },
+          {
+            "type": "html",
+            "text": " [[Image Magick]]:<br>more image manipulation",
+            "id": "aa360ab4347ad3cc20cf176d5fd575c0"
+          },
+          {
+            "type": "html",
+            "text": " diff:<br>show differences between revisions of a page (use this to build a [[Quick Diff]] feature inside [[Soft Wiki]] itself)",
+            "id": "eb6b94621201e022074a04050d56ad3b"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "407690b285d7bb7fecd789ad5166b7cb"
+          },
+          {
+            "type": "html",
+            "text": "I've been asked many times \"why Tcl?\", or more about supporting non-Tcl languages in [[Soft Wiki]] (Python, Perl, Java, Guile, Lisp, Scheme...). I'd certainly like to be able to use other languages, but there are some issues to resolve first:",
+            "id": "347e365bc0211700bcf467b3a20761c5"
+          },
+          {
+            "type": "html",
+            "text": " Language implementation must feature a restricted interpreter and must pass a security audit to protect its host machine from accidents or abuse. This virtually always implies an open-source implementation.",
+            "id": "c8ca2f36a3ef1401a715a2fe80b18d79"
+          },
+          {
+            "type": "html",
+            "text": " Language must be available and working on Linux.",
+            "id": "451d4ff6cb58e98ecc1056d153098987"
+          },
+          {
+            "type": "html",
+            "text": " Language should be interpreted (but Java is a good example of a compiled language that would be acceptable).",
+            "id": "850151e8af91a323c75374241e25b19d"
+          },
+          {
+            "type": "html",
+            "text": " Language should be easy to manipulate with a web browser (so if a tab is not syntactically equivalent to 8 spaces, the language may have problems; ditto languages that use non-ASCII-text source code).",
+            "id": "976bfd5a2983a0f9b425a978b290019d"
+          },
+          {
+            "type": "html",
+            "text": " Language should allow writing simple scripts quickly by someone experienced in the language (otherwise it's not very [[Wiki Wiki]], is it?).",
+            "id": "88ca3e9f3b64f2bfe1f3cb157ac9ef3b"
+          },
+          {
+            "type": "html",
+            "text": " Language should be dynamically loadable from a C program.",
+            "id": "81f68ba151811a648d79ec84a0b0698a"
+          },
+          {
+            "type": "html",
+            "text": " Language should be easy to extend (positively, by adding new functionality, and negatively, by removing functionality that exists) in C, or a language accessible from C.",
+            "id": "13c477ffe3ede4bb5c5f0d2a7ff2b888"
+          },
+          {
+            "type": "html",
+            "text": " Language must respect hard CPU, memory, and I/O resource limits.  Unix makes this easy for small interpreters embedded in a single process per client request; however, if the language is something like LambdaMOO, where a big server process handles all client requests, that server will be responsible for resource managements.",
+            "id": "de05b26bc8e009e0068ca66597065c87"
+          },
+          {
+            "type": "html",
+            "text": "\nSo far, Perl and Guile/Scheme are being considered as [[Soft Wiki]]'s second languages.",
+            "id": "51f71ba636e25d9c628630a6334a72d8"
+          },
+          {
+            "type": "html",
+            "text": "\nThe issue of multiple language support raises some interesting (and as yet not entirely resolved) problems:  ",
+            "id": "09b2a4b715d4804afad15e2659c3ebbf"
+          },
+          {
+            "type": "html",
+            "text": " How do you know in advance what language a [[Soft Wiki]] object (all of which are simple text strings) will be written (or interpreted) in?",
+            "id": "fbfbb88fc88c110afff48de57362f26c"
+          },
+          {
+            "type": "html",
+            "text": " Possible answer:<br>A \"loader\" script (of course written inside [[Soft Wiki]]) determines the language using something analogous to \"#!\" Unix syntax, except with names meaningful to [[Soft Wiki]]",
+            "id": "36169453833b47168b38ccf09c9224f6"
+          },
+          {
+            "type": "html",
+            "text": " How do interpreters of language X access interpreters of language Y?",
+            "id": "5a32affa4873d86a4d71bed319d1e722"
+          },
+          {
+            "type": "html",
+            "text": " The apparent Lingua Franca is a function for each language which interprets a string of source code in that language and returns some result as a string. Passing more complex objects around, even when they are supported by both languages involved, is less well-specified.",
+            "id": "bef37f606b015af2e33f5b315587fa1c"
+          },
+          {
+            "type": "html",
+            "text": " One could use a two-step approach:<br>the first step creates an interpreter in the called language as an object in the calling language. The second step is to use the object in the calling language to interpret source code for the called language in that language's interpreter. This would allow control over initialization overhead.",
+            "id": "ad22e4a94e926885463842fe9a88dfad"
+          },
+          {
+            "type": "html",
+            "text": " How often and under what circumstances do languages communicate?",
+            "id": "28cbfa18100d57154f1122607d334b86"
+          },
+          {
+            "type": "html",
+            "text": " The most common case is likely to be a simple case of language X loading a string in language Y, interpreting that string in language Y, and then exiting. Call this the \"bootstrap\" model, where Tcl is used to select a different language, and all the interesting stuff happens in that language.",
+            "id": "faf66c976ea609605cd636286e572e6a"
+          },
+          {
+            "type": "html",
+            "text": " The worst case is two object-oriented languages doing inherited method calls into each other.",
+            "id": "b1412ac3a529b44f173f685303e73c08"
+          },
+          {
+            "type": "html",
+            "text": " How does [[Soft Wiki]] internal security work when multiple languages are available?  Recall that Tcl can implement a hierarchical access control mechanism using nested interpreters. This access control mechanism apparently falls apart when interpreters of other languages are created, unless these other language interpreters have exactly identical access control mechanisms implemented themselves.",
+            "id": "7964b68090d4895fe167130db24d96c0"
+          },
+          {
+            "type": "html",
+            "text": " One solution is to replace \"/boot/cgi\" (the Boot script) with \"/boot/cgi.tcl\", \"/boot/cgi.pl\", \"/boot/cgi.guile\", \"/boot/cgi.py\", \"/boot/cgi.class\", i.e. one boot script for each language. That also implies one debugger for each language, and indeed one complete set of [[Soft Wiki]] infrastructure per language.",
+            "id": "36a91827f00e0550f41c33cac64eaa1a"
+          },
+          {
+            "type": "html",
+            "text": " Another solution is to implement access control inside the database itself, outside of any interpreter. Again, what language do you express such controls in...",
+            "id": "ad64e94945c3a022ec2ebf3516f38620"
+          },
+          {
+            "type": "html",
+            "text": " Perhaps the most elegant solution is to find some way to implement each child interpreter's [[Soft Wiki]] interface in terms of its parent's. This may require N^2 different implementations for N languages. Ouch.",
+            "id": "a250acfa8682a5d55ec03a1e858a0214"
+          },
+          {
+            "type": "html",
+            "text": "\nThanks for the comments so far. They're really helping me to better understand the problem. -- [[Zygo Blaxell]]",
+            "id": "3fe3fd57ec5dc952798cf1b2de691d12"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "407690b285d7bb7fecd789ad5166b7cb"
+          },
+          {
+            "type": "html",
+            "text": "[[Mike Stump]] suggests [[Soft Wiki]] as a first step toward a truly global source code management system. It's a nice idea, but all I designed [[Soft Wiki]] for was to be a maintenance-enhanced [[Wiki Wiki Web]].",
+            "id": "6723d209f6777c4d0f21f200c87f2338"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Programming In Wiki]]?",
+            "id": "a9fc4a18c249fdf9a6cb27b8018fbcae"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "407690b285d7bb7fecd789ad5166b7cb"
+          },
+          {
+            "type": "html",
+            "text": "See [[Xp System]]",
+            "id": "03c30ce1de4effb62a3d176da5e28277"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "407690b285d7bb7fecd789ad5166b7cb"
+          },
+          {
+            "type": "html",
+            "text": "I've made a system like this in Perl, based off [[Use Mod]]. There is a small bootstrap program that runs a community-editable [[Use Mod]]-like script. It's live and is able to accept modifications in its code. See [[Self Programming Wiki]] or [http://purl.net/net/spw purl.net] .",
+            "id": "38ffd8a0e749d9ace27d544372741635"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Bayle Shanks]]",
+            "id": "6f027c3a124c8e9934cff5119dffa3fc"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "407690b285d7bb7fecd789ad5166b7cb"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Wiki Implementation]]",
+            "id": "e1b11a1828b9036257d83bfa2fef1112"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?SoftWiki c2.com]",
+            "id": "f703af5d63db4ff7bd3459427e11c1f8"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1550581079007
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "4d265b900d3cf759",
+        "text": "# See also\n"
+      },
+      "after": "f703af5d63db4ff7bd3459427e11c1f8",
+      "id": "4d265b900d3cf759",
+      "date": 1550599767567
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "2dfa736f1c31a277",
+        "text": "- [[Literate Wiki]]\n- [[Self Programming Wiki]]\n- [[Programming In Wiki]]\n- [[Wiki With Programmable Content]]\n- [[Wiki Ide]]\n- [[Soft Wiki]]\n- [[Wiki With More Than Pages]]"
+      },
+      "after": "4d265b900d3cf759",
+      "id": "2dfa736f1c31a277",
+      "date": 1550599770118
+    },
+    {
+      "type": "remove",
+      "id": "f703af5d63db4ff7bd3459427e11c1f8",
+      "date": 1550599776380
+    },
+    {
+      "type": "edit",
+      "id": "29553228923791e9fbec0d0624d9d265",
+      "item": {
+        "type": "html",
+        "text": "An experimental all-software [[Wiki With Programmable Content]] by [[Zygo Blaxell]] - [http://c2.com/cgi/wiki?SoftWiki c2.com]",
+        "id": "29553228923791e9fbec0d0624d9d265"
+      },
+      "date": 1550599784266
+    },
+    {
+      "type": "remove",
+      "id": "6963a03993491a65de34edf76e0cacb0",
+      "date": 1550599893947
+    },
+    {
+      "type": "edit",
+      "id": "6381b6b57f99295662e67f92c25fb72c",
+      "item": {
+        "type": "html",
+        "text": "Currently unavailable to the public until a suitable server host can be found.",
+        "id": "6381b6b57f99295662e67f92c25fb72c"
+      },
+      "date": 1550599902805
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9554884cd15df308"
+      },
+      "id": "9554884cd15df308",
+      "type": "add",
+      "after": "4d265b900d3cf759",
+      "date": 1550599907971
+    },
+    {
+      "type": "edit",
+      "id": "9554884cd15df308",
+      "item": {
+        "type": "markdown",
+        "id": "9554884cd15df308",
+        "text": "# General description"
+      },
+      "date": 1550599911661
+    },
+    {
+      "type": "move",
+      "order": [
+        "29553228923791e9fbec0d0624d9d265",
+        "9554884cd15df308",
+        "6381b6b57f99295662e67f92c25fb72c",
+        "a52c801957fc80932f5fcfd0362bee3d",
+        "234dcf2252d8af9d1f33b3da3dbea39b",
+        "edbfc07c783e76b9ed7149891b6dc89f",
+        "29d5fc485e30efe3578876e2ace8afe7",
+        "9f4f537b4f3c9c88105005159d6b3717",
+        "dd3dab5b5796eb3700084b7def3ddfde",
+        "1a75c0a42508f6222eb069224c4a746e",
+        "f03a63a8a770e4ebb0e4e13510af1c6a",
+        "dcafa34b709db50e5993b43ff2bc5906",
+        "b7f4841fbc90961eaf06431c6877589c",
+        "a6f9fcc5d4dd94cc63bd7d32cf87fdc5",
+        "226ea85981e3cccf802913111c35822d",
+        "eba34e14619ebf0105bce16ca46b8ebf",
+        "b4839dcee4beea6a17187d80c05cf7db",
+        "32299e5848b3a1a343e8a3840104c04d",
+        "907543f155469943d573872c2c1d9a3c",
+        "3efd8f7499fd6fdc7b3219eee1d19226",
+        "7991f16d526ca569e710ecb6d959f123",
+        "d16a28e0872a5dcf8e432af6ea0de91b",
+        "3f1d05da3ed71b5afe69a97f33118fef",
+        "2382fa49525b9476215d78171961bfcc",
+        "095ee58e863f6089c8fca14a06ed8b6c",
+        "a3e8ae533220884b20b02f98e7be8866",
+        "79a8c3556a62f77fbc6037753a92c82a",
+        "c71cf740a9f9a0b681df57804cf4d980",
+        "8994a7a5e5a4377ad297b90bf621ce69",
+        "93359bc87d4b2862736477717333af4f",
+        "c0e544a818b696323729b95a6cc58155",
+        "741f4ad8234daa936d298fdcc5ac523d",
+        "84d7a3adf482c87e6114eb080c743b9a",
+        "3a00c71cabc185bd327ec1525c7cb945",
+        "ca314f0e8491f80146a8f4f95d54b1d6",
+        "bc60e2df11a8675f35f8b6c6f65d6dde",
+        "f2551247455dcb77b4e4376714f89cdf",
+        "b1d047d1cdd78da7a56a9f2078ba74af",
+        "f47afe59c4e169ede2792706bcfb5523",
+        "9f425a856f690adea720fcc6165a69b8",
+        "b3777450c47506269b10986e34cf1f1b",
+        "03e19a7183748649da352cd8e4a9b8e7",
+        "8c2556d8421753ba768a814a5d82ec1c",
+        "5130a9f2812dd718ad4e57ec9c50910a",
+        "4d1a570b469035add7e5367b9871e1a3",
+        "505468815d10a2752e69a22b6fe0844f",
+        "901a50eb6604914b00662565e0161073",
+        "bc1d4de693ee8e2c37c4278dab159556",
+        "30311df5228b2fad1b4959d8ffed0332",
+        "5d2d54753201adaabd156bd6edd41ff9",
+        "f3071dcef3afcb3f4f5d4f5a3037d366",
+        "6984567fed5fe71e5ead16d23c28296e",
+        "18cc30d61552ace4cac42c673f00e9fd",
+        "496a3590060accb6eda4f31b4848ab3e",
+        "d62096adea4ece25560c7eceb6af735a",
+        "eddc7903757495e19923a582b6d56e2b",
+        "7a7d8a0049e2208419af3e947348e36e",
+        "cc9c1736d88abda1e244706ac57c0c3d",
+        "6fc560348e6881d9317f672bebfa773d",
+        "895a0bbc1aa87d654acb624a7accee14",
+        "4bb3f86c0ce34204c4c855c3bec49594",
+        "5227dbfeb2f46bdd2eb9f863f94bdd5c",
+        "4995c1179e61df291ea3d9ae62fc78f1",
+        "8a36c4392d36d7e01ad04fa42cc4fa20",
+        "ec128f78ca9fe10257aeec60da78cb87",
+        "5dd923186cbe9716e70f08aebde8474d",
+        "5061c2f69c5db69ce8b27a340a7ef405",
+        "554a5c74a10877e515de5a8b92d0ec03",
+        "5227dbfeb2f46bdd2eb9f863f94bdd5c",
+        "f450ac04544dc5fb1dbe4db78ec04f27",
+        "952fd54b6f256641412c4cf83824fbd0",
+        "42d91bfbc45e7144ff0ec7e687aa2726",
+        "e7f8f3fb413b551143b6adcd75f669dd",
+        "b550b7007d50db393c79be54cc91327b",
+        "4714234ca4835a01148a9248acaa3031",
+        "54d2bc4b5e2bd84591a0a60b8ca9862b",
+        "fa4f773fee19d4b61bd23f4e89292361",
+        "22fc66fd83b392b66e716764bc495f67",
+        "4109b75c1dc400ca6243f7da5c50d5a0",
+        "8e1398f09ef6c202fa7808e984172555",
+        "a0a8b40b66a417bb7293686284d7fb15",
+        "b7d98ece4a0311596a43d8924b04e8b1",
+        "9cdc4c851fc025bd5213ea705184ebf1",
+        "85aa210658ab6b709aafead94913a2e0",
+        "aa360ab4347ad3cc20cf176d5fd575c0",
+        "eb6b94621201e022074a04050d56ad3b",
+        "407690b285d7bb7fecd789ad5166b7cb",
+        "347e365bc0211700bcf467b3a20761c5",
+        "c8ca2f36a3ef1401a715a2fe80b18d79",
+        "451d4ff6cb58e98ecc1056d153098987",
+        "850151e8af91a323c75374241e25b19d",
+        "976bfd5a2983a0f9b425a978b290019d",
+        "88ca3e9f3b64f2bfe1f3cb157ac9ef3b",
+        "81f68ba151811a648d79ec84a0b0698a",
+        "13c477ffe3ede4bb5c5f0d2a7ff2b888",
+        "de05b26bc8e009e0068ca66597065c87",
+        "51f71ba636e25d9c628630a6334a72d8",
+        "09b2a4b715d4804afad15e2659c3ebbf",
+        "fbfbb88fc88c110afff48de57362f26c",
+        "36169453833b47168b38ccf09c9224f6",
+        "5a32affa4873d86a4d71bed319d1e722",
+        "bef37f606b015af2e33f5b315587fa1c",
+        "ad22e4a94e926885463842fe9a88dfad",
+        "28cbfa18100d57154f1122607d334b86",
+        "faf66c976ea609605cd636286e572e6a",
+        "b1412ac3a529b44f173f685303e73c08",
+        "7964b68090d4895fe167130db24d96c0",
+        "36a91827f00e0550f41c33cac64eaa1a",
+        "ad64e94945c3a022ec2ebf3516f38620",
+        "a250acfa8682a5d55ec03a1e858a0214",
+        "3fe3fd57ec5dc952798cf1b2de691d12",
+        "407690b285d7bb7fecd789ad5166b7cb",
+        "6723d209f6777c4d0f21f200c87f2338",
+        "a9fc4a18c249fdf9a6cb27b8018fbcae",
+        "407690b285d7bb7fecd789ad5166b7cb",
+        "03c30ce1de4effb62a3d176da5e28277",
+        "407690b285d7bb7fecd789ad5166b7cb",
+        "38ffd8a0e749d9ace27d544372741635",
+        "6f027c3a124c8e9934cff5119dffa3fc",
+        "407690b285d7bb7fecd789ad5166b7cb",
+        "e1b11a1828b9036257d83bfa2fef1112",
+        "4d265b900d3cf759"
+      ],
+      "id": "9554884cd15df308",
+      "date": 1550599930269
+    },
+    {
+      "type": "remove",
+      "id": "6381b6b57f99295662e67f92c25fb72c",
+      "date": 1550599934077
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "2dfa736f1c31a277",
+        "text": "- [[Literate Wiki]]\n- [[Self Programming Wiki]]\n- [[Programming In Wiki]]\n- [[Wiki With Programmable Content]]\n- [[Wiki Ide]]\n- [[Soft Wiki]]\n- [[Wiki With More Than Pages]]"
+      },
+      "after": "4d265b900d3cf759",
+      "id": "2dfa736f1c31a277",
+      "date": 1550599946552
+    },
+    {
+      "type": "fork",
+      "site": "literate.wiki",
+      "date": 1626101535045
+    }
+  ]
+}

@@ -1,0 +1,472 @@
+{
+  "title": "Lexical Scoping",
+  "story": [
+    {
+      "type": "html",
+      "text": "From The [[Free On Line Dictionary Of Computing]]:",
+      "id": "1b3e889bb5ed2f24b85cbc0374237eb0"
+    },
+    {
+      "type": "html",
+      "text": "lexical scope:<br><programming> (Or \"static scope\") In a lexically scoped language, the {scope} of an {identifier} is fixed at {compile time} to some region in the {source code} containing the identifier's declaration. This means that an identifier is only accessible within that region (including procedures declared within it).",
+      "id": "154e8a1334a0592e8e77825b1fce7441"
+    },
+    {
+      "type": "html",
+      "text": "This contrasts with {dynamic scope} where the scope depends on the nesting of {procedure} and {function} calls at {run time}.",
+      "id": "9924b2a5073a93242f537cca8892b54b"
+    },
+    {
+      "type": "html",
+      "text": "Statically scoped languages differ as to whether the scope is limited to the smallest {block} (including {begin}/end blocks) containing the identifier's declaration (e.g. {C}, {Perl}) or to whole function and procedure bodies (e.g. ?), or some larger unit of code (e.g. ?).",
+      "id": "4e63146e4ddf5a2890907e413a11c095"
+    },
+    {
+      "type": "html",
+      "text": "(2001-09-07)",
+      "id": "70ac5f8c927e5c66235895b02a97fc95"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9ad65b9c281e1975c8ec40dfaad28ab5"
+    },
+    {
+      "type": "html",
+      "text": "Also note that in Lisp, a symbol's binding has lexical scope, not the mapping from an identifier to a symbol. That mapping transcends scope. For instance in (let ((x 3)) (let ((x 4)) ..)) the identifier X in the source is mapped to a symbol object when the source is scanned and turned into a nested list, at what is known as \"read time\". Both occurrences of X map to the same symbol object, even though each one denotes a local variable in a different lexical scope. A symbol object is a concrete data structure in the address space; every X in the internal representation of the form is a pointer to that object.",
+      "id": "fc7ba6e496aa18cfa92b1210cdd78bd9"
+    },
+    {
+      "type": "html",
+      "text": "\nIn languages that don't treat symbols as first-class abstractions, terms like <i>symbol</i>, <i>name</i> or <i>identifier</i> are used interchangeably, and basically just refer to a text-string-like entity that is not a real object. Compilers for these languages typically use quite a different symbol-table structure; each lexical scope creates a new symbol table, and nested lexical scopes are represented as a [[Spaghetti Stack]] of these tables (a structure constructed by pushing and popping, in which the popped frames remain in place and refer to the parent frames). In the Lisp approach, the symbol table is global (and is known as a \"package\"). The nested stack of lexical bindings that may be constructed by the compiler internally is something other than a symbol table; it's known as an \"environment\"---a context object that establishes a mapping from symbols to various entities. [[Lexical Closure]] objects capture such environments.",
+      "id": "5e5d02c4e92325959cae408c1d17679c"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Lexical Scope]] has several advantages. Firstly, it allows for [[Lexical Closure]]. But even in the absence of lexical closures, lexical scope is useful because it allows for compilation of functions to efficient, reentrant machine code. If lexical closures are not supported by a language, then local variables can be implemented as global entities that are saved and restored. This is called [[Dynamic Scoping]]. However, such saving and restoring must be made thread-safe at some expense, and is even harder to make interrupt-safe. True lexical variables can be stored in stack frames that support reentrancy in a trivial way, and can be placed in memory location or optimized into registers such that the symbols which refer to them in the source code completely go away upon compilation. Data flow analysis can tell the compiler that a lexical variable is only ever manipulated by code that is all under one scope, and such it has complete control over optimizing its representation.",
+      "id": "4996312938360a4044ef8c5cc896e723"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9ad65b9c281e1975c8ec40dfaad28ab5"
+    },
+    {
+      "type": "html",
+      "text": "\nMore on [[Lexical Scoping]]; an argument that it isn't always a [[Good Thing]].",
+      "id": "431409e5dbcfc6411687301d60a68d1a"
+    },
+    {
+      "type": "html",
+      "text": "\nA language with [[Lexical Scoping]] has the following characteristics:",
+      "id": "d86c73dc04c0463e001e40de3399ba7b"
+    },
+    {
+      "type": "html",
+      "text": " Functions (and procedures, etc.) can be defined within other functions",
+      "id": "f3917b9ac4c8a02c98a5583a13f0cd00"
+    },
+    {
+      "type": "html",
+      "text": " Such inner functions have access to the local variables defined in the enclosing scope.",
+      "id": "4e8bb843753b54a211e5fc36ef27cc63"
+    },
+    {
+      "type": "html",
+      "text": "[It is possible to have the first without the second; what languages do this? -- [[Up Values]]: Lua did that in a way up to Version 5.0. Lexical closures were only allowed to read variables in the enclosing scope, but no to write to them]",
+      "id": "4cd1a3dd12831e68892d37783c3a80c3"
+    },
+    {
+      "type": "html",
+      "text": "\nThe paper [[Global Variables Considered Harmful]] gives some reasons why this might be a bad idea (but see that page for counterarguments). In general, any instance of this can be [[Re Factor]]ed in one of two ways:",
+      "id": "75c9c4d0faa298ff065586e1e65e3738"
+    },
+    {
+      "type": "html",
+      "text": "<b>Use explicit parameters</b>. Sometimes, accessing outer scope variables is done for the sake of convenience--not because of any necessary coupling between the two. In this case, rewrite the inner procedure so that the values it needs from the outer procedure are <i>arguments</i> to the inner function--when the outer function (or some other function defined in the outer function's scope) calls the inner function, it supplies these as actual arguments. This will make the inner function independently testable--as it no longer depends on the outer function's state for its behavior. And you may find that once the inner function is decoupled from the outer--it becomes a useful function on its own.",
+      "id": "f0527dc8804384b0a065ab390ef60d2b"
+    },
+    {
+      "type": "html",
+      "text": "<i>It is indeed only <b>sometimes</b> the case that accessing outer scope variables is done only for convenience -- and so this is a weak argument for saying that a language should not support it. (And even if it was done \"for the sake of convenience\", what is wrong with that?)</i>",
+      "id": "ef5be09c4466864baa1189a1d3d84e81"
+    },
+    {
+      "type": "html",
+      "text": "<b>Use objects, not closures</b>. <i>Since [[Objects And Closures Are Equivalent]], this doesn't make sense. Refactored discussion about this below.</i>",
+      "id": "858a1e8c2f9dfa05fe8bcedc3d51aadf"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9ad65b9c281e1975c8ec40dfaad28ab5"
+    },
+    {
+      "type": "html",
+      "text": "[[Objects And Closures Are Equivalent]]. However, closures are better for one shot objects declared inline. You use closures for things you wouldn't want to use classes for, like this [[Java Script]]:",
+      "id": "4e7d859b10a21e9a7474b5580153c2fc"
+    },
+    {
+      "type": "code",
+      "text": "  var outerValue = new Something()\n  aList.For''''''Each(function(each){each.Do''''''Something(outerValue)});",
+      "id": "d74b2dc687c209fd7c11ea91ed3b6181"
+    },
+    {
+      "type": "html",
+      "text": "\nor Smalltalk",
+      "id": "47e28bf4f1c16a7ffb5b5d16948e9f30"
+    },
+    {
+      "type": "code",
+      "text": "  |outerValue|\n  outerValue := Something new.\n  aList Do: [:each | each Do''''''Something: outerValue].",
+      "id": "cda415aaf39dd9c271ed5d14c49f3dd5"
+    },
+    {
+      "type": "html",
+      "text": "\nThe whole point is that for those little one liners, using classes would be silly. I.e. use a closure (or equivalent, such as a Smalltalk block) when you want anonymous objects, and don't want to declare a class.",
+      "id": "d20424bc1e5df3693c294334f9677a94"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Lexical Scoping]] has a great impact on closures, it prevents you from having to declare a class to use a closure. Without lexical scope, as in Java, you must declare an inner class to create a closure, making the syntax very heavy. [[Lexical Scoping]] allows a very light syntax for creating closures. And without a light syntax for closures, use of [[Higher Order Functions]] would be rare, as they all take closures as arguments. Closures and [[Higher Order Functions]] are a pair best used together. Objects work well at the Domain level, Closures and [[Higher Order Functions]] work well at the language level. Both are often needed.",
+      "id": "2a58e4bc12fdb6eec42a845847459b76"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9ad65b9c281e1975c8ec40dfaad28ab5"
+    },
+    {
+      "type": "html",
+      "text": "From the perspective of a reader of an implemented process' source code, I find scope adds a level of thought which is unnatural. If I have to decide that the variable thisvar is being used, I have to do more than look for other references to it in the source code - I have to consider each individual occurrence in terms of scope. And if I get that wrong, I can be very misled for a while. This is superfluous thought, imposed because the structure of the source contains more than one level of process.",
+      "id": "5c6f42c176348e57afb1c58a9600a2fc"
+    },
+    {
+      "type": "html",
+      "text": "\nTo quote the above -",
+      "id": "c7763c8dbba80a184eed7efb2ca37133"
+    },
+    {
+      "type": "html",
+      "text": " \"The whole point is that for those little one liners, using classes would be silly. I.e. use a closure (or equivalent, such as a Smalltalk block) when you want anonymous objects, and don't want to declare a class.\"",
+      "id": "a06cd44252060568144c34a297fd5e52"
+    },
+    {
+      "type": "html",
+      "text": "\nThe communal error in agreeing with this statement is that there is no such thing as a class (used in the broadest sense - as an encapsulation of functionality) which is silly. If all the [[Lisp Weenies]] are constantly ignoring the small encapsulations because they can, then the entire Lisp community is missing out on the lowest level important often used encapsulations. ",
+      "id": "79b2cb2fe045b7d62a8f8c82beb3fedd"
+    },
+    {
+      "type": "html",
+      "text": "\nThe answer, I believe, is to make each level of scope discrete - one complete piece of source text is one scope. ",
+      "id": "d018644052f0d5217dc054dd1554401d"
+    },
+    {
+      "type": "html",
+      "text": "\nThen this quote from above -",
+      "id": "3926617c5ad260941e360e25a39462b4"
+    },
+    {
+      "type": "html",
+      "text": " And you may find that once the inner function is decoupled from the outer--it becomes a useful function on its own.\nwill be fulfilled always, by design.",
+      "id": "8d5eab9b28dc3b892c7b7e64455fd8e8"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Peter Lynch]]",
+      "id": "de4aba7478e2f2d5b28a22f7cab1d773"
+    },
+    {
+      "type": "html",
+      "text": "\nThere is a such thing as a class which is silly. Smalltalk makes heavy use of [] for a reason, it isn't always practical to declare a class, to make use of a higher order function, one \"needs\" to be able to pass anon functions inline, not forced to declare them. This ability is what makes Smalltalk, Smalltalk, it allows the language itself to be part of the library. Languages that ignore this lesson, Java for example, are quite ugly in comparison, and quite repetitive as a result. [] is a functional idiom that fits well with OO, together, OO and functional make for a great language, ask any Smalltalker, or Lisper.",
+      "id": "4ca8a66a93e2db04d5dbabced0ffff23"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9ad65b9c281e1975c8ec40dfaad28ab5"
+    },
+    {
+      "type": "html",
+      "text": "One thing that really surprised me is this [[Action Script]] behaviour:",
+      "id": "3fc13d73e12841c96dfb9411b3adc523"
+    },
+    {
+      "type": "code",
+      "text": "  function makeClosure(outerValue) {\n  return function() {} \n  }\n  \n  var outerValue = new Something()\n  var closure = makeClosure(outerValue)\n  outerValue =  null  //won't be collected, closure keeps reference to outerValue\n  ",
+      "id": "0c41261395be8886014bc7fbd13f8892"
+    },
+    {
+      "type": "html",
+      "text": "This felt really odd to me since my only previous experience with closures was in [[Lua Language]] scripts, where closures keep references only for something they actually use not for entire lexical environment where they are created.\nHow common is this behaviour? Does it make storing closures a little risky?",
+      "id": "be80571146be589919a40ec3198237f7"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9ad65b9c281e1975c8ec40dfaad28ab5"
+    },
+    {
+      "type": "html",
+      "text": "See also [[Dynamic Scoping]], [[Nested Scopes]], [[Scoping Rules]], [[Scope And Closures]], [[Global Variables Considered Harmful]].",
+      "id": "277a718151488cdbf92d33ccdd9a9e81"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "9ad65b9c281e1975c8ec40dfaad28ab5"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Coding Conventions]]",
+      "id": "9756a9c24b630452463d3421acd1013e"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?LexicalScoping c2.com]",
+      "id": "2a3d8bdf42da7a60e58c4be76c68b5db"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1304867766000,
+      "id": "ae4f8aa0201145748e633c0b0df6ff29",
+      "type": "create",
+      "item": {
+        "title": "Lexical Scoping",
+        "story": [
+          {
+            "type": "html",
+            "text": "From The [[Free On Line Dictionary Of Computing]]:",
+            "id": "1b3e889bb5ed2f24b85cbc0374237eb0"
+          },
+          {
+            "type": "html",
+            "text": "lexical scope:<br><programming> (Or \"static scope\") In a lexically scoped language, the {scope} of an {identifier} is fixed at {compile time} to some region in the {source code} containing the identifier's declaration. This means that an identifier is only accessible within that region (including procedures declared within it).",
+            "id": "154e8a1334a0592e8e77825b1fce7441"
+          },
+          {
+            "type": "html",
+            "text": "This contrasts with {dynamic scope} where the scope depends on the nesting of {procedure} and {function} calls at {run time}.",
+            "id": "9924b2a5073a93242f537cca8892b54b"
+          },
+          {
+            "type": "html",
+            "text": "Statically scoped languages differ as to whether the scope is limited to the smallest {block} (including {begin}/end blocks) containing the identifier's declaration (e.g. {C}, {Perl}) or to whole function and procedure bodies (e.g. ?), or some larger unit of code (e.g. ?).",
+            "id": "4e63146e4ddf5a2890907e413a11c095"
+          },
+          {
+            "type": "html",
+            "text": "(2001-09-07)",
+            "id": "70ac5f8c927e5c66235895b02a97fc95"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9ad65b9c281e1975c8ec40dfaad28ab5"
+          },
+          {
+            "type": "html",
+            "text": "Also note that in Lisp, a symbol's binding has lexical scope, not the mapping from an identifier to a symbol. That mapping transcends scope. For instance in (let ((x 3)) (let ((x 4)) ..)) the identifier X in the source is mapped to a symbol object when the source is scanned and turned into a nested list, at what is known as \"read time\". Both occurrences of X map to the same symbol object, even though each one denotes a local variable in a different lexical scope. A symbol object is a concrete data structure in the address space; every X in the internal representation of the form is a pointer to that object.",
+            "id": "fc7ba6e496aa18cfa92b1210cdd78bd9"
+          },
+          {
+            "type": "html",
+            "text": "\nIn languages that don't treat symbols as first-class abstractions, terms like <i>symbol</i>, <i>name</i> or <i>identifier</i> are used interchangeably, and basically just refer to a text-string-like entity that is not a real object. Compilers for these languages typically use quite a different symbol-table structure; each lexical scope creates a new symbol table, and nested lexical scopes are represented as a [[Spaghetti Stack]] of these tables (a structure constructed by pushing and popping, in which the popped frames remain in place and refer to the parent frames). In the Lisp approach, the symbol table is global (and is known as a \"package\"). The nested stack of lexical bindings that may be constructed by the compiler internally is something other than a symbol table; it's known as an \"environment\"---a context object that establishes a mapping from symbols to various entities. [[Lexical Closure]] objects capture such environments.",
+            "id": "5e5d02c4e92325959cae408c1d17679c"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Lexical Scope]] has several advantages. Firstly, it allows for [[Lexical Closure]]. But even in the absence of lexical closures, lexical scope is useful because it allows for compilation of functions to efficient, reentrant machine code. If lexical closures are not supported by a language, then local variables can be implemented as global entities that are saved and restored. This is called [[Dynamic Scoping]]. However, such saving and restoring must be made thread-safe at some expense, and is even harder to make interrupt-safe. True lexical variables can be stored in stack frames that support reentrancy in a trivial way, and can be placed in memory location or optimized into registers such that the symbols which refer to them in the source code completely go away upon compilation. Data flow analysis can tell the compiler that a lexical variable is only ever manipulated by code that is all under one scope, and such it has complete control over optimizing its representation.",
+            "id": "4996312938360a4044ef8c5cc896e723"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9ad65b9c281e1975c8ec40dfaad28ab5"
+          },
+          {
+            "type": "html",
+            "text": "\nMore on [[Lexical Scoping]]; an argument that it isn't always a [[Good Thing]].",
+            "id": "431409e5dbcfc6411687301d60a68d1a"
+          },
+          {
+            "type": "html",
+            "text": "\nA language with [[Lexical Scoping]] has the following characteristics:",
+            "id": "d86c73dc04c0463e001e40de3399ba7b"
+          },
+          {
+            "type": "html",
+            "text": " Functions (and procedures, etc.) can be defined within other functions",
+            "id": "f3917b9ac4c8a02c98a5583a13f0cd00"
+          },
+          {
+            "type": "html",
+            "text": " Such inner functions have access to the local variables defined in the enclosing scope.",
+            "id": "4e8bb843753b54a211e5fc36ef27cc63"
+          },
+          {
+            "type": "html",
+            "text": "[It is possible to have the first without the second; what languages do this? -- [[Up Values]]: Lua did that in a way up to Version 5.0. Lexical closures were only allowed to read variables in the enclosing scope, but no to write to them]",
+            "id": "4cd1a3dd12831e68892d37783c3a80c3"
+          },
+          {
+            "type": "html",
+            "text": "\nThe paper [[Global Variables Considered Harmful]] gives some reasons why this might be a bad idea (but see that page for counterarguments). In general, any instance of this can be [[Re Factor]]ed in one of two ways:",
+            "id": "75c9c4d0faa298ff065586e1e65e3738"
+          },
+          {
+            "type": "html",
+            "text": "<b>Use explicit parameters</b>. Sometimes, accessing outer scope variables is done for the sake of convenience--not because of any necessary coupling between the two. In this case, rewrite the inner procedure so that the values it needs from the outer procedure are <i>arguments</i> to the inner function--when the outer function (or some other function defined in the outer function's scope) calls the inner function, it supplies these as actual arguments. This will make the inner function independently testable--as it no longer depends on the outer function's state for its behavior. And you may find that once the inner function is decoupled from the outer--it becomes a useful function on its own.",
+            "id": "f0527dc8804384b0a065ab390ef60d2b"
+          },
+          {
+            "type": "html",
+            "text": "<i>It is indeed only <b>sometimes</b> the case that accessing outer scope variables is done only for convenience -- and so this is a weak argument for saying that a language should not support it. (And even if it was done \"for the sake of convenience\", what is wrong with that?)</i>",
+            "id": "ef5be09c4466864baa1189a1d3d84e81"
+          },
+          {
+            "type": "html",
+            "text": "<b>Use objects, not closures</b>. <i>Since [[Objects And Closures Are Equivalent]], this doesn't make sense. Refactored discussion about this below.</i>",
+            "id": "858a1e8c2f9dfa05fe8bcedc3d51aadf"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9ad65b9c281e1975c8ec40dfaad28ab5"
+          },
+          {
+            "type": "html",
+            "text": "[[Objects And Closures Are Equivalent]]. However, closures are better for one shot objects declared inline. You use closures for things you wouldn't want to use classes for, like this [[Java Script]]:",
+            "id": "4e7d859b10a21e9a7474b5580153c2fc"
+          },
+          {
+            "type": "code",
+            "text": "  var outerValue = new Something()\n  aList.For''''''Each(function(each){each.Do''''''Something(outerValue)});",
+            "id": "d74b2dc687c209fd7c11ea91ed3b6181"
+          },
+          {
+            "type": "html",
+            "text": "\nor Smalltalk",
+            "id": "47e28bf4f1c16a7ffb5b5d16948e9f30"
+          },
+          {
+            "type": "code",
+            "text": "  |outerValue|\n  outerValue := Something new.\n  aList Do: [:each | each Do''''''Something: outerValue].",
+            "id": "cda415aaf39dd9c271ed5d14c49f3dd5"
+          },
+          {
+            "type": "html",
+            "text": "\nThe whole point is that for those little one liners, using classes would be silly. I.e. use a closure (or equivalent, such as a Smalltalk block) when you want anonymous objects, and don't want to declare a class.",
+            "id": "d20424bc1e5df3693c294334f9677a94"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Lexical Scoping]] has a great impact on closures, it prevents you from having to declare a class to use a closure. Without lexical scope, as in Java, you must declare an inner class to create a closure, making the syntax very heavy. [[Lexical Scoping]] allows a very light syntax for creating closures. And without a light syntax for closures, use of [[Higher Order Functions]] would be rare, as they all take closures as arguments. Closures and [[Higher Order Functions]] are a pair best used together. Objects work well at the Domain level, Closures and [[Higher Order Functions]] work well at the language level. Both are often needed.",
+            "id": "2a58e4bc12fdb6eec42a845847459b76"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9ad65b9c281e1975c8ec40dfaad28ab5"
+          },
+          {
+            "type": "html",
+            "text": "From the perspective of a reader of an implemented process' source code, I find scope adds a level of thought which is unnatural. If I have to decide that the variable thisvar is being used, I have to do more than look for other references to it in the source code - I have to consider each individual occurrence in terms of scope. And if I get that wrong, I can be very misled for a while. This is superfluous thought, imposed because the structure of the source contains more than one level of process.",
+            "id": "5c6f42c176348e57afb1c58a9600a2fc"
+          },
+          {
+            "type": "html",
+            "text": "\nTo quote the above -",
+            "id": "c7763c8dbba80a184eed7efb2ca37133"
+          },
+          {
+            "type": "html",
+            "text": " \"The whole point is that for those little one liners, using classes would be silly. I.e. use a closure (or equivalent, such as a Smalltalk block) when you want anonymous objects, and don't want to declare a class.\"",
+            "id": "a06cd44252060568144c34a297fd5e52"
+          },
+          {
+            "type": "html",
+            "text": "\nThe communal error in agreeing with this statement is that there is no such thing as a class (used in the broadest sense - as an encapsulation of functionality) which is silly. If all the [[Lisp Weenies]] are constantly ignoring the small encapsulations because they can, then the entire Lisp community is missing out on the lowest level important often used encapsulations. ",
+            "id": "79b2cb2fe045b7d62a8f8c82beb3fedd"
+          },
+          {
+            "type": "html",
+            "text": "\nThe answer, I believe, is to make each level of scope discrete - one complete piece of source text is one scope. ",
+            "id": "d018644052f0d5217dc054dd1554401d"
+          },
+          {
+            "type": "html",
+            "text": "\nThen this quote from above -",
+            "id": "3926617c5ad260941e360e25a39462b4"
+          },
+          {
+            "type": "html",
+            "text": " And you may find that once the inner function is decoupled from the outer--it becomes a useful function on its own.\nwill be fulfilled always, by design.",
+            "id": "8d5eab9b28dc3b892c7b7e64455fd8e8"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Peter Lynch]]",
+            "id": "de4aba7478e2f2d5b28a22f7cab1d773"
+          },
+          {
+            "type": "html",
+            "text": "\nThere is a such thing as a class which is silly. Smalltalk makes heavy use of [] for a reason, it isn't always practical to declare a class, to make use of a higher order function, one \"needs\" to be able to pass anon functions inline, not forced to declare them. This ability is what makes Smalltalk, Smalltalk, it allows the language itself to be part of the library. Languages that ignore this lesson, Java for example, are quite ugly in comparison, and quite repetitive as a result. [] is a functional idiom that fits well with OO, together, OO and functional make for a great language, ask any Smalltalker, or Lisper.",
+            "id": "4ca8a66a93e2db04d5dbabced0ffff23"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9ad65b9c281e1975c8ec40dfaad28ab5"
+          },
+          {
+            "type": "html",
+            "text": "One thing that really surprised me is this [[Action Script]] behaviour:",
+            "id": "3fc13d73e12841c96dfb9411b3adc523"
+          },
+          {
+            "type": "code",
+            "text": "  function makeClosure(outerValue) {\n  return function() {} \n  }\n  \n  var outerValue = new Something()\n  var closure = makeClosure(outerValue)\n  outerValue =  null  //won't be collected, closure keeps reference to outerValue\n  ",
+            "id": "0c41261395be8886014bc7fbd13f8892"
+          },
+          {
+            "type": "html",
+            "text": "This felt really odd to me since my only previous experience with closures was in [[Lua Language]] scripts, where closures keep references only for something they actually use not for entire lexical environment where they are created.\nHow common is this behaviour? Does it make storing closures a little risky?",
+            "id": "be80571146be589919a40ec3198237f7"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9ad65b9c281e1975c8ec40dfaad28ab5"
+          },
+          {
+            "type": "html",
+            "text": "See also [[Dynamic Scoping]], [[Nested Scopes]], [[Scoping Rules]], [[Scope And Closures]], [[Global Variables Considered Harmful]].",
+            "id": "277a718151488cdbf92d33ccdd9a9e81"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "9ad65b9c281e1975c8ec40dfaad28ab5"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Coding Conventions]]",
+            "id": "9756a9c24b630452463d3421acd1013e"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?LexicalScoping c2.com]",
+            "id": "2a3d8bdf42da7a60e58c4be76c68b5db"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "language.sfw.c2.com",
+      "date": 1644991165595
+    }
+  ]
+}

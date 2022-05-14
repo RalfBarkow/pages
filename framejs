@@ -1,0 +1,96 @@
+{
+  "title": "frame.js",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "484e092159df2d01",
+      "text": "Explain what this does."
+    },
+    {
+      "type": "code",
+      "id": "5eb6b67568179aa3",
+      "text": "// Code that does it.\n\n// We wrap the Frame plugin's integrations with a promise-based interface and\n// distribute them as an ES6 module along with a couple of helpers we've found useful.\n// See http://code.fed.wiki/frame-integration-promises.html\n\nexport const asSlug = title => title.replace(/\\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()\nexport const asCopy = obj => JSON.parse(JSON.stringify(obj))\n\n\n// I N P U T\n\nexport function context() {\n  return new Promise(resolve => {\n    let handler = event => {\n      let {data} = event\n      if (!data.action == \"frameContext\") return\n      window.removeEventListener('message',handler)\n      resolve(data)\n    }\n    window.addEventListener('message',handler)\n    window.parent.postMessage({action:\"sendFrameContext\"},\"*\")\n  })\n}\n\nexport function sources(topic) {\n  const action = 'requestSourceData'\n  return new Promise(resolve => {\n    let fn = event => {\n      let {data} = event\n      if (!data.action == action) return\n      window.removeEventListener('message', fn)\n      resolve(data.sources)\n    }\n    window.addEventListener('message', fn)\n    window.parent.postMessage({action, topic},\"*\")\n  })\n}\n\nexport async function assets() {\n  let table = []\n  let assets = await sources('assets')\n  for (let source of assets){\n    let site = source.panel.site\n    let slug = source.panel.slug\n    let item = source.panel.itemId\n    for (let dir of Object.keys(source.assetsData)) {\n      for (let path of Object.keys(source.assetsData[dir])) {\n        for (let file of source.assetsData[dir][path]) {\n          path = path.startsWith(\"//\") ? path : `//${site}${path}`\n          let url = `${path}/${dir}/${file}`\n          let row = {site,slug,item,dir,path,file,url}\n          table.push(row)\n        }\n      }\n    }\n  }\n  return table\n}\n\nexport function neighbors() {\n  return new Promise((resolve, reject) => {\n    window.addEventListener(\"message\", neighborhood)\n    function neighborhood({data}) {\n      if (data.action != \"neighborhood\") return\n      window.removeEventListener(\n        \"message\", neighborhood)\n      resolve(data.neighborhood)\n    }\n    window.parent.postMessage({\n      action: \"requestNeighborhood\"\n    }, \"*\") \n  })\n}\n\n\n// O U T P U T\n\nexport function link(title, keepLineup=false) {\n  window.parent.postMessage({action:\"doInternalLink\",title,keepLineup},\"*\")\n}\n\nexport function open(page, keepLineup=false, forks=[]) {\n  let date = Date.now()\n  for (let item of page.story) item.id ||= (Math.random()*10**20).toFixed(0)\n  page.journal ||= [{type:'create', date, item:asCopy(page)}, ...forks.map(site => ({type:'fork',date,site}))]\n  let message = {action: \"showResult\", page, keepLineup}\n  window.parent.postMessage(message, \"*\")\n}\n\nexport function importer(pages, keepLineup=false, forks=[]) {\n  let date = Date.now()\n  for (let page of Object.values(pages)) {\n    for (let item of page.story) item.id ||= (Math.random()*10**20).toFixed(0)\n    page.journal ||= [{type:'create', date, item:asCopy(page)}, ...forks.map(site => ({type:'fork',date,site}))]\n  }\n  let message = {action: \"importer\", pages, keepLineup}\n  window.parent.postMessage(message, \"*\")\n}\n\nexport function download(string, file, mime='text/json') {\n  var data = `data:${mime};charset=utf-8,` + encodeURIComponent(string)\n  var anchor = document.createElement('a')\n  anchor.setAttribute(\"href\", data)\n  anchor.setAttribute(\"download\", file)\n  document.body.appendChild(anchor) // required for firefox\n  anchor.click()\n  anchor.remove()\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "caa626ac93aa7d4c",
+      "text": "In the frame below we can view the results."
+    },
+    {
+      "type": "frame",
+      "id": "6cf52409eec3988c",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/esm.html\nHEIGHT 400"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "frame.js",
+        "story": [
+          {
+            "type": "paragraph",
+            "id": "484e092159df2d01",
+            "text": "Explain what this does."
+          },
+          {
+            "type": "code",
+            "id": "5eb6b67568179aa3",
+            "text": "// Code that does it.\n\nexport async function emit(el) {\n el.innerHTML = 2 + 3\n}\n\n"
+          },
+          {
+            "type": "paragraph",
+            "id": "caa626ac93aa7d4c",
+            "text": "In the frame below we can view the results."
+          },
+          {
+            "type": "frame",
+            "id": "6cf52409eec3988c",
+            "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/esm.html\nHEIGHT 400"
+          },
+          {
+            "type": "paragraph",
+            "id": "8155a586f5842b0f",
+            "text": "See also [[Static Import Snippet]]"
+          }
+        ]
+      },
+      "date": 1652090561283
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/esm.html\nHEIGHT 400"
+      },
+      "date": 1652090584440
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "// Code that does it.\n// We wrap the Frame plugin's integrations with a promise-based interface and\n// distribute them as an ES6 module along with a couple of helpers we've found useful.\n// See http://code.fed.wiki/frame-integration-promises.html\n\nexport const asSlug = title => title.replace(/\\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()\nexport const asCopy = obj => JSON.parse(JSON.stringify(obj))\n\n\n// I N P U T\n\nexport function context() {\n  return new Promise(resolve => {\n    let handler = event => {\n      let {data} = event\n      if (!data.action == \"frameContext\") return\n      window.removeEventListener('message',handler)\n      resolve(data)\n    }\n    window.addEventListener('message',handler)\n    window.parent.postMessage({action:\"sendFrameContext\"},\"*\")\n  })\n}\n\nexport function sources(topic) {\n  const action = 'requestSourceData'\n  return new Promise(resolve => {\n    let fn = event => {\n      let {data} = event\n      if (!data.action == action) return\n      window.removeEventListener('message', fn)\n      resolve(data.sources)\n    }\n    window.addEventListener('message', fn)\n    window.parent.postMessage({action, topic},\"*\")\n  })\n}\n\nexport async function assets() {\n  let table = []\n  let assets = await sources('assets')\n  for (let source of assets){\n    let site = source.panel.site\n    let slug = source.panel.slug\n    let item = source.panel.itemId\n    for (let dir of Object.keys(source.assetsData)) {\n      for (let path of Object.keys(source.assetsData[dir])) {\n        for (let file of source.assetsData[dir][path]) {\n          path = path.startsWith(\"//\") ? path : `//${site}${path}`\n          let url = `${path}/${dir}/${file}`\n          let row = {site,slug,item,dir,path,file,url}\n          table.push(row)\n        }\n      }\n    }\n  }\n  return table\n}\n\nexport function neighbors() {\n  return new Promise((resolve, reject) => {\n    window.addEventListener(\"message\", neighborhood)\n    function neighborhood({data}) {\n      if (data.action != \"neighborhood\") return\n      window.removeEventListener(\n        \"message\", neighborhood)\n      resolve(data.neighborhood)\n    }\n    window.parent.postMessage({\n      action: \"requestNeighborhood\"\n    }, \"*\") \n  })\n}\n\n\n// O U T P U T\n\nexport function link(title, keepLineup=false) {\n  window.parent.postMessage({action:\"doInternalLink\",title,keepLineup},\"*\")\n}\n\nexport function open(page, keepLineup=false, forks=[]) {\n  let date = Date.now()\n  for (let item of page.story) item.id ||= (Math.random()*10**20).toFixed(0)\n  page.journal ||= [{type:'create', date, item:asCopy(page)}, ...forks.map(site => ({type:'fork',date,site}))]\n  let message = {action: \"showResult\", page, keepLineup}\n  window.parent.postMessage(message, \"*\")\n}\n\nexport function importer(pages, keepLineup=false, forks=[]) {\n  let date = Date.now()\n  for (let page of Object.values(pages)) {\n    for (let item of page.story) item.id ||= (Math.random()*10**20).toFixed(0)\n    page.journal ||= [{type:'create', date, item:asCopy(page)}, ...forks.map(site => ({type:'fork',date,site}))]\n  }\n  let message = {action: \"importer\", pages, keepLineup}\n  window.parent.postMessage(message, \"*\")\n}\n\nexport function download(string, file, mime='text/json') {\n  var data = `data:${mime};charset=utf-8,` + encodeURIComponent(string)\n  var anchor = document.createElement('a')\n  anchor.setAttribute(\"href\", data)\n  anchor.setAttribute(\"download\", file)\n  document.body.appendChild(anchor) // required for firefox\n  anchor.click()\n  anchor.remove()\n}\n"
+      },
+      "date": 1652090607676
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "// Code that does it.\n\n// We wrap the Frame plugin's integrations with a promise-based interface and\n// distribute them as an ES6 module along with a couple of helpers we've found useful.\n// See http://code.fed.wiki/frame-integration-promises.html\n\nexport const asSlug = title => title.replace(/\\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()\nexport const asCopy = obj => JSON.parse(JSON.stringify(obj))\n\n\n// I N P U T\n\nexport function context() {\n  return new Promise(resolve => {\n    let handler = event => {\n      let {data} = event\n      if (!data.action == \"frameContext\") return\n      window.removeEventListener('message',handler)\n      resolve(data)\n    }\n    window.addEventListener('message',handler)\n    window.parent.postMessage({action:\"sendFrameContext\"},\"*\")\n  })\n}\n\nexport function sources(topic) {\n  const action = 'requestSourceData'\n  return new Promise(resolve => {\n    let fn = event => {\n      let {data} = event\n      if (!data.action == action) return\n      window.removeEventListener('message', fn)\n      resolve(data.sources)\n    }\n    window.addEventListener('message', fn)\n    window.parent.postMessage({action, topic},\"*\")\n  })\n}\n\nexport async function assets() {\n  let table = []\n  let assets = await sources('assets')\n  for (let source of assets){\n    let site = source.panel.site\n    let slug = source.panel.slug\n    let item = source.panel.itemId\n    for (let dir of Object.keys(source.assetsData)) {\n      for (let path of Object.keys(source.assetsData[dir])) {\n        for (let file of source.assetsData[dir][path]) {\n          path = path.startsWith(\"//\") ? path : `//${site}${path}`\n          let url = `${path}/${dir}/${file}`\n          let row = {site,slug,item,dir,path,file,url}\n          table.push(row)\n        }\n      }\n    }\n  }\n  return table\n}\n\nexport function neighbors() {\n  return new Promise((resolve, reject) => {\n    window.addEventListener(\"message\", neighborhood)\n    function neighborhood({data}) {\n      if (data.action != \"neighborhood\") return\n      window.removeEventListener(\n        \"message\", neighborhood)\n      resolve(data.neighborhood)\n    }\n    window.parent.postMessage({\n      action: \"requestNeighborhood\"\n    }, \"*\") \n  })\n}\n\n\n// O U T P U T\n\nexport function link(title, keepLineup=false) {\n  window.parent.postMessage({action:\"doInternalLink\",title,keepLineup},\"*\")\n}\n\nexport function open(page, keepLineup=false, forks=[]) {\n  let date = Date.now()\n  for (let item of page.story) item.id ||= (Math.random()*10**20).toFixed(0)\n  page.journal ||= [{type:'create', date, item:asCopy(page)}, ...forks.map(site => ({type:'fork',date,site}))]\n  let message = {action: \"showResult\", page, keepLineup}\n  window.parent.postMessage(message, \"*\")\n}\n\nexport function importer(pages, keepLineup=false, forks=[]) {\n  let date = Date.now()\n  for (let page of Object.values(pages)) {\n    for (let item of page.story) item.id ||= (Math.random()*10**20).toFixed(0)\n    page.journal ||= [{type:'create', date, item:asCopy(page)}, ...forks.map(site => ({type:'fork',date,site}))]\n  }\n  let message = {action: \"importer\", pages, keepLineup}\n  window.parent.postMessage(message, \"*\")\n}\n\nexport function download(string, file, mime='text/json') {\n  var data = `data:${mime};charset=utf-8,` + encodeURIComponent(string)\n  var anchor = document.createElement('a')\n  anchor.setAttribute(\"href\", data)\n  anchor.setAttribute(\"download\", file)\n  document.body.appendChild(anchor) // required for firefox\n  anchor.click()\n  anchor.remove()\n}\n"
+      },
+      "date": 1652090621966
+    },
+    {
+      "type": "remove",
+      "id": "8155a586f5842b0f",
+      "date": 1652090767532
+    }
+  ]
+}

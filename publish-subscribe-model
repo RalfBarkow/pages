@@ -1,0 +1,322 @@
+{
+  "title": "Publish Subscribe Model",
+  "story": [
+    {
+      "type": "html",
+      "text": "Publish/Subscribe is a useful model which, although it is not new, is receiving increasing interest and attention.",
+      "id": "d42d13f0a17cc5ccdaf0dd8814b531f7"
+    },
+    {
+      "type": "html",
+      "text": "<i>\"Publish and Subscribe is a well-established communications paradigm that allows any number of publishers to communicate with any number of subscribers asynchronously and anonymously via an event channel.\" -- [[David Houlding]] page088 [[Dr Dobbs Journal]] July 2000</i>",
+      "id": "ccc93f522e3ed735d83bb4f5af633fe8"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "35a1239265e002ac254d8e61a83e8a9a"
+    },
+    {
+      "type": "html",
+      "text": "\nSome are familiar with the concept of a \"list-server\", where a group of users subscribe to a particular topic from a given server and are notified and updated via email. It is a form of [[Multi Casting]] which emulates what we see in the broadcast of television and radio programs to potentially large audiences. Whose desired effect is to deliver high value information to a mass-audience. This is precisely what the [[Publish Subscribe Model]] seeks to do. The [[Publish Subscribe Model]] lies at the core of [[Event Driven Information Processing]]. This model is used extensively in embedded systems where components need to respond in real time to events on a list. (See example, below.)",
+      "id": "072992d6887dc8061bd0ebdb08a6b0e0"
+    },
+    {
+      "type": "html",
+      "text": "\nPub/sub is handy for decoupling parts of a system, too; [[Linda Language]], for example, is a sort of pub/sub. Spread, [[Xml Blaster]], and mod_pubsub all provide pub/sub.",
+      "id": "0ed7951ee81de83cd7ba85a18fab61fb"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "35a1239265e002ac254d8e61a83e8a9a"
+    },
+    {
+      "type": "html",
+      "text": "<b>Use in Embedded Systems</b>",
+      "id": "577312daecbee882cb69c26fbfccb4a2"
+    },
+    {
+      "type": "html",
+      "text": "\nPublish/Subscribe is very powerful in event driven embedded technologies. Suppose a system has an [[Event Handler]] that wants to send out Notification X whenever this event occurs. You have a priority component, Component A, which is there almost all the time and has to see this message right away. You also have a bunch of dynamic secondary components (B, C, and D) which may be there or not. They all have to receive the message sooner or later. Let's look at some possible scenarios:",
+      "id": "ee6ebf48784d7e0cfe5d8535fd794449"
+    },
+    {
+      "type": "html",
+      "text": "<b>Nothing is very time critical.</b> Publisher sends out Note X to A, B, C, D... ad nauseum. B, C, and D all begin reacting to X. In the mean time, A gets all panicky and generates event Y. Notification Y (effectively a Cancel X) goes out to B, C, et al, and these components all roll their eyes, mutter something about these kids not being able to make up their minds, and toss the work they did to process the X note. Done.",
+      "id": "ea80f1afe38986dc1cf5e85aad09bda6"
+    },
+    {
+      "type": "html",
+      "text": "<b>Some things are time critical.</b> X goes out as a conditional X. This means that a follow-up message will come out within a certain maximum time to confirm or cancel the X event. A gets a chance to chew on the X note and then generate a Confirm or Cancel. B, C, and D can all get their house in order in case this is the real thing. If they get a Confirm follow-up they complete the processing of X. Otherwise they get a Cancel and they can drop the whole thing. That finishes that.",
+      "id": "b6e7640781f07a351f0cacbd429f7a40"
+    },
+    {
+      "type": "html",
+      "text": "<b>Time critical and dynamic.</b> The worst case is where A is dynamic as well as the rest of the subscribers and time is critical. Without A in the picture Note X just goes out to whoever else is there. When A comes into the picture it has to register with the X event handler. Then the X handler sends a conditional X notification. The business with the Confirm or Cancel still applies.",
+      "id": "4cd5a5c05ded69b64669b596bb4c86ca"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "35a1239265e002ac254d8e61a83e8a9a"
+    },
+    {
+      "type": "html",
+      "text": "Publish and subscribe should be used very carefully. There are some problems in distributed systems:",
+      "id": "80e5304c772847bc588de2641bd26910"
+    },
+    {
+      "type": "html",
+      "text": "<i>Incomplete subscriber list.</i> When you publish, are you publishing to everyone that is supposed to get the message? This is a system start/failover issue. Different nodes come up at different times, which means they will register at different times. Data can be lost.",
+      "id": "3fd97010fbff2a018dc613a2ba10720d"
+    },
+    {
+      "type": "html",
+      "text": " <i>Solution:</i> For state topics, the current state is (if available) immediately returned upon subscription, even if there is no immediate publish operation.",
+      "id": "3f4984fee3af07eb35bff8875d7b120b"
+    },
+    {
+      "type": "html",
+      "text": " <i>Solution:</i> For event topics, historical data is kept... possibly limited by age (e.g. 1 hour), memory limits (e.g. 1 MB), or some combination of the two. Some portion of this historical data is provided if requested as part of the subscription.",
+      "id": "87a55ec6e2e5867edb732330bf77e844"
+    },
+    {
+      "type": "html",
+      "text": "<i>Fast publisher, slow subscriber.</i> Publish is a push technology, which means a chatty sender can overload the system. This may also cause memory and network problems (drops).",
+      "id": "76b0ea6d6cac2e1e9defb1f325e3fd8c"
+    },
+    {
+      "type": "html",
+      "text": " <i>Solution:</i> Data is published to an intermediate service, which itself subscribes to the data. Subscribers specify desired minimal recovery period and maximum acceptable latency (max time by which data may be out-of-date before it is useless, which is often on the order of minutes for Command+Control to hours for RSS). Messages are delivered no faster than recovery period, and maximal latencies help set priorities and allow optimizations and retries. For 'stateful' entities, only the final state is delivered; for 'event' topics, events delivered in large blocks that are (hopefully) cheaper to process as a collection than they would be individually.",
+      "id": "2370cec70596382687037ac301cf7e1d"
+    },
+    {
+      "type": "html",
+      "text": " <i>Solution:</i> Publisher may negotiate Subscriber criticality and other factors then decide how to handle the set of constraints from the collective subscribers. (Think of modem negotiation, etc.) (Pros: very precise. Cons: a lot of extra protocol work.)",
+      "id": "59658db7bf350232276f72fe43cc0137"
+    },
+    {
+      "type": "html",
+      "text": "<i>Message order.</i> Message order is often important. If the publisher maintains order, then how does it deal with a situation where one or more consumers have drops? The entire cohort will be held back waiting for retransmission.",
+      "id": "bdc1683124b1c34c1c36fd3e4cbb9ea2"
+    },
+    {
+      "type": "html",
+      "text": " <i>Solution:</i> Intermediate service between publisher and receiver to handle this mess. ([[Data Distribution Service]] is a reasonable choice.)",
+      "id": "bdd595af1ee4213d2a7e09d56c0209e5"
+    },
+    {
+      "type": "html",
+      "text": " <i>Solution:</i> Publisher requests SCTP or TCP delivery receipts for all critical messages. Any Subscriber not returning a delivery receipt within a known time is dropped like a hot rock. If the Subscriber getting dropped is really important then Publisher issues an error.",
+      "id": "65a9266de83496d86d862697d64ba7d1"
+    },
+    {
+      "type": "html",
+      "text": "\nDistributed systems (of any kind, even multiple threads using the same processor but operating at different dispatch priorities) can have the kinds of problems listed here (and many more beside).",
+      "id": "bde2df40542ac9584f2bd08217477b16"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "35a1239265e002ac254d8e61a83e8a9a"
+    },
+    {
+      "type": "html",
+      "text": "Asked in [[Declarative Gui]]: <i>What is a \"subscription\"?</i>",
+      "id": "2b3501b6ce3446fab093a7cf177d0546"
+    },
+    {
+      "type": "html",
+      "text": "\nA subscription is a request for a callback upon update to some state. Doing so allows low-latency update processing without the bandwidth and processing costs associated with polling. (Polling has a periodic query+reply cost, and might often reply that there has been no change, whereas subscription has a one-time subscribe+unsubscribe cost and replies with the current state only after at least one change. Polling and subscriptions are equally subject to powerful exponential-strength optimizations via caching at network boundaries.) The trade-off is complexity of subscription management, and slightly bulkier state management (due to maintaining lists of subscriptions for each cell). For very large state values, subscriptions can be optimized by just returning the deltas from the last callback - a compression mechanism [[Data Delta Isolation]]. In general one may also subscribe to events that might never be committed to state, but that possibility isn't necessary - or even desirable - in this particular context. ",
+      "id": "08cf7445a20bc90bc3b0ca821e5d4d7a"
+    },
+    {
+      "type": "html",
+      "text": "\nAs a note: the reason for rejecting event subscriptions in the context of keeping document definitions up-to-date for [[Declarative Gui]] (or any document model, really) is that event subscriptions are not robust, they cannot be regenerated after partial network failure or disruption, even one missed event can be a big problem. They also resist [[Zoomable User Interface]] where subscriptions are disabled for objects you aren't looking at any longer. This is actually true in general: event subscriptions (e.g. to signals, or to particular changes in state) aren't robust, whereas state subscriptions can simply be regenerated from scratch at any time and thus are very robust. It's worth keeping in mind when designing [[Distributed System]]s atop [[Publish Subscribe Model]].",
+      "id": "cac447bed3f296094b745cce8da636c0"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "35a1239265e002ac254d8e61a83e8a9a"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Pattern]]",
+      "id": "855fe1b08840f7c77a18b9aab6f9558a"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?PublishSubscribeModel c2.com]",
+      "id": "10d53668309e0b8bd093fe28c020a897"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1242325733000,
+      "id": "fcf0f0cffc2a03d99e4269bebc863171",
+      "type": "create",
+      "item": {
+        "title": "Publish Subscribe Model",
+        "story": [
+          {
+            "type": "html",
+            "text": "Publish/Subscribe is a useful model which, although it is not new, is receiving increasing interest and attention.",
+            "id": "d42d13f0a17cc5ccdaf0dd8814b531f7"
+          },
+          {
+            "type": "html",
+            "text": "<i>\"Publish and Subscribe is a well-established communications paradigm that allows any number of publishers to communicate with any number of subscribers asynchronously and anonymously via an event channel.\" -- [[David Houlding]] page088 [[Dr Dobbs Journal]] July 2000</i>",
+            "id": "ccc93f522e3ed735d83bb4f5af633fe8"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "35a1239265e002ac254d8e61a83e8a9a"
+          },
+          {
+            "type": "html",
+            "text": "\nSome are familiar with the concept of a \"list-server\", where a group of users subscribe to a particular topic from a given server and are notified and updated via email. It is a form of [[Multi Casting]] which emulates what we see in the broadcast of television and radio programs to potentially large audiences. Whose desired effect is to deliver high value information to a mass-audience. This is precisely what the [[Publish Subscribe Model]] seeks to do. The [[Publish Subscribe Model]] lies at the core of [[Event Driven Information Processing]]. This model is used extensively in embedded systems where components need to respond in real time to events on a list. (See example, below.)",
+            "id": "072992d6887dc8061bd0ebdb08a6b0e0"
+          },
+          {
+            "type": "html",
+            "text": "\nPub/sub is handy for decoupling parts of a system, too; [[Linda Language]], for example, is a sort of pub/sub. Spread, [[Xml Blaster]], and mod_pubsub all provide pub/sub.",
+            "id": "0ed7951ee81de83cd7ba85a18fab61fb"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "35a1239265e002ac254d8e61a83e8a9a"
+          },
+          {
+            "type": "html",
+            "text": "<b>Use in Embedded Systems</b>",
+            "id": "577312daecbee882cb69c26fbfccb4a2"
+          },
+          {
+            "type": "html",
+            "text": "\nPublish/Subscribe is very powerful in event driven embedded technologies. Suppose a system has an [[Event Handler]] that wants to send out Notification X whenever this event occurs. You have a priority component, Component A, which is there almost all the time and has to see this message right away. You also have a bunch of dynamic secondary components (B, C, and D) which may be there or not. They all have to receive the message sooner or later. Let's look at some possible scenarios:",
+            "id": "ee6ebf48784d7e0cfe5d8535fd794449"
+          },
+          {
+            "type": "html",
+            "text": "<b>Nothing is very time critical.</b> Publisher sends out Note X to A, B, C, D... ad nauseum. B, C, and D all begin reacting to X. In the mean time, A gets all panicky and generates event Y. Notification Y (effectively a Cancel X) goes out to B, C, et al, and these components all roll their eyes, mutter something about these kids not being able to make up their minds, and toss the work they did to process the X note. Done.",
+            "id": "ea80f1afe38986dc1cf5e85aad09bda6"
+          },
+          {
+            "type": "html",
+            "text": "<b>Some things are time critical.</b> X goes out as a conditional X. This means that a follow-up message will come out within a certain maximum time to confirm or cancel the X event. A gets a chance to chew on the X note and then generate a Confirm or Cancel. B, C, and D can all get their house in order in case this is the real thing. If they get a Confirm follow-up they complete the processing of X. Otherwise they get a Cancel and they can drop the whole thing. That finishes that.",
+            "id": "b6e7640781f07a351f0cacbd429f7a40"
+          },
+          {
+            "type": "html",
+            "text": "<b>Time critical and dynamic.</b> The worst case is where A is dynamic as well as the rest of the subscribers and time is critical. Without A in the picture Note X just goes out to whoever else is there. When A comes into the picture it has to register with the X event handler. Then the X handler sends a conditional X notification. The business with the Confirm or Cancel still applies.",
+            "id": "4cd5a5c05ded69b64669b596bb4c86ca"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "35a1239265e002ac254d8e61a83e8a9a"
+          },
+          {
+            "type": "html",
+            "text": "Publish and subscribe should be used very carefully. There are some problems in distributed systems:",
+            "id": "80e5304c772847bc588de2641bd26910"
+          },
+          {
+            "type": "html",
+            "text": "<i>Incomplete subscriber list.</i> When you publish, are you publishing to everyone that is supposed to get the message? This is a system start/failover issue. Different nodes come up at different times, which means they will register at different times. Data can be lost.",
+            "id": "3fd97010fbff2a018dc613a2ba10720d"
+          },
+          {
+            "type": "html",
+            "text": " <i>Solution:</i> For state topics, the current state is (if available) immediately returned upon subscription, even if there is no immediate publish operation.",
+            "id": "3f4984fee3af07eb35bff8875d7b120b"
+          },
+          {
+            "type": "html",
+            "text": " <i>Solution:</i> For event topics, historical data is kept... possibly limited by age (e.g. 1 hour), memory limits (e.g. 1 MB), or some combination of the two. Some portion of this historical data is provided if requested as part of the subscription.",
+            "id": "87a55ec6e2e5867edb732330bf77e844"
+          },
+          {
+            "type": "html",
+            "text": "<i>Fast publisher, slow subscriber.</i> Publish is a push technology, which means a chatty sender can overload the system. This may also cause memory and network problems (drops).",
+            "id": "76b0ea6d6cac2e1e9defb1f325e3fd8c"
+          },
+          {
+            "type": "html",
+            "text": " <i>Solution:</i> Data is published to an intermediate service, which itself subscribes to the data. Subscribers specify desired minimal recovery period and maximum acceptable latency (max time by which data may be out-of-date before it is useless, which is often on the order of minutes for Command+Control to hours for RSS). Messages are delivered no faster than recovery period, and maximal latencies help set priorities and allow optimizations and retries. For 'stateful' entities, only the final state is delivered; for 'event' topics, events delivered in large blocks that are (hopefully) cheaper to process as a collection than they would be individually.",
+            "id": "2370cec70596382687037ac301cf7e1d"
+          },
+          {
+            "type": "html",
+            "text": " <i>Solution:</i> Publisher may negotiate Subscriber criticality and other factors then decide how to handle the set of constraints from the collective subscribers. (Think of modem negotiation, etc.) (Pros: very precise. Cons: a lot of extra protocol work.)",
+            "id": "59658db7bf350232276f72fe43cc0137"
+          },
+          {
+            "type": "html",
+            "text": "<i>Message order.</i> Message order is often important. If the publisher maintains order, then how does it deal with a situation where one or more consumers have drops? The entire cohort will be held back waiting for retransmission.",
+            "id": "bdc1683124b1c34c1c36fd3e4cbb9ea2"
+          },
+          {
+            "type": "html",
+            "text": " <i>Solution:</i> Intermediate service between publisher and receiver to handle this mess. ([[Data Distribution Service]] is a reasonable choice.)",
+            "id": "bdd595af1ee4213d2a7e09d56c0209e5"
+          },
+          {
+            "type": "html",
+            "text": " <i>Solution:</i> Publisher requests SCTP or TCP delivery receipts for all critical messages. Any Subscriber not returning a delivery receipt within a known time is dropped like a hot rock. If the Subscriber getting dropped is really important then Publisher issues an error.",
+            "id": "65a9266de83496d86d862697d64ba7d1"
+          },
+          {
+            "type": "html",
+            "text": "\nDistributed systems (of any kind, even multiple threads using the same processor but operating at different dispatch priorities) can have the kinds of problems listed here (and many more beside).",
+            "id": "bde2df40542ac9584f2bd08217477b16"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "35a1239265e002ac254d8e61a83e8a9a"
+          },
+          {
+            "type": "html",
+            "text": "Asked in [[Declarative Gui]]: <i>What is a \"subscription\"?</i>",
+            "id": "2b3501b6ce3446fab093a7cf177d0546"
+          },
+          {
+            "type": "html",
+            "text": "\nA subscription is a request for a callback upon update to some state. Doing so allows low-latency update processing without the bandwidth and processing costs associated with polling. (Polling has a periodic query+reply cost, and might often reply that there has been no change, whereas subscription has a one-time subscribe+unsubscribe cost and replies with the current state only after at least one change. Polling and subscriptions are equally subject to powerful exponential-strength optimizations via caching at network boundaries.) The trade-off is complexity of subscription management, and slightly bulkier state management (due to maintaining lists of subscriptions for each cell). For very large state values, subscriptions can be optimized by just returning the deltas from the last callback - a compression mechanism [[Data Delta Isolation]]. In general one may also subscribe to events that might never be committed to state, but that possibility isn't necessary - or even desirable - in this particular context. ",
+            "id": "08cf7445a20bc90bc3b0ca821e5d4d7a"
+          },
+          {
+            "type": "html",
+            "text": "\nAs a note: the reason for rejecting event subscriptions in the context of keeping document definitions up-to-date for [[Declarative Gui]] (or any document model, really) is that event subscriptions are not robust, they cannot be regenerated after partial network failure or disruption, even one missed event can be a big problem. They also resist [[Zoomable User Interface]] where subscriptions are disabled for objects you aren't looking at any longer. This is actually true in general: event subscriptions (e.g. to signals, or to particular changes in state) aren't robust, whereas state subscriptions can simply be regenerated from scratch at any time and thus are very robust. It's worth keeping in mind when designing [[Distributed System]]s atop [[Publish Subscribe Model]].",
+            "id": "cac447bed3f296094b745cce8da636c0"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "35a1239265e002ac254d8e61a83e8a9a"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Pattern]]",
+            "id": "855fe1b08840f7c77a18b9aab6f9558a"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?PublishSubscribeModel c2.com]",
+            "id": "10d53668309e0b8bd093fe28c020a897"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1651574259206
+    }
+  ]
+}

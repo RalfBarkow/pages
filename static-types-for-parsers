@@ -1,0 +1,966 @@
+{
+  "title": "Static Types for Parsers",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "78c5d7f81cf02aa6",
+      "text": "All of our [[Seran]] [[outpost]] experiments teach about the tools and libraries preferred by [[deno]]. "
+    },
+    {
+      "type": "pagefold",
+      "id": "169c9a9a2d625a44",
+      "text": "~"
+    },
+    {
+      "type": "markdown",
+      "id": "5ba4417aa4d1588e",
+      "text": "What is [[Seran]]? -- [[Ralf Barkow]]\n"
+    },
+    {
+      "type": "pagefold",
+      "id": "7a1c0466d0cec329",
+      "text": "."
+    },
+    {
+      "type": "paragraph",
+      "id": "d00ce78ca46a81e5",
+      "text": "Here I report some ups and downs writing a [[parser]] in typescript and then not typescript and then in typescript again."
+    },
+    {
+      "type": "paragraph",
+      "id": "a7e2e0b69851bde0",
+      "text": "See [[Content Transformation]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6a3fabd867514c7c",
+      "text": "We deviated from our intended method by writing the parser using deno to evaluate a script full of console.log, rather than using wiki pages for the same purpose. The typescript type unions of tag|text and tree|text proved challenging. "
+    },
+    {
+      "type": "paragraph",
+      "id": "ee45bf41c429f65c",
+      "text": "Here I quote offline conversation."
+    },
+    {
+      "type": "markdown",
+      "id": "a10d14499d64d0a8",
+      "text": "Ward:\n> I wrote a minimal html parser and then added some tree traversal functions that would extract the very text we were going to need today. I had trouble writing in typescript so I reverted to javascript. This was a mistake as it was much harder to integrate the code without types associated with each function argument and return. In my pull request I proved that it worked. But I didn't show how it worked. Today rebuilding the call sequence in the new application lead to many type and runtime errors that could have been avoided. [https://github.com/joshuabenuck/seran-prog21/pull/2 github]\n\n> From this experience I conclude, for a page of code it might be faster to write it in javascript, but it will be faster to move a page of code to a new environment if I bothered to wrap up my coding work by adding types before sharing."
+    },
+    {
+      "type": "paragraph",
+      "id": "a5a2a91a10a6c975",
+      "text": "Joshua:"
+    },
+    {
+      "type": "markdown",
+      "id": "cc1a172c5f8bd905",
+      "text": "> Example of where types are more trouble than they are worth: `Page | () => Page`. This is a type that can either be a page or a function that produces a page. In JavaScript, you simply check for the presence of a property that only pages have, call the function if it is missing, and then use the page normally from there on out as you know it will always be a page object. Doing the same in TypeScript required three fairly ugly casts. I wasn't able to find a nicer way to do it and kept running into situations where it would start complaining again so I dropped the types for that parameter.\n\n>Even with the approach I outlined, types result in more work (especially when refactoring code that merely passes references around). There's probably some minimal number of places one could get away with typing that could further reduce the overhead."
+    },
+    {
+      "type": "paragraph",
+      "id": "9696f6b21ed4506b",
+      "text": "Ward:"
+    },
+    {
+      "type": "markdown",
+      "id": "e961404ef09b81a6",
+      "text": "> I've tried hard to revise parse.js to be typescript. I can't get it to work. Help me out. [https://github.com/WardCunningham/seran-prog21/tree/master/scripts github]"
+    },
+    {
+      "type": "paragraph",
+      "id": "9e72e06ee947a499",
+      "text": "Joshua:"
+    },
+    {
+      "type": "markdown",
+      "id": "2a928f03eaf11388",
+      "text": "> This illustrates my point. If you relax the type checker, what you have will compile just fine.\n\n> `deno -c .\\tsconfig.json  ...`\n\n> That works without error. If I remove the config (the thing that relaxes the type checker), I get three errors. If you are just looking to leverage types when and where they help you catch casual type errors, I recommend using a setup like the tsconfig.json in the seran-wiki repo.\n\n> If this is more of an academic exercise to understand how to satisfy all of the type checking rules, I can help dig in there. My impression was you were after the former."
+    },
+    {
+      "type": "paragraph",
+      "id": "41bf25f22618e94e",
+      "text": "Ward:"
+    },
+    {
+      "type": "markdown",
+      "id": "6ec8ffacd205798c",
+      "text": "> Did you read the types and agree that they would have made our work today go faster?  This is a little tricky in that the scanner finds two kinds of nodes, tags and text between them. Then parse reorganize these into a nested structure where the text between open and close tags is similarly composed of two kinds of nodes, trees and text. I work though the cases so that I know I have text when I try to move it from token stream to parse tree. I take it as a personal challenge to describe this partial equivalence in the type system. This might be foolish but I feel like have to prove my worth to the type checker. "
+    },
+    {
+      "type": "paragraph",
+      "id": "95f4b7475d911c66",
+      "text": "Eric:"
+    },
+    {
+      "type": "markdown",
+      "id": "b3b06edffdab4eb5",
+      "text": "> Some years ago I took a coursera introduction to scala. The course itself was very well constructed. There was a point when I was taking that course that I could make sense of complex types and the syntax needed to specify them. I think if it were closer to the time when I had taken that course or if I'd stayed longer with a strictly typed language I might be able to make sense of the types needed to make this work. When I tried last night, some of that understanding returned, but not enough to get me to a solution before I began to doze off."
+    },
+    {
+      "type": "paragraph",
+      "id": "8a8b2b97ac6b6c64",
+      "text": "Joshua:"
+    },
+    {
+      "type": "markdown",
+      "id": "346d0f15deda2834",
+      "text": "> That brings back memories. I had several co-workers who took that course. I had already read a book on Scala by the time I heard about it. I think Clojure caught my eye soon after that."
+    },
+    {
+      "type": "paragraph",
+      "id": "bdb9fb94d2b77282",
+      "text": "Ward:"
+    },
+    {
+      "type": "markdown",
+      "id": "bd69e9c48eda6d20",
+      "text": "> Too much good thought is happening here to have it lost in a chat room. Tactical coordination is ok here, but strategic thinking would be better served by wiki and we have a pod for that already. I have a page, Dream Big, there but I don't think it is thinking big enough. Today I started a new list, [[Outpost Thinking]], where Seran experiments can be cataloged."
+    },
+    {
+      "type": "paragraph",
+      "id": "51a756a1332ded56",
+      "text": "Having thought about this more I realize that the types a scanner might add to tokens must be dynamic types for a parser to branch on type as they must do."
+    },
+    {
+      "type": "paragraph",
+      "id": "6eb99be2cc67c6cb",
+      "text": "When I created the static union types I was enabling implicit assertions that would distinguish tokens from trees but nothing that would effect the control flow of a type correct program."
+    },
+    {
+      "type": "code",
+      "id": "35544c296e33f940",
+      "text": "type token = tag | text\ntype tree = ... (tree | text)[] ..."
+    }
+  ],
+  "journal": [
+    {
+      "type": "edit",
+      "id": "78c5d7f81cf02aa6",
+      "item": {
+        "type": "paragraph",
+        "id": "78c5d7f81cf02aa6",
+        "text": "All of our [[Seran]] [[outpost]] experiments teach about the tools and libraries preferred by [[deno]]. "
+      },
+      "date": 1631788029804
+    },
+    {
+      "type": "fork",
+      "site": "don.noyes.asia.wiki.org",
+      "date": 1631788008780
+    },
+    {
+      "type": "fork",
+      "site": "ward.asia.wiki.org",
+      "date": 1586037324049
+    },
+    {
+      "type": "edit",
+      "id": "6eb99be2cc67c6cb",
+      "item": {
+        "type": "paragraph",
+        "id": "6eb99be2cc67c6cb",
+        "text": "When I created the static union types I was enabling implicit assertions that would distinguish tokens from trees but nothing that would effect the control flow of a type correct program."
+      },
+      "date": 1585852657587
+    },
+    {
+      "type": "edit",
+      "id": "51a756a1332ded56",
+      "item": {
+        "type": "paragraph",
+        "id": "51a756a1332ded56",
+        "text": "Having thought about this more I realize that the types a scanner might add to tokens must be dynamic types for a parser to branch on type as they must do."
+      },
+      "date": 1585852446353
+    },
+    {
+      "type": "edit",
+      "id": "51a756a1332ded56",
+      "item": {
+        "type": "paragraph",
+        "id": "51a756a1332ded56",
+        "text": "Having thought about this more I realize that the types a scanner might add to tokens must be dynamic types for a parser to branch based on the token type at runtime."
+      },
+      "date": 1585852364316
+    },
+    {
+      "type": "edit",
+      "id": "35544c296e33f940",
+      "item": {
+        "type": "code",
+        "id": "35544c296e33f940",
+        "text": "type token = tag | text\ntype tree = ... (tree | text)[] ..."
+      },
+      "date": 1585851680970
+    },
+    {
+      "type": "edit",
+      "id": "35544c296e33f940",
+      "item": {
+        "type": "code",
+        "id": "35544c296e33f940",
+        "text": "token = tag | text\ntree = ... tree | text"
+      },
+      "date": 1585851556556
+    },
+    {
+      "type": "edit",
+      "id": "6eb99be2cc67c6cb",
+      "item": {
+        "type": "paragraph",
+        "id": "6eb99be2cc67c6cb",
+        "text": "When I created the union types I was enabling implicit assertions that would distinguish tokens from trees but nothing that would effect the control flow of a type correct program."
+      },
+      "date": 1585850840816
+    },
+    {
+      "type": "edit",
+      "id": "35544c296e33f940",
+      "item": {
+        "type": "code",
+        "id": "35544c296e33f940",
+        "text": "token = tag | text\ntree = tree | text"
+      },
+      "date": 1585850831001
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "35544c296e33f940"
+      },
+      "id": "35544c296e33f940",
+      "type": "add",
+      "after": "6eb99be2cc67c6cb",
+      "date": 1585850796329
+    },
+    {
+      "type": "add",
+      "id": "6eb99be2cc67c6cb",
+      "item": {
+        "type": "paragraph",
+        "id": "6eb99be2cc67c6cb",
+        "text": "When I created the union type I was enabling implicit assertions that would distinguish tokens from trees but nothing that would effect the control flow of a type correct program."
+      },
+      "after": "51a756a1332ded56",
+      "date": 1585850794397
+    },
+    {
+      "type": "edit",
+      "id": "51a756a1332ded56",
+      "item": {
+        "type": "paragraph",
+        "id": "51a756a1332ded56",
+        "text": "Having thought about this more I realize that the types a scanner might add to tokens don't help the parser much at all when the parser wants to do branch based on the token type at runtime."
+      },
+      "date": 1585850578298
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "51a756a1332ded56"
+      },
+      "id": "51a756a1332ded56",
+      "type": "add",
+      "after": "bd69e9c48eda6d20",
+      "date": 1585850456828
+    },
+    {
+      "type": "edit",
+      "id": "cc1a172c5f8bd905",
+      "item": {
+        "type": "markdown",
+        "id": "cc1a172c5f8bd905",
+        "text": "> Example of where types are more trouble than they are worth: `Page | () => Page`. This is a type that can either be a page or a function that produces a page. In JavaScript, you simply check for the presence of a property that only pages have, call the function if it is missing, and then use the page normally from there on out as you know it will always be a page object. Doing the same in TypeScript required three fairly ugly casts. I wasn't able to find a nicer way to do it and kept running into situations where it would start complaining again so I dropped the types for that parameter.\n\n>Even with the approach I outlined, types result in more work (especially when refactoring code that merely passes references around). There's probably some minimal number of places one could get away with typing that could further reduce the overhead."
+      },
+      "date": 1585850289365
+    },
+    {
+      "type": "add",
+      "id": "a7e2e0b69851bde0",
+      "item": {
+        "type": "paragraph",
+        "id": "a7e2e0b69851bde0",
+        "text": "See [[Content Transformation]]"
+      },
+      "after": "78c5d7f81cf02aa6",
+      "date": 1585850151467
+    },
+    {
+      "type": "edit",
+      "id": "bd69e9c48eda6d20",
+      "item": {
+        "type": "markdown",
+        "id": "bd69e9c48eda6d20",
+        "text": "> Too much good thought is happening here to have it lost in a chat room. Tactical coordination is ok here, but strategic thinking would be better served by wiki and we have a pod for that already. I have a page, Dream Big, there but I don't think it is thinking big enough. Today I started a new list, [[Outpost Thinking]], where Seran experiments can be cataloged."
+      },
+      "date": 1585850114845
+    },
+    {
+      "type": "edit",
+      "id": "bd69e9c48eda6d20",
+      "item": {
+        "type": "markdown",
+        "id": "bd69e9c48eda6d20",
+        "text": "> Too much good thought is happening here to have it lost in a chat room. Tactical coordination is ok here, but strategic thinking would be better served by wiki and we have a pod for that already. I have a page, Dream Big, there but I don't think it is thinking big enough. Today I started a new list, Outpost Thinking, where Seran experiments can be cataloged."
+      },
+      "date": 1585850101044
+    },
+    {
+      "type": "add",
+      "id": "bd69e9c48eda6d20",
+      "item": {
+        "type": "factory",
+        "id": "bd69e9c48eda6d20",
+        "text": "Too much good thought is happening here to have it lost in a chat room. Tactical coordination is ok here, but strategic thinking would be better served by wiki and we have a pod for that already. I have a page, Dream Big, there but I don't think it is thinking big enough. Today I started a new list, Outpost Thinking, where Seran experiments can be cataloged."
+      },
+      "after": "bdb9fb94d2b77282",
+      "date": 1585850091917
+    },
+    {
+      "type": "edit",
+      "id": "bdb9fb94d2b77282",
+      "item": {
+        "type": "paragraph",
+        "id": "bdb9fb94d2b77282",
+        "text": "Ward:"
+      },
+      "date": 1585850088816
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bdb9fb94d2b77282"
+      },
+      "id": "bdb9fb94d2b77282",
+      "type": "add",
+      "after": "346d0f15deda2834",
+      "date": 1585850082058
+    },
+    {
+      "type": "edit",
+      "id": "346d0f15deda2834",
+      "item": {
+        "type": "markdown",
+        "id": "346d0f15deda2834",
+        "text": "> That brings back memories. I had several co-workers who took that course. I had already read a book on Scala by the time I heard about it. I think Clojure caught my eye soon after that."
+      },
+      "date": 1585850040241
+    },
+    {
+      "type": "add",
+      "id": "346d0f15deda2834",
+      "item": {
+        "type": "factory",
+        "id": "346d0f15deda2834",
+        "text": "That brings back memories. I had several co-workers who took that course. I had already read a book on Scala by the time I heard about it. I think Clojure caught my eye soon after that."
+      },
+      "after": "8a8b2b97ac6b6c64",
+      "date": 1585850034478
+    },
+    {
+      "type": "edit",
+      "id": "8a8b2b97ac6b6c64",
+      "item": {
+        "type": "paragraph",
+        "id": "8a8b2b97ac6b6c64",
+        "text": "Joshua:"
+      },
+      "date": 1585850031439
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8a8b2b97ac6b6c64"
+      },
+      "id": "8a8b2b97ac6b6c64",
+      "type": "add",
+      "after": "b3b06edffdab4eb5",
+      "date": 1585850025425
+    },
+    {
+      "type": "edit",
+      "id": "b3b06edffdab4eb5",
+      "item": {
+        "type": "markdown",
+        "id": "b3b06edffdab4eb5",
+        "text": "> Some years ago I took a coursera introduction to scala. The course itself was very well constructed. There was a point when I was taking that course that I could make sense of complex types and the syntax needed to specify them. I think if it were closer to the time when I had taken that course or if I'd stayed longer with a strictly typed language I might be able to make sense of the types needed to make this work. When I tried last night, some of that understanding returned, but not enough to get me to a solution before I began to doze off."
+      },
+      "date": 1585849995847
+    },
+    {
+      "type": "add",
+      "id": "b3b06edffdab4eb5",
+      "item": {
+        "type": "factory",
+        "id": "b3b06edffdab4eb5",
+        "text": "Some years ago I took a coursera introduction to scala. The course itself was very well constructed. There was a point when I was taking that course that I could make sense of complex types and the syntax needed to specify them. I think if it were closer to the time when I had taken that course or if I'd stayed longer with a strictly typed language I might be able to make sense of the types needed to make this work. When I tried last night, some of that understanding returned, but not enough to get me to a solution before I began to doze off."
+      },
+      "after": "95f4b7475d911c66",
+      "date": 1585849986626
+    },
+    {
+      "type": "edit",
+      "id": "95f4b7475d911c66",
+      "item": {
+        "type": "paragraph",
+        "id": "95f4b7475d911c66",
+        "text": "Eric:"
+      },
+      "date": 1585849981992
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "95f4b7475d911c66"
+      },
+      "id": "95f4b7475d911c66",
+      "type": "add",
+      "after": "6ec8ffacd205798c",
+      "date": 1585849975021
+    },
+    {
+      "type": "edit",
+      "id": "6ec8ffacd205798c",
+      "item": {
+        "type": "markdown",
+        "id": "6ec8ffacd205798c",
+        "text": "> Did you read the types and agree that they would have made our work today go faster?  This is a little tricky in that the scanner finds two kinds of nodes, tags and text between them. Then parse reorganize these into a nested structure where the text between open and close tags is similarly composed of two kinds of nodes, trees and text. I work though the cases so that I know I have text when I try to move it from token stream to parse tree. I take it as a personal challenge to describe this partial equivalence in the type system. This might be foolish but I feel like have to prove my worth to the type checker. "
+      },
+      "date": 1585849925598
+    },
+    {
+      "type": "edit",
+      "id": "6ec8ffacd205798c",
+      "item": {
+        "type": "paragraph",
+        "id": "6ec8ffacd205798c",
+        "text": "> Did you read the types and agree that they would have made our work today go faster?  This is a little tricky in that the scanner finds two kinds of nodes, tags and text between them. Then parse reorganize these into a nested structure where the text between open and close tags is similarly composed of two kinds of nodes, trees and text. I work though the cases so that I know I have text when I try to move it from token stream to parse tree. I take it as a personal challenge to describe this partial equivalence in the type system. This might be foolish but I feel like have to prove my worth to the type checker."
+      },
+      "date": 1585849911622
+    },
+    {
+      "type": "fork",
+      "date": 1585849900251
+    },
+    {
+      "type": "add",
+      "id": "6ec8ffacd205798c",
+      "item": {
+        "type": "factory",
+        "id": "6ec8ffacd205798c",
+        "text": "Did you read the types and agree that they would have made our work today go faster?  This is a little tricky in that the scanner finds two kinds of nodes, tags and text between them. Then parse reorganize these into a nested structure where the text between open and close tags is similarly composed of two kinds of nodes, trees and text. I work though the cases so that I know I have text when I try to move it from token stream to parse tree. I take it as a personal challenge to describe this partial equivalence in the type system. This might be foolish but I feel like have to prove my worth to the type checker."
+      },
+      "after": "41bf25f22618e94e",
+      "date": 1585849780463
+    },
+    {
+      "type": "edit",
+      "id": "41bf25f22618e94e",
+      "item": {
+        "type": "paragraph",
+        "id": "41bf25f22618e94e",
+        "text": "Ward:"
+      },
+      "date": 1585849777054
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "41bf25f22618e94e"
+      },
+      "id": "41bf25f22618e94e",
+      "type": "add",
+      "after": "2a928f03eaf11388",
+      "date": 1585849771457
+    },
+    {
+      "type": "edit",
+      "id": "2a928f03eaf11388",
+      "item": {
+        "type": "markdown",
+        "id": "2a928f03eaf11388",
+        "text": "> This illustrates my point. If you relax the type checker, what you have will compile just fine.\n\n> `deno -c .\\tsconfig.json  ...`\n\n> That works without error. If I remove the config (the thing that relaxes the type checker), I get three errors. If you are just looking to leverage types when and where they help you catch casual type errors, I recommend using a setup like the tsconfig.json in the seran-wiki repo.\n\n> If this is more of an academic exercise to understand how to satisfy all of the type checking rules, I can help dig in there. My impression was you were after the former."
+      },
+      "date": 1585849708014
+    },
+    {
+      "type": "edit",
+      "id": "2a928f03eaf11388",
+      "item": {
+        "type": "markdown",
+        "id": "2a928f03eaf11388",
+        "text": "> This illustrates my point. If you relax the type checker, what you have will compile just fine.\n\n`deno -c .\\tsconfig.json  ...`\n\n> That works without error. If I remove the config (the thing that relaxes the type checker), I get three errors. If you are just looking to leverage types when and where they help you catch casual type errors, I recommend using a setup like the tsconfig.json in the seran-wiki repo.\n\n> If this is more of an academic exercise to understand how to satisfy all of the type checking rules, I can help dig in there. My impression was you were after the former."
+      },
+      "date": 1585849699017
+    },
+    {
+      "type": "edit",
+      "id": "2a928f03eaf11388",
+      "item": {
+        "type": "markdown",
+        "id": "2a928f03eaf11388",
+        "text": "> This illustrates my point. If you relax the type checker, what you have will compile just fine.\n\n`deno -c .\\tsconfig.json  ...`\n\nThat works without error. If I remove the config (the thing that relaxes the type checker), I get three errors. If you are just looking to leverage types when and where they help you catch casual type errors, I recommend using a setup like the tsconfig.json in the seran-wiki repo.\n\n> If this is more of an academic exercise to understand how to satisfy all of the type checking rules, I can help dig in there. My impression was you were after the former."
+      },
+      "date": 1585849686375
+    },
+    {
+      "type": "edit",
+      "id": "2a928f03eaf11388",
+      "item": {
+        "type": "markdown",
+        "id": "2a928f03eaf11388",
+        "text": "> This illustrates my point. If you relax the type checker, what you have will compile just fine.\n\n`deno -c .\\tsconfig.json  ...`\n\nThat works without error. If I remove the `-c tsconfig.json` (the thing that relaxes the type checker), I get three errors. If you are just looking to leverage types when and where they help you catch casual type errors, I recommend using a setup like the tsconfig.json in the seran-wiki repo.\n\n> If this is more of an academic exercise to understand how to satisfy all of the type checking rules, I can help dig in there. My impression was you were after the former."
+      },
+      "date": 1585849655612
+    },
+    {
+      "type": "edit",
+      "id": "2a928f03eaf11388",
+      "item": {
+        "type": "markdown",
+        "id": "2a928f03eaf11388",
+        "text": "> This illustrates my point. If you relax the type checker, what you have will compile just fine.\n\n`PS C:\\Users\\joshu\\src\\denowiki> deno -c .\\tsconfig.json https://raw.githubusercontent.com/WardCunningham/seran-prog21/master/scripts/parse.ts`\n\nThat works without error.\nIf I remove the `-c tsconfig.json` (the thing that relaxes the type checker), I get three errors.\nOne of which is that crazy one you quoted.\nIf you are just looking to leverage types when and where they help you catch casual type errors, I recommend using a setup like the tsconfig.json in the seran-wiki repo.\n\n> If this is more of an academic exercise to understand how to satisfy all of the type checking rules, I can help dig in there. My impression was you were after the former."
+      },
+      "date": 1585849582587
+    },
+    {
+      "type": "edit",
+      "id": "2a928f03eaf11388",
+      "item": {
+        "type": "markdown",
+        "id": "2a928f03eaf11388",
+        "text": "> This illustrates my point. If you relax the type checker, what you have will compile just fine.\n'''\nPS C:\\Users\\joshu\\src\\denowiki> deno -c .\\tsconfig.json https://raw.githubusercontent.com/WardCunningham/seran-prog21/master/scripts/parse.ts\n'''\nThat works without error.\nIf I remove the `-c tsconfig.json` (the thing that relaxes the type checker), I get three errors.\nOne of which is that crazy one you quoted.\nIf you are just looking to leverage types when and where they help you catch casual type errors, I recommend using a setup like the tsconfig.json in the seran-wiki repo.\n\n> If this is more of an academic exercise to understand how to satisfy all of the type checking rules, I can help dig in there. My impression was you were after the former."
+      },
+      "date": 1585849490257
+    },
+    {
+      "type": "add",
+      "id": "2a928f03eaf11388",
+      "item": {
+        "type": "factory",
+        "id": "2a928f03eaf11388",
+        "text": ">This illustrates my point. If you relax the type checker, what you have will compile just fine.\nPS C:\\Users\\joshu\\src\\denowiki> deno -c .\\tsconfig.json https://raw.githubusercontent.com/WardCunningham/seran-prog21/master/scripts/parse.ts\nThat works without error.\nIf I remove the -c tsconfig.json (the thing that relaxes the type checker), I get three errors.\nOne of which is that crazy one you quoted.\nIf you are just looking to leverage types when and where they help you catch casual type errors, I recommend using a setup like the tsconfig.json in the seran-wiki repo.\nIf this is more of an academic exercise to understand how to satisfy all of the type checking rules, I can help dig in there. My impression was you were after the former."
+      },
+      "after": "9e72e06ee947a499",
+      "date": 1585849429812
+    },
+    {
+      "type": "edit",
+      "id": "9e72e06ee947a499",
+      "item": {
+        "type": "paragraph",
+        "id": "9e72e06ee947a499",
+        "text": "Joshua:"
+      },
+      "date": 1585849418077
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9e72e06ee947a499"
+      },
+      "id": "9e72e06ee947a499",
+      "type": "add",
+      "after": "e961404ef09b81a6",
+      "date": 1585849408771
+    },
+    {
+      "type": "edit",
+      "id": "e961404ef09b81a6",
+      "item": {
+        "type": "markdown",
+        "id": "e961404ef09b81a6",
+        "text": "> I've tried hard to revise parse.js to be typescript. I can't get it to work. Help me out. [https://github.com/WardCunningham/seran-prog21/tree/master/scripts github]"
+      },
+      "date": 1585849343689
+    },
+    {
+      "type": "edit",
+      "id": "e961404ef09b81a6",
+      "item": {
+        "type": "markdown",
+        "id": "e961404ef09b81a6",
+        "text": "> I've tried hard to revise parse.js to be typescript. I can't get it to work. Help me out.\n[https://github.com/WardCunningham/seran-prog21/tree/master/scripts github]"
+      },
+      "date": 1585849326571
+    },
+    {
+      "type": "add",
+      "id": "e961404ef09b81a6",
+      "item": {
+        "type": "factory",
+        "id": "e961404ef09b81a6",
+        "text": "I've tried hard to revise parse.js to be typescript. I can't get it to work. Help me out.\nhttps://github.com/WardCunningham/seran-prog21/tree/master/scripts"
+      },
+      "after": "9696f6b21ed4506b",
+      "date": 1585849313731
+    },
+    {
+      "type": "edit",
+      "id": "9696f6b21ed4506b",
+      "item": {
+        "type": "paragraph",
+        "id": "9696f6b21ed4506b",
+        "text": "Ward:"
+      },
+      "date": 1585849305488
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9696f6b21ed4506b"
+      },
+      "id": "9696f6b21ed4506b",
+      "type": "add",
+      "after": "cc1a172c5f8bd905",
+      "date": 1585849299324
+    },
+    {
+      "type": "edit",
+      "id": "a10d14499d64d0a8",
+      "item": {
+        "type": "markdown",
+        "id": "a10d14499d64d0a8",
+        "text": "Ward:\n> I wrote a minimal html parser and then added some tree traversal functions that would extract the very text we were going to need today. I had trouble writing in typescript so I reverted to javascript. This was a mistake as it was much harder to integrate the code without types associated with each function argument and return. In my pull request I proved that it worked. But I didn't show how it worked. Today rebuilding the call sequence in the new application lead to many type and runtime errors that could have been avoided. [https://github.com/joshuabenuck/seran-prog21/pull/2 github]\n\n> From this experience I conclude, for a page of code it might be faster to write it in javascript, but it will be faster to move a page of code to a new environment if I bothered to wrap up my coding work by adding types before sharing."
+      },
+      "date": 1585849177224
+    },
+    {
+      "type": "remove",
+      "id": "1fa6fb438d759f98",
+      "date": 1585849169991
+    },
+    {
+      "type": "edit",
+      "id": "cc1a172c5f8bd905",
+      "item": {
+        "type": "markdown",
+        "id": "cc1a172c5f8bd905",
+        "text": "> Example of where types are more trouble than they are worth: _Page | () => Page_. This is a type that can either be a page or a function that produces a page. In JavaScript, you simply check for the presence of a property that only pages have, call the function if it is missing, and then use the page normally from there on out as you know it will always be a page object. Doing the same in TypeScript required three fairly ugly casts. I wasn't able to find a nicer way to do it and kept running into situations where it would start complaining again so I dropped the types for that parameter.\n\n>Even with the approach I outlined, types result in more work (especially when refactoring code that merely passes references around). There's probably some minimal number of places one could get away with typing that could further reduce the overhead."
+      },
+      "date": 1585849160738
+    },
+    {
+      "type": "add",
+      "id": "cc1a172c5f8bd905",
+      "item": {
+        "type": "factory",
+        "id": "cc1a172c5f8bd905",
+        "text": "Example of where types are more trouble than they are worth: Page | () => Page. This is a type that can either be a page or a function that produces a page. In JavaScript, you simply check for the presence of a property that only pages have, call the function if it is missing, and then use the page normally from there on out as you know it will always be a page object. Doing the same in TypeScript required three fairly ugly casts. I wasn't able to find a nicer way to do it and kept running into situations where it would start complaining again so I dropped the types for that parameter.\nEven with the approach I outlined, types result in more work (especially when refactoring code that merely passes references around). There's probably some minimal number of places one could get away with typing that could further reduce the overhead."
+      },
+      "after": "a5a2a91a10a6c975",
+      "date": 1585849114260
+    },
+    {
+      "type": "edit",
+      "id": "a5a2a91a10a6c975",
+      "item": {
+        "type": "paragraph",
+        "id": "a5a2a91a10a6c975",
+        "text": "Joshua:"
+      },
+      "date": 1585849106130
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a5a2a91a10a6c975"
+      },
+      "id": "a5a2a91a10a6c975",
+      "type": "add",
+      "after": "1fa6fb438d759f98",
+      "date": 1585849099666
+    },
+    {
+      "type": "add",
+      "id": "1fa6fb438d759f98",
+      "item": {
+        "type": "markdown",
+        "id": "1fa6fb438d759f98",
+        "text": "> From this experience I conclude, for a page of code it might be faster to write it in javascript, but it will be faster to move a page of code to a new environment if I bothered to wrap up my coding work by adding types before sharing."
+      },
+      "after": "a10d14499d64d0a8",
+      "date": 1585849031615
+    },
+    {
+      "type": "edit",
+      "id": "a10d14499d64d0a8",
+      "item": {
+        "type": "markdown",
+        "id": "a10d14499d64d0a8",
+        "text": "Ward:\n> I wrote a minimal html parser and then added some tree traversal functions that would extract the very text we were going to need today. I had trouble writing in typescript so I reverted to javascript. This was a mistake as it was much harder to integrate the code without types associated with each function argument and return. In my pull request I proved that it worked. But I didn't show how it worked. Today rebuilding the call sequence in the new application lead to many type and runtime errors that could have been avoided. [https://github.com/joshuabenuck/seran-prog21/pull/2 github]\n\n\n"
+      },
+      "date": 1585849025239
+    },
+    {
+      "type": "edit",
+      "id": "a10d14499d64d0a8",
+      "item": {
+        "type": "factory",
+        "id": "a10d14499d64d0a8",
+        "text": "Ward:\n> I wrote a minimal html parser and then added some tree traversal functions that would extract the very text we were going to need today. I had trouble writing in typescript so I reverted to javascript. This was a mistake as it was much harder to integrate the code without types associated with each function argument and return. In my pull request I proved that it worked. But I didn't show how it worked. Today rebuilding the call sequence in the new application lead to many type and runtime errors that could have been avoided. [https://github.com/joshuabenuck/seran-prog21/pull/2 github]\n\nFrom this experience I conclude, for a page of code it might be faster to write it in javascript, but it will be faster to move a page of code to a new environment if I bothered to wrap up my coding work by adding types before sharing."
+      },
+      "date": 1585849015454
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a10d14499d64d0a8"
+      },
+      "id": "a10d14499d64d0a8",
+      "type": "add",
+      "after": "ee45bf41c429f65c",
+      "date": 1585848956612
+    },
+    {
+      "type": "add",
+      "id": "ee45bf41c429f65c",
+      "item": {
+        "type": "paragraph",
+        "id": "ee45bf41c429f65c",
+        "text": "Here I quote offline conversation."
+      },
+      "after": "6a3fabd867514c7c",
+      "date": 1585848929503
+    },
+    {
+      "id": "6a3fabd867514c7c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "6a3fabd867514c7c",
+        "text": "We deviated from our intended method by writing the parser using deno to evaluate a script full of console.log, rather than using wiki pages for the same purpose. The typescript type unions of tag|text and tree|text proved challenging. "
+      },
+      "after": "78c5d7f81cf02aa6",
+      "date": 1585848668141
+    },
+    {
+      "type": "edit",
+      "id": "78c5d7f81cf02aa6",
+      "item": {
+        "type": "paragraph",
+        "id": "78c5d7f81cf02aa6",
+        "text": "All of our Seran outpost experiments teach about the tools and libraries preferred by deno. Here I report some ups and downs writing a parser in typescript and then not typescript and then in typescript again."
+      },
+      "date": 1585848656306
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "78c5d7f81cf02aa6"
+      },
+      "id": "78c5d7f81cf02aa6",
+      "type": "add",
+      "date": 1585848511256
+    },
+    {
+      "type": "create",
+      "item": {
+        "title": "Static Types for Parsers",
+        "story": []
+      },
+      "date": 1585848506551
+    },
+    {
+      "type": "edit",
+      "id": "78c5d7f81cf02aa6",
+      "item": {
+        "type": "paragraph",
+        "id": "78c5d7f81cf02aa6",
+        "text": "All of our [[Seran]] [[outpost]] experiments teach about the tools and libraries preferred by [[deno]]. "
+      },
+      "date": 1631788053942
+    },
+    {
+      "type": "edit",
+      "id": "78c5d7f81cf02aa6",
+      "item": {
+        "type": "paragraph",
+        "id": "78c5d7f81cf02aa6",
+        "text": "All of our [[Seran]] [[outpost]] experiments teach about the tools and libraries preferred by [[deno]]. "
+      },
+      "date": 1631788068547
+    },
+    {
+      "type": "fork",
+      "date": 1631788074382
+    },
+    {
+      "type": "add",
+      "id": "d00ce78ca46a81e5",
+      "item": {
+        "type": "paragraph",
+        "id": "d00ce78ca46a81e5",
+        "text": "Here I report some ups and downs writing a parser in typescript and then not typescript and then in typescript again."
+      },
+      "after": "78c5d7f81cf02aa6",
+      "date": 1631788074798
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "169c9a9a2d625a44"
+      },
+      "id": "169c9a9a2d625a44",
+      "type": "add",
+      "after": "35544c296e33f940",
+      "date": 1631788075334
+    },
+    {
+      "type": "edit",
+      "id": "169c9a9a2d625a44",
+      "item": {
+        "type": "pagefold",
+        "id": "169c9a9a2d625a44",
+        "text": "~"
+      },
+      "date": 1631788084892
+    },
+    {
+      "id": "169c9a9a2d625a44",
+      "type": "move",
+      "order": [
+        "78c5d7f81cf02aa6",
+        "169c9a9a2d625a44",
+        "d00ce78ca46a81e5",
+        "a7e2e0b69851bde0",
+        "6a3fabd867514c7c",
+        "ee45bf41c429f65c",
+        "a10d14499d64d0a8",
+        "a5a2a91a10a6c975",
+        "cc1a172c5f8bd905",
+        "9696f6b21ed4506b",
+        "e961404ef09b81a6",
+        "9e72e06ee947a499",
+        "2a928f03eaf11388",
+        "41bf25f22618e94e",
+        "6ec8ffacd205798c",
+        "95f4b7475d911c66",
+        "b3b06edffdab4eb5",
+        "8a8b2b97ac6b6c64",
+        "346d0f15deda2834",
+        "bdb9fb94d2b77282",
+        "bd69e9c48eda6d20",
+        "51a756a1332ded56",
+        "6eb99be2cc67c6cb",
+        "35544c296e33f940"
+      ],
+      "date": 1631788092806
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5ba4417aa4d1588e"
+      },
+      "id": "5ba4417aa4d1588e",
+      "type": "add",
+      "after": "35544c296e33f940",
+      "date": 1631788097229
+    },
+    {
+      "type": "edit",
+      "id": "5ba4417aa4d1588e",
+      "item": {
+        "type": "markdown",
+        "id": "5ba4417aa4d1588e",
+        "text": "What is [[Seran]]? -- [[Ralf Barkow]]\n"
+      },
+      "date": 1631788125827
+    },
+    {
+      "id": "5ba4417aa4d1588e",
+      "type": "move",
+      "order": [
+        "78c5d7f81cf02aa6",
+        "169c9a9a2d625a44",
+        "5ba4417aa4d1588e",
+        "d00ce78ca46a81e5",
+        "a7e2e0b69851bde0",
+        "6a3fabd867514c7c",
+        "ee45bf41c429f65c",
+        "a10d14499d64d0a8",
+        "a5a2a91a10a6c975",
+        "cc1a172c5f8bd905",
+        "9696f6b21ed4506b",
+        "e961404ef09b81a6",
+        "9e72e06ee947a499",
+        "2a928f03eaf11388",
+        "41bf25f22618e94e",
+        "6ec8ffacd205798c",
+        "95f4b7475d911c66",
+        "b3b06edffdab4eb5",
+        "8a8b2b97ac6b6c64",
+        "346d0f15deda2834",
+        "bdb9fb94d2b77282",
+        "bd69e9c48eda6d20",
+        "51a756a1332ded56",
+        "6eb99be2cc67c6cb",
+        "35544c296e33f940"
+      ],
+      "date": 1631788133353
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7a1c0466d0cec329"
+      },
+      "id": "7a1c0466d0cec329",
+      "type": "add",
+      "after": "35544c296e33f940",
+      "date": 1631788137901
+    },
+    {
+      "type": "edit",
+      "id": "7a1c0466d0cec329",
+      "item": {
+        "type": "pagefold",
+        "id": "7a1c0466d0cec329",
+        "text": "."
+      },
+      "date": 1631788141625
+    },
+    {
+      "id": "7a1c0466d0cec329",
+      "type": "move",
+      "order": [
+        "78c5d7f81cf02aa6",
+        "169c9a9a2d625a44",
+        "5ba4417aa4d1588e",
+        "7a1c0466d0cec329",
+        "d00ce78ca46a81e5",
+        "a7e2e0b69851bde0",
+        "6a3fabd867514c7c",
+        "ee45bf41c429f65c",
+        "a10d14499d64d0a8",
+        "a5a2a91a10a6c975",
+        "cc1a172c5f8bd905",
+        "9696f6b21ed4506b",
+        "e961404ef09b81a6",
+        "9e72e06ee947a499",
+        "2a928f03eaf11388",
+        "41bf25f22618e94e",
+        "6ec8ffacd205798c",
+        "95f4b7475d911c66",
+        "b3b06edffdab4eb5",
+        "8a8b2b97ac6b6c64",
+        "346d0f15deda2834",
+        "bdb9fb94d2b77282",
+        "bd69e9c48eda6d20",
+        "51a756a1332ded56",
+        "6eb99be2cc67c6cb",
+        "35544c296e33f940"
+      ],
+      "date": 1631788149010
+    },
+    {
+      "type": "edit",
+      "id": "d00ce78ca46a81e5",
+      "item": {
+        "type": "paragraph",
+        "id": "d00ce78ca46a81e5",
+        "text": "Here I report some ups and downs writing a [[parser]] in typescript and then not typescript and then in typescript again."
+      },
+      "date": 1631788172415
+    }
+  ]
+}

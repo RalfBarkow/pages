@@ -1,0 +1,1194 @@
+{
+  "title": "Enrich Arrows SVG",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "3fbc89d8f402aaa1",
+      "text": "We have enjoyed constructing graphs with Neo4J's Arrows app. Here we offer a workflow to enrich the SVG export from Arrows with wiki internal links. The combination makes for a fairly nice concept mapping tool. [https://arrows.app app]"
+    },
+    {
+      "type": "paragraph",
+      "id": "b092d232e1985be5",
+      "text": "Draw the diagram in Arrows. Click the \"Download/Export\" button. Choose the SVG format. Copy the download link."
+    },
+    {
+      "type": "frame",
+      "id": "6cf52409eec3988c",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/esm.html\nHEIGHT 55"
+    },
+    {
+      "type": "paragraph",
+      "id": "afc8ea82895f2bde",
+      "text": "Arrows encodes the SVG into a data:image/svg+xml,base64 link. We can use that link directly in this form. It should also work fine if you copy a URL to an asset."
+    },
+    {
+      "type": "grep",
+      "id": "f03d0d183108943b",
+      "text": "ITEM html\nTEXT .*<svg.*"
+    },
+    {
+      "type": "pagefold",
+      "id": "633c919f2920c76a",
+      "text": "."
+    },
+    {
+      "type": "paragraph",
+      "id": "0d96d9bcf0dcf594",
+      "text": "We annotate the code which enriches the Arrows SVG."
+    },
+    {
+      "type": "paragraph",
+      "id": "dfddd2d989966f0c",
+      "text": "Import [[Frame Integration Promises]] and setup DOM helpers."
+    },
+    {
+      "type": "code",
+      "id": "5cbd82e529085e9a",
+      "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => \n  Array.from(el.querySelectorAll(s))"
+    },
+    {
+      "type": "paragraph",
+      "id": "06e0a883fec35e19",
+      "text": "Given an Arrows SVG export URL, get the SVG DOM. We also remove the height and width attributes so browsers will scale the image to fit."
+    },
+    {
+      "type": "code",
+      "id": "f58fa4daedf47228",
+      "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  return svg\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "e7fffc816ad4a2ab",
+      "text": "Here is where we encode our understanding of the DOM structure of Arrows SVG export diagrams. We wrap specific elements in the document with annotated anchor tags that our HTML plugin interprets as internal links."
+    },
+    {
+      "type": "code",
+      "id": "f600e20860690557",
+      "text": "function enrich(svg) {\n  $$('g > rect:not([stroke=\"none\"])+text', svg)\n    .forEach(wrapLabel)\n  $$('.relationship g > rect+text', svg)\n    .forEach(wrapRelationship)\n  $$('.node', svg)\n    .forEach(wrapNode)\n}"
+    },
+    {
+      "type": "code",
+      "id": "09044e5fea53bd73",
+      "text": "function wrapLabel(text) {\n  let title = text.textContent.trim()\n  let anchor = anchorFor(`Label: ${title}`)\n  let g = text.closest(\"g\")\n  g.parentElement.appendChild(anchor)\n  g.parentElement.removeChild(g)\n  anchor.appendChild(g)\n}"
+    },
+    {
+      "type": "code",
+      "id": "e8a0128707ad685a",
+      "text": "function wrapRelationship(text) {\n  let title = text.textContent.trim()\n  let anchor = anchorFor(title)\n  let g = text.closest(\".relationship\")\n  g.parentElement.appendChild(anchor)\n  g.parentElement.removeChild(g)\n  anchor.appendChild(g)\n}\n"
+    },
+    {
+      "type": "code",
+      "id": "dff87e6623733fff",
+      "text": "function wrapNode(node) {\n  let title = $$(\"g > text\", node).filter(text => \n      !$(\"rect\", text.parentElement.parentElement))\n    .map(text => text.textContent.trim())\n    .join(\" \")\n  let anchor = anchorFor(title)\n  node.parentElement.appendChild(anchor)\n  node.parentElement.removeChild(node)\n  anchor.appendChild(node)\n}"
+    },
+    {
+      "type": "code",
+      "id": "90c74c2554acf86a",
+      "text": "function anchorFor(title) {\n  let anchor = document.createElementNS(\n    \"http://www.w3.org/2000/svg\", \"a\")\n  anchor.setAttribute(\"class\", \"internal\")\n  anchor.setAttribute(\"data-title\", title)\n  anchor.setAttribute(\"href\",\n    `/${asSlug(title)}.html`)\n  return anchor\n}"
+    },
+    {
+      "type": "code",
+      "id": "78d6e5d07027c7f5",
+      "text": "const asSlug = title => title\n  .replace(/\\s/g, '-')\n  .replace(/[^A-Za-z0-9-]/g, '')\n  .toLowerCase()\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "97a2cf7d2ec8212f",
+      "text": "Emit the HTML form."
+    },
+    {
+      "type": "code",
+      "id": "532408a599a375b7",
+      "text": "export async function emit(el) {\n  el.innerHTML = `\n<style>input {width: 100%; display: block;}</style>\n<input name=\"title\" type=\"text\"\n  placeholder=\"page title\">\n<input name=\"source\" type=\"text\"\n  placeholder=\"URL to svg file\">\n<button>Create</button>\n`\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "22cc8700998c384d",
+      "text": "Bind a click handler to the form button."
+    },
+    {
+      "type": "code",
+      "id": "f3292e6fcac877b9",
+      "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await getSvg(url)\n    enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this graph.\"},\n        {type:\"html\", text: svg.outerHTML}\n      ]\n    }, e.shiftKey)\n  }\n}"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Enrich Arrows SVG",
+        "story": []
+      },
+      "date": 1641441483410
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3fbc89d8f402aaa1"
+      },
+      "id": "3fbc89d8f402aaa1",
+      "type": "add",
+      "date": 1641441510477
+    },
+    {
+      "type": "edit",
+      "id": "3fbc89d8f402aaa1",
+      "item": {
+        "type": "paragraph",
+        "id": "3fbc89d8f402aaa1",
+        "text": "We have been enjoying constructing graphs with Neo4J's Arrows app. Here we offer a workflow to enrich the SVG export from Arrows with wiki internal links. [https:// app]"
+      },
+      "date": 1641441601411
+    },
+    {
+      "type": "edit",
+      "id": "3fbc89d8f402aaa1",
+      "item": {
+        "type": "paragraph",
+        "id": "3fbc89d8f402aaa1",
+        "text": "We have been enjoying constructing graphs with Neo4J's Arrows app. Here we offer a workflow to enrich the SVG export from Arrows with wiki internal links. [https://arrows.app app]"
+      },
+      "date": 1641441617743
+    },
+    {
+      "id": "6cf52409eec3988c",
+      "type": "add",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/importjs.html\nHEIGHT 75"
+      },
+      "after": "3fbc89d8f402aaa1",
+      "date": 1641441730425
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "532408a599a375b7"
+      },
+      "id": "532408a599a375b7",
+      "type": "add",
+      "after": "6cf52409eec3988c",
+      "date": 1641441792499
+    },
+    {
+      "type": "edit",
+      "id": "532408a599a375b7",
+      "item": {
+        "type": "code",
+        "id": "532408a599a375b7",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<input name=\"title\" type=\"text\" placeholder=\"page title\" style=\"width: 100%\"></br>\n<input name=\"source\" type=\"text\" placeholder=\"URL to svg file\" style=\"width:100%\"><br>\n<button>Create</button>\n`\n}\n"
+      },
+      "date": 1641441889795
+    },
+    {
+      "id": "532408a599a375b7",
+      "type": "move",
+      "order": [
+        "3fbc89d8f402aaa1",
+        "532408a599a375b7",
+        "6cf52409eec3988c"
+      ],
+      "date": 1641441896046
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/esm.html\nHEIGHT 75"
+      },
+      "date": 1641442211799
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f3292e6fcac877b9"
+      },
+      "id": "f3292e6fcac877b9",
+      "type": "add",
+      "after": "6cf52409eec3988c",
+      "date": 1641442616590
+    },
+    {
+      "id": "f3292e6fcac877b9",
+      "type": "move",
+      "order": [
+        "3fbc89d8f402aaa1",
+        "532408a599a375b7",
+        "f3292e6fcac877b9",
+        "6cf52409eec3988c"
+      ],
+      "date": 1641442619463
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"input[name=title]\").value.trim() ||\n\n    let url = $(\"input[name=source]\").value.trim()\n    \n  }\n}"
+      },
+      "date": 1641443012679
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    \n  }\n}"
+      },
+      "date": 1641443075495
+    },
+    {
+      "type": "edit",
+      "id": "3fbc89d8f402aaa1",
+      "item": {
+        "type": "paragraph",
+        "id": "3fbc89d8f402aaa1",
+        "text": "We have enjoyed constructing graphs with Neo4J's Arrows app. Here we offer a workflow to enrich the SVG export from Arrows with wiki internal links. The combination makes for a fairly nice concept mapping tool. [https://arrows.app app]"
+      },
+      "date": 1641443146926
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "import * as frame from \"/assets/v1/frame.js\"\n\nexport async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    \n  }\n}"
+      },
+      "date": 1641443736799
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "import * as frame from \"/assets/v1/frame.js\"\n\nexport async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    frame.open({\n      title\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1641443808529
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "import * as frame from \"//wiki.dbbs.co/assets/v1/frame.js\"\n\nexport async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    frame.open({\n      title\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1641443891285
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\n\nexport async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    frame.open({\n      title\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1641443912803
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\n\nexport async function bind(el) {\n  $ = document.querySelector\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    frame.open({\n      title\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1641443954503
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = document.querySelector\nconst $$ = document.querySelectorAll\n\nexport async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    frame.open({\n      title\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1641443978307
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = document.querySelector.bind(document)\nconst $$ = document.querySelectorAll.bind(document)\n\nexport async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    frame.open({\n      title\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1641444001674
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = document.querySelector.bind(document)\nconst $$ = document.querySelectorAll.bind(document)\n\nexport async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    frame.open({\n      title, story: []\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1641444032280
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    frame.open({\n      title, story: []\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1641444077593
+    },
+    {
+      "type": "edit",
+      "id": "532408a599a375b7",
+      "item": {
+        "type": "code",
+        "id": "532408a599a375b7",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = document.querySelector.bind(document)\nconst $$ = document.querySelectorAll.bind(document)\n\nexport async function emit(el) {\n  el.innerHTML = `\n<input name=\"title\" type=\"text\" placeholder=\"page title\" style=\"width: 100%\"></br>\n<input name=\"source\" type=\"text\" placeholder=\"URL to svg file\" style=\"width:100%\"><br>\n<button>Create</button>\n`\n}\n"
+      },
+      "date": 1641444082999
+    },
+    {
+      "type": "edit",
+      "id": "532408a599a375b7",
+      "item": {
+        "type": "code",
+        "id": "532408a599a375b7",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => el.querySelectorAll(s)\n\nexport async function emit(el) {\n  el.innerHTML = `\n<input name=\"title\" type=\"text\" placeholder=\"page title\" style=\"width: 100%\"></br>\n<input name=\"source\" type=\"text\" placeholder=\"URL to svg file\" style=\"width:100%\"><br>\n<button>Create</button>\n`\n}\n"
+      },
+      "date": 1641444283551
+    },
+    {
+      "type": "edit",
+      "id": "532408a599a375b7",
+      "item": {
+        "type": "code",
+        "id": "532408a599a375b7",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => el.querySelectorAll(s)\n\nexport async function emit(el) {\n  el.innerHTML = `\n<style>input {width: 100%; display: block;}\n<input name=\"title\" type=\"text\"\n  placeholder=\"page title\">\n<input name=\"source\" type=\"text\"\n  placeholder=\"URL to svg file\">\n<button>Create</button>\n`\n}\n"
+      },
+      "date": 1641444555373
+    },
+    {
+      "type": "edit",
+      "id": "532408a599a375b7",
+      "item": {
+        "type": "code",
+        "id": "532408a599a375b7",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => el.querySelectorAll(s)\n\nexport async function emit(el) {\n  el.innerHTML = `\n<style>input {width: 100%; display: block;}</style>\n<input name=\"title\" type=\"text\"\n  placeholder=\"page title\">\n<input name=\"source\" type=\"text\"\n  placeholder=\"URL to svg file\">\n<button>Create</button>\n`\n}\n"
+      },
+      "date": 1641444598891
+    },
+    {
+      "type": "edit",
+      "id": "532408a599a375b7",
+      "item": {
+        "type": "code",
+        "id": "532408a599a375b7",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<style>input {width: 100%; display: block;}</style>\n<input name=\"title\" type=\"text\"\n  placeholder=\"page title\">\n<input name=\"source\" type=\"text\"\n  placeholder=\"URL to svg file\">\n<button>Create</button>\n`\n}\n"
+      },
+      "date": 1641444645824
+    },
+    {
+      "type": "add",
+      "id": "dfddd2d989966f0c",
+      "item": {
+        "type": "paragraph",
+        "id": "dfddd2d989966f0c",
+        "text": "Import frame helpers from [[]]."
+      },
+      "after": "3fbc89d8f402aaa1",
+      "date": 1641444707406
+    },
+    {
+      "type": "add",
+      "id": "5cbd82e529085e9a",
+      "item": {
+        "type": "factory",
+        "id": "5cbd82e529085e9a",
+        "text": "//code"
+      },
+      "after": "dfddd2d989966f0c",
+      "date": 1641444713216
+    },
+    {
+      "type": "edit",
+      "id": "5cbd82e529085e9a",
+      "item": {
+        "type": "code",
+        "id": "5cbd82e529085e9a",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => el.querySelectorAll(s)"
+      },
+      "date": 1641444721198
+    },
+    {
+      "type": "edit",
+      "id": "dfddd2d989966f0c",
+      "item": {
+        "type": "paragraph",
+        "id": "dfddd2d989966f0c",
+        "text": "Import frame helpers and setup DOM helpers. See [[Frame Integration Promises]]."
+      },
+      "date": 1641444789876
+    },
+    {
+      "type": "edit",
+      "id": "dfddd2d989966f0c",
+      "item": {
+        "type": "paragraph",
+        "id": "dfddd2d989966f0c",
+        "text": "Import [[Frame Integration Promises]] and setup DOM helpers."
+      },
+      "date": 1641444814774
+    },
+    {
+      "type": "add",
+      "id": "97a2cf7d2ec8212f",
+      "item": {
+        "type": "paragraph",
+        "id": "97a2cf7d2ec8212f",
+        "text": "Emit the HTML form."
+      },
+      "after": "dfddd2d989966f0c",
+      "date": 1641444850111
+    },
+    {
+      "id": "97a2cf7d2ec8212f",
+      "type": "move",
+      "order": [
+        "3fbc89d8f402aaa1",
+        "dfddd2d989966f0c",
+        "5cbd82e529085e9a",
+        "97a2cf7d2ec8212f",
+        "532408a599a375b7",
+        "f3292e6fcac877b9",
+        "6cf52409eec3988c"
+      ],
+      "date": 1641444853091
+    },
+    {
+      "type": "add",
+      "id": "22cc8700998c384d",
+      "item": {
+        "type": "paragraph",
+        "id": "22cc8700998c384d",
+        "text": "Bind a click handler to the form button."
+      },
+      "after": "97a2cf7d2ec8212f",
+      "date": 1641444878635
+    },
+    {
+      "id": "22cc8700998c384d",
+      "type": "move",
+      "order": [
+        "3fbc89d8f402aaa1",
+        "dfddd2d989966f0c",
+        "5cbd82e529085e9a",
+        "97a2cf7d2ec8212f",
+        "532408a599a375b7",
+        "22cc8700998c384d",
+        "f3292e6fcac877b9",
+        "6cf52409eec3988c"
+      ],
+      "date": 1641444881082
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await arrows.fetch(url)\n    await arrows.enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this graph.\"},\n        {type:\"html\", text: svg}\n      ]\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1641445059160
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await getSvg(url)\n    await enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this graph.\"},\n        {type:\"html\", text: svg}\n      ]\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1641445862237
+    },
+    {
+      "type": "add",
+      "id": "06e0a883fec35e19",
+      "item": {
+        "type": "paragraph",
+        "id": "06e0a883fec35e19",
+        "text": "Given an Arrows SVG export URL, get the SVG DOM."
+      },
+      "after": "5cbd82e529085e9a",
+      "date": 1641445924861
+    },
+    {
+      "type": "add",
+      "id": "f58fa4daedf47228",
+      "item": {
+        "type": "factory",
+        "id": "f58fa4daedf47228",
+        "text": "//code"
+      },
+      "after": "06e0a883fec35e19",
+      "date": 1641445926743
+    },
+    {
+      "type": "edit",
+      "id": "f58fa4daedf47228",
+      "item": {
+        "type": "code",
+        "id": "f58fa4daedf47228",
+        "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let svg = new DOMParser.\n}"
+      },
+      "date": 1641445985773
+    },
+    {
+      "type": "edit",
+      "id": "f58fa4daedf47228",
+      "item": {
+        "type": "code",
+        "id": "f58fa4daedf47228",
+        "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  return svg\n}"
+      },
+      "date": 1641446050531
+    },
+    {
+      "type": "edit",
+      "id": "06e0a883fec35e19",
+      "item": {
+        "type": "paragraph",
+        "id": "06e0a883fec35e19",
+        "text": "Given an Arrows SVG export URL, get the SVG DOM. We also remove the height and width attributes so browsers will scale the image to fit."
+      },
+      "date": 1641446298541
+    },
+    {
+      "type": "add",
+      "id": "e7fffc816ad4a2ab",
+      "item": {
+        "type": "paragraph",
+        "id": "e7fffc816ad4a2ab",
+        "text": "Here is where we encode our understanding of the DOM structure of Arrows SVG export diagrams. We wrap specific elements in the document with annotated anchor tags that our HTML plugin interprets as internal links."
+      },
+      "after": "f58fa4daedf47228",
+      "date": 1641446425569
+    },
+    {
+      "type": "add",
+      "id": "f600e20860690557",
+      "item": {
+        "type": "factory",
+        "id": "f600e20860690557",
+        "text": "//code"
+      },
+      "after": "e7fffc816ad4a2ab",
+      "date": 1641446427806
+    },
+    {
+      "type": "edit",
+      "id": "f600e20860690557",
+      "item": {
+        "type": "code",
+        "id": "f600e20860690557",
+        "text": "async function enrich(svg) {\n\n}"
+      },
+      "date": 1641446445930
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await getSvg(url)\n    await enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this graph.\"},\n        {type:\"html\", text: svg.outerHTML}\n      ]\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1641446653006
+    },
+    {
+      "type": "edit",
+      "id": "f600e20860690557",
+      "item": {
+        "type": "code",
+        "id": "f600e20860690557",
+        "text": "async function enrich(svg) {\n  \n}"
+      },
+      "date": 1641447847143
+    },
+    {
+      "type": "edit",
+      "id": "f600e20860690557",
+      "item": {
+        "type": "code",
+        "id": "f600e20860690557",
+        "text": "async function enrich(svg) {\n  $$('g > rect:not([stroke=\"none\"])+text')\n    .map(txt => txt.parentElement)\n    .forEach(wrapAnchor(\"\"))\n}"
+      },
+      "date": 1641448019297
+    },
+    {
+      "type": "edit",
+      "id": "f600e20860690557",
+      "item": {
+        "type": "code",
+        "id": "f600e20860690557",
+        "text": "async function enrich(svg) {\n  $$('g > rect:not([stroke=\"none\"])+text')\n    .map(txt => txt.parentElement)\n    .forEach(wrapAnchor(\"label\"))\n  \n}"
+      },
+      "date": 1641448074153
+    },
+    {
+      "type": "edit",
+      "id": "f600e20860690557",
+      "item": {
+        "type": "code",
+        "id": "f600e20860690557",
+        "text": "async function enrich(svg) {\n  $$('g > rect:not([stroke=\"none\"])+text')\n    .map(txt => txt.parentElement)\n    .forEach(wrapLabel)\n  \n}"
+      },
+      "date": 1641448364915
+    },
+    {
+      "type": "edit",
+      "id": "f600e20860690557",
+      "item": {
+        "type": "code",
+        "id": "f600e20860690557",
+        "text": "async function enrich(svg) {\n  $$('g > rect:not([stroke=\"none\"])+text')\n    .forEach(wrapLabel)\n  $$('.relationship g > rect+text')\n    .forEach(wrapRelationship)\n  \n}"
+      },
+      "date": 1641448453143
+    },
+    {
+      "type": "edit",
+      "id": "f600e20860690557",
+      "item": {
+        "type": "code",
+        "id": "f600e20860690557",
+        "text": "async function enrich(svg) {\n  $$('g > rect:not([stroke=\"none\"])+text')\n    .forEach(wrapLabel)\n  $$('.relationship g > rect+text')\n    .forEach(wrapRelationship)\n  $$('.node')\n    .forEach(wrapNode)\n}"
+      },
+      "date": 1641449333048
+    },
+    {
+      "type": "edit",
+      "id": "f600e20860690557",
+      "item": {
+        "type": "code",
+        "id": "f600e20860690557",
+        "text": "function enrich(svg) {\n  $$('g > rect:not([stroke=\"none\"])+text')\n    .forEach(wrapLabel)\n  $$('.relationship g > rect+text')\n    .forEach(wrapRelationship)\n  $$('.node')\n    .forEach(wrapNode)\n}"
+      },
+      "date": 1641449355368
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await getSvg(url)\n    enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this graph.\"},\n        {type:\"html\", text: svg.outerHTML}\n      ]\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1641449364224
+    },
+    {
+      "type": "add",
+      "id": "09044e5fea53bd73",
+      "item": {
+        "type": "factory",
+        "id": "09044e5fea53bd73",
+        "text": "//code"
+      },
+      "after": "f600e20860690557",
+      "date": 1641449377060
+    },
+    {
+      "type": "edit",
+      "id": "09044e5fea53bd73",
+      "item": {
+        "type": "code",
+        "id": "09044e5fea53bd73",
+        "text": "function wrapLabel(text) {\n  let title = text.textContent.trim()\n  let a = document.createElement(\"a\")\n  \n  text.closest(\"g\")\n}"
+      },
+      "date": 1641449514676
+    },
+    {
+      "type": "edit",
+      "id": "09044e5fea53bd73",
+      "item": {
+        "type": "code",
+        "id": "09044e5fea53bd73",
+        "text": "function wrapLabel(text) {\n  let title = text.textContent.trim()\n  let anchor = document.createElementNS(\n    \"http://www.w3.org/2000/svg\", \"a\")\n  let g = text.closest(\"g\")\n  g.parentElement.appendChild(anchor)\n  g.parentElement.removeChild(g)\n  anchor.appendChild(g)\n}"
+      },
+      "date": 1641449695028
+    },
+    {
+      "type": "edit",
+      "id": "09044e5fea53bd73",
+      "item": {
+        "type": "code",
+        "id": "09044e5fea53bd73",
+        "text": "function wrapLabel(text) {\n  let title = text.textContent.trim()\n  let anchor = document.createElementNS(\n    \"http://www.w3.org/2000/svg\", \"a\")\n  anchor.setAttribute(\"class\", \"internal\")\n  anchor.setAttribute(\"data-title\", `Label: ${title}`)\n  anchor.setAttribute(\"href\", `/${slug(title)}.html`)\n  let g = text.closest(\"g\")\n  g.parentElement.appendChild(anchor)\n  g.parentElement.removeChild(g)\n  anchor.appendChild(g)\n}"
+      },
+      "date": 1641449885716
+    },
+    {
+      "type": "edit",
+      "id": "09044e5fea53bd73",
+      "item": {
+        "type": "code",
+        "id": "09044e5fea53bd73",
+        "text": "function wrapLabel(text) {\n  let title = text.textContent.trim()\n  let anchor = document.createElementNS(\n    \"http://www.w3.org/2000/svg\", \"a\")\n  anchor.setAttribute(\"class\", \"internal\")\n  anchor.setAttribute(\"data-title\",\n    `Label: ${title}`)\n  anchor.setAttribute(\"href\", `/${slug(title)}.html`)\n  let g = text.closest(\"g\")\n  g.parentElement.appendChild(anchor)\n  g.parentElement.removeChild(g)\n  anchor.appendChild(g)\n}"
+      },
+      "date": 1641449896479
+    },
+    {
+      "type": "add",
+      "id": "e8a0128707ad685a",
+      "item": {
+        "type": "factory",
+        "id": "e8a0128707ad685a",
+        "text": "//code"
+      },
+      "after": "09044e5fea53bd73",
+      "date": 1641449923737
+    },
+    {
+      "type": "edit",
+      "id": "e8a0128707ad685a",
+      "item": {
+        "type": "code",
+        "id": "e8a0128707ad685a",
+        "text": "function wrapRelationship(text) {}\n"
+      },
+      "date": 1641449966318
+    },
+    {
+      "type": "add",
+      "id": "dff87e6623733fff",
+      "item": {
+        "type": "factory",
+        "id": "dff87e6623733fff",
+        "text": "//code"
+      },
+      "after": "e8a0128707ad685a",
+      "date": 1641449973435
+    },
+    {
+      "type": "edit",
+      "id": "dff87e6623733fff",
+      "item": {
+        "type": "code",
+        "id": "dff87e6623733fff",
+        "text": "function wrapNode(node) {}"
+      },
+      "date": 1641449978798
+    },
+    {
+      "type": "edit",
+      "id": "09044e5fea53bd73",
+      "item": {
+        "type": "code",
+        "id": "09044e5fea53bd73",
+        "text": "function wrapLabel(text) {\n  let title = text.textContent.trim()\n  console.log(\"wrapLabel\", {text})\n  let anchor = document.createElementNS(\n    \"http://www.w3.org/2000/svg\", \"a\")\n  anchor.setAttribute(\"class\", \"internal\")\n  anchor.setAttribute(\"data-title\",\n    `Label: ${title}`)\n  anchor.setAttribute(\"href\", `/${slug(title)}.html`)\n  let g = text.closest(\"g\")\n  g.parentElement.appendChild(anchor)\n  g.parentElement.removeChild(g)\n  anchor.appendChild(g)\n}"
+      },
+      "date": 1641450160093
+    },
+    {
+      "type": "add",
+      "id": "78d6e5d07027c7f5",
+      "item": {
+        "type": "factory",
+        "id": "78d6e5d07027c7f5",
+        "text": "//code"
+      },
+      "after": "dff87e6623733fff",
+      "date": 1641450166555
+    },
+    {
+      "type": "edit",
+      "id": "78d6e5d07027c7f5",
+      "item": {
+        "type": "code",
+        "id": "78d6e5d07027c7f5",
+        "text": "function slug(title) {return title}"
+      },
+      "date": 1641450194729
+    },
+    {
+      "type": "edit",
+      "id": "f600e20860690557",
+      "item": {
+        "type": "code",
+        "id": "f600e20860690557",
+        "text": "function enrich(svg) {\n  $$('g > rect:not([stroke=\"none\"])+text', svg)\n    .forEach(wrapLabel)\n  $$('.relationship g > rect+text', svg)\n    .forEach(wrapRelationship)\n  $$('.node', svg)\n    .forEach(wrapNode)\n}"
+      },
+      "date": 1641450551683
+    },
+    {
+      "type": "edit",
+      "id": "09044e5fea53bd73",
+      "item": {
+        "type": "code",
+        "id": "09044e5fea53bd73",
+        "text": "function wrapLabel(text) {\n  let title = text.textContent.trim()\n  let anchor = document.createElementNS(\n    \"http://www.w3.org/2000/svg\", \"a\")\n  anchor.setAttribute(\"class\", \"internal\")\n  anchor.setAttribute(\"data-title\",\n    `Label: ${title}`)\n  anchor.setAttribute(\"href\", `/${slug(title)}.html`)\n  let g = text.closest(\"g\")\n  g.parentElement.appendChild(anchor)\n  g.parentElement.removeChild(g)\n  anchor.appendChild(g)\n}"
+      },
+      "date": 1641450636712
+    },
+    {
+      "type": "add",
+      "id": "90c74c2554acf86a",
+      "item": {
+        "type": "factory",
+        "id": "90c74c2554acf86a",
+        "text": "//code"
+      },
+      "after": "78d6e5d07027c7f5",
+      "date": 1641450645532
+    },
+    {
+      "type": "edit",
+      "id": "90c74c2554acf86a",
+      "item": {
+        "type": "code",
+        "id": "90c74c2554acf86a",
+        "text": "function anchor(title) {\n\n}"
+      },
+      "date": 1641450666852
+    },
+    {
+      "type": "edit",
+      "id": "90c74c2554acf86a",
+      "item": {
+        "type": "code",
+        "id": "90c74c2554acf86a",
+        "text": "function anchorFor(title) {\n  let anchor = document.createElementNS(\n    \"http://www.w3.org/2000/svg\", \"a\")\n  anchor.setAttribute(\"class\", \"internal\")\n  anchor.setAttribute(\"data-title\",\n    `Label: ${title}`)\n  anchor.setAttribute(\"href\", `/${slug(title)}.html`)\n  return anchor\n}"
+      },
+      "date": 1641450701163
+    },
+    {
+      "type": "edit",
+      "id": "78d6e5d07027c7f5",
+      "item": {
+        "type": "code",
+        "id": "78d6e5d07027c7f5",
+        "text": "const asSlug = title => title\n  .replace(/\\s/g, '-')\n  .replace(/[^A-Za-z0-9-]/g, '')\n  .toLowerCase()\n"
+      },
+      "date": 1641450969731
+    },
+    {
+      "id": "78d6e5d07027c7f5",
+      "type": "move",
+      "order": [
+        "3fbc89d8f402aaa1",
+        "dfddd2d989966f0c",
+        "5cbd82e529085e9a",
+        "06e0a883fec35e19",
+        "f58fa4daedf47228",
+        "e7fffc816ad4a2ab",
+        "f600e20860690557",
+        "09044e5fea53bd73",
+        "e8a0128707ad685a",
+        "dff87e6623733fff",
+        "90c74c2554acf86a",
+        "78d6e5d07027c7f5",
+        "97a2cf7d2ec8212f",
+        "532408a599a375b7",
+        "22cc8700998c384d",
+        "f3292e6fcac877b9",
+        "6cf52409eec3988c"
+      ],
+      "date": 1641450973207
+    },
+    {
+      "type": "edit",
+      "id": "90c74c2554acf86a",
+      "item": {
+        "type": "code",
+        "id": "90c74c2554acf86a",
+        "text": "function anchorFor(title) {\n  let anchor = document.createElementNS(\n    \"http://www.w3.org/2000/svg\", \"a\")\n  anchor.setAttribute(\"class\", \"internal\")\n  anchor.setAttribute(\"data-title\",\n    `Label: ${title}`)\n  anchor.setAttribute(\"href\",\n    `/${asSlug(title)}.html`)\n  return anchor\n}"
+      },
+      "date": 1641450992365
+    },
+    {
+      "type": "edit",
+      "id": "09044e5fea53bd73",
+      "item": {
+        "type": "code",
+        "id": "09044e5fea53bd73",
+        "text": "function wrapLabel(text) {\n  let title = text.textContent.trim()\n  let anchor = anchorFor(`Label: ${title}`)\n  let g = text.closest(\"g\")\n  g.parentElement.appendChild(anchor)\n  g.parentElement.removeChild(g)\n  anchor.appendChild(g)\n}"
+      },
+      "date": 1641451038204
+    },
+    {
+      "type": "edit",
+      "id": "e8a0128707ad685a",
+      "item": {
+        "type": "code",
+        "id": "e8a0128707ad685a",
+        "text": "function wrapRelationship(text) {\n  let title = text.textContent.trim()\n  let anchor = anchorFor(title)\n  let g = text.closest(\".relationship\")\n  g.parentElement.appendChild(anchor)\n  g.parentElement.removeChild(g)\n  anchor.appendChild(g)\n}\n"
+      },
+      "date": 1641451196556
+    },
+    {
+      "type": "edit",
+      "id": "90c74c2554acf86a",
+      "item": {
+        "type": "code",
+        "id": "90c74c2554acf86a",
+        "text": "function anchorFor(title) {\n  let anchor = document.createElementNS(\n    \"http://www.w3.org/2000/svg\", \"a\")\n  anchor.setAttribute(\"class\", \"internal\")\n  anchor.setAttribute(\"data-title\", title)\n  anchor.setAttribute(\"href\",\n    `/${asSlug(title)}.html`)\n  return anchor\n}"
+      },
+      "date": 1641451282497
+    },
+    {
+      "type": "edit",
+      "id": "dff87e6623733fff",
+      "item": {
+        "type": "code",
+        "id": "dff87e6623733fff",
+        "text": "function wrapNode(node) {\n  let title = $$(\"g > text\", node).filter(text => \n      !$(\"rect\", text.parentElement.parentElement))\n    .map(text => text.textContent.trim())\n    .join(\" \")\n  \n    \n}"
+      },
+      "date": 1641452068877
+    },
+    {
+      "type": "edit",
+      "id": "dff87e6623733fff",
+      "item": {
+        "type": "code",
+        "id": "dff87e6623733fff",
+        "text": "function wrapNode(node) {\n  let title = $$(\"g > text\", node).filter(text => \n      !$(\"rect\", text.parentElement.parentElement))\n    .map(text => text.textContent.trim())\n    .join(\" \")\n  let anchor = anchorFor(title)\n  node.parentElement.appendChild(anchor)\n  node.parentElement.removeChild(node)\n  anchor.appendChild(node)\n}"
+      },
+      "date": 1641452119424
+    },
+    {
+      "type": "edit",
+      "id": "5cbd82e529085e9a",
+      "item": {
+        "type": "code",
+        "id": "5cbd82e529085e9a",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => \n  Array.from(el.querySelectorAll(s))"
+      },
+      "date": 1641452153825
+    },
+    {
+      "id": "6cf52409eec3988c",
+      "type": "move",
+      "order": [
+        "3fbc89d8f402aaa1",
+        "6cf52409eec3988c",
+        "dfddd2d989966f0c",
+        "5cbd82e529085e9a",
+        "06e0a883fec35e19",
+        "f58fa4daedf47228",
+        "e7fffc816ad4a2ab",
+        "f600e20860690557",
+        "09044e5fea53bd73",
+        "e8a0128707ad685a",
+        "dff87e6623733fff",
+        "90c74c2554acf86a",
+        "78d6e5d07027c7f5",
+        "97a2cf7d2ec8212f",
+        "532408a599a375b7",
+        "22cc8700998c384d",
+        "f3292e6fcac877b9"
+      ],
+      "date": 1641452307750
+    },
+    {
+      "type": "add",
+      "id": "633c919f2920c76a",
+      "item": {
+        "type": "factory",
+        "id": "633c919f2920c76a",
+        "text": "..."
+      },
+      "after": "6cf52409eec3988c",
+      "date": 1641452718731
+    },
+    {
+      "type": "edit",
+      "id": "633c919f2920c76a",
+      "item": {
+        "type": "pagefold",
+        "id": "633c919f2920c76a",
+        "text": "."
+      },
+      "date": 1641452726337
+    },
+    {
+      "type": "add",
+      "id": "0d96d9bcf0dcf594",
+      "item": {
+        "type": "paragraph",
+        "id": "0d96d9bcf0dcf594",
+        "text": "We annotate the code which enriches the Arrows SVG."
+      },
+      "after": "633c919f2920c76a",
+      "date": 1641452794952
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await getSvg(url)\n    enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this graph.\"},\n        {type:\"html\", text: svg.outerHTML}\n      ]\n    }, e.shiftKey)\n  }\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1641452921771
+    },
+    {
+      "type": "add",
+      "id": "b092d232e1985be5",
+      "item": {
+        "type": "paragraph",
+        "id": "b092d232e1985be5",
+        "text": "Draw the diagram in Arrows. Click the \"Download/Export\" button. Choose the SVG format. Copy the download link. (Arrows uses a data:svg)"
+      },
+      "after": "3fbc89d8f402aaa1",
+      "date": 1641453082021
+    },
+    {
+      "type": "edit",
+      "id": "b092d232e1985be5",
+      "item": {
+        "type": "paragraph",
+        "id": "b092d232e1985be5",
+        "text": "Draw the diagram in Arrows. Click the \"Download/Export\" button. Choose the SVG format. Copy the download link."
+      },
+      "date": 1641453181069
+    },
+    {
+      "type": "add",
+      "id": "afc8ea82895f2bde",
+      "item": {
+        "type": "paragraph",
+        "id": "afc8ea82895f2bde",
+        "text": "Arrows encodes the SVG into a data:image/svg+xml,base64 link. We can use that link directly in this form. It should also work fine if you copy a URL to an asset."
+      },
+      "after": "b092d232e1985be5",
+      "date": 1641453255894
+    },
+    {
+      "id": "afc8ea82895f2bde",
+      "type": "move",
+      "order": [
+        "3fbc89d8f402aaa1",
+        "b092d232e1985be5",
+        "6cf52409eec3988c",
+        "afc8ea82895f2bde",
+        "633c919f2920c76a",
+        "0d96d9bcf0dcf594",
+        "dfddd2d989966f0c",
+        "5cbd82e529085e9a",
+        "06e0a883fec35e19",
+        "f58fa4daedf47228",
+        "e7fffc816ad4a2ab",
+        "f600e20860690557",
+        "09044e5fea53bd73",
+        "e8a0128707ad685a",
+        "dff87e6623733fff",
+        "90c74c2554acf86a",
+        "78d6e5d07027c7f5",
+        "97a2cf7d2ec8212f",
+        "532408a599a375b7",
+        "22cc8700998c384d",
+        "f3292e6fcac877b9"
+      ],
+      "date": 1641453259108
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await getSvg(url)\n    enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this graph.\"},\n        {type:\"html\", text: svg.outerHTML}\n      ]\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1641453274721
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/esm.html\nHEIGHT 60"
+      },
+      "date": 1641453286039
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/esm.html\nHEIGHT 50"
+      },
+      "date": 1641453293408
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/esm.html\nHEIGHT 55"
+      },
+      "date": 1641453301995
+    },
+    {
+      "type": "add",
+      "id": "f03d0d183108943b",
+      "item": {
+        "type": "factory",
+        "id": "f03d0d183108943b",
+        "text": "SEARCH"
+      },
+      "after": "afc8ea82895f2bde",
+      "date": 1648072888234
+    },
+    {
+      "type": "edit",
+      "id": "f03d0d183108943b",
+      "item": {
+        "type": "grep",
+        "id": "f03d0d183108943b",
+        "text": "ITEM html\nTEXT <svg"
+      },
+      "date": 1648072912117
+    },
+    {
+      "type": "edit",
+      "id": "f03d0d183108943b",
+      "item": {
+        "type": "grep",
+        "id": "f03d0d183108943b",
+        "text": "ITEM html\nTEXT svg"
+      },
+      "date": 1648072947208
+    },
+    {
+      "type": "edit",
+      "id": "f03d0d183108943b",
+      "item": {
+        "type": "grep",
+        "id": "f03d0d183108943b",
+        "text": "ITEM html\nTEXT .*<svg.*"
+      },
+      "date": 1648073033979
+    },
+    {
+      "type": "fork",
+      "site": "wiki.dbbs.co",
+      "date": 1651875196481
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/esm.html\nHEIGHT 55"
+      },
+      "date": 1651875214661
+    }
+  ]
+}

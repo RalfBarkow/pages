@@ -1,0 +1,1279 @@
+{
+  "title": "Live El Dorado Demo",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "a9b5a04bbdde23c2",
+      "text": "We consider how to build a read-only demo db from the manufactured data we collect in this site. [https://github.com/WardCunningham/context-map-data github]"
+    },
+    {
+      "type": "markdown",
+      "id": "c1921f2cf810b48c",
+      "text": "# Docker"
+    },
+    {
+      "type": "paragraph",
+      "id": "618af45bdfc0aa8a",
+      "text": "We'll start with a neo4j docker image, run a script to load the db with data from json files, then deploy the built db in a read-only configuration. [https://github.com/WardCunningham/context-db github]"
+    },
+    {
+      "type": "code",
+      "id": "7b9c24e60513f125",
+      "text": "FROM neo4j:3.1.5"
+    },
+    {
+      "type": "paragraph",
+      "id": "311f962ede254f87",
+      "text": "We'll install various tools."
+    },
+    {
+      "type": "code",
+      "id": "3aa779591f24afff",
+      "text": "RUN apk --no-cache upgrade && \\\n    apk --no-cache add curl jq\n\nWORKDIR /\nCOPY . /\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "d913bd8be62fd105",
+      "text": "We will fetch json and import it into the running db using a shell script load_json.sh which takes a cypher script as its second argument."
+    },
+    {
+      "type": "code",
+      "id": "cf9357520cec9195",
+      "text": "# Configure neo4j for read/write\nCOPY neo4j.write.conf /var/lib/neo4j/conf/neo4j.conf\n\nWORKDIR /var/lib/neo4j\nENV PATH /var/lib/neo4j/bin:$PATH\nRUN neo4j start && \\\n    sleep 15 && \\\n    cat /var/lib/neo4j/logs/neo4j.log && \\\n    echo ================================ && \\\n    sh /load_json.sh organization-chart && \\\n    sh /load_json.sh source-code-control && \\\n    sh /load_json.sh dataflow-diagram && \\\n    sh /load_json.sh service-traffic-reports && \\\n    echo ================================ && \\\n    neo4j stop\n\n# Configure neo4j for read-only\nCOPY neo4j.conf /var/lib/neo4j/conf/"
+    },
+    {
+      "type": "paragraph",
+      "id": "451c5e51ad321472",
+      "text": "We disable the cache for all steps when only those after reading from the network should be repeated. There is technique to achieve this. [https://stackoverflow.com/questions/35134713/disable-cache-for-specific-run-commands stackoverflow]"
+    },
+    {
+      "type": "markdown",
+      "id": "1ceff400857e7678",
+      "text": "# Cypher"
+    },
+    {
+      "type": "paragraph",
+      "id": "61588b8130062a60",
+      "text": "[[Michael Hunger]] shows that retrieving that data and ingesting it into Neo4j using Cypher is really straightforward and takes only little effort. [https://neo4j.com/blog/cypher-load-json-from-url/ post]"
+    },
+    {
+      "type": "paragraph",
+      "id": "045ffb70ebd16cab",
+      "text": "Note: Michael shows a lightweight solution using bash instead of ruby. This might be a better approach to copying bits into Neo4j."
+    },
+    {
+      "type": "paragraph",
+      "id": "1b2b086ae6b8dcb2",
+      "text": "Our json is typically organized as an array of objects. We'll fetch each file and then pass them to a cypher query that will process each object."
+    },
+    {
+      "type": "code",
+      "id": "89d6ab8cbeee3127",
+      "text": "WITH {json} as data\nUNWIND data as obj"
+    },
+    {
+      "type": "paragraph",
+      "id": "6a44b365f6742452",
+      "text": "Consider how this would work for the [[Organization Chart]]. Each object has a name, email and a manager identified by their email."
+    },
+    {
+      "type": "code",
+      "id": "c17f2e730436fb60",
+      "text": "MERGE (e:EMPLOYEE {email:obj.email})\nON CREATE SET e.name=obj.name\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "0666f788128f03d4",
+      "text": "A careful reading of create and merge documentation indicates there could be more clever coding. [https://neo4j.com/docs/developer-manual/current/cypher/clauses/create/#create-create-multiple-nodes-with-a-parameter-for-their-properties neo4j]"
+    },
+    {
+      "type": "code",
+      "id": "11c4d2e0329d8987",
+      "text": "UNWIND {json} as props\nCREATE (e:EMPLOYEE)\nSET e = props"
+    },
+    {
+      "type": "markdown",
+      "id": "76dc361f12575b9e",
+      "text": "# Wiki"
+    },
+    {
+      "type": "paragraph",
+      "id": "ba98c5b2bdf642d5",
+      "text": "We collect data from various sources to be transformed and loaded into the graph database. We've designed a specification suitable for validating uploads. Experience shows that sources change continually and such validation may be the only notice of significant changes."
+    },
+    {
+      "type": "paragraph",
+      "id": "6e53fe5bb559b0dd",
+      "text": "The Metamodel plugin could use the same specification to generate cypher commands for creating nodes and relations in the graph by the methods already shown.  In this way one wiki page provides both the data to be stored and the cypher to store it."
+    },
+    {
+      "type": "paragraph",
+      "id": "e0b002aea388672e",
+      "text": "For for now we add handcrafted cypher as code. Neo4j build from this information now available. [http://c02kn1ekfft3.local:7474 local]"
+    },
+    {
+      "type": "paragraph",
+      "id": "f18f80c227808c07",
+      "text": "With the domain specific part of this build reduced to a list of pages we now realize that is easily moved to a \"Charmed\" list in markdown that can be invoked through graph transport. [https://github.com/fedwiki/wiki-plugin-markdown/pull/18 github]"
+    },
+    {
+      "type": "markdown",
+      "graph": true,
+      "id": "5f4fe7b1ac0ae094",
+      "text": "- [[Organization Chart]]\n- [[Source Code Control]]\n- [[Dataflow Diagram]]\n- [[Service Traffic Reports]]"
+    },
+    {
+      "type": "transport",
+      "id": "a6a471c20b22704e",
+      "text": "GRAPH POST https://ward.local:3000/neo4j-build-run"
+    },
+    {
+      "type": "paragraph",
+      "id": "8c9259d4141d2fcb",
+      "text": "Handcrafting cypher can be error prone with error messages mixed in with all the other docker build noise. If handcrafting is to be the norm, we should make a Cypher plugin that at least validates the text. There are modules to help. [https://www.npmjs.com/package/cypher-parser npm]"
+    },
+    {
+      "type": "markdown",
+      "id": "622aa38e6321140c",
+      "text": "# Explain"
+    },
+    {
+      "type": "paragraph",
+      "id": "623a90479f51f617",
+      "text": "Our most recent load_json.sh script extracts more source information from the wiki page and passes it to cypher scripts as a second parameter, props, ready made for creating EXPLAIN nodes in the graph."
+    },
+    {
+      "type": "code",
+      "id": "fd981c2903c6c2f9",
+      "text": "create (s:EXPLAIN {props})"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Live El Dorado Demo",
+        "story": []
+      },
+      "date": 1541792818018
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a9b5a04bbdde23c2"
+      },
+      "id": "a9b5a04bbdde23c2",
+      "type": "add",
+      "date": 1541792820686
+    },
+    {
+      "type": "edit",
+      "id": "a9b5a04bbdde23c2",
+      "item": {
+        "type": "paragraph",
+        "id": "a9b5a04bbdde23c2",
+        "text": "We consider how to build a read-only demo db from the manufactured data we collect in this site."
+      },
+      "date": 1541792924813
+    },
+    {
+      "type": "add",
+      "id": "618af45bdfc0aa8a",
+      "item": {
+        "type": "paragraph",
+        "id": "618af45bdfc0aa8a",
+        "text": "We'll start with a neo4j docker image, run a script to load the db with data from json files, then deploy the built db in a read-only configuration."
+      },
+      "after": "a9b5a04bbdde23c2",
+      "date": 1541793186596
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7b9c24e60513f125"
+      },
+      "id": "7b9c24e60513f125",
+      "type": "add",
+      "after": "618af45bdfc0aa8a",
+      "date": 1541793409940
+    },
+    {
+      "type": "edit",
+      "id": "7b9c24e60513f125",
+      "item": {
+        "type": "code",
+        "id": "7b9c24e60513f125",
+        "text": "FROM neo4j:3.2.1\n\nENV BUILD_PKGS=\"curl build-base ruby-dev linux-headers readline-dev zlib-dev openssl-dev perl graphviz\" \\\n    SUPPORT_PKGS=\"bash openssh-client\"\n\nENV RBENV_ROOT /usr/local/rbenv\nENV PATH /usr/local/rbenv/shims:/usr/local/rbenv/bin:/var/lib/neo4j/bin:$PATH\n\nRUN apk --no-cache upgrade && \\\n    apk --no-cache add $BUILD_PKGS $SUPPORT_PKGS"
+      },
+      "date": 1541793420117
+    },
+    {
+      "type": "edit",
+      "id": "7b9c24e60513f125",
+      "item": {
+        "type": "code",
+        "id": "7b9c24e60513f125",
+        "text": "FROM neo4j:3.2.1\n\nENV BUILD_PKGS=\"curl build-base ruby-dev linux-headers readline-dev zlib-dev openssl-dev perl graphviz\" \\\n    SUPPORT_PKGS=\"bash openssh-client\"\n\nENV RBENV_ROOT /usr/local/rbenv\nENV PATH /usr/local/rbenv/shims:/usr/local/rbenv/bin:/var/lib/neo4j/bin:$PATH\n\nRUN apk --no-cache upgrade && \\\n    apk --no-cache add $BUILD_PKGS $SUPPORT_PKGS\n\nRUN mkdir -p /working/scripts\n\nWORKDIR /working\n\nCOPY scripts/try-ruby /working/scripts/\nCOPY .ruby-version /working/\n\nRUN /working/scripts/try-ruby"
+      },
+      "date": 1541793523704
+    },
+    {
+      "type": "edit",
+      "id": "7b9c24e60513f125",
+      "item": {
+        "type": "code",
+        "id": "7b9c24e60513f125",
+        "text": "FROM neo4j:3.2.1\n\nENV BUILD_PKGS=\"curl build-base ruby-dev linux-headers readline-dev zlib-dev openssl-dev perl graphviz\" \\\n    SUPPORT_PKGS=\"bash openssh-client\"\n\nENV RBENV_ROOT /usr/local/rbenv\nENV PATH /usr/local/rbenv/shims:/usr/local/rbenv/bin:/var/lib/neo4j/bin:$PATH\n\nRUN apk --no-cache upgrade && \\\n    apk --no-cache add $BUILD_PKGS $SUPPORT_PKGS\n\nRUN mkdir -p /working/scripts\n\nWORKDIR /working\n\nCOPY scripts/try-ruby /working/scripts/\nCOPY .ruby-version /working/\n\nRUN /working/scripts/try-ruby\n\n\nCOPY Gemfile* /working/\nRUN bundle install\n\nCOPY . /working"
+      },
+      "date": 1541793579302
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d913bd8be62fd105"
+      },
+      "id": "d913bd8be62fd105",
+      "type": "add",
+      "after": "7b9c24e60513f125",
+      "date": 1541793660129
+    },
+    {
+      "type": "edit",
+      "id": "d913bd8be62fd105",
+      "item": {
+        "type": "paragraph",
+        "id": "d913bd8be62fd105",
+        "text": "We'll mimic this production script that uses a bulk load of csv files. Instead we will fetch json and import these into the running db using a ruby script."
+      },
+      "date": 1541793769493
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "cf9357520cec9195"
+      },
+      "id": "cf9357520cec9195",
+      "type": "add",
+      "after": "d913bd8be62fd105",
+      "date": 1541793776621
+    },
+    {
+      "type": "edit",
+      "id": "cf9357520cec9195",
+      "item": {
+        "type": "paragraph",
+        "id": "cf9357520cec9195",
+        "text": "RUN sh /working/scripts/create-db.sh && \\\n    mkdir databases && \\\n    mv new.graphdb ./databases/graph.db\n\n# Put configuration in place\nCOPY neo4j.write.conf /var/lib/neo4j/conf/neo4j.conf\n\nWORKDIR /var/lib/neo4j\n\nRUN neo4j start && \\\n    sleep 30 && \\\n    ruby /working/lib/infer-relations.rb && \\\n    # ruby /working/lib/smoketest.rb && \\\n    neo4j stop\n\n# Put configuration in place\nCOPY neo4j.conf /var/lib/neo4j/conf/\n"
+      },
+      "date": 1541793805086
+    },
+    {
+      "type": "edit",
+      "id": "cf9357520cec9195",
+      "item": {
+        "type": "code",
+        "id": "cf9357520cec9195",
+        "text": "RUN sh /working/scripts/create-db.sh && \\\n    mkdir databases && \\\n    mv new.graphdb ./databases/graph.db\n\n# Put configuration in place\nCOPY neo4j.write.conf /var/lib/neo4j/conf/neo4j.conf\n\nWORKDIR /var/lib/neo4j\n\nRUN neo4j start && \\\n    sleep 30 && \\\n    ruby /working/lib/infer-relations.rb && \\\n    ruby /working/lib/smoketest.rb && \\\n    neo4j stop\n\n# Put configuration in place\nCOPY neo4j.conf /var/lib/neo4j/conf/\n"
+      },
+      "date": 1541793833235
+    },
+    {
+      "type": "edit",
+      "id": "d913bd8be62fd105",
+      "item": {
+        "type": "paragraph",
+        "id": "d913bd8be62fd105",
+        "text": "We'll mimic this production script that uses a bulk load of csv files. Instead we will fetch json and import these into the running db using a ruby script as we have here with infer-relations.rb and smoketest.rb."
+      },
+      "date": 1541793867920
+    },
+    {
+      "type": "edit",
+      "id": "7b9c24e60513f125",
+      "item": {
+        "type": "code",
+        "id": "7b9c24e60513f125",
+        "text": "FROM neo4j:3.2.1"
+      },
+      "date": 1541793906382
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "311f962ede254f87"
+      },
+      "id": "311f962ede254f87",
+      "type": "add",
+      "after": "cf9357520cec9195",
+      "date": 1541793912148
+    },
+    {
+      "type": "move",
+      "order": [
+        "a9b5a04bbdde23c2",
+        "618af45bdfc0aa8a",
+        "7b9c24e60513f125",
+        "311f962ede254f87",
+        "d913bd8be62fd105",
+        "cf9357520cec9195"
+      ],
+      "id": "311f962ede254f87",
+      "date": 1541793924768
+    },
+    {
+      "type": "edit",
+      "id": "311f962ede254f87",
+      "item": {
+        "type": "paragraph",
+        "id": "311f962ede254f87",
+        "text": "We'll install ruby so that it is available to load our data into the db once it is running."
+      },
+      "date": 1541793977925
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3aa779591f24afff"
+      },
+      "id": "3aa779591f24afff",
+      "type": "add",
+      "after": "cf9357520cec9195",
+      "date": 1541793980616
+    },
+    {
+      "type": "move",
+      "order": [
+        "a9b5a04bbdde23c2",
+        "618af45bdfc0aa8a",
+        "7b9c24e60513f125",
+        "311f962ede254f87",
+        "3aa779591f24afff",
+        "d913bd8be62fd105",
+        "cf9357520cec9195"
+      ],
+      "id": "3aa779591f24afff",
+      "date": 1541793983660
+    },
+    {
+      "type": "edit",
+      "id": "3aa779591f24afff",
+      "item": {
+        "type": "code",
+        "id": "3aa779591f24afff",
+        "text": "\nENV BUILD_PKGS=\"curl build-base ruby-dev linux-headers readline-dev zlib-dev openssl-dev perl graphviz\" \\\n    SUPPORT_PKGS=\"bash openssh-client\"\n\nENV RBENV_ROOT /usr/local/rbenv\nENV PATH /usr/local/rbenv/shims:/usr/local/rbenv/bin:/var/lib/neo4j/bin:$PATH\n\nRUN apk --no-cache upgrade && \\\n    apk --no-cache add $BUILD_PKGS $SUPPORT_PKGS\n\nRUN mkdir -p /working/scripts\n\nWORKDIR /working\n\nCOPY scripts/try-ruby /working/scripts/\nCOPY .ruby-version /working/\n\nRUN /working/scripts/try-ruby\n\n\nCOPY Gemfile* /working/\nRUN bundle install\n\nCOPY . /working"
+      },
+      "date": 1541793988321
+    },
+    {
+      "type": "add",
+      "id": "c1921f2cf810b48c",
+      "item": {
+        "type": "paragraph",
+        "id": "c1921f2cf810b48c",
+        "text": "# Docker"
+      },
+      "after": "a9b5a04bbdde23c2",
+      "date": 1541794159498
+    },
+    {
+      "type": "edit",
+      "id": "c1921f2cf810b48c",
+      "item": {
+        "type": "markdown",
+        "id": "c1921f2cf810b48c",
+        "text": "# Docker"
+      },
+      "date": 1541794162042
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1ceff400857e7678"
+      },
+      "id": "1ceff400857e7678",
+      "type": "add",
+      "after": "cf9357520cec9195",
+      "date": 1541794168402
+    },
+    {
+      "type": "edit",
+      "id": "1ceff400857e7678",
+      "item": {
+        "type": "paragraph",
+        "id": "1ceff400857e7678",
+        "text": "# Cypher"
+      },
+      "date": 1541794186788
+    },
+    {
+      "type": "add",
+      "id": "61588b8130062a60",
+      "item": {
+        "type": "paragraph",
+        "id": "61588b8130062a60",
+        "text": "Michael Hunger shows that retrieving that data and ingesting it into Neo4j using Cypher is really straightforward and takes only little effort."
+      },
+      "after": "1ceff400857e7678",
+      "date": 1541794259345
+    },
+    {
+      "type": "edit",
+      "id": "61588b8130062a60",
+      "item": {
+        "type": "paragraph",
+        "id": "61588b8130062a60",
+        "text": "Michael Hunger shows that retrieving that data and ingesting it into Neo4j using Cypher is really straightforward and takes only little effort. [https://neo4j.com/blog/cypher-load-json-from-url/ post]"
+      },
+      "date": 1541794274235
+    },
+    {
+      "type": "edit",
+      "id": "1ceff400857e7678",
+      "item": {
+        "type": "markdown",
+        "id": "1ceff400857e7678",
+        "text": "# Cypher"
+      },
+      "date": 1541794276703
+    },
+    {
+      "type": "add",
+      "id": "1b2b086ae6b8dcb2",
+      "item": {
+        "type": "paragraph",
+        "id": "1b2b086ae6b8dcb2",
+        "text": "Our json is typically organized as an array of objects. We'll fetch a file and then pass it to neo4j as a parameter to a query."
+      },
+      "after": "61588b8130062a60",
+      "date": 1541794483675
+    },
+    {
+      "type": "edit",
+      "id": "1b2b086ae6b8dcb2",
+      "item": {
+        "type": "paragraph",
+        "id": "1b2b086ae6b8dcb2",
+        "text": "Our json is typically organized as an array of objects. We'll fetch a file and then pass it to a cypher query as a parameter."
+      },
+      "date": 1541794503117
+    },
+    {
+      "type": "edit",
+      "id": "1b2b086ae6b8dcb2",
+      "item": {
+        "type": "paragraph",
+        "id": "1b2b086ae6b8dcb2",
+        "text": "Our json is typically organized as an array of objects. We'll fetch each file and then pass them to a cypher query that will process each object."
+      },
+      "date": 1541794554204
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "89d6ab8cbeee3127"
+      },
+      "id": "89d6ab8cbeee3127",
+      "type": "add",
+      "after": "1b2b086ae6b8dcb2",
+      "date": 1541794556623
+    },
+    {
+      "type": "edit",
+      "id": "89d6ab8cbeee3127",
+      "item": {
+        "type": "code",
+        "id": "89d6ab8cbeee3127",
+        "text": "WITH {json} as data\nUNWIND data.items as obj"
+      },
+      "date": 1541794591027
+    },
+    {
+      "type": "edit",
+      "id": "89d6ab8cbeee3127",
+      "item": {
+        "type": "code",
+        "id": "89d6ab8cbeee3127",
+        "text": "WITH {json} as data\nUNWIND data as obj"
+      },
+      "date": 1541794687624
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6a44b365f6742452"
+      },
+      "id": "6a44b365f6742452",
+      "type": "add",
+      "after": "89d6ab8cbeee3127",
+      "date": 1541794929534
+    },
+    {
+      "type": "edit",
+      "id": "6a44b365f6742452",
+      "item": {
+        "type": "paragraph",
+        "id": "6a44b365f6742452",
+        "text": "Consider how this would work for the [[Organization Chart]]. Each object has a name, email and a manager identified by their email."
+      },
+      "date": 1541795059531
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c17f2e730436fb60"
+      },
+      "id": "c17f2e730436fb60",
+      "type": "add",
+      "after": "6a44b365f6742452",
+      "date": 1541795192620
+    },
+    {
+      "type": "edit",
+      "id": "c17f2e730436fb60",
+      "item": {
+        "type": "code",
+        "id": "c17f2e730436fb60",
+        "text": "MERGE (e:EMPLOYEE {id:'employee'+obj.email})\nON CREATE SET e.name=obj.name, e.email=obj.email\n"
+      },
+      "date": 1541795401458
+    },
+    {
+      "type": "add",
+      "id": "045ffb70ebd16cab",
+      "item": {
+        "type": "paragraph",
+        "id": "045ffb70ebd16cab",
+        "text": "Note: Michael shows a lightweight solution using bash instead of ruby. This might be a better approach to copying bits into Neo4j if that is all we are using ruby to do."
+      },
+      "after": "61588b8130062a60",
+      "date": 1541801985258
+    },
+    {
+      "type": "edit",
+      "id": "045ffb70ebd16cab",
+      "item": {
+        "type": "paragraph",
+        "id": "045ffb70ebd16cab",
+        "text": "Note: Michael shows a lightweight solution using bash instead of ruby. This might be a better approach to copying bits into Neo4j."
+      },
+      "date": 1541801994506
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "76dc361f12575b9e"
+      },
+      "id": "76dc361f12575b9e",
+      "type": "add",
+      "after": "c17f2e730436fb60",
+      "date": 1541802745057
+    },
+    {
+      "type": "edit",
+      "id": "76dc361f12575b9e",
+      "item": {
+        "type": "paragraph",
+        "id": "76dc361f12575b9e",
+        "text": "# Wiki"
+      },
+      "date": 1541802754686
+    },
+    {
+      "type": "add",
+      "id": "ba98c5b2bdf642d5",
+      "item": {
+        "type": "paragraph",
+        "id": "ba98c5b2bdf642d5",
+        "text": "We collect data from various sources to be transformed and loaded into the graph database. We've designed a specification suitable for validating uploads. Experience shows that sources change continually and such validation may be the only notice of significant changes."
+      },
+      "after": "76dc361f12575b9e",
+      "date": 1541803057340
+    },
+    {
+      "type": "add",
+      "id": "6e53fe5bb559b0dd",
+      "item": {
+        "type": "paragraph",
+        "id": "6e53fe5bb559b0dd",
+        "text": "The Metamodel plugin could use the same specification to generate cypher commands for creating nodes and relations in the graph by the methods already shown.  In this way one wiki page provides both the data to be stored and the cypher to store it. "
+      },
+      "after": "ba98c5b2bdf642d5",
+      "date": 1541803374087
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f4574e64a18a8b4c"
+      },
+      "id": "f4574e64a18a8b4c",
+      "type": "add",
+      "after": "6e53fe5bb559b0dd",
+      "date": 1541803406582
+    },
+    {
+      "type": "edit",
+      "id": "f4574e64a18a8b4c",
+      "item": {
+        "type": "code",
+        "id": "f4574e64a18a8b4c",
+        "text": "RUN neo4j start && \\\n    sleep 30 && \\\n    sh /working/lib/load.sh organization-chart && \\\n    sh /working/lib/load.sh source-code-control && \\\n    sh /working/lib/load.sh dataflow-diagram && \\\n    sh /working/lib/load.sh service-traffic-reports && \\\n    neo4j stop\n"
+      },
+      "date": 1541803576832
+    },
+    {
+      "type": "edit",
+      "id": "f4574e64a18a8b4c",
+      "item": {
+        "type": "code",
+        "id": "f4574e64a18a8b4c",
+        "text": "RUN neo4j start && \\\n  sleep 30 && \\\n  sh /working/lib/load.sh organization-chart && \\\n  sh /working/lib/load.sh source-code-control && \\\n  sh /working/lib/load.sh dataflow-diagram && \\\n  sh /working/lib/load.sh service-traffic-reports && \\\n  neo4j stop\n"
+      },
+      "date": 1541803611058
+    },
+    {
+      "type": "edit",
+      "id": "f4574e64a18a8b4c",
+      "item": {
+        "type": "code",
+        "id": "f4574e64a18a8b4c",
+        "text": "RUN neo4j start && \\\n  sleep 30 && \\\n  sh /working/lib/load.sh organization-chart && \\\n  sh /working/lib/load.sh source-code-control && \\\n  sh /working/lib/load.sh dataflow-diagram && \\\n  sh /working/lib/load.sh service-traffic-report && \\\n  neo4j stop\n"
+      },
+      "date": 1541803644031
+    },
+    {
+      "type": "edit",
+      "id": "f4574e64a18a8b4c",
+      "item": {
+        "type": "code",
+        "id": "f4574e64a18a8b4c",
+        "text": "RUN neo4j start && \\\n  sleep 30 && \\\n  sh /working/lib/load.sh organization-chart && \\\n  sh /working/lib/load.sh source-code-control && \\\n  sh /working/lib/load.sh dataflow-diagram && \\\n  sh /working/lib/load.sh service-traffic-reports && \\\n  neo4j stop\n"
+      },
+      "date": 1541803744615
+    },
+    {
+      "type": "edit",
+      "id": "3aa779591f24afff",
+      "item": {
+        "type": "code",
+        "id": "3aa779591f24afff",
+        "text": "ENV BUILD_PKGS=\"curl build-base ruby-dev linux-headers readline-dev zlib-dev openssl-dev perl graphviz\" \\\n    SUPPORT_PKGS=\"bash openssh-client\"\n\nENV RBENV_ROOT /usr/local/rbenv\nENV PATH /usr/local/rbenv/shims:/usr/local/rbenv/bin:/var/lib/neo4j/bin:$PATH\n\nRUN apk --no-cache upgrade && \\\n    apk --no-cache add $BUILD_PKGS $SUPPORT_PKGS\n\nRUN mkdir -p /work/scripts\n\nWORKDIR /work\n\nCOPY scripts/try-ruby /work/scripts/\nCOPY .ruby-version /work/\n\nRUN /working/scripts/try-ruby\n\n\nCOPY Gemfile* /working/\nRUN bundle install\n\nCOPY . /working"
+      },
+      "date": 1541803782882
+    },
+    {
+      "type": "edit",
+      "id": "cf9357520cec9195",
+      "item": {
+        "type": "code",
+        "id": "cf9357520cec9195",
+        "text": "RUN sh /work/scripts/create-db.sh && \\\n    mkdir databases && \\\n    mv new.graphdb ./databases/graph.db\n\n# Put configuration in place\nCOPY neo4j.write.conf /var/lib/neo4j/conf/neo4j.conf\n\nWORKDIR /var/lib/neo4j\n\nRUN neo4j start && \\\n    sleep 30 && \\\n    ruby /work/lib/infer-relations.rb && \\\n    ruby /work/lib/smoketest.rb && \\\n    neo4j stop\n\n# Put configuration in place\nCOPY neo4j.conf /var/lib/neo4j/conf/\n"
+      },
+      "date": 1541803824138
+    },
+    {
+      "type": "edit",
+      "id": "f4574e64a18a8b4c",
+      "item": {
+        "type": "code",
+        "id": "f4574e64a18a8b4c",
+        "text": "RUN neo4j start && \\\n  sleep 30 && \\\n  sh /work/lib/load.sh organization-chart && \\\n  sh /work/lib/load.sh source-code-control && \\\n  sh /work/lib/load.sh dataflow-diagram && \\\n  sh /work/lib/load.sh service-traffic-reports && \\\n  neo4j stop\n"
+      },
+      "date": 1541803847606
+    },
+    {
+      "type": "edit",
+      "id": "76dc361f12575b9e",
+      "item": {
+        "type": "markdown",
+        "id": "76dc361f12575b9e",
+        "text": "# Wiki"
+      },
+      "date": 1541803873905
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b94191f1516296bd"
+      },
+      "id": "b94191f1516296bd",
+      "type": "add",
+      "after": "f4574e64a18a8b4c",
+      "date": 1541812527008
+    },
+    {
+      "type": "edit",
+      "id": "b94191f1516296bd",
+      "item": {
+        "type": "assets",
+        "id": "b94191f1516296bd",
+        "text": "live-demo"
+      },
+      "date": 1541812551830
+    },
+    {
+      "type": "edit",
+      "id": "7b9c24e60513f125",
+      "item": {
+        "type": "code",
+        "id": "7b9c24e60513f125",
+        "text": "FROM neo4j:3.1.5"
+      },
+      "date": 1541817553913
+    },
+    {
+      "type": "edit",
+      "id": "3aa779591f24afff",
+      "item": {
+        "type": "code",
+        "id": "3aa779591f24afff",
+        "text": "ENV BUILD_PKGS=\"curl\" \\\n    SUPPORT_PKGS=\"bash openssh-client\"\n\nENV PATH /var/lib/neo4j/bin:$PATH\n\nRUN apk --no-cache upgrade && \\\n    apk --no-cache add $BUILD_PKGS $SUPPORT_PKGS\n\nRUN mkdir -p /working/scripts\n\nWORKDIR /working\n\nCOPY . /working"
+      },
+      "date": 1541817632034
+    },
+    {
+      "type": "edit",
+      "id": "311f962ede254f87",
+      "item": {
+        "type": "paragraph",
+        "id": "311f962ede254f87",
+        "text": "We'll install various tools."
+      },
+      "date": 1541817758708
+    },
+    {
+      "type": "edit",
+      "id": "cf9357520cec9195",
+      "item": {
+        "type": "code",
+        "id": "cf9357520cec9195",
+        "text": "# Put configuration in place\nCOPY neo4j.write.conf /var/lib/neo4j/conf/neo4j.conf\n\nWORKDIR /var/lib/neo4j\n\nRUN neo4j start && \\\n    sleep 10 && \\\n    sh /working/load_json.sh \\\n      'http://context.asia.wiki.org/plugin/json/organization-chart' \\\n      /working/import_org_chart.cypher && \\\n    neo4j stop\n\n# Put configuration in place\nCOPY neo4j.conf /var/lib/neo4j/conf/\n"
+      },
+      "date": 1541825581596
+    },
+    {
+      "type": "edit",
+      "id": "d913bd8be62fd105",
+      "item": {
+        "type": "paragraph",
+        "id": "d913bd8be62fd105",
+        "text": "We will fetch json and import it into the running db using a shell script load_json.sh."
+      },
+      "date": 1541825733000
+    },
+    {
+      "type": "edit",
+      "id": "d913bd8be62fd105",
+      "item": {
+        "type": "paragraph",
+        "id": "d913bd8be62fd105",
+        "text": "We will fetch json and import it into the running db using a shell script load_json.sh which takes a cypher script as its second argument."
+      },
+      "date": 1541825762427
+    },
+    {
+      "type": "edit",
+      "id": "cf9357520cec9195",
+      "item": {
+        "type": "code",
+        "id": "cf9357520cec9195",
+        "text": "# Put configuration in place\nCOPY neo4j.write.conf /var/lib/neo4j/conf/neo4j.conf\n\nWORKDIR /var/lib/neo4j\n\nRUN neo4j start && \\\n    sleep 10 && \\\n    sh /working/load_json.sh \\\n      'organization-chart' \\\n      /working/import_org_chart.cypher && \\\n    neo4j stop\n\n# Put configuration in place\nCOPY neo4j.conf /var/lib/neo4j/conf/\n"
+      },
+      "date": 1541825868190
+    },
+    {
+      "type": "add",
+      "id": "0666f788128f03d4",
+      "item": {
+        "type": "paragraph",
+        "id": "0666f788128f03d4",
+        "text": "A careful reading of create and merge documentation indicates there could be more clever coding."
+      },
+      "after": "6a44b365f6742452",
+      "date": 1541864774744
+    },
+    {
+      "type": "move",
+      "order": [
+        "a9b5a04bbdde23c2",
+        "c1921f2cf810b48c",
+        "618af45bdfc0aa8a",
+        "7b9c24e60513f125",
+        "311f962ede254f87",
+        "3aa779591f24afff",
+        "d913bd8be62fd105",
+        "cf9357520cec9195",
+        "1ceff400857e7678",
+        "61588b8130062a60",
+        "045ffb70ebd16cab",
+        "1b2b086ae6b8dcb2",
+        "89d6ab8cbeee3127",
+        "6a44b365f6742452",
+        "c17f2e730436fb60",
+        "0666f788128f03d4",
+        "76dc361f12575b9e",
+        "ba98c5b2bdf642d5",
+        "6e53fe5bb559b0dd",
+        "f4574e64a18a8b4c",
+        "b94191f1516296bd"
+      ],
+      "id": "0666f788128f03d4",
+      "date": 1541864778998
+    },
+    {
+      "type": "edit",
+      "id": "0666f788128f03d4",
+      "item": {
+        "type": "paragraph",
+        "id": "0666f788128f03d4",
+        "text": "A careful reading of create and merge documentation indicates there could be more clever coding. [https://neo4j.com/docs/developer-manual/current/cypher/clauses/create/#create-create-multiple-nodes-with-a-parameter-for-their-properties neo4j]"
+      },
+      "date": 1541864811144
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "11c4d2e0329d8987"
+      },
+      "id": "11c4d2e0329d8987",
+      "type": "add",
+      "after": "b94191f1516296bd",
+      "date": 1541864850335
+    },
+    {
+      "type": "move",
+      "order": [
+        "a9b5a04bbdde23c2",
+        "c1921f2cf810b48c",
+        "618af45bdfc0aa8a",
+        "7b9c24e60513f125",
+        "311f962ede254f87",
+        "3aa779591f24afff",
+        "d913bd8be62fd105",
+        "cf9357520cec9195",
+        "1ceff400857e7678",
+        "61588b8130062a60",
+        "045ffb70ebd16cab",
+        "1b2b086ae6b8dcb2",
+        "89d6ab8cbeee3127",
+        "6a44b365f6742452",
+        "c17f2e730436fb60",
+        "0666f788128f03d4",
+        "11c4d2e0329d8987",
+        "76dc361f12575b9e",
+        "ba98c5b2bdf642d5",
+        "6e53fe5bb559b0dd",
+        "f4574e64a18a8b4c",
+        "b94191f1516296bd"
+      ],
+      "id": "11c4d2e0329d8987",
+      "date": 1541864854747
+    },
+    {
+      "type": "edit",
+      "id": "11c4d2e0329d8987",
+      "item": {
+        "type": "code",
+        "id": "11c4d2e0329d8987",
+        "text": "UNWIND {json}\nCREATE (e:EMPLOYEE)\nSET e"
+      },
+      "date": 1541864914070
+    },
+    {
+      "type": "edit",
+      "id": "11c4d2e0329d8987",
+      "item": {
+        "type": "code",
+        "id": "11c4d2e0329d8987",
+        "text": "UNWIND {json} as props\nCREATE (e:EMPLOYEE)\nSET e = props"
+      },
+      "date": 1541864947389
+    },
+    {
+      "type": "edit",
+      "id": "c17f2e730436fb60",
+      "item": {
+        "type": "code",
+        "id": "c17f2e730436fb60",
+        "text": "MERGE (e:EMPLOYEE {email:obj.email})\nON CREATE SET e.name=obj.name\n"
+      },
+      "date": 1541865164817
+    },
+    {
+      "type": "remove",
+      "id": "b94191f1516296bd",
+      "date": 1541877995499
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3a44e32642f9975c"
+      },
+      "id": "3a44e32642f9975c",
+      "type": "add",
+      "after": "f4574e64a18a8b4c",
+      "date": 1541877997617
+    },
+    {
+      "type": "remove",
+      "id": "3a44e32642f9975c",
+      "date": 1541878039136
+    },
+    {
+      "type": "edit",
+      "id": "6e53fe5bb559b0dd",
+      "item": {
+        "type": "paragraph",
+        "id": "6e53fe5bb559b0dd",
+        "text": "The Metamodel plugin could use the same specification to generate cypher commands for creating nodes and relations in the graph by the methods already shown.  In this way one wiki page provides both the data to be stored and the cypher to store it."
+      },
+      "date": 1541878124975
+    },
+    {
+      "type": "add",
+      "id": "e0b002aea388672e",
+      "item": {
+        "type": "paragraph",
+        "id": "e0b002aea388672e",
+        "text": "For for now we add handcrafted cypher as code. Database build from this information now available. [https://github.com/WardCunningham/context-db github]"
+      },
+      "after": "6e53fe5bb559b0dd",
+      "date": 1541878187798
+    },
+    {
+      "type": "edit",
+      "id": "e0b002aea388672e",
+      "item": {
+        "type": "paragraph",
+        "id": "e0b002aea388672e",
+        "text": "For for now we add handcrafted cypher as code. Neo4j build from this information now available. [https://github.com/WardCunningham/context-db github]"
+      },
+      "date": 1541878200317
+    },
+    {
+      "type": "edit",
+      "id": "cf9357520cec9195",
+      "item": {
+        "type": "code",
+        "id": "cf9357520cec9195",
+        "text": "# Put configuration in place\nCOPY neo4j.write.conf /var/lib/neo4j/conf/neo4j.conf\n\nWORKDIR /var/lib/neo4j\n\nRUN neo4j start && \\\n    sleep 10 && \\\n    sh /working/load_json.sh \\\n      organization-chart \\\n      /working/import_org_chart.cypher && \\\n    neo4j stop\n\n# Put configuration in place\nCOPY neo4j.conf /var/lib/neo4j/conf/\n"
+      },
+      "date": 1541879510569
+    },
+    {
+      "type": "edit",
+      "id": "e0b002aea388672e",
+      "item": {
+        "type": "paragraph",
+        "id": "e0b002aea388672e",
+        "text": "For for now we add handcrafted cypher as code. Neo4j build from this information now available. [https://github.com/WardCunningham/context-db github] [http://c02kn1ekfft3.local:7474 local]"
+      },
+      "date": 1541911133263
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f18f80c227808c07"
+      },
+      "id": "f18f80c227808c07",
+      "type": "add",
+      "after": "f4574e64a18a8b4c",
+      "date": 1541950026748
+    },
+    {
+      "type": "edit",
+      "id": "f18f80c227808c07",
+      "item": {
+        "type": "paragraph",
+        "id": "f18f80c227808c07",
+        "text": "With the domain specific part of this build reduced to a list of pages we now realize that is easily moved to a \"Charmed\" list in markdown that can be invoked through graph transport."
+      },
+      "date": 1541950213467
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5f4fe7b1ac0ae094"
+      },
+      "id": "5f4fe7b1ac0ae094",
+      "type": "add",
+      "after": "f18f80c227808c07",
+      "date": 1541950249670
+    },
+    {
+      "type": "edit",
+      "id": "5f4fe7b1ac0ae094",
+      "item": {
+        "type": "markdown",
+        "id": "5f4fe7b1ac0ae094",
+        "text": "- [[Organization Chart]]\n- [[Source Code Control]]\n- [[Dataflow Diagram]]\n- [[Service Traffic Reports]]"
+      },
+      "date": 1541950320020
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a6a471c20b22704e"
+      },
+      "id": "a6a471c20b22704e",
+      "type": "add",
+      "after": "5f4fe7b1ac0ae094",
+      "date": 1541950332258
+    },
+    {
+      "type": "edit",
+      "id": "a6a471c20b22704e",
+      "item": {
+        "type": "transport",
+        "id": "a6a471c20b22704e",
+        "text": "Initiate Staging Build and Run\nGRAPH POST https://ward.local:3000/neo4j-build-run"
+      },
+      "date": 1541950472139
+    },
+    {
+      "type": "edit",
+      "id": "a6a471c20b22704e",
+      "item": {
+        "type": "transport",
+        "id": "a6a471c20b22704e",
+        "text": "GRAPH POST https://ward.local:3000/neo4j-build-run"
+      },
+      "date": 1541950707358
+    },
+    {
+      "type": "edit",
+      "id": "f18f80c227808c07",
+      "item": {
+        "type": "paragraph",
+        "id": "f18f80c227808c07",
+        "text": "With the domain specific part of this build reduced to a list of pages we now realize that is easily moved to a \"Charmed\" list in markdown that can be invoked through graph transport. [https://github.com/fedwiki/wiki-plugin-markdown/pull/18 github]"
+      },
+      "date": 1541951627134
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8c9259d4141d2fcb"
+      },
+      "id": "8c9259d4141d2fcb",
+      "type": "add",
+      "after": "a6a471c20b22704e",
+      "date": 1541955083527
+    },
+    {
+      "type": "edit",
+      "id": "8c9259d4141d2fcb",
+      "item": {
+        "type": "paragraph",
+        "id": "8c9259d4141d2fcb",
+        "text": "Handcrafting cypher can be error prone with error messages mixed in with all the other docker build noise. If handcrafting is to be the norm, we should make a Cypher plugin that at least validates the text. There are modules to help. [https://www.npmjs.com/package/cypher-parser npm]"
+      },
+      "date": 1541955240490
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "451c5e51ad321472"
+      },
+      "id": "451c5e51ad321472",
+      "type": "add",
+      "after": "8c9259d4141d2fcb",
+      "date": 1541974780286
+    },
+    {
+      "type": "edit",
+      "id": "451c5e51ad321472",
+      "item": {
+        "type": "paragraph",
+        "id": "451c5e51ad321472",
+        "text": "We disable the cache for all steps when only those after reading from the network should be repeated. There is technique to achieve this. [https://stackoverflow.com/questions/35134713/disable-cache-for-specific-run-commands stackoverflow]"
+      },
+      "date": 1541974836860
+    },
+    {
+      "type": "move",
+      "order": [
+        "a9b5a04bbdde23c2",
+        "c1921f2cf810b48c",
+        "618af45bdfc0aa8a",
+        "7b9c24e60513f125",
+        "311f962ede254f87",
+        "3aa779591f24afff",
+        "d913bd8be62fd105",
+        "cf9357520cec9195",
+        "451c5e51ad321472",
+        "1ceff400857e7678",
+        "61588b8130062a60",
+        "045ffb70ebd16cab",
+        "1b2b086ae6b8dcb2",
+        "89d6ab8cbeee3127",
+        "6a44b365f6742452",
+        "c17f2e730436fb60",
+        "0666f788128f03d4",
+        "11c4d2e0329d8987",
+        "76dc361f12575b9e",
+        "ba98c5b2bdf642d5",
+        "6e53fe5bb559b0dd",
+        "e0b002aea388672e",
+        "f4574e64a18a8b4c",
+        "f18f80c227808c07",
+        "5f4fe7b1ac0ae094",
+        "a6a471c20b22704e",
+        "8c9259d4141d2fcb"
+      ],
+      "id": "451c5e51ad321472",
+      "date": 1541974850535
+    },
+    {
+      "type": "edit",
+      "id": "a9b5a04bbdde23c2",
+      "item": {
+        "type": "paragraph",
+        "id": "a9b5a04bbdde23c2",
+        "text": "We consider how to build a read-only demo db from the manufactured data we collect in this site. [https://github.com/WardCunningham/context-map-data github]"
+      },
+      "date": 1541992707336
+    },
+    {
+      "type": "edit",
+      "id": "618af45bdfc0aa8a",
+      "item": {
+        "type": "paragraph",
+        "id": "618af45bdfc0aa8a",
+        "text": "We'll start with a neo4j docker image, run a script to load the db with data from json files, then deploy the built db in a read-only configuration. [https://github.com/WardCunningham/context-db github]"
+      },
+      "date": 1541992745590
+    },
+    {
+      "type": "edit",
+      "id": "3aa779591f24afff",
+      "item": {
+        "type": "code",
+        "id": "3aa779591f24afff",
+        "text": "RUN apk --no-cache upgrade && \\\n    apk --no-cache add curl jq\n\nWORKDIR /working\nCOPY . /working"
+      },
+      "date": 1541992790566
+    },
+    {
+      "type": "edit",
+      "id": "cf9357520cec9195",
+      "item": {
+        "type": "code",
+        "id": "cf9357520cec9195",
+        "text": "# Configure neo4j for read/write\nCOPY neo4j.write.conf /var/lib/neo4j/conf/neo4j.conf\n\nWORKDIR /var/lib/neo4j\nENV PATH /var/lib/neo4j/bin:$PATH\nRUN neo4j start && \\\n    sleep 15 && \\\n    cat /var/lib/neo4j/logs/neo4j.log && \\\n    echo ================================ && \\\n    sh /working/load_json.sh organization-chart && \\\n    sh /working/load_json.sh source-code-control && \\\n    sh /working/load_json.sh dataflow-diagram && \\\n    sh /working/load_json.sh service-traffic-reports && \\\n    echo ================================ && \\\n    neo4j stop\n\n# Configure neo4j for read-only\nCOPY neo4j.conf /var/lib/neo4j/conf/"
+      },
+      "date": 1541992836296
+    },
+    {
+      "type": "edit",
+      "id": "cf9357520cec9195",
+      "item": {
+        "type": "code",
+        "id": "cf9357520cec9195",
+        "text": "# Configure neo4j for read/write\nCOPY neo4j.write.conf /var/lib/neo4j/conf/neo4j.conf\n\nWORKDIR /var/lib/neo4j\nENV PATH /var/lib/neo4j/bin:$PATH\nRUN neo4j start && \\\n  sleep 15 && \\\n  cat /var/lib/neo4j/logs/neo4j.log && \\\n  echo ================================ && \\\n  sh /working/load_json.sh organization-chart && \\\n  sh /working/load_json.sh source-code-control && \\\n  sh /working/load_json.sh dataflow-diagram && \\\n  sh /working/load_json.sh service-traffic-reports && \\\n  echo ================================ && \\\n  neo4j stop\n\n# Configure neo4j for read-only\nCOPY neo4j.conf /var/lib/neo4j/conf/"
+      },
+      "date": 1541992949958
+    },
+    {
+      "type": "edit",
+      "id": "3aa779591f24afff",
+      "item": {
+        "type": "code",
+        "id": "3aa779591f24afff",
+        "text": "RUN apk --no-cache upgrade && \\\n    apk --no-cache add curl jq\n\nWORKDIR /\nCOPY . /\n\n"
+      },
+      "date": 1541995590089
+    },
+    {
+      "type": "edit",
+      "id": "cf9357520cec9195",
+      "item": {
+        "type": "code",
+        "id": "cf9357520cec9195",
+        "text": "# Configure neo4j for read/write\nCOPY neo4j.write.conf /var/lib/neo4j/conf/neo4j.conf\n\nWORKDIR /var/lib/neo4j\nENV PATH /var/lib/neo4j/bin:$PATH\nRUN neo4j start && \\\n    sleep 15 && \\\n    cat /var/lib/neo4j/logs/neo4j.log && \\\n    echo ================================ && \\\n    sh /load_json.sh organization-chart && \\\n    sh /load_json.sh source-code-control && \\\n    sh /load_json.sh dataflow-diagram && \\\n    sh /load_json.sh service-traffic-reports && \\\n    echo ================================ && \\\n    neo4j stop\n\n# Configure neo4j for read-only\nCOPY neo4j.conf /var/lib/neo4j/conf/"
+      },
+      "date": 1541995650588
+    },
+    {
+      "type": "remove",
+      "id": "f4574e64a18a8b4c",
+      "date": 1541995862282
+    },
+    {
+      "type": "edit",
+      "id": "e0b002aea388672e",
+      "item": {
+        "type": "paragraph",
+        "id": "e0b002aea388672e",
+        "text": "For for now we add handcrafted cypher as code. Neo4j build from this information now available. [http://c02kn1ekfft3.local:7474 local]"
+      },
+      "date": 1541995878769
+    },
+    {
+      "type": "add",
+      "id": "622aa38e6321140c",
+      "item": {
+        "type": "paragraph",
+        "id": "622aa38e6321140c",
+        "text": "# Explain"
+      },
+      "after": "8c9259d4141d2fcb",
+      "date": 1543016769710
+    },
+    {
+      "type": "add",
+      "id": "623a90479f51f617",
+      "item": {
+        "type": "paragraph",
+        "id": "623a90479f51f617",
+        "text": "Our most recent load_json.sh script extracts more source information from the wiki page and passes it to cypher scripts as a second parameter, props, ready made for creating EXPLAIN nodes in the graph."
+      },
+      "after": "622aa38e6321140c",
+      "date": 1543016896671
+    },
+    {
+      "type": "edit",
+      "id": "622aa38e6321140c",
+      "item": {
+        "type": "markdown",
+        "id": "622aa38e6321140c",
+        "text": "# Explain"
+      },
+      "date": 1543016899358
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fd981c2903c6c2f9"
+      },
+      "id": "fd981c2903c6c2f9",
+      "type": "add",
+      "after": "623a90479f51f617",
+      "date": 1543016949331
+    },
+    {
+      "type": "edit",
+      "id": "fd981c2903c6c2f9",
+      "item": {
+        "type": "code",
+        "id": "fd981c2903c6c2f9",
+        "text": "create (s:EXPLAIN {props})"
+      },
+      "date": 1543016955299
+    },
+    {
+      "type": "fork",
+      "site": "context.asia.wiki.org",
+      "date": 1638955188110
+    },
+    {
+      "type": "edit",
+      "id": "61588b8130062a60",
+      "item": {
+        "type": "paragraph",
+        "id": "61588b8130062a60",
+        "text": "[[Michael Hunger]] shows that retrieving that data and ingesting it into Neo4j using Cypher is really straightforward and takes only little effort. [https://neo4j.com/blog/cypher-load-json-from-url/ post]"
+      },
+      "date": 1638955200491
+    }
+  ]
+}
