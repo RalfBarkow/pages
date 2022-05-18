@@ -1,0 +1,144 @@
+{
+  "title": "Events aren't always asynchronous",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "32ac63c21aedc1ad",
+      "text": "Most JavaScript event emitters (including Node's) are actually synchronous. This is extremely confusing if you happen to be coming from the browser, where events tend to be asynchronous. It's also confusing if you're used to promises, which guarantee that they will happen asynchronously. So, how can this trip us up?"
+    },
+    {
+      "type": "paragraph",
+      "id": "e23cf99cc5d5a391",
+      "text": "Well, if we emit an event the handlers get called right then. And if one of them throws an error, it will blow out our current stack, not some amorphous future stack we don't care about."
+    },
+    {
+      "type": "code",
+      "id": "a2c11a863d3fbe85",
+      "text": "var EE = require('events').EventEmitter\nvar ee = new EE()\n\nee.on('yolo', function (a) {\n  // WARNING: If 'a' doesn't exit, this will throw.\n  console.log(a.b)\n})\n\nee.emit('yolo') // Oh no...\n\nconsole.log('Is it safe?') // We don't get here."
+    },
+    {
+      "type": "paragraph",
+      "id": "28e68f72647b6300",
+      "text": "We can also miss events if we aren't careful to listen for them before anyone else could emit them."
+    },
+    {
+      "type": "code",
+      "id": "22dfb9084e4e242a",
+      "text": "var EE = require('events').EventEmitter\nvar ee = new EE()\n\nenterLottery(ee)\n\nee.on('winner', function (amount) {\n  // Could have had all this.\n  while (amount--) {\n    console.log('Omg omg omg we win!')\n  }\n  // But we weren't listening in tme.\n  // We never knew we won.\n})\n\nfunction enterLottery (emitter) {\n  ee.emit('winner', 1000000000)\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "d1872bcd7c1042dc",
+      "text": "There isn't one size fits all solution to these problems. Know that they exist, and be careful about them. There are very good performance and simplicity reasons for eventEmitters to not always be asynchronous by default. However consider emitting events in nextTick, to get them to happen as soon as possible, but asynchronously."
+    },
+    {
+      "type": "paragraph",
+      "id": "5c3e33d5957be4db",
+      "text": "But for the love of god, make sure you don't release [http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony Zalgo]."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Events aren't always asynchronous",
+        "story": []
+      },
+      "date": 1431013318304
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "32ac63c21aedc1ad",
+        "text": "Most JavaScript event emitters (including Node's) are actually synchronous. This is extremely confusing if you happen to be coming from the browser, where events tend to be asynchronous. It's also confusing if you're used to promises, which guarantee that they will happen asynchronously. So, how can this trip us up?"
+      },
+      "id": "32ac63c21aedc1ad",
+      "date": 1431013321862
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "e23cf99cc5d5a391",
+        "text": "Well, if we emit an event the handlers get called right then. And if one of them throws an error, it will blow out our current stack, not some amorphous future stack we don't care about."
+      },
+      "id": "e23cf99cc5d5a391",
+      "date": 1431013324886
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "a2c11a863d3fbe85",
+        "text": "var EE = require('events').EventEmitter\nvar ee = new EE()\n\nee.on('yolo', function (a) {\n  // WARNING: If 'a' doesn't exit, this will throw.\n  console.log(a.b)\n})\n\nee.emit('yolo') // Oh no...\n\nconsole.log('Is it safe?') // We don't get here."
+      },
+      "after": "32ac63c21aedc1ad",
+      "id": "a2c11a863d3fbe85",
+      "date": 1431013329415
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "28e68f72647b6300",
+        "text": "We can also miss events if we aren't careful to listen for them before anyone else could emit them."
+      },
+      "after": "a2c11a863d3fbe85",
+      "id": "28e68f72647b6300",
+      "date": 1431013332491
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "22dfb9084e4e242a",
+        "text": "var EE = require('events').EventEmitter\nvar ee = new EE()\n\nenterLottery(ee)\n\nee.on('winner', function (amount) {\n  // Could have had all this.\n  while (amount--) {\n    console.log('Omg omg omg we win!')\n  }\n  // But we weren't listening in tme.\n  // We never knew we won.\n})\n\nfunction enterLottery (emitter) {\n  ee.emit('winner', 1000000000)\n}"
+      },
+      "after": "28e68f72647b6300",
+      "id": "22dfb9084e4e242a",
+      "date": 1431013337093
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "d1872bcd7c1042dc",
+        "text": "There isn't one size fits all solution to these problems. Know that they exist, and be careful about them. There are very good performance and simplicity reasons for eventEmitters to not always be asynchronous by default. However consider emitting events in nextTick, to get them to happen as soon as possible, but asynchronously."
+      },
+      "after": "22dfb9084e4e242a",
+      "id": "d1872bcd7c1042dc",
+      "date": 1431013345078
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "5c3e33d5957be4db",
+        "text": "But for the love of god, make sure you don't release [http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony Zalgo]."
+      },
+      "after": "d1872bcd7c1042dc",
+      "id": "5c3e33d5957be4db",
+      "date": 1431013371686
+    },
+    {
+      "type": "move",
+      "order": [
+        "32ac63c21aedc1ad",
+        "e23cf99cc5d5a391",
+        "a2c11a863d3fbe85",
+        "28e68f72647b6300",
+        "22dfb9084e4e242a",
+        "d1872bcd7c1042dc",
+        "5c3e33d5957be4db"
+      ],
+      "id": "32ac63c21aedc1ad",
+      "date": 1431013402025
+    },
+    {
+      "type": "fork",
+      "site": "nrn.io",
+      "date": 1652868331493
+    }
+  ]
+}

@@ -1,0 +1,311 @@
+{
+  "title": "parallel execution",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "e117eb8d96377d4f",
+      "text": "In JavaScript parallel execution of asynchronous operations is the default. However, managing that with callbacks means that execution branches for each new thing. Collecting the results from those asynchronous operations back together, in order, without blocking each other is one of the [[JavaScript common pitfalls]]."
+    },
+    {
+      "type": "code",
+      "id": "c87706db587cc231",
+      "text": "var resArray = []\n\n//broken\n;['foo','bar','baz'].forEach(function (name, i) {\n  LOUD(name, function done (err, results) {\n    if (err) throw err\n    resArray[i] = results\n  })\n})\n\nconsole.log('Yay!', resArray) // boo, empty array :(\n// LOUD hasn't done its work when this gets logged\n\nfunction LOUD(name, cb) {\n  setTimeout(function () {\n    cb(null, name.toUpperCase())\n  }, Math.random() * 1000)\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "2101f416581efc48",
+      "text": "The easiest way to solve this problem is to have a function you call when they are all done. Simply by keeping count of all of the things you're expecting, and the things that come back you can know when they've all completed. This trusts that each of the callbacks you send out get called exactly once (like they should in a node style callback api). There are a lot of libraries that can do this, but I recommend writing it by hand at first to learn how they work."
+    },
+    {
+      "type": "code",
+      "id": "0059d4c5e92be816",
+      "text": "var once = require('once')\n\nvar cb = once(function (err, res) {\n  if (err) return console.error(err)\n  console.log('Yay!', res)\n})\n\nvar resArray = []\nvar total = 0\nvar called = 0\n\n;['foo','bar','baz'].forEach(function (name, i) {\n  total += 1\n  LOUD(name, function done (err, results) {\n    if (err) return cb(err)\n    resArray[i] = results\n    called += 1\n    if (total === called) cb(null, resArray)\n  })\n})\n\nfunction LOUD(name, cb) {\n  setTimeout(function () {\n    cb(null, name.toUpperCase())\n  }, Math.random() * 1000)\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "53873b2be963ad87",
+      "text": "Once you're comfortable with that idea, you'll notice that while it's not hard, it is tedious. There is a lot of housekeeping that is is easy to screw up, so try abstracting it away into it's own library. We'll call it 'afterParallel'."
+    },
+    {
+      "type": "code",
+      "id": "1e648ddfdbeb9314",
+      "text": "var once = require('once')                                                                                                                                        \n\nvar makeCb = afterParallel(function (err, res) {\n  if (err) return console.error(err)\n  console.log('Yay!', res)\n})\n\n;['foo','bar','baz'].forEach(function (name) {\n  LOUD(name, makeCb())\n})\n\nfunction LOUD(name, cb) {\n  setTimeout(function () {\n    cb(null, name.toUpperCase())\n  }, Math.random() * 1000)\n}\n\nfunction afterParallel (fn) {\n  var cb = once(fn)\n  var resArray = []\n  var total = 0\n  var called = 0\n\n  return function makeDone () {\n    if (called) {\n      throw new Error('Added another parallel cb \\\nafter results started comming back')\n    }\n    var position = total\n    total += 1\n    return function done (err, results) {\n      if (err) return cb(err)\n      resArray[position] = results\n      called += 1\n      if (total === called) cb(null, resArray)\n    }\n  }\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "b01c169cb06db457",
+      "text": "This isn't the only api possible, it's just my favorite. There are a lot of other good ways to think about this. Check out the async module's parallel, and the after-all node module. Whatever you use in production, playing with your own implementation will help you use other modules with more confidence."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "parallel execution",
+        "story": []
+      },
+      "date": 1432529022741
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e117eb8d96377d4f"
+      },
+      "id": "e117eb8d96377d4f",
+      "type": "add",
+      "date": 1432529024388
+    },
+    {
+      "type": "edit",
+      "id": "e117eb8d96377d4f",
+      "item": {
+        "type": "paragraph",
+        "id": "e117eb8d96377d4f",
+        "text": "In JavaScript parallel execution of asynchronous operations is the default. However, managing that with callbacks means that execution branches for each new thing. Collecting the results from those asynchronous operations back together, in order, without blocking each other is one of the [[JavaScript common pitfalls]]."
+      },
+      "date": 1432529206254
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1e648ddfdbeb9314"
+      },
+      "id": "1e648ddfdbeb9314",
+      "type": "add",
+      "after": "e117eb8d96377d4f",
+      "date": 1432595813111
+    },
+    {
+      "type": "edit",
+      "id": "1e648ddfdbeb9314",
+      "item": {
+        "type": "code",
+        "id": "1e648ddfdbeb9314",
+        "text": "var once = require('once')                                                                                                                                        [1/242]\n\nvar makeCb = afterParallel(function (err, res) {\n  if (err) return console.error(err)\n  console.log('Yay!', res)\n})\n\n;[ 'foo', 'bar', 'baz' ].forEach(function (name) {\n  LOUD(name, makeCb())\n})\n\nfunction LOUD(name, cb) {\n  setTimeout(function () {\n    cb(null, name.toUpperCase())\n  }, Math.random() * 1000)\n}\n\nfunction afterParallel (fn) {\n  var cb = once(fn)\n  var resArray = []\n  var total = 0\n  var called = 0\n\n  return function makeDone () {\n    if (called) {\n      throw new Error('Added another parallel cb \\\nafter results started comming back')\n    }\n    var position = total\n    total += 1\n    return function done (err, results) {\n      if (err) return cb(err)\n      resArray[position] = results\n      called += 1\n      if (total === called) cb(null, resArray)\n    }\n  }\n}"
+      },
+      "date": 1432595818274
+    },
+    {
+      "type": "edit",
+      "id": "1e648ddfdbeb9314",
+      "item": {
+        "type": "code",
+        "id": "1e648ddfdbeb9314",
+        "text": "var once = require('once')                                                                                                                                        \n\nvar makeCb = afterParallel(function (err, res) {\n  if (err) return console.error(err)\n  console.log('Yay!', res)\n})\n\n;[ 'foo', 'bar', 'baz' ].forEach(function (name) {\n  LOUD(name, makeCb())\n})\n\nfunction LOUD(name, cb) {\n  setTimeout(function () {\n    cb(null, name.toUpperCase())\n  }, Math.random() * 1000)\n}\n\nfunction afterParallel (fn) {\n  var cb = once(fn)\n  var resArray = []\n  var total = 0\n  var called = 0\n\n  return function makeDone () {\n    if (called) {\n      throw new Error('Added another parallel cb \\\nafter results started comming back')\n    }\n    var position = total\n    total += 1\n    return function done (err, results) {\n      if (err) return cb(err)\n      resArray[position] = results\n      called += 1\n      if (total === called) cb(null, resArray)\n    }\n  }\n}"
+      },
+      "date": 1432595852833
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2101f416581efc48"
+      },
+      "id": "2101f416581efc48",
+      "type": "add",
+      "after": "1e648ddfdbeb9314",
+      "date": 1432595917881
+    },
+    {
+      "type": "edit",
+      "id": "2101f416581efc48",
+      "item": {
+        "type": "paragraph",
+        "id": "2101f416581efc48",
+        "text": "The easiest way to solve this problem is to just keep a counter of all of the things you're expecting to come back, and count the things that come back. There are a lot of libraries that can do this, but I recommend writing it by hand at first to learn how they work."
+      },
+      "date": 1432596054136
+    },
+    {
+      "type": "move",
+      "order": [
+        "e117eb8d96377d4f",
+        "2101f416581efc48",
+        "1e648ddfdbeb9314"
+      ],
+      "id": "2101f416581efc48",
+      "date": 1432596493681
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0059d4c5e92be816"
+      },
+      "id": "0059d4c5e92be816",
+      "type": "add",
+      "after": "1e648ddfdbeb9314",
+      "date": 1432596501822
+    },
+    {
+      "type": "edit",
+      "id": "0059d4c5e92be816",
+      "item": {
+        "type": "code",
+        "id": "0059d4c5e92be816",
+        "text": "var once = require('once')\n\nvar cb = once(function (err, res) {\n  if (err) return console.error(err)\n  console.log('Yay!', res)\n})\n\nvar resArray = []\nvar total = 0\nvar called = 0\n\n;[ 'foo', 'bar', 'baz' ].forEach(function (name, i) {\n  total += 1\n  LOUD(name, function done (err, results) {\n    if (err) return cb(err)\n    resArray[i] = results\n    called += 1\n    if (total === called) cb(null, resArray)\n  })\n})\n\nfunction LOUD(name, cb) {\n  setTimeout(function () {\n    cb(null, name.toUpperCase())\n  }, Math.random() * 1000)\n}"
+      },
+      "date": 1432596507120
+    },
+    {
+      "type": "move",
+      "order": [
+        "e117eb8d96377d4f",
+        "2101f416581efc48",
+        "0059d4c5e92be816",
+        "1e648ddfdbeb9314"
+      ],
+      "id": "0059d4c5e92be816",
+      "date": 1432596516671
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "53873b2be963ad87"
+      },
+      "id": "53873b2be963ad87",
+      "type": "add",
+      "after": "1e648ddfdbeb9314",
+      "date": 1432596545598
+    },
+    {
+      "type": "move",
+      "order": [
+        "e117eb8d96377d4f",
+        "2101f416581efc48",
+        "0059d4c5e92be816",
+        "53873b2be963ad87",
+        "1e648ddfdbeb9314"
+      ],
+      "id": "53873b2be963ad87",
+      "date": 1432596558870
+    },
+    {
+      "type": "edit",
+      "id": "53873b2be963ad87",
+      "item": {
+        "type": "paragraph",
+        "id": "53873b2be963ad87",
+        "text": "Once you're comfortable with that idea, you'll notice that while it's not hard, it is tedious. There is a lot of housekeeping that is is easy to screw up, so try abstracting it away into it's own library. We'll call it 'afterParallel'."
+      },
+      "date": 1432596688750
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b01c169cb06db457"
+      },
+      "id": "b01c169cb06db457",
+      "type": "add",
+      "after": "1e648ddfdbeb9314",
+      "date": 1432596695702
+    },
+    {
+      "type": "edit",
+      "id": "b01c169cb06db457",
+      "item": {
+        "type": "paragraph",
+        "id": "b01c169cb06db457",
+        "text": "This isn't the only api possible, it's just my favorite. There are a lot of other good ways to think about this. Check out the async module's parallel, and the after-all node module. Whatever you use in production, playing with your own implementation will help you use other modules with more confidence."
+      },
+      "date": 1432596870405
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c87706db587cc231"
+      },
+      "id": "c87706db587cc231",
+      "type": "add",
+      "after": "b01c169cb06db457",
+      "date": 1432597045500
+    },
+    {
+      "type": "move",
+      "order": [
+        "e117eb8d96377d4f",
+        "c87706db587cc231",
+        "2101f416581efc48",
+        "0059d4c5e92be816",
+        "53873b2be963ad87",
+        "1e648ddfdbeb9314",
+        "b01c169cb06db457"
+      ],
+      "id": "c87706db587cc231",
+      "date": 1432597055026
+    },
+    {
+      "type": "edit",
+      "id": "c87706db587cc231",
+      "item": {
+        "type": "code",
+        "id": "c87706db587cc231",
+        "text": "var resArray = []\n\n//broken\n;[ 'foo', 'bar', 'baz' ].forEach(function (name, i) {\n  LOUD(name, function done (err, results) {\n    if (err) throw err\n    resArray[i] = results\n  })\n})\n\nconsole.log('Yay!', resArray) // boo, empty array :(\n\nfunction LOUD(name, cb) {\n  setTimeout(function () {\n    cb(null, name.toUpperCase())\n  }, Math.random() * 1000)\n}\n"
+      },
+      "date": 1432597060549
+    },
+    {
+      "type": "edit",
+      "id": "2101f416581efc48",
+      "item": {
+        "type": "paragraph",
+        "id": "2101f416581efc48",
+        "text": "The easiest way to solve this problem is to have a function you call when they are all done. Simply by keeping count of all of the things you're expecting, and the things that come back you can know when they've all completed. This trusts that each of the callbacks you send out get called exactly once (like they should in a node style callback api). There are a lot of libraries that can do this, but I recommend writing it by hand at first to learn how they work."
+      },
+      "date": 1432597218881
+    },
+    {
+      "type": "edit",
+      "id": "c87706db587cc231",
+      "item": {
+        "type": "code",
+        "id": "c87706db587cc231",
+        "text": "var resArray = []\n\n//broken\n;[ 'foo', 'bar', 'baz' ].forEach(function (name, i) {\n  LOUD(name, function done (err, results) {\n    if (err) throw err\n    resArray[i] = results\n  })\n})\n\nconsole.log('Yay!', resArray) // boo, empty array :(\n// LOUD hasn't done its work when this gets called\n\nfunction LOUD(name, cb) {\n  setTimeout(function () {\n    cb(null, name.toUpperCase())\n  }, Math.random() * 1000)\n}\n"
+      },
+      "date": 1432597327300
+    },
+    {
+      "type": "edit",
+      "id": "c87706db587cc231",
+      "item": {
+        "type": "code",
+        "id": "c87706db587cc231",
+        "text": "var resArray = []\n\n//broken\n;[ 'foo', 'bar', 'baz' ].forEach(function (name, i) {\n  LOUD(name, function done (err, results) {\n    if (err) throw err\n    resArray[i] = results\n  })\n})\n\nconsole.log('Yay!', resArray) // boo, empty array :(\n// LOUD hasn't done its work when this gets logged\n\nfunction LOUD(name, cb) {\n  setTimeout(function () {\n    cb(null, name.toUpperCase())\n  }, Math.random() * 1000)\n}\n"
+      },
+      "date": 1432597342398
+    },
+    {
+      "type": "edit",
+      "id": "c87706db587cc231",
+      "item": {
+        "type": "code",
+        "id": "c87706db587cc231",
+        "text": "var resArray = []\n\n//broken\n;['foo','bar','baz'].forEach(function (name, i) {\n  LOUD(name, function done (err, results) {\n    if (err) throw err\n    resArray[i] = results\n  })\n})\n\nconsole.log('Yay!', resArray) // boo, empty array :(\n// LOUD hasn't done its work when this gets logged\n\nfunction LOUD(name, cb) {\n  setTimeout(function () {\n    cb(null, name.toUpperCase())\n  }, Math.random() * 1000)\n}\n"
+      },
+      "date": 1432597377102
+    },
+    {
+      "type": "edit",
+      "id": "0059d4c5e92be816",
+      "item": {
+        "type": "code",
+        "id": "0059d4c5e92be816",
+        "text": "var once = require('once')\n\nvar cb = once(function (err, res) {\n  if (err) return console.error(err)\n  console.log('Yay!', res)\n})\n\nvar resArray = []\nvar total = 0\nvar called = 0\n\n;['foo','bar','baz'].forEach(function (name, i) {\n  total += 1\n  LOUD(name, function done (err, results) {\n    if (err) return cb(err)\n    resArray[i] = results\n    called += 1\n    if (total === called) cb(null, resArray)\n  })\n})\n\nfunction LOUD(name, cb) {\n  setTimeout(function () {\n    cb(null, name.toUpperCase())\n  }, Math.random() * 1000)\n}"
+      },
+      "date": 1432597395073
+    },
+    {
+      "type": "edit",
+      "id": "1e648ddfdbeb9314",
+      "item": {
+        "type": "code",
+        "id": "1e648ddfdbeb9314",
+        "text": "var once = require('once')                                                                                                                                        \n\nvar makeCb = afterParallel(function (err, res) {\n  if (err) return console.error(err)\n  console.log('Yay!', res)\n})\n\n;['foo','bar','baz'].forEach(function (name) {\n  LOUD(name, makeCb())\n})\n\nfunction LOUD(name, cb) {\n  setTimeout(function () {\n    cb(null, name.toUpperCase())\n  }, Math.random() * 1000)\n}\n\nfunction afterParallel (fn) {\n  var cb = once(fn)\n  var resArray = []\n  var total = 0\n  var called = 0\n\n  return function makeDone () {\n    if (called) {\n      throw new Error('Added another parallel cb \\\nafter results started comming back')\n    }\n    var position = total\n    total += 1\n    return function done (err, results) {\n      if (err) return cb(err)\n      resArray[position] = results\n      called += 1\n      if (total === called) cb(null, resArray)\n    }\n  }\n}"
+      },
+      "date": 1432597418374
+    },
+    {
+      "type": "fork",
+      "site": "nrn.io",
+      "date": 1652868548655
+    }
+  ]
+}

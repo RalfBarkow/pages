@@ -1,0 +1,449 @@
+{
+  "title": "Get the full result of a stream",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "c60462c5753cc576",
+      "text": "Streams are an amazing abstraction for many things. They let us pipe things together, transform them, and control their flow, all without having to buffer the contents into memory. However, sometimes you just want the full contents all at once. Maybe because you can't do what you need to as a stream, maybe because it's just easier for what you're doing. Screwing up collecting the results of a stream is one of the [[JavaScript common pitfalls]]."
+    },
+    {
+      "type": "paragraph",
+      "id": "ab85d37b2997546d",
+      "text": "Say, for example, you had a sample.txt file and you needed to know whether the contents are a palindrome, and if so how many characters long is it. Not the best as a streaming work load. So lets take a look at the easy hand-rolled implementation."
+    },
+    {
+      "type": "paragraph",
+      "id": "508941729501e301",
+      "text": "Using this sample.txt file:"
+    },
+    {
+      "type": "code",
+      "id": "2753bcccbc0390bb",
+      "text": "a man a plan a canal panama"
+    },
+    {
+      "type": "paragraph",
+      "id": "1ba13bb7ec4833e2",
+      "text": "Our program looks like:"
+    },
+    {
+      "type": "code",
+      "id": "fbfe0fa4e9527833",
+      "text": "var fs = require('fs')\n\nvar buffer = ''\nfs.createReadStream('./sample.txt')\n  .on('data', function (chunk) {\n    buffer += chunk\n  }).on('end', function () {\n    var noSpace = buffer.replace(/\\s/g, '')\n    var len = noSpace.length\n    var isPalendrome = true\n    for (var i = 0; i < (len/2); i++) {\n      if (noSpace[i] !== noSpace[len-1-i]) {\n        isPalendrome = false\n        break;\n      }\n    }\n    console.log(isPalendrome, len)\n  }).on('error', function () {\n    console.error('Oh, the humanity!')\n  })"
+    },
+    {
+      "type": "paragraph",
+      "id": "cce0491ffadc80bd",
+      "text": "This works for our example, but it doesn't handle characters who have been split into different halves of a buffer, and it allocates a new string the size of the entire contents of the file for every chunk that comes in. It is also a lot of boiler plate code for a situation that comes of fairly often."
+    },
+    {
+      "type": "paragraph",
+      "id": "9aba8fb70d63f57b",
+      "text": "So, lets use a library to take care of the boiler plate. Max Ogden's 'concat-stream'. It takes a call back, and turns it into a stream you can pipe to. It buffers the contents of the stream internally, and then calls the function when it has the full results. It handles all kinds of things that you can stream, but you still have to watch for errors on the streams you pipe into it!"
+    },
+    {
+      "type": "code",
+      "id": "736ee691d087a392",
+      "text": "var fs = require('fs')\nvar concat = require('concat-stream')\n\nfs.createReadStream('./sample.txt')\n  .on('error', function () {\n    console.error('Oh, the humanity!')\n  }).pipe(concat(function (res) {\n    var noSpace = res.toString().replace(/\\s/g, '')\n    var len = noSpace.length\n    var isPalendrome = true\n    for (var i = 0; i < (len/2); i++) {\n      if (noSpace[i] !== noSpace[len-1-i]) {\n        isPalendrome = false\n        break;\n      }\n    }\n    console.log(isPalendrome, len)\n  }))"
+    },
+    {
+      "type": "paragraph",
+      "id": "ce879a1e7ce56249",
+      "text": "So, use concat-stream, 1million + downloads a month can't be wrong. I wrote my own module 'stream-cb' to handle many of the same use cases back in the wild west before we knew how to discover modules, if I'd know about concat-stream I would have used it instead."
+    },
+    {
+      "type": "paragraph",
+      "id": "544da6be8e4bf414",
+      "text": "So, quit writing janky buffering code on your own, and concat-stream all of the streams that you need to dam up and turn into lakes."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Get the full result of a stream",
+        "story": []
+      },
+      "date": 1432780287890
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c60462c5753cc576"
+      },
+      "id": "c60462c5753cc576",
+      "type": "add",
+      "date": 1432780308295
+    },
+    {
+      "type": "edit",
+      "id": "c60462c5753cc576",
+      "item": {
+        "type": "paragraph",
+        "id": "c60462c5753cc576",
+        "text": "Streams are an amazing abstraction."
+      },
+      "date": 1432780815852
+    },
+    {
+      "type": "edit",
+      "id": "c60462c5753cc576",
+      "item": {
+        "type": "paragraph",
+        "id": "c60462c5753cc576",
+        "text": "Streams are an amazing abstraction for many things. They let us pipe things together, transform them, and control their flow, all without having to buffer the contents into memory. However, sometimes you just want the full contents all at once. Maybe because you can't do what you need to as a stream, maybe because it's just easier for what you're doing. Screwing up collecting the results of a stream is one of the [[JavaScript common pitfalls]]."
+      },
+      "date": 1432790221883
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ab85d37b2997546d"
+      },
+      "id": "ab85d37b2997546d",
+      "type": "add",
+      "after": "c60462c5753cc576",
+      "date": 1432791566441
+    },
+    {
+      "type": "edit",
+      "id": "ab85d37b2997546d",
+      "item": {
+        "type": "paragraph",
+        "id": "ab85d37b2997546d",
+        "text": "Say, for example, you had a sample.txt file and you needed to know whether the contents are a palindrome, and if so how many characters long is it. Not the best as a streaming work load. So lets take a look at the easy hand-rolled implementation."
+      },
+      "date": 1432791802753
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1917e00e664b0df1"
+      },
+      "id": "1917e00e664b0df1",
+      "type": "add",
+      "after": "ab85d37b2997546d",
+      "date": 1432791803743
+    },
+    {
+      "type": "remove",
+      "id": "1917e00e664b0df1",
+      "date": 1432791807237
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "508941729501e301"
+      },
+      "id": "508941729501e301",
+      "type": "add",
+      "after": "ab85d37b2997546d",
+      "date": 1432791837718
+    },
+    {
+      "type": "edit",
+      "id": "508941729501e301",
+      "item": {
+        "type": "paragraph",
+        "id": "508941729501e301",
+        "text": "Using this sample.txt file:"
+      },
+      "date": 1432791855006
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2753bcccbc0390bb"
+      },
+      "id": "2753bcccbc0390bb",
+      "type": "add",
+      "after": "508941729501e301",
+      "date": 1432791856258
+    },
+    {
+      "type": "edit",
+      "id": "2753bcccbc0390bb",
+      "item": {
+        "type": "code",
+        "id": "2753bcccbc0390bb",
+        "text": "a man a plan a canal panama"
+      },
+      "date": 1432791860862
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fbfe0fa4e9527833"
+      },
+      "id": "fbfe0fa4e9527833",
+      "type": "add",
+      "after": "2753bcccbc0390bb",
+      "date": 1432791881581
+    },
+    {
+      "type": "edit",
+      "id": "fbfe0fa4e9527833",
+      "item": {
+        "type": "code",
+        "id": "fbfe0fa4e9527833",
+        "text": "var fs = require('fs')\n\nvar buffer = ''\nfs.createReadStream('./sample.txt')\n  .on('data', function (chunk) {\n    buffer += chunk\n  }).on('end', function () {\n    var noSpace = buffer.replace(/\\s/g, '')\n    var len = noSpace.length\n    var isPalendrome = true\n    for (var i = 0; i < (len/2); i++) {\n      if (noSpace[i] !== noSpace[len-1-i]) {\n        isPalendrome = false\n        break;\n      }\n    }\n    console.log(isPalendrome, len)\n  }).on('error', function () {\n    console.error('Oh, the humanity!')\n  })"
+      },
+      "date": 1432791888995
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "cce0491ffadc80bd"
+      },
+      "id": "cce0491ffadc80bd",
+      "type": "add",
+      "after": "fbfe0fa4e9527833",
+      "date": 1432877595125
+    },
+    {
+      "type": "edit",
+      "id": "cce0491ffadc80bd",
+      "item": {
+        "type": "paragraph",
+        "id": "cce0491ffadc80bd",
+        "text": "This works for our example, but it doesn't handle characters who have been split into different halves of a buffer, and it allocates a new string the size of the entire contents of the file for every chunk that comes in. It is also a lot of boiler plate code for a situation that comes of fairly often."
+      },
+      "date": 1432877755285
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1ba13bb7ec4833e2"
+      },
+      "id": "1ba13bb7ec4833e2",
+      "type": "add",
+      "after": "cce0491ffadc80bd",
+      "date": 1432877784755
+    },
+    {
+      "type": "move",
+      "order": [
+        "c60462c5753cc576",
+        "ab85d37b2997546d",
+        "508941729501e301",
+        "2753bcccbc0390bb",
+        "1ba13bb7ec4833e2",
+        "fbfe0fa4e9527833",
+        "cce0491ffadc80bd"
+      ],
+      "id": "1ba13bb7ec4833e2",
+      "date": 1432877787506
+    },
+    {
+      "type": "edit",
+      "id": "1ba13bb7ec4833e2",
+      "item": {
+        "type": "paragraph",
+        "id": "1ba13bb7ec4833e2",
+        "text": "Our program looks like:"
+      },
+      "date": 1432877802488
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9aba8fb70d63f57b"
+      },
+      "id": "9aba8fb70d63f57b",
+      "type": "add",
+      "after": "cce0491ffadc80bd",
+      "date": 1432877811718
+    },
+    {
+      "type": "edit",
+      "id": "9aba8fb70d63f57b",
+      "item": {
+        "type": "paragraph",
+        "id": "9aba8fb70d63f57b",
+        "text": "So, lets use a library to take care of the boiler plate. First lets look at my own stream-cb. It lets you interact with callback apis using streams, and stream apis using callbacks. It only supports buffer streams, so it works well with all core APIs, but not necessarily all userland streams."
+      },
+      "date": 1432877950052
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "005476c104851e06"
+      },
+      "id": "005476c104851e06",
+      "type": "add",
+      "after": "9aba8fb70d63f57b",
+      "date": 1432878221508
+    },
+    {
+      "type": "edit",
+      "id": "005476c104851e06",
+      "item": {
+        "type": "code",
+        "id": "005476c104851e06",
+        "text": "var fs = require('fs')\nvar streamCb = require('stream-cb')\n\nfs.createReadStream('./sample.txt')\n  .pipe(streamCb(function (err, res) {\n    if (err) return console.error('Oh, the humanity!')\n    var noSpace = res.replace(/\\s/g, '')\n    var len = noSpace.length\n    var isPalendrome = true\n    for (var i = 0; i < (len/2); i++) {\n      if (noSpace[i] !== noSpace[len-1-i]) {\n        isPalendrome = false\n        break;\n      }\n    }\n    console.log(isPalendrome, len)\n}))"
+      },
+      "date": 1432878228976
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "42ac483036bb2078"
+      },
+      "id": "42ac483036bb2078",
+      "type": "add",
+      "after": "005476c104851e06",
+      "date": 1432878244551
+    },
+    {
+      "type": "edit",
+      "id": "42ac483036bb2078",
+      "item": {
+        "type": "paragraph",
+        "id": "42ac483036bb2078",
+        "text": "stream-cb takes the node style call back, and turns it into a stream you can pipe to. It buffers the contents of the stream internally, and then calls the function when it has the full results, or if there is an error. It works well for a lot of things, but it automatically converts the buffer to a string at the end, it doesn't handle object mode streams at all, and it's not very popular. So lets check out the module that handles those concerns."
+      },
+      "date": 1432878424537
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "736ee691d087a392"
+      },
+      "id": "736ee691d087a392",
+      "type": "add",
+      "after": "42ac483036bb2078",
+      "date": 1432878785709
+    },
+    {
+      "type": "edit",
+      "id": "736ee691d087a392",
+      "item": {
+        "type": "code",
+        "id": "736ee691d087a392",
+        "text": "var fs = require('fs')\nvar concat = require('concat-stream')\n\nfs.createReadStream('./sample.txt')\n  .on('error', function () {\n    console.error('Oh, the humanity!')\n  }).pipe(concat(function (res) {\n    var noSpace = res.toString().replace(/\\s/g, '')\n    var len = noSpace.length\n    var isPalendrome = true\n    for (var i = 0; i < (len/2); i++) {\n      if (noSpace[i] !== noSpace[len-1-i]) {\n        isPalendrome = false\n        break;\n      }\n    }\n    console.log(isPalendrome, len)\n  }))"
+      },
+      "date": 1432878794540
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "030c9beb9152a906"
+      },
+      "id": "030c9beb9152a906",
+      "type": "add",
+      "after": "736ee691d087a392",
+      "date": 1432878798578
+    },
+    {
+      "type": "remove",
+      "id": "030c9beb9152a906",
+      "date": 1432878840659
+    },
+    {
+      "type": "edit",
+      "id": "005476c104851e06",
+      "item": {
+        "type": "code",
+        "id": "005476c104851e06",
+        "text": "var fs = require('fs')\nvar streamCb = require('stream-cb')\n\nfs.createReadStream('./sample.txt')\n  .on('error', function () {\n    console.error('Oh, the humanity!')\n  }).pipe(streamCb(function (err, res) {\n    if (err) return console.error('Oh, the humanity!')\n    var noSpace = res.replace(/\\s/g, '')\n    var len = noSpace.length\n    var isPalendrome = true\n    for (var i = 0; i < (len/2); i++) {\n      if (noSpace[i] !== noSpace[len-1-i]) {\n        isPalendrome = false\n        break;\n      }\n    }\n    console.log(isPalendrome, len)\n}))"
+      },
+      "date": 1432879027645
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ce879a1e7ce56249"
+      },
+      "id": "ce879a1e7ce56249",
+      "type": "add",
+      "after": "736ee691d087a392",
+      "date": 1432879040047
+    },
+    {
+      "type": "edit",
+      "id": "ce879a1e7ce56249",
+      "item": {
+        "type": "paragraph",
+        "id": "ce879a1e7ce56249",
+        "text": "We explicitly convert the buffer into a string, but otherwise it's pretty much the same, and it accepts all kinds of input."
+      },
+      "date": 1432879102517
+    },
+    {
+      "type": "edit",
+      "id": "ce879a1e7ce56249",
+      "item": {
+        "type": "paragraph",
+        "id": "ce879a1e7ce56249",
+        "text": "We explicitly convert the buffer into a string, but otherwise it's pretty much the same, and it accepts all kinds of input. So, use concat-stream, 1million + downloads a month can't be wrong. I wrote my back in the wild west before we knew how to discover modules, if I'd know about concat-stream I would have used it."
+      },
+      "date": 1432879351580
+    },
+    {
+      "type": "add",
+      "id": "544da6be8e4bf414",
+      "item": {
+        "type": "paragraph",
+        "id": "544da6be8e4bf414",
+        "text": "So, quit writing janky buffering code on your own, and concat-stream all of the streams that you need to dam up and turn into lakes."
+      },
+      "after": "ce879a1e7ce56249",
+      "date": 1432879391472
+    },
+    {
+      "type": "edit",
+      "id": "9aba8fb70d63f57b",
+      "item": {
+        "type": "paragraph",
+        "id": "9aba8fb70d63f57b",
+        "text": "So, lets use a library to take care of the boiler plate."
+      },
+      "date": 1432879445097
+    },
+    {
+      "type": "remove",
+      "id": "005476c104851e06",
+      "date": 1432879454737
+    },
+    {
+      "type": "remove",
+      "id": "42ac483036bb2078",
+      "date": 1432879511375
+    },
+    {
+      "type": "edit",
+      "id": "9aba8fb70d63f57b",
+      "item": {
+        "type": "paragraph",
+        "id": "9aba8fb70d63f57b",
+        "text": "So, lets use a library to take care of the boiler plate. 'concat-stream' takes a call back, and turns it into a stream you can pipe to. It buffers the contents of the stream internally, and then calls the function when it has the full results. It handles all kinds of things that you can stream, but you still have to watch for errors on the streams you pipe into it!"
+      },
+      "date": 1432879600793
+    },
+    {
+      "type": "edit",
+      "id": "ce879a1e7ce56249",
+      "item": {
+        "type": "paragraph",
+        "id": "ce879a1e7ce56249",
+        "text": "So, use concat-stream, 1million + downloads a month can't be wrong. I wrote my own module 'stream-cb' to handle many of the same use cases back in the wild west before we knew how to discover modules, if I'd know about concat-stream I would have used it instead."
+      },
+      "date": 1432879695647
+    },
+    {
+      "type": "edit",
+      "id": "9aba8fb70d63f57b",
+      "item": {
+        "type": "paragraph",
+        "id": "9aba8fb70d63f57b",
+        "text": "So, lets use a library to take care of the boiler plate. Max Ogden's 'concat-stream'. It takes a call back, and turns it into a stream you can pipe to. It buffers the contents of the stream internally, and then calls the function when it has the full results. It handles all kinds of things that you can stream, but you still have to watch for errors on the streams you pipe into it!"
+      },
+      "date": 1432879745181
+    },
+    {
+      "type": "fork",
+      "site": "nrn.io",
+      "date": 1652868560921
+    }
+  ]
+}

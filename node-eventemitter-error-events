@@ -1,0 +1,435 @@
+{
+  "title": "Node EventEmitter error events",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "ebffac8e8c9d4134",
+      "text": "Node's EventEmitter implementation by default throws an error if an 'error' event is emitted, but no handlers are there to listen for it. This is both great and awful. If the default was for it to do nothing (as with normal events) you would miss that important errors are happening. However it is possible for unimportant things that never come up during development to cause hard errors in production, like wonky network traffic."
+    },
+    {
+      "type": "paragraph",
+      "id": "2310e9bb87ee403c",
+      "text": "One problem with this is that most of the core apis are eventEmitters, or streams (which themselves are eventEmitters)."
+    },
+    {
+      "type": "code",
+      "id": "9ec02266f76968ac",
+      "text": "var http = require('http')\nvar fs = require('fs')\n\nhttp.get('http://nrn.io:2222', function (res) {\n    res.pipe(fs.createWriteStream('./na/foo'))\n})"
+    },
+    {
+      "type": "paragraph",
+      "id": "fe5d628c7d5ecf34",
+      "text": "In theory this is fine, except that I don't have any services running on port 2222, so I get an `ECONNREFUSED` error that crashes my process. Where does that error come from and how do we catch it though? The first instinct is to wrap the call in a try catch."
+    },
+    {
+      "type": "code",
+      "id": "0653d4302e6ce79a",
+      "text": "var http = require('http')\nvar fs = require('fs')\n\n// broken\ntry {\n  http.get('http://nrn.io:2222', function (res) {\n      res.pipe(fs.createWriteStream('./na/foo'))\n  })\n} catch (e) {\n  console.log(e)\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "a5c9606b95ca6e48",
+      "text": "This is still broken, because the error happens asynchronously in the future, we don't know that our connection has been refused until an undetermined time after our code has executed. It turns out http.get returns us an eventEmitter that we can get updates on, and that is where the ECONNREFUSED error is getting emitted."
+    },
+    {
+      "type": "code",
+      "id": "4cb09b750b4482ee",
+      "text": "var http = require('http')\nvar fs = require('fs')\n\nhttp.get('http://nrn.io:2222', function (res) {\n  res.pipe(fs.createWriteStream('./na/foo'))\n}).on('error', function (e) { console.error(e) })\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "8856087b50c810ff",
+      "text": "Now we're just logging out the error instead of crashing the process. But what if we fix the call to point at something that exists, so we can see how these error events play out in the streams inside? "
+    },
+    {
+      "type": "paragraph",
+      "id": "49f6faef9175beb7",
+      "text": "We get an ENOENT, because we are trying to write to a folder/file that doesn't exist. We already know this happens in the future from the time the code executes, so lets skip the try catch, and listen to the error event."
+    },
+    {
+      "type": "code",
+      "id": "18ad5db956b5d88f",
+      "text": "var http = require('http')\nvar fs = require('fs')\n\nhttp.get('http://nrn.io', function (res) {\n  res.pipe(fs.createWriteStream('./na/foo')\n  ).on('error', function (e) { console.error(e) })\n}).on('error', function (e) { console.error(e) })\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "0785d7ab28ff94d5",
+      "text": "Well, that worked first time, because the pipe method happens to return the thing being piped to, not the thing being piped from. But it misses the more sinister thing here. Errors aren't propagated through streams that are piped together. So only the write stream's errors are handled here, if our response has a problem it will still throw a hard error and crash the process. "
+    },
+    {
+      "type": "paragraph",
+      "id": "c6f3368e0b5ed2e8",
+      "text": "Listen for all errors that you know can happen, and can gracefully clean up from. More importantly, plan for your process to crash. If you add blanket error handlers that swallow errors they don't understand you can leave your process in a state that you have never tested, and is probably broken. You're better off writing it in a way that crashing isn't such a big deal, and when these unexpected things come up, crash, collect the details you need to fix it in a future version, and spin up a new process."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Node EventEmitter error events",
+        "story": []
+      },
+      "date": 1431752585222
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ebffac8e8c9d4134"
+      },
+      "id": "ebffac8e8c9d4134",
+      "type": "add",
+      "date": 1431752587421
+    },
+    {
+      "type": "edit",
+      "id": "ebffac8e8c9d4134",
+      "item": {
+        "type": "paragraph",
+        "id": "ebffac8e8c9d4134",
+        "text": "Node's EventEmitter implementation by default throws an error if an 'error' event is emitted, but no handlers are there to listen for it. This is both great and awful. If the default was for it to do nothing (as with normal events) you would miss that important errors are happening. However it is possible for unimportant things that never come up during development to cause hard errors in production, like wonky network traffic."
+      },
+      "date": 1431752772423
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "2310e9bb87ee403c",
+        "text": "One problem with this is that most of the core apis are eventEmitters, or streams (which themselves are eventEmitters)."
+      },
+      "id": "2310e9bb87ee403c",
+      "type": "add",
+      "after": "ebffac8e8c9d4134",
+      "date": 1431753230776
+    },
+    {
+      "type": "edit",
+      "id": "2310e9bb87ee403c",
+      "item": {
+        "type": "paragraph",
+        "id": "2310e9bb87ee403c",
+        "text": "One problem with this is that most of the core apis are eventEmitters, or streams (which themselves are eventEmitters)."
+      },
+      "date": 1431753317752
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "9ec02266f76968ac",
+        "text": "var http = require('http')\nvar fs = require('fs')\n\nhttp.get('http://nrn.io:2222', function (res) {\n    res.pipe(fs.createWriteStream('./na/foo'))\n})"
+      },
+      "id": "9ec02266f76968ac",
+      "type": "add",
+      "after": "2310e9bb87ee403c",
+      "date": 1431753319559
+    },
+    {
+      "type": "edit",
+      "id": "9ec02266f76968ac",
+      "item": {
+        "type": "code",
+        "id": "9ec02266f76968ac",
+        "text": "var http = require('http')\nvar fs = require('fs')\n\nhttp.get('http://nrn.io:2222', function (res) {\n    res.pipe(fs.createWriteStream('./na/foo'))\n})"
+      },
+      "date": 1431753326616
+    },
+    {
+      "type": "edit",
+      "id": "9ec02266f76968ac",
+      "item": {
+        "type": "code",
+        "id": "9ec02266f76968ac",
+        "text": "var http = require('http')\nvar fs = require('fs')\n\nhttp.get('http://nrn.io:2222', function (res) {\n    res.pipe(fs.createWriteStream('./na/foo'))\n})"
+      },
+      "date": 1431753366930
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "fe5d628c7d5ecf34",
+        "text": "In theory this is fine, except that I don't have any services running on port 2222, so I get an `ECONNREFUSED` error that crashes my process. Where does that error come from and how do we catch it though? The first instinct is to wrap the call in a try catch."
+      },
+      "id": "fe5d628c7d5ecf34",
+      "type": "add",
+      "after": "9ec02266f76968ac",
+      "date": 1431753425241
+    },
+    {
+      "type": "edit",
+      "id": "fe5d628c7d5ecf34",
+      "item": {
+        "type": "paragraph",
+        "id": "fe5d628c7d5ecf34",
+        "text": "In theory this is fine, except that I don't have any services running on port 2222, so I get an `ECONNREFUSED` error that crashes my process. Where does that error come from and how do we catch it though? The first instinct is to wrap the call in a try catch."
+      },
+      "date": 1431753455476
+    },
+    {
+      "type": "edit",
+      "id": "fe5d628c7d5ecf34",
+      "item": {
+        "type": "paragraph",
+        "id": "fe5d628c7d5ecf34",
+        "text": "In theory this is fine, except that I don't have any services running on port 2222, so I get an `ECONNREFUSED` error that crashes my process. Where does that error come from and how do we catch it though? The first instinct is to wrap the call in a try catch."
+      },
+      "date": 1431753536924
+    },
+    {
+      "type": "edit",
+      "id": "fe5d628c7d5ecf34",
+      "item": {
+        "type": "paragraph",
+        "id": "fe5d628c7d5ecf34",
+        "text": "In theory this is fine, except that I don't have any services running on port 2222, so I get an `ECONNREFUSED` error that crashes my process. Where does that error come from and how do we catch it though? The first instinct is to wrap the call in a try catch."
+      },
+      "date": 1431753698134
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "0653d4302e6ce79a",
+        "text": "var http = require('http')\nvar fs = require('fs')\n\n// broken\ntry {\n  http.get('http://nrn.io:2222', function (res) {\n      res.pipe(fs.createWriteStream('./na/foo'))\n  })\n} catch (e) {\n  console.log(e)\n}"
+      },
+      "id": "0653d4302e6ce79a",
+      "type": "add",
+      "after": "fe5d628c7d5ecf34",
+      "date": 1431753699999
+    },
+    {
+      "type": "edit",
+      "id": "0653d4302e6ce79a",
+      "item": {
+        "type": "code",
+        "id": "0653d4302e6ce79a",
+        "text": "var http = require('http')\nvar fs = require('fs')\n\n// broken\ntry {\n  http.get('http://nrn.io:2222', function (res) {\n      res.pipe(fs.createWriteStream('./na/foo'))\n  })\n} catch (e) {\n  console.log(e)\n}"
+      },
+      "date": 1431753704808
+    },
+    {
+      "type": "edit",
+      "id": "0653d4302e6ce79a",
+      "item": {
+        "type": "code",
+        "id": "0653d4302e6ce79a",
+        "text": "var http = require('http')\nvar fs = require('fs')\n\n// broken\ntry {\n  http.get('http://nrn.io:2222', function (res) {\n      res.pipe(fs.createWriteStream('./na/foo'))\n  })\n} catch (e) {\n  console.log(e)\n}"
+      },
+      "date": 1431753716023
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "a5c9606b95ca6e48",
+        "text": "This is still broken, because the error happens asynchronously in the future, we don't know that our connection has been refused until an undetermined time after our code has executed. It turns out http.get returns us an eventEmitter that we can get updates on, and that is where the ECONNREFUSED error is getting emitted."
+      },
+      "id": "a5c9606b95ca6e48",
+      "type": "add",
+      "after": "0653d4302e6ce79a",
+      "date": 1431753727364
+    },
+    {
+      "type": "edit",
+      "id": "a5c9606b95ca6e48",
+      "item": {
+        "type": "paragraph",
+        "id": "a5c9606b95ca6e48",
+        "text": "This is still broken, because the error happens asynchronously in the future, we don't know that our connection has been refused until an undetermined time after our code has executed. It turns out http.get returns us an eventEmitter that we can get updates on, and that is where the ECONNREFUSED error is getting emitted."
+      },
+      "date": 1431753825295
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "4cb09b750b4482ee",
+        "text": "var http = require('http')\nvar fs = require('fs')\n\nhttp.get('http://nrn.io:2222', function (res) {\n  res.pipe(fs.createWriteStream('./na/foo'))\n}).on('error', function (e) { console.error(e) })\n"
+      },
+      "id": "4cb09b750b4482ee",
+      "type": "add",
+      "after": "a5c9606b95ca6e48",
+      "date": 1431753937018
+    },
+    {
+      "type": "edit",
+      "id": "4cb09b750b4482ee",
+      "item": {
+        "type": "code",
+        "id": "4cb09b750b4482ee",
+        "text": "var http = require('http')\nvar fs = require('fs')\n\nhttp.get('http://nrn.io:2222', function (res) {\n  res.pipe(fs.createWriteStream('./na/foo'))\n}).on('error', function (e) { console.error(e) })\n"
+      },
+      "date": 1431753945638
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "8856087b50c810ff",
+        "text": "Now we're just logging out the error instead of crashing the process. But what if we fix the call to point at something that exists, so we can see how these error events play out in the streams inside? "
+      },
+      "id": "8856087b50c810ff",
+      "type": "add",
+      "after": "4cb09b750b4482ee",
+      "date": 1431753974403
+    },
+    {
+      "type": "edit",
+      "id": "8856087b50c810ff",
+      "item": {
+        "type": "paragraph",
+        "id": "8856087b50c810ff",
+        "text": "Now we're just logging out the error instead of crashing the process. But what if we fix the call to point at something that exists, so we can see how these error events play out in the streams inside? "
+      },
+      "date": 1431754087950
+    },
+    {
+      "type": "edit",
+      "id": "5c27aeeeb0e6677b",
+      "item": {
+        "type": "code",
+        "id": "5c27aeeeb0e6677b",
+        "text": "var http = require('http')\nvar fs = require('fs')\n\nhttp.get('http://nrn.io', function (res) {\n  res.pipe(fs.createWriteStream('./na/foo'))\n}).on('error', function (e) { console.error(e) })"
+      },
+      "date": 1431754170166
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "5c27aeeeb0e6677b",
+        "text": "var http = require('http')\nvar fs = require('fs')\n\nhttp.get('http://nrn.io', function (res) {\n  res.pipe(fs.createWriteStream('./na/foo'))\n}).on('error', function (e) { console.error(e) })"
+      },
+      "id": "5c27aeeeb0e6677b",
+      "type": "add",
+      "after": "8856087b50c810ff",
+      "date": 1431754154006
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "49f6faef9175beb7",
+        "text": "We get an ENOENT, because we are trying to write to a folder/file that doesn't exist. We already know this happens in the future from the time the code executes, so lets skip the try catch, and listen to the error event."
+      },
+      "id": "49f6faef9175beb7",
+      "type": "add",
+      "after": "5c27aeeeb0e6677b",
+      "date": 1431754200875
+    },
+    {
+      "type": "edit",
+      "id": "49f6faef9175beb7",
+      "item": {
+        "type": "paragraph",
+        "id": "49f6faef9175beb7",
+        "text": "We get an ENOENT, because we are trying to write to a folder/file that doesn't exist. We already know this happens in the future from the time the code executes, so lets skip the try catch, and listen to the error event."
+      },
+      "date": 1431754215269
+    },
+    {
+      "type": "edit",
+      "id": "49f6faef9175beb7",
+      "item": {
+        "type": "paragraph",
+        "id": "49f6faef9175beb7",
+        "text": "We get an ENOENT, because we are trying to write to a folder/file that doesn't exist. We already know this happens in the future from the time the code executes, so lets skip the try catch, and listen to the error event."
+      },
+      "date": 1431754274284
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "18ad5db956b5d88f",
+        "text": "var http = require('http')\nvar fs = require('fs')\n\nhttp.get('http://nrn.io', function (res) {\n  res.pipe(fs.createWriteStream('./na/foo')\n  ).on('error', function (e) { console.error(e) })\n}).on('error', function (e) { console.error(e) })\n"
+      },
+      "id": "18ad5db956b5d88f",
+      "type": "add",
+      "after": "49f6faef9175beb7",
+      "date": 1431754423996
+    },
+    {
+      "type": "edit",
+      "id": "18ad5db956b5d88f",
+      "item": {
+        "type": "code",
+        "id": "18ad5db956b5d88f",
+        "text": "var http = require('http')\nvar fs = require('fs')\n\nhttp.get('http://nrn.io', function (res) {\n  res.pipe(fs.createWriteStream('./na/foo')\n  ).on('error', function (e) { console.error(e) })\n}).on('error', function (e) { console.error(e) })\n"
+      },
+      "date": 1431754430568
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "0785d7ab28ff94d5",
+        "text": "Well, that worked first time, because the pipe method happens to return the thing being piped to, not the thing being piped from. But it misses the more sinister thing here. Errors aren't propagated through streams that are piped together. So only the write stream's errors are handled here, if our response has a problem it will still throw a hard error and crash the process. "
+      },
+      "id": "0785d7ab28ff94d5",
+      "type": "add",
+      "after": "18ad5db956b5d88f",
+      "date": 1431754434711
+    },
+    {
+      "type": "edit",
+      "id": "0785d7ab28ff94d5",
+      "item": {
+        "type": "paragraph",
+        "id": "0785d7ab28ff94d5",
+        "text": "Well, that worked first time, because the pipe method happens to return the thing being piped to, not the thing being piped from. But it misses the more sinister thing here. Errors aren't propagated through streams that are piped together. So only the write stream's errors are handled here, if our response has a problem it will still throw a hard error and crash the process. "
+      },
+      "date": 1431754594517
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "c6f3368e0b5ed2e8",
+        "text": "Listen for all errors that you know can happen, and can gracefully clean up from. More importantly, plan for your process to crash. If you add blanket error handlers that swallow errors they don't understand you can leave your process in a state that you have never tested, and is probably broken. You're better off writing it in a way that crashing isn't such a big deal, and when these unexpected things come up, crash, collect the details you need to fix it in a future version, and spin up a new process."
+      },
+      "id": "c6f3368e0b5ed2e8",
+      "type": "add",
+      "after": "0785d7ab28ff94d5",
+      "date": 1431754599110
+    },
+    {
+      "type": "edit",
+      "id": "c6f3368e0b5ed2e8",
+      "item": {
+        "type": "paragraph",
+        "id": "c6f3368e0b5ed2e8",
+        "text": "Listen for all errors that you know can happen, and can gracefully clean up from. More importantly, plan for your process to crash. If you add blanket error handlers that swallow errors they don't understand you can leave your process in a state that you have never tested, and is probably broken. You're better off writing it in a way that crashing isn't such a big deal, and when these unexpected things come up, crash, collect the details you need to fix it in a future version, and spin up a new process."
+      },
+      "date": 1431754775498
+    },
+    {
+      "type": "edit",
+      "id": "c6f3368e0b5ed2e8",
+      "item": {
+        "type": "paragraph",
+        "id": "c6f3368e0b5ed2e8",
+        "text": "Listen for all errors that you know can happen, and can gracefully clean up from. More importantly, plan for your process to crash. If you add blanket error handlers that swallow errors they don't understand you can leave your process in a state that you have never tested, and is probably broken. You're better off writing it in a way that crashing isn't such a big deal, and when these unexpected things come up, crash, collect the details you need to fix it in a future version, and spin up a new process."
+      },
+      "date": 1431754808020
+    },
+    {
+      "type": "edit",
+      "id": "8856087b50c810ff",
+      "item": {
+        "type": "paragraph",
+        "id": "8856087b50c810ff",
+        "text": "Now we're just logging out the error instead of crashing the process. But what if we fix the call to point at something that exists, so we can see how these error events play out in the streams inside? "
+      },
+      "date": 1431754198132,
+      "error": {
+        "type": "error",
+        "msg": "",
+        "response": ""
+      }
+    },
+    {
+      "type": "fork",
+      "date": 1431792390624
+    },
+    {
+      "type": "remove",
+      "id": "5c27aeeeb0e6677b",
+      "date": 1431792626194
+    },
+    {
+      "type": "fork",
+      "site": "nrn.io",
+      "date": 1652868521321
+    }
+  ]
+}

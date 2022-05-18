@@ -1,0 +1,210 @@
+{
+  "title": "Mysteriously mutating objects",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "30809be5080dce2f",
+      "text": "All objects in javaScript are mutable. In our own code base we use this for better or ill with very few train wrecks. But when we start accepting objects from other modules and unexpectedly mutating them, we can get into very hard to debug situations."
+    },
+    {
+      "type": "code",
+      "id": "5d284af64d00c8ce",
+      "text": "// ------- User Code ----------\nvar options = { type: 'dog' }\n\nvar Spot = new buildPet(options)\nconsole.dir(Spot)\n\nvar Fido = new buildPet(options)\nconsole.dir(Fido)\n\n// ------- Our Third Party Module ----------\n\nfunction buildPet (options) {\n  var color = [ 'black', 'white', 'brownn' ]\n  if (!options) options = {}\n  if (!options.color) {\n    var pick = Math.floor(Math.random() * 3)\n    options.color = color[pick]\n  }\n\n  for (var i in options) {\n    this[i] = options[i]\n  }\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "e214c007d31db89f",
+      "text": "The user intends to build two new pets. Both dogs, with random colors. However, since we mutate the options object they provided us in order to add computed or default properties the color will always be the same for both Spot and Fido."
+    },
+    {
+      "type": "paragraph",
+      "id": "4783dbd1b06da8cc",
+      "text": "The solution is simple, if you don't know how other parts of the code that share a reference to the same object will be using that object, then copy it before you mutate."
+    },
+    {
+      "type": "code",
+      "id": "fbe38d85b070e405",
+      "text": "var pc = require('photocopy')\n\n// ------- User Code ----------\nvar options = { type: 'dog' }\n\nvar Spot = new buildPet(options)\nconsole.dir(Spot)\n\nvar Fido = new buildPet(options)\nconsole.dir(Fido)\n\n// ------- Our Third Party Module ----------\n//\n\nfunction buildPet (options) {\n  var color = [ 'black', 'white', 'brownn' ]\n  if (!options) options = {}\n  options = pc(options)\n  if (!options.color) {\n    var pick = Math.floor(Math.random() * 3)\n    options.color = color[pick]\n  }\n\n  for (var i in options) {\n    this[i] = options[i]\n  }\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "c46d2d66c14fa8e8",
+      "text": "Now each dog gets its own randomly assigned color, even though they are sharing the same options object. Defensive copying's only big disadvantage is performance overhead. Though it's better to not mutate when possible."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Mysteriously mutating objects",
+        "story": []
+      },
+      "date": 1431152314371
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "30809be5080dce2f",
+        "text": "All objects in javaScript are mutable. In our own code base we use this for better or ill with very few train wrecks. But when we start accepting objects from other modules and unexpectedly mutating them, we can get into very hard to debug situations."
+      },
+      "id": "30809be5080dce2f",
+      "type": "add",
+      "date": 1431152322349
+    },
+    {
+      "type": "edit",
+      "id": "30809be5080dce2f",
+      "item": {
+        "type": "paragraph",
+        "id": "30809be5080dce2f",
+        "text": "All objects in javaScript are mutable. In our own code base we use this for better or ill with very few train wrecks. But when we start accepting objects from other modules and unexpectedly mutating them, we can get into very hard to debug situations."
+      },
+      "date": 1431152509870
+    },
+    {
+      "type": "edit",
+      "id": "30809be5080dce2f",
+      "item": {
+        "type": "paragraph",
+        "id": "30809be5080dce2f",
+        "text": "All objects in javaScript are mutable. In our own code base we use this for better or ill with very few train wrecks. But when we start accepting objects from other modules and unexpectedly mutating them, we can get into very hard to debug situations."
+      },
+      "date": 1431153364919
+    },
+    {
+      "type": "fork",
+      "date": 1431153367045
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f4556f8f95373185"
+      },
+      "id": "f4556f8f95373185",
+      "type": "add",
+      "after": "30809be5080dce2f",
+      "date": 1431153578274
+    },
+    {
+      "type": "remove",
+      "id": "f4556f8f95373185",
+      "date": 1431153589924
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5d284af64d00c8ce"
+      },
+      "id": "5d284af64d00c8ce",
+      "type": "add",
+      "after": "30809be5080dce2f",
+      "date": 1431153601357
+    },
+    {
+      "type": "edit",
+      "id": "5d284af64d00c8ce",
+      "item": {
+        "type": "code",
+        "id": "5d284af64d00c8ce",
+        "text": "// ------- User Code ----------\nvar options = { type: 'dog' }\n\nvar Spot = new buildPet(options)\nconsole.dir(Spot)\n\nvar Fido = new buildPet(options)\nconsole.dir(Fido)\n\n// ------- Our Third Party Module ----------\n\nfunction buildPet (options) {\n  var color = [ 'black', 'white', 'brownn' ]\n  if (!options) options = {}\n  if (!options.color) {\n    options.color = color[Math.floor(Math.random() * 3)]\n  }\n\n  for (var i in options) {\n    this[i] = options[i]\n  }\n}"
+      },
+      "date": 1431153606749
+    },
+    {
+      "type": "edit",
+      "id": "5d284af64d00c8ce",
+      "item": {
+        "type": "code",
+        "id": "5d284af64d00c8ce",
+        "text": "// ------- User Code ----------\nvar options = { type: 'dog' }\n\nvar Spot = new buildPet(options)\nconsole.dir(Spot)\n\nvar Fido = new buildPet(options)\nconsole.dir(Fido)\n\n// ------- Our Third Party Module ----------\n\nfunction buildPet (options) {\n  var color = [ 'black', 'white', 'brownn' ]\n  if (!options) options = {}\n  if (!options.color) {\n    var pick = Math.floor(Math.random() * 3)\n    options.color = color[pick]\n  }\n\n  for (var i in options) {\n    this[i] = options[i]\n  }\n}"
+      },
+      "date": 1431153659228
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e214c007d31db89f"
+      },
+      "id": "e214c007d31db89f",
+      "type": "add",
+      "after": "5d284af64d00c8ce",
+      "date": 1431153694490
+    },
+    {
+      "type": "edit",
+      "id": "e214c007d31db89f",
+      "item": {
+        "type": "paragraph",
+        "id": "e214c007d31db89f",
+        "text": "The user intends to build two new pets. Both dogs, with random colors. However, since we mutate the options object they provided us in order to add computed or default properties the color will always be the same for both Spot and Fido."
+      },
+      "date": 1431153794995
+    },
+    {
+      "type": "add",
+      "id": "4783dbd1b06da8cc",
+      "item": {
+        "type": "paragraph",
+        "id": "4783dbd1b06da8cc",
+        "text": "The solution is simple, if you don't know how other parts of the code that share a reference to the same object will be using that object, then copy it before you mutate."
+      },
+      "after": "e214c007d31db89f",
+      "date": 1431153891257
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fbe38d85b070e405"
+      },
+      "id": "fbe38d85b070e405",
+      "type": "add",
+      "after": "4783dbd1b06da8cc",
+      "date": 1431153914132
+    },
+    {
+      "type": "edit",
+      "id": "fbe38d85b070e405",
+      "item": {
+        "type": "code",
+        "id": "fbe38d85b070e405",
+        "text": "var pc = require('photocopy')\n\n// ------- User Code ----------\nvar options = { type: 'dog' }\n\nvar Spot = new buildPet(options)\nconsole.dir(Spot)\n\nvar Fido = new buildPet(options)\nconsole.dir(Fido)\n\n// ------- Our Third Party Module ----------\n//\n\nfunction buildPet (options) {\n  var color = [ 'black', 'white', 'brownn' ]\n  if (!options) options = {}\n  options = pc(options)\n  if (!options.color) {\n    options.color = color[Math.floor(Math.random() * 3)]\n  }\n\n  for (var i in options) {\n    this[i] = options[i]\n  }\n}"
+      },
+      "date": 1431153930280
+    },
+    {
+      "type": "edit",
+      "id": "fbe38d85b070e405",
+      "item": {
+        "type": "code",
+        "id": "fbe38d85b070e405",
+        "text": "var pc = require('photocopy')\n\n// ------- User Code ----------\nvar options = { type: 'dog' }\n\nvar Spot = new buildPet(options)\nconsole.dir(Spot)\n\nvar Fido = new buildPet(options)\nconsole.dir(Fido)\n\n// ------- Our Third Party Module ----------\n//\n\nfunction buildPet (options) {\n  var color = [ 'black', 'white', 'brownn' ]\n  if (!options) options = {}\n  options = pc(options)\n  if (!options.color) {\n    var pick = Math.floor(Math.random() * 3)\n    options.color = color[pick]\n  }\n\n  for (var i in options) {\n    this[i] = options[i]\n  }\n}"
+      },
+      "date": 1431153975939
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c46d2d66c14fa8e8"
+      },
+      "id": "c46d2d66c14fa8e8",
+      "type": "add",
+      "after": "fbe38d85b070e405",
+      "date": 1431154006429
+    },
+    {
+      "type": "edit",
+      "id": "c46d2d66c14fa8e8",
+      "item": {
+        "type": "paragraph",
+        "id": "c46d2d66c14fa8e8",
+        "text": "Now each dog gets its own randomly assigned color, even though they are sharing the same options object. Defensive copying's only big disadvantage is performance overhead. Though it's better to not mutate when possible."
+      },
+      "date": 1431154184285
+    },
+    {
+      "type": "fork",
+      "site": "nrn.io",
+      "date": 1652868351983
+    }
+  ]
+}

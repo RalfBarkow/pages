@@ -1,0 +1,318 @@
+{
+  "title": "Recursion Depth",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "2e359395f4205dd3",
+      "text": "JavaScript is just finally getting tail call optimization on es6. That means that in all current platforms, as of summer 2015, if a function calls itself too many times recursively it eventually causes an exception. This most often comes up in forward recursive algorithms which can be really fast, even with a lot of function calls."
+    },
+    {
+      "type": "paragraph",
+      "id": "36f31f68921fa2c8",
+      "text": "In V8 there isn't any one number of recursions before you get \"RangeError: Maximum call stack size exceeded\", it depends on the code, the version and the platform. However it often seems to be in the 10-20k range."
+    },
+    {
+      "type": "code",
+      "id": "c127953153dec0f4",
+      "text": "// broken\nconsole.log(\n  fib(13974) // throws RangeError\n)\n\nfunction fib (n) {\n  return calcFib(0, 1, n)\n}\n\nfunction calcFib (total, last, i) {\n  if (i === 0) return total\n  return calcFib(total+last, total, i-1)\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "9506660f61e5274b",
+      "text": "For this code on my machine 13974 is the straw that broke the camels back, 13973 executes just fine. And incredibly quickly. For some things this is a fine limit, for example the 10,000th Fibonacci number is already too large for JavaScript, and we get 'infinity`. But what could we do to use a recursive algorithm without hitting the stack limit?  "
+    },
+    {
+      "type": "paragraph",
+      "id": "3105f3f9d2fecb8a",
+      "text": "One option is to use asynchronous recursion, setting each next iteration inside a timer, and passing a call back along to get (in this case log) the final total."
+    },
+    {
+      "type": "code",
+      "id": "44d34aa081c8b473",
+      "text": "fib(3000000, console.log.bind(console))\n\nfunction fib (n, cb) {\n  return calcFib(0, 1, n, cb)\n}\n\nfunction calcFib (total, last, i, cb) {\n  if (i === 0) return cb(total)\n  setImmediate(function () {\n    calcFib(total+last, total, i-1, cb)\n  })\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "165a088b117d9d52",
+      "text": "This is slower than the original, up from 100ms to 150ms for n = 13000. It takes a few seconds to do the full 3million. But it never blows out the stack due to depth, because each one is starting fresh."
+    },
+    {
+      "type": "paragraph",
+      "id": "6b106989b8af891a",
+      "text": "There is another amazing side effect of this. It's not blocking. A long running synchronous process blocks the thread so no other events/timers can happen, but by breaking it up across the timers we avoid that. The rest of our process still functions as normal, executing any incoming events and timers in between each step of calcFib."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Recursion Depth",
+        "story": []
+      },
+      "date": 1432146821820
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2e359395f4205dd3"
+      },
+      "id": "2e359395f4205dd3",
+      "type": "add",
+      "date": 1432146824288
+    },
+    {
+      "type": "edit",
+      "id": "2e359395f4205dd3",
+      "item": {
+        "type": "paragraph",
+        "id": "2e359395f4205dd3",
+        "text": "JavaScript is just finally getting tail call optimization on es6. That means that in all current platforms, as of summer 2015, if a function calls itself too many times recursively it eventually causes an exception. This most often comes up in forward recursive algorithms which can be really fast, even with a lot of function calls."
+      },
+      "date": 1432147257261
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5aa53dd74034d8c9"
+      },
+      "id": "5aa53dd74034d8c9",
+      "type": "add",
+      "after": "2e359395f4205dd3",
+      "date": 1432147331688
+    },
+    {
+      "type": "remove",
+      "id": "5aa53dd74034d8c9",
+      "date": 1432147353289
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "36f31f68921fa2c8"
+      },
+      "id": "36f31f68921fa2c8",
+      "type": "add",
+      "after": "2e359395f4205dd3",
+      "date": 1432147388989
+    },
+    {
+      "type": "edit",
+      "id": "36f31f68921fa2c8",
+      "item": {
+        "type": "paragraph",
+        "id": "36f31f68921fa2c8",
+        "text": "In V8 there isn't any one number of recursions before you get \"RangeError: Maximum call stack size exceeded\", it seems to depend on the code, and probably the version/platform. However it seems to be in the 10-20k range."
+      },
+      "date": 1432147484673
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c127953153dec0f4"
+      },
+      "id": "c127953153dec0f4",
+      "type": "add",
+      "after": "36f31f68921fa2c8",
+      "date": 1432147535143
+    },
+    {
+      "type": "edit",
+      "id": "c127953153dec0f4",
+      "item": {
+        "type": "code",
+        "id": "c127953153dec0f4",
+        "text": "console.log(\n  fib(13973)\n)\n\nfunction fib (num) {\n  return calculateFib(0, 1, num)\n}\n\nfunction calculateFib(total, last, iterationsLeft) {\n  if (iterationsLeft === 0) return total\n  return calculateFib(total+last, total, iterationsLeft-1)\n}"
+      },
+      "date": 1432147541811
+    },
+    {
+      "type": "edit",
+      "id": "c127953153dec0f4",
+      "item": {
+        "type": "code",
+        "id": "c127953153dec0f4",
+        "text": "// broken\nconsole.log(\n  fib(13974) // throws RangeError\n)\n\nfunction fib (num) {\n  return calculateFib(0, 1, num)\n}\n\nfunction calculateFib(total, last, iterationsLeft) {\n  if (iterationsLeft === 0) return total\n  return calculateFib(total+last, total, iterationsLeft-1)\n}"
+      },
+      "date": 1432147576417
+    },
+    {
+      "type": "edit",
+      "id": "c127953153dec0f4",
+      "item": {
+        "type": "code",
+        "id": "c127953153dec0f4",
+        "text": "// broken\nconsole.log(\n  fib(13974) // throws RangeError\n)\n\nfunction fib (n) {\n  return calcFib(0, 1, n)\n}\n\nfunction calcFib (total, last, i) {\n  if (i === 0) return total\n  return calcFib(total+last, total, i-1)\n}"
+      },
+      "date": 1432147789472
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9506660f61e5274b"
+      },
+      "id": "9506660f61e5274b",
+      "type": "add",
+      "after": "c127953153dec0f4",
+      "date": 1432147836575
+    },
+    {
+      "type": "edit",
+      "id": "9506660f61e5274b",
+      "item": {
+        "type": "paragraph",
+        "id": "9506660f61e5274b",
+        "text": "For this code on my machine 13974 is the straw that broke the camels back, 13973 executes just fine. And incredibly quickly."
+      },
+      "date": 1432147886675
+    },
+    {
+      "type": "edit",
+      "id": "9506660f61e5274b",
+      "item": {
+        "type": "paragraph",
+        "id": "9506660f61e5274b",
+        "text": "For this code on my machine 13974 is the straw that broke the camels back, 13973 executes just fine. And incredibly quickly. For some things this is a fine limit, for example the 10,000th Fibonacci number is already too large for JavaScript, so we've just been getting 'infinity'. "
+      },
+      "date": 1432148214657
+    },
+    {
+      "type": "edit",
+      "id": "9506660f61e5274b",
+      "item": {
+        "type": "paragraph",
+        "id": "9506660f61e5274b",
+        "text": "For this code on my machine 13974 is the straw that broke the camels back, 13973 executes just fine. And incredibly quickly. For some things this is a fine limit, for example the 10,000th Fibonacci number is already too large for JavaScript, and we get 'infinity`. But what could we do to use a recursive algorithm without hitting the stack limit?  "
+      },
+      "date": 1432148338101
+    },
+    {
+      "type": "edit",
+      "id": "36f31f68921fa2c8",
+      "item": {
+        "type": "paragraph",
+        "id": "36f31f68921fa2c8",
+        "text": "In V8 there isn't any one number of recursions before you get \"RangeError: Maximum call stack size exceeded\", it depends on the code, the version and the platform. However it often seems to be in the 10-20k range."
+      },
+      "date": 1432148411510
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "44d34aa081c8b473"
+      },
+      "id": "44d34aa081c8b473",
+      "type": "add",
+      "after": "9506660f61e5274b",
+      "date": 1432149030114
+    },
+    {
+      "type": "edit",
+      "id": "44d34aa081c8b473",
+      "item": {
+        "type": "code",
+        "id": "44d34aa081c8b473",
+        "text": "fib(3000000, console.log.bind(console))\n\nfunction fib (n, cb) {\n  return calcFib(0, 1, n, cb)\n}\n\nfunction calcFib (total, last, i, cb) {\n  if (i === 0) return cb(total)\n  setImmediate(function () { calcFib(total+last, total, i-1, cb) })\n}"
+      },
+      "date": 1432149036376
+    },
+    {
+      "type": "edit",
+      "id": "44d34aa081c8b473",
+      "item": {
+        "type": "code",
+        "id": "44d34aa081c8b473",
+        "text": "fib(3000000, console.log.bind(console))\n\nfunction fib (n, cb) {\n  return calcFib(0, 1, n, cb)\n}\n\nfunction calcFib (total, last, i, cb) {\n  if (i === 0) return cb(total)\n  setImmediate(function () {\n    calcFib(total+last, total, i-1, cb)\n  })\n}"
+      },
+      "date": 1432149095017
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3105f3f9d2fecb8a"
+      },
+      "id": "3105f3f9d2fecb8a",
+      "type": "add",
+      "after": "44d34aa081c8b473",
+      "date": 1432149123286
+    },
+    {
+      "type": "move",
+      "order": [
+        "2e359395f4205dd3",
+        "36f31f68921fa2c8",
+        "c127953153dec0f4",
+        "9506660f61e5274b",
+        "3105f3f9d2fecb8a",
+        "44d34aa081c8b473"
+      ],
+      "id": "3105f3f9d2fecb8a",
+      "date": 1432149127029
+    },
+    {
+      "type": "edit",
+      "id": "3105f3f9d2fecb8a",
+      "item": {
+        "type": "paragraph",
+        "id": "3105f3f9d2fecb8a",
+        "text": "One option is to use asynchronous recursion, setting each next iteration inside a timer."
+      },
+      "date": 1432149200375
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "165a088b117d9d52"
+      },
+      "id": "165a088b117d9d52",
+      "type": "add",
+      "after": "44d34aa081c8b473",
+      "date": 1432149205160
+    },
+    {
+      "type": "edit",
+      "id": "165a088b117d9d52",
+      "item": {
+        "type": "paragraph",
+        "id": "165a088b117d9d52",
+        "text": "Doing three million of them does take a couple of seconds, both because three million is a lot, and because we are going around the event loop each time."
+      },
+      "date": 1432149314989
+    },
+    {
+      "type": "edit",
+      "id": "3105f3f9d2fecb8a",
+      "item": {
+        "type": "paragraph",
+        "id": "3105f3f9d2fecb8a",
+        "text": "One option is to use asynchronous recursion, setting each next iteration inside a timer, and passing a call back along to get (in this case log) the final total."
+      },
+      "date": 1432149348361
+    },
+    {
+      "type": "edit",
+      "id": "165a088b117d9d52",
+      "item": {
+        "type": "paragraph",
+        "id": "165a088b117d9d52",
+        "text": "This is slower than the original, up from 100ms to 150ms for n = 13000. It takes a few seconds to do the full 3million. But it never blows out the stack due to depth, because each one is starting fresh."
+      },
+      "date": 1432149657672
+    },
+    {
+      "type": "add",
+      "id": "6b106989b8af891a",
+      "item": {
+        "type": "paragraph",
+        "id": "6b106989b8af891a",
+        "text": "There is another amazing side effect of this. It's not blocking. A long running synchronous process blocks the thread so no other events/timers can happen, but by breaking it up across the timers we avoid that. The rest of our process still functions as normal, executing any incoming events and timers in between each step of calcFib."
+      },
+      "after": "165a088b117d9d52",
+      "date": 1432149899718
+    },
+    {
+      "type": "fork",
+      "site": "nrn.io",
+      "date": 1652868533109
+    }
+  ]
+}

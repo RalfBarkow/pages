@@ -1,0 +1,377 @@
+{
+  "title": "Deeply nested callbacks for serial execution",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "94975e5287969a12",
+      "text": "One of the easiest things to do in most languages is executing steps serially in sequence. In most languages, but not JavaScript. In JavaScript the way people first learn to write this is as an ever deepening series of anonymous callbacks, it is one of the leading causes of \"callbackhell\"."
+    },
+    {
+      "type": "code",
+      "id": "40c3886649c88189",
+      "text": "var fs = require('fs')\nvar https = require('https')\nvar streamCb = require('stream-cb')\n\nhttps.get('https://github.com/nrn.keys', function (response) {\n    response.pipe(streamCb(function (e, body) {\n      if (e) throw e\n      fs.writeFile('./example-keys', body, function (aargh) {\n        if (aargh) throw aargh\n        console.log('are we there yet?')\n      })\n    }))\n})"
+    },
+    {
+      "type": "paragraph",
+      "id": "be89e84a7915010d",
+      "text": "Now I'm going to have to ask for a little bit of willful suspension of disbelief here for a minute, because for some reason I couldn't contrive an example that wouldn't be super easy with streams. So imagine your streams brain is broken. Or these are APIs that don't support streaming. Or maybe we just wanna use callbacks for example-reason."
+    },
+    {
+      "type": "paragraph",
+      "id": "340baba18bf3dc16",
+      "text": "There are many problems with writing code this way. It's not so bad to write, but it's very inflexible and hard to refactor. It ends up with a lot of redundancy. And each inner function ends up with more and more state it has access to, so they become increasingly hard to read and understand."
+    },
+    {
+      "type": "paragraph",
+      "id": "055e98eb1d81c02a",
+      "text": "First we start pulling out these processes that we want to do serially, and instead of putting them in anonymous callbacks in line, we name them. There is a lot of power in a name. It allows us to communicate about, reuse, and better understand what we are trying to do."
+    },
+    {
+      "type": "code",
+      "id": "4bcd7ba888a5e227",
+      "text": "var fs = require('fs')\nvar https = require('https')\nvar streamCb = require('stream-cb')\n\nhttps.get('https://github.com/nrn.keys',\n    poolResponse(writeKeys(logSnark)))\n\nfunction poolResponse (cb) {\n  return function (resp) {\n    resp.pipe(streamCb(cb))\n  }\n}\n\nfunction writeKeys (cb) {\n  return function (err, body) {\n    if (err) return cb(err)\n    fs.writeFile('./example-keys', body, cb)\n  }\n}\n\nfunction logSnark (err) {\n  // All errors in this series end up here.\n  if (err) throw err\n  console.log('are we there yet?')\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "277605f87d008bfa",
+      "text": "This still has some unnecessary boiler plate in each function. It means each step has to know about setting up the chain of steps, and forwarding errors through to the end."
+    },
+    {
+      "type": "code",
+      "id": "e004cdd1150e871b",
+      "text": "var fs = require('fs')\nvar https = require('https')\nvar streamCb = require('stream-cb')\n\nhttps.get('https://github.com/nrn.keys', function (stream) {\n// kicking this off is weird since https.get\n// doesn't follow the (err, result) pattern.\n    serial(\n      [ poolResponse\n      , writeKeys\n      ], logSnark\n    )(null, stream)\n  }\n)\n\nfunction poolResponse (done, resp) {\n  resp.pipe(streamCb(done))\n}\n\nfunction writeKeys (done, body) {\n  fs.writeFile('./example-keys', body, done)\n}\n\nfunction logSnark (err) {\n  // All errors in this series end up here.\n  if (err) throw err\n  console.log('are we there yet?')\n}\n\nfunction serial (steps, end) {\n  return steps.reduceRight(wrapStep, end)\n}\n\nfunction wrapStep (nextStep, thisStep) {\n  return function (err, res) {\n    if (err) return nextStep(err)\n    thisStep(nextStep, res)\n  }\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "c8862a343b4da78d",
+      "text": "Now each step gets a done function to call with its results or error, and the results of the previous step. If an error occurs it just propagates through to the end. Serial and wrapStep should be moved into their own module (or just use async.serial or similar). Now we're talking about discrete asynchronous steps that can be reused and trivially reshuffled, with error handling in a single place."
+    },
+    {
+      "type": "paragraph",
+      "id": "0426bafdf210fa69",
+      "text": "But in this case, I really should have used streams."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Deeply nested callbacks for serial execution",
+        "story": []
+      },
+      "date": 1431060888746
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "94975e5287969a12"
+      },
+      "id": "94975e5287969a12",
+      "type": "add",
+      "date": 1431060964423
+    },
+    {
+      "type": "edit",
+      "id": "94975e5287969a12",
+      "item": {
+        "type": "paragraph",
+        "id": "94975e5287969a12",
+        "text": "One of the easiest things to do in most languages is execute a series of steps serially in sequence. In most languages, but not JavaScript. In JavaScript the way people first learn to write this is as an ever deepening series of anonymous callbacks, \"callbackhell\"."
+      },
+      "date": 1431061121616
+    },
+    {
+      "type": "edit",
+      "id": "94975e5287969a12",
+      "item": {
+        "type": "paragraph",
+        "id": "94975e5287969a12",
+        "text": "One of the easiest things to do in most languages is execute a series of steps serially in sequence. In most languages, but not JavaScript. In JavaScript the way people first learn to write this is as an ever deepening series of anonymous callbacks, it is one of the leading causes of \"callbackhell\"."
+      },
+      "date": 1431103498938
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "40c3886649c88189"
+      },
+      "id": "40c3886649c88189",
+      "type": "add",
+      "after": "94975e5287969a12",
+      "date": 1431103503826
+    },
+    {
+      "type": "edit",
+      "id": "40c3886649c88189",
+      "item": {
+        "type": "code",
+        "id": "40c3886649c88189",
+        "text": "var fs = require('fs')\nvar https = require('https')\nvar streamCb = require('stream-cb')\n\nhttps.get('https://github.com/nrn.keys', function (response) {\n    response.pipe(streamCb(function (e, body) {\n      if (e) throw e\n      fs.writeFile('./example-keys', body, function (aargh) {\n        if (aargh) throw aargh\n        console.log('are we there yet?')\n      })\n    }))\n})"
+      },
+      "date": 1431103508541
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "be89e84a7915010d"
+      },
+      "id": "be89e84a7915010d",
+      "type": "add",
+      "after": "40c3886649c88189",
+      "date": 1431103526311
+    },
+    {
+      "type": "edit",
+      "id": "be89e84a7915010d",
+      "item": {
+        "type": "paragraph",
+        "id": "be89e84a7915010d",
+        "text": "Now I'm going to have to ask for a little bit of willful suspension of disbelief here for a minute, because for some reason I couldn't contrive an example that wouldn't be super easy with streams. So imagine your streams brain is broken. Or these are APIs that don't support streaming. Or maybe we just wanna use callbacks for example-reason."
+      },
+      "date": 1431103697806
+    },
+    {
+      "type": "add",
+      "id": "340baba18bf3dc16",
+      "item": {
+        "type": "paragraph",
+        "id": "340baba18bf3dc16",
+        "text": "So, there are many problems with writing code this way. It's not so bad to write, but it's very inflexible and hard to refactor. It ends up with a lot of redundancy. And each inner function ends up with more and more state it has access to, so they become increasingly hard to read and understand."
+      },
+      "after": "be89e84a7915010d",
+      "date": 1431103933556
+    },
+    {
+      "type": "add",
+      "id": "055e98eb1d81c02a",
+      "item": {
+        "type": "paragraph",
+        "id": "055e98eb1d81c02a",
+        "text": "So, first we start pulling out these processes that we want to do serially, and instead of putting them in anonymous callbacks in line, we name them. There is a lot of power in a name. It allows us to communicate about, reuse, and better understand what we are trying to do."
+      },
+      "after": "340baba18bf3dc16",
+      "date": 1431104111881
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "479b72da7812a3ff"
+      },
+      "id": "479b72da7812a3ff",
+      "type": "add",
+      "after": "055e98eb1d81c02a",
+      "date": 1431104115097
+    },
+    {
+      "type": "remove",
+      "id": "479b72da7812a3ff",
+      "date": 1431104119186
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4bcd7ba888a5e227"
+      },
+      "id": "4bcd7ba888a5e227",
+      "type": "add",
+      "after": "055e98eb1d81c02a",
+      "date": 1431104146824
+    },
+    {
+      "type": "edit",
+      "id": "4bcd7ba888a5e227",
+      "item": {
+        "type": "code",
+        "id": "4bcd7ba888a5e227",
+        "text": "var fs = require('fs')\nvar https = require('https')\nvar streamCb = require('stream-cb')\n\nhttps.get('https://github.com/nrn.keys',\n    poolResponse(writeKeys(logSnark)))\n\nfunction poolResponse (cb) {\n  return function (resp) {\n    resp.pipe(streamCb(cb))\n  }\n}\n\nfunction writeKeys (cb) {\n  return function (err, body) {\n    if (err) return cb(err)\n    fs.writeFile('./example-keys', body, cb)\n  }\n}"
+      },
+      "date": 1431104173324
+    },
+    {
+      "type": "edit",
+      "id": "4bcd7ba888a5e227",
+      "item": {
+        "type": "code",
+        "id": "4bcd7ba888a5e227",
+        "text": "\n"
+      },
+      "date": 1431104216888
+    },
+    {
+      "type": "edit",
+      "id": "4bcd7ba888a5e227",
+      "item": {
+        "type": "code",
+        "id": "4bcd7ba888a5e227",
+        "text": "var fs = require('fs')\nvar https = require('https')\nvar streamCb = require('stream-cb')\n\nhttps.get('https://github.com/nrn.keys',\n    poolResponse(writeKeys(logSnark)))\n\nfunction poolResponse (cb) {\n  return function (resp) {\n    resp.pipe(streamCb(cb))\n  }\n}\n\nfunction writeKeys (cb) {\n  return function (err, body) {\n    if (err) return cb(err)\n    fs.writeFile('./example-keys', body, cb)\n  }\n}\n\nfunction logSnark (err) {\n  if (err) throw err // All errors in this series end up here.\n  console.log('are we there yet?')\n}\n"
+      },
+      "date": 1431104238706
+    },
+    {
+      "type": "edit",
+      "id": "4bcd7ba888a5e227",
+      "item": {
+        "type": "code",
+        "id": "4bcd7ba888a5e227",
+        "text": "var fs = require('fs')\nvar https = require('https')\nvar streamCb = require('stream-cb')\n\nhttps.get('https://github.com/nrn.keys',\n    poolResponse(writeKeys(logSnark)))\n\nfunction poolResponse (cb) {\n  return function (resp) {\n    resp.pipe(streamCb(cb))\n  }\n}\n\nfunction writeKeys (cb) {\n  return function (err, body) {\n    if (err) return cb(err)\n    fs.writeFile('./example-keys', body, cb)\n  }\n}\n\nfunction logSnark (err) {\n  // All errors in this series end up here.\n  if (err) throw err\n  console.log('are we there yet?')\n}\n"
+      },
+      "date": 1431104270712
+    },
+    {
+      "type": "edit",
+      "id": "055e98eb1d81c02a",
+      "item": {
+        "type": "paragraph",
+        "id": "055e98eb1d81c02a",
+        "text": "Frst we start pulling out these processes that we want to do serially, and instead of putting them in anonymous callbacks in line, we name them. There is a lot of power in a name. It allows us to communicate about, reuse, and better understand what we are trying to do."
+      },
+      "date": 1431105027228
+    },
+    {
+      "type": "edit",
+      "id": "340baba18bf3dc16",
+      "item": {
+        "type": "paragraph",
+        "id": "340baba18bf3dc16",
+        "text": "There are many problems with writing code this way. It's not so bad to write, but it's very inflexible and hard to refactor. It ends up with a lot of redundancy. And each inner function ends up with more and more state it has access to, so they become increasingly hard to read and understand."
+      },
+      "date": 1431105031603
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "277605f87d008bfa"
+      },
+      "id": "277605f87d008bfa",
+      "type": "add",
+      "after": "4bcd7ba888a5e227",
+      "date": 1431105066691
+    },
+    {
+      "type": "edit",
+      "id": "277605f87d008bfa",
+      "item": {
+        "type": "paragraph",
+        "id": "277605f87d008bfa",
+        "text": "This still has some unnecessary boiler plate in each function. It means each step has to know about setting up the chain of steps, and forwarding errors through to the end."
+      },
+      "date": 1431105146466
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e004cdd1150e871b"
+      },
+      "id": "e004cdd1150e871b",
+      "type": "add",
+      "after": "277605f87d008bfa",
+      "date": 1431105149708
+    },
+    {
+      "type": "edit",
+      "id": "e004cdd1150e871b",
+      "item": {
+        "type": "code",
+        "id": "e004cdd1150e871b",
+        "text": "var fs = require('fs')\nvar https = require('https')\nvar streamCb = require('stream-cb')\n\nhttps.get('https://github.com/nrn.keys', function (stream) {\n    serial(\n      [ poolResponse\n      , writeKeys\n      ], logSnark\n    )(null, stream)\n  }\n)\n\nfunction poolResponse (done, resp) {\n  resp.pipe(streamCb(done))\n}\n\nfunction writeKeys (done, body) {\n  fs.writeFile('./example-keys', body, done)\n}\n\nfunction logSnark (err) {\n  if (err) throw err // All errors in this series end up here.\n  console.log('are we there yet?')\n}\n\nfunction serial (steps, end) {\n  return steps.reduceRight(wrapStep, end)\n}\n\nfunction wrapStep (nextStep, thisStep) {\n  return function (err, res) {\n    if (err) return nextStep(err)\n    thisStep(nextStep, res)\n  }\n}\n"
+      },
+      "date": 1431105193246
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c8862a343b4da78d"
+      },
+      "id": "c8862a343b4da78d",
+      "type": "add",
+      "after": "e004cdd1150e871b",
+      "date": 1431105224515
+    },
+    {
+      "type": "edit",
+      "id": "c8862a343b4da78d",
+      "item": {
+        "type": "paragraph",
+        "id": "c8862a343b4da78d",
+        "text": "Now each step gets a done function to call with its results or error, and the results of the previous step. If an error occurs it just propagates through to the end. Serial and wrapStep should be moved into their own module (or just use async.serial or similar). Now we're talking about discrete asynchronous steps that can be reused and trivially reshuffled, with error handling in a single place."
+      },
+      "date": 1431105576789
+    },
+    {
+      "type": "add",
+      "id": "0426bafdf210fa69",
+      "item": {
+        "type": "paragraph",
+        "id": "0426bafdf210fa69",
+        "text": "But in this case, I really should have used streams."
+      },
+      "after": "c8862a343b4da78d",
+      "date": 1431105597203
+    },
+    {
+      "type": "edit",
+      "id": "94975e5287969a12",
+      "item": {
+        "type": "paragraph",
+        "id": "94975e5287969a12",
+        "text": "One of the easiest things to do in most languages is execute a steps serially in sequence. In most languages, but not JavaScript. In JavaScript the way people first learn to write this is as an ever deepening series of anonymous callbacks, it is one of the leading causes of \"callbackhell\"."
+      },
+      "date": 1431105682971
+    },
+    {
+      "type": "edit",
+      "id": "94975e5287969a12",
+      "item": {
+        "type": "paragraph",
+        "id": "94975e5287969a12",
+        "text": "One of the easiest things to do in most languages is execute steps serially in sequence. In most languages, but not JavaScript. In JavaScript the way people first learn to write this is as an ever deepening series of anonymous callbacks, it is one of the leading causes of \"callbackhell\"."
+      },
+      "date": 1431105689693
+    },
+    {
+      "type": "edit",
+      "id": "94975e5287969a12",
+      "item": {
+        "type": "paragraph",
+        "id": "94975e5287969a12",
+        "text": "One of the easiest things to do in most languages is executing steps serially in sequence. In most languages, but not JavaScript. In JavaScript the way people first learn to write this is as an ever deepening series of anonymous callbacks, it is one of the leading causes of \"callbackhell\"."
+      },
+      "date": 1431105713453
+    },
+    {
+      "type": "edit",
+      "id": "055e98eb1d81c02a",
+      "item": {
+        "type": "paragraph",
+        "id": "055e98eb1d81c02a",
+        "text": "First we start pulling out these processes that we want to do serially, and instead of putting them in anonymous callbacks in line, we name them. There is a lot of power in a name. It allows us to communicate about, reuse, and better understand what we are trying to do."
+      },
+      "date": 1431105762761
+    },
+    {
+      "type": "edit",
+      "id": "e004cdd1150e871b",
+      "item": {
+        "type": "code",
+        "id": "e004cdd1150e871b",
+        "text": "var fs = require('fs')\nvar https = require('https')\nvar streamCb = require('stream-cb')\n\nhttps.get('https://github.com/nrn.keys', function (stream) {\n// kicking this off is weird since https.get\n// doesn't follow the (err, result) pattern.\n    serial(\n      [ poolResponse\n      , writeKeys\n      ], logSnark\n    )(null, stream)\n  }\n)\n\nfunction poolResponse (done, resp) {\n  resp.pipe(streamCb(done))\n}\n\nfunction writeKeys (done, body) {\n  fs.writeFile('./example-keys', body, done)\n}\n\nfunction logSnark (err) {\n  if (err) throw err // All errors in this series end up here.\n  console.log('are we there yet?')\n}\n\nfunction serial (steps, end) {\n  return steps.reduceRight(wrapStep, end)\n}\n\nfunction wrapStep (nextStep, thisStep) {\n  return function (err, res) {\n    if (err) return nextStep(err)\n    thisStep(nextStep, res)\n  }\n}\n"
+      },
+      "date": 1431105820227
+    },
+    {
+      "type": "edit",
+      "id": "e004cdd1150e871b",
+      "item": {
+        "type": "code",
+        "id": "e004cdd1150e871b",
+        "text": "var fs = require('fs')\nvar https = require('https')\nvar streamCb = require('stream-cb')\n\nhttps.get('https://github.com/nrn.keys', function (stream) {\n// kicking this off is weird since https.get\n// doesn't follow the (err, result) pattern.\n    serial(\n      [ poolResponse\n      , writeKeys\n      ], logSnark\n    )(null, stream)\n  }\n)\n\nfunction poolResponse (done, resp) {\n  resp.pipe(streamCb(done))\n}\n\nfunction writeKeys (done, body) {\n  fs.writeFile('./example-keys', body, done)\n}\n\nfunction logSnark (err) {\n  // All errors in this series end up here.\n  if (err) throw err\n  console.log('are we there yet?')\n}\n\nfunction serial (steps, end) {\n  return steps.reduceRight(wrapStep, end)\n}\n\nfunction wrapStep (nextStep, thisStep) {\n  return function (err, res) {\n    if (err) return nextStep(err)\n    thisStep(nextStep, res)\n  }\n}\n"
+      },
+      "date": 1431105849658
+    },
+    {
+      "type": "fork",
+      "site": "nrn.io",
+      "date": 1652868335901
+    }
+  ]
+}

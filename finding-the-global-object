@@ -1,0 +1,270 @@
+{
+  "title": "Finding the global object",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "af282d4eed63ce60",
+      "text": "One of the [[JavaScript common pitfalls]] is a problem finding the global object in a truly universal way. This is especially common for code not relying on a specific build system. When you're writing code that could be dropped in anyway, included with any module loader or build system, and loaded into any JS environment there isn't a whole lot you can count on. Not even how to access the global object."
+    },
+    {
+      "type": "paragraph",
+      "id": "9941b01cb5f55b4b",
+      "text": "The common mistake is to rely on 'this' outside of your functions definition. That works if your module has been included in the browser as a script tag, but if it's been built with a module loader, you have no idea what this outside of your function could be."
+    },
+    {
+      "type": "code",
+      "id": "65d6140481d9f974",
+      "text": "(function (win) {\n  win.foo = 'bar'\n})(this)\n\nconsole.log(global.foo) // undefined\nconsole.log(exports.foo) // bar"
+    },
+    {
+      "type": "paragraph",
+      "id": "793649b853cccc8f",
+      "text": "When run in node, the code above does something unexpected, but interesting. Instead of putting the properties on the global object, it puts them on the exports object... If you run it in the browser directly, it will put foo on window. Useful in both cases, but not very portable."
+    },
+    {
+      "type": "code",
+      "id": "b615e9123d411019",
+      "text": "(function () {\n  var win = this\n  win.foo = 'bar'\n})()\n\nconsole.log(global.foo) // bar\nconsole.log(exports.foo) // undefined"
+    },
+    {
+      "type": "paragraph",
+      "id": "6e918943c25ef949",
+      "text": "By assigning win to 'this' inside of our function, we can tell how our function was called, and thus know what the 'this' value should be. In node and the browser this fixes our function right up. But what if it was wrapped inside a function by a build system that uses strict mode?"
+    },
+    {
+      "type": "code",
+      "id": "2d6037c636e949b2",
+      "text": "// broken\n(function () {\n  \"use strict\";\n    (function () {\n      var win = this\n      win.foo = 'bar'\n//TypeError: Cannot set property 'foo' of undefined\n    })()\n})()\n\nconsole.log(global.foo) // we never\nconsole.log(exports.foo) // get here"
+    },
+    {
+      "type": "paragraph",
+      "id": "b2b44a0f467fc60a",
+      "text": "Both of the approaches above have the same problem, strict mode effects all functions underneath them, so an outer strict mode wrapper made 'this' within stand alone function calls 'undefined' instead of the global object. This is specifically so functions have a harder time modifying the global object. It is a sensible thing to do, but it puts a damper on our plan."
+    },
+    {
+      "type": "paragraph",
+      "id": "ff0b3ac897a8697c",
+      "text": "When possible, the best way out of this is to require a simple module, designed to solve just this problem: [https://github.com/Raynos/global/blob/master/window.js global]. The best part is that this is likely to be updated if a new environment comes out that isn't supported. Really though, Node probably should have just made window a reference to the global object..."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Finding the global object",
+        "story": []
+      },
+      "date": 1433660005335
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "af282d4eed63ce60"
+      },
+      "id": "af282d4eed63ce60",
+      "type": "add",
+      "date": 1433660007297
+    },
+    {
+      "type": "edit",
+      "id": "af282d4eed63ce60",
+      "item": {
+        "type": "paragraph",
+        "id": "af282d4eed63ce60",
+        "text": "One of the [[JavaScript common pitfalls]] that crops up in hand rolled universal module definitions is a problem finding the global object in a truly universal way. When you're writing code that could be dropped in anyway, included with any module loader or build system, and loaded into any JS environment there isn't a whole lot you can count on."
+      },
+      "date": 1433660378817
+    },
+    {
+      "type": "add",
+      "id": "9941b01cb5f55b4b",
+      "item": {
+        "type": "paragraph",
+        "id": "9941b01cb5f55b4b",
+        "text": "The common mistake is to rely on 'this' outside of your functions definition. That works if your module has been included in the browser as a script tag, but if it's been built with a module loader, you have no idea what this outside of your function could be."
+      },
+      "after": "af282d4eed63ce60",
+      "date": 1433660504864
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "65d6140481d9f974"
+      },
+      "id": "65d6140481d9f974",
+      "type": "add",
+      "after": "9941b01cb5f55b4b",
+      "date": 1433660968135
+    },
+    {
+      "type": "edit",
+      "id": "65d6140481d9f974",
+      "item": {
+        "type": "code",
+        "id": "65d6140481d9f974",
+        "text": "(function (win) {\n  win.foo = 'bar'\n})(this)\n\nconsole.log(global.foo) // undefined\nconsole.log(exports.foo) // bar"
+      },
+      "date": 1433660976179
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "793649b853cccc8f"
+      },
+      "id": "793649b853cccc8f",
+      "type": "add",
+      "after": "65d6140481d9f974",
+      "date": 1433660978927
+    },
+    {
+      "type": "edit",
+      "id": "793649b853cccc8f",
+      "item": {
+        "type": "paragraph",
+        "id": "793649b853cccc8f",
+        "text": "When run in node, the code above does something unexpected, but interesting. Instead of putting the properties on the global object, it puts them on the exports object... If you run it in the browser directly, it will put foo on window. Useful in both cases, but not very portable."
+      },
+      "date": 1433661131257
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b615e9123d411019"
+      },
+      "id": "b615e9123d411019",
+      "type": "add",
+      "after": "793649b853cccc8f",
+      "date": 1433661274099
+    },
+    {
+      "type": "edit",
+      "id": "b615e9123d411019",
+      "item": {
+        "type": "code",
+        "id": "b615e9123d411019",
+        "text": "(function () {\n  var win = this\n  win.foo = 'bar'\n})()\n\nconsole.log(global.foo) // bar\nconsole.log(exports.foo) // undefined"
+      },
+      "date": 1433661278871
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6e918943c25ef949"
+      },
+      "id": "6e918943c25ef949",
+      "type": "add",
+      "after": "b615e9123d411019",
+      "date": 1433661282608
+    },
+    {
+      "type": "edit",
+      "id": "6e918943c25ef949",
+      "item": {
+        "type": "paragraph",
+        "id": "6e918943c25ef949",
+        "text": "By assigning win to 'this' inside of our function, we can tell how our function was called, and thus know what the 'this' value should be. In node and the browser this fixes our function right up. But what if it was wrapped inside a function by a build system that uses strict mode?"
+      },
+      "date": 1433661380720
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "784d040d2682f6a7"
+      },
+      "id": "784d040d2682f6a7",
+      "type": "add",
+      "after": "6e918943c25ef949",
+      "date": 1433661515562
+    },
+    {
+      "type": "edit",
+      "id": "784d040d2682f6a7",
+      "item": {
+        "type": "paragraph",
+        "id": "784d040d2682f6a7",
+        "text": "// broken\n(function () {\n  \"use strict\";\n    (function () {\n      var win = this\n      win.foo = 'bar'\n//TypeError: Cannot set property 'foo' of undefined\n    })()\n})()\n\nconsole.log(global.foo) // we never\nconsole.log(exports.foo) // get here"
+      },
+      "date": 1433661535731
+    },
+    {
+      "type": "remove",
+      "id": "784d040d2682f6a7",
+      "date": 1433661542083
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2d6037c636e949b2"
+      },
+      "id": "2d6037c636e949b2",
+      "type": "add",
+      "after": "6e918943c25ef949",
+      "date": 1433661543298
+    },
+    {
+      "type": "edit",
+      "id": "2d6037c636e949b2",
+      "item": {
+        "type": "code",
+        "id": "2d6037c636e949b2",
+        "text": "// broken\n(function () {\n  \"use strict\";\n    (function () {\n      var win = this\n      win.foo = 'bar'\n//TypeError: Cannot set property 'foo' of undefined\n    })()\n})()\n\nconsole.log(global.foo) // we never\nconsole.log(exports.foo) // get here"
+      },
+      "date": 1433661546818
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b2b44a0f467fc60a"
+      },
+      "id": "b2b44a0f467fc60a",
+      "type": "add",
+      "after": "2d6037c636e949b2",
+      "date": 1433661554240
+    },
+    {
+      "type": "edit",
+      "id": "b2b44a0f467fc60a",
+      "item": {
+        "type": "paragraph",
+        "id": "b2b44a0f467fc60a",
+        "text": "Both of the approaches above have the same problem, strict mode effects all functions underneath them, so an outer strict mode wrapper made 'this' within stand alone function calls 'undefined' instead of the global object. This is specifically so functions have a harder time modifying the global object. It is a sensible thing to do, but it puts a damper on our plan."
+      },
+      "date": 1433661727742
+    },
+    {
+      "type": "edit",
+      "id": "af282d4eed63ce60",
+      "item": {
+        "type": "paragraph",
+        "id": "af282d4eed63ce60",
+        "text": "One of the [[JavaScript common pitfalls]] is a problem finding the global object in a truly universal way. This is especially common for code not relying on a specific build system. When you're writing code that could be dropped in anyway, included with any module loader or build system, and loaded into any JS environment there isn't a whole lot you can count on. Not even how to access the global object."
+      },
+      "date": 1433663053041
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ff0b3ac897a8697c"
+      },
+      "id": "ff0b3ac897a8697c",
+      "type": "add",
+      "after": "b2b44a0f467fc60a",
+      "date": 1433663121970
+    },
+    {
+      "type": "edit",
+      "id": "ff0b3ac897a8697c",
+      "item": {
+        "type": "paragraph",
+        "id": "ff0b3ac897a8697c",
+        "text": "When possible, the best way out of this is to require a simple module, designed to solve just this problem: [https://github.com/Raynos/global/blob/master/window.js global]. The best part is that this is likely to be updated if a new environment comes out that isn't supported. Really though, Node probably should have just made window a reference to the global object..."
+      },
+      "date": 1433663236540
+    },
+    {
+      "type": "fork",
+      "site": "nrn.io",
+      "date": 1652868649320
+    }
+  ]
+}

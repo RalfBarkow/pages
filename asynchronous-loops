@@ -1,0 +1,463 @@
+{
+  "title": "Asynchronous Loops",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "213e1cf95f9a8dbb",
+      "text": "JavaScript's built in looping mechanisms, 'while', 'for', 'array.forEach', etc, are all synchronous. They work well for processing a set of things in an object or array that are in memory already. There are many other tasks that can be modeled well as an asynchronous loop. For example render loops, polling, and cron like tasks. Letting these loops terminate too early or be unexpectedly infinite are some of the [[JavaScript common pitfalls]]."
+    },
+    {
+      "type": "paragraph",
+      "id": "ba7329c85618141f",
+      "text": "Whatever your use case, the ideas behind an asynchronous loop follow a common pattern. Check your condition, do some work, set yourself to be called again in the future."
+    },
+    {
+      "type": "paragraph",
+      "id": "89220e27e38ac50d",
+      "text": "Infinite loops don't need to check their condition. They are like `while (true)`, but more useful because they don't block the event loop so everything else keeps working. A render loop is a good example of this."
+    },
+    {
+      "type": "code",
+      "id": "9ad81bf5c0d1f322",
+      "text": "var count = 0\nvar render = function () {\n  document.body.innerHTML = count++\n  window.requestAnimationFrame(render)\n}\n\nwindow.requestAnimationFrame(render)"
+    },
+    {
+      "type": "paragraph",
+      "id": "7a26d19cc4073cf0",
+      "text": "Now we have a timer that does it's best to display a number and increment itself 60 times a second."
+    },
+    {
+      "type": "paragraph",
+      "id": "7123dea3512bb84e",
+      "text": "This doesn't look like a loop, because many parts of the mechanism aren't in our control. We skip the condition check entirely because we want to keep going forever. Queueing up the next iteration is handled by calling requestAnimationFrame, and it handles the frequency at which our code is called."
+    },
+    {
+      "type": "paragraph",
+      "id": "3a9ca76383d26e97",
+      "text": "Another common thing you want to do is poll. A lot of time polling is the easy road out of something that really should be done in another way, in reaction to events or streams, on the fulfillment of a promise, etc..."
+    },
+    {
+      "type": "paragraph",
+      "id": "67b847e459581d62",
+      "text": "Avoid polling in those cases, polling makes things more complicated, and less reliable. It has performance overhead. It hogs cpu and drains batteries. But sometimes it's required. And sometimes it's the right thing to do even if it isn't required, because the other way would be hard, and you don't have the time to do it right. But make that tradeoff consciously."
+    },
+    {
+      "type": "paragraph",
+      "id": "23a6f154c9fd583d",
+      "text": "Here is a contrived example of what polling for the results of an http request could look like. It is a prefect example of a time when polling is wholly unnecessary."
+    },
+    {
+      "type": "code",
+      "id": "3d3bf098af382f8c",
+      "text": "var request = require('request')\nvar content = ''\n\nvar useContent = function () {\n  if (content) {\n    console.log(content)\n  } else {\n    setTimeout(useContent, 10)\n  }\n}\n\nuseContent()\n\nrequest('http://nrn.io/javascript-common-pitfalls.html',\n  function (err, res, body) {\n    content = body\n  }\n)"
+    },
+    {
+      "type": "paragraph",
+      "id": "136497bd66de06b6",
+      "text": "So far we've been using timers for our loops, and the frequencies are entirely arbitrary. We can do this with any kind of asynchronous operation though, here's a simple way to aggressively poll for changes in a wiki page using [[node style callbacks]]."
+    },
+    {
+      "type": "code",
+      "id": "38a1b6513a25c3c7",
+      "text": "var request = require('request')\nvar start = Date.now()\nvar url = 'http://wiki.nrn.io/welcome-visitors.json'\n\nrequest(url,\n  function poll (err, res, body) {\n    var journal = JSON.parse(body).journal\n    if (journal[journal.length-1].date > start) {\n      console.log('New Version!')\n      return\n    }\n\n    //if nothing has changed, ask again\n    request(url, poll)\n  }\n)\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "b98ee3ae8981aa93",
+      "text": "Naming the function expression 'poll' lets us easily pass a reference to it to the next request. This pattern of having the callback to an asynchronous function set itself to be called again in the future works well with most kinds of async functions."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Asynchronous Loops",
+        "story": []
+      },
+      "date": 1433310928845
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "213e1cf95f9a8dbb"
+      },
+      "id": "213e1cf95f9a8dbb",
+      "type": "add",
+      "date": 1433310934167
+    },
+    {
+      "type": "edit",
+      "id": "213e1cf95f9a8dbb",
+      "item": {
+        "type": "paragraph",
+        "id": "213e1cf95f9a8dbb",
+        "text": "JavaScript's built in looping mechanisms, 'while', 'for', 'array.forEach', etc, are all synchronous. They work well for processing a set of things in an object or array that are in memory already. There are many other tasks that can be modeled well as an asynchronous loop. For example render loops, polling, and cron like tasks. Letting these loops terminate too early or be unexpectedly infinite are some of the [[JavaScript common pitfalls]]."
+      },
+      "date": 1433311441037
+    },
+    {
+      "type": "add",
+      "id": "ba7329c85618141f",
+      "item": {
+        "type": "paragraph",
+        "id": "ba7329c85618141f",
+        "text": "Whatever your use case, the ideas behind an asynchronous loop follow a common pattern. Check your condition, do some work, set yourself to be called again in the future."
+      },
+      "after": "213e1cf95f9a8dbb",
+      "date": 1433311716874
+    },
+    {
+      "type": "add",
+      "id": "89220e27e38ac50d",
+      "item": {
+        "type": "paragraph",
+        "id": "89220e27e38ac50d",
+        "text": "Infinite loops don't need to check their condition. They are like `while (true)`, but more useful because they don't block the event loop so everything else keeps working. A render loop is a good example of this."
+      },
+      "after": "ba7329c85618141f",
+      "date": 1433311851029
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "537868d47f73d76f"
+      },
+      "id": "537868d47f73d76f",
+      "type": "add",
+      "after": "89220e27e38ac50d",
+      "date": 1433312036583
+    },
+    {
+      "type": "edit",
+      "id": "537868d47f73d76f",
+      "item": {
+        "type": "paragraph",
+        "id": "537868d47f73d76f",
+        "text": "var count = 0\nvar render = function () {\n  document.body.innerHTML = count++\n  window.requestAnimationFrame(render)\n}\n\nwindow.requestAnimationFrame(render)"
+      },
+      "date": 1433312044040
+    },
+    {
+      "type": "remove",
+      "id": "537868d47f73d76f",
+      "date": 1433312050628
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9ad81bf5c0d1f322"
+      },
+      "id": "9ad81bf5c0d1f322",
+      "type": "add",
+      "after": "89220e27e38ac50d",
+      "date": 1433312052589
+    },
+    {
+      "type": "edit",
+      "id": "9ad81bf5c0d1f322",
+      "item": {
+        "type": "code",
+        "id": "9ad81bf5c0d1f322",
+        "text": "var count = 0\nvar render = function () {\n  document.body.innerHTML = count++\n  window.requestAnimationFrame(render)\n}\n\nwindow.requestAnimationFrame(render)"
+      },
+      "date": 1433312057379
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7a26d19cc4073cf0"
+      },
+      "id": "7a26d19cc4073cf0",
+      "type": "add",
+      "after": "9ad81bf5c0d1f322",
+      "date": 1433312063695
+    },
+    {
+      "type": "edit",
+      "id": "7a26d19cc4073cf0",
+      "item": {
+        "type": "paragraph",
+        "id": "7a26d19cc4073cf0",
+        "text": "Now we have a timer that does it's best to display a number and increment itself 60 times a second."
+      },
+      "date": 1433312152503
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3bfd643893de39d5"
+      },
+      "id": "3bfd643893de39d5",
+      "type": "add",
+      "after": "7a26d19cc4073cf0",
+      "date": 1433487596823
+    },
+    {
+      "type": "remove",
+      "id": "3bfd643893de39d5",
+      "date": 1433487602224
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7123dea3512bb84e"
+      },
+      "id": "7123dea3512bb84e",
+      "type": "add",
+      "after": "7a26d19cc4073cf0",
+      "date": 1433487722695
+    },
+    {
+      "type": "edit",
+      "id": "7123dea3512bb84e",
+      "item": {
+        "type": "paragraph",
+        "id": "7123dea3512bb84e",
+        "text": "This doesn't look like a loop, because many parts of the mechanism aren't in our control. We skip the condition check entirely because we want to keep going forever. Queueing up the next iteration is handled by calling requestAnimationFrame, and it handles the frequency at which our code is called."
+      },
+      "date": 1433488017454
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3a9ca76383d26e97"
+      },
+      "id": "3a9ca76383d26e97",
+      "type": "add",
+      "after": "7123dea3512bb84e",
+      "date": 1433488565091
+    },
+    {
+      "type": "edit",
+      "id": "3a9ca76383d26e97",
+      "item": {
+        "type": "paragraph",
+        "id": "3a9ca76383d26e97",
+        "text": "Another common thing you want to do is poll. A lot of time polling is the easy road out of something that really should be done in another way, in reaction to events or streams, on the fulfillment of a promise, etc..."
+      },
+      "date": 1433488693483
+    },
+    {
+      "type": "add",
+      "id": "67b847e459581d62",
+      "item": {
+        "type": "paragraph",
+        "id": "67b847e459581d62",
+        "text": "Avoid polling in those cases, polling makes things more complicated, and less reliable. It has performance overhead. It hogs cpu and drains batteries. But sometimes it's required. And sometimes it's the right thing to do even if it isn't required, because the other way would be hard, and you don't have the time to do it right. But make that tradeoff  ."
+      },
+      "after": "3a9ca76383d26e97",
+      "date": 1433488928030
+    },
+    {
+      "type": "edit",
+      "id": "67b847e459581d62",
+      "item": {
+        "type": "paragraph",
+        "id": "67b847e459581d62",
+        "text": "Avoid polling in those cases, polling makes things more complicated, and less reliable. It has performance overhead. It hogs cpu and drains batteries. But sometimes it's required. And sometimes it's the right thing to do even if it isn't required, because the other way would be hard, and you don't have the time to do it right. But make that tradeoff consciously."
+      },
+      "date": 1433488981025
+    },
+    {
+      "type": "add",
+      "id": "23a6f154c9fd583d",
+      "item": {
+        "type": "paragraph",
+        "id": "23a6f154c9fd583d",
+        "text": "Here is a contrived example of what polling for the results of an http request could look like. It is a prefect example of a time when polling is wholly unnecessary."
+      },
+      "after": "67b847e459581d62",
+      "date": 1433489041061
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e465719c61334b51"
+      },
+      "id": "e465719c61334b51",
+      "type": "add",
+      "after": "23a6f154c9fd583d",
+      "date": 1433489042153
+    },
+    {
+      "type": "remove",
+      "id": "e465719c61334b51",
+      "date": 1433489048337
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3d3bf098af382f8c"
+      },
+      "id": "3d3bf098af382f8c",
+      "type": "add",
+      "after": "23a6f154c9fd583d",
+      "date": 1433489056670
+    },
+    {
+      "type": "edit",
+      "id": "3d3bf098af382f8c",
+      "item": {
+        "type": "code",
+        "id": "3d3bf098af382f8c",
+        "text": "var request = require('request')\nvar content = ''\n\nvar useContent = function () {\n  if (content) {\n    console.log(content)\n  } else {\n    setTimeout(useContent, 10)\n  }\n}\n\nuseContent()\n\nrequest('http://nrn.io/javascript-common-pitfalls.html',\n  function (err, res, body) {\n    content = body\n  }\n)"
+      },
+      "date": 1433489062414
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "136497bd66de06b6"
+      },
+      "id": "136497bd66de06b6",
+      "type": "add",
+      "after": "3d3bf098af382f8c",
+      "date": 1433489176731
+    },
+    {
+      "type": "edit",
+      "id": "136497bd66de06b6",
+      "item": {
+        "type": "paragraph",
+        "id": "136497bd66de06b6",
+        "text": "So far we've been using timers for our loops, and the frequencies are entirely arbitrary. We can do this with any kind of asynchronous operation though, here's a simple way with node style callbacks."
+      },
+      "date": 1433489319340
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d90b269d7edf6d6d"
+      },
+      "id": "d90b269d7edf6d6d",
+      "type": "add",
+      "after": "136497bd66de06b6",
+      "date": 1433489937926
+    },
+    {
+      "type": "edit",
+      "id": "d90b269d7edf6d6d",
+      "item": {
+        "type": "paragraph",
+        "id": "d90b269d7edf6d6d",
+        "text": "Test"
+      },
+      "date": 1433489953381
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "53f166323b4ca666"
+      },
+      "id": "53f166323b4ca666",
+      "type": "add",
+      "after": "d90b269d7edf6d6d",
+      "date": 1433490058107
+    },
+    {
+      "type": "edit",
+      "id": "d90b269d7edf6d6d",
+      "item": {
+        "type": "paragraph",
+        "id": "d90b269d7edf6d6d",
+        "text": "Test a"
+      },
+      "date": 1433490068424
+    },
+    {
+      "type": "edit",
+      "id": "d90b269d7edf6d6d",
+      "item": {
+        "type": "paragraph",
+        "id": "d90b269d7edf6d6d",
+        "text": "Test a b"
+      },
+      "date": 1433490139914
+    },
+    {
+      "type": "edit",
+      "id": "d90b269d7edf6d6d",
+      "item": {
+        "type": "paragraph",
+        "id": "d90b269d7edf6d6d",
+        "text": "Test a b c"
+      },
+      "date": 1433490146186
+    },
+    {
+      "type": "edit",
+      "id": "53f166323b4ca666",
+      "item": {
+        "type": "paragraph",
+        "id": "53f166323b4ca666",
+        "text": "foo"
+      },
+      "date": 1433490252405
+    },
+    {
+      "type": "remove",
+      "id": "53f166323b4ca666",
+      "date": 1433490887379
+    },
+    {
+      "type": "remove",
+      "id": "d90b269d7edf6d6d",
+      "date": 1433491173325
+    },
+    {
+      "type": "edit",
+      "id": "136497bd66de06b6",
+      "item": {
+        "type": "paragraph",
+        "id": "136497bd66de06b6",
+        "text": "So far we've been using timers for our loops, and the frequencies are entirely arbitrary. We can do this with any kind of asynchronous operation though, here's a simple way to aggressively poll for changes in a wiki page using [[node style callbacks]]."
+      },
+      "date": 1433491236913
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "38a1b6513a25c3c7"
+      },
+      "id": "38a1b6513a25c3c7",
+      "type": "add",
+      "after": "136497bd66de06b6",
+      "date": 1433491238254
+    },
+    {
+      "type": "edit",
+      "id": "38a1b6513a25c3c7",
+      "item": {
+        "type": "code",
+        "id": "38a1b6513a25c3c7",
+        "text": "var request = require('request')\nvar start = Date.now()\nvar url = 'http://wiki.nrn.io/welcome-visitors.json'\n\nrequest(url,\n  function poll (err, res, body) {\n    var journal = JSON.parse(body).journal\n    if (journal[journal.length-1].date > start) {\n      console.log('New Version!')\n      return\n    }\n\n    //if nothing has changed, ask again\n    request(url, poll)\n  }\n)\n"
+      },
+      "date": 1433491249078
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b98ee3ae8981aa93"
+      },
+      "id": "b98ee3ae8981aa93",
+      "type": "add",
+      "after": "38a1b6513a25c3c7",
+      "date": 1433491261618
+    },
+    {
+      "type": "edit",
+      "id": "b98ee3ae8981aa93",
+      "item": {
+        "type": "paragraph",
+        "id": "b98ee3ae8981aa93",
+        "text": "Naming the function expression 'poll' lets us easily pass a reference to it to the next request. This pattern of having the callback to an asynchronous function set itself to be called again in the future works well with most kinds of async functions."
+      },
+      "date": 1433491392015
+    },
+    {
+      "type": "fork",
+      "site": "nrn.io",
+      "date": 1652868580245
+    }
+  ]
+}
