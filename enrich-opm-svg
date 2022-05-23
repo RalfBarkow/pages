@@ -1,0 +1,337 @@
+{
+  "title": "Enrich OPM SVG",
+  "story": [
+    {
+      "id": "39160000",
+      "type": "paragraph",
+      "text": "Here we offer a tool which can enrich SVG diagrams exported from OPM with hyperlinks that conform to wiki's internal link conventions."
+    },
+    {
+      "type": "frame",
+      "id": "6cf52409eec3988c",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/esm.html\nHEIGHT 55"
+    },
+    {
+      "type": "paragraph",
+      "id": "5ef7c7a9c3870691",
+      "text": "Placeholder for more notes..."
+    },
+    {
+      "type": "pagefold",
+      "id": "97e410bb90791cb8",
+      "text": "."
+    },
+    {
+      "type": "paragraph",
+      "id": "04bfb2692d07aa60",
+      "text": "Below this pagefold we reveal the code which does the enriching. We believe this transparency may help other tinkerers to experiment with enrichment for specialized SVG structures. See [[Enrich Arrows SVG]]."
+    },
+    {
+      "type": "paragraph",
+      "id": "dfddd2d989966f0c",
+      "text": "Import [[Frame Integration Promises]] and setup DOM helpers."
+    },
+    {
+      "type": "code",
+      "id": "5cbd82e529085e9a",
+      "text": "import * as frame from \"https://wiki.ralfbarkow.ch/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => \n  Array.from(el.querySelectorAll(s))"
+    },
+    {
+      "type": "paragraph",
+      "id": "02b8d780c9a129c3",
+      "text": "Given a URL to and SVG document, or a data:image/svg+xml URL, we fetch the SVG DOM. We also remove width and height attributes so our processed images will scale to fit wiki's narrow pages."
+    },
+    {
+      "type": "code",
+      "id": "f58fa4daedf47228",
+      "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  return svg\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "e7fffc816ad4a2ab",
+      "text": "Here is where we make educated guesses about the structure of the SVG. We wrap specific elements in the document with annotated anchor tags that our HTML plugin interprets as internal links."
+    },
+    {
+      "type": "code",
+      "id": "f600e20860690557",
+      "text": "function enrich(svg) {\n  $$('text', svg)\n    .forEach(wrapElement)\n}"
+    },
+    {
+      "type": "code",
+      "id": "dff87e6623733fff",
+      "text": "function wrapElement(el) {\n  let title = Array.from(el.childNodes)\n    .map(el => el.textContent.trim())\n    .join(\" \")\n  let anchor = anchorFor(title)\n  el.parentElement.appendChild(anchor)\n  el.parentElement.removeChild(el)\n  anchor.appendChild(el)\n}"
+    },
+    {
+      "type": "code",
+      "id": "90c74c2554acf86a",
+      "text": "function anchorFor(title) {\n  let anchor = document.createElementNS(\n    \"http://www.w3.org/2000/svg\", \"a\")\n  anchor.setAttribute(\"class\", \"internal\")\n  anchor.setAttribute(\"data-title\", title)\n  anchor.setAttribute(\"href\",\n    `/${asSlug(title)}.html`)\n  return anchor\n}"
+    },
+    {
+      "type": "code",
+      "id": "78d6e5d07027c7f5",
+      "text": "const asSlug = title => title\n  .replace(/\\s/g, '-')\n  .replace(/[^A-Za-z0-9-]/g, '')\n  .toLowerCase()\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "97a2cf7d2ec8212f",
+      "text": "Emit the HTML form."
+    },
+    {
+      "type": "code",
+      "id": "532408a599a375b7",
+      "text": "export async function emit(el) {\n  el.innerHTML = `\n<style>input {width: 100%; display: block;}</style>\n<input name=\"title\" type=\"text\"\n  placeholder=\"page title\">\n<input name=\"source\" type=\"text\"\n  placeholder=\"URL to svg file\">\n<button>Create</button>\n`\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "22cc8700998c384d",
+      "text": "Bind a click handler to the form button."
+    },
+    {
+      "type": "code",
+      "id": "f3292e6fcac877b9",
+      "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched OPM SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await getSvg(url)\n    enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this diagram.\"},\n        {type:\"html\", text: svg.outerHTML}\n      ]\n    }, e.shiftKey)\n  }\n}"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Enrich OPM SVG",
+        "story": [
+          {
+            "id": "39160000",
+            "type": "paragraph",
+            "text": "Here we offer a tool which can enrich SVG diagrams exported from OPM with hyperlinks that conform to wiki's internal link conventions."
+          }
+        ]
+      },
+      "date": 1653071354247
+    },
+    {
+      "type": "fork",
+      "date": 1653071357341
+    },
+    {
+      "id": "6cf52409eec3988c",
+      "type": "add",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/esm.html\nHEIGHT 55"
+      },
+      "after": "39160000",
+      "date": 1653071361230
+    },
+    {
+      "id": "5ef7c7a9c3870691",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "5ef7c7a9c3870691",
+        "text": "Placeholder for more notes..."
+      },
+      "after": "6cf52409eec3988c",
+      "date": 1653071367807
+    },
+    {
+      "id": "97e410bb90791cb8",
+      "type": "add",
+      "item": {
+        "type": "pagefold",
+        "id": "97e410bb90791cb8",
+        "text": "."
+      },
+      "after": "5ef7c7a9c3870691",
+      "date": 1653071374974
+    },
+    {
+      "id": "04bfb2692d07aa60",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "04bfb2692d07aa60",
+        "text": "Below this pagefold we reveal the code which does the enriching. We believe this transparency may help other tinkerers to experiment with enrichment for specialized SVG structures. See [[Enrich Arrows SVG]]."
+      },
+      "after": "97e410bb90791cb8",
+      "date": 1653071382015
+    },
+    {
+      "id": "dfddd2d989966f0c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "dfddd2d989966f0c",
+        "text": "Import [[Frame Integration Promises]] and setup DOM helpers."
+      },
+      "after": "04bfb2692d07aa60",
+      "date": 1653071386613
+    },
+    {
+      "id": "5cbd82e529085e9a",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "5cbd82e529085e9a",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => \n  Array.from(el.querySelectorAll(s))"
+      },
+      "after": "dfddd2d989966f0c",
+      "date": 1653071389687
+    },
+    {
+      "id": "02b8d780c9a129c3",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "02b8d780c9a129c3",
+        "text": "Given a URL to and SVG document, or a data:image/svg+xml URL, we fetch the SVG DOM. We also remove width and height attributes so our processed images will scale to fit wiki's narrow pages."
+      },
+      "after": "5cbd82e529085e9a",
+      "date": 1653071396663
+    },
+    {
+      "id": "f58fa4daedf47228",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "f58fa4daedf47228",
+        "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  return svg\n}"
+      },
+      "after": "02b8d780c9a129c3",
+      "date": 1653071400223
+    },
+    {
+      "id": "e7fffc816ad4a2ab",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "e7fffc816ad4a2ab",
+        "text": "Here is where we make educated guesses about the structure of the SVG. We wrap specific elements in the document with annotated anchor tags that our HTML plugin interprets as internal links."
+      },
+      "after": "f58fa4daedf47228",
+      "date": 1653071408352
+    },
+    {
+      "id": "f600e20860690557",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "f600e20860690557",
+        "text": "function enrich(svg) {\n  $$('text', svg)\n    .forEach(wrapElement)\n}"
+      },
+      "after": "e7fffc816ad4a2ab",
+      "date": 1653071411099
+    },
+    {
+      "id": "dff87e6623733fff",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "dff87e6623733fff",
+        "text": "function wrapElement(el) {\n  let title = Array.from(el.childNodes)\n    .map(el => el.textContent.trim())\n    .join(\" \")\n  let anchor = anchorFor(title)\n  el.parentElement.appendChild(anchor)\n  el.parentElement.removeChild(el)\n  anchor.appendChild(el)\n}"
+      },
+      "after": "f600e20860690557",
+      "date": 1653071416013
+    },
+    {
+      "id": "90c74c2554acf86a",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "90c74c2554acf86a",
+        "text": "function anchorFor(title) {\n  let anchor = document.createElementNS(\n    \"http://www.w3.org/2000/svg\", \"a\")\n  anchor.setAttribute(\"class\", \"internal\")\n  anchor.setAttribute(\"data-title\", title)\n  anchor.setAttribute(\"href\",\n    `/${asSlug(title)}.html`)\n  return anchor\n}"
+      },
+      "after": "dff87e6623733fff",
+      "date": 1653071421100
+    },
+    {
+      "id": "78d6e5d07027c7f5",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "78d6e5d07027c7f5",
+        "text": "const asSlug = title => title\n  .replace(/\\s/g, '-')\n  .replace(/[^A-Za-z0-9-]/g, '')\n  .toLowerCase()\n"
+      },
+      "after": "90c74c2554acf86a",
+      "date": 1653071425101
+    },
+    {
+      "id": "97a2cf7d2ec8212f",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "97a2cf7d2ec8212f",
+        "text": "Emit the HTML form."
+      },
+      "after": "78d6e5d07027c7f5",
+      "date": 1653071429497
+    },
+    {
+      "id": "532408a599a375b7",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "532408a599a375b7",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<style>input {width: 100%; display: block;}</style>\n<input name=\"title\" type=\"text\"\n  placeholder=\"page title\">\n<input name=\"source\" type=\"text\"\n  placeholder=\"URL to svg file\">\n<button>Create</button>\n`\n}\n"
+      },
+      "after": "97a2cf7d2ec8212f",
+      "date": 1653071431959
+    },
+    {
+      "id": "22cc8700998c384d",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "22cc8700998c384d",
+        "text": "Bind a click handler to the form button."
+      },
+      "after": "532408a599a375b7",
+      "date": 1653071436775
+    },
+    {
+      "id": "f3292e6fcac877b9",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await getSvg(url)\n    enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this diagram.\"},\n        {type:\"html\", text: svg.outerHTML}\n      ]\n    }, e.shiftKey)\n  }\n}"
+      },
+      "after": "22cc8700998c384d",
+      "date": 1653071445324
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched OPM SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await getSvg(url)\n    enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this diagram.\"},\n        {type:\"html\", text: svg.outerHTML}\n      ]\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1653072310885
+    },
+    {
+      "type": "fork",
+      "site": "wiki.dbbs.co",
+      "date": 1653224311211
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/esm.html\nHEIGHT 55"
+      },
+      "date": 1653224326773
+    },
+    {
+      "type": "edit",
+      "id": "5cbd82e529085e9a",
+      "item": {
+        "type": "code",
+        "id": "5cbd82e529085e9a",
+        "text": "import * as frame from \"https://wiki.ralfbarkow.ch/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => \n  Array.from(el.querySelectorAll(s))"
+      },
+      "date": 1653224361805
+    }
+  ]
+}

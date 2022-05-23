@@ -1,0 +1,892 @@
+{
+  "title": "Visitor Pattern",
+  "story": [
+    {
+      "type": "html",
+      "text": "One of the [[Behavioral Patterns]] described by the [[Gang Of Four]] in the book [[Design Patterns]].",
+      "id": "b3f451895b86af5f55bc84160aa23d37"
+    },
+    {
+      "type": "html",
+      "text": "<b>Intent</b>: Represent an operation to be performed on the elements of an object structure.\nVisitor lets you define a new operation without changing the classes of the elements on which it operates.",
+      "id": "e630505f74dcd4950a13812b6bf1230d"
+    },
+    {
+      "type": "html",
+      "text": " [http://home.earthlink.net/~huston2/dp/visitor.html home.earthlink.net] (defunct)",
+      "id": "801304fd5eb5412112c58392688feea4"
+    },
+    {
+      "type": "html",
+      "text": " [http://wiki.cs.uiuc.edu/patternStories/VisitorPattern wiki.cs.uiuc.edu] (times out)",
+      "id": "3ee68defca1f6986b6b7dbf8cf9ab348"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a47285b295a3a5360285622fa8414cc2"
+    },
+    {
+      "type": "html",
+      "text": "Am I the only person who finds the [[Visitor Pattern]] kind of useless? The typical example of the use of the [[Visitor Pattern]] is an expression evaluator where the actual evaluation of the various operations are encapsulated in the visitor class. The big question here is: When do you really write a new visitor implementation? And if you happen to do so, and you want to add a new operation, all visitor subclasses need to change. In the end, I doubt that the flexibility offered by this pattern is ever used.",
+      "id": "21652be41e380063fe1797c7dbc8f04e"
+    },
+    {
+      "type": "html",
+      "text": "<i>You use the visitor pattern implicitly in [[Common Lisp]] programming.</i>",
+      "id": "f8ecd6434e5d499622be69d2c32eb970"
+    },
+    {
+      "type": "code",
+      "text": "  (walk-my-object #'evaluate my-object)",
+      "id": "43406266bcda440b90322d045fc86286"
+    },
+    {
+      "type": "code",
+      "text": "  (walk-my-object #'pretty-print my-object)",
+      "id": "633228bbcd428e6ffa2c147812c4a047"
+    },
+    {
+      "type": "html",
+      "text": "<i>EVALUATE and PRETTY-PRINT could be ordinary functions or [[Generic Function]]s that dispatch methods on consideration of every parameter type. The [[Visitor Pattern]] is basically a clumsy emulation of generic functions. Generic functions can readily encapsulate algorithms independently of the objects to which they are specialized. So EVALUATE or PRETTY-PRINT have behaviors that depend on the various types of nodes of MY-OBJECT. There are two levels of dispatch going on: first, the indirection upon the [[Generic Function Object]] parameter, so that EVALUATE or PRETTY-PRINT is called. And then, there is the OO dispatch on the type of node visited. So what is left is to write methods that specialize EVALUATE or PRETTY-PRINT:</i>",
+      "id": "afc9430c5b4e4908d01a0c1e9f29024c"
+    },
+    {
+      "type": "code",
+      "text": "  (defmethod evaluate ((node foo-node-class)) ...)",
+      "id": "88df69e5c48eacfa24cc4869e4d9671d"
+    },
+    {
+      "type": "code",
+      "text": "  (defmethod evaluate ((node bar-node-class)) ...)",
+      "id": "f518a732fcc0debb8362cb5a0e99d5ce"
+    },
+    {
+      "type": "html",
+      "text": "<i>etc. --[[Kaz Kylheku]]</i>",
+      "id": "47a9a1ad7281e8e380d8f66b0b73ea8f"
+    },
+    {
+      "type": "html",
+      "text": "\nIt feels as though you create a very complex framework in order to prepare for something that most probably will never happen, and doesn't that break the [[Do The Simplest Thing That Could Possibly Work]]?",
+      "id": "8bdded1e4c781c5aec6fc258ab4cfc26"
+    },
+    {
+      "type": "html",
+      "text": "\nIs there anyone that could point to a situation where this pattern is being used successfully, and where it has proved to be flexible and served a useful purpose?",
+      "id": "261f083f5e427104a86a40df6621a514"
+    },
+    {
+      "type": "html",
+      "text": "<i>Sure, pretty much every time I use the [[Composite Pattern]] I have found the [[Visitor Pattern]] useful. However, I am usually not creating specific implementations for each Leaf type. If I subclass the leaf, it rarely impacts my traversal of the composite so I don't change the visitor implementation. I use visitor adaptors too. For example, I have hierarchically grouped rules in my system. I also have hierarchically grouped nodes (or rule targets). I create a visitor that wraps a visitor to each of these in order to make an inner-product of the node/rule pairs. Seems to do what it's supposed to.</i>",
+      "id": "70d9c189bce88b983a6f769d07f3c5c1"
+    },
+    {
+      "type": "html",
+      "text": "\nThat's exactly the situation I have now. My profs want to see [[Composite Pattern]] combined [[Visitor Pattern]]. I still don't know how to combine it in an elegant way.",
+      "id": "c809dc1cdd099ead52096dc2a90cb6e4"
+    },
+    {
+      "type": "html",
+      "text": "<i>The [[Open Scene Graph]] library makes extensive use of the [[Visitor Pattern]].</i>",
+      "id": "cf68197b26c79bca7ff24e4334ef46f0"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a47285b295a3a5360285622fa8414cc2"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Visitor Pattern]] suggests [[Composite Pattern]], which smells a great deal like [[Navigational Database]] or [[Object Oriented Database]]. In this sense, [[Visitor Pattern]] might be considered a [[Language Smell]] - a weak hack to get around the fact that an OOPL lacks [[First Class]] object-graph management, transform, join, and view operations. For many OOPLs, you'll also be fighting the language to achieve safe concurrency, handle partial-failures during a manipulation, implement persistence and serialization, and enforcing whole-graph consistency rules. That is: where you have a [[Data Base]], you're going to want [[Atomic Consistent Isolated Durable]] properties, and most OOPLs don't offer those (and none offer all of them at once or allow big-step consistency semantics - allowing a temporary breach of consistency so long as it is fixed by the end of transaction - it's almost always small-step class invariants per-method-call). The better solution here is integrating a [[Data Base]], and it is likely worth considering a [[Relational Database]] - they perform better than you think, especially if you're forced to use explicit locks or something to handle concurrency.",
+      "id": "cfea614d5ea31ce7c33f4e16e1f70de7"
+    },
+    {
+      "type": "html",
+      "text": "\nSometimes [[Composite Pattern]] is used to represent independent messages or values with 'immutable' structure, which doesn't have quite so many ACID problems (excepting persistence and serialization concerns). This can be used for [[Message Passing]] in an OOP, especially in combination with concurrency, as such messages may easily cross process boundaries without damage to their semantics. Use of [[Visitor Pattern]] in this case is essentially a [[Fold Function]] with [[Side Effect]]s. This is likely useful if the OOPL lacks real support for [[Functional Programming]], but any OOPL would do well to provide [[First Class]] support for immutable and [[Side Effect]]-free message structures to better support distribution, concurrency, and [[Partial Evaluation]].",
+      "id": "541984b0606b55778960316b959723e5"
+    },
+    {
+      "type": "html",
+      "text": "\nIn some OOPLs, such as [[Erlang Language]] (which isn't advertised as an OOPL but its [[First Class]] processes fit the classic [[Definitions For Oo]]), objects are not used to represent messages. In those cases, Object references in messages tend to be part of 'protocol' (handshakes representing connections with communications context, reply-to receivers and continuations for [[Continuation Passing Style]], etc.). This fits the notion that OOP is about abstraction of program behavior (representing program elements - [[Nygaard Classification]]), and not about 'data' abstraction (by which I mean reflecting some state of a real or imagined world that must be tweaked and managed by external observers). ",
+      "id": "58b8dd902b7b465e6836916829e69254"
+    },
+    {
+      "type": "html",
+      "text": "<i>Related: [[Greencodds Tenth Rule Of Programming]]. Note that I probably did not write the above statement. --top</i>",
+      "id": "4c396c62cebc3ebde69a6b1ad812ec5f"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a47285b295a3a5360285622fa8414cc2"
+    },
+    {
+      "type": "html",
+      "text": "From a discussion about operations on sets of objects over at [[Sets And Polymorphism]]:",
+      "id": "f0ca63713f9bead700cccd3229de5d3d"
+    },
+    {
+      "type": "html",
+      "text": "[That depends entirely on what you want to do with the results.  You might want to collect them.  You might want to add them.  You might want to average them.  You might want to pick the biggest one.  I wouldn't tie shape methods to sets.  I'd make a visitor or something to traverse the set and do whatever I wanted with the results.]",
+      "id": "3f9de4b3650cbcfda79885fb32b3fd7c"
+    },
+    {
+      "type": "html",
+      "text": "{But isn't [[Visitor Pattern]] \"kind of useless\" according to some opinions on that page? }",
+      "id": "fd61494f38e07a089b49bcbc700da29c"
+    },
+    {
+      "type": "html",
+      "text": "[No.  Visitor lets me decouple what I want to do with the results of operations on things in sets from the things and the sets.  That's kind of useful.]",
+      "id": "601036c90602a2bbb5dae08b456b9a13"
+    },
+    {
+      "type": "html",
+      "text": "\nIt is not exactly the poster-boy of simplicity. I have not decided at this point it seems there must be cases where it is useful, but want to hear both sides of the debate.",
+      "id": "021ec7623ff825c7b44a66e1e4c027b4"
+    },
+    {
+      "type": "html",
+      "text": "[How do you mean?]",
+      "id": "801c67df2a7ac743f4a16f112c0f3a3b"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a47285b295a3a5360285622fa8414cc2"
+    },
+    {
+      "type": "html",
+      "text": "Would it be fair to draw an analogy between [[Visitor Pattern]]/Classes and [[Parameter Object]]/Methods? I.e. each is externalized (abstracted?) from it's parent \"construct\" in an effort to simplify them and the design.",
+      "id": "23d517a0449b26f0b14b4a2cb26dcb33"
+    },
+    {
+      "type": "html",
+      "text": "<i>Sure.  Visitor pattern decouples some behavior from a set of classes and the structure that contains them.</i>",
+      "id": "942acf620d1a33fc991f1558b58b5abf"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a47285b295a3a5360285622fa8414cc2"
+    },
+    {
+      "type": "html",
+      "text": "\nAn application of the [[Visitor Pattern]] has been patented in the [[United States]].  See [[Ibm Double Dispatch Patent]].",
+      "id": "09d263b4785aceb881c0d27b212c8fde"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a47285b295a3a5360285622fa8414cc2"
+    },
+    {
+      "type": "html",
+      "text": "I have a \"Java OLAP\" framework that aggregates values in various ways: sum, average, min, max, count. I implemented a visitor for each kind of aggregation. The data set has an accept(Visitor) method that iterates over all values and calls visitor.visit(value) for each value. At the end the visitor has seen and aggregated all values. To add a new aggregation I just create a new type of visitor, everything else stays the same. Neat!",
+      "id": "a89f65b875b39835ee65ea3b64c9ede8"
+    },
+    {
+      "type": "html",
+      "text": "\nChris Treber, ct on ctreber point com",
+      "id": "af9fd03da3460f079a42a7e66ca3d806"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a47285b295a3a5360285622fa8414cc2"
+    },
+    {
+      "type": "html",
+      "text": "I'm writing a source-to-source converter between two languages.  The language I'm converting from supports several operations, including jumping out of an arbitrary number of nested \"while\" loops, that the destination language does not (natively).  Therefore, when converting a \"while\" statement I have to know if any there are any \"evil jump statements\" inside its code blocks.  The same holds true for \"case\" statements.  This is difficult, because such \"evil\" statements could be nested within an arbitrary number of if/for/while/case/switch statements.  Therefore, I converted all the syntax nodes that potentially contain other blocks of code to accept an arbitrary number of visitors and iterate over their contents with them.  In this case, the visitor pattern made for an elegant, robust, easy-to-understand solution.",
+      "id": "9e7ac5dc936fe19abaa1cf30934b61fd"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a47285b295a3a5360285622fa8414cc2"
+    },
+    {
+      "type": "html",
+      "text": "\nThe visitor pattern isn't exactly necessary, but it's safer than leaving static and reinterpret casts up to the user.",
+      "id": "b0e68a6ea7964b60613cf516c5c71671"
+    },
+    {
+      "type": "html",
+      "text": "\nAny situation where you would go.",
+      "id": "a96293bddc58e8342df7fce7ea45c4b2"
+    },
+    {
+      "type": "html",
+      "text": "\nif( someobject.get_type_info() = otherobject.get_type_info() ) {",
+      "id": "676eca2c5b3e0bbd336c537b1483f2c7"
+    },
+    {
+      "type": "code",
+      "text": "  sometype * t = static_cast<sometype*>(&otherobject);",
+      "id": "6c8ebaba5d2f3a7e3170c446bf0a9f4e"
+    },
+    {
+      "type": "html",
+      "text": "}",
+      "id": "ac4f38c7b11cbf10ca94f575cbc57a07"
+    },
+    {
+      "type": "html",
+      "text": "\nCould be made \"cleaner\" with some kind of Visitor pattern.  For example, an abstract syntax tree is a perfect fit for the visitor pattern.",
+      "id": "587f31198f0cde0bd48f125e619eab82"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a47285b295a3a5360285622fa8414cc2"
+    },
+    {
+      "type": "html",
+      "text": "Variations of this pattern:",
+      "id": "ba33ad2b1adba541522e21767de76109"
+    },
+    {
+      "type": "html",
+      "text": " [[Acyclic Visitor]] -- eliminates cyclic dependencies, sometimes slower than normal visitors",
+      "id": "b39af51a7b337ba45568f44fa109a7fe"
+    },
+    {
+      "type": "html",
+      "text": " [[Selector Generating Visitor]] -- avoids modifying visited classes",
+      "id": "abc0c00178bbfc7cf93f0e8bf64a9cd0"
+    },
+    {
+      "type": "html",
+      "text": " [[Hierarchical Visitor Pattern]] -- another way to handle the pretty-printing problem",
+      "id": "c95ac5dbb9b75a7be65ca8036f2ecf20"
+    },
+    {
+      "type": "html",
+      "text": " [[Independent Visitor Pattern]] -- another way to eliminate cyclic dependencies",
+      "id": "a87fa61ff67177d0bea3cd6e415f0d45"
+    },
+    {
+      "type": "html",
+      "text": " [[Default Visitor Pattern]] -- generalization of the [[Null Object And Visitor]] pattern",
+      "id": "d6baf878b07211598963a2badc2aa896"
+    },
+    {
+      "type": "html",
+      "text": " [[Extrinsic Visitor Pattern]]",
+      "id": "ab9ec6ed284b873bdbe61cb41c09eb82"
+    },
+    {
+      "type": "html",
+      "text": "\nSee also the [[Variations On The Visitor Pattern]] paper.",
+      "id": "b93d481447fa400d2c9d35e0e4cb907c"
+    },
+    {
+      "type": "html",
+      "text": "\nRelated Topics:",
+      "id": "4cc867379b457b1de8ef4711dc82dab8"
+    },
+    {
+      "type": "html",
+      "text": " [[Comments On Visitor]]",
+      "id": "fac2a67d1fdb9bb1fd4e8769820eb03c"
+    },
+    {
+      "type": "html",
+      "text": " [[Pretty Printing Java With Visitor]]",
+      "id": "c9455f8bf66dab1a0641e008401a4a38"
+    },
+    {
+      "type": "html",
+      "text": " [[Null Object And Visitor]] -- combining [[Null Object]] with the [[Visitor Pattern]]",
+      "id": "9a0d0d97e1874d3c004c77a96312d051"
+    },
+    {
+      "type": "html",
+      "text": " [[Visitor In Frameworks]]",
+      "id": "47a58d2e03c353b9a4b705eb6b307f1f"
+    },
+    {
+      "type": "html",
+      "text": " [[Pattern Hatching]] -- see pages 36, 81-84",
+      "id": "dfbe628c948b1b5a2ac939eacf7044fc"
+    },
+    {
+      "type": "html",
+      "text": " [[Translator Pattern]] == alternative visitor style used in [[Functional Programming]]",
+      "id": "3cb300207aa9486bd538375cde62d23f"
+    },
+    {
+      "type": "html",
+      "text": " [[Resource Releases Resource]] -- can a single object accept a visitor?",
+      "id": "f8e9424c4f79cad65718d1507bf74f3e"
+    },
+    {
+      "type": "html",
+      "text": " Java programmers will find [[Nested Exception]] useful.",
+      "id": "e79cab1ebb103bae114338c5278d5b40"
+    },
+    {
+      "type": "html",
+      "text": " [[Traveller Pattern]]",
+      "id": "b240429bcc179177f5125c6186de7d8a"
+    },
+    {
+      "type": "html",
+      "text": " [[Visitor Pattern Example]]",
+      "id": "8378c8e7c56af41fca1d532716caf817"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a47285b295a3a5360285622fa8414cc2"
+    },
+    {
+      "type": "html",
+      "text": "Papers related to the visitor pattern",
+      "id": "97c643bfeb291cc1448794bdeb63fd75"
+    },
+    {
+      "type": "html",
+      "text": " [[Acyclic Visitor]]",
+      "id": "c2937484b4b84026f339e6a10d36cadc"
+    },
+    {
+      "type": "html",
+      "text": " [http://www.ccs.neu.edu/research/demeter/adaptive-patterns/visitor-usage/papers/plop96/acyclic-visitor-martin.ps www.ccs.neu.edu]",
+      "id": "a2201f2ad105d5ad9045608553c63b79"
+    },
+    {
+      "type": "html",
+      "text": " [[Interface Extension]]",
+      "id": "a63fc13a276b2e81748e7beda1116ceb"
+    },
+    {
+      "type": "html",
+      "text": "[http://www.ccs.neu.edu/research/demeter/adaptive-patterns/visitor-usage/papers/plop96/extension-objects-gamma.ps www.ccs.neu.edu]",
+      "id": "390762e7be36aa638b853b8d57587ff0"
+    },
+    {
+      "type": "html",
+      "text": " Propagators",
+      "id": "30971ee313c89d22272f1ec865a38a39"
+    },
+    {
+      "type": "html",
+      "text": " [http://www.ccs.neu.edu/research/demeter/adaptive-patterns/visitor-usage/papers/plop96/propagator-tichy-feiler.ps www.ccs.neu.edu]",
+      "id": "eac9577594d485f3896677cf5026c73b"
+    },
+    {
+      "type": "html",
+      "text": " [[Visitor Variations]]",
+      "id": "12168bf05c33b35701c645ec05b108e7"
+    },
+    {
+      "type": "html",
+      "text": " [http://www.ccs.neu.edu/research/demeter/adaptive-patterns/visitor-usage/papers/plop96/variations-visitor-nordberg.ps www.ccs.neu.edu]",
+      "id": "fe933cd44a02d5636030b9edbc3e35c1"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a47285b295a3a5360285622fa8414cc2"
+    },
+    {
+      "type": "html",
+      "text": "\nRelated:",
+      "id": "e7fe028d5a74331be82657c59fca9e9a"
+    },
+    {
+      "type": "html",
+      "text": " [[Visitor Pattern Example]]",
+      "id": "8378c8e7c56af41fca1d532716caf817"
+    },
+    {
+      "type": "html",
+      "text": " [[Composite Pattern]]",
+      "id": "dfa5be338b44e7f9d3460e30d9d81008"
+    },
+    {
+      "type": "html",
+      "text": " [[Design Patterns]]",
+      "id": "adc03ffd5a5206b3ca63779d26b6f849"
+    },
+    {
+      "type": "html",
+      "text": " [[Internal Iterator]]",
+      "id": "11517fa713d523a9fdc786771aafa4d1"
+    },
+    {
+      "type": "html",
+      "text": " [[Double Dispatch]]",
+      "id": "2edc76648e18e871ddc199e909b88f4c"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "a47285b295a3a5360285622fa8414cc2"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Category Pattern]]  [[Category Behavioral Patterns]] ",
+      "id": "d79d8454ba50bc01c3129ff84e380ccc"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?VisitorPattern c2.com]",
+      "id": "7de511c9270375011359f8be0ec88e00"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1359076853000,
+      "id": "09f6d2ed3bc496fdb1e473b429c18286",
+      "type": "create",
+      "item": {
+        "title": "Visitor Pattern",
+        "story": [
+          {
+            "type": "html",
+            "text": "One of the [[Behavioral Patterns]] described by the [[Gang Of Four]] in the book [[Design Patterns]].",
+            "id": "b3f451895b86af5f55bc84160aa23d37"
+          },
+          {
+            "type": "html",
+            "text": "<b>Intent</b>: Represent an operation to be performed on the elements of an object structure.\nVisitor lets you define a new operation without changing the classes of the elements on which it operates.",
+            "id": "e630505f74dcd4950a13812b6bf1230d"
+          },
+          {
+            "type": "html",
+            "text": " [http://home.earthlink.net/~huston2/dp/visitor.html home.earthlink.net] (defunct)",
+            "id": "801304fd5eb5412112c58392688feea4"
+          },
+          {
+            "type": "html",
+            "text": " [http://wiki.cs.uiuc.edu/patternStories/VisitorPattern wiki.cs.uiuc.edu] (times out)",
+            "id": "3ee68defca1f6986b6b7dbf8cf9ab348"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a47285b295a3a5360285622fa8414cc2"
+          },
+          {
+            "type": "html",
+            "text": "Am I the only person who finds the [[Visitor Pattern]] kind of useless? The typical example of the use of the [[Visitor Pattern]] is an expression evaluator where the actual evaluation of the various operations are encapsulated in the visitor class. The big question here is: When do you really write a new visitor implementation? And if you happen to do so, and you want to add a new operation, all visitor subclasses need to change. In the end, I doubt that the flexibility offered by this pattern is ever used.",
+            "id": "21652be41e380063fe1797c7dbc8f04e"
+          },
+          {
+            "type": "html",
+            "text": "<i>You use the visitor pattern implicitly in [[Common Lisp]] programming.</i>",
+            "id": "f8ecd6434e5d499622be69d2c32eb970"
+          },
+          {
+            "type": "code",
+            "text": "  (walk-my-object #'evaluate my-object)",
+            "id": "43406266bcda440b90322d045fc86286"
+          },
+          {
+            "type": "code",
+            "text": "  (walk-my-object #'pretty-print my-object)",
+            "id": "633228bbcd428e6ffa2c147812c4a047"
+          },
+          {
+            "type": "html",
+            "text": "<i>EVALUATE and PRETTY-PRINT could be ordinary functions or [[Generic Function]]s that dispatch methods on consideration of every parameter type. The [[Visitor Pattern]] is basically a clumsy emulation of generic functions. Generic functions can readily encapsulate algorithms independently of the objects to which they are specialized. So EVALUATE or PRETTY-PRINT have behaviors that depend on the various types of nodes of MY-OBJECT. There are two levels of dispatch going on: first, the indirection upon the [[Generic Function Object]] parameter, so that EVALUATE or PRETTY-PRINT is called. And then, there is the OO dispatch on the type of node visited. So what is left is to write methods that specialize EVALUATE or PRETTY-PRINT:</i>",
+            "id": "afc9430c5b4e4908d01a0c1e9f29024c"
+          },
+          {
+            "type": "code",
+            "text": "  (defmethod evaluate ((node foo-node-class)) ...)",
+            "id": "88df69e5c48eacfa24cc4869e4d9671d"
+          },
+          {
+            "type": "code",
+            "text": "  (defmethod evaluate ((node bar-node-class)) ...)",
+            "id": "f518a732fcc0debb8362cb5a0e99d5ce"
+          },
+          {
+            "type": "html",
+            "text": "<i>etc. --[[Kaz Kylheku]]</i>",
+            "id": "47a9a1ad7281e8e380d8f66b0b73ea8f"
+          },
+          {
+            "type": "html",
+            "text": "\nIt feels as though you create a very complex framework in order to prepare for something that most probably will never happen, and doesn't that break the [[Do The Simplest Thing That Could Possibly Work]]?",
+            "id": "8bdded1e4c781c5aec6fc258ab4cfc26"
+          },
+          {
+            "type": "html",
+            "text": "\nIs there anyone that could point to a situation where this pattern is being used successfully, and where it has proved to be flexible and served a useful purpose?",
+            "id": "261f083f5e427104a86a40df6621a514"
+          },
+          {
+            "type": "html",
+            "text": "<i>Sure, pretty much every time I use the [[Composite Pattern]] I have found the [[Visitor Pattern]] useful. However, I am usually not creating specific implementations for each Leaf type. If I subclass the leaf, it rarely impacts my traversal of the composite so I don't change the visitor implementation. I use visitor adaptors too. For example, I have hierarchically grouped rules in my system. I also have hierarchically grouped nodes (or rule targets). I create a visitor that wraps a visitor to each of these in order to make an inner-product of the node/rule pairs. Seems to do what it's supposed to.</i>",
+            "id": "70d9c189bce88b983a6f769d07f3c5c1"
+          },
+          {
+            "type": "html",
+            "text": "\nThat's exactly the situation I have now. My profs want to see [[Composite Pattern]] combined [[Visitor Pattern]]. I still don't know how to combine it in an elegant way.",
+            "id": "c809dc1cdd099ead52096dc2a90cb6e4"
+          },
+          {
+            "type": "html",
+            "text": "<i>The [[Open Scene Graph]] library makes extensive use of the [[Visitor Pattern]].</i>",
+            "id": "cf68197b26c79bca7ff24e4334ef46f0"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a47285b295a3a5360285622fa8414cc2"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Visitor Pattern]] suggests [[Composite Pattern]], which smells a great deal like [[Navigational Database]] or [[Object Oriented Database]]. In this sense, [[Visitor Pattern]] might be considered a [[Language Smell]] - a weak hack to get around the fact that an OOPL lacks [[First Class]] object-graph management, transform, join, and view operations. For many OOPLs, you'll also be fighting the language to achieve safe concurrency, handle partial-failures during a manipulation, implement persistence and serialization, and enforcing whole-graph consistency rules. That is: where you have a [[Data Base]], you're going to want [[Atomic Consistent Isolated Durable]] properties, and most OOPLs don't offer those (and none offer all of them at once or allow big-step consistency semantics - allowing a temporary breach of consistency so long as it is fixed by the end of transaction - it's almost always small-step class invariants per-method-call). The better solution here is integrating a [[Data Base]], and it is likely worth considering a [[Relational Database]] - they perform better than you think, especially if you're forced to use explicit locks or something to handle concurrency.",
+            "id": "cfea614d5ea31ce7c33f4e16e1f70de7"
+          },
+          {
+            "type": "html",
+            "text": "\nSometimes [[Composite Pattern]] is used to represent independent messages or values with 'immutable' structure, which doesn't have quite so many ACID problems (excepting persistence and serialization concerns). This can be used for [[Message Passing]] in an OOP, especially in combination with concurrency, as such messages may easily cross process boundaries without damage to their semantics. Use of [[Visitor Pattern]] in this case is essentially a [[Fold Function]] with [[Side Effect]]s. This is likely useful if the OOPL lacks real support for [[Functional Programming]], but any OOPL would do well to provide [[First Class]] support for immutable and [[Side Effect]]-free message structures to better support distribution, concurrency, and [[Partial Evaluation]].",
+            "id": "541984b0606b55778960316b959723e5"
+          },
+          {
+            "type": "html",
+            "text": "\nIn some OOPLs, such as [[Erlang Language]] (which isn't advertised as an OOPL but its [[First Class]] processes fit the classic [[Definitions For Oo]]), objects are not used to represent messages. In those cases, Object references in messages tend to be part of 'protocol' (handshakes representing connections with communications context, reply-to receivers and continuations for [[Continuation Passing Style]], etc.). This fits the notion that OOP is about abstraction of program behavior (representing program elements - [[Nygaard Classification]]), and not about 'data' abstraction (by which I mean reflecting some state of a real or imagined world that must be tweaked and managed by external observers). ",
+            "id": "58b8dd902b7b465e6836916829e69254"
+          },
+          {
+            "type": "html",
+            "text": "<i>Related: [[Greencodds Tenth Rule Of Programming]]. Note that I probably did not write the above statement. --top</i>",
+            "id": "4c396c62cebc3ebde69a6b1ad812ec5f"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a47285b295a3a5360285622fa8414cc2"
+          },
+          {
+            "type": "html",
+            "text": "From a discussion about operations on sets of objects over at [[Sets And Polymorphism]]:",
+            "id": "f0ca63713f9bead700cccd3229de5d3d"
+          },
+          {
+            "type": "html",
+            "text": "[That depends entirely on what you want to do with the results.  You might want to collect them.  You might want to add them.  You might want to average them.  You might want to pick the biggest one.  I wouldn't tie shape methods to sets.  I'd make a visitor or something to traverse the set and do whatever I wanted with the results.]",
+            "id": "3f9de4b3650cbcfda79885fb32b3fd7c"
+          },
+          {
+            "type": "html",
+            "text": "{But isn't [[Visitor Pattern]] \"kind of useless\" according to some opinions on that page? }",
+            "id": "fd61494f38e07a089b49bcbc700da29c"
+          },
+          {
+            "type": "html",
+            "text": "[No.  Visitor lets me decouple what I want to do with the results of operations on things in sets from the things and the sets.  That's kind of useful.]",
+            "id": "601036c90602a2bbb5dae08b456b9a13"
+          },
+          {
+            "type": "html",
+            "text": "\nIt is not exactly the poster-boy of simplicity. I have not decided at this point it seems there must be cases where it is useful, but want to hear both sides of the debate.",
+            "id": "021ec7623ff825c7b44a66e1e4c027b4"
+          },
+          {
+            "type": "html",
+            "text": "[How do you mean?]",
+            "id": "801c67df2a7ac743f4a16f112c0f3a3b"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a47285b295a3a5360285622fa8414cc2"
+          },
+          {
+            "type": "html",
+            "text": "Would it be fair to draw an analogy between [[Visitor Pattern]]/Classes and [[Parameter Object]]/Methods? I.e. each is externalized (abstracted?) from it's parent \"construct\" in an effort to simplify them and the design.",
+            "id": "23d517a0449b26f0b14b4a2cb26dcb33"
+          },
+          {
+            "type": "html",
+            "text": "<i>Sure.  Visitor pattern decouples some behavior from a set of classes and the structure that contains them.</i>",
+            "id": "942acf620d1a33fc991f1558b58b5abf"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a47285b295a3a5360285622fa8414cc2"
+          },
+          {
+            "type": "html",
+            "text": "\nAn application of the [[Visitor Pattern]] has been patented in the [[United States]].  See [[Ibm Double Dispatch Patent]].",
+            "id": "09d263b4785aceb881c0d27b212c8fde"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a47285b295a3a5360285622fa8414cc2"
+          },
+          {
+            "type": "html",
+            "text": "I have a \"Java OLAP\" framework that aggregates values in various ways: sum, average, min, max, count. I implemented a visitor for each kind of aggregation. The data set has an accept(Visitor) method that iterates over all values and calls visitor.visit(value) for each value. At the end the visitor has seen and aggregated all values. To add a new aggregation I just create a new type of visitor, everything else stays the same. Neat!",
+            "id": "a89f65b875b39835ee65ea3b64c9ede8"
+          },
+          {
+            "type": "html",
+            "text": "\nChris Treber, ct on ctreber point com",
+            "id": "af9fd03da3460f079a42a7e66ca3d806"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a47285b295a3a5360285622fa8414cc2"
+          },
+          {
+            "type": "html",
+            "text": "I'm writing a source-to-source converter between two languages.  The language I'm converting from supports several operations, including jumping out of an arbitrary number of nested \"while\" loops, that the destination language does not (natively).  Therefore, when converting a \"while\" statement I have to know if any there are any \"evil jump statements\" inside its code blocks.  The same holds true for \"case\" statements.  This is difficult, because such \"evil\" statements could be nested within an arbitrary number of if/for/while/case/switch statements.  Therefore, I converted all the syntax nodes that potentially contain other blocks of code to accept an arbitrary number of visitors and iterate over their contents with them.  In this case, the visitor pattern made for an elegant, robust, easy-to-understand solution.",
+            "id": "9e7ac5dc936fe19abaa1cf30934b61fd"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a47285b295a3a5360285622fa8414cc2"
+          },
+          {
+            "type": "html",
+            "text": "\nThe visitor pattern isn't exactly necessary, but it's safer than leaving static and reinterpret casts up to the user.",
+            "id": "b0e68a6ea7964b60613cf516c5c71671"
+          },
+          {
+            "type": "html",
+            "text": "\nAny situation where you would go.",
+            "id": "a96293bddc58e8342df7fce7ea45c4b2"
+          },
+          {
+            "type": "html",
+            "text": "\nif( someobject.get_type_info() = otherobject.get_type_info() ) {",
+            "id": "676eca2c5b3e0bbd336c537b1483f2c7"
+          },
+          {
+            "type": "code",
+            "text": "  sometype * t = static_cast<sometype*>(&otherobject);",
+            "id": "6c8ebaba5d2f3a7e3170c446bf0a9f4e"
+          },
+          {
+            "type": "html",
+            "text": "}",
+            "id": "ac4f38c7b11cbf10ca94f575cbc57a07"
+          },
+          {
+            "type": "html",
+            "text": "\nCould be made \"cleaner\" with some kind of Visitor pattern.  For example, an abstract syntax tree is a perfect fit for the visitor pattern.",
+            "id": "587f31198f0cde0bd48f125e619eab82"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a47285b295a3a5360285622fa8414cc2"
+          },
+          {
+            "type": "html",
+            "text": "Variations of this pattern:",
+            "id": "ba33ad2b1adba541522e21767de76109"
+          },
+          {
+            "type": "html",
+            "text": " [[Acyclic Visitor]] -- eliminates cyclic dependencies, sometimes slower than normal visitors",
+            "id": "b39af51a7b337ba45568f44fa109a7fe"
+          },
+          {
+            "type": "html",
+            "text": " [[Selector Generating Visitor]] -- avoids modifying visited classes",
+            "id": "abc0c00178bbfc7cf93f0e8bf64a9cd0"
+          },
+          {
+            "type": "html",
+            "text": " [[Hierarchical Visitor Pattern]] -- another way to handle the pretty-printing problem",
+            "id": "c95ac5dbb9b75a7be65ca8036f2ecf20"
+          },
+          {
+            "type": "html",
+            "text": " [[Independent Visitor Pattern]] -- another way to eliminate cyclic dependencies",
+            "id": "a87fa61ff67177d0bea3cd6e415f0d45"
+          },
+          {
+            "type": "html",
+            "text": " [[Default Visitor Pattern]] -- generalization of the [[Null Object And Visitor]] pattern",
+            "id": "d6baf878b07211598963a2badc2aa896"
+          },
+          {
+            "type": "html",
+            "text": " [[Extrinsic Visitor Pattern]]",
+            "id": "ab9ec6ed284b873bdbe61cb41c09eb82"
+          },
+          {
+            "type": "html",
+            "text": "\nSee also the [[Variations On The Visitor Pattern]] paper.",
+            "id": "b93d481447fa400d2c9d35e0e4cb907c"
+          },
+          {
+            "type": "html",
+            "text": "\nRelated Topics:",
+            "id": "4cc867379b457b1de8ef4711dc82dab8"
+          },
+          {
+            "type": "html",
+            "text": " [[Comments On Visitor]]",
+            "id": "fac2a67d1fdb9bb1fd4e8769820eb03c"
+          },
+          {
+            "type": "html",
+            "text": " [[Pretty Printing Java With Visitor]]",
+            "id": "c9455f8bf66dab1a0641e008401a4a38"
+          },
+          {
+            "type": "html",
+            "text": " [[Null Object And Visitor]] -- combining [[Null Object]] with the [[Visitor Pattern]]",
+            "id": "9a0d0d97e1874d3c004c77a96312d051"
+          },
+          {
+            "type": "html",
+            "text": " [[Visitor In Frameworks]]",
+            "id": "47a58d2e03c353b9a4b705eb6b307f1f"
+          },
+          {
+            "type": "html",
+            "text": " [[Pattern Hatching]] -- see pages 36, 81-84",
+            "id": "dfbe628c948b1b5a2ac939eacf7044fc"
+          },
+          {
+            "type": "html",
+            "text": " [[Translator Pattern]] == alternative visitor style used in [[Functional Programming]]",
+            "id": "3cb300207aa9486bd538375cde62d23f"
+          },
+          {
+            "type": "html",
+            "text": " [[Resource Releases Resource]] -- can a single object accept a visitor?",
+            "id": "f8e9424c4f79cad65718d1507bf74f3e"
+          },
+          {
+            "type": "html",
+            "text": " Java programmers will find [[Nested Exception]] useful.",
+            "id": "e79cab1ebb103bae114338c5278d5b40"
+          },
+          {
+            "type": "html",
+            "text": " [[Traveller Pattern]]",
+            "id": "b240429bcc179177f5125c6186de7d8a"
+          },
+          {
+            "type": "html",
+            "text": " [[Visitor Pattern Example]]",
+            "id": "8378c8e7c56af41fca1d532716caf817"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a47285b295a3a5360285622fa8414cc2"
+          },
+          {
+            "type": "html",
+            "text": "Papers related to the visitor pattern",
+            "id": "97c643bfeb291cc1448794bdeb63fd75"
+          },
+          {
+            "type": "html",
+            "text": " [[Acyclic Visitor]]",
+            "id": "c2937484b4b84026f339e6a10d36cadc"
+          },
+          {
+            "type": "html",
+            "text": " [http://www.ccs.neu.edu/research/demeter/adaptive-patterns/visitor-usage/papers/plop96/acyclic-visitor-martin.ps www.ccs.neu.edu]",
+            "id": "a2201f2ad105d5ad9045608553c63b79"
+          },
+          {
+            "type": "html",
+            "text": " [[Interface Extension]]",
+            "id": "a63fc13a276b2e81748e7beda1116ceb"
+          },
+          {
+            "type": "html",
+            "text": "[http://www.ccs.neu.edu/research/demeter/adaptive-patterns/visitor-usage/papers/plop96/extension-objects-gamma.ps www.ccs.neu.edu]",
+            "id": "390762e7be36aa638b853b8d57587ff0"
+          },
+          {
+            "type": "html",
+            "text": " Propagators",
+            "id": "30971ee313c89d22272f1ec865a38a39"
+          },
+          {
+            "type": "html",
+            "text": " [http://www.ccs.neu.edu/research/demeter/adaptive-patterns/visitor-usage/papers/plop96/propagator-tichy-feiler.ps www.ccs.neu.edu]",
+            "id": "eac9577594d485f3896677cf5026c73b"
+          },
+          {
+            "type": "html",
+            "text": " [[Visitor Variations]]",
+            "id": "12168bf05c33b35701c645ec05b108e7"
+          },
+          {
+            "type": "html",
+            "text": " [http://www.ccs.neu.edu/research/demeter/adaptive-patterns/visitor-usage/papers/plop96/variations-visitor-nordberg.ps www.ccs.neu.edu]",
+            "id": "fe933cd44a02d5636030b9edbc3e35c1"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a47285b295a3a5360285622fa8414cc2"
+          },
+          {
+            "type": "html",
+            "text": "\nRelated:",
+            "id": "e7fe028d5a74331be82657c59fca9e9a"
+          },
+          {
+            "type": "html",
+            "text": " [[Visitor Pattern Example]]",
+            "id": "8378c8e7c56af41fca1d532716caf817"
+          },
+          {
+            "type": "html",
+            "text": " [[Composite Pattern]]",
+            "id": "dfa5be338b44e7f9d3460e30d9d81008"
+          },
+          {
+            "type": "html",
+            "text": " [[Design Patterns]]",
+            "id": "adc03ffd5a5206b3ca63779d26b6f849"
+          },
+          {
+            "type": "html",
+            "text": " [[Internal Iterator]]",
+            "id": "11517fa713d523a9fdc786771aafa4d1"
+          },
+          {
+            "type": "html",
+            "text": " [[Double Dispatch]]",
+            "id": "2edc76648e18e871ddc199e909b88f4c"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "a47285b295a3a5360285622fa8414cc2"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Category Pattern]]  [[Category Behavioral Patterns]] ",
+            "id": "d79d8454ba50bc01c3129ff84e380ccc"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?VisitorPattern c2.com]",
+            "id": "7de511c9270375011359f8be0ec88e00"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1653057857790
+    }
+  ]
+}

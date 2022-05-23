@@ -2,24 +2,94 @@
   "title": "Enrich Any SVG",
   "story": [
     {
+      "id": "1531d000",
       "type": "paragraph",
-      "id": "7dae397532078e18",
-      "text": "The top grey box is a Asset Plugin. Drag any file onto it to upload the file to this asset plug in."
-    },
-    {
-      "type": "assets",
-      "id": "f44483397c13de7b",
-      "text": "*"
-    },
-    {
-      "type": "paragraph",
-      "id": "6f48088a55313b14",
-      "text": "We look for all SVG files in lineup assets including the copy at the top of this page. Click on the file SVG file name below and a FedWiki page will be created with a clickable SVG in it."
+      "text": "Here we offer a tool which makes a best effort to enrich any SVG diagram with hyperlinks that conform to wiki's internal link conventions."
     },
     {
       "type": "frame",
-      "id": "840563608b4bd74b",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/svg-enrichment/convert-any-svg.html\nHEIGHT 100"
+      "id": "6cf52409eec3988c",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/esm.html\nHEIGHT 55"
+    },
+    {
+      "type": "paragraph",
+      "id": "5ef7c7a9c3870691",
+      "text": "Placeholder for more notes..."
+    },
+    {
+      "type": "pagefold",
+      "id": "97e410bb90791cb8",
+      "text": "."
+    },
+    {
+      "type": "paragraph",
+      "id": "04bfb2692d07aa60",
+      "text": "Below this pagefold we reveal the code which does the enriching. We believe this transparency may help other tinkerers to experiment with enrichment for specialized SVG structures. See [[Enrich Arrows SVG]]."
+    },
+    {
+      "type": "paragraph",
+      "id": "dfddd2d989966f0c",
+      "text": "Import [[Frame Integration Promises]] and setup DOM helpers."
+    },
+    {
+      "type": "code",
+      "id": "5cbd82e529085e9a",
+      "text": "import * as frame from \"https://wiki.ralfbarkow.ch/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => \n  Array.from(el.querySelectorAll(s))"
+    },
+    {
+      "type": "paragraph",
+      "id": "02b8d780c9a129c3",
+      "text": "Given a URL to and SVG document, or a data:image/svg+xml URL, we fetch the SVG DOM. We also remove width and height attributes so our processed images will scale to fit wiki's narrow pages."
+    },
+    {
+      "type": "code",
+      "id": "f58fa4daedf47228",
+      "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  return svg\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "e7fffc816ad4a2ab",
+      "text": "Here is where we make educated guesses about the structure of the SVG. We wrap specific elements in the document with annotated anchor tags that our HTML plugin interprets as internal links."
+    },
+    {
+      "type": "code",
+      "id": "f600e20860690557",
+      "text": "function enrich(svg) {\n  $$('text', svg)\n    .forEach(wrapElement)\n}"
+    },
+    {
+      "type": "code",
+      "id": "dff87e6623733fff",
+      "text": "function wrapElement(el) {\n  let title = Array.from(el.childNodes)\n    .map(el => el.textContent.trim())\n    .join(\" \")\n  let anchor = anchorFor(title)\n  el.parentElement.appendChild(anchor)\n  el.parentElement.removeChild(el)\n  anchor.appendChild(el)\n}"
+    },
+    {
+      "type": "code",
+      "id": "90c74c2554acf86a",
+      "text": "function anchorFor(title) {\n  let anchor = document.createElementNS(\n    \"http://www.w3.org/2000/svg\", \"a\")\n  anchor.setAttribute(\"class\", \"internal\")\n  anchor.setAttribute(\"data-title\", title)\n  anchor.setAttribute(\"href\",\n    `/${asSlug(title)}.html`)\n  return anchor\n}"
+    },
+    {
+      "type": "code",
+      "id": "78d6e5d07027c7f5",
+      "text": "const asSlug = title => title\n  .replace(/\\s/g, '-')\n  .replace(/[^A-Za-z0-9-]/g, '')\n  .toLowerCase()\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "97a2cf7d2ec8212f",
+      "text": "Emit the HTML form."
+    },
+    {
+      "type": "code",
+      "id": "532408a599a375b7",
+      "text": "export async function emit(el) {\n  el.innerHTML = `\n<style>input {width: 100%; display: block;}</style>\n<input name=\"title\" type=\"text\"\n  placeholder=\"page title\">\n<input name=\"source\" type=\"text\"\n  placeholder=\"URL to svg file\">\n<button>Create</button>\n`\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "22cc8700998c384d",
+      "text": "Bind a click handler to the form button."
+    },
+    {
+      "type": "code",
+      "id": "f3292e6fcac877b9",
+      "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await getSvg(url)\n    enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this diagram.\"},\n        {type:\"html\", text: svg.outerHTML}\n      ]\n    }, e.shiftKey)\n  }\n}"
     }
   ],
   "journal": [
@@ -27,209 +97,350 @@
       "type": "create",
       "item": {
         "title": "Enrich Any SVG",
-        "story": []
+        "story": [
+          {
+            "id": "1531d000",
+            "type": "paragraph",
+            "text": "Here we offer a tool which makes a best effort to enrich any SVG diagram with hyperlinks that conform to wiki's internal link conventions."
+          }
+        ]
       },
-      "date": 1637803915734
-    },
-    {
-      "item": {
-        "type": "factory",
-        "id": "6f48088a55313b14"
-      },
-      "id": "6f48088a55313b14",
-      "type": "add",
-      "date": 1637803922071
-    },
-    {
-      "type": "edit",
-      "id": "6f48088a55313b14",
-      "item": {
-        "type": "paragraph",
-        "id": "6f48088a55313b14",
-        "text": "We look for all SVG files in lineup assets."
-      },
-      "date": 1637803999650
-    },
-    {
-      "item": {
-        "type": "factory",
-        "id": "840563608b4bd74b"
-      },
-      "id": "840563608b4bd74b",
-      "type": "add",
-      "after": "6f48088a55313b14",
-      "date": 1637804001806
-    },
-    {
-      "type": "edit",
-      "id": "840563608b4bd74b",
-      "item": {
-        "type": "frame",
-        "id": "840563608b4bd74b",
-        "text": "http://ward.dojo.fed.wiki/assets/pages/svg-enrichment/convert-any-svg.html\nHEIGHT 400"
-      },
-      "date": 1637804016065
-    },
-    {
-      "type": "edit",
-      "id": "840563608b4bd74b",
-      "item": {
-        "type": "frame",
-        "id": "840563608b4bd74b",
-        "text": "http://ward.dojo.fed.wiki/assets/pages/svg-enrichment/scripts/convert-any-svg.html\nHEIGHT 400"
-      },
-      "date": 1638117695073
-    },
-    {
-      "type": "edit",
-      "id": "840563608b4bd74b",
-      "item": {
-        "type": "frame",
-        "id": "840563608b4bd74b",
-        "text": "http://ward.dojo.fed.wiki/assets/pages/svg-enrichment/convert-any-svg.html\nHEIGHT 400"
-      },
-      "date": 1638583878900
+      "date": 1653063220493
     },
     {
       "type": "fork",
-      "site": "ward.dojo.fed.wiki",
-      "date": 1640826753561
+      "date": 1653063232677
     },
     {
-      "id": "f44483397c13de7b",
+      "id": "6cf52409eec3988c",
       "type": "add",
       "item": {
-        "type": "assets",
-        "id": "f44483397c13de7b",
-        "text": "*"
-      },
-      "date": 1651171234800
-    },
-    {
-      "type": "edit",
-      "id": "840563608b4bd74b",
-      "item": {
         "type": "frame",
-        "id": "840563608b4bd74b",
-        "text": "http://ward.dojo.fed.wiki/assets/pages/svg-enrichment/convert-any-svg.html\nHEIGHT 200"
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/esm.html\nHEIGHT 55"
       },
-      "date": 1651171299214
-    },
-    {
-      "type": "edit",
-      "id": "840563608b4bd74b",
-      "item": {
-        "type": "frame",
-        "id": "840563608b4bd74b",
-        "text": "http://ward.dojo.fed.wiki/assets/pages/svg-enrichment/convert-any-svg.html\nHEIGHT 100"
-      },
-      "date": 1651171309980
+      "after": "1531d000",
+      "date": 1653063259816
     },
     {
       "item": {
         "type": "factory",
-        "id": "7dae397532078e18"
+        "id": "5ef7c7a9c3870691"
       },
-      "id": "7dae397532078e18",
+      "id": "5ef7c7a9c3870691",
       "type": "add",
-      "after": "840563608b4bd74b",
-      "date": 1651171321289
+      "after": "6cf52409eec3988c",
+      "date": 1653064531348
     },
     {
       "type": "edit",
-      "id": "7dae397532078e18",
+      "id": "5ef7c7a9c3870691",
       "item": {
         "type": "paragraph",
-        "id": "7dae397532078e18",
-        "text": "The top grey box is a Asset Plugin. Drag any file onto it to upload the file to this asset plug in."
+        "id": "5ef7c7a9c3870691",
+        "text": "Placeholder for more notes..."
       },
-      "date": 1651171368560
+      "date": 1653064544184
     },
     {
-      "id": "7dae397532078e18",
-      "type": "move",
-      "order": [
-        "7dae397532078e18",
-        "f44483397c13de7b",
-        "6f48088a55313b14",
-        "840563608b4bd74b"
-      ],
-      "date": 1651171371210
+      "type": "add",
+      "id": "97e410bb90791cb8",
+      "item": {
+        "type": "paragraph",
+        "id": "97e410bb90791cb8",
+        "text": "...pagefold"
+      },
+      "after": "5ef7c7a9c3870691",
+      "date": 1653064554782
+    },
+    {
+      "type": "add",
+      "id": "04bfb2692d07aa60",
+      "item": {
+        "type": "paragraph",
+        "id": "04bfb2692d07aa60",
+        "text": "Below this pagefold we reveal the code which does the enriching. We believe this transparency may help other tinkerers to experiment with enrichment for specialized SVG structures. See [[Enrich Arrows SVG]]."
+      },
+      "after": "97e410bb90791cb8",
+      "date": 1653064727763
     },
     {
       "type": "edit",
-      "id": "6f48088a55313b14",
+      "id": "97e410bb90791cb8",
+      "item": {
+        "type": "pagefold",
+        "id": "97e410bb90791cb8",
+        "text": "."
+      },
+      "date": 1653064736100
+    },
+    {
+      "id": "97a2cf7d2ec8212f",
+      "type": "add",
       "item": {
         "type": "paragraph",
-        "id": "6f48088a55313b14",
-        "text": "We look for all SVG files in lineup assets including the copy at the top of this page."
+        "id": "97a2cf7d2ec8212f",
+        "text": "Emit the HTML form."
       },
-      "date": 1651171491686
+      "after": "04bfb2692d07aa60",
+      "date": 1653065400889
+    },
+    {
+      "id": "532408a599a375b7",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "532408a599a375b7",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<style>input {width: 100%; display: block;}</style>\n<input name=\"title\" type=\"text\"\n  placeholder=\"page title\">\n<input name=\"source\" type=\"text\"\n  placeholder=\"URL to svg file\">\n<button>Create</button>\n`\n}\n"
+      },
+      "after": "97a2cf7d2ec8212f",
+      "date": 1653065404255
+    },
+    {
+      "id": "22cc8700998c384d",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "22cc8700998c384d",
+        "text": "Bind a click handler to the form button."
+      },
+      "after": "532408a599a375b7",
+      "date": 1653065407668
+    },
+    {
+      "id": "f3292e6fcac877b9",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await getSvg(url)\n    enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this graph.\"},\n        {type:\"html\", text: svg.outerHTML}\n      ]\n    }, e.shiftKey)\n  }\n}"
+      },
+      "after": "22cc8700998c384d",
+      "date": 1653065431411
+    },
+    {
+      "id": "dfddd2d989966f0c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "dfddd2d989966f0c",
+        "text": "Import [[Frame Integration Promises]] and setup DOM helpers."
+      },
+      "after": "04bfb2692d07aa60",
+      "date": 1653065459591
+    },
+    {
+      "id": "5cbd82e529085e9a",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "5cbd82e529085e9a",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => \n  Array.from(el.querySelectorAll(s))"
+      },
+      "after": "dfddd2d989966f0c",
+      "date": 1653065463142
+    },
+    {
+      "type": "add",
+      "id": "02b8d780c9a129c3",
+      "item": {
+        "type": "paragraph",
+        "id": "02b8d780c9a129c3",
+        "text": "Given a URL to and SVG document, or a data:image/svg+xml URL, we fetch the SVG DOM. We also remove width and height attributes so our processed images will scale to fit wiki's narrow pages."
+      },
+      "after": "5cbd82e529085e9a",
+      "date": 1653065621370
+    },
+    {
+      "id": "f58fa4daedf47228",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "f58fa4daedf47228",
+        "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  return svg\n}"
+      },
+      "after": "02b8d780c9a129c3",
+      "date": 1653065625709
+    },
+    {
+      "id": "e7fffc816ad4a2ab",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "e7fffc816ad4a2ab",
+        "text": "Here is where we encode our understanding of the DOM structure of Arrows SVG export diagrams. We wrap specific elements in the document with annotated anchor tags that our HTML plugin interprets as internal links."
+      },
+      "after": "f58fa4daedf47228",
+      "date": 1653065644104
     },
     {
       "type": "edit",
-      "id": "6f48088a55313b14",
+      "id": "e7fffc816ad4a2ab",
       "item": {
         "type": "paragraph",
-        "id": "6f48088a55313b14",
-        "text": "We look for all SVG files in lineup assets including the copy at the top of this page. Click on the file SVG file name below and a FedWiki page will be created with a clickable SVG in it."
+        "id": "e7fffc816ad4a2ab",
+        "text": "Here is where we make educated guesses about the structure of the SVG. We wrap specific elements in the document with annotated anchor tags that our HTML plugin interprets as internal links."
       },
-      "date": 1651171588426
+      "date": 1653065700376
+    },
+    {
+      "id": "dff87e6623733fff",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "dff87e6623733fff",
+        "text": "function wrapNode(node) {\n  let title = $$(\"g > text\", node).filter(text => \n      !$(\"rect\", text.parentElement.parentElement))\n    .map(text => text.textContent.trim())\n    .join(\" \")\n  let anchor = anchorFor(title)\n  node.parentElement.appendChild(anchor)\n  node.parentElement.removeChild(node)\n  anchor.appendChild(node)\n}"
+      },
+      "after": "e7fffc816ad4a2ab",
+      "date": 1653065715448
+    },
+    {
+      "id": "f600e20860690557",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "f600e20860690557",
+        "text": "function enrich(svg) {\n  $$('g > rect:not([stroke=\"none\"])+text', svg)\n    .forEach(wrapLabel)\n  $$('.relationship g > rect+text', svg)\n    .forEach(wrapRelationship)\n  $$('.node', svg)\n    .forEach(wrapNode)\n}"
+      },
+      "after": "e7fffc816ad4a2ab",
+      "date": 1653065742080
+    },
+    {
+      "id": "90c74c2554acf86a",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "90c74c2554acf86a",
+        "text": "function anchorFor(title) {\n  let anchor = document.createElementNS(\n    \"http://www.w3.org/2000/svg\", \"a\")\n  anchor.setAttribute(\"class\", \"internal\")\n  anchor.setAttribute(\"data-title\", title)\n  anchor.setAttribute(\"href\",\n    `/${asSlug(title)}.html`)\n  return anchor\n}"
+      },
+      "after": "dff87e6623733fff",
+      "date": 1653065761638
+    },
+    {
+      "id": "78d6e5d07027c7f5",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "78d6e5d07027c7f5",
+        "text": "const asSlug = title => title\n  .replace(/\\s/g, '-')\n  .replace(/[^A-Za-z0-9-]/g, '')\n  .toLowerCase()\n"
+      },
+      "after": "90c74c2554acf86a",
+      "date": 1653065766415
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await getSvg(url)\n    enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this diagram.\"},\n        {type:\"html\", text: svg.outerHTML}\n      ]\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1653065806319
+    },
+    {
+      "type": "edit",
+      "id": "f600e20860690557",
+      "item": {
+        "type": "code",
+        "id": "f600e20860690557",
+        "text": "function enrich(svg) {\n  $$('text', svg)\n    .forEach(wrapElement)\n}"
+      },
+      "date": 1653066009873
+    },
+    {
+      "type": "edit",
+      "id": "dff87e6623733fff",
+      "item": {
+        "type": "code",
+        "id": "dff87e6623733fff",
+        "text": "function wrapElement(node) {\n  let title = $$(\"g > text\", node).filter(text => \n      !$(\"rect\", text.parentElement.parentElement))\n    .map(text => text.textContent.trim())\n    .join(\" \")\n  let anchor = anchorFor(title)\n  node.parentElement.appendChild(anchor)\n  node.parentElement.removeChild(node)\n  anchor.appendChild(node)\n}"
+      },
+      "date": 1653066015348
+    },
+    {
+      "type": "edit",
+      "id": "dff87e6623733fff",
+      "item": {
+        "type": "code",
+        "id": "dff87e6623733fff",
+        "text": "function wrapElement(el) {\n  let title = $$(\"g > text\", node).filter(text => \n      !$(\"rect\", text.parentElement.parentElement))\n    .map(text => text.textContent.trim())\n    .join(\" \")\n  let anchor = anchorFor(title)\n  node.parentElement.appendChild(anchor)\n  node.parentElement.removeChild(node)\n  anchor.appendChild(node)\n}"
+      },
+      "date": 1653066020258
+    },
+    {
+      "type": "edit",
+      "id": "dff87e6623733fff",
+      "item": {
+        "type": "code",
+        "id": "dff87e6623733fff",
+        "text": "function wrapElement(el) {\n  let title = $$(\"g > text\", el).filter(text => \n      !$(\"rect\", text.parentElement.parentElement))\n    .map(text => text.textContent.trim())\n    .join(\" \")\n  let anchor = anchorFor(title)\n  node.parentElement.appendChild(anchor)\n  node.parentElement.removeChild(node)\n  anchor.appendChild(node)\n}"
+      },
+      "date": 1653066026615
+    },
+    {
+      "type": "edit",
+      "id": "dff87e6623733fff",
+      "item": {
+        "type": "code",
+        "id": "dff87e6623733fff",
+        "text": "function wrapElement(el) {\n  let title = $$(\"g > text\", el).filter(text => \n      !$(\"rect\", text.parentElement.parentElement))\n    .map(text => text.textContent.trim())\n    .join(\" \")\n  let anchor = anchorFor(title)\n  node.parentElement.appendChild(anchor)\n  node.parentElement.removeChild(el)\n  anchor.appendChild(el)\n}"
+      },
+      "date": 1653066035804
+    },
+    {
+      "type": "edit",
+      "id": "dff87e6623733fff",
+      "item": {
+        "type": "code",
+        "id": "dff87e6623733fff",
+        "text": "function wrapElement(el) {\n  let title = Array.from(el.childNodes)\n    .map(el => el.textContent.trim())\n    .join(\" \")\n  let anchor = anchorFor(title)\n  node.parentElement.appendChild(anchor)\n  node.parentElement.removeChild(el)\n  anchor.appendChild(el)\n}"
+      },
+      "date": 1653070463455
+    },
+    {
+      "type": "edit",
+      "id": "dff87e6623733fff",
+      "item": {
+        "type": "code",
+        "id": "dff87e6623733fff",
+        "text": "function wrapElement(el) {\n  let title = Array.from(el.childNodes)\n    .map(el => el.textContent.trim())\n    .join(\" \")\n  let anchor = anchorFor(title)\n  el.parentElement.appendChild(anchor)\n  el.parentElement.removeChild(el)\n  anchor.appendChild(el)\n}"
+      },
+      "date": 1653070786176
+    },
+    {
+      "type": "edit",
+      "id": "f3292e6fcac877b9",
+      "item": {
+        "type": "code",
+        "id": "f3292e6fcac877b9",
+        "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await getSvg(url)\n    enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this diagram.\"},\n        {type:\"html\", text: svg.outerHTML}\n      ]\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1653072285600
     },
     {
       "type": "fork",
-      "site": "marc.tries.fed.wiki",
-      "date": 1651771763007
+      "site": "wiki.dbbs.co",
+      "date": 1653087012543
     },
     {
       "type": "edit",
-      "id": "840563608b4bd74b",
+      "id": "6cf52409eec3988c",
       "item": {
         "type": "frame",
-        "id": "840563608b4bd74b",
-        "text": "//wiki.ralfbarkow.ch/assets/pages/svg-enrichment/convert-any-svg.html\nHEIGHT 100"
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/esm.html\nHEIGHT 55"
       },
-      "date": 1651771784777
+      "date": 1653087025502
     },
     {
       "type": "edit",
-      "id": "840563608b4bd74b",
+      "id": "5cbd82e529085e9a",
       "item": {
-        "type": "frame",
-        "id": "840563608b4bd74b",
-        "text": "https://wiki.ralfbarkow.ch/assets/pages/svg-enrichment/convert-any-svg.html\nHEIGHT 100"
+        "type": "code",
+        "id": "5cbd82e529085e9a",
+        "text": "import * as frame from \"https://wiki.ralfbarkow.ch/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => \n  Array.from(el.querySelectorAll(s))"
       },
-      "date": 1651772681073
-    },
-    {
-      "type": "edit",
-      "id": "840563608b4bd74b",
-      "item": {
-        "type": "frame",
-        "id": "840563608b4bd74b",
-        "text": "https: /assets/pages/svg-enrichment/convert-any-svg.html\nHEIGHT 100"
-      },
-      "date": 1651774783144
-    },
-    {
-      "type": "edit",
-      "id": "840563608b4bd74b",
-      "item": {
-        "type": "frame",
-        "id": "840563608b4bd74b",
-        "text": "https://wiki.ralfbarkow.ch/assets/pages/svg-enrichment/convert-any-svg.html\nHEIGHT 100"
-      },
-      "date": 1651775405955
-    },
-    {
-      "type": "edit",
-      "id": "840563608b4bd74b",
-      "item": {
-        "type": "frame",
-        "id": "840563608b4bd74b",
-        "text": "//wiki.ralfbarkow.ch/assets/pages/svg-enrichment/convert-any-svg.html\nHEIGHT 100"
-      },
-      "date": 1651875601927
+      "date": 1653111243066
     }
   ]
 }

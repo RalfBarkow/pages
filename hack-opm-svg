@@ -1,0 +1,992 @@
+{
+  "title": "Hack OPM SVG",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "484e092159df2d01",
+      "text": "As of this writing, SVG exported from OPM does not render the node shapes when embedded in wiki's HTML plugin. See [[Diagnose an SVG]]. Here we attempt to hack around with the SVG to see if we can make something workable."
+    },
+    {
+      "type": "paragraph",
+      "id": "b1d6c01495ab77d0",
+      "text": "We import some libraries."
+    },
+    {
+      "type": "code",
+      "id": "55759c323d138792",
+      "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\n\nconst dompurifyLoaded = import('https://cdn.jsdelivr.net/npm/dompurify@2.3.8/dist/purify.min.js');\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "c6a2c738286c43ab",
+      "text": "We store a local copy of the original SVG file from OPM."
+    },
+    {
+      "type": "assets",
+      "id": "2b45b23ec3f0a131",
+      "text": "pages/hack-opm-svg"
+    },
+    {
+      "type": "paragraph",
+      "id": "e4969cc5aac78a58",
+      "text": "We copy the sanitize function we're using in the HTML plugin."
+    },
+    {
+      "type": "code",
+      "id": "1eb63b9c5ac7d91a",
+      "text": "function sanitize(dirty) {\n  return window.DOMPurify.sanitize(dirty, {\n    SANITIZE_DOM: false,\n    ADD_TAGS: ['foreignObject']\n  });\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "d500c9291c396f07",
+      "text": "We create a new sanitize function."
+    },
+    {
+      "type": "code",
+      "id": "ac9c46f2743297c1",
+      "text": "function newSanitize(dirty) {\n  return window.DOMPurify.sanitize(dirty, {\n    ADD_TAGS: ['foreignObject', 'feDropShadow']\n  });\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "310a9805fb2e960a",
+      "text": "We fetch the SVGs from the asset."
+    },
+    {
+      "type": "code",
+      "id": "f1ec65412fcf60f0",
+      "text": "async function svgs() {\n  return await Promise.all(\n    (await frame.assets())\n    .filter(it => it.url.match(/\\.svg$/i))\n    .map(async it => {\n      const req = await fetch(it.url)\n      return await req.text()\n    })\n  )\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "f4f2c5ab04a3e6b0",
+      "text": "We construct a page with buttons to show the original and new sanitize configurations."
+    },
+    {
+      "type": "code",
+      "id": "04389817c17ee700",
+      "text": "export async function emit(el) {\n  await dompurifyLoaded\n\n  document.body.innerHTML = `\n  <div>\n    <button id=old>Old Sanitize</button>\n    <button id=new>New Sanitize</button>\n  </div>\n  <div id=result></div>`\n\n  let items = await svgs()\n\n  document.body.addEventListener('click', event => {\n    if (event.target.tagName == \"BUTTON\") {\n      event.preventDefault()\n      event.stopPropagation()\n      if (event.target.id == \"old\") {\n        window.result.innerHTML =\n          items.map(sanitize).join(\"\\n<hr>\\n\")\n      } else {\n        window.result.innerHTML =\n          items.map(newSanitize).join(\"\\n<hr>\\n\")\n      }\n      frame.resize()\n    }\n  })\n\n  frame.resize()\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "caa626ac93aa7d4c",
+      "text": "In the frame below we can view the results."
+    },
+    {
+      "type": "frame",
+      "id": "6cf52409eec3988c",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/snippet-template/esm.html"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Hack OPM SVG",
+        "story": [
+          {
+            "type": "paragraph",
+            "id": "484e092159df2d01",
+            "text": "As of this writing, SVG exported from OPM does not render the node shapes when embedded in wiki's HTML plugin. See [[Diagnose an SVG]]. Here we attempt to hack around with the SVG to see if we can make something workable."
+          },
+          {
+            "type": "code",
+            "id": "5eb6b67568179aa3",
+            "text": "export async function emit(el) {\n  el.innerHTML = `\n    <div id=\"caption\"></div>\n    <div id=\"display\"></div>`\n}"
+          },
+          {
+            "type": "paragraph",
+            "id": "caa626ac93aa7d4c",
+            "text": "In the frame below we can view the results."
+          },
+          {
+            "type": "frame",
+            "id": "6cf52409eec3988c",
+            "text": "//eric.dojo.fed.wiki/assets/pages/snippet-template/esm.html"
+          },
+          {
+            "type": "paragraph",
+            "id": "4af3e06016116216",
+            "text": "See [[About Frame Plugin]]."
+          },
+          {
+            "type": "paragraph",
+            "id": "da49ee08fd0e2a07",
+            "text": "See [[About Frame Integrations]]."
+          }
+        ]
+      },
+      "date": 1652917054895
+    },
+    {
+      "type": "edit",
+      "id": "484e092159df2d01",
+      "item": {
+        "type": "paragraph",
+        "id": "484e092159df2d01",
+        "text": "As of this writing, SVG exported from OPM does not render the node shapes when embedded in wiki's HTML plugin. See [[Diagnose an SVG]]. Here we attempt to hack around with the SVG to see if we can make something workable."
+      },
+      "date": 1652917342533
+    },
+    {
+      "type": "add",
+      "id": "2b45b23ec3f0a131",
+      "item": {
+        "type": "assets",
+        "id": "2b45b23ec3f0a131",
+        "text": "pages/hack-opm-svg"
+      },
+      "after": "484e092159df2d01",
+      "date": 1652917414522
+    },
+    {
+      "type": "edit",
+      "id": "2b45b23ec3f0a131",
+      "item": {
+        "type": "assets",
+        "id": "2b45b23ec3f0a131",
+        "text": "pages/hack-opm-svg"
+      },
+      "date": 1652917420209
+    },
+    {
+      "type": "edit",
+      "id": "2b45b23ec3f0a131",
+      "item": {
+        "type": "assets",
+        "id": "2b45b23ec3f0a131",
+        "text": "pages/hack-opm-svg"
+      },
+      "date": 1652917432137
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n    <div id=\"caption\"></div>\n    <div id=\"display\"></div>`\n}"
+      },
+      "date": 1652917523267
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n    <div id=\"caption\"></div>\n    <div id=\"display\"></div>`\n}"
+      },
+      "date": 1652917797931
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n    <div id=\"caption\"></div>\n    <div id=\"display\"></div>`\n}"
+      },
+      "date": 1652917817589
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n    <div id=\"caption\"></div>\n    <div id=\"display\"></div>`\n}"
+      },
+      "date": 1652917874167
+    },
+    {
+      "type": "add",
+      "id": "e4969cc5aac78a58",
+      "item": {
+        "type": "paragraph",
+        "id": "e4969cc5aac78a58",
+        "text": "Resize the frame to fit the contents..."
+      },
+      "after": "5eb6b67568179aa3",
+      "date": 1652917893171
+    },
+    {
+      "type": "add",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  let assets = await frame.sources('assets')\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${JSON.stringify(assets, null, 2)}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "after": "e4969cc5aac78a58",
+      "date": 1652917895065
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  let assets = await frame.sources('assets')\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${JSON.stringify(assets, null, 2)}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652917911078
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n    <div id=\"caption\"></div>\n    <div id=\"display\"></div>`\n}"
+      },
+      "date": 1652917921967
+    },
+    {
+      "type": "add",
+      "id": "b1d6c01495ab77d0",
+      "item": {
+        "type": "paragraph",
+        "id": "b1d6c01495ab77d0",
+        "text": "We import some libraries."
+      },
+      "after": "484e092159df2d01",
+      "date": 1652917955458
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n    <div id=\"caption\"></div>\n    <div id=\"display\"></div>`\n}"
+      },
+      "date": 1652917966254
+    },
+    {
+      "type": "add",
+      "id": "55759c323d138792",
+      "item": {
+        "type": "code",
+        "id": "55759c323d138792",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\n\nconst dompurifyLoaded = import('https://cdn.jsdelivr.net/npm/dompurify@2.3.8/dist/purify.min.js');\n"
+      },
+      "after": "b1d6c01495ab77d0",
+      "date": 1652917972485
+    },
+    {
+      "type": "edit",
+      "id": "55759c323d138792",
+      "item": {
+        "type": "code",
+        "id": "55759c323d138792",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\n\nconst dompurifyLoaded = import('https://cdn.jsdelivr.net/npm/dompurify@2.3.8/dist/purify.min.js');\n"
+      },
+      "date": 1652917976953
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  let assets = await frame.sources('assets')\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${JSON.stringify(assets, null, 2)}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652918385360
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  let assets = await frame.sources('assets')\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${JSON.stringify(assets, null, 2)}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652918454758
+    },
+    {
+      "type": "add",
+      "id": "a7d0a3ed772860b4",
+      "item": {
+        "type": "reference",
+        "id": "a7d0a3ed772860b4",
+        "text": "We wrap the Frame plugin's integrations with a promise-based interface and distribute them as an ES6 module along with a couple of helpers we've found useful.",
+        "site": "wiki.dbbs.co",
+        "slug": "frame-integration-promises",
+        "title": "Frame Integration Promises"
+      },
+      "after": "6cf52409eec3988c",
+      "date": 1652918547627
+    },
+    {
+      "type": "edit",
+      "id": "a7d0a3ed772860b4",
+      "item": {
+        "type": "reference",
+        "id": "a7d0a3ed772860b4",
+        "text": "We wrap the Frame plugin's integrations with a promise-based interface and distribute them as an ES6 module along with a couple of helpers we've found useful.",
+        "site": "wiki.dbbs.co",
+        "slug": "frame-integration-promises",
+        "title": "Frame Integration Promises"
+      },
+      "date": 1652918553602
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n    <div id=\"caption\"></div>\n    <div id=\"display\"></div>`\n}"
+      },
+      "date": 1652925525128,
+      "error": {
+        "type": "error",
+        "msg": ""
+      }
+    },
+    {
+      "type": "fork",
+      "date": 1652925549523
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  let [assets, context] = Promise.all([\n    frame.sources('assets'),\n    frame.context()\n  ])\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${JSON.stringify(assets, null, 2)}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652925659934
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  let [assets, context] = await Promise.all([\n    frame.sources('assets'),\n    frame.context()\n  ])\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${JSON.stringify(assets, null, 2)}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652925673368
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  let [assets, context] = await Promise.all([\n    frame.sources('assets'),\n    frame.context()\n  ])\n  const ids = Object.fromEntries(\n    new URLSearchParams(\n      window.location.hash.substr(1)\n    ).entries()\n  )\n  let {assetsData} = assets.find(A => \n    a.panel.pageKey == ids.pageKey)\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${JSON.stringify(assetsData, null, 2)}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652925907072
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  let [assets, context] = await Promise.all([\n    frame.sources('assets'),\n    frame.context()\n  ])\n  const ids = Object.fromEntries(\n    new URLSearchParams(\n      window.location.hash.substr(1)\n    ).entries()\n  )\n  let {assetsData} = assets.find(A => \n    A.panel.pageKey == ids.pageKey)\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${JSON.stringify(assetsData, null, 2)}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652925917769
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  let [assets, context] = await Promise.all([\n    frame.assets(),\n    frame.context()\n  ])\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${JSON.stringify(assets, null, 2)}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652926047159
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  const assets = await frame.assets()\n\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${JSON.stringify(assets, null, 2)}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652926123450
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  const svgs = (await frame.assets())\n    .filter(it => it.url.matches(/\\.svg$/i))\n\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${JSON.stringify(svgs, null, 2)}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652926237919
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  const svgs = (await frame.assets())\n    .filter(it => it.url.match(/\\.svg$/i))\n\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${JSON.stringify(svgs, null, 2)}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652926245488
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  const svgs = (await frame.assets())\n    .filter(it => it.url.match(/\\.svg$/i))\n    .map(it => it.url)\n\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${JSON.stringify(svgs, null, 2)}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652926271214
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  const svgs = await Promise.all(\n    (await frame.assets())\n    .filter(it => it.url.match(/\\.svg$/i))\n    .map(async it => await fetch(it.url))\n  )\n\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${svgs.map(it => it.substr(20)).join(\"\\n\")}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652926500384
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  const svgs = await Promise.all(\n    (await frame.assets())\n    .filter(it => it.url.match(/\\.svg$/i))\n    .map(async it => await fetch(it.url))\n  )\n\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${svgs.map(it => it.substring(20)).join(\"\\n\")}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652926512094
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  const svgs = await Promise.all(\n    (await frame.assets())\n    .filter(it => it.url.match(/\\.svg$/i))\n    .map(async it => {\n      const req = fetch(it.url)\n      return it.body()\n    })\n  )\n\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${svgs.map(it => it.substring(20)).join(\"\\n\")}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652926592419
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  const svgs = await Promise.all(\n    (await frame.assets())\n    .filter(it => it.url.match(/\\.svg$/i))\n    .map(async it => {\n      const req = fetch(it.url)\n      return it.text()\n    })\n  )\n\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${svgs.map(it => it.substring(20)).join(\"\\n\")}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652926776529
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  const svgs = await Promise.all(\n    (await frame.assets())\n    .filter(it => it.url.match(/\\.svg$/i))\n    .map(async it => {\n      const req = await fetch(it.url)\n      return await req.text()\n    })\n  )\n\n  document.body.insertAdjacentHTML('beforeend', `\n<pre>${svgs.map(it => it.substring(20)).join(\"\\n\")}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652926794486
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  const svgs = await Promise.all(\n    (await frame.assets())\n    .filter(it => it.url.match(/\\.svg$/i))\n    .map(async it => {\n      const req = await fetch(it.url)\n      return await req.text()\n    })\n  )\n\n  document.body.insertAdjacentText('beforeend', `\n<pre>${svgs.map(it => it.substring(20)).join(\"\\n\")}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652926836078
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  const svgs = await Promise.all(\n    (await frame.assets())\n    .filter(it => it.url.match(/\\.svg$/i))\n    .map(async it => {\n      const req = await fetch(it.url)\n      return await req.text()\n    })\n  )\n\n  document.body.insertAdjacentText('beforeend', `\n<pre>${svgs.map(it => it.substr(20)).join(\"\\n\")}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652926855979
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  const svgs = await Promise.all(\n    (await frame.assets())\n    .filter(it => it.url.match(/\\.svg$/i))\n    .map(async it => {\n      const req = await fetch(it.url)\n      return await req.text()\n    })\n  )\n\n  document.body.insertAdjacentText('beforeend', `\n<pre>${svgs.map(it => it.substring(0,20)).join(\"\\n\")}</pre>\n`)\n  frame.resize()\n}"
+      },
+      "date": 1652926867211
+    },
+    {
+      "type": "edit",
+      "id": "e4969cc5aac78a58",
+      "item": {
+        "type": "paragraph",
+        "id": "e4969cc5aac78a58",
+        "text": "Do all the things."
+      },
+      "date": 1652927327896
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  const svgs = await Promise.all(\n    (await frame.assets())\n    .filter(it => it.url.match(/\\.svg$/i))\n    .map(async it => {\n      const req = await fetch(it.url)\n      return await req.text()\n    })\n  )\n\n  document.body.insertAdjacentHTML(\n    'beforeend',\n    svgs.join(\"\\n<hr>\\n\")\n  )\n  frame.resize()\n}"
+      },
+      "date": 1652927411383
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  const svgs = await Promise.all(\n    (await frame.assets())\n    .filter(it => it.url.match(/\\.svg$/i))\n    .map(async it => {\n      const req = await fetch(it.url)\n      return await req.text()\n    })\n  )\n\n  await dompurifyLoaded\n\n  \n\n  document.body.insertAdjacentHTML(\n    'beforeend',\n    svgs.join(\"\\n<hr>\\n\")\n  )\n  frame.resize()\n}"
+      },
+      "date": 1652927525768
+    },
+    {
+      "type": "add",
+      "id": "1eb63b9c5ac7d91a",
+      "item": {
+        "type": "factory",
+        "id": "1eb63b9c5ac7d91a",
+        "text": "..."
+      },
+      "after": "e4969cc5aac78a58",
+      "date": 1652927926261
+    },
+    {
+      "type": "edit",
+      "id": "1eb63b9c5ac7d91a",
+      "item": {
+        "type": "code",
+        "id": "1eb63b9c5ac7d91a",
+        "text": "function sanitize(dirty) {\n  return window.DOMPurify.sanitize(dirty, {\n    SANITIZE_DOM: false,\n    ADD_TAGS: ['foreignObject']\n  });\n}"
+      },
+      "date": 1652927972469
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  const svgs = await Promise.all(\n    (await frame.assets())\n    .filter(it => it.url.match(/\\.svg$/i))\n    .map(async it => {\n      const req = await fetch(it.url)\n      return await req.text()\n    })\n  )\n\n  await dompurifyLoaded\n\n  document.body.insertAdjacentHTML(\n    'beforeend',\n    svgs\n      .map(it => sanitize(it))\n      .join(\"\\n<hr>\\n\")\n  )\n  frame.resize()\n}"
+      },
+      "date": 1652928024506
+    },
+    {
+      "type": "edit",
+      "id": "1eb63b9c5ac7d91a",
+      "item": {
+        "type": "code",
+        "id": "1eb63b9c5ac7d91a",
+        "text": "function sanitize(dirty) {\n  return window.DOMPurify.sanitize(dirty, {\n  });\n}"
+      },
+      "date": 1652928046853
+    },
+    {
+      "type": "edit",
+      "id": "1eb63b9c5ac7d91a",
+      "item": {
+        "type": "code",
+        "id": "1eb63b9c5ac7d91a",
+        "text": "function sanitize(dirty) {\n  return window.DOMPurify.sanitize(dirty, {\n    USE_PROFILES: {svg: true, svgFilters:true}\n  });\n}"
+      },
+      "date": 1652928069595
+    },
+    {
+      "type": "edit",
+      "id": "1eb63b9c5ac7d91a",
+      "item": {
+        "type": "code",
+        "id": "1eb63b9c5ac7d91a",
+        "text": "function sanitize(dirty) {\n  return window.DOMPurify.sanitize(dirty,\n    {USE_PROFILES: {svg: true, svgFilters: true}}\n  );\n}"
+      },
+      "date": 1652928120726
+    },
+    {
+      "type": "edit",
+      "id": "1eb63b9c5ac7d91a",
+      "item": {
+        "type": "code",
+        "id": "1eb63b9c5ac7d91a",
+        "text": "function sanitize(dirty) {\n  return window.DOMPurify.sanitize(dirty, {\n    USE_PROFILES: {svg: true, svgFilters: true},\n    ADD_TAGS: ['feDropShadow']\n  });\n}"
+      },
+      "date": 1652928851061
+    },
+    {
+      "type": "edit",
+      "id": "1eb63b9c5ac7d91a",
+      "item": {
+        "type": "code",
+        "id": "1eb63b9c5ac7d91a",
+        "text": "function sanitize(dirty) {\n  return window.DOMPurify.sanitize(dirty, {\n    SANITIZE_DOM: false,\n    ADD_TAGS: ['feDropShadow']\n  });\n}"
+      },
+      "date": 1652929024120
+    },
+    {
+      "type": "add",
+      "id": "c6a2c738286c43ab",
+      "item": {
+        "type": "paragraph",
+        "id": "c6a2c738286c43ab",
+        "text": "We store a local copy of the original SVG file from OPM."
+      },
+      "after": "b1d6c01495ab77d0",
+      "date": 1652936050977
+    },
+    {
+      "id": "c6a2c738286c43ab",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "b1d6c01495ab77d0",
+        "55759c323d138792",
+        "c6a2c738286c43ab",
+        "2b45b23ec3f0a131",
+        "5eb6b67568179aa3",
+        "e4969cc5aac78a58",
+        "1eb63b9c5ac7d91a",
+        "04389817c17ee700",
+        "caa626ac93aa7d4c",
+        "6cf52409eec3988c",
+        "a7d0a3ed772860b4",
+        "4af3e06016116216",
+        "da49ee08fd0e2a07"
+      ],
+      "date": 1652936054400
+    },
+    {
+      "type": "add",
+      "id": "eea2b49ad9e24497",
+      "item": {
+        "type": "paragraph",
+        "id": "eea2b49ad9e24497",
+        "text": "We setup ..."
+      },
+      "after": "c6a2c738286c43ab",
+      "date": 1652936088364
+    },
+    {
+      "id": "eea2b49ad9e24497",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "b1d6c01495ab77d0",
+        "55759c323d138792",
+        "c6a2c738286c43ab",
+        "2b45b23ec3f0a131",
+        "eea2b49ad9e24497",
+        "5eb6b67568179aa3",
+        "e4969cc5aac78a58",
+        "1eb63b9c5ac7d91a",
+        "04389817c17ee700",
+        "caa626ac93aa7d4c",
+        "6cf52409eec3988c",
+        "a7d0a3ed772860b4",
+        "4af3e06016116216",
+        "da49ee08fd0e2a07"
+      ],
+      "date": 1652936091963
+    },
+    {
+      "type": "edit",
+      "id": "eea2b49ad9e24497",
+      "item": {
+        "type": "paragraph",
+        "id": "eea2b49ad9e24497",
+        "text": "We setup some structure where we can report our results."
+      },
+      "date": 1652936133524
+    },
+    {
+      "type": "edit",
+      "id": "e4969cc5aac78a58",
+      "item": {
+        "type": "paragraph",
+        "id": "e4969cc5aac78a58",
+        "text": "We copy the sanitize function we're using in the HTML plugin."
+      },
+      "date": 1652936188636
+    },
+    {
+      "type": "edit",
+      "id": "1eb63b9c5ac7d91a",
+      "item": {
+        "type": "code",
+        "id": "1eb63b9c5ac7d91a",
+        "text": "function sanitize(dirty) {\n  return window.DOMPurify.sanitize(dirty, {\n    SANITIZE_DOM: false,\n    ADD_TAGS: ['foreignObject']\n  });\n}"
+      },
+      "date": 1652936199073
+    },
+    {
+      "type": "remove",
+      "id": "4af3e06016116216",
+      "date": 1652936221114
+    },
+    {
+      "type": "remove",
+      "id": "da49ee08fd0e2a07",
+      "date": 1652936223661
+    },
+    {
+      "type": "remove",
+      "id": "a7d0a3ed772860b4",
+      "date": 1652936226382
+    },
+    {
+      "type": "add",
+      "id": "310a9805fb2e960a",
+      "item": {
+        "type": "paragraph",
+        "id": "310a9805fb2e960a",
+        "text": "We fetch the SVG from the asset."
+      },
+      "after": "e4969cc5aac78a58",
+      "date": 1652936351453
+    },
+    {
+      "id": "310a9805fb2e960a",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "b1d6c01495ab77d0",
+        "55759c323d138792",
+        "c6a2c738286c43ab",
+        "2b45b23ec3f0a131",
+        "eea2b49ad9e24497",
+        "5eb6b67568179aa3",
+        "e4969cc5aac78a58",
+        "1eb63b9c5ac7d91a",
+        "310a9805fb2e960a",
+        "04389817c17ee700",
+        "caa626ac93aa7d4c",
+        "6cf52409eec3988c"
+      ],
+      "date": 1652936354189
+    },
+    {
+      "type": "add",
+      "id": "f1ec65412fcf60f0",
+      "item": {
+        "type": "paragraph",
+        "id": "f1ec65412fcf60f0",
+        "text": "//code"
+      },
+      "after": "310a9805fb2e960a",
+      "date": 1652936359812
+    },
+    {
+      "type": "edit",
+      "id": "f1ec65412fcf60f0",
+      "item": {
+        "type": "paragraph",
+        "id": "f1ec65412fcf60f0",
+        "text": "async function foo() {"
+      },
+      "date": 1652936406220
+    },
+    {
+      "type": "edit",
+      "id": "f1ec65412fcf60f0",
+      "item": {
+        "type": "factory",
+        "id": "f1ec65412fcf60f0",
+        "text": "async function foo() {}"
+      },
+      "date": 1652936409152
+    },
+    {
+      "type": "edit",
+      "id": "f1ec65412fcf60f0",
+      "item": {
+        "type": "code",
+        "id": "f1ec65412fcf60f0",
+        "text": "async function svgs() {\n  return await Promise.all(\n    (await frame.assets())\n    .filter(it => it.url.match(/\\.svg$/i))\n    .map(async it => {\n      const req = await fetch(it.url)\n      return await req.text()\n    })\n  )\n}"
+      },
+      "date": 1652936566623
+    },
+    {
+      "type": "edit",
+      "id": "310a9805fb2e960a",
+      "item": {
+        "type": "paragraph",
+        "id": "310a9805fb2e960a",
+        "text": "We fetch the SVGs from the asset."
+      },
+      "date": 1652936572740
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function bind(el) {\n  await dompurifyLoaded\n\n  document.body.insertAdjacentHTML(\n    'beforeend',\n    (await svgs())\n      .map(it => sanitize(it))\n      .join(\"\\n<hr>\\n\")\n  )\n  frame.resize()\n}"
+      },
+      "date": 1652936616533
+    },
+    {
+      "type": "remove",
+      "id": "5eb6b67568179aa3",
+      "date": 1652937550291
+    },
+    {
+      "type": "remove",
+      "id": "eea2b49ad9e24497",
+      "date": 1652937552328
+    },
+    {
+      "type": "add",
+      "id": "f4f2c5ab04a3e6b0",
+      "item": {
+        "type": "paragraph",
+        "id": "f4f2c5ab04a3e6b0",
+        "text": "We ..."
+      },
+      "after": "310a9805fb2e960a",
+      "date": 1652937564379
+    },
+    {
+      "id": "f4f2c5ab04a3e6b0",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "b1d6c01495ab77d0",
+        "55759c323d138792",
+        "c6a2c738286c43ab",
+        "2b45b23ec3f0a131",
+        "e4969cc5aac78a58",
+        "1eb63b9c5ac7d91a",
+        "310a9805fb2e960a",
+        "f1ec65412fcf60f0",
+        "f4f2c5ab04a3e6b0",
+        "04389817c17ee700",
+        "caa626ac93aa7d4c",
+        "6cf52409eec3988c"
+      ],
+      "date": 1652937566749
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function emit(el) {\n  await dompurifyLoaded\n\n  document.body.insertAdjacentHTML(\n    'beforeend',\n    (await svgs())\n      .map(it => sanitize(it))\n      .join(\"\\n<hr>\\n\")\n  )\n  frame.resize()\n}"
+      },
+      "date": 1652937702031
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function emit(el) {\n  await dompurifyLoaded\n\n  document.body.innerHTML = `\n  <div>\n  <button id=old>Old Sanitize</button>\n  <button id=new>New Sanitize</button>\n  </div>\n  <div id=result></div>`\n      let items = await svgs()\n\n  document.body.addEventHandler('click', event => {\n    if (event.target.tagName == \"BUTTON\") {\n      event.preventDefault()\n      event.stopPropagation()\n      window.result.innerHTML = `\n        ()\n          .map(it => sanitize(it))\n          .join(\"\\n<hr>\\n\")\n  )\n      \n    }\n  })\n    \n  }\n  frame.resize()\n}"
+      },
+      "date": 1652938196030
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function emit(el) {\n  await dompurifyLoaded\n\n  document.body.innerHTML = `\n  <div>\n    <button id=old>Old Sanitize</button>\n    <button id=new>New Sanitize</button>\n  </div>\n  <div id=result></div>`\n\n  let items = await svgs()\n\n  document.body.addEventHandler('click', event => {\n    if (event.target.tagName == \"BUTTON\") {\n      event.preventDefault()\n      event.stopPropagation()\n      if (event.target.id == \"old\") {\n        window.result.innerHTML =\n          items.map(sanitize).join(\"\\n<hr>\\n\")\n      } else {\n        window.result.innerHTML =\n          items.map(newSanitize).join(\"\\n<hr>\\n\")\n      }\n  )\n      \n    }\n  })\n    \n  }\n  frame.resize()\n}"
+      },
+      "date": 1652938349898
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function emit(el) {\n  await dompurifyLoaded\n\n  document.body.innerHTML = `\n  <div>\n    <button id=old>Old Sanitize</button>\n    <button id=new>New Sanitize</button>\n  </div>\n  <div id=result></div>`\n\n  let items = await svgs()\n\n  document.body.addEventHandler('click', event => {\n    if (event.target.tagName == \"BUTTON\") {\n      event.preventDefault()\n      event.stopPropagation()\n      if (event.target.id == \"old\") {\n        window.result.innerHTML =\n          items.map(sanitize).join(\"\\n<hr>\\n\")\n      } else {\n        window.result.innerHTML =\n          items.map(newSanitize).join(\"\\n<hr>\\n\")\n      }\n      frame.resize()\n    }\n  }\n\n  frame.resize()\n}"
+      },
+      "date": 1652938426766
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function emit(el) {\n  await dompurifyLoaded\n\n  document.body.innerHTML = `\n  <div>\n    <button id=old>Old Sanitize</button>\n    <button id=new>New Sanitize</button>\n  </div>\n  <div id=result></div>`\n\n  let items = await svgs()\n\n  document.body.addEventHandler('click', event => {\n    if (event.target.tagName == \"BUTTON\") {\n      event.preventDefault()\n      event.stopPropagation()\n      if (event.target.id == \"old\") {\n        window.result.innerHTML =\n          items.map(sanitize).join(\"\\n<hr>\\n\")\n      } else {\n        window.result.innerHTML =\n          items.map(newSanitize).join(\"\\n<hr>\\n\")\n      }\n      frame.resize()\n    }\n  })\n\n  frame.resize()\n}"
+      },
+      "date": 1652938446883
+    },
+    {
+      "type": "edit",
+      "id": "04389817c17ee700",
+      "item": {
+        "type": "code",
+        "id": "04389817c17ee700",
+        "text": "export async function emit(el) {\n  await dompurifyLoaded\n\n  document.body.innerHTML = `\n  <div>\n    <button id=old>Old Sanitize</button>\n    <button id=new>New Sanitize</button>\n  </div>\n  <div id=result></div>`\n\n  let items = await svgs()\n\n  document.body.addEventListener('click', event => {\n    if (event.target.tagName == \"BUTTON\") {\n      event.preventDefault()\n      event.stopPropagation()\n      if (event.target.id == \"old\") {\n        window.result.innerHTML =\n          items.map(sanitize).join(\"\\n<hr>\\n\")\n      } else {\n        window.result.innerHTML =\n          items.map(newSanitize).join(\"\\n<hr>\\n\")\n      }\n      frame.resize()\n    }\n  })\n\n  frame.resize()\n}"
+      },
+      "date": 1652938484119
+    },
+    {
+      "type": "edit",
+      "id": "f4f2c5ab04a3e6b0",
+      "item": {
+        "type": "paragraph",
+        "id": "f4f2c5ab04a3e6b0",
+        "text": "We construct a page with buttons to show the original and new sanitize configurations."
+      },
+      "date": 1652938551054
+    },
+    {
+      "type": "add",
+      "id": "d500c9291c396f07",
+      "item": {
+        "type": "paragraph",
+        "id": "d500c9291c396f07",
+        "text": "We create a new sanitize function."
+      },
+      "after": "1eb63b9c5ac7d91a",
+      "date": 1652938584283
+    },
+    {
+      "type": "add",
+      "id": "ac9c46f2743297c1",
+      "item": {
+        "type": "factory",
+        "id": "ac9c46f2743297c1",
+        "text": "//code"
+      },
+      "after": "d500c9291c396f07",
+      "date": 1652938593981
+    },
+    {
+      "type": "edit",
+      "id": "ac9c46f2743297c1",
+      "item": {
+        "type": "code",
+        "id": "ac9c46f2743297c1",
+        "text": "function newSanitize(dirty) {\n  return window.DOMPurify.sanitize(dirty, {\n    ADD_TAGS: ['foreignObject', 'feDropShadow']\n  });\n}"
+      },
+      "date": 1652938618083
+    },
+    {
+      "type": "fork",
+      "site": "eric.dojo.fed.wiki",
+      "date": 1653039129468
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/snippet-template/esm.html"
+      },
+      "date": 1653039342578
+    }
+  ]
+}
