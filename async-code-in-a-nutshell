@@ -1,0 +1,498 @@
+{
+  "title": "Async Code In A Nutshell",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "e64f8a87257d048a",
+      "text": "A fairly succinct journey through the many ways javascript developers have learned to cope with asynchrony. Callbacks vs Promises vs RxJS vs async/await [https://www.academind.com/learn/javascript/callbacks-vs-promises-vs-rxjs-vs-async-awaits/ link]"
+    },
+    {
+      "type": "code",
+      "id": "887530500ac9433c",
+      "text": "// The problem\nconst getUser = () => {\n  setTimeout(() => {\n    return {name: 'Max'}\n  }, 2000);\n};\n\nconst user = getUser(); // user is null\nconsole.log(user.name); // so this won't work"
+    },
+    {
+      "type": "code",
+      "id": "16d3c04f4f0bfd7e",
+      "text": "// The callback\nconst getUser = (cb) => {\n  setTimeout(() => {\n    cb({name: 'Max'});\n  }, 2000);\n};\n\ngetUser((user) => {\n  console.log(user.name); // Prints 'Max' after 2 seconds\n})"
+    },
+    {
+      "type": "code",
+      "id": "1ff370b9dc8ba9ad",
+      "text": "// callback hell\nconst checkAuth = (cb) => {\n  // timer simulates network latency\n  setTimeout(() => {\n    cb({isAuth: true});\n  }, 2000);\n};\nconst getUser = (authInfo, cb) => {\n  if (!authInfo.isAuth) {\n    cb(null);\n    return;\n  }\n  setTimeout(() => {\n    cb({name: 'Max'});\n  }, 2000);\n};\n// this next part get much worse in Real Life\ncheckAuth((authInfo) => {\n  getUser(authInfo, (user) => {\n    console.log(user.name);\n  });\n});"
+    },
+    {
+      "type": "code",
+      "id": "d5d78aadfa7eae4c",
+      "text": "// The promise\nconst getUser = () => {\n  return new Promise(resolve => {\n    setTimeout(() => {\n      resolve({name: 'Max'});\n    }, 2000);\n  });\n};\ngetUser()\n.then(user => {\n  console.log(user.name);\n})"
+    },
+    {
+      "type": "code",
+      "id": "e0f986d63ab68089",
+      "text": "// Promised relief from callback hell\ncheckAuth()\n  .then(authStatus => getUser(authStatus))\n  .then(user => console.log(user.name))\n  .catch(error => {\n    // handle error here\n  });"
+    },
+    {
+      "type": "code",
+      "id": "e19d648ad7e43755",
+      "text": "// Promises only resolve once\nconst button = document.querySelector('button');\nconst handleClick = () => {\n  return new Promise(resolve => {\n    button.addEventListener('click', () => {\n      resolve(event);\n    });\n  });\n};\n// So this doesn't do what you mean\nhandleClick().then(event => {\n  console.log(event.target);\n});"
+    },
+    {
+      "type": "markdown",
+      "id": "0202dc62171942df",
+      "text": "_N.B. the RxJS examples are apparently out-of-date_"
+    },
+    {
+      "type": "code",
+      "id": "a71c2d7271358f14",
+      "text": "// RxJS Observables handle event streams\nconst button = document.querySelector('button');\n\nconst observable = Rx.Observable.fromEvent(button, 'click');\n\nobservable.subscribe(\n  event => console.log(event.target),\n  error => console.log(error) \n);"
+    },
+    {
+      "type": "code",
+      "id": "3304483530b8cd08",
+      "text": "// RxJS switchMap operator to chain observables\nconst button = document.querySelector('button');\nRx.Observable.fromEvent(button, 'click')\n  .switchMap(event => Rx.Observable.timer(1000))\n  .subscribe(\n      (data) => console.log(data)\n    );"
+    },
+    {
+      "type": "code",
+      "id": "693a87550d5b8112",
+      "text": "// RxJS offers a menagerie of stream operators\n// maybe even convenient enough for non-async code\nconst observable = Rx.Observable.of({name: 'Max'});\nobservable\n  .pluck('name')\n  .subscribe(console.log);"
+    },
+    {
+      "type": "code",
+      "id": "4344db213655c0bc",
+      "text": "// async/await also promising ;-)\nasync function fetchUser() {\n  try {\n    const auth = await checkAuth();\n    const user = await getUser(auth);\n    return user;\n  } catch (error) {\n    return {name: 'Default'};\n  }\n}\nfetchUser().then(user => console.log(user.name));"
+    },
+    {
+      "type": "pagefold",
+      "id": "ef5f2204b96ee56d",
+      "text": "."
+    },
+    {
+      "type": "code",
+      "id": "49d98abf1ca372ba",
+      "text": "// more modern RxJS example -- pipe!\nconst { fromEvent } = rxjs;\nconst { throttleTime, scan } = rxjs.operators;\n\nconst button = document.querySelector('button');\nfromEvent(button, 'click').pipe(\n  throttleTime(5000),\n  scan(count => count + 1, 0)\n)\n.subscribe(count => console.log(`Clicked ${count} times`));"
+    },
+    {
+      "type": "markdown",
+      "id": "867c70da29380852",
+      "text": "Apparently generalizing over that progression of asynchrony: Why we need callbags [https://staltz.com/why-we-need-callbags.html link]\n"
+    },
+    {
+      "type": "markdown",
+      "id": "3f05118befef18a3",
+      "text": "Mostly tangential comment caught my eye _(emphasis added)_:\n> the long-term goal of [https://cycle.js.org/ Cycle.js]: to be a **framework for visual programming**\n"
+    },
+    {
+      "type": "markdown",
+      "id": "4478821ab2ca3249",
+      "text": "André Staltz also cryptographicly signs his articles:\n> You can make sure that the author wrote this post by copy-pasting [https://raw.githubusercontent.com/staltz/staltz.com/master/signed_posts/2018-01-30-why-we-need-callbags.md.asc this signature] into [https://keybase.io/verify this Keybase page]."
+    },
+    {
+      "type": "markdown",
+      "id": "92d4b71c80ba20d2",
+      "text": "Once upon a time, I observed event-based computing in GUIs was showing up server-side: [http://dobbse.net/thinair/2004/10/pcd-lessons.html blog]. I also claimed there that pipeline pattern and state pattern were duals.  Do I finally live in a world where these reactive event streams flow from business analysis through the network all the way through the UI?  [[Event Storming]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Async Code In A Nutshell",
+        "story": []
+      },
+      "date": 1527805530745
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "e64f8a87257d048a",
+        "text": "A fairly succinct journey through the many ways javascript developers have learned to cope with asynchrony. Callbacks vs Promises vs RxJS vs async/await [https://www.academind.com/learn/javascript/callbacks-vs-promises-vs-rxjs-vs-async-awaits/ link]"
+      },
+      "id": "e64f8a87257d048a",
+      "date": 1527805538305
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "887530500ac9433c",
+        "text": "// The problem\nconst getUser = () => {\n  setTimeout(() => {\n    return {name: 'Max'}\n  }, 2000);\n};\n\nconst user = getUser(); // user is null\nconsole.log(user.name); // so this won't work"
+      },
+      "after": "e64f8a87257d048a",
+      "id": "887530500ac9433c",
+      "date": 1527805545124
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "16d3c04f4f0bfd7e",
+        "text": "// The callback\nconst getUser = (cb) => {\n  setTimeout(() => {\n    cb({name: 'Max'});\n  }, 2000);\n};\n\ngetUser((user) => {\n  console.log(user.name); // Prints 'Max' after 2 seconds\n})"
+      },
+      "after": "887530500ac9433c",
+      "id": "16d3c04f4f0bfd7e",
+      "date": 1527805551024
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "1ff370b9dc8ba9ad",
+        "text": "// callback hell\nconst checkAuth = (cb) => {\n  // timer simulates network latency\n  setTimeout(() => {\n    cb({isAuth: true});\n  }, 2000);\n};\nconst getUser = (authInfo, cb) => {\n  if (!authInfo.isAuth) {\n    cb(null);\n    return;\n  }\n  setTimeout(() => {\n    cb({name: 'Max'});\n  }, 2000);\n};\n// this next part get much worse in Real Life\ncheckAuth((authInfo) => {\n  getUser(authInfo, (user) => {\n    console.log(user.name);\n  });\n});"
+      },
+      "after": "16d3c04f4f0bfd7e",
+      "id": "1ff370b9dc8ba9ad",
+      "date": 1527805556140
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "d5d78aadfa7eae4c",
+        "text": "// The promise\nconst getUser = () => {\n  return new Promise(resolve => {\n    setTimeout(() => {\n      resolve({name: 'Max'});\n    }, 2000);\n  });\n};\ngetUser()\n.then(user => {\n  console.log(user.name);\n})"
+      },
+      "after": "1ff370b9dc8ba9ad",
+      "id": "d5d78aadfa7eae4c",
+      "date": 1527805560385
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "e0f986d63ab68089",
+        "text": "// Promised relief from callback hell\ncheckAuth()\n  .then(authStatus => getUser(authStatus))\n  .then(user => console.log(user.name))\n  .catch(error => {\n    // handle error here\n  });"
+      },
+      "after": "d5d78aadfa7eae4c",
+      "id": "e0f986d63ab68089",
+      "date": 1527805564647
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "e19d648ad7e43755",
+        "text": "// Promises only resolve once\nconst button = document.querySelector('button');\nconst handleClick = () => {\n  return new Promise(resolve => {\n    button.addEventListener('click', () => {\n      resolve(event);\n    });\n  });\n};\n// So this doesn't do what you mean\nhandleClick().then(event => {\n  console.log(event.target);\n});"
+      },
+      "after": "e0f986d63ab68089",
+      "id": "e19d648ad7e43755",
+      "date": 1527805574297
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "a71c2d7271358f14",
+        "text": "// RxJS Observables handle event streams\nconst button = document.querySelector('button');\n\nconst observable = Rx.Observable.fromEvent(button, 'click');\n\nobservable.subscribe(\n  event => console.log(event.target),\n  error => console.log(error) \n);"
+      },
+      "after": "e19d648ad7e43755",
+      "id": "a71c2d7271358f14",
+      "date": 1527805617714
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "3304483530b8cd08",
+        "text": "// RxJS switchMap operator to chain observables\nconst button = document.querySelector('button');\nRx.Observable.fromEvent(button, 'click')\n  .switchMap(event => Rx.Observable.timer(1000))\n  .subscribe(\n      (data) => console.log(data)\n    );"
+      },
+      "after": "a71c2d7271358f14",
+      "id": "3304483530b8cd08",
+      "date": 1527805625250
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "693a87550d5b8112",
+        "text": "// RxJS offers a menagerie of stream operators\n// maybe even convenient enough for non-async code\nconst observable = Rx.Observable.of({name: 'Max'});\nobservable\n  .pluck('name')\n  .subscribe(console.log);"
+      },
+      "after": "3304483530b8cd08",
+      "id": "693a87550d5b8112",
+      "date": 1527805632615
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "4344db213655c0bc",
+        "text": "// async/await also promising ;-)\nasync function fetchUser() {\n  try {\n    const auth = await checkAuth();\n    const user = await getUser(auth);\n    return user;\n  } catch (error) {\n    return {name: 'Default'};\n  }\n}\nfetchUser().then(user => console.log(user.name));"
+      },
+      "after": "693a87550d5b8112",
+      "id": "4344db213655c0bc",
+      "date": 1527805639026
+    },
+    {
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "867c70da29380852",
+        "text": "Apparently generalizing over that progression of asynchrony: Why we need callbags [https://staltz.com/why-we-need-callbags.html link]\n"
+      },
+      "after": "4344db213655c0bc",
+      "id": "867c70da29380852",
+      "date": 1527805645782
+    },
+    {
+      "type": "edit",
+      "id": "867c70da29380852",
+      "item": {
+        "type": "markdown",
+        "id": "867c70da29380852",
+        "text": "Apparently generalizing over that progression of asynchrony: Why we need callbags [https://staltz.com/why-we-need-callbags.html link]\n\n"
+      },
+      "date": 1527805704655
+    },
+    {
+      "type": "add",
+      "id": "0202dc62171942df",
+      "item": {
+        "type": "markdown",
+        "id": "0202dc62171942df",
+        "text": "_N.B. the RxJS examples are apparently out-of-date"
+      },
+      "after": "867c70da29380852",
+      "date": 1527805748367
+    },
+    {
+      "type": "edit",
+      "id": "0202dc62171942df",
+      "item": {
+        "type": "markdown",
+        "id": "0202dc62171942df",
+        "text": "_N.B. the RxJS examples are apparently out-of-date_"
+      },
+      "date": 1527805889755
+    },
+    {
+      "type": "move",
+      "order": [
+        "e64f8a87257d048a",
+        "887530500ac9433c",
+        "16d3c04f4f0bfd7e",
+        "1ff370b9dc8ba9ad",
+        "d5d78aadfa7eae4c",
+        "e0f986d63ab68089",
+        "e19d648ad7e43755",
+        "0202dc62171942df",
+        "a71c2d7271358f14",
+        "3304483530b8cd08",
+        "693a87550d5b8112",
+        "4344db213655c0bc",
+        "867c70da29380852"
+      ],
+      "id": "0202dc62171942df",
+      "date": 1527805897021
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ef5f2204b96ee56d"
+      },
+      "id": "ef5f2204b96ee56d",
+      "type": "add",
+      "after": "867c70da29380852",
+      "date": 1527805920771
+    },
+    {
+      "type": "edit",
+      "id": "ef5f2204b96ee56d",
+      "item": {
+        "type": "pagefold",
+        "id": "ef5f2204b96ee56d",
+        "text": "."
+      },
+      "date": 1527805924419
+    },
+    {
+      "type": "move",
+      "order": [
+        "e64f8a87257d048a",
+        "887530500ac9433c",
+        "16d3c04f4f0bfd7e",
+        "1ff370b9dc8ba9ad",
+        "d5d78aadfa7eae4c",
+        "e0f986d63ab68089",
+        "e19d648ad7e43755",
+        "0202dc62171942df",
+        "a71c2d7271358f14",
+        "3304483530b8cd08",
+        "693a87550d5b8112",
+        "4344db213655c0bc",
+        "ef5f2204b96ee56d",
+        "867c70da29380852"
+      ],
+      "id": "ef5f2204b96ee56d",
+      "date": 1527805927698
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "49d98abf1ca372ba"
+      },
+      "id": "49d98abf1ca372ba",
+      "type": "add",
+      "after": "867c70da29380852",
+      "date": 1527806230252
+    },
+    {
+      "type": "edit",
+      "id": "49d98abf1ca372ba",
+      "item": {
+        "type": "code",
+        "id": "49d98abf1ca372ba",
+        "text": "// more modern RxJS example -- pipe!\nconst { fromEvent } = rxjs;\nconst { throttleTime, scan } = rxjs.operators;\n\nconst button = document.querySelector('button');\nfromEvent(button, 'click').pipe(\n  throttleTime(5000),\n  scan(count => count + 1, 0)\n)\n.subscribe(count => console.log(`Clicked ${count} times`));"
+      },
+      "date": 1527806299713
+    },
+    {
+      "type": "move",
+      "order": [
+        "e64f8a87257d048a",
+        "887530500ac9433c",
+        "16d3c04f4f0bfd7e",
+        "1ff370b9dc8ba9ad",
+        "d5d78aadfa7eae4c",
+        "e0f986d63ab68089",
+        "e19d648ad7e43755",
+        "0202dc62171942df",
+        "a71c2d7271358f14",
+        "3304483530b8cd08",
+        "693a87550d5b8112",
+        "4344db213655c0bc",
+        "ef5f2204b96ee56d",
+        "49d98abf1ca372ba",
+        "867c70da29380852"
+      ],
+      "id": "49d98abf1ca372ba",
+      "date": 1527806303651
+    },
+    {
+      "type": "edit",
+      "id": "867c70da29380852",
+      "item": {
+        "type": "markdown",
+        "id": "867c70da29380852",
+        "text": "Apparently generalizing over that progression of asynchrony: Why we need callbags [https://staltz.com/why-we-need-callbags.html link]\n\nOnce upon a time, I observed event-based computing in GUIs was showing up server-side: [http://dobbse.net/thinair/2004/10/pcd-lessons.html blog]. I also claimed there that pipeline pattern and state pattern were duals.  Do I finally live in a world where these reactive event streams flow from business analysis through the network all the way through the UI?  [[Event Storming]]"
+      },
+      "date": 1527806768115
+    },
+    {
+      "type": "edit",
+      "id": "867c70da29380852",
+      "item": {
+        "type": "markdown",
+        "id": "867c70da29380852",
+        "text": "Apparently generalizing over that progression of asynchrony: Why we need callbags [https://staltz.com/why-we-need-callbags.html link]\n"
+      },
+      "date": 1527806830060
+    },
+    {
+      "type": "add",
+      "id": "3f05118befef18a3",
+      "item": {
+        "type": "markdown",
+        "id": "3f05118befef18a3",
+        "text": "> the long-term goal of Cycle.js: to be a framework for visual programming\n"
+      },
+      "after": "867c70da29380852",
+      "date": 1527806835000
+    },
+    {
+      "type": "add",
+      "id": "92d4b71c80ba20d2",
+      "item": {
+        "type": "markdown",
+        "id": "92d4b71c80ba20d2",
+        "text": "Once upon a time, I observed event-based computing in GUIs was showing up server-side: [http://dobbse.net/thinair/2004/10/pcd-lessons.html blog]. I also claimed there that pipeline pattern and state pattern were duals.  Do I finally live in a world where these reactive event streams flow from business analysis through the network all the way through the UI?  [[Event Storming]]"
+      },
+      "after": "3f05118befef18a3",
+      "date": 1527806837943
+    },
+    {
+      "type": "edit",
+      "id": "3f05118befef18a3",
+      "item": {
+        "type": "markdown",
+        "id": "3f05118befef18a3",
+        "text": "> the long-term goal of Cycle.js: to be a framework for visual programming\n\n"
+      },
+      "date": 1527806940358
+    },
+    {
+      "type": "add",
+      "id": "4478821ab2ca3249",
+      "item": {
+        "type": "markdown",
+        "id": "4478821ab2ca3249",
+        "text": "André Staltz also cryptographicly signs his articles.\n>"
+      },
+      "after": "3f05118befef18a3",
+      "date": 1527806973911
+    },
+    {
+      "type": "edit",
+      "id": "4478821ab2ca3249",
+      "item": {
+        "type": "markdown",
+        "id": "4478821ab2ca3249",
+        "text": "André Staltz also cryptographicly signs his articles.\n> You can make sure that the author wrote this post by copy-pasting this signature into this Keybase page. "
+      },
+      "date": 1527807004089
+    },
+    {
+      "type": "edit",
+      "id": "4478821ab2ca3249",
+      "item": {
+        "type": "markdown",
+        "id": "4478821ab2ca3249",
+        "text": "André Staltz also cryptographicly signs his articles.\n> You can make sure that the author wrote this post by copy-pasting [https://raw.githubusercontent.com/staltz/staltz.com/master/signed_posts/2018-01-30-why-we-need-callbags.md.asc this signature] into [https://keybase.io/verify this Keybase page].      "
+      },
+      "date": 1527807102842
+    },
+    {
+      "type": "edit",
+      "id": "4478821ab2ca3249",
+      "item": {
+        "type": "markdown",
+        "id": "4478821ab2ca3249",
+        "text": "André Staltz also cryptographicly signs his articles:\n> You can make sure that the author wrote this post by copy-pasting [https://raw.githubusercontent.com/staltz/staltz.com/master/signed_posts/2018-01-30-why-we-need-callbags.md.asc this signature] into [https://keybase.io/verify this Keybase page]."
+      },
+      "date": 1527807146088
+    },
+    {
+      "type": "edit",
+      "id": "3f05118befef18a3",
+      "item": {
+        "type": "markdown",
+        "id": "3f05118befef18a3",
+        "text": "Mostly tangential comment caught my eye:\n> the long-term goal of [https://cycle.js.org/ Cycle.js]: to be a **framework for visual programming**\n_emphasis added_"
+      },
+      "date": 1527807258106
+    },
+    {
+      "type": "edit",
+      "id": "3f05118befef18a3",
+      "item": {
+        "type": "markdown",
+        "id": "3f05118befef18a3",
+        "text": "Mostly tangential comment caught my eye:\n> the long-term goal of [https://cycle.js.org/ Cycle.js]: to be a **framework for visual programming**\n\n_emphasis added_"
+      },
+      "date": 1527807263307
+    },
+    {
+      "type": "edit",
+      "id": "3f05118befef18a3",
+      "item": {
+        "type": "markdown",
+        "id": "3f05118befef18a3",
+        "text": "Mostly tangential comment caught my eye _(emphasis added)_:\n> the long-term goal of [https://cycle.js.org/ Cycle.js]: to be a **framework for visual programming**\n"
+      },
+      "date": 1527807283366
+    },
+    {
+      "type": "fork",
+      "site": "wiki.dbbs.co",
+      "date": 1653815668065
+    }
+  ]
+}
