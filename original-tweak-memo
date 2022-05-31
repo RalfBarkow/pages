@@ -1,0 +1,321 @@
+{
+  "title": "Original Tweak Memo",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "b219c1d708b0b22e",
+      "text": "⇒ [[Original Tweak Memo]] [https://web.archive.org/web/20111002012532/http://tweakproject.org/ABOUT/FAQ/OriginalTweakMemo/ wayback]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6cb567b96b335875",
+      "text": "Andreas has "
+    },
+    {
+      "type": "markdown",
+      "id": "7ecd521ec5223f26",
+      "text": "> done some thinking about events and scripts and it appears to me that we're overlooking a few fundamental issues here. As an example, when Alan talks about \"events within scripts\" I think it is important to understand that the most common use of it will not be some sort of #firstTime:eachTime:lastTime: based on some mouse click behavior but much rather a dog-simple use along the lines of:"
+    },
+    {
+      "type": "code",
+      "id": "d4dd8b8ea614f4e2",
+      "text": "button label: 'Click to play movie'.\nbutton waitUntil: #click.\nmovie startPlaing.\nmovie waitUntil: #done.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "58fc798dad83cb01",
+      "text": "The immanent problem in doing anything like the above (or using any kinds of events from within methods) is that in such an environment (or any media system in general) everything is about time. If you write a media-script you need to deal with time and you need to do so in a straightforward way. E.g., the above is obviously a simple and desirable way of doing things but in the current system the above would require us to use multiple indirections (such as using #on:send:to:). An even worse example is \"Alan's slide sequencer\" which should be expressed by:"
+    },
+    {
+      "type": "code",
+      "id": "afe99eb55219a8cc",
+      "text": "slide1 show.\nnextButton waitUntil: #click.\nslide2 show.\nnextButton waitUntil: #click.\nslide3 show."
+    },
+    {
+      "type": "paragraph",
+      "id": "530b28df864dc1ae",
+      "text": "This not only requires the indirection(s) from the above but in addition we even need to stitch the sequence back together! (Alan does this by using an extra variable) What a horrible construct to explain to an omni-user ;-("
+    },
+    {
+      "type": "markdown",
+      "id": "743d5e79fdcae0bf",
+      "text": "So what's the problem?! What we want to be able to do is basically suspend the execution of the script at a certain point for either a specified (Delay) or an unspecified amount of time (#click). And we *do* have ways of doing this - our processes do *exactly* what we want to be able to do here.\n\nSo why not use processes?! Looking back at some older conversation about using multiple processes it appears to me that we've been holding back on it because of synchronization issues. While this is certainly understandable (we all know how hard process synchronization can be) I think that we can solve this problem in a very simple way that gives us the best of all worlds.\n\nHere it is:\n\nThe basic problem that we have when using multiple processes is that we can't always say for sure when they are run. Because of this, the system may activate some process while we're in the midst of redrawing the screen, handling events, executing some (interfering) other process etc.\n\nIf not for the single problem of synchronization, using processes would solve many of the problems we're facing. Why?! Well, let's assume we would run those processes at a specific point in time (namely at the point where we invoke #step methods). If so, the system wouldn't be interrupted in an inconsistent state. Let's assume we would run the scripts in order (that is until they are either completed or suspended). If so, we would never have unexpectedly interfering process switches. And this means that have *exactly* the same semantics that scripts in eToys have (think about it: eToy scripts are run in order, in a certain time slot, until completion etc). Except that now we're carrying an execution environment with us, one that can be trivially suspended and resumed, one that can be reflected upon, one that's even efficient ;-)\n\nSo what if ... we just do that?! What if we define that \"script process\" and provide a default scheduling mechanism that avoids the more general problems?!\n\nIn my understanding, this would have some huge advantages such as:\n\n* a \"default\" synchronization\n\nSince script processes are scheduled in a specific time slot, the system is in a stable state. Since scripts are scheduled in order, they do not interfere with one another. In effect, we do provide a default synchronization mechanism which goes exactly as far as the eToy system today. This is neither to say that there will be no synchronization issues (you can write scripts in eToys suffering from lack of synchronization, but so can #step methods) nor that it's the ultimate solution for all users. All it does and all we need is to provide a useful default synchronization scheme.\n\n* a clear separation of \"script activation\" and \"message send\"\n\nIn other words, invoking \"self mumble\" has the meaning of \"run the script mumble in the current execution environment\" whereas \"self startScript: #mumble\" means \"schedule script mumble in a new execution environment\".\n\n* scripts can be \"modal\" and take time\n\nIt would be trivial to write any of the above examples the way they should be done. Since scripts carry the evaluation context we can just suspend them at the points we want to. This would allow us to have scripts that represent the equivalent to Wonderland scripts (which take time) while avoiding some of their complexities (no default sequencing).\n\n[An interesting side effect here would be that a script that doesn't \"take time\" (e.g., does not invoke a method that implies delayed evaluation of sorts) could in effect be synchronous. So that \"3 squared\" = could effectively be equivalent to \"3 startScript: #squared\"].\n\n* debugging scripts\n\nOne of the biggest problem we have is that eToy scripts are almost impossible to debug. If we encapsulate the user-script in its own process we could debug each script separately or stop execution of all scripts or whatever we think is reasonable. In short, we got a variety of options for the user. And, we could even being smart about the fact that we're debugging a user script and not a system process.\n\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "c66aac44b8a6b265",
+      "text": "I do believe that tackling the inherent problem of synchronizing multiple processes in a way that (even if it wouldn't be considered straight-forward) can be explained to an omni-user will bring us a long, long way from where we are today. Since we could give those \"user-scripts\" the advantages of processes (carrying their own execution environment) as well as the advantages of the current \"script scheduler\" (ordered execution in a specific time slot) I don't see a reason not to go for multiple processes in user scripts.\n\nDo you?\n\nCheers,\n\n- Andreas\n"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Original Tweak Memo",
+        "story": []
+      },
+      "date": 1653987118685
+    },
+    {
+      "id": "b219c1d708b0b22e",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "b219c1d708b0b22e",
+        "text": "⇒ [[Original Tweak Memo]] [https://web.archive.org/web/20111002012532/http://tweakproject.org/ABOUT/FAQ/OriginalTweakMemo/ wayback]"
+      },
+      "date": 1653987121798
+    },
+    {
+      "type": "fork",
+      "date": 1653987140661
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6cb567b96b335875"
+      },
+      "id": "6cb567b96b335875",
+      "type": "add",
+      "after": "b219c1d708b0b22e",
+      "date": 1653987195496
+    },
+    {
+      "type": "edit",
+      "id": "6cb567b96b335875",
+      "item": {
+        "type": "paragraph",
+        "id": "6cb567b96b335875",
+        "text": "Andreas has "
+      },
+      "date": 1653987207549
+    },
+    {
+      "type": "edit",
+      "id": "6cb567b96b335875",
+      "item": {
+        "type": "paragraph",
+        "id": "6cb567b96b335875",
+        "text": "Andreas has \"done some thinking about events and scripts and it appears to me that we're overlooking a few fundamental issues here. As an example, when Alan talks about \"events within scripts\" I think it is important to understand that the most common use of it will not be some sort of #firstTime:eachTime:lastTime: based on some mouse click behavior but much rather a dog-simple use along the lines of:\""
+      },
+      "date": 1653987217526
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "23f259c680b1000e"
+      },
+      "id": "23f259c680b1000e",
+      "type": "add",
+      "after": "6cb567b96b335875",
+      "date": 1653987223118
+    },
+    {
+      "type": "remove",
+      "id": "23f259c680b1000e",
+      "date": 1653987224180
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d4dd8b8ea614f4e2"
+      },
+      "id": "d4dd8b8ea614f4e2",
+      "type": "add",
+      "after": "6cb567b96b335875",
+      "date": 1653987225475
+    },
+    {
+      "type": "edit",
+      "id": "d4dd8b8ea614f4e2",
+      "item": {
+        "type": "code",
+        "id": "d4dd8b8ea614f4e2",
+        "text": "button label: 'Click to play movie'.\nbutton waitUntil: #click.\nmovie startPlaing.\nmovie waitUntil: #done.\n"
+      },
+      "date": 1653987234131
+    },
+    {
+      "type": "edit",
+      "id": "6cb567b96b335875",
+      "item": {
+        "type": "paragraph",
+        "id": "6cb567b96b335875",
+        "text": "Andreas has "
+      },
+      "date": 1653987269297
+    },
+    {
+      "type": "add",
+      "id": "7ecd521ec5223f26",
+      "item": {
+        "type": "paragraph",
+        "id": "7ecd521ec5223f26",
+        "text": ">\"done some thinking about events and scripts and it appears to me that we're overlooking a few fundamental issues here. As an example, when Alan talks about \"events within scripts\" I think it is important to understand that the most common use of it will not be some sort of #firstTime:eachTime:lastTime: based on some mouse click behavior but much rather a dog-simple use along the lines of:\""
+      },
+      "after": "6cb567b96b335875",
+      "date": 1653987271772
+    },
+    {
+      "type": "edit",
+      "id": "7ecd521ec5223f26",
+      "item": {
+        "type": "markdown",
+        "id": "7ecd521ec5223f26",
+        "text": ">\"done some thinking about events and scripts and it appears to me that we're overlooking a few fundamental issues here. As an example, when Alan talks about \"events within scripts\" I think it is important to understand that the most common use of it will not be some sort of #firstTime:eachTime:lastTime: based on some mouse click behavior but much rather a dog-simple use along the lines of:\""
+      },
+      "date": 1653987273662
+    },
+    {
+      "type": "edit",
+      "id": "7ecd521ec5223f26",
+      "item": {
+        "type": "markdown",
+        "id": "7ecd521ec5223f26",
+        "text": ">done some thinking about events and scripts and it appears to me that we're overlooking a few fundamental issues here. As an example, when Alan talks about \"events within scripts\" I think it is important to understand that the most common use of it will not be some sort of #firstTime:eachTime:lastTime: based on some mouse click behavior but much rather a dog-simple use along the lines of:"
+      },
+      "date": 1653987283722
+    },
+    {
+      "type": "edit",
+      "id": "7ecd521ec5223f26",
+      "item": {
+        "type": "markdown",
+        "id": "7ecd521ec5223f26",
+        "text": "> done some thinking about events and scripts and it appears to me that we're overlooking a few fundamental issues here. As an example, when Alan talks about \"events within scripts\" I think it is important to understand that the most common use of it will not be some sort of #firstTime:eachTime:lastTime: based on some mouse click behavior but much rather a dog-simple use along the lines of:"
+      },
+      "date": 1653987291268
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "58fc798dad83cb01"
+      },
+      "id": "58fc798dad83cb01",
+      "type": "add",
+      "after": "d4dd8b8ea614f4e2",
+      "date": 1653987319093
+    },
+    {
+      "type": "edit",
+      "id": "58fc798dad83cb01",
+      "item": {
+        "type": "paragraph",
+        "id": "58fc798dad83cb01",
+        "text": "The immanent problem in doing anything like the above (or using any kinds of events from within methods) is that in such an environment (or any media system in general) everything is about time. If you write a media-script you need to deal with time and you need to do so in a straightforward way. E.g., the above is obviously a simple and desirable way of doing things but in the current system the above would require us to use multiple indirections (such as using #on:send:to:). An even worse example is \"Alan's slide sequencer\" which should be expressed by:"
+      },
+      "date": 1653987320467
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ac075cf836cb6bc6"
+      },
+      "id": "ac075cf836cb6bc6",
+      "type": "add",
+      "after": "58fc798dad83cb01",
+      "date": 1653987328834
+    },
+    {
+      "type": "remove",
+      "id": "ac075cf836cb6bc6",
+      "date": 1653987331799
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "afe99eb55219a8cc"
+      },
+      "id": "afe99eb55219a8cc",
+      "type": "add",
+      "after": "58fc798dad83cb01",
+      "date": 1653987332928
+    },
+    {
+      "type": "edit",
+      "id": "afe99eb55219a8cc",
+      "item": {
+        "type": "code",
+        "id": "afe99eb55219a8cc",
+        "text": "slide1 show.\nnextButton waitUntil: #click.\nslide2 show.\nnextButton waitUntil: #click.\nslide3 show."
+      },
+      "date": 1653987361635
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "530b28df864dc1ae"
+      },
+      "id": "530b28df864dc1ae",
+      "type": "add",
+      "after": "afe99eb55219a8cc",
+      "date": 1653987370818
+    },
+    {
+      "type": "edit",
+      "id": "530b28df864dc1ae",
+      "item": {
+        "type": "paragraph",
+        "id": "530b28df864dc1ae",
+        "text": "This not only requires the indirection(s) from the above but in addition we even need to stitch the sequence back together! (Alan does this by using an extra variable) What a horrible construct to explain to an omni-user ;-("
+      },
+      "date": 1653987372761
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7846e10cd6f03445"
+      },
+      "id": "7846e10cd6f03445",
+      "type": "add",
+      "after": "530b28df864dc1ae",
+      "date": 1653988711161
+    },
+    {
+      "type": "remove",
+      "id": "7846e10cd6f03445",
+      "date": 1653988712392
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "743d5e79fdcae0bf"
+      },
+      "id": "743d5e79fdcae0bf",
+      "type": "add",
+      "after": "530b28df864dc1ae",
+      "date": 1653988713639
+    },
+    {
+      "type": "edit",
+      "id": "743d5e79fdcae0bf",
+      "item": {
+        "type": "markdown",
+        "id": "743d5e79fdcae0bf",
+        "text": "So what's the problem?! What we want to be able to do is basically suspend the execution of the script at a certain point for either a specified (Delay) or an unspecified amount of time (#click). And we *do* have ways of doing this - our processes do *exactly* what we want to be able to do here.\n\nSo why not use processes?! Looking back at some older conversation about using multiple processes it appears to me that we've been holding back on it because of synchronization issues. While this is certainly understandable (we all know how hard process synchronization can be) I think that we can solve this problem in a very simple way that gives us the best of all worlds.\n\nHere it is:\n\nThe basic problem that we have when using multiple processes is that we can't always say for sure when they are run. Because of this, the system may activate some process while we're in the midst of redrawing the screen, handling events, executing some (interfering) other process etc.\n\nIf not for the single problem of synchronization, using processes would solve many of the problems we're facing. Why?! Well, let's assume we would run those processes at a specific point in time (namely at the point where we invoke #step methods). If so, the system wouldn't be interrupted in an inconsistent state. Let's assume we would run the scripts in order (that is until they are either completed or suspended). If so, we would never have unexpectedly interfering process switches. And this means that have *exactly* the same semantics that scripts in eToys have (think about it: eToy scripts are run in order, in a certain time slot, until completion etc). Except that now we're carrying an execution environment with us, one that can be trivially suspended and resumed, one that can be reflected upon, one that's even efficient ;-)\n\nSo what if ... we just do that?! What if we define that \"script process\" and provide a default scheduling mechanism that avoids the more general problems?!\n\nIn my understanding, this would have some huge advantages such as:\n\n* a \"default\" synchronization\n\nSince script processes are scheduled in a specific time slot, the system is in a stable state. Since scripts are scheduled in order, they do not interfere with one another. In effect, we do provide a default synchronization mechanism which goes exactly as far as the eToy system today. This is neither to say that there will be no synchronization issues (you can write scripts in eToys suffering from lack of synchronization, but so can #step methods) nor that it's the ultimate solution for all users. All it does and all we need is to provide a useful default synchronization scheme.\n\n* a clear separation of \"script activation\" and \"message send\"\n\nIn other words, invoking \"self mumble\" has the meaning of \"run the script mumble in the current execution environment\" whereas \"self startScript: #mumble\" means \"schedule script mumble in a new execution environment\".\n\n* scripts can be \"modal\" and take time\n\nIt would be trivial to write any of the above examples the way they should be done. Since scripts carry the evaluation context we can just suspend them at the points we want to. This would allow us to have scripts that represent the equivalent to Wonderland scripts (which take time) while avoiding some of their complexities (no default sequencing).\n\n[An interesting side effect here would be that a script that doesn't \"take time\" (e.g., does not invoke a method that implies delayed evaluation of sorts) could in effect be synchronous. So that \"3 squared\" = could effectively be equivalent to \"3 startScript: #squared\"].\n\n* debugging scripts\n\nOne of the biggest problem we have is that eToy scripts are almost impossible to debug. If we encapsulate the user-script in its own process we could debug each script separately or stop execution of all scripts or whatever we think is reasonable. In short, we got a variety of options for the user. And, we could even being smart about the fact that we're debugging a user script and not a system process.\n\nI do believe that tackling the inherent problem of synchronizing multiple processes in a way that (even if it wouldn't be considered straight-forward) can be explained to an omni-user will bring us a long, long way from where we are today. Since we could give those \"user-scripts\" the advantages of processes (carrying their own execution environment) as well as the advantages of the current \"script scheduler\" (ordered execution in a specific time slot) I don't see a reason not to go for multiple processes in user scripts.\n\nDo you?\n\nCheers,\n\n- Andreas\n"
+      },
+      "date": 1653988715396
+    },
+    {
+      "type": "edit",
+      "id": "743d5e79fdcae0bf",
+      "item": {
+        "type": "markdown",
+        "id": "743d5e79fdcae0bf",
+        "text": "So what's the problem?! What we want to be able to do is basically suspend the execution of the script at a certain point for either a specified (Delay) or an unspecified amount of time (#click). And we *do* have ways of doing this - our processes do *exactly* what we want to be able to do here.\n\nSo why not use processes?! Looking back at some older conversation about using multiple processes it appears to me that we've been holding back on it because of synchronization issues. While this is certainly understandable (we all know how hard process synchronization can be) I think that we can solve this problem in a very simple way that gives us the best of all worlds.\n\nHere it is:\n\nThe basic problem that we have when using multiple processes is that we can't always say for sure when they are run. Because of this, the system may activate some process while we're in the midst of redrawing the screen, handling events, executing some (interfering) other process etc.\n\nIf not for the single problem of synchronization, using processes would solve many of the problems we're facing. Why?! Well, let's assume we would run those processes at a specific point in time (namely at the point where we invoke #step methods). If so, the system wouldn't be interrupted in an inconsistent state. Let's assume we would run the scripts in order (that is until they are either completed or suspended). If so, we would never have unexpectedly interfering process switches. And this means that have *exactly* the same semantics that scripts in eToys have (think about it: eToy scripts are run in order, in a certain time slot, until completion etc). Except that now we're carrying an execution environment with us, one that can be trivially suspended and resumed, one that can be reflected upon, one that's even efficient ;-)\n\nSo what if ... we just do that?! What if we define that \"script process\" and provide a default scheduling mechanism that avoids the more general problems?!\n\nIn my understanding, this would have some huge advantages such as:\n\n* a \"default\" synchronization\n\nSince script processes are scheduled in a specific time slot, the system is in a stable state. Since scripts are scheduled in order, they do not interfere with one another. In effect, we do provide a default synchronization mechanism which goes exactly as far as the eToy system today. This is neither to say that there will be no synchronization issues (you can write scripts in eToys suffering from lack of synchronization, but so can #step methods) nor that it's the ultimate solution for all users. All it does and all we need is to provide a useful default synchronization scheme.\n\n* a clear separation of \"script activation\" and \"message send\"\n\nIn other words, invoking \"self mumble\" has the meaning of \"run the script mumble in the current execution environment\" whereas \"self startScript: #mumble\" means \"schedule script mumble in a new execution environment\".\n\n* scripts can be \"modal\" and take time\n\nIt would be trivial to write any of the above examples the way they should be done. Since scripts carry the evaluation context we can just suspend them at the points we want to. This would allow us to have scripts that represent the equivalent to Wonderland scripts (which take time) while avoiding some of their complexities (no default sequencing).\n\n[An interesting side effect here would be that a script that doesn't \"take time\" (e.g., does not invoke a method that implies delayed evaluation of sorts) could in effect be synchronous. So that \"3 squared\" = could effectively be equivalent to \"3 startScript: #squared\"].\n\n* debugging scripts\n\nOne of the biggest problem we have is that eToy scripts are almost impossible to debug. If we encapsulate the user-script in its own process we could debug each script separately or stop execution of all scripts or whatever we think is reasonable. In short, we got a variety of options for the user. And, we could even being smart about the fact that we're debugging a user script and not a system process.\n\n\n"
+      },
+      "date": 1653988982830
+    },
+    {
+      "type": "add",
+      "id": "c66aac44b8a6b265",
+      "item": {
+        "type": "markdown",
+        "id": "c66aac44b8a6b265",
+        "text": "I do believe that tackling the inherent problem of synchronizing multiple processes in a way that (even if it wouldn't be considered straight-forward) can be explained to an omni-user will bring us a long, long way from where we are today. Since we could give those \"user-scripts\" the advantages of processes (carrying their own execution environment) as well as the advantages of the current \"script scheduler\" (ordered execution in a specific time slot) I don't see a reason not to go for multiple processes in user scripts.\n\nDo you?\n\nCheers,\n\n- Andreas\n"
+      },
+      "after": "743d5e79fdcae0bf",
+      "date": 1653988987912
+    }
+  ]
+}
