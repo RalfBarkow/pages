@@ -1,0 +1,242 @@
+{
+  "title": "Mark And Sweep",
+  "story": [
+    {
+      "type": "html",
+      "text": "Mark and sweep is a technique in [[Garbage Collection]] to free all unreferenced objects.",
+      "id": "78cd318b8b06daabc13bb1415496094a"
+    },
+    {
+      "type": "html",
+      "text": "\nIt works with three passes.",
+      "id": "05774582508c0380222fa9c4b3421235"
+    },
+    {
+      "type": "html",
+      "text": " First, for all objects in the system, if they have their mark bit set, it is cleared.",
+      "id": "b54d3e42a94ab0ed37fd7efda76566a4"
+    },
+    {
+      "type": "html",
+      "text": " The second pass traverses all pointers, starting at the accessible roots of a program (conventionally, globals, the stack, and registers) and for each object traversed it marks the object.",
+      "id": "aef7abf974975a97efb92717fbe8fd87"
+    },
+    {
+      "type": "html",
+      "text": " The third pass walks the heap linearly again and removes all objects that are not marked.",
+      "id": "589e9610e22afe0f7beaf4631a3947fe"
+    },
+    {
+      "type": "html",
+      "text": "\nThis approach requires two linear walks of the heap (steps 1 and 3) and one recursive traversal of the heap, which can be inefficient. In addition, this technique does not address fragmentation at all. A related technique, [[Stop And Copy]] does - but it has other drawbacks.",
+      "id": "8c09a0eaf9ba31cf68fe3345b06a9d88"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Mark Grosberg]]",
+      "id": "29eda6092bb73766d233f95560c3be00"
+    },
+    {
+      "type": "html",
+      "text": "\nThere is a simple variation of [[Mark And Sweep]] that needs to make only one linear sweep. It works simply by reversing the meaning of the mark bit from sweep to sweep. I am also under the impression that in practice marking tends to dominate sweeping, but this of course depends on what percentage of the heap is actually live at GC-time. -- [[Curtis Bartley]]",
+      "id": "8eca98c6641bd63a5a7385ce83c623ed"
+    },
+    {
+      "type": "html",
+      "text": "\nI've seen a variant that uses two bits - one bit for even sweeps and the other bit for the odd sweep. The even sweep clears the odd bit, and vice versa. It still takes a second pass to clean out garbage. -- [[Dave Smith]]",
+      "id": "91851bcfeb0117e3c34774caddcf97a1"
+    },
+    {
+      "type": "html",
+      "text": "\nYou can have one linear sweep and only one mark bit. The final sweep unsets the mark bits as it passes through all the objects.\nSee [http://www.brpreiss.com/books/opus5/html/page424.html www.brpreiss.com].",
+      "id": "207f6f60bc63a68096f7de61e6cf6db4"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Karl Okeeffe]]",
+      "id": "ba4f6dc871384333e9420eed3af855ef"
+    },
+    {
+      "type": "html",
+      "text": "\nIf one wishes to provide a way for objects to release their resources when they're about to be removed (what Java calls finalizing), an additional pass must be made; you can't just call the finalizer as you sweep, since if one dead object has a reference to another dead object, and uses it in its finalizer, the process would fail if the referenced object had already been deleted. The finalizing pass is after marking but before sweeping, and simply calls the finalizers of all dead objects. -- [[Mikael Brockman]]",
+      "id": "d1834a45f43170f9ec3f569b27b1e74d"
+    },
+    {
+      "type": "html",
+      "text": "\nI came to this page to look for what [[Mark And Sweep]] meant. When I read the descriptions however, it is reminiscent of Clock algorithm for page file replacement used in many operating systems. -- [[Anand Hariharan]]",
+      "id": "14313f2d089a5be2765ba292d4f8f33b"
+    },
+    {
+      "type": "html",
+      "text": "<i>I think it's worth noting that all [[Mark And Sweep]] algorithms have an execution time proportional to the size of the entire object space rather than the number of live objects. This (in addition to the need to pause system operation while executing) makes them less attractive than the various semi-space scavenging algorithms that copy live objects from \"from space\" to \"to space\". No such pauses are needed, and execution time is proportional to the number of live objects rather than available space. A price paid for this advantage is a factor of two increase in the available memory required.</i>",
+      "id": "0e3d5493044e4a186f2b65d748ef74d7"
+    },
+    {
+      "type": "html",
+      "text": " 'Paying for the garbage' is only true of naive implementations. Explained here is a method of mark&sweep that gets around \"marking everything unused\" by making that part of its allocation step: [http://people.csail.mit.edu/gregs/ll1-discuss-archive-html/msg00761.html people.csail.mit.edu]",
+      "id": "8b1d841c398d38b74cb3673862947ea5"
+    },
+    {
+      "type": "html",
+      "text": " A copying collector doesn't need to be a semi-space collector. For a copying collector, you only need enough free space to allocate the largest object in the heap - i.e. if you keep all objects under a page, then you only need one free page because (by nature) you'll free at least a page for every page you fill. ",
+      "id": "d2ea98a96d7a375deb088b6a256b8156"
+    },
+    {
+      "type": "html",
+      "text": "\nIt's probably also worth noting that this feature can be an advantage in certain situations. For example, garbage collectors in embedded systems frequently use [[Mark And Sweep]] because memory sizes are small enough that capacity is the limiting factor. Often, the later stages in a generational collector also use [[Mark And Sweep]] because a high proportion of old objects remain live at each collection (this is the whole point of [[Generational Garbage Collection]]). -- [[Jonathan Tang]]",
+      "id": "ae87a479a0aec19f8e15031f42243ab9"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "096b351b613f77f74e1787d465fe8fd5"
+    },
+    {
+      "type": "html",
+      "text": "<i>In the naïve mark-and-sweep method, each object in memory has a flag (typically a single bit) reserved for garbage collection use only. This flag is always cleared, except during the collection cycle. The first stage of collection sweeps the entire 'root set', marking each accessible object as being 'in-use'. All objects transitively accessible from the root set are marked, as well. Finally, each object in memory is again examined; those with the in-use flag still cleared are [[Not Reachable]] by any program or data, and their memory is freed. (For objects which are marked in-use, the in-use flag is cleared again, preparing for the next cycle.)</i>",
+      "id": "63213f4d55eccf930451b59bfc39668f"
+    },
+    {
+      "type": "html",
+      "text": " [[Wiki Pedia]]: Garbage Collection",
+      "id": "9be35549ddcc4d67decce147978f525e"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Category Garbage Collection]]",
+      "id": "ebdcb817b25486d4fa33caeb4782d598"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?MarkAndSweep c2.com]",
+      "id": "ebf69cea23fec69f81e5d4fabf199bd9"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1372831825000,
+      "id": "d3d987d5e95582ab1dd6dbc25409efe8",
+      "type": "create",
+      "item": {
+        "title": "Mark And Sweep",
+        "story": [
+          {
+            "type": "html",
+            "text": "Mark and sweep is a technique in [[Garbage Collection]] to free all unreferenced objects.",
+            "id": "78cd318b8b06daabc13bb1415496094a"
+          },
+          {
+            "type": "html",
+            "text": "\nIt works with three passes.",
+            "id": "05774582508c0380222fa9c4b3421235"
+          },
+          {
+            "type": "html",
+            "text": " First, for all objects in the system, if they have their mark bit set, it is cleared.",
+            "id": "b54d3e42a94ab0ed37fd7efda76566a4"
+          },
+          {
+            "type": "html",
+            "text": " The second pass traverses all pointers, starting at the accessible roots of a program (conventionally, globals, the stack, and registers) and for each object traversed it marks the object.",
+            "id": "aef7abf974975a97efb92717fbe8fd87"
+          },
+          {
+            "type": "html",
+            "text": " The third pass walks the heap linearly again and removes all objects that are not marked.",
+            "id": "589e9610e22afe0f7beaf4631a3947fe"
+          },
+          {
+            "type": "html",
+            "text": "\nThis approach requires two linear walks of the heap (steps 1 and 3) and one recursive traversal of the heap, which can be inefficient. In addition, this technique does not address fragmentation at all. A related technique, [[Stop And Copy]] does - but it has other drawbacks.",
+            "id": "8c09a0eaf9ba31cf68fe3345b06a9d88"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Mark Grosberg]]",
+            "id": "29eda6092bb73766d233f95560c3be00"
+          },
+          {
+            "type": "html",
+            "text": "\nThere is a simple variation of [[Mark And Sweep]] that needs to make only one linear sweep. It works simply by reversing the meaning of the mark bit from sweep to sweep. I am also under the impression that in practice marking tends to dominate sweeping, but this of course depends on what percentage of the heap is actually live at GC-time. -- [[Curtis Bartley]]",
+            "id": "8eca98c6641bd63a5a7385ce83c623ed"
+          },
+          {
+            "type": "html",
+            "text": "\nI've seen a variant that uses two bits - one bit for even sweeps and the other bit for the odd sweep. The even sweep clears the odd bit, and vice versa. It still takes a second pass to clean out garbage. -- [[Dave Smith]]",
+            "id": "91851bcfeb0117e3c34774caddcf97a1"
+          },
+          {
+            "type": "html",
+            "text": "\nYou can have one linear sweep and only one mark bit. The final sweep unsets the mark bits as it passes through all the objects.\nSee [http://www.brpreiss.com/books/opus5/html/page424.html www.brpreiss.com].",
+            "id": "207f6f60bc63a68096f7de61e6cf6db4"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Karl Okeeffe]]",
+            "id": "ba4f6dc871384333e9420eed3af855ef"
+          },
+          {
+            "type": "html",
+            "text": "\nIf one wishes to provide a way for objects to release their resources when they're about to be removed (what Java calls finalizing), an additional pass must be made; you can't just call the finalizer as you sweep, since if one dead object has a reference to another dead object, and uses it in its finalizer, the process would fail if the referenced object had already been deleted. The finalizing pass is after marking but before sweeping, and simply calls the finalizers of all dead objects. -- [[Mikael Brockman]]",
+            "id": "d1834a45f43170f9ec3f569b27b1e74d"
+          },
+          {
+            "type": "html",
+            "text": "\nI came to this page to look for what [[Mark And Sweep]] meant. When I read the descriptions however, it is reminiscent of Clock algorithm for page file replacement used in many operating systems. -- [[Anand Hariharan]]",
+            "id": "14313f2d089a5be2765ba292d4f8f33b"
+          },
+          {
+            "type": "html",
+            "text": "<i>I think it's worth noting that all [[Mark And Sweep]] algorithms have an execution time proportional to the size of the entire object space rather than the number of live objects. This (in addition to the need to pause system operation while executing) makes them less attractive than the various semi-space scavenging algorithms that copy live objects from \"from space\" to \"to space\". No such pauses are needed, and execution time is proportional to the number of live objects rather than available space. A price paid for this advantage is a factor of two increase in the available memory required.</i>",
+            "id": "0e3d5493044e4a186f2b65d748ef74d7"
+          },
+          {
+            "type": "html",
+            "text": " 'Paying for the garbage' is only true of naive implementations. Explained here is a method of mark&sweep that gets around \"marking everything unused\" by making that part of its allocation step: [http://people.csail.mit.edu/gregs/ll1-discuss-archive-html/msg00761.html people.csail.mit.edu]",
+            "id": "8b1d841c398d38b74cb3673862947ea5"
+          },
+          {
+            "type": "html",
+            "text": " A copying collector doesn't need to be a semi-space collector. For a copying collector, you only need enough free space to allocate the largest object in the heap - i.e. if you keep all objects under a page, then you only need one free page because (by nature) you'll free at least a page for every page you fill. ",
+            "id": "d2ea98a96d7a375deb088b6a256b8156"
+          },
+          {
+            "type": "html",
+            "text": "\nIt's probably also worth noting that this feature can be an advantage in certain situations. For example, garbage collectors in embedded systems frequently use [[Mark And Sweep]] because memory sizes are small enough that capacity is the limiting factor. Often, the later stages in a generational collector also use [[Mark And Sweep]] because a high proportion of old objects remain live at each collection (this is the whole point of [[Generational Garbage Collection]]). -- [[Jonathan Tang]]",
+            "id": "ae87a479a0aec19f8e15031f42243ab9"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "096b351b613f77f74e1787d465fe8fd5"
+          },
+          {
+            "type": "html",
+            "text": "<i>In the naïve mark-and-sweep method, each object in memory has a flag (typically a single bit) reserved for garbage collection use only. This flag is always cleared, except during the collection cycle. The first stage of collection sweeps the entire 'root set', marking each accessible object as being 'in-use'. All objects transitively accessible from the root set are marked, as well. Finally, each object in memory is again examined; those with the in-use flag still cleared are [[Not Reachable]] by any program or data, and their memory is freed. (For objects which are marked in-use, the in-use flag is cleared again, preparing for the next cycle.)</i>",
+            "id": "63213f4d55eccf930451b59bfc39668f"
+          },
+          {
+            "type": "html",
+            "text": " [[Wiki Pedia]]: Garbage Collection",
+            "id": "9be35549ddcc4d67decce147978f525e"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Category Garbage Collection]]",
+            "id": "ebdcb817b25486d4fa33caeb4782d598"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?MarkAndSweep c2.com]",
+            "id": "ebf69cea23fec69f81e5d4fabf199bd9"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1654019061940
+    }
+  ]
+}

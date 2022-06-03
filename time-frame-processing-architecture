@@ -1,0 +1,932 @@
+{
+  "title": "Time Frame Processing Architecture",
+  "story": [
+    {
+      "type": "html",
+      "text": "An [[Architectural Pattern]].",
+      "id": "4e9ce880a10d630e40e6a5dd81a3c2fc"
+    },
+    {
+      "type": "html",
+      "text": "\nThis architecture is used in the \"data acquisition\" case-study in chapter 8 of [[Object Oriented Analysis And Design]].",
+      "id": "225880fffb88678bb1ea7c74ddaf5c0d"
+    },
+    {
+      "type": "html",
+      "text": "\nIn order to perform pseudo-multitasking, think of time as a series of \"time-frames\". Each concurrent task is written as an \"activity\".",
+      "id": "5cbca3757a43a2fa829dec32601982af"
+    },
+    {
+      "type": "html",
+      "text": "\nThe architecture ensures that all activities are executed in each time frame. Activities must be:",
+      "id": "76722a1954b83dcd4ca2bc87f7621780"
+    },
+    {
+      "type": "html",
+      "text": " run in the same order within each time frame,",
+      "id": "cd24f61f0ab8b74141e4a7e5a7194e3a"
+    },
+    {
+      "type": "html",
+      "text": " obviously each activity must terminate, and",
+      "id": "7d9534ac122dc78fa5a287e88df2fb4f"
+    },
+    {
+      "type": "html",
+      "text": " each activity should perform small units of work that complete within a predictable (or at least estimatable) amount of time.",
+      "id": "46c159a2e1c295662023da6f1874861f"
+    },
+    {
+      "type": "html",
+      "text": "(Is there any difference between this and \"[[Cooperative Multitasking]] with a round-robin scheduler\"?)",
+      "id": "7bb89b4f39fb5234f4e2aa485dca60e7"
+    },
+    {
+      "type": "html",
+      "text": "\nThe architecture is appropriate for performing work periodically.\nIn the Booch example, it is used to poll sensors at fixed intervals. For example, if time frames occur every 60th of a second and we have an activity that requires a reading from a device every second, the activity when initiated will test whether a reading needs to be taken and will read the device only if it hasn't been read in the last 59 frames.",
+      "id": "2b2b6baf85026c255e49f603800aa264"
+    },
+    {
+      "type": "html",
+      "text": "\nHas anyone seen or used this style of architecture? I'd like to hear about it if you have.",
+      "id": "04fd825c7a562dfed06455ed485ca086"
+    },
+    {
+      "type": "html",
+      "text": "--",
+      "id": "ed46dda490394530ac1e9dda1cab09c0"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+    },
+    {
+      "type": "html",
+      "text": "\nI [[Have This Pattern]]. In fact I've had it for two separate systems. One was a signal identification system and the other was a real time simulator. You can email me for the details. -- [[Yonat Sharon]]",
+      "id": "4f5a460cbd8c603813c1bc077a469774"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+    },
+    {
+      "type": "html",
+      "text": "\nA standard for real-time processing.\nSee [[Doug Schmidt]]'s home page for ACE/TAO information; a system that uses this and many other patterns.",
+      "id": "785e4679de0473f937bc661b122bc3f1"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+    },
+    {
+      "type": "html",
+      "text": "\nI expect that every video game ever written uses this architecture. Certainly the ones that I write do. -- [[Nat Pryce]]",
+      "id": "711fefeab34604b40b9f635fa754886d"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+    },
+    {
+      "type": "html",
+      "text": "\nFor a nice write-up on this technique, see the article \"Simple Task Scheduler Prevents Priority Inversion\" by Orv Balcom in the June 1995 <i>Embedded Systems Programming</i>. In the world of tiny little embedded processors, this architecture often represents the entirety of the 'operating system'. In a common implementation, the scheduler is the body of a timer interrupt routine. Most embedded systems people are quite familiar with it, if not by name, then by pattern. -- [[Tim Voght]]",
+      "id": "0a2957f0624e90f5fada3a77bf4222e2"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+    },
+    {
+      "type": "html",
+      "text": "OK, then what are the standard problems that arise when you use this architecture? What patterns are often associated with it? --[[Ralph Johnson]]",
+      "id": "cae5b100fdeb4f8dae7cb178987b821e"
+    },
+    {
+      "type": "html",
+      "text": "\nA common problem:\nYou have one high-speed task that takes a very small fraction of CPU time when running alone, but needs to be run very often - perhaps you need to sample the audio output at 44.1 KHz.",
+      "id": "eceefee16ad564ad8022c1db640fe24f"
+    },
+    {
+      "type": "html",
+      "text": "\nThen you have lots and lots of slow tasks that only need to run once a second or so, any one of which doesn't seem to interfere with the fast task; and even when all added together the CPU seems to be running at less than a 50% load.",
+      "id": "6a1d63792bc89d8991d32da154c7d3a2"
+    },
+    {
+      "type": "html",
+      "text": "\nIt's almost too easy to schedule all of the slow tasks at exactly the same instant, causing a glitch in the audio once a second.",
+      "id": "6d59fb8b0190698737ecae14d2e7f7b4"
+    },
+    {
+      "type": "html",
+      "text": "\nIf that glitch is imperceptible, then Time Frame Processing works fine. Otherwise you need to switch to [[Real Time]] techniques such as the RMA (rate monotonic algorithm).",
+      "id": "3485c2183ab9e1f41572d643662d6e02"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+    },
+    {
+      "type": "html",
+      "text": "My attempt at forces:",
+      "id": "245124302692a0c1b32f86945e6efd92"
+    },
+    {
+      "type": "html",
+      "text": " A small system with restricted memory. There may well be no operating system. (Scheduling and elaborate runtime systems aren't likely to be practicable.)",
+      "id": "d5b28ad30bc963ff17f6913256d871e9"
+    },
+    {
+      "type": "html",
+      "text": " Pseudo-multitasking and deterministic scheduling are required.",
+      "id": "0d637e9cc4f906ae72d96107c13712a6"
+    },
+    {
+      "type": "html",
+      "text": " Since there isn't a notion of an OS task or of \"thread\" the programmer must create an architecture that performs consistent interleaving of tasks.",
+      "id": "ae86c7084941814c5606e02a76a4668c"
+    },
+    {
+      "type": "html",
+      "text": "\"Therefore\":",
+      "id": "a140e8f9d74aab3828b3999bd3b186a6"
+    },
+    {
+      "type": "html",
+      "text": " Define a notion of an atomic \"activity\" which terminates. Each activity is assigned a priority number. (The Lower the value the more frequently invoked.)",
+      "id": "f33f68725d960175bf28dcf1fffc8a4a"
+    },
+    {
+      "type": "html",
+      "text": " Partition runtime into discrete time of fixed length (time-frames)",
+      "id": "37698b1b502ed59ecec0007a2df3b1dd"
+    },
+    {
+      "type": "html",
+      "text": " Each time-frame is initiated by hardware (or the external actor of your choice...)",
+      "id": "6d802aeed86ce8d3de362c3ab2341590"
+    },
+    {
+      "type": "html",
+      "text": " Code runs in reponse to the timer interrupt. This code iterates through each activity in turn deciding whether it should be run in this time-frame depending on its priority number.",
+      "id": "238d72a3c5da7ef29a41e9c3b4794f3a"
+    },
+    {
+      "type": "html",
+      "text": "\nEnsure that the timer doesn't interrupt running activities by calculating/estimating the total amount of time spent in all activities present in the system. - The timing granularity of the time-frame is critical to the applicability of this (proto?) pattern.",
+      "id": "aaf87b78ed07221facf9dcb07d19a84f"
+    },
+    {
+      "type": "html",
+      "text": "\nPartitioning up a bubble sort execution process into an atomic activity would for example involve performance of a few tests on indexes, possibly swap two numbers and possibly some index updates in each activity invocation. (Hence you perform a small chunk of the algorithm in each invocation - but you <i>ensure that you terminate</i>.) ",
+      "id": "dea229bbb7ffa2dd5cf59bacf0e529ad"
+    },
+    {
+      "type": "html",
+      "text": "\nThe emphasis is on partitioning non-constant time execution into constant time chunks that can be inverleaved by an external entity.",
+      "id": "20098511a57e00c9563f69eb77228622"
+    },
+    {
+      "type": "html",
+      "text": "--",
+      "id": "ed46dda490394530ac1e9dda1cab09c0"
+    },
+    {
+      "type": "html",
+      "text": "\nSome comments on the forces...",
+      "id": "8d7de0775c6b061229737e4307277c1c"
+    },
+    {
+      "type": "html",
+      "text": "<i>\"A small system with restricted memory. There may well be no operating system. (Scheduling and elaborate runtime systems aren't likely to be practicable.)\"</i>",
+      "id": "e53ae63aea4a51f617e5d1494463c13b"
+    },
+    {
+      "type": "html",
+      "text": "\nVideo games that run on desk-top PCs use this pattern. In fact, video games are probably among the few applications commonly run on current PCs that actually require all the CPU, memory, and audio & graphical processing capability provided by todays hardware!",
+      "id": "0aec8e3278e4068187e2e38252730596"
+    },
+    {
+      "type": "html",
+      "text": "<i>\"Pseudo-multitasking and deterministic scheduling are required.\"</i>",
+      "id": "21d6f685a9f70f96702fdb0ef2ecf033"
+    },
+    {
+      "type": "html",
+      "text": "<i>Pseudo</i>-multitasking is the result of using this pattern.",
+      "id": "54832e96c01e47b9f126f42e7e122d9a"
+    },
+    {
+      "type": "html",
+      "text": "<i>\"Since there isn't a notion of an OS task or of \"thread\" the programmer must create an architecture that performs consistent interleaving of tasks.\"</i>",
+      "id": "53470e52bd5265af282c53b6912fb49e"
+    },
+    {
+      "type": "html",
+      "text": "\nPC video games run on desktop operating systems, and even home games consoles have some form of OS. The new Sega Dreamcast uses Windows CE, for example, which implements processes with memory-protection and multiple pre-emptive threads.",
+      "id": "bc3f8618966bd52016e3a635a18513cc"
+    },
+    {
+      "type": "html",
+      "text": "\nI think the forces can be described as:",
+      "id": "3428ff6300c5743753fdbd1ba3eefc45"
+    },
+    {
+      "type": "html",
+      "text": " Multitasking is required (but what does deterministic mean in this context?)",
+      "id": "92657e3f306af760fccf57f5e39ef353"
+    },
+    {
+      "type": "html",
+      "text": " The order in which tasks are selected for processing must be deterministic.",
+      "id": "bac42ca69a5999062b31acf8bbc4ba24"
+    },
+    {
+      "type": "html",
+      "text": " You want to minimize the amount of time the system spends scheduling tasks and maximize the amount of time spent performing the tasks. (This one's a bit obvious - is it too obvious to be a valid force? <i>[[Pre Emptive Multi Tasking]] spends *more* time scheduling tasks, *less* time performing the tasks, than this [[Cooperative Multitasking]] - so no, it's not obvious.</i>)",
+      "id": "8a09038e2f8b7e4a4d9083838e57ee75"
+    },
+    {
+      "type": "html",
+      "text": " The overhead of using more convenient forms of multitasking, such as the time and space overhead of transitioning to kernel mode and saving/restoring processor context when using pre-emptive threads or coroutines, is too great, either because of restricted processing capabilities (i.e. embedded systems), or because of the large number of tasks that require scheduling (i.e. games, human-in-the-loop simulations).",
+      "id": "e931a2ee4845a697f190e0ea13efd2c6"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Nat Pryce]]",
+      "id": "ca66e91c11c067bf43598f982d447a59"
+    },
+    {
+      "type": "html",
+      "text": "<i>Deterministic ordering:</i>",
+      "id": "7abc6bda2990e5a16614ddeae191ef29"
+    },
+    {
+      "type": "html",
+      "text": "\nIf you had the following activities:",
+      "id": "27d44e516d1d144d6a8c03debc90dc27"
+    },
+    {
+      "type": "html",
+      "text": " Read in data from sensors (Activity A)",
+      "id": "446738b047d25d1aab3ad902f7de4983"
+    },
+    {
+      "type": "html",
+      "text": " Update domain objects based on sensor data (Activity B)",
+      "id": "69b323fce2ce3bec5c8955164e1b80cf"
+    },
+    {
+      "type": "html",
+      "text": " Redraw GUI objects. (Activity C)",
+      "id": "4cc8f7b65dee5cee6a384293728958ed"
+    },
+    {
+      "type": "html",
+      "text": " Poll user keypad. (Activity D)",
+      "id": "e2e290cad703234568b7568f9f23e24f"
+    },
+    {
+      "type": "html",
+      "text": "\nYou wish to ensure that each activity happens in a predefined order:",
+      "id": "1ea2dfa43fcef23224347ec089ec1ab8"
+    },
+    {
+      "type": "code",
+      "text": " ABC ABC ABCD ABC ABC ABCD ...",
+      "id": "b7596ccd0e134708cec3691547d4c356"
+    },
+    {
+      "type": "html",
+      "text": "Imagine if the system was nondeterministic (i.e. you can't guarantee the activities run in a predefined order) Let's say you got an execution that ran:",
+      "id": "39b65770af7bab78b92d4af9be3a3539"
+    },
+    {
+      "type": "code",
+      "text": " BAC DCBB ABC ABCD",
+      "id": "fc371c73d8610bc3182a8b32eaad4590"
+    },
+    {
+      "type": "html",
+      "text": "..the sensors aren't being polled periodically at the right intervals and you might get also get errors by updating domain objects twice in a row.",
+      "id": "a3c5cccf433cf89c1b7ae61a210bef0b"
+    },
+    {
+      "type": "html",
+      "text": "\nA similar case can be made for the video game example above. (There is a causal relationship between each of the activities. The activities must occur in a single predefined order which does not change over time to ensure correct timing behaviour and consistent updates.)",
+      "id": "cfa25d0a84bb3795ae48011972719e39"
+    },
+    {
+      "type": "html",
+      "text": "<i>overhead of using more convenient forms of multitasking...</i>",
+      "id": "068cd9543fc22f9ab5ca865480790153"
+    },
+    {
+      "type": "html",
+      "text": "\nIf the tasks to be scheduled are static enough in nature and change very little you can decide the scheduling statically.",
+      "id": "5ec67da8cf5d8d557e6df34d16156e68"
+    },
+    {
+      "type": "html",
+      "text": "(I'm assuming there isn't any self-modifying code, or demand-loaded componentry involved.) \n[[David Parnas]] used a (different) static scheduling strategy in the A7E aircraft project.\nSee the SEI book [[Software Engineering In Practice]] for a description.",
+      "id": "1af31fd8a63a2e96478a6286bb6f6774"
+    },
+    {
+      "type": "html",
+      "text": "--",
+      "id": "ed46dda490394530ac1e9dda1cab09c0"
+    },
+    {
+      "type": "html",
+      "text": "\nYou also have a time and space overhead if the scheduler needs a transition to kernel mode (if necessary) or needs to save and restore processor state when tasks are scheduled. This overhead occurs if you use pre-emptive threads or coroutines but does not occur in a [[Time Frame Processing Architecture]].",
+      "id": "ade92563a54427e231f9f7b671e91534"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Nat Pryce]]",
+      "id": "ca66e91c11c067bf43598f982d447a59"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+    },
+    {
+      "type": "html",
+      "text": "\nThis sounds like a timeslicer model, and a venerable one at that. The problem with such polling loops is CPU thrashing and fragility. Which is why interrupt driven hardware was invented.",
+      "id": "0dba0322261bf517d621c8c8be5e86da"
+    },
+    {
+      "type": "html",
+      "text": "-- Richard Henderson",
+      "id": "72da0645c07eb0559a841333596110b8"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+    },
+    {
+      "type": "html",
+      "text": "Here are some patterns that immediately come to mind... ",
+      "id": "0e215f5942c2c2ce913e355b39483c4e"
+    },
+    {
+      "type": "html",
+      "text": "<b>Multiple Phases per Time Frame</b>",
+      "id": "e2da5a27b97c9448e2eda992a76c1b20"
+    },
+    {
+      "type": "html",
+      "text": "\nOne often needs to divide each time frame into <i>causally related phases</i>.\nFor example, in a game it is unfair for each player to think and act (e.g. attack their opponent or avoid their opponent's attack) in turn. The first player to be simulated has an unfair advantage if he and his opponent attack each other simultaneously: his attack might kill the opponent before the opponent's attack is simulated.",
+      "id": "43dd072b37777407c3a573fead43ec84"
+    },
+    {
+      "type": "html",
+      "text": "<b>Therefore:</b> divide each time frame into \"phases\" in which every object performs the same kind of activity, and the activities of one phase have a causal relationship to the activities of the next. E.g: every time frame in the game, all objects would decide and perform their next action based on the current public state of other objects, then collision detection would be performed and affected objects would record the results of collisions as private state, finally all objects would update their public state (whether they are alive or dead, their graphical representation, etc.) ready for the next time frame.",
+      "id": "0f0cef3f3d067125e1b5ec531790d814"
+    },
+    {
+      "type": "html",
+      "text": "<b>Variable-Duration Frames</b>",
+      "id": "faba7afa2414f9dab525376a4afb907a"
+    },
+    {
+      "type": "html",
+      "text": "\nIn many programs organised using a [[Time Frame Processing Architecture]] one cannot predict in advance how long each frame will last. For example: the program may not be running on a real-time operating system (e.g. a game on Windows) or the program may have to perform more I/O processing during some frames than during others.",
+      "id": "dabbe4cef5f2c70ee2762b9904347f1d"
+    },
+    {
+      "type": "html",
+      "text": "<b>Therefore:</b> measure the duration of each frame and feed that duration into to the simulation phase of the next frame. Over multiple frames, variations in time will be smoothed out. This approach adapts to gradual changes in processor load.",
+      "id": "48415352092c505082c37fa35df0f85d"
+    },
+    {
+      "type": "html",
+      "text": "\nOften the frame rate is close to the accuracy limit of the computer's clock, resulting in inaccurate time measurements and jerky animation. To solve this, \"antialias\" time measurements by timing multiple frames and using the average duration.",
+      "id": "f8895bdb02fc46602fc6fa891ffc6e5e"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Nat Pryce]]",
+      "id": "ca66e91c11c067bf43598f982d447a59"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+    },
+    {
+      "type": "html",
+      "text": "When programming using the languages defined in the IEC Standard 61131, this is the architecture used.",
+      "id": "5c315d03e2245aba00f6d2ecf1e4fe95"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Linus Tolke]]",
+      "id": "32c99d889bdc474adbb822f52c115e86"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+    },
+    {
+      "type": "html",
+      "text": "\nsimilar to [[Real Time]].",
+      "id": "513f1cf92584b3dd67a4309436b6ae19"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Pattern]] [[Category Time]]",
+      "id": "9efb3efbedc32aaca5f50781afed29e8"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?TimeFrameProcessingArchitecture c2.com]",
+      "id": "21e2306aba8a437f9b23bb31cdc1ea9f"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1334108553000,
+      "id": "7783d2e798b704db173e5e72ba57f79f",
+      "type": "create",
+      "item": {
+        "title": "Time Frame Processing Architecture",
+        "story": [
+          {
+            "type": "html",
+            "text": "An [[Architectural Pattern]].",
+            "id": "4e9ce880a10d630e40e6a5dd81a3c2fc"
+          },
+          {
+            "type": "html",
+            "text": "\nThis architecture is used in the \"data acquisition\" case-study in chapter 8 of [[Object Oriented Analysis And Design]].",
+            "id": "225880fffb88678bb1ea7c74ddaf5c0d"
+          },
+          {
+            "type": "html",
+            "text": "\nIn order to perform pseudo-multitasking, think of time as a series of \"time-frames\". Each concurrent task is written as an \"activity\".",
+            "id": "5cbca3757a43a2fa829dec32601982af"
+          },
+          {
+            "type": "html",
+            "text": "\nThe architecture ensures that all activities are executed in each time frame. Activities must be:",
+            "id": "76722a1954b83dcd4ca2bc87f7621780"
+          },
+          {
+            "type": "html",
+            "text": " run in the same order within each time frame,",
+            "id": "cd24f61f0ab8b74141e4a7e5a7194e3a"
+          },
+          {
+            "type": "html",
+            "text": " obviously each activity must terminate, and",
+            "id": "7d9534ac122dc78fa5a287e88df2fb4f"
+          },
+          {
+            "type": "html",
+            "text": " each activity should perform small units of work that complete within a predictable (or at least estimatable) amount of time.",
+            "id": "46c159a2e1c295662023da6f1874861f"
+          },
+          {
+            "type": "html",
+            "text": "(Is there any difference between this and \"[[Cooperative Multitasking]] with a round-robin scheduler\"?)",
+            "id": "7bb89b4f39fb5234f4e2aa485dca60e7"
+          },
+          {
+            "type": "html",
+            "text": "\nThe architecture is appropriate for performing work periodically.\nIn the Booch example, it is used to poll sensors at fixed intervals. For example, if time frames occur every 60th of a second and we have an activity that requires a reading from a device every second, the activity when initiated will test whether a reading needs to be taken and will read the device only if it hasn't been read in the last 59 frames.",
+            "id": "2b2b6baf85026c255e49f603800aa264"
+          },
+          {
+            "type": "html",
+            "text": "\nHas anyone seen or used this style of architecture? I'd like to hear about it if you have.",
+            "id": "04fd825c7a562dfed06455ed485ca086"
+          },
+          {
+            "type": "html",
+            "text": "--",
+            "id": "ed46dda490394530ac1e9dda1cab09c0"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+          },
+          {
+            "type": "html",
+            "text": "\nI [[Have This Pattern]]. In fact I've had it for two separate systems. One was a signal identification system and the other was a real time simulator. You can email me for the details. -- [[Yonat Sharon]]",
+            "id": "4f5a460cbd8c603813c1bc077a469774"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+          },
+          {
+            "type": "html",
+            "text": "\nA standard for real-time processing.\nSee [[Doug Schmidt]]'s home page for ACE/TAO information; a system that uses this and many other patterns.",
+            "id": "785e4679de0473f937bc661b122bc3f1"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+          },
+          {
+            "type": "html",
+            "text": "\nI expect that every video game ever written uses this architecture. Certainly the ones that I write do. -- [[Nat Pryce]]",
+            "id": "711fefeab34604b40b9f635fa754886d"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+          },
+          {
+            "type": "html",
+            "text": "\nFor a nice write-up on this technique, see the article \"Simple Task Scheduler Prevents Priority Inversion\" by Orv Balcom in the June 1995 <i>Embedded Systems Programming</i>. In the world of tiny little embedded processors, this architecture often represents the entirety of the 'operating system'. In a common implementation, the scheduler is the body of a timer interrupt routine. Most embedded systems people are quite familiar with it, if not by name, then by pattern. -- [[Tim Voght]]",
+            "id": "0a2957f0624e90f5fada3a77bf4222e2"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+          },
+          {
+            "type": "html",
+            "text": "OK, then what are the standard problems that arise when you use this architecture? What patterns are often associated with it? --[[Ralph Johnson]]",
+            "id": "cae5b100fdeb4f8dae7cb178987b821e"
+          },
+          {
+            "type": "html",
+            "text": "\nA common problem:\nYou have one high-speed task that takes a very small fraction of CPU time when running alone, but needs to be run very often - perhaps you need to sample the audio output at 44.1 KHz.",
+            "id": "eceefee16ad564ad8022c1db640fe24f"
+          },
+          {
+            "type": "html",
+            "text": "\nThen you have lots and lots of slow tasks that only need to run once a second or so, any one of which doesn't seem to interfere with the fast task; and even when all added together the CPU seems to be running at less than a 50% load.",
+            "id": "6a1d63792bc89d8991d32da154c7d3a2"
+          },
+          {
+            "type": "html",
+            "text": "\nIt's almost too easy to schedule all of the slow tasks at exactly the same instant, causing a glitch in the audio once a second.",
+            "id": "6d59fb8b0190698737ecae14d2e7f7b4"
+          },
+          {
+            "type": "html",
+            "text": "\nIf that glitch is imperceptible, then Time Frame Processing works fine. Otherwise you need to switch to [[Real Time]] techniques such as the RMA (rate monotonic algorithm).",
+            "id": "3485c2183ab9e1f41572d643662d6e02"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+          },
+          {
+            "type": "html",
+            "text": "My attempt at forces:",
+            "id": "245124302692a0c1b32f86945e6efd92"
+          },
+          {
+            "type": "html",
+            "text": " A small system with restricted memory. There may well be no operating system. (Scheduling and elaborate runtime systems aren't likely to be practicable.)",
+            "id": "d5b28ad30bc963ff17f6913256d871e9"
+          },
+          {
+            "type": "html",
+            "text": " Pseudo-multitasking and deterministic scheduling are required.",
+            "id": "0d637e9cc4f906ae72d96107c13712a6"
+          },
+          {
+            "type": "html",
+            "text": " Since there isn't a notion of an OS task or of \"thread\" the programmer must create an architecture that performs consistent interleaving of tasks.",
+            "id": "ae86c7084941814c5606e02a76a4668c"
+          },
+          {
+            "type": "html",
+            "text": "\"Therefore\":",
+            "id": "a140e8f9d74aab3828b3999bd3b186a6"
+          },
+          {
+            "type": "html",
+            "text": " Define a notion of an atomic \"activity\" which terminates. Each activity is assigned a priority number. (The Lower the value the more frequently invoked.)",
+            "id": "f33f68725d960175bf28dcf1fffc8a4a"
+          },
+          {
+            "type": "html",
+            "text": " Partition runtime into discrete time of fixed length (time-frames)",
+            "id": "37698b1b502ed59ecec0007a2df3b1dd"
+          },
+          {
+            "type": "html",
+            "text": " Each time-frame is initiated by hardware (or the external actor of your choice...)",
+            "id": "6d802aeed86ce8d3de362c3ab2341590"
+          },
+          {
+            "type": "html",
+            "text": " Code runs in reponse to the timer interrupt. This code iterates through each activity in turn deciding whether it should be run in this time-frame depending on its priority number.",
+            "id": "238d72a3c5da7ef29a41e9c3b4794f3a"
+          },
+          {
+            "type": "html",
+            "text": "\nEnsure that the timer doesn't interrupt running activities by calculating/estimating the total amount of time spent in all activities present in the system. - The timing granularity of the time-frame is critical to the applicability of this (proto?) pattern.",
+            "id": "aaf87b78ed07221facf9dcb07d19a84f"
+          },
+          {
+            "type": "html",
+            "text": "\nPartitioning up a bubble sort execution process into an atomic activity would for example involve performance of a few tests on indexes, possibly swap two numbers and possibly some index updates in each activity invocation. (Hence you perform a small chunk of the algorithm in each invocation - but you <i>ensure that you terminate</i>.) ",
+            "id": "dea229bbb7ffa2dd5cf59bacf0e529ad"
+          },
+          {
+            "type": "html",
+            "text": "\nThe emphasis is on partitioning non-constant time execution into constant time chunks that can be inverleaved by an external entity.",
+            "id": "20098511a57e00c9563f69eb77228622"
+          },
+          {
+            "type": "html",
+            "text": "--",
+            "id": "ed46dda490394530ac1e9dda1cab09c0"
+          },
+          {
+            "type": "html",
+            "text": "\nSome comments on the forces...",
+            "id": "8d7de0775c6b061229737e4307277c1c"
+          },
+          {
+            "type": "html",
+            "text": "<i>\"A small system with restricted memory. There may well be no operating system. (Scheduling and elaborate runtime systems aren't likely to be practicable.)\"</i>",
+            "id": "e53ae63aea4a51f617e5d1494463c13b"
+          },
+          {
+            "type": "html",
+            "text": "\nVideo games that run on desk-top PCs use this pattern. In fact, video games are probably among the few applications commonly run on current PCs that actually require all the CPU, memory, and audio & graphical processing capability provided by todays hardware!",
+            "id": "0aec8e3278e4068187e2e38252730596"
+          },
+          {
+            "type": "html",
+            "text": "<i>\"Pseudo-multitasking and deterministic scheduling are required.\"</i>",
+            "id": "21d6f685a9f70f96702fdb0ef2ecf033"
+          },
+          {
+            "type": "html",
+            "text": "<i>Pseudo</i>-multitasking is the result of using this pattern.",
+            "id": "54832e96c01e47b9f126f42e7e122d9a"
+          },
+          {
+            "type": "html",
+            "text": "<i>\"Since there isn't a notion of an OS task or of \"thread\" the programmer must create an architecture that performs consistent interleaving of tasks.\"</i>",
+            "id": "53470e52bd5265af282c53b6912fb49e"
+          },
+          {
+            "type": "html",
+            "text": "\nPC video games run on desktop operating systems, and even home games consoles have some form of OS. The new Sega Dreamcast uses Windows CE, for example, which implements processes with memory-protection and multiple pre-emptive threads.",
+            "id": "bc3f8618966bd52016e3a635a18513cc"
+          },
+          {
+            "type": "html",
+            "text": "\nI think the forces can be described as:",
+            "id": "3428ff6300c5743753fdbd1ba3eefc45"
+          },
+          {
+            "type": "html",
+            "text": " Multitasking is required (but what does deterministic mean in this context?)",
+            "id": "92657e3f306af760fccf57f5e39ef353"
+          },
+          {
+            "type": "html",
+            "text": " The order in which tasks are selected for processing must be deterministic.",
+            "id": "bac42ca69a5999062b31acf8bbc4ba24"
+          },
+          {
+            "type": "html",
+            "text": " You want to minimize the amount of time the system spends scheduling tasks and maximize the amount of time spent performing the tasks. (This one's a bit obvious - is it too obvious to be a valid force? <i>[[Pre Emptive Multi Tasking]] spends *more* time scheduling tasks, *less* time performing the tasks, than this [[Cooperative Multitasking]] - so no, it's not obvious.</i>)",
+            "id": "8a09038e2f8b7e4a4d9083838e57ee75"
+          },
+          {
+            "type": "html",
+            "text": " The overhead of using more convenient forms of multitasking, such as the time and space overhead of transitioning to kernel mode and saving/restoring processor context when using pre-emptive threads or coroutines, is too great, either because of restricted processing capabilities (i.e. embedded systems), or because of the large number of tasks that require scheduling (i.e. games, human-in-the-loop simulations).",
+            "id": "e931a2ee4845a697f190e0ea13efd2c6"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Nat Pryce]]",
+            "id": "ca66e91c11c067bf43598f982d447a59"
+          },
+          {
+            "type": "html",
+            "text": "<i>Deterministic ordering:</i>",
+            "id": "7abc6bda2990e5a16614ddeae191ef29"
+          },
+          {
+            "type": "html",
+            "text": "\nIf you had the following activities:",
+            "id": "27d44e516d1d144d6a8c03debc90dc27"
+          },
+          {
+            "type": "html",
+            "text": " Read in data from sensors (Activity A)",
+            "id": "446738b047d25d1aab3ad902f7de4983"
+          },
+          {
+            "type": "html",
+            "text": " Update domain objects based on sensor data (Activity B)",
+            "id": "69b323fce2ce3bec5c8955164e1b80cf"
+          },
+          {
+            "type": "html",
+            "text": " Redraw GUI objects. (Activity C)",
+            "id": "4cc8f7b65dee5cee6a384293728958ed"
+          },
+          {
+            "type": "html",
+            "text": " Poll user keypad. (Activity D)",
+            "id": "e2e290cad703234568b7568f9f23e24f"
+          },
+          {
+            "type": "html",
+            "text": "\nYou wish to ensure that each activity happens in a predefined order:",
+            "id": "1ea2dfa43fcef23224347ec089ec1ab8"
+          },
+          {
+            "type": "code",
+            "text": " ABC ABC ABCD ABC ABC ABCD ...",
+            "id": "b7596ccd0e134708cec3691547d4c356"
+          },
+          {
+            "type": "html",
+            "text": "Imagine if the system was nondeterministic (i.e. you can't guarantee the activities run in a predefined order) Let's say you got an execution that ran:",
+            "id": "39b65770af7bab78b92d4af9be3a3539"
+          },
+          {
+            "type": "code",
+            "text": " BAC DCBB ABC ABCD",
+            "id": "fc371c73d8610bc3182a8b32eaad4590"
+          },
+          {
+            "type": "html",
+            "text": "..the sensors aren't being polled periodically at the right intervals and you might get also get errors by updating domain objects twice in a row.",
+            "id": "a3c5cccf433cf89c1b7ae61a210bef0b"
+          },
+          {
+            "type": "html",
+            "text": "\nA similar case can be made for the video game example above. (There is a causal relationship between each of the activities. The activities must occur in a single predefined order which does not change over time to ensure correct timing behaviour and consistent updates.)",
+            "id": "cfa25d0a84bb3795ae48011972719e39"
+          },
+          {
+            "type": "html",
+            "text": "<i>overhead of using more convenient forms of multitasking...</i>",
+            "id": "068cd9543fc22f9ab5ca865480790153"
+          },
+          {
+            "type": "html",
+            "text": "\nIf the tasks to be scheduled are static enough in nature and change very little you can decide the scheduling statically.",
+            "id": "5ec67da8cf5d8d557e6df34d16156e68"
+          },
+          {
+            "type": "html",
+            "text": "(I'm assuming there isn't any self-modifying code, or demand-loaded componentry involved.) \n[[David Parnas]] used a (different) static scheduling strategy in the A7E aircraft project.\nSee the SEI book [[Software Engineering In Practice]] for a description.",
+            "id": "1af31fd8a63a2e96478a6286bb6f6774"
+          },
+          {
+            "type": "html",
+            "text": "--",
+            "id": "ed46dda490394530ac1e9dda1cab09c0"
+          },
+          {
+            "type": "html",
+            "text": "\nYou also have a time and space overhead if the scheduler needs a transition to kernel mode (if necessary) or needs to save and restore processor state when tasks are scheduled. This overhead occurs if you use pre-emptive threads or coroutines but does not occur in a [[Time Frame Processing Architecture]].",
+            "id": "ade92563a54427e231f9f7b671e91534"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Nat Pryce]]",
+            "id": "ca66e91c11c067bf43598f982d447a59"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+          },
+          {
+            "type": "html",
+            "text": "\nThis sounds like a timeslicer model, and a venerable one at that. The problem with such polling loops is CPU thrashing and fragility. Which is why interrupt driven hardware was invented.",
+            "id": "0dba0322261bf517d621c8c8be5e86da"
+          },
+          {
+            "type": "html",
+            "text": "-- Richard Henderson",
+            "id": "72da0645c07eb0559a841333596110b8"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+          },
+          {
+            "type": "html",
+            "text": "Here are some patterns that immediately come to mind... ",
+            "id": "0e215f5942c2c2ce913e355b39483c4e"
+          },
+          {
+            "type": "html",
+            "text": "<b>Multiple Phases per Time Frame</b>",
+            "id": "e2da5a27b97c9448e2eda992a76c1b20"
+          },
+          {
+            "type": "html",
+            "text": "\nOne often needs to divide each time frame into <i>causally related phases</i>.\nFor example, in a game it is unfair for each player to think and act (e.g. attack their opponent or avoid their opponent's attack) in turn. The first player to be simulated has an unfair advantage if he and his opponent attack each other simultaneously: his attack might kill the opponent before the opponent's attack is simulated.",
+            "id": "43dd072b37777407c3a573fead43ec84"
+          },
+          {
+            "type": "html",
+            "text": "<b>Therefore:</b> divide each time frame into \"phases\" in which every object performs the same kind of activity, and the activities of one phase have a causal relationship to the activities of the next. E.g: every time frame in the game, all objects would decide and perform their next action based on the current public state of other objects, then collision detection would be performed and affected objects would record the results of collisions as private state, finally all objects would update their public state (whether they are alive or dead, their graphical representation, etc.) ready for the next time frame.",
+            "id": "0f0cef3f3d067125e1b5ec531790d814"
+          },
+          {
+            "type": "html",
+            "text": "<b>Variable-Duration Frames</b>",
+            "id": "faba7afa2414f9dab525376a4afb907a"
+          },
+          {
+            "type": "html",
+            "text": "\nIn many programs organised using a [[Time Frame Processing Architecture]] one cannot predict in advance how long each frame will last. For example: the program may not be running on a real-time operating system (e.g. a game on Windows) or the program may have to perform more I/O processing during some frames than during others.",
+            "id": "dabbe4cef5f2c70ee2762b9904347f1d"
+          },
+          {
+            "type": "html",
+            "text": "<b>Therefore:</b> measure the duration of each frame and feed that duration into to the simulation phase of the next frame. Over multiple frames, variations in time will be smoothed out. This approach adapts to gradual changes in processor load.",
+            "id": "48415352092c505082c37fa35df0f85d"
+          },
+          {
+            "type": "html",
+            "text": "\nOften the frame rate is close to the accuracy limit of the computer's clock, resulting in inaccurate time measurements and jerky animation. To solve this, \"antialias\" time measurements by timing multiple frames and using the average duration.",
+            "id": "f8895bdb02fc46602fc6fa891ffc6e5e"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Nat Pryce]]",
+            "id": "ca66e91c11c067bf43598f982d447a59"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+          },
+          {
+            "type": "html",
+            "text": "When programming using the languages defined in the IEC Standard 61131, this is the architecture used.",
+            "id": "5c315d03e2245aba00f6d2ecf1e4fe95"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Linus Tolke]]",
+            "id": "32c99d889bdc474adbb822f52c115e86"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+          },
+          {
+            "type": "html",
+            "text": "\nsimilar to [[Real Time]].",
+            "id": "513f1cf92584b3dd67a4309436b6ae19"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "aeccb81aa11e464aa3ae8bfe70ec807b"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Pattern]] [[Category Time]]",
+            "id": "9efb3efbedc32aaca5f50781afed29e8"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?TimeFrameProcessingArchitecture c2.com]",
+            "id": "21e2306aba8a437f9b23bb31cdc1ea9f"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1654019067742
+    }
+  ]
+}
