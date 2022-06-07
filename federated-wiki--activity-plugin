@@ -1,0 +1,2827 @@
+{
+  "title": "Federated Wiki – Activity Plugin",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "8bfeb435e0380d9c",
+      "text": "The [[Activity]] plugin lists pages in your [[Neighborhood]]. [https://github.com/fedwiki/wiki-plugin-activity github] It expands as your neighborhood grows. Page names used on multiple sites are grouped together, with the most current site on the right.\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "db2cf8f0468691fc",
+      "text": "The [[Recent Changes]] suddenly stopped working.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "e29603535e895a2b",
+      "text": "paul90 via [[https://matrix.to/#/!ORfrUEFeWFcHAMLFLr:matrix.org/$1654350224166299iTKVI:matrix.org?via=matrix.org&via=matrix.allmende.io&via=chat.weho.st matrix]]\n🤔 think I can see what is happening, just not sure why...\nlooks to be caused by Uncaught TypeError: sites.push is not a function\nsites expected to be an array, and adding a console.log just before the push I see that it is - but then there is a time it is Object() rather than the expect array.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "efe1027302da062a",
+      "text": "paul90\nI've worked out what is happening... looks to be caused by a page with a slug of [[constructor]] - which is getting the object constructor rather than...\n"
+    },
+    {
+      "type": "code",
+      "id": "70eb26a83529e2e6",
+      "text": "➜  wiki-plugin-activity git:(paul90/fix-creator-slug) ✗ grunt     ~/Projects/RalfBarkow/fedwiki/wiki-plugin-activity\nRunning \"clean:0\" (clean) task\n>> 0 paths cleaned.\n\nRunning \"clean:1\" (clean) task\n>> 0 paths cleaned.\n\nRunning \"clean:2\" (clean) task\n>> 0 paths cleaned.\n\nRunning \"clean:3\" (clean) task\n>> 0 paths cleaned.\n\nRunning \"mochaTest:test\" (mochaTest) task\n\n\n  activity plugin\n    escape\n      ✔ can escape html markup characters\n    since\n      ✔ can parse days\n      ✔ can parse day\n      ✔ can parse DAYS\n      ✔ can parse hours\n      ✔ can parse weeks\n      ✔ can parse a date\n    neighborhood\n      ✔ can parse YES\n      ✔ can parse no\n    twins\n      ✔ can parse a number\n      ✔ ignores text\n    sort\n      ✔ can parse Title\n      ✔ can parse date\n    search\n      ✔ can parse search\n    roster\n      ✔ excludes neighborhood\n    mine\n      ✔ can parse to include mine\n      ✔ can parse to exclude mine\n      ✔ can parse for mine only\n      ✔ can parse to exclude mine\n    conversation\n      ✔ can parse to add conversation link\n    narrative\n      ✔ can parse to add narrative link\n\n\n  21 passing (27ms)\n\n\nRunning \"browserify:plugin\" (browserify) task\n>> Bundle client/activity.js created.\n\nDone."
+    },
+    {
+      "type": "markdown",
+      "id": "5fbcadbe65d2f9e3",
+      "text": "paul90\nAn updated version of the activity plugin has been published, this fixes the issue that Ralf reported yesterday.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "09edac31345236de",
+      "text": "//TODO rsync ? ; Read-only file system ; nix store"
+    },
+    {
+      "type": "code",
+      "id": "567d7153243bdc9c",
+      "text": "/nix/store/[…]-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/wiki-plugin-activity/client:\n  total used in directory 604 available 6.2 GiB\n  dr-xr-xr-x 2 root root   4096 Jan  1  1970   .\n  dr-xr-xr-x 4 root root   4096 Jan  1  1970   ..\n  -r--r--r-- 2 root root 609788 Jan  1  1970   activity.js\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "70f691083cf29895",
+      "text": "How to edit file in /nix/store? [https://discourse.nixos.org/t/how-to-edit-file-in-nix-store/19261 discourse]"
+    },
+    {
+      "type": "markdown",
+      "id": "92145dce5ccbc271",
+      "text": "> The stuff in /nix/store is read-only, intentionally. Changing it by hand is throwing the entire concept of nixos out the window, and may cause all kinds of issues. I won’t tell you how to undo the read-only bit, just in case you actually try, or someone else reading this does. Please don’t even try to hack around it :slight_smile:\n\nRather, you want to modify the package that provides that file downstream (read: for your configuration). It’s natural that you’d like to hand-modify the files, because that’s how other distros work, given they make changing package contents or writing your own painfully cumbersome.\n\nBut this is where the really cool part of NixOS comes in, this is much easier in our world; you can do all of that with some changes to `configuration.nix`.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "49f7594466667ba4",
+      "text": "Let’s start with what this change actually is. **We’ll look at the commit that was made upstream**: contentstatsid key might not be present · lutris/lutris@072e72a · GitHub 1\n\nIt doesn’t really matter what that change does, the important bit is that **it is a change** to the lutris source code. If we can apply the same change to the source of the lutris you’re using, and rebuild it, it should all magically work.\n\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "bf162e66594294f0",
+      "text": "**Nix allows you to take an existing package, and override how it is built.** […]"
+    },
+    {
+      "type": "paragraph",
+      "id": "a85f419b16a60c0d",
+      "text": "⇒ [[node2nix]]: result -> /nix/store/a3xw7yav23rm6xgwf6miv4bw2b6y5x9w-node_wiki-plugin-activity-0.4.10"
+    },
+    {
+      "type": "paragraph",
+      "id": "757e3af158182842",
+      "text": "$ cd ../wiki"
+    },
+    {
+      "type": "code",
+      "id": "4f3c50e0473fd0f5",
+      "text": "[rgb@wiki:~/wiki]$ grep wiki-plugin-activity *\nnode-packages.nix:    \"wiki-plugin-activity-0.4.9\" = {\nnode-packages.nix:      name = \"wiki-plugin-activity\";\nnode-packages.nix:      packageName = \"wiki-plugin-activity\";\nnode-packages.nix:        url = \"https://registry.npmjs.org/wiki-plugin-activity/-/wiki-plugin-activity-0.4.9.tgz\";\nnode-packages.nix:      sources.\"wiki-plugin-activity-0.4.9\"\npackage.json:    \"wiki-plugin-activity\": \"^0.4.8\",\npackage-lock.json:        \"wiki-plugin-activity\": \"^0.4.8\",\npackage-lock.json:    \"node_modules/wiki-plugin-activity\": {\npackage-lock.json:      \"resolved\": \"https://registry.npmjs.org/wiki-plugin-activity/-/wiki-plugin-activity-0.4.8.tgz\",\npackage-lock.json:    \"wiki-plugin-activity\": {\npackage-lock.json:      \"resolved\": \"https://registry.npmjs.org/wiki-plugin-activity/-/wiki-plugin-activity-0.4.8.tgz\",\ngrep: result: Is a directory"
+    },
+    {
+      "type": "paragraph",
+      "id": "ca4cff087af70203",
+      "text": "$ cp node-packages.nix node-packages.nix.orig"
+    },
+    {
+      "type": "paragraph",
+      "id": "c0b1bf8571720275",
+      "text": "Replace wiki-plugin-activity version and"
+    },
+    {
+      "type": "paragraph",
+      "id": "0b6580d93ca25f9d",
+      "text": "$ nix-build -A package"
+    },
+    {
+      "type": "code",
+      "id": "15fa620464450761",
+      "text": "error: attribute 'wiki-plugin-activity-0.4.9' missing\n\n       at /home/rgb/wiki/node-packages.nix:2536:7:\n\n         2535|       sources.\"wiki-client-0.23.4\"\n         2536|       sources.\"wiki-plugin-activity-0.4.9\"\n             |       ^\n         2537|       (sources.\"wiki-plugin-assets-0.3.1\" // {\n       Did you mean wiki-plugin-activity-0.4.10?\n(use '--show-trace' to show detailed location information)"
+    },
+    {
+      "type": "paragraph",
+      "id": "37a9df281116843c",
+      "text": "[rgb@wiki:~/wiki]$ nix-build -A package\nwarning: found empty hash, assuming 'sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='\nthese 70 derivations will be built: […]"
+    },
+    {
+      "type": "code",
+      "id": "40847e2a55563aff",
+      "text": "error: hash mismatch in fixed-output derivation '/nix/store/p96h6zmwbj2wii2kwfj5a3fmc61g2gjs-wiki-plugin-activity-0.4.10.tgz.drv':\n         specified: sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\n            got:    sha256-gbz8MgzomooqaaMhUjkuTbYGpI4z839WFaOMLQufvso=\nerror: 1 dependencies of derivation '/nix/store/b0nx0hjcl1l6k8qqhkdjxf16b744s9kx-node_wiki-0.27.0.drv' failed to build\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "f2b518924de0e380",
+      "text": "Adjust sha256"
+    },
+    {
+      "type": "markdown",
+      "id": "7baf676b839d536b",
+      "text": "[…] post-installation fixup\nshrinking RPATHs of ELF executables and libraries in /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0\nrewriting symlink /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/bin to be relative to /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0\npatching script interpreter paths in /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/uglify-js/bin/uglifyjs: interpreter directive changed from \"#! /usr/bin/env node\" to \"/nix/store/zmv0sbz4ngsl9z6s0djhswij3v4hd7kv-nodejs-14.19.3/bin/node\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/delayed-require.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/initial-value.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/difference.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/delayed-call.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\nchecking for references to /build/ in /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0...\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0"
+    },
+    {
+      "type": "code",
+      "id": "ca9fbb3541ffc545",
+      "text": "result -> /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/\n"
+    },
+    {
+      "type": "markdown",
+      "id": "85432fb5f3de5fd9",
+      "text": "Adjust `wiki.nix`:\n"
+    },
+    {
+      "type": "code",
+      "id": "575b279f06680b5f",
+      "text": " # wiki-plugin-activity-0.4.10\n      ExecStart = \"/nix/store/[…]-node_wiki-0.27.0/bin/wiki --config /home/rgb/.wiki/config.json\";\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "3c0cb9fe47807144",
+      "text": "$ nixos-rebuild switch\n\n"
+    },
+    {
+      "type": "reference",
+      "id": "af5e08bb6ca288cd",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "about-plugmatic-plugin",
+      "title": "About Plugmatic Plugin",
+      "text": "This plugin queries the origin server for information about installed plugins. Server administrators can install new or updated existing plugins from included inventories."
+    },
+    {
+      "type": "markdown",
+      "id": "08c173e31de02acf",
+      "text": "activity 0.4.10 installed"
+    },
+    {
+      "type": "reference",
+      "id": "46545de67df41739",
+      "site": "asia.wiki.org",
+      "slug": "recently-released-plugins",
+      "title": "Recently Released Plugins",
+      "text": "These are plugins where we are tracking current releases."
+    },
+    {
+      "type": "pagefold",
+      "id": "b89e885f211da245",
+      "text": "~"
+    },
+    {
+      "type": "reference",
+      "id": "d5d97731902364c2",
+      "site": "video.fed.wiki.org",
+      "slug": "21-activity-collaboration-neighborhood",
+      "title": "21 Activity Collaboration Neighborhood",
+      "text": "We track activity by neighborhood. More neighbors, more activity. Shared pages show together, ordered by collaborator and temporal place within other work."
+    },
+    {
+      "type": "reference",
+      "id": "e71a71b173f1bd25",
+      "site": "http.wiki.ralfbarkow.ch",
+      "slug": "activity",
+      "title": "Activity",
+      "text": "We use the term activity to refer to changes or work done in [[the federation]]."
+    },
+    {
+      "type": "reference",
+      "id": "f7d7ad97f1650292",
+      "site": "don.noyes.asia.wiki.org",
+      "slug": "coordination-in-joint-activity",
+      "title": "Coordination in Joint Activity",
+      "text": "We apply our understanding of common ground and nessary features of joint activity to account for issues in the design"
+    },
+    {
+      "type": "reference",
+      "id": "95c789a763d9da95",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "requirements-for-joint-activity",
+      "title": "Requirements for Joint Activity",
+      "text": "# [[Requirements]] for Joint Activity among People"
+    },
+    {
+      "type": "reference",
+      "id": "e5e9a074d602db99",
+      "site": "ward.dojo.fed.wiki",
+      "slug": "peer-activity",
+      "title": "Peer Activity",
+      "text": "List sites hosted within the origin's domain showing page counts and most recent activity."
+    },
+    {
+      "type": "reference",
+      "id": "ece807e5f4efddd3",
+      "site": "don.noyes.asia.wiki.org",
+      "slug": "activity-template",
+      "title": "Activity Template",
+      "text": ""
+    },
+    {
+      "type": "reference",
+      "id": "6dfc2fffdacaf4e5",
+      "site": "don.noyes.asia.wiki.org",
+      "slug": "todays-activity",
+      "title": "Todays Activity",
+      "text": "Where is all the [[activity]] in [[the federation]]?  Here we show [[recent changes]] in the [[visible federation]]. See also:"
+    },
+    {
+      "type": "reference",
+      "id": "7f40061e219c5e54",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "federation-activity",
+      "title": "Federation Activity",
+      "text": "Where is all the [[activity]] in [[the federation]]?  Here we show [[recent changes]] in the [[visible federation]]. See also:"
+    },
+    {
+      "type": "reference",
+      "id": "8a10ee9e0704a85b",
+      "site": "don.noyes.asia.wiki.org",
+      "slug": "federation-activity",
+      "title": "Federation Activity",
+      "text": "ROSTER Recent Federation Activity"
+    },
+    {
+      "type": "reference",
+      "id": "d535459d47f10406",
+      "site": "scrape.ward.bay.wiki.org",
+      "slug": "activity-directory",
+      "title": "activity directory",
+      "text": "Collect activity over the past week."
+    },
+    {
+      "type": "reference",
+      "id": "55f8d5d0aa7c0a19",
+      "site": "http.wiki.ralfbarkow.ch",
+      "slug": "goal-jam-activity",
+      "title": "Goal Jam Activity",
+      "text": "Here we can view all the pages created by members of the [[Goal Jam Pod]]."
+    },
+    {
+      "type": "reference",
+      "id": "d90681b66ee50909",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "c0de-activity",
+      "title": "C0de Activity",
+      "text": "Here we list all the sites we know of that concentrate mainly on [[C0de Sites]]. We also provide other views of activity that you might find useful:"
+    },
+    {
+      "type": "reference",
+      "id": "619ae47d42e8a6ec",
+      "site": "don.noyes.asia.wiki.org",
+      "slug": "atopia-activity",
+      "title": "Atopia Activity",
+      "text": ""
+    },
+    {
+      "type": "reference",
+      "id": "ef44e923aa3ef71d",
+      "site": "don.noyes.asia.wiki.org",
+      "slug": "fedwiki-activity",
+      "title": "Fedwiki Activity",
+      "text": "Here we list all the sites we know of that concentrate on the technical and social aspects of writing in [[Federated Wiki]]. See [[Fedwiki Sites]] for a list of domains we use in the views below:"
+    },
+    {
+      "type": "reference",
+      "id": "bd9d4a56cae5194b",
+      "site": "don.noyes.asia.wiki.org",
+      "slug": "filtered-federation-activity",
+      "title": "Filtered Federation Activity",
+      "text": "Here we show __filtered__ [[recent changes]] in the [[visible federation]] for pages that are not on the [[Atopia Server]]."
+    },
+    {
+      "type": "reference",
+      "id": "31c051f43dcc83d9",
+      "site": "don.noyes.asia.wiki.org",
+      "slug": "visible-federation",
+      "title": "Visible Federation",
+      "text": "We split [[the federation]] into the following:"
+    },
+    {
+      "type": "reference",
+      "id": "a1c2fb566e3f0983",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "mega-sites",
+      "title": "Mega Sites",
+      "text": "__Mega Sites__ are federation sites with more than 30 pages. The [[generated roster]] below  has been made from the [[visible federation]] constructed from the [[search index downloads]]."
+    },
+    {
+      "type": "reference",
+      "id": "9558c65a34339e6d",
+      "site": "don.noyes.asia.wiki.org",
+      "slug": "since-template",
+      "title": "Since Template",
+      "text": "Tip: Double-click Page Activity to edit options. There are many. See [[More About Activity Plugin]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Federated Wiki – Activity Plugin",
+        "story": []
+      },
+      "date": 1654424306032
+    },
+    {
+      "id": "d1adaee1618cfaf8",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "d1adaee1618cfaf8",
+        "text": "# [[Federated Wiki – Activity Plugin]]\n\nThe Activity plugin lists pages in your neighborhood. It expands as your neighborhood grows.\nPage names used on multiple sites are grouped together, with the most current site on the right.\n"
+      },
+      "date": 1654424311392
+    },
+    {
+      "id": "70eb26a83529e2e6",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "70eb26a83529e2e6",
+        "text": "➜  wiki-plugin-activity git:(paul90/fix-creator-slug) ✗ grunt     ~/Projects/RalfBarkow/fedwiki/wiki-plugin-activity\nRunning \"clean:0\" (clean) task\n>> 0 paths cleaned.\n\nRunning \"clean:1\" (clean) task\n>> 0 paths cleaned.\n\nRunning \"clean:2\" (clean) task\n>> 0 paths cleaned.\n\nRunning \"clean:3\" (clean) task\n>> 0 paths cleaned.\n\nRunning \"mochaTest:test\" (mochaTest) task\n\n\n  activity plugin\n    escape\n      ✔ can escape html markup characters\n    since\n      ✔ can parse days\n      ✔ can parse day\n      ✔ can parse DAYS\n      ✔ can parse hours\n      ✔ can parse weeks\n      ✔ can parse a date\n    neighborhood\n      ✔ can parse YES\n      ✔ can parse no\n    twins\n      ✔ can parse a number\n      ✔ ignores text\n    sort\n      ✔ can parse Title\n      ✔ can parse date\n    search\n      ✔ can parse search\n    roster\n      ✔ excludes neighborhood\n    mine\n      ✔ can parse to include mine\n      ✔ can parse to exclude mine\n      ✔ can parse for mine only\n      ✔ can parse to exclude mine\n    conversation\n      ✔ can parse to add conversation link\n    narrative\n      ✔ can parse to add narrative link\n\n\n  21 passing (27ms)\n\n\nRunning \"browserify:plugin\" (browserify) task\n>> Bundle client/activity.js created.\n\nDone."
+      },
+      "after": "d1adaee1618cfaf8",
+      "date": 1654424314347
+    },
+    {
+      "id": "09edac31345236de",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "09edac31345236de",
+        "text": "//TODO rsync"
+      },
+      "after": "70eb26a83529e2e6",
+      "date": 1654424324322
+    },
+    {
+      "id": "567d7153243bdc9c",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "567d7153243bdc9c",
+        "text": "/nix/store/[…]-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/wiki-plugin-activity/client:\n  total used in directory 604 available 6.2 GiB\n  dr-xr-xr-x 2 root root   4096 Jan  1  1970   .\n  dr-xr-xr-x 4 root root   4096 Jan  1  1970   ..\n  -r--r--r-- 2 root root 609788 Jan  1  1970   activity.js\n"
+      },
+      "after": "09edac31345236de",
+      "date": 1654424326256
+    },
+    {
+      "type": "edit",
+      "id": "d1adaee1618cfaf8",
+      "item": {
+        "type": "markdown",
+        "id": "d1adaee1618cfaf8",
+        "text": "# [[Federated Wiki – Activity Plugin]]\n"
+      },
+      "date": 1654424331954
+    },
+    {
+      "id": "d1adaee1618cfaf8",
+      "type": "remove",
+      "date": 1654424335736
+    },
+    {
+      "type": "add",
+      "id": "8bfeb435e0380d9c",
+      "item": {
+        "type": "markdown",
+        "id": "8bfeb435e0380d9c",
+        "text": "The Activity plugin lists pages in your neighborhood. It expands as your neighborhood grows.\nPage names used on multiple sites are grouped together, with the most current site on the right.\n"
+      },
+      "after": "d1adaee1618cfaf8",
+      "date": 1654424342563
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b89e885f211da245"
+      },
+      "id": "b89e885f211da245",
+      "type": "add",
+      "after": "567d7153243bdc9c",
+      "date": 1654424474007
+    },
+    {
+      "type": "edit",
+      "id": "b89e885f211da245",
+      "item": {
+        "type": "pagefold",
+        "id": "b89e885f211da245",
+        "text": "~"
+      },
+      "date": 1654424478538
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0fd286f529a8a918"
+      },
+      "id": "0fd286f529a8a918",
+      "type": "add",
+      "after": "b89e885f211da245",
+      "date": 1654424480500
+    },
+    {
+      "type": "edit",
+      "id": "0fd286f529a8a918",
+      "item": {
+        "type": "reference",
+        "id": "0fd286f529a8a918",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "activity-template",
+        "title": "Activity Template",
+        "text": ""
+      },
+      "date": 1654424482215
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6be8ace76759d5d7"
+      },
+      "id": "6be8ace76759d5d7",
+      "type": "add",
+      "after": "0fd286f529a8a918",
+      "date": 1654424489967
+    },
+    {
+      "type": "edit",
+      "id": "6be8ace76759d5d7",
+      "item": {
+        "type": "reference",
+        "id": "6be8ace76759d5d7",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "todays-activity",
+        "title": "Todays Activity",
+        "text": "Where is all the [[activity]] in [[the federation]]?  Here we show [[recent changes]] in the [[visible federation]]. See also:"
+      },
+      "date": 1654424492045
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7f40061e219c5e54"
+      },
+      "id": "7f40061e219c5e54",
+      "type": "add",
+      "after": "6be8ace76759d5d7",
+      "date": 1654424498773
+    },
+    {
+      "type": "edit",
+      "id": "7f40061e219c5e54",
+      "item": {
+        "type": "reference",
+        "id": "7f40061e219c5e54",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "federation-activity",
+        "title": "Federation Activity",
+        "text": "Where is all the [[activity]] in [[the federation]]?  Here we show [[recent changes]] in the [[visible federation]]. See also:"
+      },
+      "date": 1654424500701
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d422ad8e0362a4eb"
+      },
+      "id": "d422ad8e0362a4eb",
+      "type": "add",
+      "after": "7f40061e219c5e54",
+      "date": 1654424507141
+    },
+    {
+      "type": "edit",
+      "id": "d422ad8e0362a4eb",
+      "item": {
+        "type": "reference",
+        "id": "d422ad8e0362a4eb",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "activity",
+        "title": "Activity",
+        "text": "We use the term activity to refer to changes or work done in [[the federation]]."
+      },
+      "date": 1654424509841
+    },
+    {
+      "id": "d422ad8e0362a4eb",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "b89e885f211da245",
+        "d422ad8e0362a4eb",
+        "0fd286f529a8a918",
+        "6be8ace76759d5d7",
+        "7f40061e219c5e54"
+      ],
+      "date": 1654424511344
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "01dce12f0cb8f810"
+      },
+      "id": "01dce12f0cb8f810",
+      "type": "add",
+      "after": "7f40061e219c5e54",
+      "date": 1654424583547
+    },
+    {
+      "type": "edit",
+      "id": "01dce12f0cb8f810",
+      "item": {
+        "type": "reference",
+        "id": "01dce12f0cb8f810",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "peer-activity",
+        "title": "Peer Activity",
+        "text": "List sites hosted within the origin's domain showing page counts and most recent activity."
+      },
+      "date": 1654424586613
+    },
+    {
+      "id": "01dce12f0cb8f810",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "b89e885f211da245",
+        "d422ad8e0362a4eb",
+        "01dce12f0cb8f810",
+        "0fd286f529a8a918",
+        "6be8ace76759d5d7",
+        "7f40061e219c5e54"
+      ],
+      "date": 1654424589120
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d535459d47f10406"
+      },
+      "id": "d535459d47f10406",
+      "type": "add",
+      "after": "7f40061e219c5e54",
+      "date": 1654424614694
+    },
+    {
+      "type": "edit",
+      "id": "d535459d47f10406",
+      "item": {
+        "type": "reference",
+        "id": "d535459d47f10406",
+        "site": "scrape.ward.bay.wiki.org",
+        "slug": "activity-directory",
+        "title": "activity directory",
+        "text": "Collect activity over the past week."
+      },
+      "date": 1654424624620
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e5e9a074d602db99"
+      },
+      "id": "e5e9a074d602db99",
+      "type": "add",
+      "after": "d535459d47f10406",
+      "date": 1654424634329
+    },
+    {
+      "type": "edit",
+      "id": "e5e9a074d602db99",
+      "item": {
+        "type": "reference",
+        "id": "e5e9a074d602db99",
+        "site": "ward.dojo.fed.wiki",
+        "slug": "peer-activity",
+        "title": "Peer Activity",
+        "text": "List sites hosted within the origin's domain showing page counts and most recent activity."
+      },
+      "date": 1654424637315
+    },
+    {
+      "id": "e5e9a074d602db99",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "b89e885f211da245",
+        "d422ad8e0362a4eb",
+        "e5e9a074d602db99",
+        "01dce12f0cb8f810",
+        "0fd286f529a8a918",
+        "6be8ace76759d5d7",
+        "7f40061e219c5e54",
+        "d535459d47f10406"
+      ],
+      "date": 1654424639145
+    },
+    {
+      "type": "remove",
+      "id": "01dce12f0cb8f810",
+      "date": 1654424642162
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e71a71b173f1bd25"
+      },
+      "id": "e71a71b173f1bd25",
+      "type": "add",
+      "after": "d535459d47f10406",
+      "date": 1654424674110
+    },
+    {
+      "type": "edit",
+      "id": "e71a71b173f1bd25",
+      "item": {
+        "type": "reference",
+        "id": "e71a71b173f1bd25",
+        "site": "http.wiki.ralfbarkow.ch",
+        "slug": "activity",
+        "title": "Activity",
+        "text": "We use the term activity to refer to changes or work done in [[the federation]]."
+      },
+      "date": 1654424705125
+    },
+    {
+      "id": "e71a71b173f1bd25",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "b89e885f211da245",
+        "e71a71b173f1bd25",
+        "d422ad8e0362a4eb",
+        "e5e9a074d602db99",
+        "0fd286f529a8a918",
+        "6be8ace76759d5d7",
+        "7f40061e219c5e54",
+        "d535459d47f10406"
+      ],
+      "date": 1654424707876
+    },
+    {
+      "type": "remove",
+      "id": "d422ad8e0362a4eb",
+      "date": 1654424711108
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ece807e5f4efddd3"
+      },
+      "id": "ece807e5f4efddd3",
+      "type": "add",
+      "after": "d535459d47f10406",
+      "date": 1654424759687
+    },
+    {
+      "type": "edit",
+      "id": "ece807e5f4efddd3",
+      "item": {
+        "type": "reference",
+        "id": "ece807e5f4efddd3",
+        "site": "don.noyes.asia.wiki.org",
+        "slug": "activity-template",
+        "title": "Activity Template",
+        "text": ""
+      },
+      "date": 1654424762653
+    },
+    {
+      "id": "ece807e5f4efddd3",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "b89e885f211da245",
+        "e71a71b173f1bd25",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "0fd286f529a8a918",
+        "6be8ace76759d5d7",
+        "7f40061e219c5e54",
+        "d535459d47f10406"
+      ],
+      "date": 1654424765177
+    },
+    {
+      "type": "remove",
+      "id": "0fd286f529a8a918",
+      "date": 1654424768550
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6dfc2fffdacaf4e5"
+      },
+      "id": "6dfc2fffdacaf4e5",
+      "type": "add",
+      "after": "d535459d47f10406",
+      "date": 1654424780942
+    },
+    {
+      "id": "6dfc2fffdacaf4e5",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "b89e885f211da245",
+        "e71a71b173f1bd25",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "6be8ace76759d5d7",
+        "7f40061e219c5e54",
+        "d535459d47f10406"
+      ],
+      "date": 1654424783088
+    },
+    {
+      "type": "edit",
+      "id": "6dfc2fffdacaf4e5",
+      "item": {
+        "type": "reference",
+        "id": "6dfc2fffdacaf4e5",
+        "site": "don.noyes.asia.wiki.org",
+        "slug": "todays-activity",
+        "title": "Todays Activity",
+        "text": "Where is all the [[activity]] in [[the federation]]?  Here we show [[recent changes]] in the [[visible federation]]. See also:"
+      },
+      "date": 1654424785592
+    },
+    {
+      "type": "remove",
+      "id": "6be8ace76759d5d7",
+      "date": 1654424789193
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8a10ee9e0704a85b"
+      },
+      "id": "8a10ee9e0704a85b",
+      "type": "add",
+      "after": "d535459d47f10406",
+      "date": 1654424796286
+    },
+    {
+      "type": "edit",
+      "id": "8a10ee9e0704a85b",
+      "item": {
+        "type": "reference",
+        "id": "8a10ee9e0704a85b",
+        "site": "don.noyes.asia.wiki.org",
+        "slug": "federation-activity",
+        "title": "Federation Activity",
+        "text": "ROSTER Recent Federation Activity"
+      },
+      "date": 1654424799395
+    },
+    {
+      "id": "8a10ee9e0704a85b",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "b89e885f211da245",
+        "e71a71b173f1bd25",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406"
+      ],
+      "date": 1654424802798
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "55f8d5d0aa7c0a19"
+      },
+      "id": "55f8d5d0aa7c0a19",
+      "type": "add",
+      "after": "d535459d47f10406",
+      "date": 1654424832063
+    },
+    {
+      "type": "edit",
+      "id": "55f8d5d0aa7c0a19",
+      "item": {
+        "type": "reference",
+        "id": "55f8d5d0aa7c0a19",
+        "site": "http.wiki.ralfbarkow.ch",
+        "slug": "goal-jam-activity",
+        "title": "Goal Jam Activity",
+        "text": "Here we can view all the pages created by members of the [[Goal Jam Pod]]."
+      },
+      "date": 1654424835328
+    },
+    {
+      "type": "edit",
+      "id": "09edac31345236de",
+      "item": {
+        "type": "paragraph",
+        "id": "09edac31345236de",
+        "text": "//TODO rsync ; Read-only file system ; nix store"
+      },
+      "date": 1654425919927
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "70f691083cf29895"
+      },
+      "id": "70f691083cf29895",
+      "type": "add",
+      "after": "55f8d5d0aa7c0a19",
+      "date": 1654426632441
+    },
+    {
+      "type": "edit",
+      "id": "70f691083cf29895",
+      "item": {
+        "type": "paragraph",
+        "id": "70f691083cf29895",
+        "text": "How to edit file in /nix/store?"
+      },
+      "date": 1654426634501
+    },
+    {
+      "id": "70f691083cf29895",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "b89e885f211da245",
+        "e71a71b173f1bd25",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19"
+      ],
+      "date": 1654426637436
+    },
+    {
+      "type": "edit",
+      "id": "70f691083cf29895",
+      "item": {
+        "type": "paragraph",
+        "id": "70f691083cf29895",
+        "text": "How to edit file in /nix/store? [https://discourse.nixos.org/t/how-to-edit-file-in-nix-store/19261 discourse]"
+      },
+      "date": 1654426651398
+    },
+    {
+      "type": "add",
+      "id": "92145dce5ccbc271",
+      "item": {
+        "type": "paragraph",
+        "id": "92145dce5ccbc271",
+        "text": "The stuff in /nix/store is read-only, intentionally. Changing it by hand is throwing the entire concept of nixos out the window, and may cause all kinds of issues. I won’t tell you how to undo the read-only bit, just in case you actually try, or someone else reading this does. Please don’t even try to hack around it :slight_smile:\n\nRather, you want to modify the package that provides that file downstream (read: for your configuration). It’s natural that you’d like to hand-modify the files, because that’s how other distros work, given they make changing package contents or writing your own painfully cumbersome.\n\nBut this is where the really cool part of NixOS comes in, this is much easier in our world; you can do all of that with some changes to configuration.nix.\n\nLet’s start with what this change actually is. We’ll look at the commit that was made upstream: contentstatsid key might not be present · lutris/lutris@072e72a · GitHub 1\n\nIt doesn’t really matter what that change does, the important bit is that it is a change to the lutris source code. If we can apply the same change to the source of the lutris you’re using, and rebuild it, it should all magically work.\n\nNix allows you to take an existing package, and override how it is built. We can use that to apply the above change to the source code. In this case, we can do that like so (in configuration.nix):"
+      },
+      "after": "70f691083cf29895",
+      "date": 1654426692085
+    },
+    {
+      "type": "edit",
+      "id": "92145dce5ccbc271",
+      "item": {
+        "type": "paragraph",
+        "id": "92145dce5ccbc271",
+        "text": "> The stuff in /nix/store is read-only, intentionally. Changing it by hand is throwing the entire concept of nixos out the window, and may cause all kinds of issues. I won’t tell you how to undo the read-only bit, just in case you actually try, or someone else reading this does. Please don’t even try to hack around it :slight_smile:\n\nRather, you want to modify the package that provides that file downstream (read: for your configuration). It’s natural that you’d like to hand-modify the files, because that’s how other distros work, given they make changing package contents or writing your own painfully cumbersome.\n\nBut this is where the really cool part of NixOS comes in, this is much easier in our world; you can do all of that with some changes to configuration.nix.\n\nLet’s start with what this change actually is. We’ll look at the commit that was made upstream: contentstatsid key might not be present · lutris/lutris@072e72a · GitHub 1\n\nIt doesn’t really matter what that change does, the important bit is that it is a change to the lutris source code. If we can apply the same change to the source of the lutris you’re using, and rebuild it, it should all magically work.\n\nNix allows you to take an existing package, and override how it is built. We can use that to apply the above change to the source code. In this case, we can do that like so (in configuration.nix):"
+      },
+      "date": 1654426704995
+    },
+    {
+      "type": "edit",
+      "id": "92145dce5ccbc271",
+      "item": {
+        "type": "markdown",
+        "id": "92145dce5ccbc271",
+        "text": "> The stuff in /nix/store is read-only, intentionally. Changing it by hand is throwing the entire concept of nixos out the window, and may cause all kinds of issues. I won’t tell you how to undo the read-only bit, just in case you actually try, or someone else reading this does. Please don’t even try to hack around it :slight_smile:\n\nRather, you want to modify the package that provides that file downstream (read: for your configuration). It’s natural that you’d like to hand-modify the files, because that’s how other distros work, given they make changing package contents or writing your own painfully cumbersome.\n\nBut this is where the really cool part of NixOS comes in, this is much easier in our world; you can do all of that with some changes to configuration.nix.\n\nLet’s start with what this change actually is. We’ll look at the commit that was made upstream: contentstatsid key might not be present · lutris/lutris@072e72a · GitHub 1\n\nIt doesn’t really matter what that change does, the important bit is that it is a change to the lutris source code. If we can apply the same change to the source of the lutris you’re using, and rebuild it, it should all magically work.\n\nNix allows you to take an existing package, and override how it is built. We can use that to apply the above change to the source code. In this case, we can do that like so (in configuration.nix):"
+      },
+      "date": 1654426705987
+    },
+    {
+      "type": "edit",
+      "id": "92145dce5ccbc271",
+      "item": {
+        "type": "markdown",
+        "id": "92145dce5ccbc271",
+        "text": "> The stuff in /nix/store is read-only, intentionally. Changing it by hand is throwing the entire concept of nixos out the window, and may cause all kinds of issues. I won’t tell you how to undo the read-only bit, just in case you actually try, or someone else reading this does. Please don’t even try to hack around it :slight_smile:\n\nRather, you want to modify the package that provides that file downstream (read: for your configuration). It’s natural that you’d like to hand-modify the files, because that’s how other distros work, given they make changing package contents or writing your own painfully cumbersome.\n\nBut this is where the really cool part of NixOS comes in, this is much easier in our world; you can do all of that with some changes to `configuration.nix`.\n"
+      },
+      "date": 1654426760538
+    },
+    {
+      "type": "add",
+      "id": "49f7594466667ba4",
+      "item": {
+        "type": "markdown",
+        "id": "49f7594466667ba4",
+        "text": "Let’s start with what this change actually is. We’ll look at the commit that was made upstream: contentstatsid key might not be present · lutris/lutris@072e72a · GitHub 1\n\nIt doesn’t really matter what that change does, the important bit is that it is a change to the lutris source code. If we can apply the same change to the source of the lutris you’re using, and rebuild it, it should all magically work.\n\nNix allows you to take an existing package, and override how it is built. We can use that to apply the above change to the source code. In this case, we can do that like so (in configuration.nix):"
+      },
+      "after": "92145dce5ccbc271",
+      "date": 1654426768254
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "cc0acf938835c673"
+      },
+      "id": "cc0acf938835c673",
+      "type": "add",
+      "after": "55f8d5d0aa7c0a19",
+      "date": 1654426827112
+    },
+    {
+      "id": "cc0acf938835c673",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "cc0acf938835c673",
+        "b89e885f211da245",
+        "e71a71b173f1bd25",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19"
+      ],
+      "date": 1654426834688
+    },
+    {
+      "type": "edit",
+      "id": "cc0acf938835c673",
+      "item": {
+        "type": "code",
+        "id": "cc0acf938835c673",
+        "text": "{pkgs, lib, ...}: let\n  # lutris-unwrapped is the \"real\" lutris. The lutris package that is\n  # installed \"wraps\" the \"real\" lutris to make it actually work on\n  # NixOS, but the source is compiled here.\n  #\n  # We use `overrideAttrs` to change the way the package is actually\n  # built. In particular, this is because we want to override\n  # something in the `stdenv.mkDerivation` call, this to be specific:\n  #\n  # https://github.com/NixOS/nixpkgs/blob/685d243d971c4f9655c981036b9c7bafdb728a0d/pkgs/applications/misc/lutris/default.nix#L131\n  lutris-unwrapped = pkgs.lutris-unwrapped.overrideAttrs (oldAttrs: {\n    patches = oldAttrs.patches ++ [\n      # Work around https://github.com/NixOS/nixpkgs/issues/173712\n      #\n      # TODO: Remove once updated upstream\n      (pkgs.fetchpatch {\n        name = \"fix-lutris-config.patch\";\n        # Note: Putting `.diff` at the end of a GitHub commit URL will\n        # give us a nice patch we can just apply. Very handy!\n        url = \"https://github.com/lutris/lutris/commit/072e72a4aefd91101b79dd05d8ce9f100a4b6b0c.diff\";\n        sha256 = lib.fakeSha256; # Put the checksum that nix complains to you about here\n      })\n    ];\n  });\n  # This is the lutris package we can actually install. It takes\n  # lutris-unwrapped as an input, and then creates the usable package.\n  #"
+      },
+      "date": 1654426836845
+    },
+    {
+      "type": "edit",
+      "id": "49f7594466667ba4",
+      "item": {
+        "type": "markdown",
+        "id": "49f7594466667ba4",
+        "text": "Let’s start with what this change actually is. We’ll look at the commit that was made upstream: contentstatsid key might not be present · lutris/lutris@072e72a · GitHub 1\n\nIt doesn’t really matter what that change does, the important bit is that it is a change to the lutris source code. If we can apply the same change to the source of the lutris you’re using, and rebuild it, it should all magically work.\n\nNix allows you to take an existing package, and override how it is built. We can use that to apply the above change to the source code. In this case, we can do that like so (in `configuration.nix`):"
+      },
+      "date": 1654426993996
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d90681b66ee50909"
+      },
+      "id": "d90681b66ee50909",
+      "type": "add",
+      "after": "55f8d5d0aa7c0a19",
+      "date": 1654432144428
+    },
+    {
+      "type": "edit",
+      "id": "d90681b66ee50909",
+      "item": {
+        "type": "reference",
+        "id": "d90681b66ee50909",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "c0de-activity",
+        "title": "C0de Activity",
+        "text": "Here we list all the sites we know of that concentrate mainly on [[C0de Sites]]. We also provide other views of activity that you might find useful:"
+      },
+      "date": 1654432152949
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "619ae47d42e8a6ec"
+      },
+      "id": "619ae47d42e8a6ec",
+      "type": "add",
+      "after": "d90681b66ee50909",
+      "date": 1654432190660
+    },
+    {
+      "type": "edit",
+      "id": "619ae47d42e8a6ec",
+      "item": {
+        "type": "reference",
+        "id": "619ae47d42e8a6ec",
+        "site": "don.noyes.asia.wiki.org",
+        "slug": "atopia-activity",
+        "title": "Atopia Activity",
+        "text": ""
+      },
+      "date": 1654432193211
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ef44e923aa3ef71d"
+      },
+      "id": "ef44e923aa3ef71d",
+      "type": "add",
+      "after": "619ae47d42e8a6ec",
+      "date": 1654432222436
+    },
+    {
+      "type": "edit",
+      "id": "ef44e923aa3ef71d",
+      "item": {
+        "type": "reference",
+        "id": "ef44e923aa3ef71d",
+        "site": "don.noyes.asia.wiki.org",
+        "slug": "fedwiki-activity",
+        "title": "Fedwiki Activity",
+        "text": "Here we list all the sites we know of that concentrate on the technical and social aspects of writing in [[Federated Wiki]]. See [[Fedwiki Sites]] for a list of domains we use in the views below:"
+      },
+      "date": 1654432225363
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bd9d4a56cae5194b"
+      },
+      "id": "bd9d4a56cae5194b",
+      "type": "add",
+      "after": "ef44e923aa3ef71d",
+      "date": 1654432247113
+    },
+    {
+      "type": "edit",
+      "id": "bd9d4a56cae5194b",
+      "item": {
+        "type": "reference",
+        "id": "bd9d4a56cae5194b",
+        "site": "don.noyes.asia.wiki.org",
+        "slug": "filtered-federation-activity",
+        "title": "Filtered Federation Activity",
+        "text": "Here we show __filtered__ [[recent changes]] in the [[visible federation]] for pages that are not on the [[Atopia Server]]."
+      },
+      "date": 1654432250312
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "31c051f43dcc83d9"
+      },
+      "id": "31c051f43dcc83d9",
+      "type": "add",
+      "after": "bd9d4a56cae5194b",
+      "date": 1654432351405
+    },
+    {
+      "type": "edit",
+      "id": "31c051f43dcc83d9",
+      "item": {
+        "type": "reference",
+        "id": "31c051f43dcc83d9",
+        "site": "don.noyes.asia.wiki.org",
+        "slug": "visible-federation",
+        "title": "Visible Federation",
+        "text": "We split [[the federation]] into the following:"
+      },
+      "date": 1654432354573
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a1c2fb566e3f0983"
+      },
+      "id": "a1c2fb566e3f0983",
+      "type": "add",
+      "after": "31c051f43dcc83d9",
+      "date": 1654432371124
+    },
+    {
+      "type": "edit",
+      "id": "a1c2fb566e3f0983",
+      "item": {
+        "type": "reference",
+        "id": "a1c2fb566e3f0983",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "mega-sites",
+        "title": "Mega Sites",
+        "text": "__Mega Sites__ are federation sites with more than 30 pages. The [[generated roster]] below  has been made from the [[visible federation]] constructed from the [[search index downloads]]."
+      },
+      "date": 1654432373302
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9558c65a34339e6d"
+      },
+      "id": "9558c65a34339e6d",
+      "type": "add",
+      "after": "a1c2fb566e3f0983",
+      "date": 1654432439262
+    },
+    {
+      "type": "edit",
+      "id": "9558c65a34339e6d",
+      "item": {
+        "type": "reference",
+        "id": "9558c65a34339e6d",
+        "site": "don.noyes.asia.wiki.org",
+        "slug": "since-template",
+        "title": "Since Template",
+        "text": "Tip: Double-click Page Activity to edit options. There are many. See [[More About Activity Plugin]]"
+      },
+      "date": 1654432442455
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d5d97731902364c2"
+      },
+      "id": "d5d97731902364c2",
+      "type": "add",
+      "after": "9558c65a34339e6d",
+      "date": 1654432472167
+    },
+    {
+      "id": "d5d97731902364c2",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "cc0acf938835c673",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654432481802
+    },
+    {
+      "type": "edit",
+      "id": "d5d97731902364c2",
+      "item": {
+        "type": "reference",
+        "id": "d5d97731902364c2",
+        "site": "video.fed.wiki.org",
+        "slug": "21-activity-collaboration-neighborhood",
+        "title": "21 Activity Collaboration Neighborhood",
+        "text": "We track activity by neighborhood. More neighbors, more activity. Shared pages show together, ordered by collaborator and temporal place within other work."
+      },
+      "date": 1654432484075
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "95c789a763d9da95"
+      },
+      "id": "95c789a763d9da95",
+      "type": "add",
+      "after": "9558c65a34339e6d",
+      "date": 1654432514708
+    },
+    {
+      "id": "95c789a763d9da95",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "cc0acf938835c673",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654432529264
+    },
+    {
+      "type": "edit",
+      "id": "95c789a763d9da95",
+      "item": {
+        "type": "reference",
+        "id": "95c789a763d9da95",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "requirements-for-joint-activity",
+        "title": "Requirements for Joint Activity",
+        "text": "# [[Requirements]] for Joint Activity among People"
+      },
+      "date": 1654432531776
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f7d7ad97f1650292"
+      },
+      "id": "f7d7ad97f1650292",
+      "type": "add",
+      "after": "9558c65a34339e6d",
+      "date": 1654432611930
+    },
+    {
+      "id": "f7d7ad97f1650292",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "cc0acf938835c673",
+        "f7d7ad97f1650292",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654432623219
+    },
+    {
+      "id": "f7d7ad97f1650292",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "cc0acf938835c673",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654432640979
+    },
+    {
+      "type": "edit",
+      "id": "f7d7ad97f1650292",
+      "item": {
+        "type": "reference",
+        "id": "f7d7ad97f1650292",
+        "site": "don.noyes.asia.wiki.org",
+        "slug": "coordination-in-joint-activity",
+        "title": "Coordination in Joint Activity",
+        "text": "We apply our understanding of common ground and nessary features of joint activity to account for issues in the design"
+      },
+      "date": 1654432645391
+    },
+    {
+      "type": "edit",
+      "id": "49f7594466667ba4",
+      "item": {
+        "type": "markdown",
+        "id": "49f7594466667ba4",
+        "text": "Let’s start with what this change actually is. **We’ll look at the commit that was made upstream**: contentstatsid key might not be present · lutris/lutris@072e72a · GitHub 1\n\nIt doesn’t really matter what that change does, the important bit is that it is a change to the lutris source code. If we can apply the same change to the source of the lutris you’re using, and rebuild it, it should all magically work.\n\nNix allows you to take an existing package, and override how it is built. We can use that to apply the above change to the source code. In this case, we can do that like so (in `configuration.nix`):"
+      },
+      "date": 1654456764377
+    },
+    {
+      "type": "edit",
+      "id": "49f7594466667ba4",
+      "item": {
+        "type": "markdown",
+        "id": "49f7594466667ba4",
+        "text": "Let’s start with what this change actually is. **We’ll look at the commit that was made upstream**: contentstatsid key might not be present · lutris/lutris@072e72a · GitHub 1\n\nIt doesn’t really matter what that change does, the important bit is that **it is a change** to the lutris source code. If we can apply the same change to the source of the lutris you’re using, and rebuild it, it should all magically work.\n\nNix allows you to take an existing package, and override how it is built. We can use that to apply the above change to the source code. In this case, we can do that like so (in `configuration.nix`):"
+      },
+      "date": 1654456792804
+    },
+    {
+      "type": "edit",
+      "id": "49f7594466667ba4",
+      "item": {
+        "type": "markdown",
+        "id": "49f7594466667ba4",
+        "text": "Let’s start with what this change actually is. **We’ll look at the commit that was made upstream**: contentstatsid key might not be present · lutris/lutris@072e72a · GitHub 1\n\nIt doesn’t really matter what that change does, the important bit is that **it is a change** to the lutris source code. If we can apply the same change to the source of the lutris you’re using, and rebuild it, it should all magically work.\n\n\n"
+      },
+      "date": 1654456814663
+    },
+    {
+      "type": "add",
+      "id": "bf162e66594294f0",
+      "item": {
+        "type": "markdown",
+        "id": "bf162e66594294f0",
+        "text": "**Nix allows you to take an existing package, and override how it is built.** We can use that to apply the above change to the source code. In this case, we can do that like so (in `configuration.nix`):"
+      },
+      "after": "49f7594466667ba4",
+      "date": 1654456820657
+    },
+    {
+      "type": "edit",
+      "id": "8bfeb435e0380d9c",
+      "item": {
+        "type": "markdown",
+        "id": "8bfeb435e0380d9c",
+        "text": "The Activity plugin lists pages in your neighborhood. It expands as your neighborhood grows. [https://github.com/fedwiki/wiki-plugin-activity github]\n"
+      },
+      "date": 1654457498225
+    },
+    {
+      "type": "add",
+      "id": "d807ffa598f049fc",
+      "item": {
+        "type": "markdown",
+        "id": "d807ffa598f049fc",
+        "text": "Page names used on multiple sites are grouped together, with the most current site on the right.\n"
+      },
+      "after": "8bfeb435e0380d9c",
+      "date": 1654457498816
+    },
+    {
+      "type": "edit",
+      "id": "8bfeb435e0380d9c",
+      "item": {
+        "type": "markdown",
+        "id": "8bfeb435e0380d9c",
+        "text": "The Activity plugin lists pages in your neighborhood. [https://github.com/fedwiki/wiki-plugin-activity github] It expands as your neighborhood grows. "
+      },
+      "date": 1654457534872
+    },
+    {
+      "type": "remove",
+      "id": "d807ffa598f049fc",
+      "date": 1654457546463
+    },
+    {
+      "type": "edit",
+      "id": "8bfeb435e0380d9c",
+      "item": {
+        "type": "markdown",
+        "id": "8bfeb435e0380d9c",
+        "text": "The Activity plugin lists pages in your neighborhood. [https://github.com/fedwiki/wiki-plugin-activity github] It expands as your neighborhood grows. Page names used on multiple sites are grouped together, with the most current site on the right.\n"
+      },
+      "date": 1654457547420
+    },
+    {
+      "type": "edit",
+      "id": "8bfeb435e0380d9c",
+      "item": {
+        "type": "markdown",
+        "id": "8bfeb435e0380d9c",
+        "text": "The [[Activity]] plugin lists pages in your neighborhood. [https://github.com/fedwiki/wiki-plugin-activity github] It expands as your neighborhood grows. Page names used on multiple sites are grouped together, with the most current site on the right.\n"
+      },
+      "date": 1654457583794
+    },
+    {
+      "type": "edit",
+      "id": "8bfeb435e0380d9c",
+      "item": {
+        "type": "markdown",
+        "id": "8bfeb435e0380d9c",
+        "text": "The [[Activity]] plugin lists pages in your [[neighborhood]]. [https://github.com/fedwiki/wiki-plugin-activity github] It expands as your neighborhood grows. Page names used on multiple sites are grouped together, with the most current site on the right.\n"
+      },
+      "date": 1654457597878
+    },
+    {
+      "type": "edit",
+      "id": "8bfeb435e0380d9c",
+      "item": {
+        "type": "markdown",
+        "id": "8bfeb435e0380d9c",
+        "text": "The [[Activity]] plugin lists pages in your [[Neighborhood]]. [https://github.com/fedwiki/wiki-plugin-activity github] It expands as your neighborhood grows. Page names used on multiple sites are grouped together, with the most current site on the right.\n"
+      },
+      "date": 1654457605323
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a85f419b16a60c0d"
+      },
+      "id": "a85f419b16a60c0d",
+      "type": "add",
+      "after": "9558c65a34339e6d",
+      "date": 1654491747341
+    },
+    {
+      "id": "a85f419b16a60c0d",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "cc0acf938835c673",
+        "a85f419b16a60c0d",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654491760094
+    },
+    {
+      "type": "edit",
+      "id": "a85f419b16a60c0d",
+      "item": {
+        "type": "paragraph",
+        "id": "a85f419b16a60c0d",
+        "text": "⇒ [[node2nix]]"
+      },
+      "date": 1654491777762
+    },
+    {
+      "type": "add",
+      "id": "7165495c04ac58bc",
+      "item": {
+        "type": "paragraph",
+        "id": "7165495c04ac58bc",
+        "text": " result -> /nix/store/a3xw7yav23rm6xgwf6miv4bw2b6y5x9w-node_wiki-plugin-activity-0.4.10\n"
+      },
+      "after": "a85f419b16a60c0d",
+      "date": 1654491946615
+    },
+    {
+      "type": "edit",
+      "id": "a85f419b16a60c0d",
+      "item": {
+        "type": "paragraph",
+        "id": "a85f419b16a60c0d",
+        "text": "⇒ [[node2nix]]: "
+      },
+      "date": 1654492049176
+    },
+    {
+      "type": "remove",
+      "id": "7165495c04ac58bc",
+      "date": 1654492051753
+    },
+    {
+      "type": "edit",
+      "id": "a85f419b16a60c0d",
+      "item": {
+        "type": "paragraph",
+        "id": "a85f419b16a60c0d",
+        "text": "⇒ [[node2nix]]: result -> /nix/store/a3xw7yav23rm6xgwf6miv4bw2b6y5x9w-node_wiki-plugin-activity-0.4.10\n"
+      },
+      "date": 1654492052837
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6a042bc28e29db8e"
+      },
+      "id": "6a042bc28e29db8e",
+      "type": "add",
+      "after": "9558c65a34339e6d",
+      "date": 1654492226337
+    },
+    {
+      "type": "edit",
+      "id": "6a042bc28e29db8e",
+      "item": {
+        "type": "calendar",
+        "id": "6a042bc28e29db8e",
+        "text": "[rgb@wiki:~/wiki]$ grep wiki-plugin-activity *\nnode-packages.nix:    \"wiki-plugin-activity-0.4.9\" = {\nnode-packages.nix:      name = \"wiki-plugin-activity\";\nnode-packages.nix:      packageName = \"wiki-plugin-activity\";\nnode-packages.nix:        url = \"https://registry.npmjs.org/wiki-plugin-activity/-/wiki-plugin-activity-0.4.9.tgz\";\nnode-packages.nix:      sources.\"wiki-plugin-activity-0.4.9\"\npackage.json:    \"wiki-plugin-activity\": \"^0.4.8\",\npackage-lock.json:        \"wiki-plugin-activity\": \"^0.4.8\",\npackage-lock.json:    \"node_modules/wiki-plugin-activity\": {\npackage-lock.json:      \"resolved\": \"https://registry.npmjs.org/wiki-plugin-activity/-/wiki-plugin-activity-0.4.8.tgz\",\npackage-lock.json:    \"wiki-plugin-activity\": {\npackage-lock.json:      \"resolved\": \"https://registry.npmjs.org/wiki-plugin-activity/-/wiki-plugin-activity-0.4.8.tgz\",\ngrep: result: Is a directory"
+      },
+      "date": 1654492232239
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4f3c50e0473fd0f5"
+      },
+      "id": "4f3c50e0473fd0f5",
+      "type": "add",
+      "after": "6a042bc28e29db8e",
+      "date": 1654492242372
+    },
+    {
+      "type": "remove",
+      "id": "6a042bc28e29db8e",
+      "date": 1654492244767
+    },
+    {
+      "type": "edit",
+      "id": "4f3c50e0473fd0f5",
+      "item": {
+        "type": "code",
+        "id": "4f3c50e0473fd0f5",
+        "text": "[rgb@wiki:~/wiki]$ grep wiki-plugin-activity *\nnode-packages.nix:    \"wiki-plugin-activity-0.4.9\" = {\nnode-packages.nix:      name = \"wiki-plugin-activity\";\nnode-packages.nix:      packageName = \"wiki-plugin-activity\";\nnode-packages.nix:        url = \"https://registry.npmjs.org/wiki-plugin-activity/-/wiki-plugin-activity-0.4.9.tgz\";\nnode-packages.nix:      sources.\"wiki-plugin-activity-0.4.9\"\npackage.json:    \"wiki-plugin-activity\": \"^0.4.8\",\npackage-lock.json:        \"wiki-plugin-activity\": \"^0.4.8\",\npackage-lock.json:    \"node_modules/wiki-plugin-activity\": {\npackage-lock.json:      \"resolved\": \"https://registry.npmjs.org/wiki-plugin-activity/-/wiki-plugin-activity-0.4.8.tgz\",\npackage-lock.json:    \"wiki-plugin-activity\": {\npackage-lock.json:      \"resolved\": \"https://registry.npmjs.org/wiki-plugin-activity/-/wiki-plugin-activity-0.4.8.tgz\",\ngrep: result: Is a directory"
+      },
+      "date": 1654492246724
+    },
+    {
+      "id": "4f3c50e0473fd0f5",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "cc0acf938835c673",
+        "a85f419b16a60c0d",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "4f3c50e0473fd0f5",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654492251846
+    },
+    {
+      "id": "4f3c50e0473fd0f5",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "cc0acf938835c673",
+        "4f3c50e0473fd0f5",
+        "a85f419b16a60c0d",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654492276218
+    },
+    {
+      "id": "a85f419b16a60c0d",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "cc0acf938835c673",
+        "a85f419b16a60c0d",
+        "4f3c50e0473fd0f5",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654492278711
+    },
+    {
+      "type": "edit",
+      "id": "a85f419b16a60c0d",
+      "item": {
+        "type": "paragraph",
+        "id": "a85f419b16a60c0d",
+        "text": "⇒ [[node2nix]]: result -> /nix/store/a3xw7yav23rm6xgwf6miv4bw2b6y5x9w-node_wiki-plugin-activity-0.4.10"
+      },
+      "date": 1654492286538
+    },
+    {
+      "type": "add",
+      "id": "757e3af158182842",
+      "item": {
+        "type": "paragraph",
+        "id": "757e3af158182842",
+        "text": "cd ../wiki"
+      },
+      "after": "a85f419b16a60c0d",
+      "date": 1654492293187
+    },
+    {
+      "type": "add",
+      "id": "ca4cff087af70203",
+      "item": {
+        "type": "paragraph",
+        "id": "ca4cff087af70203",
+        "text": "$ cp node-packages.nix node-packages.nix.orig"
+      },
+      "after": "757e3af158182842",
+      "date": 1654492426161
+    },
+    {
+      "id": "ca4cff087af70203",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "cc0acf938835c673",
+        "a85f419b16a60c0d",
+        "757e3af158182842",
+        "4f3c50e0473fd0f5",
+        "ca4cff087af70203",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654492429022
+    },
+    {
+      "type": "edit",
+      "id": "757e3af158182842",
+      "item": {
+        "type": "paragraph",
+        "id": "757e3af158182842",
+        "text": "$ cd ../wiki"
+      },
+      "date": 1654492450292
+    },
+    {
+      "type": "add",
+      "id": "c0b1bf8571720275",
+      "item": {
+        "type": "paragraph",
+        "id": "c0b1bf8571720275",
+        "text": "Replace wiki-plugin-activity version"
+      },
+      "after": "ca4cff087af70203",
+      "date": 1654492593825
+    },
+    {
+      "type": "edit",
+      "id": "c0b1bf8571720275",
+      "item": {
+        "type": "paragraph",
+        "id": "c0b1bf8571720275",
+        "text": "Replace wiki-plugin-activity version and"
+      },
+      "date": 1654492603341
+    },
+    {
+      "type": "add",
+      "id": "0b6580d93ca25f9d",
+      "item": {
+        "type": "paragraph",
+        "id": "0b6580d93ca25f9d",
+        "text": "$ nix-build -A package"
+      },
+      "after": "c0b1bf8571720275",
+      "date": 1654492604474
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "15fa620464450761"
+      },
+      "id": "15fa620464450761",
+      "type": "add",
+      "after": "9558c65a34339e6d",
+      "date": 1654492640710
+    },
+    {
+      "type": "edit",
+      "id": "15fa620464450761",
+      "item": {
+        "type": "code",
+        "id": "15fa620464450761",
+        "text": "error: attribute 'wiki-plugin-activity-0.4.9' missing\n\n       at /home/rgb/wiki/node-packages.nix:2536:7:\n\n         2535|       sources.\"wiki-client-0.23.4\"\n         2536|       sources.\"wiki-plugin-activity-0.4.9\"\n             |       ^\n         2537|       (sources.\"wiki-plugin-assets-0.3.1\" // {\n       Did you mean wiki-plugin-activity-0.4.10?\n(use '--show-trace' to show detailed location information)"
+      },
+      "date": 1654492644236
+    },
+    {
+      "id": "15fa620464450761",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "cc0acf938835c673",
+        "a85f419b16a60c0d",
+        "757e3af158182842",
+        "4f3c50e0473fd0f5",
+        "ca4cff087af70203",
+        "c0b1bf8571720275",
+        "0b6580d93ca25f9d",
+        "15fa620464450761",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654492657845
+    },
+    {
+      "type": "add",
+      "id": "37a9df281116843c",
+      "item": {
+        "type": "paragraph",
+        "id": "37a9df281116843c",
+        "text": "[rgb@wiki:~/wiki]$ nix-build -A package\nwarning: found empty hash, assuming 'sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='\nthese 70 derivations will be built:"
+      },
+      "after": "0b6580d93ca25f9d",
+      "date": 1654492780845
+    },
+    {
+      "id": "37a9df281116843c",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "cc0acf938835c673",
+        "a85f419b16a60c0d",
+        "757e3af158182842",
+        "4f3c50e0473fd0f5",
+        "ca4cff087af70203",
+        "c0b1bf8571720275",
+        "0b6580d93ca25f9d",
+        "15fa620464450761",
+        "37a9df281116843c",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654492784386
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "40847e2a55563aff"
+      },
+      "id": "40847e2a55563aff",
+      "type": "add",
+      "after": "9558c65a34339e6d",
+      "date": 1654492810871
+    },
+    {
+      "type": "edit",
+      "id": "40847e2a55563aff",
+      "item": {
+        "type": "code",
+        "id": "40847e2a55563aff",
+        "text": "error: hash mismatch in fixed-output derivation '/nix/store/p96h6zmwbj2wii2kwfj5a3fmc61g2gjs-wiki-plugin-activity-0.4.10.tgz.drv':\n         specified: sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\n            got:    sha256-gbz8MgzomooqaaMhUjkuTbYGpI4z839WFaOMLQufvso=\nerror: 1 dependencies of derivation '/nix/store/b0nx0hjcl1l6k8qqhkdjxf16b744s9kx-node_wiki-0.27.0.drv' failed to build\n"
+      },
+      "date": 1654492813218
+    },
+    {
+      "id": "40847e2a55563aff",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "cc0acf938835c673",
+        "a85f419b16a60c0d",
+        "757e3af158182842",
+        "4f3c50e0473fd0f5",
+        "ca4cff087af70203",
+        "c0b1bf8571720275",
+        "0b6580d93ca25f9d",
+        "15fa620464450761",
+        "37a9df281116843c",
+        "40847e2a55563aff",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654492819624
+    },
+    {
+      "type": "edit",
+      "id": "37a9df281116843c",
+      "item": {
+        "type": "paragraph",
+        "id": "37a9df281116843c",
+        "text": "[rgb@wiki:~/wiki]$ nix-build -A package\nwarning: found empty hash, assuming 'sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='\nthese 70 derivations will be built: […]"
+      },
+      "date": 1654493022830
+    },
+    {
+      "type": "add",
+      "id": "f2b518924de0e380",
+      "item": {
+        "type": "paragraph",
+        "id": "f2b518924de0e380",
+        "text": "post-installation fixup\nshrinking RPATHs of ELF executables and libraries in /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0\nrewriting symlink /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/bin to be relative to /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0\npatching script interpreter paths in /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/uglify-js/bin/uglifyjs: interpreter directive changed from \"#! /usr/bin/env node\" to \"/nix/store/zmv0sbz4ngsl9z6s0djhswij3v4hd7kv-nodejs-14.19.3/bin/node\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/delayed-require.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/initial-value.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/difference.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/delayed-call.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\nchecking for references to /build/ in /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0...\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0"
+      },
+      "after": "37a9df281116843c",
+      "date": 1654493024236
+    },
+    {
+      "id": "40847e2a55563aff",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "cc0acf938835c673",
+        "a85f419b16a60c0d",
+        "757e3af158182842",
+        "4f3c50e0473fd0f5",
+        "ca4cff087af70203",
+        "c0b1bf8571720275",
+        "0b6580d93ca25f9d",
+        "15fa620464450761",
+        "37a9df281116843c",
+        "40847e2a55563aff",
+        "f2b518924de0e380",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654493035889
+    },
+    {
+      "type": "edit",
+      "id": "f2b518924de0e380",
+      "item": {
+        "type": "paragraph",
+        "id": "f2b518924de0e380",
+        "text": "Adjust sha256"
+      },
+      "date": 1654493072186
+    },
+    {
+      "type": "add",
+      "id": "7baf676b839d536b",
+      "item": {
+        "type": "paragraph",
+        "id": "7baf676b839d536b",
+        "text": "[…] post-installation fixup\nshrinking RPATHs of ELF executables and libraries in /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0\nrewriting symlink /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/bin to be relative to /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0\npatching script interpreter paths in /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/uglify-js/bin/uglifyjs: interpreter directive changed from \"#! /usr/bin/env node\" to \"/nix/store/zmv0sbz4ngsl9z6s0djhswij3v4hd7kv-nodejs-14.19.3/bin/node\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/delayed-require.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/initial-value.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/difference.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/delayed-call.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\nchecking for references to /build/ in /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0...\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0"
+      },
+      "after": "f2b518924de0e380",
+      "date": 1654493075297
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ca9fbb3541ffc545"
+      },
+      "id": "ca9fbb3541ffc545",
+      "type": "add",
+      "after": "9558c65a34339e6d",
+      "date": 1654493116635
+    },
+    {
+      "type": "edit",
+      "id": "ca9fbb3541ffc545",
+      "item": {
+        "type": "code",
+        "id": "ca9fbb3541ffc545",
+        "text": "result -> /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/\n"
+      },
+      "date": 1654493119056
+    },
+    {
+      "id": "ca9fbb3541ffc545",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "cc0acf938835c673",
+        "a85f419b16a60c0d",
+        "757e3af158182842",
+        "4f3c50e0473fd0f5",
+        "ca4cff087af70203",
+        "c0b1bf8571720275",
+        "0b6580d93ca25f9d",
+        "15fa620464450761",
+        "37a9df281116843c",
+        "40847e2a55563aff",
+        "f2b518924de0e380",
+        "7baf676b839d536b",
+        "ca9fbb3541ffc545",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654493125841
+    },
+    {
+      "type": "add",
+      "id": "85432fb5f3de5fd9",
+      "item": {
+        "type": "paragraph",
+        "id": "85432fb5f3de5fd9",
+        "text": "Adjust `wiki.nix`:"
+      },
+      "after": "7baf676b839d536b",
+      "date": 1654493150025
+    },
+    {
+      "id": "85432fb5f3de5fd9",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "cc0acf938835c673",
+        "a85f419b16a60c0d",
+        "757e3af158182842",
+        "4f3c50e0473fd0f5",
+        "ca4cff087af70203",
+        "c0b1bf8571720275",
+        "0b6580d93ca25f9d",
+        "15fa620464450761",
+        "37a9df281116843c",
+        "40847e2a55563aff",
+        "f2b518924de0e380",
+        "7baf676b839d536b",
+        "ca9fbb3541ffc545",
+        "85432fb5f3de5fd9",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654493153165
+    },
+    {
+      "type": "edit",
+      "id": "85432fb5f3de5fd9",
+      "item": {
+        "type": "markdown",
+        "id": "85432fb5f3de5fd9",
+        "text": "Adjust `wiki.nix`:"
+      },
+      "date": 1654493154282
+    },
+    {
+      "type": "edit",
+      "id": "bf162e66594294f0",
+      "item": {
+        "type": "markdown",
+        "id": "bf162e66594294f0",
+        "text": "**Nix allows you to take an existing package, and override how it is built.** […]"
+      },
+      "date": 1654493717751
+    },
+    {
+      "type": "remove",
+      "id": "cc0acf938835c673",
+      "date": 1654493721391
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "575b279f06680b5f"
+      },
+      "id": "575b279f06680b5f",
+      "type": "add",
+      "after": "9558c65a34339e6d",
+      "date": 1654494667036
+    },
+    {
+      "type": "edit",
+      "id": "575b279f06680b5f",
+      "item": {
+        "type": "code",
+        "id": "575b279f06680b5f",
+        "text": " # wiki-plugin-activity-0.4.10\n      ExecStart = \"/nix/store/[…]-node_wiki-0.27.0/bin/wiki --config /home/rgb/.wiki/config.json\";\n\n"
+      },
+      "date": 1654494675323
+    },
+    {
+      "id": "575b279f06680b5f",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "a85f419b16a60c0d",
+        "757e3af158182842",
+        "4f3c50e0473fd0f5",
+        "ca4cff087af70203",
+        "c0b1bf8571720275",
+        "0b6580d93ca25f9d",
+        "15fa620464450761",
+        "37a9df281116843c",
+        "40847e2a55563aff",
+        "f2b518924de0e380",
+        "7baf676b839d536b",
+        "ca9fbb3541ffc545",
+        "85432fb5f3de5fd9",
+        "575b279f06680b5f",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654494681557
+    },
+    {
+      "type": "edit",
+      "id": "85432fb5f3de5fd9",
+      "item": {
+        "type": "markdown",
+        "id": "85432fb5f3de5fd9",
+        "text": "Adjust `wiki.nix`:\n"
+      },
+      "date": 1654494705447
+    },
+    {
+      "type": "add",
+      "id": "3c0cb9fe47807144",
+      "item": {
+        "type": "markdown",
+        "id": "3c0cb9fe47807144",
+        "text": "# nixos-rebuild switch"
+      },
+      "after": "85432fb5f3de5fd9",
+      "date": 1654494706372
+    },
+    {
+      "id": "3c0cb9fe47807144",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "a85f419b16a60c0d",
+        "757e3af158182842",
+        "4f3c50e0473fd0f5",
+        "ca4cff087af70203",
+        "c0b1bf8571720275",
+        "0b6580d93ca25f9d",
+        "15fa620464450761",
+        "37a9df281116843c",
+        "40847e2a55563aff",
+        "f2b518924de0e380",
+        "7baf676b839d536b",
+        "ca9fbb3541ffc545",
+        "85432fb5f3de5fd9",
+        "575b279f06680b5f",
+        "3c0cb9fe47807144",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654494708472
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "af5e08bb6ca288cd"
+      },
+      "id": "af5e08bb6ca288cd",
+      "type": "add",
+      "after": "9558c65a34339e6d",
+      "date": 1654494717223
+    },
+    {
+      "id": "af5e08bb6ca288cd",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "a85f419b16a60c0d",
+        "757e3af158182842",
+        "4f3c50e0473fd0f5",
+        "ca4cff087af70203",
+        "c0b1bf8571720275",
+        "0b6580d93ca25f9d",
+        "15fa620464450761",
+        "37a9df281116843c",
+        "40847e2a55563aff",
+        "f2b518924de0e380",
+        "7baf676b839d536b",
+        "ca9fbb3541ffc545",
+        "85432fb5f3de5fd9",
+        "575b279f06680b5f",
+        "3c0cb9fe47807144",
+        "af5e08bb6ca288cd",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654494728239
+    },
+    {
+      "type": "edit",
+      "id": "af5e08bb6ca288cd",
+      "item": {
+        "type": "reference",
+        "id": "af5e08bb6ca288cd",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "about-plugmatic-plugin",
+        "title": "About Plugmatic Plugin",
+        "text": "This plugin queries the origin server for information about installed plugins. Server administrators can install new or updated existing plugins from included inventories."
+      },
+      "date": 1654494735989
+    },
+    {
+      "type": "edit",
+      "id": "3c0cb9fe47807144",
+      "item": {
+        "type": "markdown",
+        "id": "3c0cb9fe47807144",
+        "text": "$ nixos-rebuild switch"
+      },
+      "date": 1654494763357
+    },
+    {
+      "type": "edit",
+      "id": "3c0cb9fe47807144",
+      "item": {
+        "type": "markdown",
+        "id": "3c0cb9fe47807144",
+        "text": "$ nixos-rebuild switch\n"
+      },
+      "date": 1654494773263
+    },
+    {
+      "type": "edit",
+      "id": "3c0cb9fe47807144",
+      "item": {
+        "type": "markdown",
+        "id": "3c0cb9fe47807144",
+        "text": "$ nixos-rebuild switch\n\n"
+      },
+      "date": 1654494779998
+    },
+    {
+      "type": "add",
+      "id": "08c173e31de02acf",
+      "item": {
+        "type": "markdown",
+        "id": "08c173e31de02acf",
+        "text": "activity 0.4.10 installed"
+      },
+      "after": "3c0cb9fe47807144",
+      "date": 1654494790364
+    },
+    {
+      "id": "08c173e31de02acf",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "a85f419b16a60c0d",
+        "757e3af158182842",
+        "4f3c50e0473fd0f5",
+        "ca4cff087af70203",
+        "c0b1bf8571720275",
+        "0b6580d93ca25f9d",
+        "15fa620464450761",
+        "37a9df281116843c",
+        "40847e2a55563aff",
+        "f2b518924de0e380",
+        "7baf676b839d536b",
+        "ca9fbb3541ffc545",
+        "85432fb5f3de5fd9",
+        "575b279f06680b5f",
+        "3c0cb9fe47807144",
+        "af5e08bb6ca288cd",
+        "08c173e31de02acf",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654494792404
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "46545de67df41739"
+      },
+      "id": "46545de67df41739",
+      "type": "add",
+      "after": "9558c65a34339e6d",
+      "date": 1654495222646
+    },
+    {
+      "id": "46545de67df41739",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "70eb26a83529e2e6",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "a85f419b16a60c0d",
+        "757e3af158182842",
+        "4f3c50e0473fd0f5",
+        "ca4cff087af70203",
+        "c0b1bf8571720275",
+        "0b6580d93ca25f9d",
+        "15fa620464450761",
+        "37a9df281116843c",
+        "40847e2a55563aff",
+        "f2b518924de0e380",
+        "7baf676b839d536b",
+        "ca9fbb3541ffc545",
+        "85432fb5f3de5fd9",
+        "575b279f06680b5f",
+        "3c0cb9fe47807144",
+        "af5e08bb6ca288cd",
+        "08c173e31de02acf",
+        "46545de67df41739",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654495236915
+    },
+    {
+      "type": "edit",
+      "id": "46545de67df41739",
+      "item": {
+        "type": "reference",
+        "id": "46545de67df41739",
+        "site": "asia.wiki.org",
+        "slug": "recently-released-plugins",
+        "title": "Recently Released Plugins",
+        "text": "These are plugins where we are tracking current releases."
+      },
+      "date": 1654495255471
+    },
+    {
+      "type": "edit",
+      "id": "8bfeb435e0380d9c",
+      "item": {
+        "type": "markdown",
+        "id": "8bfeb435e0380d9c",
+        "text": "The [[Activity]] plugin lists pages in your [[Neighborhood]]. [https://github.com/fedwiki/wiki-plugin-activity github] It expands as your neighborhood grows. Page names used on multiple sites are grouped together, with the most current site on the right.\n\n"
+      },
+      "date": 1654603633309
+    },
+    {
+      "type": "add",
+      "id": "db2cf8f0468691fc",
+      "item": {
+        "type": "markdown",
+        "id": "db2cf8f0468691fc",
+        "text": "[[Recent Changes] stopped working recently."
+      },
+      "after": "8bfeb435e0380d9c",
+      "date": 1654603650199
+    },
+    {
+      "type": "edit",
+      "id": "db2cf8f0468691fc",
+      "item": {
+        "type": "markdown",
+        "id": "db2cf8f0468691fc",
+        "text": "The [[Recent Changes]] suddenly stopped working."
+      },
+      "date": 1654603681826
+    },
+    {
+      "type": "edit",
+      "id": "db2cf8f0468691fc",
+      "item": {
+        "type": "markdown",
+        "id": "db2cf8f0468691fc",
+        "text": "The [[Recent Changes]] suddenly stopped working.\n"
+      },
+      "date": 1654604329947
+    },
+    {
+      "type": "add",
+      "id": "e29603535e895a2b",
+      "item": {
+        "type": "markdown",
+        "id": "e29603535e895a2b",
+        "text": "paul90\n🤔 think I can see what is happening, just not sure why...\nlooks to be caused by Uncaught TypeError: sites.push is not a function\nsites expected to be an array, and adding a console.log just before the push I see that it is - but then there is a time it is Object() rather than the expect array."
+      },
+      "after": "db2cf8f0468691fc",
+      "date": 1654604337031
+    },
+    {
+      "type": "edit",
+      "id": "e29603535e895a2b",
+      "item": {
+        "type": "markdown",
+        "id": "e29603535e895a2b",
+        "text": "paul90 via [[https://matrix.to/#/!ORfrUEFeWFcHAMLFLr:matrix.org/$1654350224166299iTKVI:matrix.org?via=matrix.org&via=matrix.allmende.io&via=chat.weho.st matrix]]\n🤔 think I can see what is happening, just not sure why...\nlooks to be caused by Uncaught TypeError: sites.push is not a function\nsites expected to be an array, and adding a console.log just before the push I see that it is - but then there is a time it is Object() rather than the expect array."
+      },
+      "date": 1654604356305
+    },
+    {
+      "type": "edit",
+      "id": "e29603535e895a2b",
+      "item": {
+        "type": "markdown",
+        "id": "e29603535e895a2b",
+        "text": "paul90 via [[https://matrix.to/#/!ORfrUEFeWFcHAMLFLr:matrix.org/$1654350224166299iTKVI:matrix.org?via=matrix.org&via=matrix.allmende.io&via=chat.weho.st matrix]]\n🤔 think I can see what is happening, just not sure why...\nlooks to be caused by Uncaught TypeError: sites.push is not a function\nsites expected to be an array, and adding a console.log just before the push I see that it is - but then there is a time it is Object() rather than the expect array.\n"
+      },
+      "date": 1654604383314
+    },
+    {
+      "type": "add",
+      "id": "efe1027302da062a",
+      "item": {
+        "type": "markdown",
+        "id": "efe1027302da062a",
+        "text": "paul90\nI've worked out what is happening... looks to be caused by a page with a slug of constructor - which is getting the object constructor rather than..."
+      },
+      "after": "e29603535e895a2b",
+      "date": 1654604388016
+    },
+    {
+      "type": "edit",
+      "id": "efe1027302da062a",
+      "item": {
+        "type": "markdown",
+        "id": "efe1027302da062a",
+        "text": "paul90\nI've worked out what is happening... looks to be caused by a page with a slug of [[constructor]] - which is getting the object constructor rather than..."
+      },
+      "date": 1654604404066
+    },
+    {
+      "type": "edit",
+      "id": "efe1027302da062a",
+      "item": {
+        "type": "markdown",
+        "id": "efe1027302da062a",
+        "text": "paul90\nI've worked out what is happening... looks to be caused by a page with a slug of [[constructor]] - which is getting the object constructor rather than...\n"
+      },
+      "date": 1654604442423
+    },
+    {
+      "type": "add",
+      "id": "5fbcadbe65d2f9e3",
+      "item": {
+        "type": "markdown",
+        "id": "5fbcadbe65d2f9e3",
+        "text": "paul90\nAn updated version of the activity plugin has been published, this fixes the issue that Ralf reported yesterday.\n"
+      },
+      "after": "efe1027302da062a",
+      "date": 1654604444595
+    },
+    {
+      "id": "5fbcadbe65d2f9e3",
+      "type": "move",
+      "order": [
+        "8bfeb435e0380d9c",
+        "db2cf8f0468691fc",
+        "e29603535e895a2b",
+        "efe1027302da062a",
+        "70eb26a83529e2e6",
+        "5fbcadbe65d2f9e3",
+        "09edac31345236de",
+        "567d7153243bdc9c",
+        "70f691083cf29895",
+        "92145dce5ccbc271",
+        "49f7594466667ba4",
+        "bf162e66594294f0",
+        "a85f419b16a60c0d",
+        "757e3af158182842",
+        "4f3c50e0473fd0f5",
+        "ca4cff087af70203",
+        "c0b1bf8571720275",
+        "0b6580d93ca25f9d",
+        "15fa620464450761",
+        "37a9df281116843c",
+        "40847e2a55563aff",
+        "f2b518924de0e380",
+        "7baf676b839d536b",
+        "ca9fbb3541ffc545",
+        "85432fb5f3de5fd9",
+        "575b279f06680b5f",
+        "3c0cb9fe47807144",
+        "af5e08bb6ca288cd",
+        "08c173e31de02acf",
+        "46545de67df41739",
+        "b89e885f211da245",
+        "d5d97731902364c2",
+        "e71a71b173f1bd25",
+        "f7d7ad97f1650292",
+        "95c789a763d9da95",
+        "e5e9a074d602db99",
+        "ece807e5f4efddd3",
+        "6dfc2fffdacaf4e5",
+        "7f40061e219c5e54",
+        "8a10ee9e0704a85b",
+        "d535459d47f10406",
+        "55f8d5d0aa7c0a19",
+        "d90681b66ee50909",
+        "619ae47d42e8a6ec",
+        "ef44e923aa3ef71d",
+        "bd9d4a56cae5194b",
+        "31c051f43dcc83d9",
+        "a1c2fb566e3f0983",
+        "9558c65a34339e6d"
+      ],
+      "date": 1654604475409
+    },
+    {
+      "type": "edit",
+      "id": "09edac31345236de",
+      "item": {
+        "type": "paragraph",
+        "id": "09edac31345236de",
+        "text": "//TODO rsync ? ; Read-only file system ; nix store"
+      },
+      "date": 1654604482004
+    },
+    {
+      "type": "edit",
+      "id": "7baf676b839d536b",
+      "item": {
+        "type": "markdown",
+        "id": "7baf676b839d536b",
+        "text": "[…] post-installation fixup\nshrinking RPATHs of ELF executables and libraries in /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0\nrewriting symlink /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/bin to be relative to /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0\npatching script interpreter paths in /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/uglify-js/bin/uglifyjs: interpreter directive changed from \"#! /usr/bin/env node\" to \"/nix/store/zmv0sbz4ngsl9z6s0djhswij3v4hd7kv-nodejs-14.19.3/bin/node\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/delayed-require.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/initial-value.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/difference.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0/lib/node_modules/wiki/node_modules/performance-now/test/scripts/delayed-call.coffee: interpreter directive changed from \"#!/usr/bin/env ./node_modules/.bin/coffee\" to \"./node_modules/.bin/coffee\"\nchecking for references to /build/ in /nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0...\n/nix/store/z807mm6f6jqaalbywj7ya4rbk4y8yvfn-node_wiki-0.27.0"
+      },
+      "date": 1654604526435
+    }
+  ]
+}
