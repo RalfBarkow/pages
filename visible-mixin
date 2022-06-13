@@ -1,0 +1,147 @@
+{
+  "title": "Visible Mixin",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "4e3312697860051a",
+      "text": "Visible pawns have a mesh and a material and they handle inserting and removing themselves from the scene. They should only be used with a companion mixin that has the method \"global\" that supplies them with a 4x4 transform. Make sure the companion mixin is added first so it will be updated first.\n\nNote that destroying a pawn will not clean up the mesh and the material because they may be used by multiple pawns.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "b9638a3443896910",
+      "text": "# PM_Visible\n"
+    },
+    {
+      "type": "code",
+      "id": "2edcde345d8f1db3",
+      "text": "export const PM_Visible = superclass => class extends superclass {\n\n    destroy() {\n        super.destroy();\n        const render = this.service(\"RenderManager\");\n        for (const layerName in render.layers) {\n            const layer = render.layers[layerName];\n            if (layer.has(this)) render.dirtyLayer(layerName);\n            render.layers[layerName].delete(this);\n        }\n    }\n\n    addToLayers(...names) {\n        const render = this.service(\"RenderManager\");\n        names.forEach(name => {\n            if (!render.layers[name]) render.layers[name] = new Set();\n            render.layers[name].add(this);\n            render.dirtyLayer(name);\n        });\n    }\n\n    removeFromLayers(...names) {\n        const render = this.service(\"RenderManager\");\n        names.forEach(name => {\n            if (!render.layers[name]) return;\n            render.layers[name].delete(this);\n            if (render.layers[name].size === 0) {\n                delete render.layers[name];\n            }\n            render.dirtyLayer(name);\n        });\n    }\n\n    layers() {\n        let result = [];\n        const render = this.service(\"RenderManager\");\n        for (const layerName in render.layers) {\n            const layer = render.layers[layerName];\n            if (layer.has(this)) result.push(layerName);\n        }\n        return result;\n    }        \n};"
+    },
+    {
+      "type": "markdown",
+      "id": "0ab1f3f6dfe8515f",
+      "text": "# PM_WebGLVisible"
+    },
+    {
+      "type": "code",
+      "id": "56b3b8af9b5db1ce",
+      "text": "export const PM_WebGLVisible = superclass => class extends PM_Visible(superclass) {\n\n    constructor(...args) {\n        super(...args);\n        this.listen(\"viewGlobalChanged\", this.refreshDrawTransform);\n    }\n\n    destroy() {\n        super.destroy();\n        if (this.draw) this.service('WebGLRenderManager').scene.removeDrawCall(this.draw);\n    }\n\n    refreshDrawTransform() {\n        if (this.draw) this.draw.transform.set(this.global);\n    }\n\n    setDrawCall(draw) {\n        if (this.draw === draw) return;\n        const scene = this.service('WebGLRenderManager').scene;\n        if (this.draw) scene.removeDrawCall(this.draw);\n        this.draw = draw;\n        if (this.draw) {\n            this.draw.transform.set(this.global || m4_identity());\n            scene.addDrawCall(this.draw);\n        }\n\n    }\n\n};"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Visible Mixin",
+        "story": []
+      },
+      "date": 1655139145678
+    },
+    {
+      "id": "4e3312697860051a",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "4e3312697860051a",
+        "text": "Visible pawns have a mesh and a material and they handle inserting and removing themselves from the scene. They should only be used with a companion mixin that has the method \"global\" that supplies them with a 4x4 transform. Make sure the companion mixin is added first so it will be updated first.\n\nNote that destroying a pawn will not clean up the mesh and the material because they may be used by multiple pawns.\n"
+      },
+      "date": 1655139157353
+    },
+    {
+      "id": "56b3b8af9b5db1ce",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "56b3b8af9b5db1ce",
+        "text": "export const PM_WebGLVisible = superclass => class extends PM_Visible(superclass) {\n\n    constructor(...args) {\n        super(...args);\n        this.listen(\"viewGlobalChanged\", this.refreshDrawTransform);\n    }\n\n    destroy() {\n        super.destroy();\n        if (this.draw) this.service('WebGLRenderManager').scene.removeDrawCall(this.draw);\n    }\n\n    refreshDrawTransform() {\n        if (this.draw) this.draw.transform.set(this.global);\n    }\n\n    setDrawCall(draw) {\n        if (this.draw === draw) return;\n        const scene = this.service('WebGLRenderManager').scene;\n        if (this.draw) scene.removeDrawCall(this.draw);\n        this.draw = draw;\n        if (this.draw) {\n            this.draw.transform.set(this.global || m4_identity());\n            scene.addDrawCall(this.draw);\n        }\n\n    }\n\n};"
+      },
+      "after": "4e3312697860051a",
+      "date": 1655139162853
+    },
+    {
+      "id": "b9638a3443896910",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "b9638a3443896910",
+        "text": "# PM_Visible\n"
+      },
+      "after": "56b3b8af9b5db1ce",
+      "date": 1655139176964
+    },
+    {
+      "id": "2edcde345d8f1db3",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "2edcde345d8f1db3",
+        "text": "export const PM_Visible = superclass => class extends superclass {\n\n    destroy() {\n        super.destroy();\n        const render = this.service(\"RenderManager\");\n        for (const layerName in render.layers) {\n            const layer = render.layers[layerName];\n            if (layer.has(this)) render.dirtyLayer(layerName);\n            render.layers[layerName].delete(this);\n        }\n    }\n\n    addToLayers(...names) {\n        const render = this.service(\"RenderManager\");\n        names.forEach(name => {\n            if (!render.layers[name]) render.layers[name] = new Set();\n            render.layers[name].add(this);\n            render.dirtyLayer(name);\n        });\n    }\n\n    removeFromLayers(...names) {\n        const render = this.service(\"RenderManager\");\n        names.forEach(name => {\n            if (!render.layers[name]) return;\n            render.layers[name].delete(this);\n            if (render.layers[name].size === 0) {\n                delete render.layers[name];\n            }\n            render.dirtyLayer(name);\n        });\n    }\n\n    layers() {\n        let result = [];\n        const render = this.service(\"RenderManager\");\n        for (const layerName in render.layers) {\n            const layer = render.layers[layerName];\n            if (layer.has(this)) result.push(layerName);\n        }\n        return result;\n    }        \n};"
+      },
+      "after": "56b3b8af9b5db1ce",
+      "date": 1655139183160
+    },
+    {
+      "id": "b9638a3443896910",
+      "type": "move",
+      "order": [
+        "4e3312697860051a",
+        "56b3b8af9b5db1ce",
+        "b9638a3443896910",
+        "2edcde345d8f1db3"
+      ],
+      "date": 1655139187917
+    },
+    {
+      "type": "fork",
+      "date": 1655139483407
+    },
+    {
+      "id": "56b3b8af9b5db1ce",
+      "type": "move",
+      "order": [
+        "4e3312697860051a",
+        "b9638a3443896910",
+        "56b3b8af9b5db1ce",
+        "2edcde345d8f1db3"
+      ],
+      "date": 1655140965682
+    },
+    {
+      "id": "2edcde345d8f1db3",
+      "type": "move",
+      "order": [
+        "4e3312697860051a",
+        "b9638a3443896910",
+        "2edcde345d8f1db3",
+        "56b3b8af9b5db1ce"
+      ],
+      "date": 1655140970619
+    },
+    {
+      "type": "add",
+      "id": "0ab1f3f6dfe8515f",
+      "item": {
+        "type": "markdown",
+        "id": "0ab1f3f6dfe8515f",
+        "text": "# PM_WebGLVisible"
+      },
+      "after": "b9638a3443896910",
+      "date": 1655140980597
+    },
+    {
+      "id": "0ab1f3f6dfe8515f",
+      "type": "move",
+      "order": [
+        "4e3312697860051a",
+        "b9638a3443896910",
+        "2edcde345d8f1db3",
+        "0ab1f3f6dfe8515f",
+        "56b3b8af9b5db1ce"
+      ],
+      "date": 1655140983037
+    },
+    {
+      "type": "fork",
+      "date": 1655149777351
+    }
+  ]
+}
