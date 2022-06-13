@@ -94,106 +94,6 @@
       "slug": "enrich-any-svg",
       "title": "Enrich Any SVG",
       "text": "Here we offer a tool which makes a best effort to enrich any SVG diagram with hyperlinks that conform to wiki's internal link conventions."
-    },
-    {
-      "type": "pagefold",
-      "id": "8fc31fcfb9173268",
-      "text": "~"
-    },
-    {
-      "type": "paragraph",
-      "id": "04bfb2692d07aa60",
-      "text": "Below this pagefold we reveal the code which does the [[Multiblaster]]."
-    },
-    {
-      "type": "paragraph",
-      "id": "a4da252e0c397ed8",
-      "text": "Uncaught TypeError: class heritage […] is not an object or null [https://stackoverflow.com/questions/64061906/uncaught-typeerror-class-heritage-this-myclass-is-not-an-object-or-null stackoverflow]"
-    },
-    {
-      "type": "markdown",
-      "id": "34d918cf23434eea",
-      "text": "> `this` is only set when you're calling a method of the object, it's not available when you're initializing an object."
-    },
-    {
-      "type": "frame",
-      "id": "65d97c995c7adf15",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/esm.html\nHEIGHT 55"
-    },
-    {
-      "type": "paragraph",
-      "id": "dfddd2d989966f0c",
-      "text": "Import [[Frame Integration Promises]] and setup DOM helpers."
-    },
-    {
-      "type": "code",
-      "id": "5cbd82e529085e9a",
-      "text": "import * as frame from \"https://wiki.ralfbarkow.ch/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => \n  Array.from(el.querySelectorAll(s))"
-    },
-    {
-      "type": "paragraph",
-      "id": "8ca86f0eb2f8116a",
-      "text": "Import Croquet 1.0.5 (see [https://croquet.io/docs/croquet/ api.croquet.io])."
-    },
-    {
-      "type": "code",
-      "id": "6adf805f6ccc38d8",
-      "text": "import * as Croquet from \"https://wiki.ralfbarkow.ch/assets/pages/croquet-multiblaster/croquet.js\""
-    },
-    {
-      "type": "paragraph",
-      "id": "e17dd4501c934e30",
-      "text": "Model code is executed inside of synced VM"
-    },
-    {
-      "type": "code",
-      "id": "112c0d130e7edf0c",
-      "text": "class Game extends Croquet.Model {\n    init() {\n        this.ships = new Map();\n        this.asteroids = new Set();\n        this.blasts = new Set();\n        this.subscribe(this.sessionId, \"view-join\", this.viewJoined);\n        this.subscribe(this.sessionId, \"view-exit\", this.viewExited);\n        Asteroid.create({});\n        this.mainLoop();\n    }\n\n    viewJoined(viewId) {\n        const ship = Ship.create({ viewId });\n        this.ships.set(viewId, ship);\n    }\n\n    viewExited(viewId) {\n        const ship = this.ships.get(viewId);\n        this.ships.delete(viewId);\n        ship.destroy();\n    }\n\n    checkCollisions() {\n        for (const asteroid of this.asteroids) {\n            if (asteroid.wasHit) continue;\n            const minx = asteroid.x - asteroid.size;\n            const maxx = asteroid.x + asteroid.size;\n            const miny = asteroid.y - asteroid.size;\n            const maxy = asteroid.y + asteroid.size;\n            for (const blast of this.blasts) {\n                if (blast.x > minx && blast.x < maxx && blast.y > miny && blast.y < maxy) {\n                    asteroid.hitBy(blast);\n                    break;\n                }\n            }\n            for (const ship of this.ships.values()) {\n                if (!ship.wasHit && ship.x + 10 > minx && ship.x - 10 < maxx && ship.y + 10 > miny && ship.y - 10 < maxy) {\n                    if (!ship.score && Math.abs(ship.x-500) + Math.abs(ship.y-500) < 40) continue; // no hit if just spawned\n                    ship.hitBy(asteroid);\n                    break;\n                }\n            }\n        }\n    }\n\n    mainLoop() {\n        for (const ship of this.ships.values()) ship.move();\n        for (const asteroid of this.asteroids) asteroid.move();\n        for (const blast of this.blasts) blast.move();\n        this.checkCollisions();\n        this.future(50).mainLoop(); // move & check every 50 ms\n    }\n}\nGame.register(\"Game\");"
-    },
-    {
-      "type": "paragraph",
-      "id": "daccb48780f07535",
-      "text": "\"class heritage Croquet.Model is not an object or null\""
-    },
-    {
-      "type": "code",
-      "id": "9cadae1ef0664bbd",
-      "text": "class Ship extends Croquet.Model {\n    init({ viewId }) {\n        this.viewId = viewId;\n        this.reset();\n        this.subscribe(viewId, \"left-thruster\", this.leftThruster);\n        this.subscribe(viewId, \"right-thruster\", this.rightThruster);\n        this.subscribe(viewId, \"forward-thruster\", this.forwardThruster);\n        this.subscribe(viewId, \"fire-blaster\", this.fireBlaster);\n    }\n\n    reset() {\n        this.x = 500;\n        this.y = 500;\n        this.a = -Math.PI / 2;\n        this.dx = 0;\n        this.dy = 0;\n        this.left = false;\n        this.right = false;\n        this.forward = false;\n        this.score = 0;\n        this.wasHit = 0;\n    }\n\n    leftThruster(active) {\n        if (this.wasHit) return;\n        this.left = active;\n    }\n\n    rightThruster(active) {\n        if (this.wasHit) return;\n        this.right = active;\n    }\n\n    forwardThruster(active) {\n        if (this.wasHit) return;\n        this.forward = active;\n    }\n\n    fireBlaster() {\n        if (this.wasHit) return;\n        const dx = Math.cos(this.a) * 20;\n        const dy = Math.sin(this.a) * 20;\n        const x = this.x + dx;\n        const y = this.y + dy;\n        Blast.create({ x, y, dx, dy, ship: this });\n    }\n\n    move() {\n        if (this.wasHit) {\n            // keep drifting as debris for 3 seconds\n            if (++this.wasHit > 60) this.reset();\n        } else {\n            // process thruster controls\n            if (this.forward) {\n                this.dx += Math.cos(this.a) * 0.5;\n                this.dy += Math.sin(this.a) * 0.5;\n                if (this.dx > 10) this.dx = 10;\n                if (this.dx < -10) this.dx = -10;\n                if (this.dy > 10) this.dy = 10;\n                if (this.dy < -10) this.dy = -10;\n            }\n            if (this.left) this.a -= 0.2;\n            if (this.right) this.a += 0.2;\n            if (this.a < 0) this.a += Math.PI * 2;\n            if (this.a > Math.PI * 2) this.a -= Math.PI * 2;\n        }\n        // drift through space\n        this.x += this.dx;\n        this.y += this.dy;\n        if (this.x < 0) this.x += 1000;\n        if (this.x > 1000) this.x -= 1000;\n        if (this.y < 0) this.y += 1000;\n        if (this.y > 1000) this.y -= 1000;\n    }\n\n    hitBy(asteroid) {\n        // turn both into debris\n        this.wasHit = 1;\n        asteroid.wasHit = 1;\n    }\n}\nShip.register(\"Ship\");"
-    },
-    {
-      "type": "code",
-      "id": "fbecce33791e6c63",
-      "text": "class Asteroid extends Croquet.Model {\n    init({ size, x, y, a, dx, dy, da }) {\n        if (size) {\n            // init second asteroid after spliting\n            this.size = size;\n            this.x = x;\n            this.y = y;\n            this.a = a;\n            this.dx = dx;\n            this.dy = dy;\n            this.da = da;\n        } else {\n            // init new large asteroid\n            this.size = 40;\n            this.x = Math.random() * 400 - 200;\n            this.y = Math.random() * 400 - 200;\n            this.a = Math.random() * Math.PI * 2;\n            const speed = Math.random() * 4 + 1;\n            this.dx = Math.cos(this.a) * speed;\n            this.dy = Math.sin(this.a) * speed;\n            this.da = (0.02 + Math.random() * 0.03) * (Math.random() < 0.5 ? 1 : -1);\n            this.wasHit = 0;\n            this.move();\n        }\n        this.wellKnownModel(\"modelRoot\").asteroids.add(this);\n    }\n\n    move() {\n        if (this.wasHit) {\n            // keep drifting as debris, larger pieces drift longer\n            if (++this.wasHit > this.size) this.destroy();\n        }\n        this.x += this.dx;\n        this.y += this.dy;\n        if (this.x < 0) this.x += 1000;\n        if (this.x > 1000) this.x -= 1000;\n        if (this.y < 0) this.y += 1000;\n        if (this.y > 1000) this.y -= 1000;\n        if (!this.wasHit) {\n            this.a += this.da;\n            if (this.a < 0) this.a += Math.PI * 2;\n            if (this.a > Math.PI * 2) this.a -= Math.PI * 2;\n        }\n    }\n\n    hitBy(blast) {\n        if (!blast.ship.wasHit) blast.ship.score++;\n        if (this.size > 20) {\n            // split into two smaller faster asteroids\n            this.size *= 0.7;\n            this.da *= 1.5;\n            this.dx = -blast.dy * 10 / this.size;\n            this.dy = blast.dx * 10 / this.size;\n            Asteroid.create({ size: this.size, x: this.x, y: this.y, a: this.a, dx: -this.dx, dy: -this.dy, da: this.da });\n        } else {\n            // turn into debris\n            this.wasHit = 1;\n        }\n        blast.destroy();\n    }\n\n    destroy() {\n        const asteroids = this.wellKnownModel(\"modelRoot\").asteroids;\n        asteroids.delete(this);\n        super.destroy();\n        // keep at least 5 asteroids around\n        if (asteroids.size < 5) Asteroid.create({});\n    }\n}\nAsteroid.register(\"Asteroid\");"
-    },
-    {
-      "type": "code",
-      "id": "4e0ce1bf660b5d27",
-      "text": "class Blast extends Croquet.Model {\n    init({x, y, dx, dy, ship}) {\n        this.ship = ship;\n        this.x = x;\n        this.y = y;\n        this.dx = dx;\n        this.dy = dy;\n        this.t = 0;\n        this.wellKnownModel(\"modelRoot\").blasts.add(this);\n    }\n\n    move() {\n        // move for 1.5 second before disappearing\n        if (++this.t < 30) {\n            this.x += this.dx;\n            this.y += this.dy;\n            if (this.x < 0) this.x += 1000;\n            if (this.x > 1000) this.x -= 1000;\n            if (this.y < 0) this.y += 1000;\n            if (this.y > 1000) this.y -= 1000;\n        } else {\n            this.destroy();\n        }\n    }\n\n    destroy() {\n        this.wellKnownModel(\"modelRoot\").blasts.delete(this);\n        super.destroy();\n    }\n}\nBlast.register(\"Blast\");"
-    },
-    {
-      "type": "paragraph",
-      "id": "a3cb9a570becaf09",
-      "text": " Code below is executed outside of synced VM"
-    },
-    {
-      "type": "code",
-      "id": "7e582141f0f3b176",
-      "text": "class Display extends Croquet.View {\n    constructor(model) {\n        super(model);\n        this.model = model;\n\n        const joystick = document.getElementById(\"joystick\");\n        const knob = document.getElementById(\"knob\");\n\n        document.onkeydown = (e) => {\n            joystick.style.display = \"none\";\n            if (e.repeat) return;\n            switch (e.key) {\n                case \"a\": case \"A\": case \"ArrowLeft\":  this.publish(this.viewId, \"left-thruster\", true); break;\n                case \"d\": case \"D\": case \"ArrowRight\": this.publish(this.viewId, \"right-thruster\", true); break;\n                case \"w\": case \"W\": case \"ArrowUp\":    this.publish(this.viewId, \"forward-thruster\", true); break;\n                case \" \":                              this.publish(this.viewId, \"fire-blaster\"); break;\n            }\n        };\n        document.onkeyup = (e) => {\n            if (e.repeat) return;\n            switch (e.key) {\n                case \"a\": case \"A\": case \"ArrowLeft\":  this.publish(this.viewId, \"left-thruster\", false); break;\n                case \"d\": case \"D\": case \"ArrowRight\": this.publish(this.viewId, \"right-thruster\", false); break;\n                case \"w\": case \"W\": case \"ArrowUp\":    this.publish(this.viewId, \"forward-thruster\", false); break;\n            }\n        };\n\n        let x = 0, y = 0, id = 0, right = false, left = false, forward = false;\n        document.onpointerdown = (e) => {\n            if (!id) {\n                id = e.pointerId;\n                x = e.clientX;\n                y = e.clientY;\n                joystick.style.left = `${x - 60}px`;\n                joystick.style.top = `${y - 60}px`;\n                joystick.style.display = \"block\";\n            }\n        };\n        document.onpointermove = (e) => {\n            e.preventDefault();\n            if (id === e.pointerId) {\n                let dx = e.clientX - x;\n                let dy = e.clientY - y;\n                if (dx > 30) {\n                    dx = 30;\n                    if (!right) { this.publish(this.viewId, \"right-thruster\", true); right = true; }\n                } else if (right) { this.publish(this.viewId, \"right-thruster\", false); right = false; }\n                if (dx < -30) {\n                    dx = -30;\n                    if (!left) { this.publish(this.viewId, \"left-thruster\", true); left = true; }\n                } else if (left) { this.publish(this.viewId, \"left-thruster\", false); left = false; }\n                if (dy < -30) {\n                    dy = -30;\n                    if (!forward) { this.publish(this.viewId, \"forward-thruster\", true); forward = true; }\n                } else if (forward) { this.publish(this.viewId, \"forward-thruster\", false); forward = false; }\n                if (dy > 0) dy = 0;\n                knob.style.left = `${20 + dx}px`;\n                knob.style.top = `${20 + dy}px`;\n            }\n        }\n        document.onpointerup = (e) => {\n            e.preventDefault();\n            if (id === e.pointerId) {\n                id = 0;\n                if (!right && !left && !forward) {\n                    this.publish(this.viewId, \"fire-blaster\");\n                }\n                if (right) { this.publish(this.viewId, \"right-thruster\", false); right = false; }\n                if (left) { this.publish(this.viewId, \"left-thruster\", false); left = false;  }\n                if (forward) { this.publish(this.viewId, \"forward-thruster\", false); forward = false; }\n                knob.style.left = `20px`;\n                knob.style.top = `20px`;\n            } else {\n                this.publish(this.viewId, \"fire-blaster\");\n            }\n        }\n        document.onpointercancel = document.onpointerup;\n        document.oncontextmenu = e => { e.preventDefault();  this.publish(this.viewId, \"fire-blaster\"); }\n        document.ontouchend = e => e.preventDefault(); // prevent double-tap zoom on iOS\n        codelink.ontouchend = () => codelink.click(); // but allow clicking link\n\n        this.smoothing = new WeakMap(); // position cache for interpolated rendering\n\n        this.context = canvas.getContext(\"2d\");\n    }\n\n    // update is called once per render frame\n    // read from shared model, interpolate, render\n    update() {\n        this.context.clearRect(0, 0, 1000, 1000);\n        this.context.font = '40px sans-serif';\n        this.context.fillStyle = \"rgba(255, 255, 255, 0.5)\";\n        this.context.lineWidth = 3;\n        this.context.strokeStyle = \"white\";\n        for (const ship of this.model.ships.values()) {\n            const { x, y, a } = this.smoothPosAndAngle(ship);\n            this.context.save();\n            this.context.translate(x, y);\n            if (ship.score) this.context.fillText(ship.score, 30, 15);\n            this.context.rotate(a);\n            if (ship.wasHit) this.drawShipDebris(ship.wasHit);\n            else this.drawShip(ship.forward, ship.viewId === this.viewId);\n            this.context.restore();\n        }\n        for (const asteroid of this.model.asteroids) {\n            const { x, y, a } = this.smoothPosAndAngle(asteroid);\n            this.context.save();\n            this.context.translate(x, y);\n            this.context.rotate(a);\n            if (asteroid.wasHit) this.drawAsteroidDebris(asteroid.size, asteroid.wasHit * 2);\n            else this.drawAsteroid(asteroid.size);\n            this.context.restore();\n        }\n        for (const blast of this.model.blasts) {\n            const { x, y } = this.smoothPos(blast);\n            this.context.save();\n            this.context.translate(x, y);\n            this.drawBlast();\n            this.context.restore();\n        }\n    }\n\n    smoothPos(obj) {\n        if (!this.smoothing.has(obj)) {\n            this.smoothing.set(obj, { x: obj.x, y: obj.y, a: obj.a });\n        }\n        const smoothed = this.smoothing.get(obj);\n        const dx = obj.x - smoothed.x;\n        const dy = obj.y - smoothed.y;\n        if (Math.abs(dx) < 50) smoothed.x += dx * 0.3; else smoothed.x = obj.x;\n        if (Math.abs(dy) < 50) smoothed.y += dy * 0.3; else smoothed.y = obj.y;\n        return smoothed;\n    }\n\n    smoothPosAndAngle(obj) {\n        const smoothed = this.smoothPos(obj);\n        const da = obj.a - smoothed.a;\n        if (Math.abs(da) < 1) smoothed.a += da * 0.3; else smoothed.a = obj.a;\n        return smoothed;\n    }\n\n    drawShip(thrust, highlight) {\n        this.context.beginPath();\n        this.context.moveTo(+20,   0);\n        this.context.lineTo(-20, +10);\n        this.context.lineTo(-20, -10);\n        this.context.closePath();\n        this.context.stroke();\n        if (highlight) {\n            this.context.fill();\n        }\n        if (thrust) {\n            this.context.beginPath();\n            this.context.moveTo(-20, +5);\n            this.context.lineTo(-30,  0);\n            this.context.lineTo(-20, -5);\n            this.context.stroke();\n        }\n    }\n\n    drawShipDebris(t) {\n        this.context.beginPath();\n        this.context.moveTo(+20 + t,   0 + t);\n        this.context.lineTo(-20 + t, +10 + t);\n        this.context.moveTo(-20 - t * 1.4, +10);\n        this.context.lineTo(-20 - t * 1.4, -10);\n        this.context.moveTo(-20 + t, -10 - t);\n        this.context.lineTo(+20 + t,   0 - t);\n        this.context.stroke();\n    }\n\n    drawAsteroid(size) {\n        this.context.beginPath();\n        this.context.moveTo(+size,  0);\n        this.context.lineTo( 0, +size);\n        this.context.lineTo(-size,  0);\n        this.context.lineTo( 0, -size);\n        this.context.closePath();\n        this.context.stroke();\n    }\n\n    drawAsteroidDebris(size, t) {\n        this.context.beginPath();\n        this.context.moveTo(+size + t,  0 + t);\n        this.context.lineTo( 0 + t, +size + t);\n        this.context.moveTo(-size - t,  0 - t);\n        this.context.lineTo( 0 - t, -size - t);\n        this.context.moveTo(-size - t,  0 + t);\n        this.context.lineTo( 0 - t, +size + t);\n        this.context.moveTo(+size + t,  0 - t);\n        this.context.lineTo( 0 + t, -size - t);\n        this.context.stroke();\n    }\n\n    drawBlast() {\n        this.context.beginPath();\n        this.context.ellipse(0, 0, 2, 2, 0, 0, 2 * Math.PI);\n        this.context.closePath();\n        this.context.stroke();\n    }\n}\n"
-    },
-    {
-      "type": "code",
-      "id": "a62aacec1b03e4b9",
-      "text": "Croquet.App.makeWidgetDock(); // shows QR code"
-    },
-    {
-      "type": "code",
-      "id": "d145e3f7ef9766f6",
-      "text": "Croquet.Session.join({\n    apiKey: '1_i65fcn11n7lhrb5n890hs3dhj11hfzfej57pvlrx', // get your own from croquet.io/keys\n    appId: 'io.croquet.multiblaster',\n    name: Croquet.App.autoSession(),\n    password: Croquet.App.autoPassword(),\n    model: Game,\n    view: Display,\n});"
-    },
-    {
-      "type": "markdown",
-      "id": "b44625b99105baeb",
-      "text": "Error \"name\": \"InvalidCharacterError\",\n  \"message\": \"String contains an invalid character\"\n} **fixed**."
     }
   ],
   "journal": [
@@ -1630,6 +1530,139 @@
         "text": "Error \"name\": \"InvalidCharacterError\",\n  \"message\": \"String contains an invalid character\"\n} **fixed**."
       },
       "date": 1654210331519
+    },
+    {
+      "id": "8fc31fcfb9173268",
+      "type": "remove",
+      "date": 1654879542477
+    },
+    {
+      "id": "04bfb2692d07aa60",
+      "type": "remove",
+      "date": 1654879548001
+    },
+    {
+      "id": "65d97c995c7adf15",
+      "type": "remove",
+      "date": 1654879560209
+    },
+    {
+      "id": "dfddd2d989966f0c",
+      "type": "remove",
+      "date": 1654879664802
+    },
+    {
+      "id": "5cbd82e529085e9a",
+      "type": "remove",
+      "date": 1654879667552
+    },
+    {
+      "type": "remove",
+      "id": "a4da252e0c397ed8",
+      "date": 1654879676110
+    },
+    {
+      "id": "8ca86f0eb2f8116a",
+      "type": "remove",
+      "date": 1654879684291
+    },
+    {
+      "type": "remove",
+      "id": "34d918cf23434eea",
+      "date": 1654879686117
+    },
+    {
+      "id": "6adf805f6ccc38d8",
+      "type": "remove",
+      "date": 1654879708316
+    },
+    {
+      "id": "e17dd4501c934e30",
+      "type": "remove",
+      "date": 1654879776951
+    },
+    {
+      "id": "112c0d130e7edf0c",
+      "type": "move",
+      "order": [
+        "7a05d4e209216814",
+        "269f62fa01a3fc0c",
+        "68209e6ccebd7b7b",
+        "60b545d2db47834c",
+        "09f971365e20546c",
+        "bec86d19dce94838",
+        "bca07b1e3b45a73f",
+        "4dc0c2f2c7db3f6c",
+        "da07f2402229cd63",
+        "7e9cb8ebec9e6008",
+        "2821f6f56347b3c1",
+        "f7fab3cb6b1471ba",
+        "31de8e3ccfde7fa2",
+        "ef3e3eecd292b747",
+        "36dd678e98c86ac8",
+        "9c8d2e3a8aa21b55",
+        "daccb48780f07535",
+        "112c0d130e7edf0c",
+        "9cadae1ef0664bbd",
+        "fbecce33791e6c63",
+        "4e0ce1bf660b5d27",
+        "a3cb9a570becaf09",
+        "7e582141f0f3b176",
+        "a62aacec1b03e4b9",
+        "d145e3f7ef9766f6",
+        "b44625b99105baeb"
+      ],
+      "date": 1654879780725
+    },
+    {
+      "type": "remove",
+      "id": "daccb48780f07535",
+      "date": 1654879805055
+    },
+    {
+      "type": "remove",
+      "id": "112c0d130e7edf0c",
+      "date": 1654879807372
+    },
+    {
+      "type": "remove",
+      "id": "9cadae1ef0664bbd",
+      "date": 1654879809748
+    },
+    {
+      "type": "remove",
+      "id": "fbecce33791e6c63",
+      "date": 1654879813021
+    },
+    {
+      "type": "remove",
+      "id": "4e0ce1bf660b5d27",
+      "date": 1654879816662
+    },
+    {
+      "type": "remove",
+      "id": "a3cb9a570becaf09",
+      "date": 1654879818979
+    },
+    {
+      "type": "remove",
+      "id": "7e582141f0f3b176",
+      "date": 1654879821255
+    },
+    {
+      "type": "remove",
+      "id": "a62aacec1b03e4b9",
+      "date": 1654879823572
+    },
+    {
+      "type": "remove",
+      "id": "d145e3f7ef9766f6",
+      "date": 1654879825666
+    },
+    {
+      "type": "remove",
+      "id": "b44625b99105baeb",
+      "date": 1654879827665
     }
   ]
 }
