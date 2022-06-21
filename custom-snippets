@@ -60,6 +60,91 @@
       "type": "paragraph",
       "id": "cb78518c6b4e763c",
       "text": "botwhytho — [https://discord.com/channels/729445214812504107/851502717472997397/923153184258658314 discord]\nDidn't want to sound negative, but did want to express it's probably non-trivial for a beginner. I was actually pretty close to completion, but then didn't do any coding for many months. I will get back to it at some point just have a specific project I want to get an MVP out to community for feedback. It's more ambiguous in my mind and has bigger scope than a custom annotation, so very easy to do some 'productive procrastinating' on that project by building custom snippets/annotations but those will have to wait for now "
+    },
+    {
+      "type": "markdown",
+      "id": "b3d245a74f87d56e",
+      "text": "botwhytho — [https://discord.com/channels/729445214812504107/851502717472997397/923055012664471603 discord]\nThere is a page in the Gt Book (inside the image) called *Extending Lepiter with Custom Snippets and Annotations* search in spotter and you'll find it. Since in Gt, everything is a subclass of a [[BlElement]] (all the way down to text in an editor), you can 'mix and match' text and icons/etc. in Gt. You can see this in many places, like with the arrow for method definition expansion. In Lepiter you have annotations {{anAnnotation}} . Basically those can be rendered as arbitrary BlElements so no reason transclussions couldn't be done, probably have to think about disallowing infinite loops (element inside same element) and other logical/visual gotchas.\nAt the moment, Lepiter is very much a work in progress from the extensibility point of view so this won't be trivial. I started, then stopped work on a custom annotation a couple of months ago, something simple, be able to insert a BrCheckbox in text, that wasn't necessarily 'easy'. Few brave others are working in custom annotations, they might be able to weigh in. "
+    },
+    {
+      "type": "markdown",
+      "id": "1e9edd6d61ba4797",
+      "text": "SeanDeNigris — [https://discord.com/channels/729445214812504107/737255889517543545/922529164148490260 discord]\nI tried to extend the parser following the instructions in the GT book, @tudor girba. Things got off to a great start! Registering handlers rather than extending the monolithic grammar of the built-in parser makes this a realistic possibility now IMHO. \n\n1) A few things:\n- It wasn't immediately obvious to me that you add styles for all three of:\n    1) the raw markup\n    2) the rendered markup (although IMHO #styleButton: is a poor message name, maybe addRenderedStyle:)\n    3) the hiding of the markup\n  and Lepiter is smart enough to somehow handle when each should be applied (I'm not clear specifically how it knows when to apply 2 vs. 3 because the index ranges seem to be the same). Maybe the #styleXyz: messages should be renamed to addXyzStyle: to make things a bit clearer.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "9f77cf158123678e",
+      "text": "- Documentation seemed to get less as I went deeper. The parser was fairly straightforward given the book and a foundation of Smacc knowledge, but the styler less so, and I felt like I was on my own by the time I got to the custom Snippet, which seems to also need a [[SnippetViewModel]], element class, and who knows what else. I found @botwhytho's https://github.com/botwhytho/LeShellSnippet helpful here as it seemed to isolate \"just what's needed to get started\" a bit better \n"
+    },
+    {
+      "type": "markdown",
+      "id": "97be28ae716a5557",
+      "text": "2) What I realized in my case of linking to arbitrary objects is that text completion does not give me enough flexibility. Due to GT's amazingness, I already have facilities to create and find object in the form of spotters, views, actions, etc. \n\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "c31bb9594a4b168f",
+      "text": "What I want instead of this:\n"
+    },
+    {
+      "type": "html",
+      "id": "44a5404d9f637835",
+      "text": "<img\n  width=\"100%\"\n  src=\"https://cdn.discordapp.com/attachments/737255889517543545/922530560067379220/IMG_9336.jpg\"\n>"
+    },
+    {
+      "type": "markdown",
+      "id": "fc5c6bd755fffe6b",
+      "text": "Is this:"
+    },
+    {
+      "type": "html",
+      "id": "75932a024a5c4374",
+      "text": "<img\n  width=\"100%\"\n  src=\"https://cdn.discordapp.com/attachments/737255889517543545/922530618540167168/IMG_9337.jpg\"\n>"
+    },
+    {
+      "type": "markdown",
+      "id": "ae051d4268bb91e4",
+      "text": "That is, to embed a spotter which gives me better (and more beautiful) access to the underlying model"
+    },
+    {
+      "type": "html",
+      "id": "31cb510630adcf2f",
+      "text": "<img\n  width=\"100%\"\n  src=\"https://cdn.discordapp.com/attachments/737255889517543545/922531325620154379/Screen_Shot_2021-12-20_at_11.49.25_AM.png\"\n>"
+    },
+    {
+      "type": "markdown",
+      "id": "0ebc27eff46c04d5",
+      "text": "SeanDeNigris — [https://discord.com/channels/729445214812504107/737255889517543545/922534262031405106 discord]\n3) My completion visitor method wasn't being called, but there was no indication why. When I put a halt and stepped through, I go the error message below, but it was baffling until I got the idea to do that \n"
+    },
+    {
+      "type": "html",
+      "id": "e3f5ccaf941682e9",
+      "text": "<img\n  width=\"100%\"\n  src=\"https://cdn.discordapp.com/attachments/737255889517543545/922534260865392670/Screen_Shot_2021-12-20_at_12.01.45_PM.png\"\n>"
+    },
+    {
+      "type": "markdown",
+      "id": "0f2176360fd6d383",
+      "text": "It still wasn't clear to me what the conflict was, since I basically copied [[LeWordAnnotationCompletionVisitor]], until I dropped into Morphic and saw that there was a conflict resolution in the class definition. \n"
+    },
+    {
+      "type": "html",
+      "id": "a043e9d30429dad2",
+      "text": "<img\n  width=\"100%\"\n  src=\"https://cdn.discordapp.com/attachments/737255889517543545/922535074681999440/Screen_Shot_2021-12-20_at_12.04.31_PM.png\"\n>"
+    },
+    {
+      "type": "paragraph",
+      "id": "844f84a80ce793b2",
+      "text": "However, this is not indicated in GT. Since we're using this Visitor as the example of first contact, that should be clearly explained until the GT class definition is sufficiently sophisticated..."
+    },
+    {
+      "type": "html",
+      "id": "a628d13444d27dc8",
+      "text": "<img\n  width=\"100%\"\n  src=\"https://cdn.discordapp.com/attachments/737255889517543545/922535406292074526/Screen_Shot_2021-12-20_at_12.05.10_PM.png\"\n>"
+    },
+    {
+      "type": "paragraph",
+      "id": "b5e32d387567b8cc",
+      "text": "tudor girba — 20.12.2021\nPlanned yes. It's not possible right now with the current completion implementation.\n"
     }
   ],
   "journal": [
@@ -455,6 +540,569 @@
         "text": "botwhytho — [https://discord.com/channels/729445214812504107/851502717472997397/923153184258658314 discord]\nDidn't want to sound negative, but did want to express it's probably non-trivial for a beginner. I was actually pretty close to completion, but then didn't do any coding for many months. I will get back to it at some point just have a specific project I want to get an MVP out to community for feedback. It's more ambiguous in my mind and has bigger scope than a custom annotation, so very easy to do some 'productive procrastinating' on that project by building custom snippets/annotations but those will have to wait for now "
       },
       "date": 1655457545308
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6887df73010fbae4"
+      },
+      "id": "6887df73010fbae4",
+      "type": "add",
+      "after": "cb78518c6b4e763c",
+      "date": 1655465063649
+    },
+    {
+      "type": "remove",
+      "id": "6887df73010fbae4",
+      "date": 1655465077984
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b3d245a74f87d56e"
+      },
+      "id": "b3d245a74f87d56e",
+      "type": "add",
+      "after": "cb78518c6b4e763c",
+      "date": 1655465080084
+    },
+    {
+      "type": "edit",
+      "id": "b3d245a74f87d56e",
+      "item": {
+        "type": "markdown",
+        "id": "b3d245a74f87d56e",
+        "text": "botwhytho — 22.12.2021\nThere is a page in the Gt Book (inside the image) called Extending Lepiter with Custom Snippets and Annotations search in spotter and you'll find it. Since in Gt, everything is a subclass of a BlElement (all the way down to text in an editor), you can 'mix and match' text and icons/etc. in Gt. You can see this in many places, like with the arrow for method definition expansion. In Lepiter you have annotations {{anAnnotation}} . Basically those can be rendered as arbitrary BlElements so no reason transclussions couldn't be done, probably have to think about disallowing infinite loops (element inside same element) and other logical/visual gotchas.\nAt the moment, Lepiter is very much a work in progress from the extensibility point of view so this won't be trivial. I started, then stopped work on a custom annotation a couple of months ago, something simple, be able to insert a BrCheckbox in text, that wasn't necessarily 'easy'. Few brave others are working in custom annotations, they might be able to weigh in "
+      },
+      "date": 1655465082448
+    },
+    {
+      "type": "edit",
+      "id": "b3d245a74f87d56e",
+      "item": {
+        "type": "markdown",
+        "id": "b3d245a74f87d56e",
+        "text": "botwhytho — [https://discord.com/channels/729445214812504107/851502717472997397/923055012664471603 discord]\nThere is a page in the Gt Book (inside the image) called Extending Lepiter with Custom Snippets and Annotations search in spotter and you'll find it. Since in Gt, everything is a subclass of a BlElement (all the way down to text in an editor), you can 'mix and match' text and icons/etc. in Gt. You can see this in many places, like with the arrow for method definition expansion. In Lepiter you have annotations {{anAnnotation}} . Basically those can be rendered as arbitrary BlElements so no reason transclussions couldn't be done, probably have to think about disallowing infinite loops (element inside same element) and other logical/visual gotchas.\nAt the moment, Lepiter is very much a work in progress from the extensibility point of view so this won't be trivial. I started, then stopped work on a custom annotation a couple of months ago, something simple, be able to insert a BrCheckbox in text, that wasn't necessarily 'easy'. Few brave others are working in custom annotations, they might be able to weigh in "
+      },
+      "date": 1655465098570
+    },
+    {
+      "type": "edit",
+      "id": "b3d245a74f87d56e",
+      "item": {
+        "type": "markdown",
+        "id": "b3d245a74f87d56e",
+        "text": "botwhytho — [https://discord.com/channels/729445214812504107/851502717472997397/923055012664471603 discord]\nThere is a page in the Gt Book (inside the image) called *Extending Lepiter with Custom Snippets and Annotations* search in spotter and you'll find it. Since in Gt, everything is a subclass of a BlElement (all the way down to text in an editor), you can 'mix and match' text and icons/etc. in Gt. You can see this in many places, like with the arrow for method definition expansion. In Lepiter you have annotations {{anAnnotation}} . Basically those can be rendered as arbitrary BlElements so no reason transclussions couldn't be done, probably have to think about disallowing infinite loops (element inside same element) and other logical/visual gotchas.\nAt the moment, Lepiter is very much a work in progress from the extensibility point of view so this won't be trivial. I started, then stopped work on a custom annotation a couple of months ago, something simple, be able to insert a BrCheckbox in text, that wasn't necessarily 'easy'. Few brave others are working in custom annotations, they might be able to weigh in "
+      },
+      "date": 1655465118669
+    },
+    {
+      "type": "edit",
+      "id": "b3d245a74f87d56e",
+      "item": {
+        "type": "markdown",
+        "id": "b3d245a74f87d56e",
+        "text": "botwhytho — [https://discord.com/channels/729445214812504107/851502717472997397/923055012664471603 discord]\nThere is a page in the Gt Book (inside the image) called *Extending Lepiter with Custom Snippets and Annotations* search in spotter and you'll find it. Since in Gt, everything is a subclass of a [[BlElement]] (all the way down to text in an editor), you can 'mix and match' text and icons/etc. in Gt. You can see this in many places, like with the arrow for method definition expansion. In Lepiter you have annotations {{anAnnotation}} . Basically those can be rendered as arbitrary BlElements so no reason transclussions couldn't be done, probably have to think about disallowing infinite loops (element inside same element) and other logical/visual gotchas.\nAt the moment, Lepiter is very much a work in progress from the extensibility point of view so this won't be trivial. I started, then stopped work on a custom annotation a couple of months ago, something simple, be able to insert a BrCheckbox in text, that wasn't necessarily 'easy'. Few brave others are working in custom annotations, they might be able to weigh in "
+      },
+      "date": 1655465134770
+    },
+    {
+      "type": "edit",
+      "id": "b3d245a74f87d56e",
+      "item": {
+        "type": "markdown",
+        "id": "b3d245a74f87d56e",
+        "text": "botwhytho — [https://discord.com/channels/729445214812504107/851502717472997397/923055012664471603 discord]\nThere is a page in the Gt Book (inside the image) called *Extending Lepiter with Custom Snippets and Annotations* search in spotter and you'll find it. Since in Gt, everything is a subclass of a [[BlElement]] (all the way down to text in an editor), you can 'mix and match' text and icons/etc. in Gt. You can see this in many places, like with the arrow for method definition expansion. In Lepiter you have annotations {{anAnnotation}} . Basically those can be rendered as arbitrary BlElements so no reason transclussions couldn't be done, probably have to think about disallowing infinite loops (element inside same element) and other logical/visual gotchas.\nAt the moment, Lepiter is very much a work in progress from the extensibility point of view so this won't be trivial. I started, then stopped work on a custom annotation a couple of months ago, something simple, be able to insert a BrCheckbox in text, that wasn't necessarily 'easy'. Few brave others are working in custom annotations, they might be able to weigh in. "
+      },
+      "date": 1655465187283
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1e9edd6d61ba4797"
+      },
+      "id": "1e9edd6d61ba4797",
+      "type": "add",
+      "after": "b3d245a74f87d56e",
+      "date": 1655465242308
+    },
+    {
+      "type": "edit",
+      "id": "1e9edd6d61ba4797",
+      "item": {
+        "type": "markdown",
+        "id": "1e9edd6d61ba4797",
+        "text": "SeanDeNigris — 20.12.2021\nI tried to extend the parser following the instructions in the GT book, @tudor girba. Things got off to a great start! Registering handlers rather than extending the monolithic grammar of the built-in parser makes this a realistic possibility now IMHO. \n\n1) A few things:\n- It wasn't immediately obvious to me that you add styles for all three of:\n    1) the raw markup\n    2) the rendered markup (although IMHO #styleButton: is a poor message name, maybe addRenderedStyle:)\n    3) the hiding of the markup\n  and Lepiter is smart enough to somehow handle when each should be applied (I'm not clear specifically how it knows when to apply 2 vs. 3 because the index ranges seem to be the same). Maybe the #styleXyz: messages should be renamed to addXyzStyle: to make things a bit clearer.\n- Documentation seemed to get less as I went deeper. The parser was fairly straightforward given the book and a foundation of Smacc knowledge, but the styler less so, and I felt like I was on my own by the time I got to the custom Snippet, which seems to also need a SnippetViewModel, element class, and who knows what else. I found @botwhytho's https://github.com/botwhytho/LeShellSnippet helpful here as it seemed to isolate \"just what's needed to get started\" a bit better \n"
+      },
+      "date": 1655465245817
+    },
+    {
+      "type": "edit",
+      "id": "1e9edd6d61ba4797",
+      "item": {
+        "type": "markdown",
+        "id": "1e9edd6d61ba4797",
+        "text": "SeanDeNigris — [https://discord.com/channels/729445214812504107/737255889517543545/922529164148490260 discord]\nI tried to extend the parser following the instructions in the GT book, @tudor girba. Things got off to a great start! Registering handlers rather than extending the monolithic grammar of the built-in parser makes this a realistic possibility now IMHO. \n\n1) A few things:\n- It wasn't immediately obvious to me that you add styles for all three of:\n    1) the raw markup\n    2) the rendered markup (although IMHO #styleButton: is a poor message name, maybe addRenderedStyle:)\n    3) the hiding of the markup\n  and Lepiter is smart enough to somehow handle when each should be applied (I'm not clear specifically how it knows when to apply 2 vs. 3 because the index ranges seem to be the same). Maybe the #styleXyz: messages should be renamed to addXyzStyle: to make things a bit clearer.\n- Documentation seemed to get less as I went deeper. The parser was fairly straightforward given the book and a foundation of Smacc knowledge, but the styler less so, and I felt like I was on my own by the time I got to the custom Snippet, which seems to also need a SnippetViewModel, element class, and who knows what else. I found @botwhytho's https://github.com/botwhytho/LeShellSnippet helpful here as it seemed to isolate \"just what's needed to get started\" a bit better \n"
+      },
+      "date": 1655465263150
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e2c0bfd19b88ae49"
+      },
+      "id": "e2c0bfd19b88ae49",
+      "type": "add",
+      "after": "1e9edd6d61ba4797",
+      "date": 1655465326860
+    },
+    {
+      "type": "remove",
+      "id": "e2c0bfd19b88ae49",
+      "date": 1655465335518
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "97be28ae716a5557"
+      },
+      "id": "97be28ae716a5557",
+      "type": "add",
+      "after": "1e9edd6d61ba4797",
+      "date": 1655465336825
+    },
+    {
+      "type": "edit",
+      "id": "97be28ae716a5557",
+      "item": {
+        "type": "markdown",
+        "id": "97be28ae716a5557",
+        "text": "2) What I realized in my case of linking to arbitrary objects is that text completion does not give me enough flexibility. Due to GT's amazingness, I already have facilities to create and find object in the form of spotters, views, actions, etc. \n"
+      },
+      "date": 1655465339190
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "44a5404d9f637835"
+      },
+      "id": "44a5404d9f637835",
+      "type": "add",
+      "after": "97be28ae716a5557",
+      "date": 1655465346428
+    },
+    {
+      "type": "edit",
+      "id": "44a5404d9f637835",
+      "item": {
+        "type": "html",
+        "id": "44a5404d9f637835",
+        "text": "<img\n  width=\"100%\"\n  src=\"https://cdn.discordapp.com/attachments/737255889517543545/922530560067379220/IMG_9336.jpg\"\n>"
+      },
+      "date": 1655465365912
+    },
+    {
+      "type": "edit",
+      "id": "97be28ae716a5557",
+      "item": {
+        "type": "markdown",
+        "id": "97be28ae716a5557",
+        "text": "2) What I realized in my case of linking to arbitrary objects is that text completion does not give me enough flexibility. Due to GT's amazingness, I already have facilities to create and find object in the form of spotters, views, actions, etc. \n\n\n"
+      },
+      "date": 1655465383296
+    },
+    {
+      "type": "add",
+      "id": "c31bb9594a4b168f",
+      "item": {
+        "type": "markdown",
+        "id": "c31bb9594a4b168f",
+        "text": "What I want instead of this:"
+      },
+      "after": "97be28ae716a5557",
+      "date": 1655465384382
+    },
+    {
+      "type": "edit",
+      "id": "c31bb9594a4b168f",
+      "item": {
+        "type": "markdown",
+        "id": "c31bb9594a4b168f",
+        "text": "What I want instead of this:\n"
+      },
+      "date": 1655465393543
+    },
+    {
+      "type": "add",
+      "id": "fc5c6bd755fffe6b",
+      "item": {
+        "type": "markdown",
+        "id": "fc5c6bd755fffe6b",
+        "text": "s this:"
+      },
+      "after": "c31bb9594a4b168f",
+      "date": 1655465394801
+    },
+    {
+      "id": "fc5c6bd755fffe6b",
+      "type": "move",
+      "order": [
+        "58359956087e9898",
+        "690a69c44169233f",
+        "c280fd053ff5a3d2",
+        "c53edbff6dd34d1b",
+        "90747de044dafe01",
+        "65d9b9b7d5b39b0a",
+        "139279d94007c26c",
+        "9ff531b7f77662a2",
+        "284e49244630f875",
+        "6da74352dd321f11",
+        "40089a0e5d19771e",
+        "cb78518c6b4e763c",
+        "b3d245a74f87d56e",
+        "1e9edd6d61ba4797",
+        "97be28ae716a5557",
+        "c31bb9594a4b168f",
+        "44a5404d9f637835",
+        "fc5c6bd755fffe6b"
+      ],
+      "date": 1655465397947
+    },
+    {
+      "type": "edit",
+      "id": "fc5c6bd755fffe6b",
+      "item": {
+        "type": "markdown",
+        "id": "fc5c6bd755fffe6b",
+        "text": "Is this:"
+      },
+      "date": 1655465405139
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "75932a024a5c4374"
+      },
+      "id": "75932a024a5c4374",
+      "type": "add",
+      "after": "fc5c6bd755fffe6b",
+      "date": 1655465411517
+    },
+    {
+      "type": "edit",
+      "id": "75932a024a5c4374",
+      "item": {
+        "type": "html",
+        "id": "75932a024a5c4374",
+        "text": "<img\n  width=\"100%\"\n  src=\"https://cdn.discordapp.com/attachments/737255889517543545/922530618540167168/IMG_9337.jpg\"\n>"
+      },
+      "date": 1655465425130
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ae051d4268bb91e4"
+      },
+      "id": "ae051d4268bb91e4",
+      "type": "add",
+      "after": "75932a024a5c4374",
+      "date": 1655465439906
+    },
+    {
+      "type": "edit",
+      "id": "ae051d4268bb91e4",
+      "item": {
+        "type": "markdown",
+        "id": "ae051d4268bb91e4",
+        "text": "That is, to embed a spotter which gives me better (and more beautiful) access to the underlying model"
+      },
+      "date": 1655465441698
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "31cb510630adcf2f"
+      },
+      "id": "31cb510630adcf2f",
+      "type": "add",
+      "after": "ae051d4268bb91e4",
+      "date": 1655465448342
+    },
+    {
+      "type": "edit",
+      "id": "31cb510630adcf2f",
+      "item": {
+        "type": "html",
+        "id": "31cb510630adcf2f",
+        "text": "<img\n  width=\"100%\"\n  src=\"https://cdn.discordapp.com/attachments/737255889517543545/922531325620154379/Screen_Shot_2021-12-20_at_11.49.25_AM.png\"\n>"
+      },
+      "date": 1655465463770
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0ebc27eff46c04d5"
+      },
+      "id": "0ebc27eff46c04d5",
+      "type": "add",
+      "after": "31cb510630adcf2f",
+      "date": 1655465477911
+    },
+    {
+      "type": "edit",
+      "id": "0ebc27eff46c04d5",
+      "item": {
+        "type": "markdown",
+        "id": "0ebc27eff46c04d5",
+        "text": "SeanDeNigris — 20.12.2021\n3) My completion visitor method wasn't being called, but there was no indication why. When I put a halt and stepped through, I go the error message below, but it was baffling until I got the idea to do that \n"
+      },
+      "date": 1655465479858
+    },
+    {
+      "type": "edit",
+      "id": "0ebc27eff46c04d5",
+      "item": {
+        "type": "markdown",
+        "id": "0ebc27eff46c04d5",
+        "text": "SeanDeNigris — [https://discord.com/channels/729445214812504107/737255889517543545/922534262031405106 discord]\n3) My completion visitor method wasn't being called, but there was no indication why. When I put a halt and stepped through, I go the error message below, but it was baffling until I got the idea to do that \n"
+      },
+      "date": 1655465496778
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e3f5ccaf941682e9"
+      },
+      "id": "e3f5ccaf941682e9",
+      "type": "add",
+      "after": "0ebc27eff46c04d5",
+      "date": 1655465739846
+    },
+    {
+      "type": "edit",
+      "id": "e3f5ccaf941682e9",
+      "item": {
+        "type": "html",
+        "id": "e3f5ccaf941682e9",
+        "text": "<img\n  width=\"100%\"\n  src=\"https://cdn.discordapp.com/attachments/737255889517543545/922534260865392670/Screen_Shot_2021-12-20_at_12.01.45_PM.png\"\n>"
+      },
+      "date": 1655465753192
+    },
+    {
+      "type": "add",
+      "id": "0f2176360fd6d383",
+      "item": {
+        "type": "markdown",
+        "id": "0f2176360fd6d383",
+        "text": "It still wasn't clear to me what the conflict was, since I basically copied LeWordAnnotationCompletionVisitor, until I dropped into Morphic and saw that there was a conflict resolution in the class definition. \n"
+      },
+      "after": "0ebc27eff46c04d5",
+      "date": 1655465765726
+    },
+    {
+      "id": "0f2176360fd6d383",
+      "type": "move",
+      "order": [
+        "58359956087e9898",
+        "690a69c44169233f",
+        "c280fd053ff5a3d2",
+        "c53edbff6dd34d1b",
+        "90747de044dafe01",
+        "65d9b9b7d5b39b0a",
+        "139279d94007c26c",
+        "9ff531b7f77662a2",
+        "284e49244630f875",
+        "6da74352dd321f11",
+        "40089a0e5d19771e",
+        "cb78518c6b4e763c",
+        "b3d245a74f87d56e",
+        "1e9edd6d61ba4797",
+        "97be28ae716a5557",
+        "c31bb9594a4b168f",
+        "44a5404d9f637835",
+        "fc5c6bd755fffe6b",
+        "75932a024a5c4374",
+        "ae051d4268bb91e4",
+        "31cb510630adcf2f",
+        "0ebc27eff46c04d5",
+        "e3f5ccaf941682e9",
+        "0f2176360fd6d383"
+      ],
+      "date": 1655465767878
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a043e9d30429dad2"
+      },
+      "id": "a043e9d30429dad2",
+      "type": "add",
+      "after": "0f2176360fd6d383",
+      "date": 1655465778379
+    },
+    {
+      "type": "edit",
+      "id": "a043e9d30429dad2",
+      "item": {
+        "type": "html",
+        "id": "a043e9d30429dad2",
+        "text": "<img\n  widht=\"100%\"\n  src=\"https://cdn.discordapp.com/attachments/737255889517543545/922535074681999440/Screen_Shot_2021-12-20_at_12.04.31_PM.png\"\n>"
+      },
+      "date": 1655465795189
+    },
+    {
+      "type": "edit",
+      "id": "a043e9d30429dad2",
+      "item": {
+        "type": "html",
+        "id": "a043e9d30429dad2",
+        "text": "<img\n  width=\"100%\"\n  src=\"https://cdn.discordapp.com/attachments/737255889517543545/922535074681999440/Screen_Shot_2021-12-20_at_12.04.31_PM.png\"\n>"
+      },
+      "date": 1655465809458
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "844f84a80ce793b2"
+      },
+      "id": "844f84a80ce793b2",
+      "type": "add",
+      "after": "a043e9d30429dad2",
+      "date": 1655465819109
+    },
+    {
+      "type": "edit",
+      "id": "844f84a80ce793b2",
+      "item": {
+        "type": "paragraph",
+        "id": "844f84a80ce793b2",
+        "text": "However, this is not indicated in GT. Since we're using this Visitor as the example of first contact, that should be clearly explained until the GT class definition is sufficiently sophisticated..."
+      },
+      "date": 1655465820856
+    },
+    {
+      "type": "edit",
+      "id": "0f2176360fd6d383",
+      "item": {
+        "type": "markdown",
+        "id": "0f2176360fd6d383",
+        "text": "It still wasn't clear to me what the conflict was, since I basically copied [[LeWordAnnotationCompletionVisitor]], until I dropped into Morphic and saw that there was a conflict resolution in the class definition. \n"
+      },
+      "date": 1655465832275
+    },
+    {
+      "type": "add",
+      "id": "ea9131d06883151d",
+      "item": {
+        "type": "paragraph",
+        "id": "ea9131d06883151d",
+        "text": "…"
+      },
+      "after": "844f84a80ce793b2",
+      "date": 1655465911774
+    },
+    {
+      "type": "add",
+      "id": "b5e32d387567b8cc",
+      "item": {
+        "type": "paragraph",
+        "id": "b5e32d387567b8cc",
+        "text": "tudor girba — 20.12.2021\nPlanned yes. It's not possible right now with the current completion implementation.\n"
+      },
+      "after": "ea9131d06883151d",
+      "date": 1655465913641
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a628d13444d27dc8"
+      },
+      "id": "a628d13444d27dc8",
+      "type": "add",
+      "after": "b5e32d387567b8cc",
+      "date": 1655465924739
+    },
+    {
+      "id": "a628d13444d27dc8",
+      "type": "move",
+      "order": [
+        "58359956087e9898",
+        "690a69c44169233f",
+        "c280fd053ff5a3d2",
+        "c53edbff6dd34d1b",
+        "90747de044dafe01",
+        "65d9b9b7d5b39b0a",
+        "139279d94007c26c",
+        "9ff531b7f77662a2",
+        "284e49244630f875",
+        "6da74352dd321f11",
+        "40089a0e5d19771e",
+        "cb78518c6b4e763c",
+        "b3d245a74f87d56e",
+        "1e9edd6d61ba4797",
+        "97be28ae716a5557",
+        "c31bb9594a4b168f",
+        "44a5404d9f637835",
+        "fc5c6bd755fffe6b",
+        "75932a024a5c4374",
+        "ae051d4268bb91e4",
+        "31cb510630adcf2f",
+        "0ebc27eff46c04d5",
+        "e3f5ccaf941682e9",
+        "0f2176360fd6d383",
+        "a043e9d30429dad2",
+        "844f84a80ce793b2",
+        "a628d13444d27dc8",
+        "ea9131d06883151d",
+        "b5e32d387567b8cc"
+      ],
+      "date": 1655465927516
+    },
+    {
+      "type": "edit",
+      "id": "a628d13444d27dc8",
+      "item": {
+        "type": "html",
+        "id": "a628d13444d27dc8",
+        "text": "<img\n  width=\"100%\"\n  src=\"https://cdn.discordapp.com/attachments/737255889517543545/922535406292074526/Screen_Shot_2021-12-20_at_12.05.10_PM.png\"\n>"
+      },
+      "date": 1655465942024
+    },
+    {
+      "type": "remove",
+      "id": "ea9131d06883151d",
+      "date": 1655465945348
+    },
+    {
+      "type": "edit",
+      "id": "1e9edd6d61ba4797",
+      "item": {
+        "type": "markdown",
+        "id": "1e9edd6d61ba4797",
+        "text": "SeanDeNigris — [https://discord.com/channels/729445214812504107/737255889517543545/922529164148490260 discord]\nI tried to extend the parser following the instructions in the GT book, @tudor girba. Things got off to a great start! Registering handlers rather than extending the monolithic grammar of the built-in parser makes this a realistic possibility now IMHO. \n\n1) A few things:\n- It wasn't immediately obvious to me that you add styles for all three of:\n    1) the raw markup\n    2) the rendered markup (although IMHO #styleButton: is a poor message name, maybe addRenderedStyle:)\n    3) the hiding of the markup\n  and Lepiter is smart enough to somehow handle when each should be applied (I'm not clear specifically how it knows when to apply 2 vs. 3 because the index ranges seem to be the same). Maybe the #styleXyz: messages should be renamed to addXyzStyle: to make things a bit clearer.\n"
+      },
+      "date": 1655470508301
+    },
+    {
+      "type": "add",
+      "id": "9f77cf158123678e",
+      "item": {
+        "type": "markdown",
+        "id": "9f77cf158123678e",
+        "text": "- Documentation seemed to get less as I went deeper. The parser was fairly straightforward given the book and a foundation of Smacc knowledge, but the styler less so, and I felt like I was on my own by the time I got to the custom Snippet, which seems to also need a SnippetViewModel, element class, and who knows what else. I found @botwhytho's https://github.com/botwhytho/LeShellSnippet helpful here as it seemed to isolate \"just what's needed to get started\" a bit better \n"
+      },
+      "after": "1e9edd6d61ba4797",
+      "date": 1655470517770
+    },
+    {
+      "type": "edit",
+      "id": "9f77cf158123678e",
+      "item": {
+        "type": "markdown",
+        "id": "9f77cf158123678e",
+        "text": "- Documentation seemed to get less as I went deeper. The parser was fairly straightforward given the book and a foundation of Smacc knowledge, but the styler less so, and I felt like I was on my own by the time I got to the custom Snippet, which seems to also need a [[SnippetViewModel]], element class, and who knows what else. I found @botwhytho's https://github.com/botwhytho/LeShellSnippet helpful here as it seemed to isolate \"just what's needed to get started\" a bit better \n"
+      },
+      "date": 1655470561402
     }
   ]
 }
