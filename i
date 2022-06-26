@@ -4,7 +4,7 @@
     {
       "type": "markdown",
       "id": "db3c92863d9358c5",
-      "text": "What [[we]] signify by thew word '[[I]]' is a complex that is also notable for being exclusively 'psychical', and it is the most stable complex in the series of our experiences. How can we understand *this* particular grouping of experiences? ([[Bogdanov]], [[Empiriomonism]], p. 13) "
+      "text": "What [[we]] signify by the word '[[I]]' is a complex that is also notable for being exclusively 'psychical', and it is the most stable complex in the series of our experiences. How can we understand *this* particular grouping of experiences? ([[Bogdanov]], [[Empiriomonism]], p. 13) "
     },
     {
       "type": "reference",
@@ -335,6 +335,16 @@
         "19dc83d8db855799"
       ],
       "date": 1644572254686
+    },
+    {
+      "type": "edit",
+      "id": "db3c92863d9358c5",
+      "item": {
+        "type": "markdown",
+        "id": "db3c92863d9358c5",
+        "text": "What [[we]] signify by the word '[[I]]' is a complex that is also notable for being exclusively 'psychical', and it is the most stable complex in the series of our experiences. How can we understand *this* particular grouping of experiences? ([[Bogdanov]], [[Empiriomonism]], p. 13) "
+      },
+      "date": 1656222192351
     }
   ]
 }
