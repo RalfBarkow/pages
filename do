@@ -3,6 +3,11 @@
   "story": [
     {
       "type": "markdown",
+      "id": "d329f8b82671936a",
+      "text": "* [[Learning Cycles]]"
+    },
+    {
+      "type": "markdown",
       "id": "f0b39c54002d8da8",
       "text": "* something via computation\n"
     },
@@ -117,6 +122,46 @@
         "text": "*  something by hand and by voice ⇒ [[Annotation vs FedWiki]] ⇒ [[The Augmented Conversation]]"
       },
       "date": 1655536435608
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d329f8b82671936a"
+      },
+      "id": "d329f8b82671936a",
+      "type": "add",
+      "after": "e2a2e11ed3f4023b",
+      "date": 1661411489089
+    },
+    {
+      "type": "edit",
+      "id": "d329f8b82671936a",
+      "item": {
+        "type": "paragraph",
+        "id": "d329f8b82671936a",
+        "text": "* [[Learning Cycles]]"
+      },
+      "date": 1661411491382
+    },
+    {
+      "type": "edit",
+      "id": "d329f8b82671936a",
+      "item": {
+        "type": "markdown",
+        "id": "d329f8b82671936a",
+        "text": "* [[Learning Cycles]]"
+      },
+      "date": 1661411492909
+    },
+    {
+      "id": "d329f8b82671936a",
+      "type": "move",
+      "order": [
+        "d329f8b82671936a",
+        "f0b39c54002d8da8",
+        "e2a2e11ed3f4023b"
+      ],
+      "date": 1661411495029
     }
   ]
 }

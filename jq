@@ -3,18 +3,18 @@
   "story": [
     {
       "type": "markdown",
-      "id": "3d6556401886cdf5",
-      "text": "https://stedolan.github.io/jq/"
+      "id": "8d6718551c4923f8",
+      "text": "jq is a lightweight and flexible command-line [[JSON]] processor. [https://stedolan.github.io/jq/ site]\n\n"
     },
     {
       "type": "markdown",
-      "id": "8d6718551c4923f8",
-      "text": "> jq is a lightweight and flexible command-line [[JSON]] processor.\n"
+      "id": "1fb2fa847ef0ea89",
+      "text": "We could be a 'proper' UNIX user and use `jq` to parse the JSON output but have to look up it's specific syntax every time we use it again. (vs. [[Infinite Pane-Ing]])"
     },
     {
       "type": "markdown",
       "id": "3ce9578e2e146a9e",
-      "text": "# Name\njq - Command-line JSON processor\n# SYNOPSIS\njq [options...] filter [files...]\n\njq  can  transform JSON in various ways, by selecting, iterating, reducing and otherwise mangling JSON documents.\n\nFor instance, running the command jq 'map(.price) | add' will take an array of JSON objects as input  and  return the sum of their \"price\" fields.\n\njq can accept text input as well, but by default, jq reads a stream of JSON entities (including numbers and other literals) from stdin. Whitespace is only needed to separate entities such as 1 and 2, and true and false. One  or more files may be specified, in which case jq will read input from those instead.\n\nThe options are described in the INVOKING JQ section; they mostly concern input and output formatting. The filter is written in the jq language and specifies how to transform the input file or document."
+      "text": "> jq [options...] filter [files...]\n\njq  can  [[transform]] JSON in various ways, by selecting, iterating, reducing and otherwise mangling JSON documents.\n\nFor instance, running the command jq 'map(.price) | add' will take an array of JSON objects as input  and  return the sum of their \"price\" fields.\n\njq can accept text input as well, but by default, jq reads a stream of JSON entities (including numbers and other literals) from stdin. Whitespace is only needed to separate entities such as 1 and 2, and true and false. One  or more files may be specified, in which case jq will read input from those instead.\n\nThe options are described in the INVOKING JQ section; they mostly concern input and output formatting. The filter is written in the jq language and specifies how to transform the input file or document."
     }
   ],
   "journal": [
@@ -125,6 +125,132 @@
         "text": "# Name\njq - Command-line JSON processor\n# SYNOPSIS\njq [options...] filter [files...]\n\njq  can  transform JSON in various ways, by selecting, iterating, reducing and otherwise mangling JSON documents.\n\nFor instance, running the command jq 'map(.price) | add' will take an array of JSON objects as input  and  return the sum of their \"price\" fields.\n\njq can accept text input as well, but by default, jq reads a stream of JSON entities (including numbers and other literals) from stdin. Whitespace is only needed to separate entities such as 1 and 2, and true and false. One  or more files may be specified, in which case jq will read input from those instead.\n\nThe options are described in the INVOKING JQ section; they mostly concern input and output formatting. The filter is written in the jq language and specifies how to transform the input file or document."
       },
       "date": 1626529219963
+    },
+    {
+      "type": "edit",
+      "id": "8d6718551c4923f8",
+      "item": {
+        "type": "markdown",
+        "id": "8d6718551c4923f8",
+        "text": "jq is a lightweight and flexible command-line [[JSON]] processor.\n"
+      },
+      "date": 1661392380079
+    },
+    {
+      "id": "8d6718551c4923f8",
+      "type": "move",
+      "order": [
+        "8d6718551c4923f8",
+        "3d6556401886cdf5",
+        "3ce9578e2e146a9e"
+      ],
+      "date": 1661392382750
+    },
+    {
+      "type": "remove",
+      "id": "3d6556401886cdf5",
+      "date": 1661392389116
+    },
+    {
+      "type": "edit",
+      "id": "8d6718551c4923f8",
+      "item": {
+        "type": "markdown",
+        "id": "8d6718551c4923f8",
+        "text": "jq is a lightweight and flexible command-line [[JSON]] processor. [https://stedolan.github.io/jq/ site]\n"
+      },
+      "date": 1661392397711
+    },
+    {
+      "type": "edit",
+      "id": "3ce9578e2e146a9e",
+      "item": {
+        "type": "markdown",
+        "id": "3ce9578e2e146a9e",
+        "text": "# SYNOPSIS\njq [options...] filter [files...]\n\njq  can  transform JSON in various ways, by selecting, iterating, reducing and otherwise mangling JSON documents.\n\nFor instance, running the command jq 'map(.price) | add' will take an array of JSON objects as input  and  return the sum of their \"price\" fields.\n\njq can accept text input as well, but by default, jq reads a stream of JSON entities (including numbers and other literals) from stdin. Whitespace is only needed to separate entities such as 1 and 2, and true and false. One  or more files may be specified, in which case jq will read input from those instead.\n\nThe options are described in the INVOKING JQ section; they mostly concern input and output formatting. The filter is written in the jq language and specifies how to transform the input file or document."
+      },
+      "date": 1661392558156
+    },
+    {
+      "type": "edit",
+      "id": "8d6718551c4923f8",
+      "item": {
+        "type": "markdown",
+        "id": "8d6718551c4923f8",
+        "text": "jq is a lightweight and flexible command-line [[JSON]] processor. [https://stedolan.github.io/jq/ site]\n\n"
+      },
+      "date": 1661393253813
+    },
+    {
+      "type": "add",
+      "id": "1fb2fa847ef0ea89",
+      "item": {
+        "type": "markdown",
+        "id": "1fb2fa847ef0ea89",
+        "text": "We  have to look up it's specific syntax every time we use it again. (vs. "
+      },
+      "after": "8d6718551c4923f8",
+      "date": 1661393280236
+    },
+    {
+      "type": "edit",
+      "id": "1fb2fa847ef0ea89",
+      "item": {
+        "type": "markdown",
+        "id": "1fb2fa847ef0ea89",
+        "text": "We  have to look up it's specific syntax every time we use it again. (vs. [[ Infinite Pane-Ing]]"
+      },
+      "date": 1661393289298
+    },
+    {
+      "type": "edit",
+      "id": "1fb2fa847ef0ea89",
+      "item": {
+        "type": "markdown",
+        "id": "1fb2fa847ef0ea89",
+        "text": "We  have to look up it's specific syntax every time we use it again. (vs. [[ Infinite Pane-Ing]])"
+      },
+      "date": 1661393294942
+    },
+    {
+      "type": "edit",
+      "id": "3ce9578e2e146a9e",
+      "item": {
+        "type": "markdown",
+        "id": "3ce9578e2e146a9e",
+        "text": "> jq [options...] filter [files...]\n\njq  can  transform JSON in various ways, by selecting, iterating, reducing and otherwise mangling JSON documents.\n\nFor instance, running the command jq 'map(.price) | add' will take an array of JSON objects as input  and  return the sum of their \"price\" fields.\n\njq can accept text input as well, but by default, jq reads a stream of JSON entities (including numbers and other literals) from stdin. Whitespace is only needed to separate entities such as 1 and 2, and true and false. One  or more files may be specified, in which case jq will read input from those instead.\n\nThe options are described in the INVOKING JQ section; they mostly concern input and output formatting. The filter is written in the jq language and specifies how to transform the input file or document."
+      },
+      "date": 1661393331742
+    },
+    {
+      "type": "edit",
+      "id": "1fb2fa847ef0ea89",
+      "item": {
+        "type": "markdown",
+        "id": "1fb2fa847ef0ea89",
+        "text": "We could be a 'proper' UNIX user and use `jq` to parse the JSON output but have to look up it's specific syntax every time we use it again. (vs. [[ Infinite Pane-Ing]])"
+      },
+      "date": 1661393450325
+    },
+    {
+      "type": "edit",
+      "id": "1fb2fa847ef0ea89",
+      "item": {
+        "type": "markdown",
+        "id": "1fb2fa847ef0ea89",
+        "text": "We could be a 'proper' UNIX user and use `jq` to parse the JSON output but have to look up it's specific syntax every time we use it again. (vs. [[Infinite Pane-Ing]])"
+      },
+      "date": 1661393476916
+    },
+    {
+      "type": "edit",
+      "id": "3ce9578e2e146a9e",
+      "item": {
+        "type": "markdown",
+        "id": "3ce9578e2e146a9e",
+        "text": "> jq [options...] filter [files...]\n\njq  can  [[transform]] JSON in various ways, by selecting, iterating, reducing and otherwise mangling JSON documents.\n\nFor instance, running the command jq 'map(.price) | add' will take an array of JSON objects as input  and  return the sum of their \"price\" fields.\n\njq can accept text input as well, but by default, jq reads a stream of JSON entities (including numbers and other literals) from stdin. Whitespace is only needed to separate entities such as 1 and 2, and true and false. One  or more files may be specified, in which case jq will read input from those instead.\n\nThe options are described in the INVOKING JQ section; they mostly concern input and output formatting. The filter is written in the jq language and specifies how to transform the input file or document."
+      },
+      "date": 1661393513700
     }
   ]
 }
