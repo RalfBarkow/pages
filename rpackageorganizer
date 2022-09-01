@@ -1,0 +1,95 @@
+{
+  "title": "RPackageOrganizer",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "74c994f6fd964fb8",
+      "text": "A RPackageOrganizer is responsible for providing all the package currently defined in the system.\nIn addition it provides a back pointer from the class to its package.\n\nThe classPackageMapping and the classExtendingPackageMapping should be moved in the future to the classes themselves. \n\n\nFor tests or actions that could destroy the package organizer,  do not access directly the singleton of RPackageOrganizer.\nUse instead \n\t\tRPackage withOrganizer: aNewOrganizer do: ablock\n\t\t\tor via RPackage organizer\n\t\t\n\t\nRPackageOrganizer fillUp will fill up the system from the current PackageOrganizer\n\t\"self fillUp\"\n\t\n-----------------------------------------------------------------------------------------------------------------------------------------------\t\n\t\n\t\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "82ac7db02b9d3e86",
+      "text": "A rpackageOrganizer update itself when some changes are made in the system. It does that by registering to a systemAnnoucer, specifying an action when an annoucement is triggered.\nHere is what I ([[Cyrille Delaunay]]) propose to do for each annocuement triggered:\n"
+    },
+    {
+      "type": "markdown",
+      "id": "5e7d8fc38b646cbc",
+      "text": "\nSystemCategoryAddedAnnouncement \t\n\t=> I would just register a new RPackage (if it does not already exist) in the RPackageOrganizer\n\t\nSystemCategoryRemovedAnnouncement \n     => I would just unregister the RPackage concerned from the organizer\n\nSystemCategoryRenamedAnnouncement\n     => I would update the RPackage concerned, by changing its name\n     => I would update the 'packages' dictionary of the organizer, putting the new name as key\n\nSystemClassAddedAnnouncement \n    => Import the class in the RPackage concerned (RPackage >> importClass:)\n    => Register the class in the 'classPackageMapping' dictionary of the organizer (RPackageOrganizer >> registerPackage:forClass)\n    (=> maybe we should pay attention if both the class and the metaclass launch this kind of event ?)\n\nSystemClassRecategorizedAnnouncement\n    => I would update the old RPackage concerned:\n            => unregister the class\n            => unregister all defined methods of the class\n    => I would update the new RPackage:\n            => Import the class in the RPackage (importClass:)\n    => I would update the organizer:\n            => update the 'classPackageDictionary' to point on the new RPackage\n\n \nSystemClassRemovedAnnouncement\n    => I would update the RPackake concerned\n             => unregister the class\n             => unregister all defined methods of the class\n    => I would update the organizer:\n             => update the 'classPackageDictionary' to remove the class\n\nSystemClassRenamedAnnouncement\n    => I would update the RPackage in which the class is defined:\n             => update the 'classDefinedSelectors' dictionary (replace the old key by the new one)\n             => update the 'metaclassDefinedSelectors' dictionary (replace the old key by the new one)\n    => I would update all RPackages extending this class\n             => update the 'classExtensionsSelectors' dictionary (replace the old key by the new one)\n             => update the 'metaclassclassExtensionsSelectors' dictionary (replace the old key by the new one)\n    => I would update the organizer\n             => update the 'classPackageDictionary' to replace the key with the new class name\n             => update the 'classExtendingPackagesMapping' to replace the key with the new class name\n                          \nSystemClassReorganizedAnnouncement \n    (=> I guess we should check if extensions have not been added or removed ? \n      (to retrieve this information, the only thing I found is ClassDescription >> organization, and then check each category begining with '*' and compare with the organizer. seems to be painful, no?))\n\t=> when an extension is removed, all methods inside are removed. Therefore, the MethodRemovedAnnounecement will do the job. Not sur this one still usefull\n\nSystemProtocolAddedAnnouncement\n    => I don't see anything to do for this annoucement\n\nSystemProtocolRemovedAnnoucement\n    => If the category is an extension from a package, I would move all the methods concerned, from the extending RPackage to the class RPackage\n\nSystemMethodAddedAnnouncement\n       => I would check the category in which the method has been defined\n               => if it correspond to an extending package -> add the method to the extending RPackage\n               => if not, add the method to the class parentPackage\n\nSystemMethodModifiedAnnouncement\n       this annoucement can correspond to several kind of modifications:\n\t       *  a method has been renamed\n                       => I would update the rPackage in which the method is defined to replace the old selector by the new one\n\t\t* a method has been move to another category \n\t\t\t-maybe from a classic category to an extending package\n                             => we should move the method from the  method class parentPackage to extendingPackage package\n\t\t\t-maybe from an extending package to another extending package\n                             => we should move the method from the  extendingPackage package to the other extendingPackage package\n\t\t\t-maybe from an extending package to a classic category\n                             =>  we should move the method from the  extendingPackage to the method class parentPackage\n\t\t        -maybe from a classic category to another classic category\n                             => we have nothing to do\n\t\t\t\n\nSystemMethodRecategorizedAnnouncement\n          same thing than above\n\nSystemMethodRemovedAnnouncement\n       => I would simply remove the method from the RPackage in which it is register"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "RPackageOrganizer",
+        "story": []
+      },
+      "date": 1662008985803
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8d9b924bb21ef970"
+      },
+      "id": "8d9b924bb21ef970",
+      "type": "add",
+      "date": 1662008988256
+    },
+    {
+      "type": "remove",
+      "id": "8d9b924bb21ef970",
+      "date": 1662008991033
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "74c994f6fd964fb8"
+      },
+      "id": "74c994f6fd964fb8",
+      "type": "add",
+      "date": 1662008994467
+    },
+    {
+      "type": "edit",
+      "id": "74c994f6fd964fb8",
+      "item": {
+        "type": "markdown",
+        "id": "74c994f6fd964fb8",
+        "text": "A RPackageOrganizer is responsible for providing all the package currently defined in the system.\nIn addition it provides a back pointer from the class to its package.\n\nThe classPackageMapping and the classExtendingPackageMapping should be moved in the future to the classes themselves. \n\n\nFor tests or actions that could destroy the package organizer,  do not access directly the singleton of RPackageOrganizer.\nUse instead \n\t\tRPackage withOrganizer: aNewOrganizer do: ablock\n\t\t\tor via RPackage organizer\n\t\t\n\t\nRPackageOrganizer fillUp will fill up the system from the current PackageOrganizer\n\t\"self fillUp\"\n\t\n-----------------------------------------------------------------------------------------------------------------------------------------------\t\n\t\n\t\nA rpackageOrganizer update itself when some changes are made in the system. It does that by registering to a systemAnnoucer, specifying an action when an annoucement is triggered.\nHere is what I (Cyrille Delaunay) propose to do for each annocuement triggered:\n\nSystemCategoryAddedAnnouncement \t\n\t=> I would just register a new RPackage (if it does not already exist) in the RPackageOrganizer\n\t\nSystemCategoryRemovedAnnouncement \n     => I would just unregister the RPackage concerned from the organizer\n\nSystemCategoryRenamedAnnouncement\n     => I would update the RPackage concerned, by changing its name\n     => I would update the 'packages' dictionary of the organizer, putting the new name as key\n\nSystemClassAddedAnnouncement \n    => Import the class in the RPackage concerned (RPackage >> importClass:)\n    => Register the class in the 'classPackageMapping' dictionary of the organizer (RPackageOrganizer >> registerPackage:forClass)\n    (=> maybe we should pay attention if both the class and the metaclass launch this kind of event ?)\n\nSystemClassRecategorizedAnnouncement\n    => I would update the old RPackage concerned:\n            => unregister the class\n            => unregister all defined methods of the class\n    => I would update the new RPackage:\n            => Import the class in the RPackage (importClass:)\n    => I would update the organizer:\n            => update the 'classPackageDictionary' to point on the new RPackage\n\n \nSystemClassRemovedAnnouncement\n    => I would update the RPackake concerned\n             => unregister the class\n             => unregister all defined methods of the class\n    => I would update the organizer:\n             => update the 'classPackageDictionary' to remove the class\n\nSystemClassRenamedAnnouncement\n    => I would update the RPackage in which the class is defined:\n             => update the 'classDefinedSelectors' dictionary (replace the old key by the new one)\n             => update the 'metaclassDefinedSelectors' dictionary (replace the old key by the new one)\n    => I would update all RPackages extending this class\n             => update the 'classExtensionsSelectors' dictionary (replace the old key by the new one)\n             => update the 'metaclassclassExtensionsSelectors' dictionary (replace the old key by the new one)\n    => I would update the organizer\n             => update the 'classPackageDictionary' to replace the key with the new class name\n             => update the 'classExtendingPackagesMapping' to replace the key with the new class name\n                          \nSystemClassReorganizedAnnouncement \n    (=> I guess we should check if extensions have not been added or removed ? \n      (to retrieve this information, the only thing I found is ClassDescription >> organization, and then check each category begining with '*' and compare with the organizer. seems to be painful, no?))\n\t=> when an extension is removed, all methods inside are removed. Therefore, the MethodRemovedAnnounecement will do the job. Not sur this one still usefull\n\nSystemProtocolAddedAnnouncement\n    => I don't see anything to do for this annoucement\n\nSystemProtocolRemovedAnnoucement\n    => If the category is an extension from a package, I would move all the methods concerned, from the extending RPackage to the class RPackage\n\nSystemMethodAddedAnnouncement\n       => I would check the category in which the method has been defined\n               => if it correspond to an extending package -> add the method to the extending RPackage\n               => if not, add the method to the class parentPackage\n\nSystemMethodModifiedAnnouncement\n       this annoucement can correspond to several kind of modifications:\n\t       *  a method has been renamed\n                       => I would update the rPackage in which the method is defined to replace the old selector by the new one\n\t\t* a method has been move to another category \n\t\t\t-maybe from a classic category to an extending package\n                             => we should move the method from the  method class parentPackage to extendingPackage package\n\t\t\t-maybe from an extending package to another extending package\n                             => we should move the method from the  extendingPackage package to the other extendingPackage package\n\t\t\t-maybe from an extending package to a classic category\n                             =>  we should move the method from the  extendingPackage to the method class parentPackage\n\t\t        -maybe from a classic category to another classic category\n                             => we have nothing to do\n\t\t\t\n\nSystemMethodRecategorizedAnnouncement\n          same thing than above\n\nSystemMethodRemovedAnnouncement\n       => I would simply remove the method from the RPackage in which it is register"
+      },
+      "date": 1662008996774
+    },
+    {
+      "type": "edit",
+      "id": "74c994f6fd964fb8",
+      "item": {
+        "type": "markdown",
+        "id": "74c994f6fd964fb8",
+        "text": "A RPackageOrganizer is responsible for providing all the package currently defined in the system.\nIn addition it provides a back pointer from the class to its package.\n\nThe classPackageMapping and the classExtendingPackageMapping should be moved in the future to the classes themselves. \n\n\nFor tests or actions that could destroy the package organizer,  do not access directly the singleton of RPackageOrganizer.\nUse instead \n\t\tRPackage withOrganizer: aNewOrganizer do: ablock\n\t\t\tor via RPackage organizer\n\t\t\n\t\nRPackageOrganizer fillUp will fill up the system from the current PackageOrganizer\n\t\"self fillUp\"\n\t\n-----------------------------------------------------------------------------------------------------------------------------------------------\t\n\t\n\t\n\n"
+      },
+      "date": 1662009090868
+    },
+    {
+      "type": "add",
+      "id": "82ac7db02b9d3e86",
+      "item": {
+        "type": "markdown",
+        "id": "82ac7db02b9d3e86",
+        "text": "A rpackageOrganizer update itself when some changes are made in the system. It does that by registering to a systemAnnoucer, specifying an action when an annoucement is triggered.\nHere is what I ([[Cyrille Delaunay]]) propose to do for each annocuement triggered:\n"
+      },
+      "after": "74c994f6fd964fb8",
+      "date": 1662009102346
+    },
+    {
+      "type": "add",
+      "id": "5e7d8fc38b646cbc",
+      "item": {
+        "type": "markdown",
+        "id": "5e7d8fc38b646cbc",
+        "text": "\nSystemCategoryAddedAnnouncement \t\n\t=> I would just register a new RPackage (if it does not already exist) in the RPackageOrganizer\n\t\nSystemCategoryRemovedAnnouncement \n     => I would just unregister the RPackage concerned from the organizer\n\nSystemCategoryRenamedAnnouncement\n     => I would update the RPackage concerned, by changing its name\n     => I would update the 'packages' dictionary of the organizer, putting the new name as key\n\nSystemClassAddedAnnouncement \n    => Import the class in the RPackage concerned (RPackage >> importClass:)\n    => Register the class in the 'classPackageMapping' dictionary of the organizer (RPackageOrganizer >> registerPackage:forClass)\n    (=> maybe we should pay attention if both the class and the metaclass launch this kind of event ?)\n\nSystemClassRecategorizedAnnouncement\n    => I would update the old RPackage concerned:\n            => unregister the class\n            => unregister all defined methods of the class\n    => I would update the new RPackage:\n            => Import the class in the RPackage (importClass:)\n    => I would update the organizer:\n            => update the 'classPackageDictionary' to point on the new RPackage\n\n \nSystemClassRemovedAnnouncement\n    => I would update the RPackake concerned\n             => unregister the class\n             => unregister all defined methods of the class\n    => I would update the organizer:\n             => update the 'classPackageDictionary' to remove the class\n\nSystemClassRenamedAnnouncement\n    => I would update the RPackage in which the class is defined:\n             => update the 'classDefinedSelectors' dictionary (replace the old key by the new one)\n             => update the 'metaclassDefinedSelectors' dictionary (replace the old key by the new one)\n    => I would update all RPackages extending this class\n             => update the 'classExtensionsSelectors' dictionary (replace the old key by the new one)\n             => update the 'metaclassclassExtensionsSelectors' dictionary (replace the old key by the new one)\n    => I would update the organizer\n             => update the 'classPackageDictionary' to replace the key with the new class name\n             => update the 'classExtendingPackagesMapping' to replace the key with the new class name\n                          \nSystemClassReorganizedAnnouncement \n    (=> I guess we should check if extensions have not been added or removed ? \n      (to retrieve this information, the only thing I found is ClassDescription >> organization, and then check each category begining with '*' and compare with the organizer. seems to be painful, no?))\n\t=> when an extension is removed, all methods inside are removed. Therefore, the MethodRemovedAnnounecement will do the job. Not sur this one still usefull\n\nSystemProtocolAddedAnnouncement\n    => I don't see anything to do for this annoucement\n\nSystemProtocolRemovedAnnoucement\n    => If the category is an extension from a package, I would move all the methods concerned, from the extending RPackage to the class RPackage\n\nSystemMethodAddedAnnouncement\n       => I would check the category in which the method has been defined\n               => if it correspond to an extending package -> add the method to the extending RPackage\n               => if not, add the method to the class parentPackage\n\nSystemMethodModifiedAnnouncement\n       this annoucement can correspond to several kind of modifications:\n\t       *  a method has been renamed\n                       => I would update the rPackage in which the method is defined to replace the old selector by the new one\n\t\t* a method has been move to another category \n\t\t\t-maybe from a classic category to an extending package\n                             => we should move the method from the  method class parentPackage to extendingPackage package\n\t\t\t-maybe from an extending package to another extending package\n                             => we should move the method from the  extendingPackage package to the other extendingPackage package\n\t\t\t-maybe from an extending package to a classic category\n                             =>  we should move the method from the  extendingPackage to the method class parentPackage\n\t\t        -maybe from a classic category to another classic category\n                             => we have nothing to do\n\t\t\t\n\nSystemMethodRecategorizedAnnouncement\n          same thing than above\n\nSystemMethodRemovedAnnouncement\n       => I would simply remove the method from the RPackage in which it is register"
+      },
+      "after": "82ac7db02b9d3e86",
+      "date": 1662009105138
+    }
+  ]
+}

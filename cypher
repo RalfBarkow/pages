@@ -2,9 +2,9 @@
   "title": "Cypher",
   "story": [
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "109374662a751299",
-      "text": "The syntax of the [[Cypher]] query language. [https://neo4j.com/docs/cypher-manual/current/syntax/ page]"
+      "text": "The syntax of the **Cypher** [[query]] language. [https://neo4j.com/docs/cypher-manual/current/syntax/ page]"
     }
   ],
   "journal": [
@@ -54,6 +54,26 @@
         "text": "The syntax of the [[Cypher]] query language. [https://neo4j.com/docs/cypher-manual/current/syntax/ page]"
       },
       "date": 1651135310490
+    },
+    {
+      "type": "edit",
+      "id": "109374662a751299",
+      "item": {
+        "type": "paragraph",
+        "id": "109374662a751299",
+        "text": "The syntax of the **Cypher** [[query]] language. [https://neo4j.com/docs/cypher-manual/current/syntax/ page]"
+      },
+      "date": 1662008862913
+    },
+    {
+      "type": "edit",
+      "id": "109374662a751299",
+      "item": {
+        "type": "markdown",
+        "id": "109374662a751299",
+        "text": "The syntax of the **Cypher** [[query]] language. [https://neo4j.com/docs/cypher-manual/current/syntax/ page]"
+      },
+      "date": 1662008864342
     }
   ]
 }
