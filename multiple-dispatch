@@ -1,0 +1,842 @@
+{
+  "title": "Multiple Dispatch",
+  "story": [
+    {
+      "type": "html",
+      "text": "When a dynamic dispatching mechanism for a function uses more than one piece of information to determine which function to actually call. Usually the pieces of information are the types of the parameters passed to the function.",
+      "id": "279145b7accf0ec559795e31430fe1bf"
+    },
+    {
+      "type": "html",
+      "text": "<b>Java-style method overloading isn't multiple dispatch.</b> In multiple dispatch, the 'switch' is done on the dynamic (run-time) type tag of the object -- but Java's (and C++'s) overloading only considers the static (compile-time) type of the object reference.",
+      "id": "dc171969a1f67660d6d025f525e9bf6f"
+    },
+    {
+      "type": "html",
+      "text": "\nLet's declare an overloaded method in an Appraiser class, which appraises the value of different things:",
+      "id": "df4c7dbe463f72f990283d1a166dcdd5"
+    },
+    {
+      "type": "code",
+      "text": "  class Appraiser {\n    public void Appraise (Vehicle v) { println (\"Appraising a vehicle...\"); }\n    public void Appraise (Tractor t) { println (\"Appraising a tractor...\"); }\n  }",
+      "id": "2093efa703a63f6596103e7961636a27"
+    },
+    {
+      "type": "html",
+      "text": "(Tractor extends Vehicle.) Now let's make a Tractor, but refer to it with a Vehicle reference:",
+      "id": "39679116bfd0f4d6a58980d9e737ff0b"
+    },
+    {
+      "type": "code",
+      "text": "  Vehicle myVehicle = new Tractor();",
+      "id": "d017426e73e25021e5de37957e8a61cf"
+    },
+    {
+      "type": "html",
+      "text": "What is the output of the following method call?",
+      "id": "c624f5016c6bae25e026bb236e58e9d4"
+    },
+    {
+      "type": "code",
+      "text": "  myAppraiser.Appraise (myVehicle);",
+      "id": "1749151c0e8a45feb9b13684ef18be01"
+    },
+    {
+      "type": "html",
+      "text": "Answer: \"Appraising a vehicle...\"! But this isn't what we want, because tractors have special features that most vehicles don't have, and we won't get the real price for our tractor.",
+      "id": "f9d101b97b0f20a332c6140d8133e2a7"
+    },
+    {
+      "type": "html",
+      "text": "\nWith true [[Multiple Dispatch]], the Tractor-specific version will be called, and we'll cash in like we should!",
+      "id": "6442369d8f1c22e8899e0db593a3d06f"
+    },
+    {
+      "type": "html",
+      "text": "<i>That sounds like [[Dynamic Dispatch]], not [[Multiple Dispatch]]...</i>",
+      "id": "157861e32b110ae2b3dcce026b569576"
+    },
+    {
+      "type": "html",
+      "text": "\nIt is describing a -lack of- [[Multiple Dispatch]] ([[Double Dispatch]] in particular).  But it needs to be extended a bit to show why.",
+      "id": "4151af57f322c017d03c262730f03a09"
+    },
+    {
+      "type": "code",
+      "text": "  class T''''''ractorHead extends Appraiser {\n    public void Appraise (Vehicle v) { println (\"Boring...\");           }\n    public void Appraise (Tractor t) { println (\"I LOVE TRACTORS!!!!\"); }\n  }",
+      "id": "1baefafe5162449cb8a33e1e34b4d5d9"
+    },
+    {
+      "type": "code",
+      "text": "  Appraiser myAppraiser = new T''''''ractorHead();\n  Vehicle   myVehicle   = new Tractor();\n  myAppraiser.Appraise(myVehicle);        // outputs: \"Boring...\"",
+      "id": "440e0d3c895c1273e9bdfca2a4b7c2ec"
+    },
+    {
+      "type": "html",
+      "text": "\nClearly we have [[Dynamic Dispatch]] because only the T<b></b>ractorHead has the behavior of printing 'Boring...'.  But this is <b>single</b> dynamic dispatch because it was 'dynamic' only on a single argument (myAppraiser).  If we had true [[Multiple Dispatch]] (even just [[Double Dispatch]]) then \"I LOVE TRACTORS\" would have been printed; the method selected (by the method 'dispatcher') would have automatically chosen the more specific instance of 'Appraise'.",
+      "id": "c1d212b3ae96d3a7705bef8a55d555a5"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+    },
+    {
+      "type": "html",
+      "text": "\nIdeally, since we're talking about features Java and most languages <i>don't</i> have, we could also further specialize in one class without introducing couplings in the base class.  Example:",
+      "id": "77c15c7ed9161d755de3e0cd97e318b9"
+    },
+    {
+      "type": "code",
+      "text": "  class T''''''ractorHead extends Appraiser {\n    ... as above ...\n    public void Appraise (U''''''nfavoredBrandTractor ubt) { println (\"Meh.\");   }\n    public void Appraise (J''''''ohnDeerTractor jdt) { printlin (\"J''''''ohnDeer tractors are the best!\"); }\n  }",
+      "id": "5b0cfc95d466bf8cb0b4338768dd1bb2"
+    },
+    {
+      "type": "code",
+      "text": "  Appraiser myAppraiser = new T''''''ractorHead();\n  myAppraiser.Appraise( new U''''''nfavoredBrandTractor() );  // prints \"I LOVE TRACTORS!!!!\"\n  Vehicle myVehicle = new J''''''ohnDeerTractor();\n  myAppraiser.Appraise( v ); // prints \"Boring...\"",
+      "id": "306f28df6c2934a8f85fdfabff82553a"
+    },
+    {
+      "type": "html",
+      "text": "\nIn this case, what we actually want are \"Meh.\" and \"J<b></b>ohnDeer tractors are the best!\" respectively.  But even if Java provided [[Multiple Dispatch]], these selections would be unlikely because they aren't overriding methods in Appraiser; i.e. we're demanding a <b>non-virtual</b> [[Dynamic Dispatch]] for myAppraiser.  This can be obtained, note, by making the dispatch-method itself 'dynamic' such that each derived class automatically overrides the dispatch method and chooses an appropriate method call based on the actual types of the parameters.  ",
+      "id": "bef9ff08428b73329e8d046ba091d701"
+    },
+    {
+      "type": "html",
+      "text": "\nHowever, something like the above might be achieved via runtime reflection on both the Appraiser and the other parameters.  One could even make it generic, wrapping all that functionality into something like:",
+      "id": "bc5ea822977e35db45e34a3ad60bd4f1"
+    },
+    {
+      "type": "code",
+      "text": "  class Dispatcher {\n     public void dispatch1(Object methodSrc, String sMethod, Object parameter1) { ... impl ... }\n     public void dispatch2(Object methodSrc, String sMethod, Object parameter1, Object parameter2) { ... impl ... }\n  }",
+      "id": "a5b42cdf0ca1dd4d7abcd60f0cc6424b"
+    },
+    {
+      "type": "code",
+      "text": "  Dispatcher myDispatcher = new Dispatcher();\n  Appraiser myAppraiser = new T''''''ractorHead();\n  Vehicle myVehicle = new J''''''ohnDeerTractor();\n  myDispatcher.dispatch1(myAppraiser,\"Appraise\",myVehicle);  // prints \"J''''''ohnDeer tractors are the best!\"",
+      "id": "d342011fe467e9677e23de3c9c4bfdb3"
+    },
+    {
+      "type": "html",
+      "text": "\nUsing reflection, it may be feasible to grab the actual method list from myAppraiser, filter it down to those matching the string \"Appraise\", grab the dynamic type of parameter1, and dispatch the specialized parameter to the correct specialized method.  Essentially you're overriding the default Java dispatcher.  Without a doubt, doing all this would be more expensive than what Java is doing (that being function-pointer lookups in a virtual table, for most implementations), but the flexibility can be useful and (just as importantly) you're avoiding the 'coupling' that comes from requiring 'Appraiser' know about every possible vehicle type.",
+      "id": "bba1405e3c633423297393e90fa69cb0"
+    },
+    {
+      "type": "html",
+      "text": "\nI'm curious if someone has an implementation for Dispatcher.  I wouldn't be surprised; based on the example below, one might use something like:",
+      "id": "13add0589cbe93c3d12744d50100769d"
+    },
+    {
+      "type": "code",
+      "text": " class Dispatcher {\n   public void dispatch1(Object src, String sMethod, Object p1) {\n      Method m = src.getClass().getDeclaredMethod(src,new Class[](p1.getClass());\n      m.invoke(src,new Object[](p1);\n   }\n }",
+      "id": "11fc178c369b7ef80aa0627143a52b11"
+    },
+    {
+      "type": "html",
+      "text": "\nThis should give true [[Double Dispatch]] between any two objects without depending on virtual overrides, and without mucking up the interfaces to 'Vehicle', and without creating coupling to some 'Appraiser' base class.",
+      "id": "24f3fccbb9059fbb30930e3ec8810a71"
+    },
+    {
+      "type": "code",
+      "text": "  Object myAppraiser = new T''''''ractorHead();\n  Object myVehicle   = new Tractor();\n  new Dispatcher().dispatch1(myAppraiser,\"Appraise\",myVehicle);  // prints \"I LOVE TRACTORS!\"",
+      "id": "d41432d1b1bb2ca7152671221a9630df"
+    },
+    {
+      "type": "html",
+      "text": "\nThe extension to more than one parameter (to true non-virtual [[Multiple Dispatch]]) should also be possible.  ",
+      "id": "3398f5ac2302d101b92c8f5efc9ca249"
+    },
+    {
+      "type": "html",
+      "text": "\nHowever, calling it [[Multiple Dispatch]] is a bit misleading.  It provides that possibility, but this seems to strictly be more general... and a lot less optimal and a lot less safe (this solution is not much for compile-time checks).",
+      "id": "f94bfc46a5e52efc87be10e549f19dd3"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+    },
+    {
+      "type": "html",
+      "text": "\nIn languages that only support single dispatch (C++, Java, Smalltalk), one can use [[Double Dispatch]], which though not [[Multiple Dispatch]], does handle most cases you might need.  But since [[Two Is An Impossible Number]], you should feel just a little dirty for this hack.",
+      "id": "39634e5ff39ac7533aae3d0933924431"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+    },
+    {
+      "type": "html",
+      "text": "\nThis is not a problem. Make a virtual string cast method on vehicle and call it from appraise. The most derived string cast will be called. You might like the appraiser method signature to have such smarts ... but what difference does it make? Oh, you're gonna talk about performance. I just know you're gonna stand there with a bald face and talk about performance ... and that's just stupid.",
+      "id": "33fe465240b8321bf73acad28f9bae0e"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+    },
+    {
+      "type": "html",
+      "text": "You can come close in Java without using [[Double Dispatch]], which (IMHO) clutters the target object's interface:",
+      "id": "d1dfed7b6f2794f78be2f2b5af284993"
+    },
+    {
+      "type": "code",
+      "text": "  class Appraiser {",
+      "id": "a526f15edac4315d80beb6a82691d129"
+    },
+    {
+      "type": "code",
+      "text": "    public void Appraise(Vehicle vehicle) {\n      // Grab the correct method using Vehicle's run-time type, and explicitly invoke it\n      Method m = this.getClass().getDeclaredMethod(\"Appraise\", new Class[]{vehicle.getClass()});\n      m.invoke(this, new Object[]{vehicle});\n    }\n    public void Appraise(Tractor tractor) {\n      System.out.println(\"Appraising a tractor\");\n    }\n    public void Appraise(Truck truck) {\n      System.out.println(\"Appraising a truck\");\n    }\n  }",
+      "id": "2ab85b355de4b67517eab9bb81d9459c"
+    },
+    {
+      "type": "html",
+      "text": "\nThis works in cases where Vehicle is an abstract base class (i.e., something that can't be appraised itself). If Vehicles aren't abstract, then you need to add additional logic to prevent an infinite call loop. This also has problems with superclasses (e.g., a [[Pickup Truck]], even if it extends Truck, needs either its own Appraise() method or needs an upclass invocation (and object.getClass().getSuperclass() in nested try/catch blocks scales worse than just doing an instanceof cascade).",
+      "id": "c23445aaadba58d1eed8077691ac028a"
+    },
+    {
+      "type": "html",
+      "text": "\nStill, if your system can use it, this strategy might help, and it reads better than the instanceof stuff...",
+      "id": "07bc04cfbd6012cef0f72562db9ed1bc"
+    },
+    {
+      "type": "html",
+      "text": "<i>you've lost the idea that double dispatch allows you to work with stuff you don't know a priori, your solution is pointless.</i>",
+      "id": "07636b98a83481e2877d4981370b4aac"
+    },
+    {
+      "type": "html",
+      "text": "\nUmmm...  No.",
+      "id": "c4eb49fc7df37a943a5cbdfa561ecaec"
+    },
+    {
+      "type": "html",
+      "text": "\nFirst, this example is not multiple dispatch.  It's in the same neighborhood, and it provides a method to get run time typing into the code which can be extended with additional logic (e.g., for superclass navigation) that can take care of the problem I mentioned above, but which obfuscates the example.  In the above example, you know you have a Vehicle class and a Tractor subclass inside the Appraiser class.  The Appraiser also know he has a method called Appraise.  [[Double Dispatch]] is appropriate for specific applications, but if you don't need to clutter up an object's interface with unrelated method signatures, you shouldn't.",
+      "id": "c29df169541d2308582cd5051dce38ea"
+    },
+    {
+      "type": "html",
+      "text": "\nWith [[Double Dispatch]], you'd have to have a method:",
+      "id": "9eeb6afec2fed97a30bcb37cba2d36a9"
+    },
+    {
+      "type": "code",
+      "text": "  class Vehicle {\n    public void Appraise(Appraiser app) {\n      app.Appraise(this);\n    }\n  }",
+      "id": "e76d8f16123e40e266e71352af19105f"
+    },
+    {
+      "type": "html",
+      "text": "\nI believe this method would have to be overridden by each Vehicle subclass (<i>which, of course, couples the 'Vehicle' interface inextricably with the 'Appraiser' interface... so NOT cool.</i>)",
+      "id": "339dddac983479c2919edb7bfb9734b8"
+    },
+    {
+      "type": "html",
+      "text": "\nWhat don't you know here that I anticipate in my example?  It looks to me like not only will Appraiser have to have overloaded methods (which, after all, is what we're trying to do), but that each individual vehicle subclass has to know it can be Appraised by an Appraiser.  Adding that method is an artifact of an implementation, and it smells.  Sometimes you have to do it, but if there's a cleaner way that works, i think you should try that first.  ",
+      "id": "e2a11f34d33986c72f98817bd706b36e"
+    },
+    {
+      "type": "html",
+      "text": "\nI did point out that you do lose the superclass magic by using the strict run time type, but you can roll your own by using a stack and exception catching (grabbing the least generic type by simply taking the first one that doesn't throw an exception).  If you're feeling quite daring, you can even grab a list of method signatures from Appraiser and roll your own dynamic dispatch.",
+      "id": "805b786c5a7fd3590f05bd10163bc05e"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+    },
+    {
+      "type": "html",
+      "text": "in the example above, near the top, the following line is wrong [if you want a tractor]:\nVehicle myVehicle = new Tractor();\nyou don't \"get\" the tractor-ness of the vehicle this way\nas soon as you set it as the parent, you lose the \"extensions\" of the child\nso you don't have a tractor and the line \"appraising a vehicle\" IS the expected outcome\nright?\ni am doubting the java knowledge of the person writing that they want to appraise a tractor but they passed the appraiser a vehicle",
+      "id": "6fc18eec78f7e82d83f5edd370bba643"
+    },
+    {
+      "type": "html",
+      "text": "<i>Yes, you do \"get\" the tractor-ness of the vehicle this way, if you evaluate Vehicle methods that are overridden by Tractor.  In the example, myVehicle references a Tractor instance.  If you invoke a Vehicle method -- e.g., myVehicle.getEngineSize() -- you will get the engine size of a Tractor if Tractor has overridden getEngineSize().  However, invoking myAppraiser.Appraise(myVehicle) will only invoke Appraise(Vehicle v), regardless of the run-time type of the instance that myVehicle references.</i>",
+      "id": "9e3f4bf6a81b359678a027f4048d8974"
+    },
+    {
+      "type": "html",
+      "text": "--\ni see your point, but when you \"down-reference\"/\"up-assign\" [or whatever you want to call it] you don't really have a \"run-time type\" tractor? you only really have treated vehicle like an interface and used tractor as the implementor rather than the extender",
+      "id": "2cc309e2d2a933b1285e220dcff13745"
+    },
+    {
+      "type": "html",
+      "text": "\ni guess I am confused with why someone would be surprised that a Vehicle is treated like a Vehicle",
+      "id": "556006b3568b2f90cd81c3c2a765906a"
+    },
+    {
+      "type": "html",
+      "text": "\ni cannot see when this would come into play",
+      "id": "a38ea856cc4beb5bf37d260c2ab7028a"
+    },
+    {
+      "type": "html",
+      "text": "{[[English Please]].  Capitalize those sentences.}",
+      "id": "77bfc631651a3c667943ce078c701b55"
+    },
+    {
+      "type": "html",
+      "text": "{The basic reason for desiring something like [[Multiple Dispatch]] above is that you wish to allow for behavior to diverge on two or more orthogonal paths, but you need to work with the components at the interface level.  Extending the above example, the Appraiser above might be appraising a whole collection of 'Vehicles', including Trucks and Tractors and Jet Planes.  [[Double Dispatch]] is especially common to the [[Visitor Pattern]] and such things as [[Pretty Print]]ers.}  ",
+      "id": "9cd66e8d2da1ef0e4a92d5422e257ddb"
+    },
+    {
+      "type": "html",
+      "text": "{More generic [[Multiple Dispatch]] (on more than two features) is not something I've seen often in practice.  One example might be Artist/Palette/[[Scene Graph]] (with artists that will utilize certain palette-specific features to draw certain objects in a scene if those features are available).  This isn't just a toy example; Artist/Palette/[[Scene Graph]] actually applies well to drawing GUIs (an [[Interactive Scene Graph]]) while supporting different toolkits (Palettes) and styles (Artists).}",
+      "id": "dcd827c35f7f9294a2293fd9053e41a8"
+    },
+    {
+      "type": "html",
+      "text": "[\nOK. Thanks. I am learning.",
+      "id": "a5c0b16370e316c85cde8162b049e9ac"
+    },
+    {
+      "type": "html",
+      "text": "]",
+      "id": "b9e90be25184301941492a71ed409f82"
+    },
+    {
+      "type": "html",
+      "text": "--",
+      "id": "654c4a61ed8bcb9e8258ee5f41bea4ea"
+    },
+    {
+      "type": "html",
+      "text": "+",
+      "id": "99497bf361b4c91427b7de5ecb8a552e"
+    },
+    {
+      "type": "html",
+      "text": "[ (Following up here), \nbased on what you say, then the example is just bad. \nThere are no interfaces in play...",
+      "id": "66dd44e8486b4aefb42f9e8172b480d5"
+    },
+    {
+      "type": "html",
+      "text": "]",
+      "id": "b9e90be25184301941492a71ed409f82"
+    },
+    {
+      "type": "html",
+      "text": "<i>I'm not sure of the relevance of interfaces here, but it is (at best) perhaps an example of the lack of dynamic dispatch in Java.  See [[Multi Methods]] for a (somewhat) better description.</i>",
+      "id": "3fa130dc9d5c86253ab6c981c8e190a0"
+    },
+    {
+      "type": "html",
+      "text": "{Interfaces?  I supposed didactically... Would using a Java Interface for the Appraiser have led you more immediately to the notion that there could be multiple different appraisers? }",
+      "id": "ec7ac15ee9b0244992b4b484f9734348"
+    },
+    {
+      "type": "html",
+      "text": "\nWhat?\nYou mentioned interfaces ('need to work with the components at the interface level'). Re: the Appraiser being an interface: what? The Vehicle needs to be an interface, and again, that is effectively what the bad construct has done. ",
+      "id": "370f8ce5cdc09d70a57dae423e1bb230"
+    },
+    {
+      "type": "html",
+      "text": "\nAlso, the line of code declaring a parent object but referencing a child is just bad code. That's just not how you do it in JAVA, which I guess is the point of the thread here. If the only examples we can have demonstrating a lack of multiple dispatch are like this, then i don't think it is a significant problem. \nThanks",
+      "id": "5f293f56d2ce8300a2402c840a9e3efe"
+    },
+    {
+      "type": "html",
+      "text": "<i>It's perfectly good code.  Declaring a variable of some base class and assigning it a derived instance is a classic OO idiom (not just Java) used in contexts where polymorphism is implemented via inheritance rather than by interface, i.e., in cases where your algorithms work with an abstraction (the base class) that is implemented by one or more concrete derivations of the base class.  While the original example is perhaps not the best illustration of the lack of multiple dispatch, it is perfectly acceptable code.  The way Appraiser is used is quite typical on occasions where the classes to be appraised (Tractor and Vehicle) may not be modified for whatever reason.  A more appropriate application of multiple dispatch is in implementing the [[Visitor Pattern]] as part of a language parser for a complex grammar; in the absence of multiple dispatch it requires an awkward festoonment of class and method declarations.</i>",
+      "id": "3060e9339d6bf9ac256ce421ed9719b0"
+    },
+    {
+      "type": "html",
+      "text": "\nEveryone knows polymorphism by inheritance is sound/good/acceptable code. I was referring to the example as not being the best demontration of a lack of [[Multiple Dispatch]].\nThanks for taking the time to explain your position. I am learning.",
+      "id": "fe89588f8e07e8347e6fa8abc2d590ea"
+    },
+    {
+      "type": "html",
+      "text": "<i>Ah.  A bit more clarity would help your criticism.  When you wrote \"the line of code declaring a parent object but referencing a child is just bad code,\" I assumed (as would many readers, I suspect) you meant in general.</i>",
+      "id": "0cdd5855a1ea8253c3dfad3c97e7d773"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+    },
+    {
+      "type": "html",
+      "text": "The following compiler adds multiple dispatch amongst other things to Java:",
+      "id": "e9414d762a57a0b33e4d0e5481ceed44"
+    },
+    {
+      "type": "code",
+      "text": "    http://pec.dev.java.net/",
+      "id": "f6cfa7b43cbf737003f98aaf26e81d1f"
+    },
+    {
+      "type": "html",
+      "text": "\nThe following is an [[Other Languages For The Java Vm]] which supports [[Multiple Dispatch]]:",
+      "id": "f2b3d13107cf19682679c62bf35851b1"
+    },
+    {
+      "type": "code",
+      "text": "  http://nice.sourceforge.net/",
+      "id": "4920c7e8212ce0d18b4190d9573fa30f"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+    },
+    {
+      "type": "html",
+      "text": "See also: [[External Polymorphism]], [[Generic Function]]s, [[Multi Methods]], [[Implementing Multiple Dispatch]], [[Double Dispatch Example]]",
+      "id": "9308e85427f6ba5b3ed8f232fdd42dc9"
+    },
+    {
+      "type": "html",
+      "text": "\nCompare [[Predicate Classes]], and consider [[Predicate Dispatching]]",
+      "id": "4d438831b1a9e388a647fb0799d0fb32"
+    },
+    {
+      "type": "html",
+      "text": "\n[[August Zero Eight]]",
+      "id": "9d24d9aae0ce609b503644c139d18804"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Category Polymorphism]], [[Category Conditionals And Dispatching]]",
+      "id": "6be607fd10b77cefa6aa96f570ab7e50"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?MultipleDispatch c2.com]",
+      "id": "c9205ebed3dc4f6e7f49a528d2c8e092"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1219330332000,
+      "id": "8951a26f15f6a82c7e8638e38c5a9cc4",
+      "type": "create",
+      "item": {
+        "title": "Multiple Dispatch",
+        "story": [
+          {
+            "type": "html",
+            "text": "When a dynamic dispatching mechanism for a function uses more than one piece of information to determine which function to actually call. Usually the pieces of information are the types of the parameters passed to the function.",
+            "id": "279145b7accf0ec559795e31430fe1bf"
+          },
+          {
+            "type": "html",
+            "text": "<b>Java-style method overloading isn't multiple dispatch.</b> In multiple dispatch, the 'switch' is done on the dynamic (run-time) type tag of the object -- but Java's (and C++'s) overloading only considers the static (compile-time) type of the object reference.",
+            "id": "dc171969a1f67660d6d025f525e9bf6f"
+          },
+          {
+            "type": "html",
+            "text": "\nLet's declare an overloaded method in an Appraiser class, which appraises the value of different things:",
+            "id": "df4c7dbe463f72f990283d1a166dcdd5"
+          },
+          {
+            "type": "code",
+            "text": "  class Appraiser {\n    public void Appraise (Vehicle v) { println (\"Appraising a vehicle...\"); }\n    public void Appraise (Tractor t) { println (\"Appraising a tractor...\"); }\n  }",
+            "id": "2093efa703a63f6596103e7961636a27"
+          },
+          {
+            "type": "html",
+            "text": "(Tractor extends Vehicle.) Now let's make a Tractor, but refer to it with a Vehicle reference:",
+            "id": "39679116bfd0f4d6a58980d9e737ff0b"
+          },
+          {
+            "type": "code",
+            "text": "  Vehicle myVehicle = new Tractor();",
+            "id": "d017426e73e25021e5de37957e8a61cf"
+          },
+          {
+            "type": "html",
+            "text": "What is the output of the following method call?",
+            "id": "c624f5016c6bae25e026bb236e58e9d4"
+          },
+          {
+            "type": "code",
+            "text": "  myAppraiser.Appraise (myVehicle);",
+            "id": "1749151c0e8a45feb9b13684ef18be01"
+          },
+          {
+            "type": "html",
+            "text": "Answer: \"Appraising a vehicle...\"! But this isn't what we want, because tractors have special features that most vehicles don't have, and we won't get the real price for our tractor.",
+            "id": "f9d101b97b0f20a332c6140d8133e2a7"
+          },
+          {
+            "type": "html",
+            "text": "\nWith true [[Multiple Dispatch]], the Tractor-specific version will be called, and we'll cash in like we should!",
+            "id": "6442369d8f1c22e8899e0db593a3d06f"
+          },
+          {
+            "type": "html",
+            "text": "<i>That sounds like [[Dynamic Dispatch]], not [[Multiple Dispatch]]...</i>",
+            "id": "157861e32b110ae2b3dcce026b569576"
+          },
+          {
+            "type": "html",
+            "text": "\nIt is describing a -lack of- [[Multiple Dispatch]] ([[Double Dispatch]] in particular).  But it needs to be extended a bit to show why.",
+            "id": "4151af57f322c017d03c262730f03a09"
+          },
+          {
+            "type": "code",
+            "text": "  class T''''''ractorHead extends Appraiser {\n    public void Appraise (Vehicle v) { println (\"Boring...\");           }\n    public void Appraise (Tractor t) { println (\"I LOVE TRACTORS!!!!\"); }\n  }",
+            "id": "1baefafe5162449cb8a33e1e34b4d5d9"
+          },
+          {
+            "type": "code",
+            "text": "  Appraiser myAppraiser = new T''''''ractorHead();\n  Vehicle   myVehicle   = new Tractor();\n  myAppraiser.Appraise(myVehicle);        // outputs: \"Boring...\"",
+            "id": "440e0d3c895c1273e9bdfca2a4b7c2ec"
+          },
+          {
+            "type": "html",
+            "text": "\nClearly we have [[Dynamic Dispatch]] because only the T<b></b>ractorHead has the behavior of printing 'Boring...'.  But this is <b>single</b> dynamic dispatch because it was 'dynamic' only on a single argument (myAppraiser).  If we had true [[Multiple Dispatch]] (even just [[Double Dispatch]]) then \"I LOVE TRACTORS\" would have been printed; the method selected (by the method 'dispatcher') would have automatically chosen the more specific instance of 'Appraise'.",
+            "id": "c1d212b3ae96d3a7705bef8a55d555a5"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+          },
+          {
+            "type": "html",
+            "text": "\nIdeally, since we're talking about features Java and most languages <i>don't</i> have, we could also further specialize in one class without introducing couplings in the base class.  Example:",
+            "id": "77c15c7ed9161d755de3e0cd97e318b9"
+          },
+          {
+            "type": "code",
+            "text": "  class T''''''ractorHead extends Appraiser {\n    ... as above ...\n    public void Appraise (U''''''nfavoredBrandTractor ubt) { println (\"Meh.\");   }\n    public void Appraise (J''''''ohnDeerTractor jdt) { printlin (\"J''''''ohnDeer tractors are the best!\"); }\n  }",
+            "id": "5b0cfc95d466bf8cb0b4338768dd1bb2"
+          },
+          {
+            "type": "code",
+            "text": "  Appraiser myAppraiser = new T''''''ractorHead();\n  myAppraiser.Appraise( new U''''''nfavoredBrandTractor() );  // prints \"I LOVE TRACTORS!!!!\"\n  Vehicle myVehicle = new J''''''ohnDeerTractor();\n  myAppraiser.Appraise( v ); // prints \"Boring...\"",
+            "id": "306f28df6c2934a8f85fdfabff82553a"
+          },
+          {
+            "type": "html",
+            "text": "\nIn this case, what we actually want are \"Meh.\" and \"J<b></b>ohnDeer tractors are the best!\" respectively.  But even if Java provided [[Multiple Dispatch]], these selections would be unlikely because they aren't overriding methods in Appraiser; i.e. we're demanding a <b>non-virtual</b> [[Dynamic Dispatch]] for myAppraiser.  This can be obtained, note, by making the dispatch-method itself 'dynamic' such that each derived class automatically overrides the dispatch method and chooses an appropriate method call based on the actual types of the parameters.  ",
+            "id": "bef9ff08428b73329e8d046ba091d701"
+          },
+          {
+            "type": "html",
+            "text": "\nHowever, something like the above might be achieved via runtime reflection on both the Appraiser and the other parameters.  One could even make it generic, wrapping all that functionality into something like:",
+            "id": "bc5ea822977e35db45e34a3ad60bd4f1"
+          },
+          {
+            "type": "code",
+            "text": "  class Dispatcher {\n     public void dispatch1(Object methodSrc, String sMethod, Object parameter1) { ... impl ... }\n     public void dispatch2(Object methodSrc, String sMethod, Object parameter1, Object parameter2) { ... impl ... }\n  }",
+            "id": "a5b42cdf0ca1dd4d7abcd60f0cc6424b"
+          },
+          {
+            "type": "code",
+            "text": "  Dispatcher myDispatcher = new Dispatcher();\n  Appraiser myAppraiser = new T''''''ractorHead();\n  Vehicle myVehicle = new J''''''ohnDeerTractor();\n  myDispatcher.dispatch1(myAppraiser,\"Appraise\",myVehicle);  // prints \"J''''''ohnDeer tractors are the best!\"",
+            "id": "d342011fe467e9677e23de3c9c4bfdb3"
+          },
+          {
+            "type": "html",
+            "text": "\nUsing reflection, it may be feasible to grab the actual method list from myAppraiser, filter it down to those matching the string \"Appraise\", grab the dynamic type of parameter1, and dispatch the specialized parameter to the correct specialized method.  Essentially you're overriding the default Java dispatcher.  Without a doubt, doing all this would be more expensive than what Java is doing (that being function-pointer lookups in a virtual table, for most implementations), but the flexibility can be useful and (just as importantly) you're avoiding the 'coupling' that comes from requiring 'Appraiser' know about every possible vehicle type.",
+            "id": "bba1405e3c633423297393e90fa69cb0"
+          },
+          {
+            "type": "html",
+            "text": "\nI'm curious if someone has an implementation for Dispatcher.  I wouldn't be surprised; based on the example below, one might use something like:",
+            "id": "13add0589cbe93c3d12744d50100769d"
+          },
+          {
+            "type": "code",
+            "text": " class Dispatcher {\n   public void dispatch1(Object src, String sMethod, Object p1) {\n      Method m = src.getClass().getDeclaredMethod(src,new Class[](p1.getClass());\n      m.invoke(src,new Object[](p1);\n   }\n }",
+            "id": "11fc178c369b7ef80aa0627143a52b11"
+          },
+          {
+            "type": "html",
+            "text": "\nThis should give true [[Double Dispatch]] between any two objects without depending on virtual overrides, and without mucking up the interfaces to 'Vehicle', and without creating coupling to some 'Appraiser' base class.",
+            "id": "24f3fccbb9059fbb30930e3ec8810a71"
+          },
+          {
+            "type": "code",
+            "text": "  Object myAppraiser = new T''''''ractorHead();\n  Object myVehicle   = new Tractor();\n  new Dispatcher().dispatch1(myAppraiser,\"Appraise\",myVehicle);  // prints \"I LOVE TRACTORS!\"",
+            "id": "d41432d1b1bb2ca7152671221a9630df"
+          },
+          {
+            "type": "html",
+            "text": "\nThe extension to more than one parameter (to true non-virtual [[Multiple Dispatch]]) should also be possible.  ",
+            "id": "3398f5ac2302d101b92c8f5efc9ca249"
+          },
+          {
+            "type": "html",
+            "text": "\nHowever, calling it [[Multiple Dispatch]] is a bit misleading.  It provides that possibility, but this seems to strictly be more general... and a lot less optimal and a lot less safe (this solution is not much for compile-time checks).",
+            "id": "f94bfc46a5e52efc87be10e549f19dd3"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+          },
+          {
+            "type": "html",
+            "text": "\nIn languages that only support single dispatch (C++, Java, Smalltalk), one can use [[Double Dispatch]], which though not [[Multiple Dispatch]], does handle most cases you might need.  But since [[Two Is An Impossible Number]], you should feel just a little dirty for this hack.",
+            "id": "39634e5ff39ac7533aae3d0933924431"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+          },
+          {
+            "type": "html",
+            "text": "\nThis is not a problem. Make a virtual string cast method on vehicle and call it from appraise. The most derived string cast will be called. You might like the appraiser method signature to have such smarts ... but what difference does it make? Oh, you're gonna talk about performance. I just know you're gonna stand there with a bald face and talk about performance ... and that's just stupid.",
+            "id": "33fe465240b8321bf73acad28f9bae0e"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+          },
+          {
+            "type": "html",
+            "text": "You can come close in Java without using [[Double Dispatch]], which (IMHO) clutters the target object's interface:",
+            "id": "d1dfed7b6f2794f78be2f2b5af284993"
+          },
+          {
+            "type": "code",
+            "text": "  class Appraiser {",
+            "id": "a526f15edac4315d80beb6a82691d129"
+          },
+          {
+            "type": "code",
+            "text": "    public void Appraise(Vehicle vehicle) {\n      // Grab the correct method using Vehicle's run-time type, and explicitly invoke it\n      Method m = this.getClass().getDeclaredMethod(\"Appraise\", new Class[]{vehicle.getClass()});\n      m.invoke(this, new Object[]{vehicle});\n    }\n    public void Appraise(Tractor tractor) {\n      System.out.println(\"Appraising a tractor\");\n    }\n    public void Appraise(Truck truck) {\n      System.out.println(\"Appraising a truck\");\n    }\n  }",
+            "id": "2ab85b355de4b67517eab9bb81d9459c"
+          },
+          {
+            "type": "html",
+            "text": "\nThis works in cases where Vehicle is an abstract base class (i.e., something that can't be appraised itself). If Vehicles aren't abstract, then you need to add additional logic to prevent an infinite call loop. This also has problems with superclasses (e.g., a [[Pickup Truck]], even if it extends Truck, needs either its own Appraise() method or needs an upclass invocation (and object.getClass().getSuperclass() in nested try/catch blocks scales worse than just doing an instanceof cascade).",
+            "id": "c23445aaadba58d1eed8077691ac028a"
+          },
+          {
+            "type": "html",
+            "text": "\nStill, if your system can use it, this strategy might help, and it reads better than the instanceof stuff...",
+            "id": "07bc04cfbd6012cef0f72562db9ed1bc"
+          },
+          {
+            "type": "html",
+            "text": "<i>you've lost the idea that double dispatch allows you to work with stuff you don't know a priori, your solution is pointless.</i>",
+            "id": "07636b98a83481e2877d4981370b4aac"
+          },
+          {
+            "type": "html",
+            "text": "\nUmmm...  No.",
+            "id": "c4eb49fc7df37a943a5cbdfa561ecaec"
+          },
+          {
+            "type": "html",
+            "text": "\nFirst, this example is not multiple dispatch.  It's in the same neighborhood, and it provides a method to get run time typing into the code which can be extended with additional logic (e.g., for superclass navigation) that can take care of the problem I mentioned above, but which obfuscates the example.  In the above example, you know you have a Vehicle class and a Tractor subclass inside the Appraiser class.  The Appraiser also know he has a method called Appraise.  [[Double Dispatch]] is appropriate for specific applications, but if you don't need to clutter up an object's interface with unrelated method signatures, you shouldn't.",
+            "id": "c29df169541d2308582cd5051dce38ea"
+          },
+          {
+            "type": "html",
+            "text": "\nWith [[Double Dispatch]], you'd have to have a method:",
+            "id": "9eeb6afec2fed97a30bcb37cba2d36a9"
+          },
+          {
+            "type": "code",
+            "text": "  class Vehicle {\n    public void Appraise(Appraiser app) {\n      app.Appraise(this);\n    }\n  }",
+            "id": "e76d8f16123e40e266e71352af19105f"
+          },
+          {
+            "type": "html",
+            "text": "\nI believe this method would have to be overridden by each Vehicle subclass (<i>which, of course, couples the 'Vehicle' interface inextricably with the 'Appraiser' interface... so NOT cool.</i>)",
+            "id": "339dddac983479c2919edb7bfb9734b8"
+          },
+          {
+            "type": "html",
+            "text": "\nWhat don't you know here that I anticipate in my example?  It looks to me like not only will Appraiser have to have overloaded methods (which, after all, is what we're trying to do), but that each individual vehicle subclass has to know it can be Appraised by an Appraiser.  Adding that method is an artifact of an implementation, and it smells.  Sometimes you have to do it, but if there's a cleaner way that works, i think you should try that first.  ",
+            "id": "e2a11f34d33986c72f98817bd706b36e"
+          },
+          {
+            "type": "html",
+            "text": "\nI did point out that you do lose the superclass magic by using the strict run time type, but you can roll your own by using a stack and exception catching (grabbing the least generic type by simply taking the first one that doesn't throw an exception).  If you're feeling quite daring, you can even grab a list of method signatures from Appraiser and roll your own dynamic dispatch.",
+            "id": "805b786c5a7fd3590f05bd10163bc05e"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+          },
+          {
+            "type": "html",
+            "text": "in the example above, near the top, the following line is wrong [if you want a tractor]:\nVehicle myVehicle = new Tractor();\nyou don't \"get\" the tractor-ness of the vehicle this way\nas soon as you set it as the parent, you lose the \"extensions\" of the child\nso you don't have a tractor and the line \"appraising a vehicle\" IS the expected outcome\nright?\ni am doubting the java knowledge of the person writing that they want to appraise a tractor but they passed the appraiser a vehicle",
+            "id": "6fc18eec78f7e82d83f5edd370bba643"
+          },
+          {
+            "type": "html",
+            "text": "<i>Yes, you do \"get\" the tractor-ness of the vehicle this way, if you evaluate Vehicle methods that are overridden by Tractor.  In the example, myVehicle references a Tractor instance.  If you invoke a Vehicle method -- e.g., myVehicle.getEngineSize() -- you will get the engine size of a Tractor if Tractor has overridden getEngineSize().  However, invoking myAppraiser.Appraise(myVehicle) will only invoke Appraise(Vehicle v), regardless of the run-time type of the instance that myVehicle references.</i>",
+            "id": "9e3f4bf6a81b359678a027f4048d8974"
+          },
+          {
+            "type": "html",
+            "text": "--\ni see your point, but when you \"down-reference\"/\"up-assign\" [or whatever you want to call it] you don't really have a \"run-time type\" tractor? you only really have treated vehicle like an interface and used tractor as the implementor rather than the extender",
+            "id": "2cc309e2d2a933b1285e220dcff13745"
+          },
+          {
+            "type": "html",
+            "text": "\ni guess I am confused with why someone would be surprised that a Vehicle is treated like a Vehicle",
+            "id": "556006b3568b2f90cd81c3c2a765906a"
+          },
+          {
+            "type": "html",
+            "text": "\ni cannot see when this would come into play",
+            "id": "a38ea856cc4beb5bf37d260c2ab7028a"
+          },
+          {
+            "type": "html",
+            "text": "{[[English Please]].  Capitalize those sentences.}",
+            "id": "77bfc631651a3c667943ce078c701b55"
+          },
+          {
+            "type": "html",
+            "text": "{The basic reason for desiring something like [[Multiple Dispatch]] above is that you wish to allow for behavior to diverge on two or more orthogonal paths, but you need to work with the components at the interface level.  Extending the above example, the Appraiser above might be appraising a whole collection of 'Vehicles', including Trucks and Tractors and Jet Planes.  [[Double Dispatch]] is especially common to the [[Visitor Pattern]] and such things as [[Pretty Print]]ers.}  ",
+            "id": "9cd66e8d2da1ef0e4a92d5422e257ddb"
+          },
+          {
+            "type": "html",
+            "text": "{More generic [[Multiple Dispatch]] (on more than two features) is not something I've seen often in practice.  One example might be Artist/Palette/[[Scene Graph]] (with artists that will utilize certain palette-specific features to draw certain objects in a scene if those features are available).  This isn't just a toy example; Artist/Palette/[[Scene Graph]] actually applies well to drawing GUIs (an [[Interactive Scene Graph]]) while supporting different toolkits (Palettes) and styles (Artists).}",
+            "id": "dcd827c35f7f9294a2293fd9053e41a8"
+          },
+          {
+            "type": "html",
+            "text": "[\nOK. Thanks. I am learning.",
+            "id": "a5c0b16370e316c85cde8162b049e9ac"
+          },
+          {
+            "type": "html",
+            "text": "]",
+            "id": "b9e90be25184301941492a71ed409f82"
+          },
+          {
+            "type": "html",
+            "text": "--",
+            "id": "654c4a61ed8bcb9e8258ee5f41bea4ea"
+          },
+          {
+            "type": "html",
+            "text": "+",
+            "id": "99497bf361b4c91427b7de5ecb8a552e"
+          },
+          {
+            "type": "html",
+            "text": "[ (Following up here), \nbased on what you say, then the example is just bad. \nThere are no interfaces in play...",
+            "id": "66dd44e8486b4aefb42f9e8172b480d5"
+          },
+          {
+            "type": "html",
+            "text": "]",
+            "id": "b9e90be25184301941492a71ed409f82"
+          },
+          {
+            "type": "html",
+            "text": "<i>I'm not sure of the relevance of interfaces here, but it is (at best) perhaps an example of the lack of dynamic dispatch in Java.  See [[Multi Methods]] for a (somewhat) better description.</i>",
+            "id": "3fa130dc9d5c86253ab6c981c8e190a0"
+          },
+          {
+            "type": "html",
+            "text": "{Interfaces?  I supposed didactically... Would using a Java Interface for the Appraiser have led you more immediately to the notion that there could be multiple different appraisers? }",
+            "id": "ec7ac15ee9b0244992b4b484f9734348"
+          },
+          {
+            "type": "html",
+            "text": "\nWhat?\nYou mentioned interfaces ('need to work with the components at the interface level'). Re: the Appraiser being an interface: what? The Vehicle needs to be an interface, and again, that is effectively what the bad construct has done. ",
+            "id": "370f8ce5cdc09d70a57dae423e1bb230"
+          },
+          {
+            "type": "html",
+            "text": "\nAlso, the line of code declaring a parent object but referencing a child is just bad code. That's just not how you do it in JAVA, which I guess is the point of the thread here. If the only examples we can have demonstrating a lack of multiple dispatch are like this, then i don't think it is a significant problem. \nThanks",
+            "id": "5f293f56d2ce8300a2402c840a9e3efe"
+          },
+          {
+            "type": "html",
+            "text": "<i>It's perfectly good code.  Declaring a variable of some base class and assigning it a derived instance is a classic OO idiom (not just Java) used in contexts where polymorphism is implemented via inheritance rather than by interface, i.e., in cases where your algorithms work with an abstraction (the base class) that is implemented by one or more concrete derivations of the base class.  While the original example is perhaps not the best illustration of the lack of multiple dispatch, it is perfectly acceptable code.  The way Appraiser is used is quite typical on occasions where the classes to be appraised (Tractor and Vehicle) may not be modified for whatever reason.  A more appropriate application of multiple dispatch is in implementing the [[Visitor Pattern]] as part of a language parser for a complex grammar; in the absence of multiple dispatch it requires an awkward festoonment of class and method declarations.</i>",
+            "id": "3060e9339d6bf9ac256ce421ed9719b0"
+          },
+          {
+            "type": "html",
+            "text": "\nEveryone knows polymorphism by inheritance is sound/good/acceptable code. I was referring to the example as not being the best demontration of a lack of [[Multiple Dispatch]].\nThanks for taking the time to explain your position. I am learning.",
+            "id": "fe89588f8e07e8347e6fa8abc2d590ea"
+          },
+          {
+            "type": "html",
+            "text": "<i>Ah.  A bit more clarity would help your criticism.  When you wrote \"the line of code declaring a parent object but referencing a child is just bad code,\" I assumed (as would many readers, I suspect) you meant in general.</i>",
+            "id": "0cdd5855a1ea8253c3dfad3c97e7d773"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+          },
+          {
+            "type": "html",
+            "text": "The following compiler adds multiple dispatch amongst other things to Java:",
+            "id": "e9414d762a57a0b33e4d0e5481ceed44"
+          },
+          {
+            "type": "code",
+            "text": "    http://pec.dev.java.net/",
+            "id": "f6cfa7b43cbf737003f98aaf26e81d1f"
+          },
+          {
+            "type": "html",
+            "text": "\nThe following is an [[Other Languages For The Java Vm]] which supports [[Multiple Dispatch]]:",
+            "id": "f2b3d13107cf19682679c62bf35851b1"
+          },
+          {
+            "type": "code",
+            "text": "  http://nice.sourceforge.net/",
+            "id": "4920c7e8212ce0d18b4190d9573fa30f"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4b3da61dba374e0a7aaf42bf5fe665ab"
+          },
+          {
+            "type": "html",
+            "text": "See also: [[External Polymorphism]], [[Generic Function]]s, [[Multi Methods]], [[Implementing Multiple Dispatch]], [[Double Dispatch Example]]",
+            "id": "9308e85427f6ba5b3ed8f232fdd42dc9"
+          },
+          {
+            "type": "html",
+            "text": "\nCompare [[Predicate Classes]], and consider [[Predicate Dispatching]]",
+            "id": "4d438831b1a9e388a647fb0799d0fb32"
+          },
+          {
+            "type": "html",
+            "text": "\n[[August Zero Eight]]",
+            "id": "9d24d9aae0ce609b503644c139d18804"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Category Polymorphism]], [[Category Conditionals And Dispatching]]",
+            "id": "6be607fd10b77cefa6aa96f570ab7e50"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?MultipleDispatch c2.com]",
+            "id": "c9205ebed3dc4f6e7f49a528d2c8e092"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1662262819603
+    }
+  ]
+}
