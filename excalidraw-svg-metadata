@@ -1,0 +1,927 @@
+{
+  "title": "Excalidraw SVG Metadata",
+  "story": [
+    {
+      "id": "70450000",
+      "type": "paragraph",
+      "text": "We enjoyed drawing with Excalidraw and in this page explore a feature of their SVG export format. [https://excalidraw.com/ app]"
+    },
+    {
+      "type": "paragraph",
+      "id": "8364cb45ed3591c4",
+      "text": "For example, this diagram from [[Reliability and Complexity]]."
+    },
+    {
+      "type": "html",
+      "id": "66801cb6623f620c",
+      "text": "<img width=\"100%\" src=\"/assets/pages/reliability-and-complexity/software-teams-model.svg\">"
+    },
+    {
+      "type": "paragraph",
+      "id": "62aea9c8e9daedc4",
+      "text": "We exported the SVG diagram from Excalidraw. By chance we noticed that when we loaded that diagram back into the Excalidraw app, it was able to reconstruct the connected relationships between the nodes in our graph. That sort of magic is not built into SVG, so they must be doing something clever to encode additional data into the SVG."
+    },
+    {
+      "type": "paragraph",
+      "id": "dfddd2d989966f0c",
+      "text": "Import [[Frame Integration Promises]] and setup DOM helpers."
+    },
+    {
+      "type": "code",
+      "id": "5cbd82e529085e9a",
+      "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => \n  Array.from(el.querySelectorAll(s))"
+    },
+    {
+      "type": "paragraph",
+      "id": "02b8d780c9a129c3",
+      "text": "Given a URL to an SVG document, or a data:image/svg+xml URL, we fetch the SVG DOM. We also remove width and height attributes so our processed images will scale to fit wiki's narrow pages."
+    },
+    {
+      "type": "code",
+      "id": "f58fa4daedf47228",
+      "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  return svg\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "e7b18fdbd961ae8a",
+      "text": "We find the URL for our example Excalidraw SVG by scraping the <img> tag in the first HTML item on this page."
+    },
+    {
+      "type": "code",
+      "id": "1625dd26d0d0dc14",
+      "text": "async function whichURL() {\n  const {\n    /* pageKey, itemId, origin, site, slug, item, */\n    page\n  } = await frame.context()\n  const [ignore, url] = page.story\n    .filter(item => item.type==\"html\")[0]\n    .text\n    .match(/src=\"(.*?)\"/)\n  return url\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "013e9912bf577375",
+      "text": "There is some encoded data in XML comments at the top of the SVG file."
+    },
+    {
+      "type": "code",
+      "id": "ea0b78197fcb3141",
+      "text": "function textOrComment(node) {\n  return [\"#text\", \"#comment\"].includes(node.nodeName)\n}\n\nfunction assertExcalidrawSVG(svg) {\n  // excalidraw puts some comments & text nodes first \n  for(let node of svg.childNodes) {\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim() == \"svg-source:excalidraw\") {\n      return true\n    }\n    if (! textOrComment(node)) {\n      return false \n    }\n  }\n}\n\nfunction excalidrawPayload(svg) {\n  for(let node of svg.childNodes) {\n    console.log(node)\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim()==\"payload-start\") {\n      return node.nextSibling.textContent\n    }\n    if (! textOrComment(node)) {\n      // maybe throw(new Error(\"missing payload\"))\n      return \"\" \n    }\n  }\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "d1ba83715d7de3e5",
+      "text": "Here we port Excalidraw's source from typescript to javascript in order to decode the payload. [https://github.com/excalidraw/excalidraw/blob/master/src/data/encode.ts github]"
+    },
+    {
+      "type": "code",
+      "id": "1b6837b5823c575f",
+      "text": "import pako from \"https://cdn.skypack.dev/pako\" \nconst {inflate} = pako\n\nfunction byteStringToArrayBuffer(byteString) {\n  const buffer = new ArrayBuffer(byteString.length)\n  const bufferView = new Uint8Array(buffer)\n  for (let i = 0, len = byteString.length; i < len; i++) {\n    bufferView[i] = byteString.charCodeAt(i)\n  }\n  return buffer\n}\n\nfunction byteStringToString(byteString) {\n  return new TextDecoder(\"utf-8\").decode(byteStringToArrayBuffer(byteString))\n}\n\nasync function decode(data) {\n  let decoded\n\n  switch (data.encoding) {\n    case \"bstring\":\n      // if compressed, do not double decode the bstring\n      decoded = data.compressed\n        ? data.encoded\n        : await byteStringToString(data.encoded);\n      break;\n    default:\n      throw new Error(`decode: unknown encoding \"${data.encoding}\"`)\n  }\n\n  if (data.compressed) {\n    return inflate(new Uint8Array(byteStringToArrayBuffer(decoded)), {\n      to: \"string\",\n    })\n  }\n\n  return decoded;\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "607941c95cd30c27",
+      "text": "There are a few layers of encoding to unpack."
+    },
+    {
+      "type": "code",
+      "id": "7f32686be2f83ea8",
+      "text": "function decodeBase64json(payload) {\n  return JSON.parse(atob(payload))\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "cbcd9d1924d18959",
+      "text": "Here we combine all of the above: find the <img> at the top of this page; use that url to fetch the SVG; verify it is an Excalidraw export format; unwrap the several layers of encoding; emit a page that includes the SVG and the now-decoded JSON."
+    },
+    {
+      "type": "code",
+      "id": "14f8ee86157d689a",
+      "text": "export async function emit(el) {\n  const url = await whichURL()\n  const svg = await getSvg(url)\n  Object.assign(window, {svg})\n  el.appendChild(svg)\n  if (assertExcalidrawSVG(svg)) {\n    const payload = excalidrawPayload(svg)\n    const obj = JSON.parse(\n      await decode(decodeBase64json(payload)))\n    el.insertAdjacentHTML(\"beforeend\",\n      `<pre>${JSON.stringify(obj, null, 2)}</pre>`)\n  }\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "b486341542d2c564",
+      "text": "next..."
+    },
+    {
+      "type": "paragraph",
+      "id": "933f562a6400b223",
+      "text": "code..."
+    },
+    {
+      "type": "frame",
+      "id": "6cf52409eec3988c",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/esm.html\nHEIGHT 400"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Excalidraw SVG Metadata",
+        "story": [
+          {
+            "id": "70450000",
+            "type": "paragraph",
+            "text": "We enjoyed drawing with Excalidraw and in this page explore a feature of their SVG export format."
+          }
+        ]
+      },
+      "date": 1663442754207
+    },
+    {
+      "type": "fork",
+      "date": 1663442762531
+    },
+    {
+      "id": "6cf52409eec3988c",
+      "type": "add",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/esm.html\nHEIGHT 400"
+      },
+      "after": "70450000",
+      "date": 1663442892515
+    },
+    {
+      "id": "66801cb6623f620c",
+      "type": "add",
+      "item": {
+        "type": "html",
+        "id": "66801cb6623f620c",
+        "text": "<img width=\"100%\" src=\"/assets/pages/reliability-and-complexity/software-teams-model.svg\">"
+      },
+      "after": "70450000",
+      "date": 1663443164181
+    },
+    {
+      "type": "add",
+      "id": "8364cb45ed3591c4",
+      "item": {
+        "type": "paragraph",
+        "id": "8364cb45ed3591c4",
+        "text": "Consider the diagram from [[Reliability and Complexity]]"
+      },
+      "after": "70450000",
+      "date": 1663443262951
+    },
+    {
+      "type": "edit",
+      "id": "70450000",
+      "item": {
+        "id": "70450000",
+        "type": "paragraph",
+        "text": "We enjoyed drawing with Excalidraw and in this page explore a feature of their SVG export format. [https://excalidraw.com/ app]"
+      },
+      "date": 1663443357890
+    },
+    {
+      "type": "edit",
+      "id": "8364cb45ed3591c4",
+      "item": {
+        "type": "paragraph",
+        "id": "8364cb45ed3591c4",
+        "text": "For example, this diagram from [[Reliability and Complexity]]."
+      },
+      "date": 1663443653325
+    },
+    {
+      "type": "add",
+      "id": "62aea9c8e9daedc4",
+      "item": {
+        "type": "paragraph",
+        "id": "62aea9c8e9daedc4",
+        "text": "We noticed ..."
+      },
+      "after": "8364cb45ed3591c4",
+      "date": 1663443736721
+    },
+    {
+      "id": "62aea9c8e9daedc4",
+      "type": "move",
+      "order": [
+        "70450000",
+        "8364cb45ed3591c4",
+        "66801cb6623f620c",
+        "62aea9c8e9daedc4",
+        "6cf52409eec3988c"
+      ],
+      "date": 1663443739374
+    },
+    {
+      "type": "edit",
+      "id": "62aea9c8e9daedc4",
+      "item": {
+        "type": "paragraph",
+        "id": "62aea9c8e9daedc4",
+        "text": "We exported the SVG diagram from Excalidraw. By chance we noticed that when we loaded that diagram back into the Excalidraw app, it was able to reconstruct the connected relationships between the nodes in our graph. That sort of magic is not built into SVG, so they must be doing something clever to encode additional data into the SVG."
+      },
+      "date": 1663443920947
+    },
+    {
+      "type": "add",
+      "id": "d71310b4eddbf37e",
+      "item": {
+        "type": "factory",
+        "id": "d71310b4eddbf37e",
+        "text": "..."
+      },
+      "after": "62aea9c8e9daedc4",
+      "date": 1663443947550
+    },
+    {
+      "type": "edit",
+      "id": "d71310b4eddbf37e",
+      "item": {
+        "type": "code",
+        "id": "d71310b4eddbf37e",
+        "text": "async function load(url) {\n  try {\n    ...\n  } catch (error) {\n    return {error}\n  }\n}"
+      },
+      "date": 1663444111683
+    },
+    {
+      "type": "add",
+      "id": "e7b18fdbd961ae8a",
+      "item": {
+        "type": "paragraph",
+        "id": "e7b18fdbd961ae8a",
+        "text": "next..."
+      },
+      "after": "62aea9c8e9daedc4",
+      "date": 1663444138518
+    },
+    {
+      "id": "e7b18fdbd961ae8a",
+      "type": "move",
+      "order": [
+        "70450000",
+        "8364cb45ed3591c4",
+        "66801cb6623f620c",
+        "62aea9c8e9daedc4",
+        "d71310b4eddbf37e",
+        "e7b18fdbd961ae8a",
+        "6cf52409eec3988c"
+      ],
+      "date": 1663444141075
+    },
+    {
+      "type": "add",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "paragraph",
+        "id": "14f8ee86157d689a",
+        "text": "code..."
+      },
+      "after": "e7b18fdbd961ae8a",
+      "date": 1663444146844
+    },
+    {
+      "type": "add",
+      "id": "b486341542d2c564",
+      "item": {
+        "type": "paragraph",
+        "id": "b486341542d2c564",
+        "text": "next..."
+      },
+      "after": "14f8ee86157d689a",
+      "date": 1663444148944
+    },
+    {
+      "type": "add",
+      "id": "933f562a6400b223",
+      "item": {
+        "type": "paragraph",
+        "id": "933f562a6400b223",
+        "text": "code..."
+      },
+      "after": "b486341542d2c564",
+      "date": 1663444150875
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "async function emit() {\n  return `<h1>Hello, World!</h1>`\n}"
+      },
+      "date": 1663444195984
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  return `<h1>Hello, World!</h1>`\n}"
+      },
+      "date": 1663444232629
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  el.innerHTML = `<h1>Hello, World!</h1>`\n}"
+      },
+      "date": 1663444254582
+    },
+    {
+      "type": "edit",
+      "id": "d71310b4eddbf37e",
+      "item": {
+        "type": "code",
+        "id": "d71310b4eddbf37e",
+        "text": "async function load(url) {\n  try {\n    //...\n  } catch (error) {\n    return {error}\n  }\n}"
+      },
+      "date": 1663444266178
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  return `<h1>Hello, World!</h1>`\n}"
+      },
+      "date": 1663444277585
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  el.innerHTML = `<h1>Hello, World!</h1>`\n}"
+      },
+      "date": 1663444294331
+    },
+    {
+      "id": "f58fa4daedf47228",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "f58fa4daedf47228",
+        "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  return svg\n}"
+      },
+      "after": "62aea9c8e9daedc4",
+      "date": 1663444374995
+    },
+    {
+      "id": "02b8d780c9a129c3",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "02b8d780c9a129c3",
+        "text": "Given a URL to and SVG document, or a data:image/svg+xml URL, we fetch the SVG DOM. We also remove width and height attributes so our processed images will scale to fit wiki's narrow pages."
+      },
+      "after": "62aea9c8e9daedc4",
+      "date": 1663444380333
+    },
+    {
+      "id": "dfddd2d989966f0c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "dfddd2d989966f0c",
+        "text": "Import [[Frame Integration Promises]] and setup DOM helpers."
+      },
+      "after": "62aea9c8e9daedc4",
+      "date": 1663444406979
+    },
+    {
+      "id": "5cbd82e529085e9a",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "5cbd82e529085e9a",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => \n  Array.from(el.querySelectorAll(s))"
+      },
+      "after": "dfddd2d989966f0c",
+      "date": 1663444409722
+    },
+    {
+      "type": "remove",
+      "id": "d71310b4eddbf37e",
+      "date": 1663444589106
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  const context = await frame.context()\n\n  el.innerHTML = `<h1>Hello, World!</h1>`\n}"
+      },
+      "date": 1663444632071
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  const {\npageKey, itemId, origin, site, slug, item, \n      page\n  } = await frame.context()\n  const {pageKey, itemId, origin, site, slug, item, \n      page: {title, story}} = data\n\n  el.innerHTML = `<h1>Hello, World!</h1>`\n}"
+      },
+      "date": 1663444765244
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  const {\n    /* pageKey, itemId, origin, site, slug, item, */\n    page\n  } = await frame.context()\n  const [ignore, url] = page.story\n    .filter(item => item.type==\"html\")\n    .text\n    .match(/src=\"(.*?)\"/)\n  el.innerHTML = `<h1>Hello, World!</h1>\n    <a target=\"_blank\" href=\"${url}\">${url}</a>`\n}"
+      },
+      "date": 1663445004232
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  const {\n    /* pageKey, itemId, origin, site, slug, item, */\n    page\n  } = await frame.context()\n  console.log({page})\n  const [ignore, url] = page.story\n    .filter(item => item.type==\"html\")\n    .text\n    .match(/src=\"(.*?)\"/)\n  el.innerHTML = `<h1>Hello, World!</h1>\n    <a target=\"_blank\" href=\"${url}\">${url}</a>`\n}"
+      },
+      "date": 1663445062535
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  const {\n    /* pageKey, itemId, origin, site, slug, item, */\n    page\n  } = await frame.context()\n  console.log({page})\n  const [ignore, url] = page.story\n    .filter(item => item.type==\"html\")[0]\n    .text\n    .match(/src=\"(.*?)\"/)\n  el.innerHTML = `<h1>Hello, World!</h1>\n    <a target=\"_blank\" href=\"${url}\">${url}</a>`\n}"
+      },
+      "date": 1663445125815
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  const {\n    /* pageKey, itemId, origin, site, slug, item, */\n    page\n  } = await frame.context()\n  console.log({page})\n  const [ignore, url] = page.story\n    .filter(item => item.type==\"html\")[0]\n    .text\n    .match(/src=\"(.*?)\"/)\n  const svg = await getSvg(url)\n  el.appendChild(svg)\n}"
+      },
+      "date": 1663445223377
+    },
+    {
+      "type": "add",
+      "id": "1625dd26d0d0dc14",
+      "item": {
+        "type": "paragraph",
+        "id": "1625dd26d0d0dc14",
+        "text": "code..."
+      },
+      "after": "e7b18fdbd961ae8a",
+      "date": 1663445249682
+    },
+    {
+      "type": "add",
+      "id": "013e9912bf577375",
+      "item": {
+        "type": "paragraph",
+        "id": "013e9912bf577375",
+        "text": "next..."
+      },
+      "after": "1625dd26d0d0dc14",
+      "date": 1663445253159
+    },
+    {
+      "type": "edit",
+      "id": "1625dd26d0d0dc14",
+      "item": {
+        "type": "code",
+        "id": "1625dd26d0d0dc14",
+        "text": "async function whichURL() {\n  \n}"
+      },
+      "date": 1663445364392
+    },
+    {
+      "type": "edit",
+      "id": "1625dd26d0d0dc14",
+      "item": {
+        "type": "code",
+        "id": "1625dd26d0d0dc14",
+        "text": "async function whichURL() {\nexport async function emit(el) {\n  const {\n    /* pageKey, itemId, origin, site, slug, item, */\n    page\n  } = await frame.context()\n  const [ignore, url] = page.story\n    .filter(item => item.type==\"html\")[0]\n    .text\n    .match(/src=\"(.*?)\"/)\n  \n}"
+      },
+      "date": 1663445387178
+    },
+    {
+      "type": "edit",
+      "id": "1625dd26d0d0dc14",
+      "item": {
+        "type": "code",
+        "id": "1625dd26d0d0dc14",
+        "text": "async function whichURL() {\nexport async function emit(el) {\n  const {\n    /* pageKey, itemId, origin, site, slug, item, */\n    page\n  } = await frame.context()\n  const [ignore, url] = page.story\n    .filter(item => item.type==\"html\")[0]\n    .text\n    .match(/src=\"(.*?)\"/)\n  return url\n}"
+      },
+      "date": 1663445398792
+    },
+    {
+      "type": "edit",
+      "id": "1625dd26d0d0dc14",
+      "item": {
+        "type": "code",
+        "id": "1625dd26d0d0dc14",
+        "text": "async function whichURL() {\n  const {\n    /* pageKey, itemId, origin, site, slug, item, */\n    page\n  } = await frame.context()\n  const [ignore, url] = page.story\n    .filter(item => item.type==\"html\")[0]\n    .text\n    .match(/src=\"(.*?)\"/)\n  return url\n}"
+      },
+      "date": 1663445411614
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  const url = await whichURL()\n  const svg = await getSvg(url)\n  el.appendChild(svg)\n}"
+      },
+      "date": 1663445434244
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  const url = await whichURL()\n  const svg = await getSvg(url)\n  Object.assign(window, {svg})\n  el.appendChild(svg)\n}"
+      },
+      "date": 1663445506498
+    },
+    {
+      "type": "edit",
+      "id": "02b8d780c9a129c3",
+      "item": {
+        "type": "paragraph",
+        "id": "02b8d780c9a129c3",
+        "text": "Given a URL to an SVG document, or a data:image/svg+xml URL, we fetch the SVG DOM. We also remove width and height attributes so our processed images will scale to fit wiki's narrow pages."
+      },
+      "date": 1663446595228
+    },
+    {
+      "type": "edit",
+      "id": "e7b18fdbd961ae8a",
+      "item": {
+        "type": "paragraph",
+        "id": "e7b18fdbd961ae8a",
+        "text": "We find the URL for our example Excalidraw SVG by scraping the <img> tag in the first HTML item on this page."
+      },
+      "date": 1663446699111
+    },
+    {
+      "type": "edit",
+      "id": "013e9912bf577375",
+      "item": {
+        "type": "paragraph",
+        "id": "013e9912bf577375",
+        "text": "There is some encoded data in XML comments at the top of the SVG file."
+      },
+      "date": 1663446802847
+    },
+    {
+      "type": "add",
+      "id": "ea0b78197fcb3141",
+      "item": {
+        "type": "paragraph",
+        "id": "ea0b78197fcb3141",
+        "text": "//code..."
+      },
+      "after": "013e9912bf577375",
+      "date": 1663446816153
+    },
+    {
+      "type": "add",
+      "id": "d1ba83715d7de3e5",
+      "item": {
+        "type": "paragraph",
+        "id": "d1ba83715d7de3e5",
+        "text": "next..."
+      },
+      "after": "ea0b78197fcb3141",
+      "date": 1663446819111
+    },
+    {
+      "type": "edit",
+      "id": "ea0b78197fcb3141",
+      "item": {
+        "type": "code",
+        "id": "ea0b78197fcb3141",
+        "text": "function assertExcalidrawSVG(svg) {\n  // excalidraw puts some comments & text nodes first \n  for(let node of svg.childNodes) {\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim() == \"svg-source:excalidraw\") {\n      return true\n    }\n    if (\n      node.nodeName != \"#comment\"\n      || node.nodeName != \"#text\"\n    ) {\n      return false \n    }\n  }\n}\n\nfunction excalidrawPayload(svg) {\n\n}"
+      },
+      "date": 1663447362249
+    },
+    {
+      "type": "edit",
+      "id": "ea0b78197fcb3141",
+      "item": {
+        "type": "code",
+        "id": "ea0b78197fcb3141",
+        "text": "function assertExcalidrawSVG(svg) {\n  // excalidraw puts some comments & text nodes first \n  for(let node of svg.childNodes) {\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim() == \"svg-source:excalidraw\") {\n      return true\n    }\n    if (\n      node.nodeName != \"#comment\"\n      || node.nodeName != \"#text\"\n    ) {\n      return false \n    }\n  }\n}\n\nfunction excalidrawPayload(svg) {\n  for(let node of svg.childNodes) {\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim()==\"payload-start\") {\n      return node.nextSibling.textContent\n    }\n    if (\n      node.nodeName != \"#comment\"\n      || node.nodeName != \"#text\"\n    ) {\n      // maybe throw(new Error(\"missing payload\"))\n      return \"\" \n    }\n  }\n}"
+      },
+      "date": 1663447539133
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  const url = await whichURL()\n  const svg = await getSvg(url)\n  Object.assign(window, {svg})\n  el.appendChild(svg)\n  if (assertExcalidrawSVG(svg)) {\n    const payload = excalidrawPayload(svg)\n    el.insertAdjacentHTML(\"beforeend\",\n      `<pre>${payload}</pre>`)\n  }\n}"
+      },
+      "date": 1663447682593
+    },
+    {
+      "type": "edit",
+      "id": "ea0b78197fcb3141",
+      "item": {
+        "type": "code",
+        "id": "ea0b78197fcb3141",
+        "text": "function assertExcalidrawSVG(svg) {\n  // excalidraw puts some comments & text nodes first \n  for(let node of svg.childNodes) {\n    console.log(node)\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim() == \"svg-source:excalidraw\") {\n      return true\n    }\n    if (\n      node.nodeName != \"#comment\"\n      || node.nodeName != \"#text\"\n    ) {\n      return false \n    }\n  }\n}\n\nfunction excalidrawPayload(svg) {\n  for(let node of svg.childNodes) {\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim()==\"payload-start\") {\n      return node.nextSibling.textContent\n    }\n    if (\n      node.nodeName != \"#comment\"\n      || node.nodeName != \"#text\"\n    ) {\n      // maybe throw(new Error(\"missing payload\"))\n      return \"\" \n    }\n  }\n}"
+      },
+      "date": 1663447735509
+    },
+    {
+      "type": "edit",
+      "id": "ea0b78197fcb3141",
+      "item": {
+        "type": "code",
+        "id": "ea0b78197fcb3141",
+        "text": "function assertExcalidrawSVG(svg) {\n  // excalidraw puts some comments & text nodes first \n  for(let node of svg.childNodes) {\n    console.log(node)\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim() == \"svg-source:excalidraw\") {\n      return true\n    }\n    if (\n      node.nodeName != \"#comment\"\n      && node.nodeName != \"#text\"\n    ) {\n      return false \n    }\n  }\n}\n\nfunction excalidrawPayload(svg) {\n  for(let node of svg.childNodes) {\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim()==\"payload-start\") {\n      return node.nextSibling.textContent\n    }\n    if (\n      node.nodeName != \"#comment\"\n      || node.nodeName != \"#text\"\n    ) {\n      // maybe throw(new Error(\"missing payload\"))\n      return \"\" \n    }\n  }\n}"
+      },
+      "date": 1663447779083
+    },
+    {
+      "type": "edit",
+      "id": "ea0b78197fcb3141",
+      "item": {
+        "type": "code",
+        "id": "ea0b78197fcb3141",
+        "text": "function assertExcalidrawSVG(svg) {\n  // excalidraw puts some comments & text nodes first \n  for(let node of svg.childNodes) {\n    console.log(node)\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim() == \"svg-source:excalidraw\") {\n      return true\n    }\n    if (\n      node.nodeName != \"#comment\"\n      && node.nodeName != \"#text\"\n    ) {\n      return false \n    }\n  }\n}\n\nfunction excalidrawPayload(svg) {\n  for(let node of svg.childNodes) {\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim()==\"payload-start\") {\n      return node.nextSibling.textContent\n    }\n    if (\n      node.nodeName != \"#comment\"\n      || node.nodeName != \"#text\"\n    ) {\n      // maybe throw(new Error(\"missing payload\"))\n      return \"\" \n    }\n  }\n}\n\nObject.assign(window,\n  {assertExcalidrawSVG, excalidrawPayload})"
+      },
+      "date": 1663447883772
+    },
+    {
+      "type": "edit",
+      "id": "ea0b78197fcb3141",
+      "item": {
+        "type": "code",
+        "id": "ea0b78197fcb3141",
+        "text": "function assertExcalidrawSVG(svg) {\n  // excalidraw puts some comments & text nodes first \n  for(let node of svg.childNodes) {\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim() == \"svg-source:excalidraw\") {\n      return true\n    }\n    if (\n      node.nodeName != \"#comment\"\n      && node.nodeName != \"#text\"\n    ) {\n      return false \n    }\n  }\n}\n\nfunction excalidrawPayload(svg) {\n  for(let node of svg.childNodes) {\n    console.log(node)\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim()==\"payload-start\") {\n      return node.nextSibling.textContent\n    }\n    if (\n      node.nodeName != \"#comment\"\n      || node.nodeName != \"#text\"\n    ) {\n      // maybe throw(new Error(\"missing payload\"))\n      return \"\" \n    }\n  }\n}\n\nObject.assign(window,\n  {assertExcalidrawSVG, excalidrawPayload})"
+      },
+      "date": 1663447938143
+    },
+    {
+      "type": "edit",
+      "id": "ea0b78197fcb3141",
+      "item": {
+        "type": "code",
+        "id": "ea0b78197fcb3141",
+        "text": "function assertExcalidrawSVG(svg) {\n  // excalidraw puts some comments & text nodes first \n  for(let node of svg.childNodes) {\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim() == \"svg-source:excalidraw\") {\n      return true\n    }\n    if (\n      node.nodeName != \"#comment\"\n      && node.nodeName != \"#text\"\n    ) {\n      return false \n    }\n  }\n}\n\nfunction excalidrawPayload(svg) {\n  for(let node of svg.childNodes) {\n    console.log(node)\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim()==\"payload-start\") {\n      return node.nextSibling.textContent\n    }\n    if (\n      node.nodeName != \"#comment\"\n      && node.nodeName != \"#text\"\n    ) {\n      // maybe throw(new Error(\"missing payload\"))\n      return \"\" \n    }\n  }\n}\n\nObject.assign(window,\n  {assertExcalidrawSVG, excalidrawPayload})"
+      },
+      "date": 1663448095379
+    },
+    {
+      "type": "edit",
+      "id": "ea0b78197fcb3141",
+      "item": {
+        "type": "code",
+        "id": "ea0b78197fcb3141",
+        "text": "function textOrComment(node) {\n  return [\"#text\", \"#comment\"].includes(node.nodeName)\n}\n\nfunction assertExcalidrawSVG(svg) {\n  // excalidraw puts some comments & text nodes first \n  for(let node of svg.childNodes) {\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim() == \"svg-source:excalidraw\") {\n      return true\n    }\n    if (\n      node.nodeName != \"#comment\"\n      && node.nodeName != \"#text\"\n    ) {\n      return false \n    }\n  }\n}\n\nfunction excalidrawPayload(svg) {\n  for(let node of svg.childNodes) {\n    console.log(node)\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim()==\"payload-start\") {\n      return node.nextSibling.textContent\n    }\n    if (\n      node.nodeName != \"#comment\"\n      && node.nodeName != \"#text\"\n    ) {\n      // maybe throw(new Error(\"missing payload\"))\n      return \"\" \n    }\n  }\n}\n\nObject.assign(window,\n  {assertExcalidrawSVG, excalidrawPayload})"
+      },
+      "date": 1663448315936
+    },
+    {
+      "type": "edit",
+      "id": "ea0b78197fcb3141",
+      "item": {
+        "type": "code",
+        "id": "ea0b78197fcb3141",
+        "text": "function textOrComment(node) {\n  return [\"#text\", \"#comment\"].includes(node.nodeName)\n}\n\nfunction assertExcalidrawSVG(svg) {\n  // excalidraw puts some comments & text nodes first \n  for(let node of svg.childNodes) {\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim() == \"svg-source:excalidraw\") {\n      return true\n    }\n    if (! textOrComment(node)) {\n      return false \n    }\n  }\n}\n\nfunction excalidrawPayload(svg) {\n  for(let node of svg.childNodes) {\n    console.log(node)\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim()==\"payload-start\") {\n      return node.nextSibling.textContent\n    }\n    if (! textOrComment(node)) {\n      // maybe throw(new Error(\"missing payload\"))\n      return \"\" \n    }\n  }\n}\n\nObject.assign(window,\n  {assertExcalidrawSVG, excalidrawPayload})"
+      },
+      "date": 1663448455134
+    },
+    {
+      "type": "edit",
+      "id": "ea0b78197fcb3141",
+      "item": {
+        "type": "code",
+        "id": "ea0b78197fcb3141",
+        "text": "function textOrComment(node) {\n  return [\"#text\", \"#comment\"].includes(node.nodeName)\n}\n\nfunction assertExcalidrawSVG(svg) {\n  // excalidraw puts some comments & text nodes first \n  for(let node of svg.childNodes) {\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim() == \"svg-source:excalidraw\") {\n      return true\n    }\n    if (! textOrComment(node)) {\n      return false \n    }\n  }\n}\n\nfunction excalidrawPayload(svg) {\n  for(let node of svg.childNodes) {\n    console.log(node)\n    if (\n      node.nodeName == \"#comment\"\n      && node.textContent.trim()==\"payload-start\") {\n      return node.nextSibling.textContent\n    }\n    if (! textOrComment(node)) {\n      // maybe throw(new Error(\"missing payload\"))\n      return \"\" \n    }\n  }\n}\n"
+      },
+      "date": 1663448504057
+    },
+    {
+      "type": "edit",
+      "id": "d1ba83715d7de3e5",
+      "item": {
+        "type": "paragraph",
+        "id": "d1ba83715d7de3e5",
+        "text": "Here we port Excalidraw's source from typescript to javascript in order to decode the payload."
+      },
+      "date": 1663448611759
+    },
+    {
+      "type": "add",
+      "id": "1b6837b5823c575f",
+      "item": {
+        "type": "factory",
+        "id": "1b6837b5823c575f",
+        "text": "//code"
+      },
+      "after": "d1ba83715d7de3e5",
+      "date": 1663448616823
+    },
+    {
+      "type": "add",
+      "id": "607941c95cd30c27",
+      "item": {
+        "type": "paragraph",
+        "id": "607941c95cd30c27",
+        "text": "next..."
+      },
+      "after": "1b6837b5823c575f",
+      "date": 1663448625637
+    },
+    {
+      "type": "edit",
+      "id": "1b6837b5823c575f",
+      "item": {
+        "type": "code",
+        "id": "1b6837b5823c575f",
+        "text": "//code..."
+      },
+      "date": 1663448634046
+    },
+    {
+      "type": "edit",
+      "id": "d1ba83715d7de3e5",
+      "item": {
+        "type": "paragraph",
+        "id": "d1ba83715d7de3e5",
+        "text": "Here we port Excalidraw's source from typescript to javascript in order to decode the payload. [https://github.com/excalidraw/excalidraw/blob/master/src/data/encode.ts github]"
+      },
+      "date": 1663448671084
+    },
+    {
+      "type": "edit",
+      "id": "1b6837b5823c575f",
+      "item": {
+        "type": "code",
+        "id": "1b6837b5823c575f",
+        "text": "import {inflate} from \"https://cdn.skypack.dev/pako\" \n\nfunction byteStringToArrayBuffer(byteString) {\n  const buffer = new ArrayBuffer(byteString.length)\n  const bufferView = new Uint8Array(buffer)\n  for (let i = 0, len = byteString.length; i < len; i++) {\n    bufferView[i] = byteString.charCodeAt(i)\n  }\n  return buffer\n}\n\nfunction byteStringToString(byteString) {\n  return new TextDecoder(\"utf-8\").decode(byteStringToArrayBuffer(byteString))\n}\n\nasync function decode(data) {\n  let decoded\n\n  switch (data.encoding) {\n    case \"bstring\":\n      // if compressed, do not double decode the bstring\n      decoded = data.compressed\n        ? data.encoded\n        : await byteStringToString(data.encoded);\n      break;\n    default:\n      throw new Error(`decode: unknown encoding \"${data.encoding}\"`)\n  }\n\n  if (data.compressed) {\n    return inflate(new Uint8Array(byteStringToArrayBuffer(decoded)), {\n      to: \"string\",\n    })\n  }\n\n  return decoded;\n}"
+      },
+      "date": 1663448871094
+    },
+    {
+      "type": "edit",
+      "id": "607941c95cd30c27",
+      "item": {
+        "type": "paragraph",
+        "id": "607941c95cd30c27",
+        "text": "There are a few layers of encoding to unpack."
+      },
+      "date": 1663448963641
+    },
+    {
+      "type": "add",
+      "id": "7f32686be2f83ea8",
+      "item": {
+        "type": "paragraph",
+        "id": "7f32686be2f83ea8",
+        "text": "//code"
+      },
+      "after": "607941c95cd30c27",
+      "date": 1663448965931
+    },
+    {
+      "type": "add",
+      "id": "cbcd9d1924d18959",
+      "item": {
+        "type": "paragraph",
+        "id": "cbcd9d1924d18959",
+        "text": "next..."
+      },
+      "after": "7f32686be2f83ea8",
+      "date": 1663448968730
+    },
+    {
+      "type": "edit",
+      "id": "7f32686be2f83ea8",
+      "item": {
+        "type": "factory",
+        "id": "7f32686be2f83ea8",
+        "text": "//code..."
+      },
+      "date": 1663448995115
+    },
+    {
+      "type": "edit",
+      "id": "7f32686be2f83ea8",
+      "item": {
+        "type": "code",
+        "id": "7f32686be2f83ea8",
+        "text": "function decodeBase64json(payload) {\n  return JSON.parse(atob(payload))\n}"
+      },
+      "date": 1663449085310
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  const url = await whichURL()\n  const svg = await getSvg(url)\n  Object.assign(window, {svg})\n  el.appendChild(svg)\n  if (assertExcalidrawSVG(svg)) {\n    const payload = excalidrawPayload(svg)\n    const obj = decodeBase64json(payload)\n    el.insertAdjacentHTML(\"beforeend\",\n      `<pre>${JSON.stringify(obj, null, 2)}</pre>`)\n  }\n}"
+      },
+      "date": 1663449144088
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  const url = await whichURL()\n  const svg = await getSvg(url)\n  Object.assign(window, {svg})\n  el.appendChild(svg)\n  if (assertExcalidrawSVG(svg)) {\n    const payload = excalidrawPayload(svg)\n    const obj = decode(decodeBase64json(payload))\n    el.insertAdjacentHTML(\"beforeend\",\n      `<pre>${JSON.stringify(obj, null, 2)}</pre>`)\n  }\n}"
+      },
+      "date": 1663449186791
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  const url = await whichURL()\n  const svg = await getSvg(url)\n  Object.assign(window, {svg})\n  el.appendChild(svg)\n  if (assertExcalidrawSVG(svg)) {\n    const payload = excalidrawPayload(svg)\n    const obj = decodeBase64json(payload)\n    el.insertAdjacentHTML(\"beforeend\",\n      `<pre>${JSON.stringify(obj, null, 2)}</pre>`)\n  }\n}"
+      },
+      "date": 1663449226063
+    },
+    {
+      "type": "edit",
+      "id": "1b6837b5823c575f",
+      "item": {
+        "type": "code",
+        "id": "1b6837b5823c575f",
+        "text": "import pako from \"https://cdn.skypack.dev/pako\" \nconst {inflate} = pako\n\nfunction byteStringToArrayBuffer(byteString) {\n  const buffer = new ArrayBuffer(byteString.length)\n  const bufferView = new Uint8Array(buffer)\n  for (let i = 0, len = byteString.length; i < len; i++) {\n    bufferView[i] = byteString.charCodeAt(i)\n  }\n  return buffer\n}\n\nfunction byteStringToString(byteString) {\n  return new TextDecoder(\"utf-8\").decode(byteStringToArrayBuffer(byteString))\n}\n\nasync function decode(data) {\n  let decoded\n\n  switch (data.encoding) {\n    case \"bstring\":\n      // if compressed, do not double decode the bstring\n      decoded = data.compressed\n        ? data.encoded\n        : await byteStringToString(data.encoded);\n      break;\n    default:\n      throw new Error(`decode: unknown encoding \"${data.encoding}\"`)\n  }\n\n  if (data.compressed) {\n    return inflate(new Uint8Array(byteStringToArrayBuffer(decoded)), {\n      to: \"string\",\n    })\n  }\n\n  return decoded;\n}"
+      },
+      "date": 1663449435822
+    },
+    {
+      "type": "edit",
+      "id": "7f32686be2f83ea8",
+      "item": {
+        "type": "code",
+        "id": "7f32686be2f83ea8",
+        "text": "function decodeBase64json(payload) {\n  return JSON.parse(atob(payload))\n}\n\nObject.assign(window, {\n  decodeBase64json,\n  decode,\n  byteStringToString,\n  byteStringToArrayBuffer,\n  inflate\n})"
+      },
+      "date": 1663449525164
+    },
+    {
+      "type": "edit",
+      "id": "7f32686be2f83ea8",
+      "item": {
+        "type": "code",
+        "id": "7f32686be2f83ea8",
+        "text": "function decodeBase64json(payload) {\n  return JSON.parse(atob(payload))\n}\n\nObject.assign(window, {\n  excalidrawPayload,\n  decodeBase64json,\n  decode,\n  byteStringToString,\n  byteStringToArrayBuffer,\n  inflate\n})"
+      },
+      "date": 1663449603949
+    },
+    {
+      "type": "edit",
+      "id": "14f8ee86157d689a",
+      "item": {
+        "type": "code",
+        "id": "14f8ee86157d689a",
+        "text": "export async function emit(el) {\n  const url = await whichURL()\n  const svg = await getSvg(url)\n  Object.assign(window, {svg})\n  el.appendChild(svg)\n  if (assertExcalidrawSVG(svg)) {\n    const payload = excalidrawPayload(svg)\n    const obj = JSON.parse(\n      await decode(decodeBase64json(payload)))\n    el.insertAdjacentHTML(\"beforeend\",\n      `<pre>${JSON.stringify(obj, null, 2)}</pre>`)\n  }\n}"
+      },
+      "date": 1663449912865
+    },
+    {
+      "type": "edit",
+      "id": "7f32686be2f83ea8",
+      "item": {
+        "type": "code",
+        "id": "7f32686be2f83ea8",
+        "text": "function decodeBase64json(payload) {\n  return JSON.parse(atob(payload))\n}"
+      },
+      "date": 1663449962482
+    },
+    {
+      "type": "edit",
+      "id": "cbcd9d1924d18959",
+      "item": {
+        "type": "paragraph",
+        "id": "cbcd9d1924d18959",
+        "text": "Here we combine all of the above: find the <img> at the top of this page; use that url to fetch the SVG; verify it is an Excalidraw export format; unwrap the several layers of encoding; emit a page that includes the SVG and the now-decoded JSON."
+      },
+      "date": 1663450150452
+    },
+    {
+      "type": "fork",
+      "site": "wiki.dbbs.co",
+      "date": 1663452113273
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/esm.html\nHEIGHT 400"
+      },
+      "date": 1663452511763
+    }
+  ]
+}

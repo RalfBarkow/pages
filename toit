@@ -4,7 +4,7 @@
     {
       "type": "markdown",
       "id": "74a9ae6a0cc643c2",
-      "text": "a modern high-level language designed specifically for microcontrollers. [https://toitlang.org/ toitlang], [https://blog.toit.io/?gi=7ed45e11cf58 blog] \n- Toit language basics. [https://docs.toit.io/language page]\n- [[Bit blit]] in Toi. [https://docs.toit.io/language/sdk/blit page]\n> Tight loops manipulating byte arrays often follow a set pattern. The blit function is implemented in C++ and can be faster than pure Toit code for manipulations that can be expressed as a [[Traversal]] of a byte array, seen as a two-dimensional array of values.\n- Toit + Jaguar = 🥳. [https://github.com/toitlang/jaguar#how-do-i-use-it github]\n- PubSub. [https://docs.toit.io/apis/pubsub page]\n"
+      "text": "a modern high-level language designed specifically for microcontrollers. [https://toitlang.org/ toitlang], [https://blog.toit.io/?gi=7ed45e11cf58 blog], [https://www.espressif.com/en/news/ESP_Toit espressif], [https://github.com/toitware/public/wiki#toit-community-projects wiki] \n- Toit language basics. [https://docs.toit.io/language page]\n- [[Bit blit]] in Toi. [https://docs.toit.io/language/sdk/blit page]\n> Tight loops manipulating byte arrays often follow a set pattern. The blit function is implemented in C++ and can be faster than pure Toit code for manipulations that can be expressed as a [[Traversal]] of a byte array, seen as a two-dimensional array of values.\n- Toit + Jaguar = 🥳. [https://github.com/toitlang/jaguar#how-do-i-use-it github]\n- PubSub. [https://docs.toit.io/apis/pubsub page]\n"
     },
     {
       "type": "markdown",
@@ -91,6 +91,26 @@
         "text": "a modern high-level language designed specifically for microcontrollers. [https://toitlang.org/ toitlang], [https://blog.toit.io/?gi=7ed45e11cf58 blog] \n- Toit language basics. [https://docs.toit.io/language page]\n- [[Bit blit]] in Toi. [https://docs.toit.io/language/sdk/blit page]\n> Tight loops manipulating byte arrays often follow a set pattern. The blit function is implemented in C++ and can be faster than pure Toit code for manipulations that can be expressed as a [[Traversal]] of a byte array, seen as a two-dimensional array of values.\n- Toit + Jaguar = 🥳. [https://github.com/toitlang/jaguar#how-do-i-use-it github]\n- PubSub. [https://docs.toit.io/apis/pubsub page]\n"
       },
       "date": 1663069226065
+    },
+    {
+      "type": "edit",
+      "id": "74a9ae6a0cc643c2",
+      "item": {
+        "type": "markdown",
+        "id": "74a9ae6a0cc643c2",
+        "text": "a modern high-level language designed specifically for microcontrollers. [https://toitlang.org/ toitlang], [https://blog.toit.io/?gi=7ed45e11cf58 blog], [https://www.espressif.com/en/news/ESP_Toit espressif] \n- Toit language basics. [https://docs.toit.io/language page]\n- [[Bit blit]] in Toi. [https://docs.toit.io/language/sdk/blit page]\n> Tight loops manipulating byte arrays often follow a set pattern. The blit function is implemented in C++ and can be faster than pure Toit code for manipulations that can be expressed as a [[Traversal]] of a byte array, seen as a two-dimensional array of values.\n- Toit + Jaguar = 🥳. [https://github.com/toitlang/jaguar#how-do-i-use-it github]\n- PubSub. [https://docs.toit.io/apis/pubsub page]\n"
+      },
+      "date": 1663129358221
+    },
+    {
+      "type": "edit",
+      "id": "74a9ae6a0cc643c2",
+      "item": {
+        "type": "markdown",
+        "id": "74a9ae6a0cc643c2",
+        "text": "a modern high-level language designed specifically for microcontrollers. [https://toitlang.org/ toitlang], [https://blog.toit.io/?gi=7ed45e11cf58 blog], [https://www.espressif.com/en/news/ESP_Toit espressif], [https://github.com/toitware/public/wiki#toit-community-projects wiki] \n- Toit language basics. [https://docs.toit.io/language page]\n- [[Bit blit]] in Toi. [https://docs.toit.io/language/sdk/blit page]\n> Tight loops manipulating byte arrays often follow a set pattern. The blit function is implemented in C++ and can be faster than pure Toit code for manipulations that can be expressed as a [[Traversal]] of a byte array, seen as a two-dimensional array of values.\n- Toit + Jaguar = 🥳. [https://github.com/toitlang/jaguar#how-do-i-use-it github]\n- PubSub. [https://docs.toit.io/apis/pubsub page]\n"
+      },
+      "date": 1663131150786
     }
   ]
 }
