@@ -1,0 +1,708 @@
+{
+  "title": "Datalog Sample Clock Anomaly",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "8c1713125fd237de",
+      "text": "Datalog plugin watches itself and became quite confusing. This disturbance and its resolution was first reported in the federated wiki chat. [https://app.element.io/#/room/#fedwiki:matrix.org/$1663645311160317MRzWR:matrix.org matrix]"
+    },
+    {
+      "type": "paragraph",
+      "id": "281728bfa8c20a2f",
+      "text": "Tip: These screen shots have details important for understanding my interpretations. Right-click to Open Image in New Tab at full resolution."
+    },
+    {
+      "type": "pagefold",
+      "id": "6354180d482ad939",
+      "text": "20:41 Sept 19, 2022"
+    },
+    {
+      "type": "paragraph",
+      "id": "e55c57a0c3e2df52",
+      "text": "I'm seeking some diagnostic help from from wiki system operators here. The Datalog plugin samples remote sources on a regular basis. This timebase comes from node's implementation of setInterval that is managed by Datalog's server-side plugin. [https://github.com/WardCunningham/wiki-plugin-datalog/blob/fa51ac94c647d8115ee10cd5dbe8d9fe9b7bf066/server/server.js#L151 github]\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "5dd281da77d04184",
+      "text": "I've monitored the accuracy and found it to be quite good  An about page discusses these observations. See [[More About Timing Accuracy]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "dfece445dec020de",
+      "text": "The Datalog plugin is broadly available but the measurements mentioned above are from a wiki running in Digital Ocean in Palo Alto named bay.wiki.org. This hasn't been updated recently so I was surprised to see a sudden departure from regularity a few days ago. A dramatic and quite unusual and inexplicable shaped change. I will share a few graphs hoping for recognition of this phenomena or suggestions for further investigation. \n[http://found.ward.bay.wiki.org/assets/plugins/datalog/plot-clock.html?slug=esp8266-datalog&chunk=day&samples=5000&keep=5 datalog]"
+    },
+    {
+      "type": "paragraph",
+      "id": "7eef865aa8bfda36",
+      "text": "This is what the change looks like when I zoom in to see the usual fluctuations around a few milliseconds from the expected period.  "
+    },
+    {
+      "type": "html",
+      "id": "5bea2f6266395812",
+      "text": "<img width=100% src=\"http://ward.asia.wiki.org/assets/pages/datalog-sample-clock-anomaly/image%20(1).png\">"
+    },
+    {
+      "type": "paragraph",
+      "id": "2ed3cc24ccc78e0c",
+      "text": "Something happened at 18:00 Sept 16th and then only partially returned to normal at 14:00 Sept 17th. What is it doing? I will zoom around and see the really strange behavior that has me stumped."
+    },
+    {
+      "type": "html",
+      "id": "20b9f2b40475cb27",
+      "text": "<img width=100% src=\"http://ward.asia.wiki.org/assets/pages/datalog-sample-clock-anomaly/image%20(2).png\">"
+    },
+    {
+      "type": "paragraph",
+      "id": "1d3635fb341b5889",
+      "text": "This plot has the same horizontal scale but expands to see an apparent oscillation of the timer firing 6 to 12 seconds early with this oscillation increasing until some measurements are in the normal range and others consistently 18 to 19 seconds early. I'll now zoom in on the horizontal time scale to see what is happening sample by sample."
+    },
+    {
+      "type": "paragraph",
+      "id": "7fec314b8488269a",
+      "text": "I should mention that Datalog has been instructed to take 5000 samples a day which turns out to be 17.28 seconds between samples."
+    },
+    {
+      "type": "html",
+      "id": "c79c44ec4079549c",
+      "text": "<img width=100% src=\"http://ward.asia.wiki.org/assets/pages/datalog-sample-clock-anomaly/image%20(3).png\">"
+    },
+    {
+      "type": "paragraph",
+      "id": "93877978eb8697af",
+      "text": "This is the moment when the oscillation begins. We see it is very regular with error increasing every other sample. I'm beginning to see a clue here. The zig-zag pattern is 17+ seconds per period but with two samples per the expected period. How could there be two samples? Unless there are two copies of the sampling logic running mostly out of phase."
+    },
+    {
+      "type": "html",
+      "id": "2692bcbf6e05ecea",
+      "text": "<img width=100% src=\"http://ward.asia.wiki.org/assets/pages/datalog-sample-clock-anomaly/image%20(4).png\">"
+    },
+    {
+      "type": "paragraph",
+      "id": "63b89ef2d6aac6d8",
+      "text": "Here we zoom way into the period of normal operation. Here we see a sample at 05:19:00 and then another at the expected 05:19:17. No double sampling here."
+    },
+    {
+      "type": "paragraph",
+      "id": "233d30319b965739",
+      "text": "I'm tempted to ssh into bay.wiki.org and see if ps shows two copies of wiki running. There is some exotic timer sharing in the server-side plugin with twisty restart logic to keep the timers running. This could have gone wrong. I think I will wait until I am fresh in the morning. I don't want to destroy any evidence as to how this might have happened?"
+    },
+    {
+      "type": "paragraph",
+      "id": "ecc9d1fd9208eee2",
+      "text": "There remains a programming puzzle. What would cause the oscillation to grow as it does and then stop growing? What mechanism would cause the two hypothesized samplers to become lock-stepped?"
+    },
+    {
+      "type": "pagefold",
+      "id": "b3a3559400168ca1",
+      "text": "08:01 Sept 20, 2022"
+    },
+    {
+      "type": "paragraph",
+      "id": "2a3c1d2f262679ad",
+      "text": "Next morning.",
+      "alias": "b3a3559400168ca1"
+    },
+    {
+      "type": "html",
+      "id": "b7de2542b5c0189d",
+      "text": "<img width=100% src=\"http://ward.asia.wiki.org/assets/pages/datalog-sample-clock-anomaly/image%20(5).png\">"
+    },
+    {
+      "type": "paragraph",
+      "id": "de1eb06c8bee9db5",
+      "text": "Good news. After a 215 second gap in coverage Datalog on bay.wiki.org has returned to normal. I still wish I knew what happened but my motivation to find out has lessened."
+    },
+    {
+      "type": "paragraph",
+      "id": "57d4e3046df42059",
+      "text": "Is it just a coincidence that the correction came at 21:07 local time? This was while I was explaining the peculiar recording here from 20:50 to 21:30. "
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Datalog Sample Clock Anomaly",
+        "story": []
+      },
+      "date": 1663687362471
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8c1713125fd237de"
+      },
+      "id": "8c1713125fd237de",
+      "type": "add",
+      "date": 1663687373285
+    },
+    {
+      "type": "edit",
+      "id": "8c1713125fd237de",
+      "item": {
+        "type": "paragraph",
+        "id": "8c1713125fd237de",
+        "text": "Datalog plugin watches itself and become quite confusing. This disturbance and its resolution was first reported in the federated wiki chat. "
+      },
+      "date": 1663687462152
+    },
+    {
+      "type": "edit",
+      "id": "8c1713125fd237de",
+      "item": {
+        "type": "paragraph",
+        "id": "8c1713125fd237de",
+        "text": "Datalog plugin watches itself and become quite confusing. This disturbance and its resolution was first reported in the federated wiki chat. [https://app.element.io/#/room/#fedwiki:matrix.org/$1663645803160433nVMlu:matrix.org matrix]"
+      },
+      "date": 1663687514086
+    },
+    {
+      "type": "edit",
+      "id": "8c1713125fd237de",
+      "item": {
+        "type": "paragraph",
+        "id": "8c1713125fd237de",
+        "text": "Datalog plugin watches itself and became quite confusing. This disturbance and its resolution was first reported in the federated wiki chat. [https://app.element.io/#/room/#fedwiki:matrix.org/$1663645803160433nVMlu:matrix.org matrix]"
+      },
+      "date": 1663687540404
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e55c57a0c3e2df52"
+      },
+      "id": "e55c57a0c3e2df52",
+      "type": "add",
+      "after": "8c1713125fd237de",
+      "date": 1663687582712
+    },
+    {
+      "type": "edit",
+      "id": "e55c57a0c3e2df52",
+      "item": {
+        "type": "paragraph",
+        "id": "e55c57a0c3e2df52",
+        "text": "I'm seeking some diagnostic help from from wiki system operators here. The Datalog plugin samples remote sources on a regular basis. This timebase comes from node's implementation of setInterval that is managed by Datalog's server-side plugin. github\n"
+      },
+      "date": 1663687590762
+    },
+    {
+      "type": "add",
+      "id": "5dd281da77d04184",
+      "item": {
+        "type": "paragraph",
+        "id": "5dd281da77d04184",
+        "text": "I've monitored the accuracy and found it to be quite good  An about page discusses these observations. http://ward.asia.wiki.org/more-about-timing-accuracy.html"
+      },
+      "after": "e55c57a0c3e2df52",
+      "date": 1663687606278
+    },
+    {
+      "type": "edit",
+      "id": "5dd281da77d04184",
+      "item": {
+        "type": "paragraph",
+        "id": "5dd281da77d04184",
+        "text": "I've monitored the accuracy and found it to be quite good  An about page discusses these observations. [[More About Timing Accuracy]]"
+      },
+      "date": 1663687636555
+    },
+    {
+      "type": "edit",
+      "id": "5dd281da77d04184",
+      "item": {
+        "type": "paragraph",
+        "id": "5dd281da77d04184",
+        "text": "I've monitored the accuracy and found it to be quite good  An about page discusses these observations. See [[More About Timing Accuracy]]"
+      },
+      "date": 1663687652097
+    },
+    {
+      "type": "edit",
+      "id": "8c1713125fd237de",
+      "item": {
+        "type": "paragraph",
+        "id": "8c1713125fd237de",
+        "text": "Datalog plugin watches itself and became quite confusing. This disturbance and its resolution was first reported in the federated wiki chat. [https://app.element.io/#/room/#fedwiki:matrix.org/$1663645311160317MRzWR:matrix.org matrix]"
+      },
+      "date": 1663687694574
+    },
+    {
+      "type": "edit",
+      "id": "e55c57a0c3e2df52",
+      "item": {
+        "type": "paragraph",
+        "id": "e55c57a0c3e2df52",
+        "text": "I'm seeking some diagnostic help from from wiki system operators here. The Datalog plugin samples remote sources on a regular basis. This timebase comes from node's implementation of setInterval that is managed by Datalog's server-side plugin. [https://github.com/WardCunningham/wiki-plugin-datalog/blob/fa51ac94c647d8115ee10cd5dbe8d9fe9b7bf066/server/server.js#L151 github]\n"
+      },
+      "date": 1663687730499
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dfece445dec020de"
+      },
+      "id": "dfece445dec020de",
+      "type": "add",
+      "after": "5dd281da77d04184",
+      "date": 1663687760081
+    },
+    {
+      "type": "edit",
+      "id": "dfece445dec020de",
+      "item": {
+        "type": "paragraph",
+        "id": "dfece445dec020de",
+        "text": "The Datalog plugin is broadly available but the measurements mentioned above are from a wiki running in Digital Ocean in Palo Alto named bay.wiki.org. This hasn't been updated recently so I was surprised to see a sudden departure from regularity a few days ago. A dramatic and quite unusual and inexplicable shaped change. I will share a few graphs hoping for recognition of this phenomena or suggestions for further investigation. \n"
+      },
+      "date": 1663687772205
+    },
+    {
+      "type": "add",
+      "id": "7eef865aa8bfda36",
+      "item": {
+        "type": "paragraph",
+        "id": "7eef865aa8bfda36",
+        "text": "This is what the change looks like when I zoom in to see the usual fluctuations around a few milliseconds from the expected period.  "
+      },
+      "after": "dfece445dec020de",
+      "date": 1663687773778
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dc951576b03758e7"
+      },
+      "id": "dc951576b03758e7",
+      "type": "add",
+      "after": "7eef865aa8bfda36",
+      "date": 1663687778527
+    },
+    {
+      "type": "edit",
+      "id": "dc951576b03758e7",
+      "item": {
+        "type": "image",
+        "id": "dc951576b03758e7",
+        "text": "Full Scale",
+        "size": "wide",
+        "width": 420,
+        "height": 243,
+        "url": "/assets/plugins/image/9971459d923c166aca71cdebed744e53.jpg"
+      },
+      "date": 1663687848621
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2fd6dc88baf5bfae"
+      },
+      "id": "2fd6dc88baf5bfae",
+      "type": "add",
+      "after": "dc951576b03758e7",
+      "date": 1663688122094
+    },
+    {
+      "type": "edit",
+      "id": "2fd6dc88baf5bfae",
+      "item": {
+        "type": "assets",
+        "id": "2fd6dc88baf5bfae",
+        "text": "pages/datalog-sample-clock-anomaly"
+      },
+      "date": 1663688146032
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5bea2f6266395812"
+      },
+      "id": "5bea2f6266395812",
+      "type": "add",
+      "after": "2fd6dc88baf5bfae",
+      "date": 1663688170723
+    },
+    {
+      "type": "edit",
+      "id": "5bea2f6266395812",
+      "item": {
+        "type": "html",
+        "id": "5bea2f6266395812",
+        "text": "<img width=100% src=datalog-sample-clock-anomaly>"
+      },
+      "date": 1663688218385
+    },
+    {
+      "type": "edit",
+      "id": "5bea2f6266395812",
+      "item": {
+        "type": "html",
+        "id": "5bea2f6266395812",
+        "text": "<img width=100% src=\"http://ward.asia.wiki.org/assets/pages/datalog-sample-clock-anomaly/image%20(1).png\">"
+      },
+      "date": 1663688237075
+    },
+    {
+      "type": "edit",
+      "id": "5bea2f6266395812",
+      "item": {
+        "type": "html",
+        "id": "5bea2f6266395812",
+        "text": "<img width=100% src=\"http://ward.asia.wiki.org/assets/pages/datalog-sample-clock-anomaly/image%20(1).png\"><center><a href=\"http://ward.asia.wiki.org/assets/pages/datalog-sample-clock-anomaly/image%20(1).png\">enlarge</a></center>"
+      },
+      "date": 1663688288705
+    },
+    {
+      "type": "edit",
+      "id": "5bea2f6266395812",
+      "item": {
+        "type": "html",
+        "id": "5bea2f6266395812",
+        "text": "<img width=100% src=\"http://ward.asia.wiki.org/assets/pages/datalog-sample-clock-anomaly/image%20(1).png\">"
+      },
+      "date": 1663688313022
+    },
+    {
+      "type": "remove",
+      "id": "dc951576b03758e7",
+      "date": 1663688424824
+    },
+    {
+      "type": "remove",
+      "id": "2fd6dc88baf5bfae",
+      "date": 1663688432182
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2ed3cc24ccc78e0c"
+      },
+      "id": "2ed3cc24ccc78e0c",
+      "type": "add",
+      "after": "5bea2f6266395812",
+      "date": 1663688465528
+    },
+    {
+      "type": "edit",
+      "id": "2ed3cc24ccc78e0c",
+      "item": {
+        "type": "paragraph",
+        "id": "2ed3cc24ccc78e0c",
+        "text": "Something happened at 18:00 Sept 16th and then only partially returned to normal at 14:00 Sept 17th. What is it doing? I will zoom around and see the really strange behavior that has me stumped."
+      },
+      "date": 1663688472937
+    },
+    {
+      "type": "add",
+      "id": "20b9f2b40475cb27",
+      "item": {
+        "type": "paragraph",
+        "id": "20b9f2b40475cb27",
+        "text": "2"
+      },
+      "after": "2ed3cc24ccc78e0c",
+      "date": 1663688516273
+    },
+    {
+      "type": "add",
+      "id": "1d3635fb341b5889",
+      "item": {
+        "type": "paragraph",
+        "id": "1d3635fb341b5889",
+        "text": "This plot has the same horizontal scale but expands to see an apparent oscillation of the timer firing 6 to 12 seconds early with this oscillation increasing until some measurements are in the normal range and others consistently 18 to 19 seconds early. I'll now zoom in on the horizontal time scale to see what is happening sample by sample."
+      },
+      "after": "20b9f2b40475cb27",
+      "date": 1663688539291
+    },
+    {
+      "type": "add",
+      "id": "7fec314b8488269a",
+      "item": {
+        "type": "paragraph",
+        "id": "7fec314b8488269a",
+        "text": "I should mention that Datalog has been instructed to take 5000 samples a day which turns out to be 17.28 seconds between samples."
+      },
+      "after": "1d3635fb341b5889",
+      "date": 1663688563073
+    },
+    {
+      "type": "add",
+      "id": "c79c44ec4079549c",
+      "item": {
+        "type": "paragraph",
+        "id": "c79c44ec4079549c",
+        "text": "3"
+      },
+      "after": "7fec314b8488269a",
+      "date": 1663688564418
+    },
+    {
+      "type": "add",
+      "id": "93877978eb8697af",
+      "item": {
+        "type": "paragraph",
+        "id": "93877978eb8697af",
+        "text": "This is the moment when the oscillation begins. We see it is very regular with error increasing every other sample. I'm beginning to see a clue here. The zig-zag pattern is 17+ seconds per period but with two samples per the expected period. How could there be two samples? Unless there are two copies of the sampling logic running mostly out of phase."
+      },
+      "after": "c79c44ec4079549c",
+      "date": 1663688590267
+    },
+    {
+      "type": "add",
+      "id": "2692bcbf6e05ecea",
+      "item": {
+        "type": "paragraph",
+        "id": "2692bcbf6e05ecea",
+        "text": "4"
+      },
+      "after": "93877978eb8697af",
+      "date": 1663688617884
+    },
+    {
+      "type": "add",
+      "id": "63b89ef2d6aac6d8",
+      "item": {
+        "type": "paragraph",
+        "id": "63b89ef2d6aac6d8",
+        "text": "Here we zoom way into the period of normal operation. Here we see a sample at 05:19:00 and then another at the expected 05:19:17. No double sampling here."
+      },
+      "after": "2692bcbf6e05ecea",
+      "date": 1663688624646
+    },
+    {
+      "type": "add",
+      "id": "233d30319b965739",
+      "item": {
+        "type": "paragraph",
+        "id": "233d30319b965739",
+        "text": "I'm tempted to ssh into bay.wiki.org and see if ps shows two copies of wiki running. There is some exotic timer sharing in the server-side plugin with twisty restart logic to keep the timers running. This could have gone wrong. I think I will wait until I am fresh in the morning. I don't want to destroy any evidence as to how this might have happened?"
+      },
+      "after": "63b89ef2d6aac6d8",
+      "date": 1663688629179
+    },
+    {
+      "type": "add",
+      "id": "ecc9d1fd9208eee2",
+      "item": {
+        "type": "paragraph",
+        "id": "ecc9d1fd9208eee2",
+        "text": "There remains a programming puzzle. What would cause the oscillation to grow as it does and then stop growing? What mechanism would cause the two hypothesized samplers to become lock-stepped?"
+      },
+      "after": "233d30319b965739",
+      "date": 1663688633394
+    },
+    {
+      "type": "add",
+      "id": "b3a3559400168ca1",
+      "item": {
+        "type": "paragraph",
+        "id": "b3a3559400168ca1",
+        "text": "Next morning."
+      },
+      "after": "ecc9d1fd9208eee2",
+      "date": 1663688704975
+    },
+    {
+      "type": "add",
+      "id": "b7de2542b5c0189d",
+      "item": {
+        "type": "paragraph",
+        "id": "b7de2542b5c0189d",
+        "text": "5"
+      },
+      "after": "b3a3559400168ca1",
+      "date": 1663688706583
+    },
+    {
+      "type": "add",
+      "id": "de1eb06c8bee9db5",
+      "item": {
+        "type": "paragraph",
+        "id": "de1eb06c8bee9db5",
+        "text": "Good news. After a 215 second gap in coverage Datalog on bay.wiki.org has returned to normal. I still wish I knew what happened but my motivation to find out has lessened."
+      },
+      "after": "b7de2542b5c0189d",
+      "date": 1663688709982
+    },
+    {
+      "type": "add",
+      "id": "57d4e3046df42059",
+      "item": {
+        "type": "paragraph",
+        "id": "57d4e3046df42059",
+        "text": "Is it just a coincidence that the correction came at 21:07 local time? This was while I was explaining the peculiar recording here from 20:50 to 21:30. "
+      },
+      "after": "de1eb06c8bee9db5",
+      "date": 1663688728836
+    },
+    {
+      "type": "edit",
+      "id": "20b9f2b40475cb27",
+      "item": {
+        "type": "html",
+        "id": "20b9f2b40475cb27",
+        "text": "<img width=100% src=\"http://ward.asia.wiki.org/assets/pages/datalog-sample-clock-anomaly/image%20(2).png\">"
+      },
+      "date": 1663688761462
+    },
+    {
+      "type": "edit",
+      "id": "c79c44ec4079549c",
+      "item": {
+        "type": "html",
+        "id": "c79c44ec4079549c",
+        "text": "<img width=100% src=\"http://ward.asia.wiki.org/assets/pages/datalog-sample-clock-anomaly/image%20(3).png\">"
+      },
+      "date": 1663688778746
+    },
+    {
+      "type": "edit",
+      "id": "2692bcbf6e05ecea",
+      "item": {
+        "type": "html",
+        "id": "2692bcbf6e05ecea",
+        "text": "<img width=100% src=\"http://ward.asia.wiki.org/assets/pages/datalog-sample-clock-anomaly/image%20(4).png\">"
+      },
+      "date": 1663688803409
+    },
+    {
+      "type": "edit",
+      "id": "b7de2542b5c0189d",
+      "item": {
+        "type": "html",
+        "id": "b7de2542b5c0189d",
+        "text": "<img width=100% src=\"http://ward.asia.wiki.org/assets/pages/datalog-sample-clock-anomaly/image%20(5).png\">"
+      },
+      "date": 1663688823943
+    },
+    {
+      "type": "add",
+      "id": "281728bfa8c20a2f",
+      "item": {
+        "type": "paragraph",
+        "id": "281728bfa8c20a2f",
+        "text": "Tip: These screen shots have details important for understanding my interpretations. "
+      },
+      "after": "8c1713125fd237de",
+      "date": 1663688954122
+    },
+    {
+      "type": "edit",
+      "id": "281728bfa8c20a2f",
+      "item": {
+        "type": "paragraph",
+        "id": "281728bfa8c20a2f",
+        "text": "Tip: These screen shots have details important for understanding my interpretations. Right-click to "
+      },
+      "date": 1663688983671
+    },
+    {
+      "type": "edit",
+      "id": "281728bfa8c20a2f",
+      "item": {
+        "type": "paragraph",
+        "id": "281728bfa8c20a2f",
+        "text": "Tip: These screen shots have details important for understanding my interpretations. Right-click to Open Image in New Tab at full resultion."
+      },
+      "date": 1663689010327
+    },
+    {
+      "type": "edit",
+      "id": "281728bfa8c20a2f",
+      "item": {
+        "type": "paragraph",
+        "id": "281728bfa8c20a2f",
+        "text": "Tip: These screen shots have details important for understanding my interpretations. Right-click to Open Image in New Tab at full resolution."
+      },
+      "date": 1663689039366
+    },
+    {
+      "type": "add",
+      "id": "6354180d482ad939",
+      "item": {
+        "type": "factory",
+        "id": "6354180d482ad939",
+        "text": "s"
+      },
+      "after": "281728bfa8c20a2f",
+      "date": 1663689124996
+    },
+    {
+      "type": "edit",
+      "id": "6354180d482ad939",
+      "item": {
+        "type": "pagefold",
+        "id": "6354180d482ad939",
+        "text": "20:41"
+      },
+      "date": 1663689136584
+    },
+    {
+      "type": "edit",
+      "id": "6354180d482ad939",
+      "item": {
+        "type": "pagefold",
+        "id": "6354180d482ad939",
+        "text": "20:41 Monday"
+      },
+      "date": 1663689172485
+    },
+    {
+      "type": "edit",
+      "id": "b3a3559400168ca1",
+      "item": {
+        "type": "pagefold",
+        "id": "b3a3559400168ca1",
+        "text": "08:01 Tuesday"
+      },
+      "date": 1663689222992
+    },
+    {
+      "type": "edit",
+      "id": "dfece445dec020de",
+      "item": {
+        "type": "paragraph",
+        "id": "dfece445dec020de",
+        "text": "The Datalog plugin is broadly available but the measurements mentioned above are from a wiki running in Digital Ocean in Palo Alto named bay.wiki.org. This hasn't been updated recently so I was surprised to see a sudden departure from regularity a few days ago. A dramatic and quite unusual and inexplicable shaped change. I will share a few graphs hoping for recognition of this phenomena or suggestions for further investigation. \n[http://found.ward.bay.wiki.org/assets/plugins/datalog/plot-clock.html?slug=esp8266-datalog&chunk=day&samples=5000&keep=5 datalog]"
+      },
+      "date": 1663689690979
+    },
+    {
+      "type": "edit",
+      "id": "6354180d482ad939",
+      "item": {
+        "type": "pagefold",
+        "id": "6354180d482ad939",
+        "text": "20:41 Sept 19, 2022"
+      },
+      "date": 1663689757362
+    },
+    {
+      "type": "edit",
+      "id": "b3a3559400168ca1",
+      "item": {
+        "type": "pagefold",
+        "id": "b3a3559400168ca1",
+        "text": "08:01 Sept 20, 2022"
+      },
+      "date": 1663689784473
+    },
+    {
+      "id": "2a3c1d2f262679ad",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "2a3c1d2f262679ad",
+        "text": "Next morning.",
+        "alias": "b3a3559400168ca1"
+      },
+      "after": "b3a3559400168ca1",
+      "date": 1663689808775
+    },
+    {
+      "type": "fork",
+      "site": "ward.asia.wiki.org",
+      "date": 1663697375772
+    }
+  ]
+}
