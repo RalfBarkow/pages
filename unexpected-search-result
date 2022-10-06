@@ -1,0 +1,612 @@
+{
+  "title": "Unexpected Search Result",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "bfa7f2091185cf22",
+      "text": "Marc has noted that sometime wiki's incremental search result shows as a tiny white empty box. No amount of reloading clears this condition."
+    },
+    {
+      "type": "paragraph",
+      "id": "a10f21589f8ad84f",
+      "text": "See [[Search Result Problem Solved]]"
+    },
+    {
+      "type": "markdown",
+      "id": "5d1a44a544b6ccd3",
+      "text": "# Grep"
+    },
+    {
+      "type": "paragraph",
+      "id": "ae4d5d0a5c13b297",
+      "text": "Paul suggested we look for error messages in the server. I found a few in the last 1,000,000 log entries with grep."
+    },
+    {
+      "type": "code",
+      "id": "8561c716a8c00623",
+      "text": "journalctl -u wiki -n1000000 | grep 'SITE INDEX ***'"
+    },
+    {
+      "type": "html",
+      "id": "f190c61b20a3d892",
+      "text": "<pre>Aug 31 11:16:25 asia wiki[18973]: SITE INDEX *** createIndex test2.ward.dojo.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/test2.ward.dojo.fed.wiki/pages'\nAug 31 11:19:03 asia wiki[18973]: SITE INDEX *** createIndex test2.ward.dojo.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/test2.ward.dojo.fed.wiki/pages'\nAug 31 11:26:39 asia wiki[18973]: SITE INDEX *** createIndex test2.ward.dojo.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/test2.ward.dojo.fed.wiki/pages'\nAug 31 20:10:02 asia wiki[18973]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0\nAug 31 20:10:18 asia wiki[18973]: SITE INDEX *** clive.tries.fed.wiki reduce to extract text on student-interactions-in-edmodo-versus-facebook failed Error extracting text from 4\nSep 01 01:33:37 asia wiki[1205]: SITE INDEX *** createIndex silke.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/silke.fed.wiki/pages'\nSep 05 05:52:36 asia wiki[17000]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0\nSep 05 05:53:12 asia wiki[17050]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0\nSep 05 05:53:52 asia wiki[17106]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0"
+    },
+    {
+      "type": "paragraph",
+      "id": "4b111359f4ff1bf6",
+      "text": "Paul will harden the index logic and report a few more conditions that might suggest a solution."
+    },
+    {
+      "type": "markdown",
+      "id": "b639cadd093f8f58",
+      "text": "# Deno"
+    },
+    {
+      "type": "paragraph",
+      "id": "1e43e2f4d09bd4f4",
+      "text": "I can run batch minisearch and use it to test every index stored in my server. [https://www.skypack.dev/view/minisearch skypack] [https://github.com/WardCunningham/assets/tree/master/pages/unexpected-search-result github]"
+    },
+    {
+      "type": "code",
+      "id": "011ff8f93d494313",
+      "text": "import MiniSearch from 'https://cdn.skypack.dev/minisearch@3.3.0'"
+    },
+    {
+      "type": "paragraph",
+      "id": "29de0e449b6dd395",
+      "text": "[Function: MiniSearch2] { loadJSON: [Function], getDefault: [Function], loadJS: [Function] }"
+    },
+    {
+      "type": "paragraph",
+      "id": "b5f7ca85b61b9bb5",
+      "text": "A test case, search for \"graph merge demo\" on my dojo site. Then repeat for marc.tries.fed.wiki."
+    },
+    {
+      "type": "image",
+      "id": "99546a2ff62bebfa",
+      "text": "Search for \"graph merge demo\" yields three results.",
+      "size": "wide",
+      "width": 420,
+      "height": 175,
+      "url": "/assets/plugins/image/d20138cfa7b28e8b6d6bfae9925b24d3.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "f9e64a931d9905cf",
+      "text": "With some reading around in wiki-client we were able to duplicate this result."
+    },
+    {
+      "type": "code",
+      "id": "4994b5bbc269bb65",
+      "text": "const query = 'graph merge demo'\nconst results = miniSearch.search(query,{\n  boost:{\n    title: 20,\n    content: 2},\n  prefix: true,\n  combineWith: 'AND'\n})"
+    },
+    {
+      "type": "html",
+      "id": "c0efd40db6b8fc6d",
+      "text": "<pre>\n[\n  {\n    id: \"travel-graph-demo\",\n    terms: [ \"graph\", \"merge\", \"demo\" ],\n    score: 804.3929281858361,\n    match: { graph: [ \"title\", \"content\" ], merge: [ \"content\" ], demo: [ \"title\" ] }\n  },\n  {\n    id: \"subgraph-creator\",\n    terms: [ \"graph\", \"graphs\", \"merge\", \"demonstrate\" ],\n    score: 377.71676225404434,\n    match: {\n      graph: [ \"content\" ],\n      graphs: [ \"content\" ],\n      merge: [ \"content\" ],\n      demonstrate: [ \"content\" ]\n    }\n  },\n  {\n    id: \"more-more-garden\",\n    terms: [ \"graphs\", \"graphviz\", \"merge\", \"demo\", \"demos\", \"democracy\" ],\n    score: 13.363907653389663,\n    match: {\n      graphs: [ \"content\" ],\n      graphviz: [ \"content\" ],\n      merge: [ \"content\" ],\n      demo: [ \"content\" ],\n      demos: [ \"content\" ],\n      democracy: [ \"content\" ]\n    }\n  }\n]"
+    },
+    {
+      "type": "paragraph",
+      "id": "22e8c6b8f6078889",
+      "text": "We try searching for all two letter combinations suspecting that for some sites this will throw an exception. For ward.dojo.fed.wiki we see no errors. For marc.tries.fed.wiki we see many."
+    },
+    {
+      "type": "html",
+      "id": "27ae6925ead4360e",
+      "text": "<pre>\naa 12\nab Cannot read properties of undefined (reading '1')\nac Cannot read properties of undefined (reading '1')\nad 695\nae 69\naf 342\nag Cannot read properties of undefined (reading '1')\nah 29\nai 167\naj 3\nak 18\nal 1115\nam 434\nan Cannot read properties of undefined (reading '1')\nao 4\nap 575\naq 4\nar 1299\nas Cannot read properties of undefined (reading '1')\nat 764\nau 313\nav 254\naw 174\nax 16\nay 2\naz 4\nba 832\nbb 8\nbc 8\nbd 9\nbe 1498\nbf 1\nbg 105\nbh 3\nbi 393\nbj 7\nbk 2\nbl 224\nbm 2\nbn 2\nbo 629\nbp 4\nbq 1\nbr 503\nbs 2\nbt 6\nbu Cannot read properties of undefined (reading '1')\nbv 1\nbw 2\nbx 1\nby 821\nbz 1\nca 1320\ncb 4\ncc 34\ncd 9\nce 324\ncf 25\ncg 6\nch 1020\nci Cannot read properties of undefined (reading '1')\ncj 2\nck 1\ncl 668\ncm 4\ncn 5\nco Cannot read properties of undefined (reading '1')\ncp 14\ncq 2\ncr Cannot read properties of undefined (reading '1')\ncs 33\nct 2\ncu 613\ncv 14\ncw 1\ncx 3\ncy 162\ncz 1\nda 509\ndb 21\ndc 7\ndd 10\nde 1450\ndf 7\ndg 2\ndh 9\ndi 1325\ndj 1\ndk 1\ndl 1\ndm 38\ndn 12\ndo Cannot read properties of undefined (reading '1')\ndp 4\ndq 1\ndr 445\nds 22\ndt 3\ndu 193\ndv 3\ndw 11\ndx 1\ndy 191\ndz 2\nea 667\neb 5\nec 375\ned 455\nee 7\nef 316\neg 28\neh 2\nei 88\nej 2\nek 1\nel 405\nem 484\nen 1062\neo 2\nep 56\neq 199\ner 162\nes 340\net Cannot read properties of undefined (reading '1')\neu 27\nev 663\new 3\nex 1084\ney 23\nez 2\nfa 762\nfb 5\nfc 5\nfd 2\nfe 834\nff 15\nfg 1\nfh 1\nfi 971\nfj 2\nfk 1\nfl 256\nfm 6\nfn 4\nfo Cannot read properties of undefined (reading '1')\nfp 2\nfq 2\nfr Cannot read properties of undefined (reading '1')\nfs 1\nft 10\nfu 603\nfv 1\nfw 12\nfx 2\nfy 1\nfz 1\nga 267\ngb 1\ngc 1\ngd 11\nge 644\ngf 3\ngg 7\ngh 8\ngi 351\ngj 1\ngk 1\ngl 170\ngm 11\ngn 2\ngo Cannot read properties of undefined (reading '1')\ngp 4\ngq 2\ngr 942\ngs 3\ngt 13\ngu 243\ngv 1\ngw 2\ngx 1\ngy 7\ngz 3\nha 1121\nhb 2\nhc 2\nhd 1\nhe Cannot read properties of undefined (reading '1')\nhf 2\nhg 1\nhh 2\nhi 539\nhj 1\nhk 2\nhl 1\nhm 2\nhn 1\nho 1023\nhp 4\nhq 1\nhr 5\nhs 3\nht 376\nhu 388\nhv 1\nhw 2\nhx 1\nhy 123\nhz 1\nia 17\nib 8\nic 44\nid 520\nie 6\nif 444\nig 40\nih 10\nii 21\nij 1\nik 2\nil 192\nim 729\nin 1942\nio 55\nip 28\niq 1\nir 51\nis Cannot read properties of undefined (reading '1')\nit Cannot read properties of undefined (reading '1')\niu 3\niv 18\niw 1\nix 3\niy 1\niz 1\nja 156\njb 1\njc 1\njd 7\nje 34\njf 1\njg 2\njh 1\nji 21\njj 1\njk 1\njl 2\njm 7\njn 1\njo 397\njp 18\njq 5\njr 3\njs 67\njt 1\nju 362\njv 1\njw 3\njx 1\njy 1\njz 2\nka 63\nkb 3\nkc 1\nkd 1\nke Cannot read properties of undefined (reading '1')\nkf 1\nkg 2\nkh 2\nki 236\nkj 1\nkk 1\nkl 2\nkm 3\nkn 416\nko 23\nkp 2\nkq 1\nkr 9\nks 2\nkt 5\nku 16\nkv 2\nkw 3\nkx 1\nky 3\nkz 1\nla Cannot read properties of undefined (reading '1')\nlb 3\nlc 2\nld 1\nle Cannot read properties of undefined (reading '1')\nlf 3\nlg 1\nlh 8\nli Cannot read properties of undefined (reading '1')\nlj 1\nlk 1\nll 61\nlm 1\nln 3\nlo 970\nlp 1\nlq 1\nlr 2\nls 3\nlt 12\nlu 43\nlv 2\nlw 2\nlx 1\nly 9\nlz 1\nma 1537\nmb 11\nmc 47\nmd 49\nme 1118\nmf 2\nmg 5\nmh 1\nmi 663\nmj 1\nmk 2\nml 1\nmm 4\nmn 5\nmo Cannot read properties of undefined (reading '1')\nmp 6\nmq 1\nmr 8\nms 9\nmt 16\nmu Cannot read properties of undefined (reading '1')\nmv 2\nmw 2\nmx 2\nmy 368\nmz 1\nna Cannot read properties of undefined (reading '1')\nnb 40\nnc 105\nnd 58\nne 1339\nnf 45\nng 39\nnh 35\nni 148\nnj 16\nnk 4\nnl 54\nnm 57\nnn 22\nno 1268\nnp 79\nnq 8\nnr 64\nns Cannot read properties of undefined (reading '1')\nnt 46\nnu 291\nnv 20\nnw 30\nnx 2\nny 7\nnz 4\noa 12\nob 343\noc 151\nod 25\noe 4\nof 1848\nog 1\noh 22\noi 8\noj 2\nok 28\nol 121\nom 23\non 1251\noo 13\nop 649\noq 1\nor 1334\nos 92\not 637\nou 815\nov 499\now 305\nox 13\noy 2\noz 2\npa 1359\npb 8\npc 6\npd 45\npe 1086\npf 2\npg 6\nph 354\npi 300\npj 2\npk 1\npl 813\npm 5\npn 36\npo 1008\npp 14\npq 1\npr 1516\nps 75\npt 9\npu 600\npv 1\npw 1\npx 1\npy 9\npz 1\nqa 1\nqb 5\nqc 3\nqd 1\nqe 2\nqf 2\nqg 1\nqh 1\nqi 1\nqj 1\nqk 1\nql 2\nqm 2\nqn 1\nqo 1\nqp 1\nqq 1\nqr 1\nqs 2\nqt 3\nqu 538\nqv 1\nqw 1\nqx 1\nqy 2\nqz 2\nra 708\nrb 3\nrc 6\nrd 4\nre Cannot read properties of undefined (reading '1')\nrf 1\nrg 5\nrh 26\nri 389\nrj 1\nrk 2\nrl Cannot read properties of undefined (reading '1')\nrm 5\nrn 9\nro 555\nrp 5\nrq 1\nrr 7\nrs 10\nrt 3\nru 268\nrv 3\nrw 6\nrx 41\nry 4\nrz 1\nsa 658\nsb 15\nsc 668\nsd 31\nse Cannot read properties of undefined (reading '1')\nsf 11\nsg 1\nsh 923\nsi 991\nsj 1\nsk 196\nsl 147\nsm 254\nsn 54\nso Cannot read properties of undefined (reading '1')\nsp 723\nsq 36\nsr 14\nss 15\nst Cannot read properties of undefined (reading '1')\nsu 1106\nsv 59\nsw 71\nsx 1\nsy Cannot read properties of undefined (reading '1')\nsz 2\nta Cannot read properties of undefined (reading '1')\ntb 13\ntc 3\ntd 9\nte Cannot read properties of undefined (reading '1')\ntf 1\ntg 8\nth Cannot read properties of undefined (reading '1')\nti Cannot read properties of undefined (reading '1')\ntj 1\ntk 1\ntl 7\ntm 4\ntn 5\nto 1864\ntp 2\ntq 1\ntr 937\nts 6\ntt 1\ntu 167\ntv 3\ntw 294\ntx 8\nty 229\ntz 1\nua 2\nub 13\nuc 2\nud 8\nue 3\nuf 1\nug 13\nuh 20\nui 13\nuj 1\nuk 29\nul 55\num 32\nun Cannot read properties of undefined (reading '1')\nuo 1\nup 506\nuq 1\nur Cannot read properties of undefined (reading '1')\nus Cannot read properties of undefined (reading '1')\nut 41\nuu 1\nuv 1\nuw 3\nux 2\nuy 2\nuz 2\nva Cannot read properties of undefined (reading '1')\nvb 5\nvc 1\nvd 1\nve 474\nvf 1\nvg 1\nvh 2\nvi 640\nvj 1\nvk 1\nvl 2\nvm 3\nvn 1\nvo 145\nvp 4\nvq 1\nvr 4\nvs 203\nvt 2\nvu 17\nvv 1\nvw 2\nvx 1\nvy 1\nvz 1\nwa 980\nwb 5\nwc 4\nwd 3\nwe 1211\nwf 2\nwg 2\nwh Cannot read properties of undefined (reading '1')\nwi Cannot read properties of undefined (reading '1')\nwj 1\nwk 4\nwl 2\nwm 1\nwn 1\nwo 1015\nwp 12\nwq 2\nwr 339\nws 3\nwt 9\nwu 3\nwv 1\nww 59\nwx 1\nwy 15\nwz 1\nxa 4\nxb 1\nxc 1\nxd 1\nxe 4\nxf 2\nxg 1\nxh 1\nxi 9\nxj 1\nxk 1\nxl 5\nxm 5\nxn 2\nxo 3\nxp 11\nxq 2\nxr 2\nxs 1\nxt 2\nxu 2\nxv 3\nxw 2\nxx 6\nxy 7\nxz 1\nya 27\nyb 3\nyc 1\nyd 2\nye 286\nyf 1\nyg 1\nyh 1\nyi 36\nyj 1\nyk 1\nyl 1\nym 2\nyn 1\nyo 593\nyp 1\nyq 2\nyr 1\nys 1\nyt 3\nyu 3\nyv 1\nyw 1\nyx 1\nyy 3\nyz 1\nza 5\nzb 1\nzc 1\nzd 1\nze 40\nzf 1\nzg 1\nzh 1\nzi 6\nzj 1\nzk 1\nzl 2\nzm 1\nzn 1\nzo 44\nzp 2\nzq 1\nzr 1\nzs 1\nzt 1\nzu 7\nzv 2\nzw 1\nzx 1\nzy 2\nzz 3"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Unexpected Search Result",
+        "story": []
+      },
+      "date": 1662670374169
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bfa7f2091185cf22"
+      },
+      "id": "bfa7f2091185cf22",
+      "type": "add",
+      "date": 1662670379841
+    },
+    {
+      "type": "edit",
+      "id": "bfa7f2091185cf22",
+      "item": {
+        "type": "paragraph",
+        "id": "bfa7f2091185cf22",
+        "text": "Marc has noted that sometime wiki's incremental search result shows as a tiny white empty box. No about of reloading clears this condition."
+      },
+      "date": 1662670474621
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ae4d5d0a5c13b297"
+      },
+      "id": "ae4d5d0a5c13b297",
+      "type": "add",
+      "after": "bfa7f2091185cf22",
+      "date": 1662670504626
+    },
+    {
+      "type": "edit",
+      "id": "ae4d5d0a5c13b297",
+      "item": {
+        "type": "paragraph",
+        "id": "ae4d5d0a5c13b297",
+        "text": "Paul suggested we look for error messages in the server. I found a few in the last 1,000,000 log entries with grep for "
+      },
+      "date": 1662670591965
+    },
+    {
+      "type": "edit",
+      "id": "ae4d5d0a5c13b297",
+      "item": {
+        "type": "paragraph",
+        "id": "ae4d5d0a5c13b297",
+        "text": "Paul suggested we look for error messages in the server. I found a few in the last 1,000,000 log entries when I would grep for 'SITE INDEX ***'."
+      },
+      "date": 1662670667800
+    },
+    {
+      "type": "edit",
+      "id": "ae4d5d0a5c13b297",
+      "item": {
+        "type": "paragraph",
+        "id": "ae4d5d0a5c13b297",
+        "text": "Paul suggested we look for error messages in the server. I found a few in the last 1,000,000 log entries with grep."
+      },
+      "date": 1662670691529
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8561c716a8c00623"
+      },
+      "id": "8561c716a8c00623",
+      "type": "add",
+      "after": "ae4d5d0a5c13b297",
+      "date": 1662670735109
+    },
+    {
+      "type": "edit",
+      "id": "8561c716a8c00623",
+      "item": {
+        "type": "code",
+        "id": "8561c716a8c00623",
+        "text": "journalctl -u wiki -n1000000 | grep 'SITE INDEX ***'"
+      },
+      "date": 1662670750230
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f190c61b20a3d892"
+      },
+      "id": "f190c61b20a3d892",
+      "type": "add",
+      "after": "8561c716a8c00623",
+      "date": 1662670825322
+    },
+    {
+      "type": "edit",
+      "id": "f190c61b20a3d892",
+      "item": {
+        "type": "code",
+        "id": "f190c61b20a3d892",
+        "text": "Aug 31 11:16:25 asia wiki[18973]: SITE INDEX *** createIndex test2.ward.dojo.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/test2.ward.dojo.fed.wiki/pages'\nAug 31 11:19:03 asia wiki[18973]: SITE INDEX *** createIndex test2.ward.dojo.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/test2.ward.dojo.fed.wiki/pages'\nAug 31 11:26:39 asia wiki[18973]: SITE INDEX *** createIndex test2.ward.dojo.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/test2.ward.dojo.fed.wiki/pages'\nAug 31 20:10:02 asia wiki[18973]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0\nAug 31 20:10:18 asia wiki[18973]: SITE INDEX *** clive.tries.fed.wiki reduce to extract text on student-interactions-in-edmodo-versus-facebook failed Error extracting text from 4\nSep 01 01:33:37 asia wiki[1205]: SITE INDEX *** createIndex silke.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/silke.fed.wiki/pages'\nSep 05 05:52:36 asia wiki[17000]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0\nSep 05 05:53:12 asia wiki[17050]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0\nSep 05 05:53:52 asia wiki[17106]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0\n"
+      },
+      "date": 1662670829522
+    },
+    {
+      "type": "edit",
+      "id": "f190c61b20a3d892",
+      "item": {
+        "type": "markdown",
+        "id": "f190c61b20a3d892",
+        "text": "Aug 31 11:16:25 asia wiki[18973]: SITE INDEX *** createIndex test2.ward.dojo.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/test2.ward.dojo.fed.wiki/pages'\nAug 31 11:19:03 asia wiki[18973]: SITE INDEX *** createIndex test2.ward.dojo.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/test2.ward.dojo.fed.wiki/pages'\nAug 31 11:26:39 asia wiki[18973]: SITE INDEX *** createIndex test2.ward.dojo.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/test2.ward.dojo.fed.wiki/pages'\nAug 31 20:10:02 asia wiki[18973]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0\nAug 31 20:10:18 asia wiki[18973]: SITE INDEX *** clive.tries.fed.wiki reduce to extract text on student-interactions-in-edmodo-versus-facebook failed Error extracting text from 4\nSep 01 01:33:37 asia wiki[1205]: SITE INDEX *** createIndex silke.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/silke.fed.wiki/pages'\nSep 05 05:52:36 asia wiki[17000]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0\nSep 05 05:53:12 asia wiki[17050]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0\nSep 05 05:53:52 asia wiki[17106]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0"
+      },
+      "date": 1662670857001
+    },
+    {
+      "type": "edit",
+      "id": "f190c61b20a3d892",
+      "item": {
+        "type": "html",
+        "id": "f190c61b20a3d892",
+        "text": "<pre>Aug 31 11:16:25 asia wiki[18973]: SITE INDEX *** createIndex test2.ward.dojo.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/test2.ward.dojo.fed.wiki/pages'\nAug 31 11:19:03 asia wiki[18973]: SITE INDEX *** createIndex test2.ward.dojo.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/test2.ward.dojo.fed.wiki/pages'\nAug 31 11:26:39 asia wiki[18973]: SITE INDEX *** createIndex test2.ward.dojo.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/test2.ward.dojo.fed.wiki/pages'\nAug 31 20:10:02 asia wiki[18973]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0\nAug 31 20:10:18 asia wiki[18973]: SITE INDEX *** clive.tries.fed.wiki reduce to extract text on student-interactions-in-edmodo-versus-facebook failed Error extracting text from 4\nSep 01 01:33:37 asia wiki[1205]: SITE INDEX *** createIndex silke.fed.wiki error: [Error: ENOENT: no such file or directory, scandir '/root/.wiki/silke.fed.wiki/pages'\nSep 05 05:52:36 asia wiki[17000]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0\nSep 05 05:53:12 asia wiki[17050]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0\nSep 05 05:53:52 asia wiki[17106]: SITE INDEX *** marc.tries.fed.wiki reduce to extract text on marcs-site-list-as-urls failed Error extracting text from 0"
+      },
+      "date": 1662670882744
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4b111359f4ff1bf6"
+      },
+      "id": "4b111359f4ff1bf6",
+      "type": "add",
+      "after": "f190c61b20a3d892",
+      "date": 1662670955731
+    },
+    {
+      "type": "edit",
+      "id": "4b111359f4ff1bf6",
+      "item": {
+        "type": "paragraph",
+        "id": "4b111359f4ff1bf6",
+        "text": "Paul will harden the index logic and report a few more conditions that might suggest a solution."
+      },
+      "date": 1662670997073
+    },
+    {
+      "type": "add",
+      "id": "1e43e2f4d09bd4f4",
+      "item": {
+        "type": "paragraph",
+        "id": "1e43e2f4d09bd4f4",
+        "text": "I'll see if I can run a batch minisearch application and use it to test every index stored in my server."
+      },
+      "after": "4b111359f4ff1bf6",
+      "date": 1662671052538
+    },
+    {
+      "type": "edit",
+      "id": "1e43e2f4d09bd4f4",
+      "item": {
+        "type": "paragraph",
+        "id": "1e43e2f4d09bd4f4",
+        "text": "I'll see if I can run a batch minisearch application and use it to test every index stored in my server. [https://www.skypack.dev/view/minisearch skypack]"
+      },
+      "date": 1662671094652
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "011ff8f93d494313"
+      },
+      "id": "011ff8f93d494313",
+      "type": "add",
+      "after": "1e43e2f4d09bd4f4",
+      "date": 1662671200059
+    },
+    {
+      "type": "edit",
+      "id": "011ff8f93d494313",
+      "item": {
+        "type": "code",
+        "id": "011ff8f93d494313",
+        "text": "import {MiniSearch} from 'https://cdn.skypack.dev/minisearch@3.3.0'"
+      },
+      "date": 1662671217003
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "29de0e449b6dd395"
+      },
+      "id": "29de0e449b6dd395",
+      "type": "add",
+      "after": "011ff8f93d494313",
+      "date": 1662671919357
+    },
+    {
+      "type": "edit",
+      "id": "29de0e449b6dd395",
+      "item": {
+        "type": "paragraph",
+        "id": "29de0e449b6dd395",
+        "text": "Bad news: SyntaxError: The requested module 'https://cdn.skypack.dev/minisearch@3.3.0' does not provide an export named 'MiniSearch'"
+      },
+      "date": 1662671927929
+    },
+    {
+      "type": "edit",
+      "id": "011ff8f93d494313",
+      "item": {
+        "type": "code",
+        "id": "011ff8f93d494313",
+        "text": "import MiniSearch from 'https://cdn.skypack.dev/minisearch@3.3.0'"
+      },
+      "date": 1662672087755
+    },
+    {
+      "type": "edit",
+      "id": "29de0e449b6dd395",
+      "item": {
+        "type": "paragraph",
+        "id": "29de0e449b6dd395",
+        "text": "[Function: MiniSearch2] { loadJSON: [Function], getDefault: [Function], loadJS: [Function] }"
+      },
+      "date": 1662672170960
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "99546a2ff62bebfa"
+      },
+      "id": "99546a2ff62bebfa",
+      "type": "add",
+      "after": "29de0e449b6dd395",
+      "date": 1662675140669
+    },
+    {
+      "type": "edit",
+      "id": "99546a2ff62bebfa",
+      "item": {
+        "type": "image",
+        "id": "99546a2ff62bebfa",
+        "text": "Search for \"graph merge demo\"",
+        "size": "wide",
+        "width": 420,
+        "height": 175,
+        "url": "/assets/plugins/image/d20138cfa7b28e8b6d6bfae9925b24d3.jpg"
+      },
+      "date": 1662675251488
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f9e64a931d9905cf"
+      },
+      "id": "f9e64a931d9905cf",
+      "type": "add",
+      "after": "99546a2ff62bebfa",
+      "date": 1662675294935
+    },
+    {
+      "type": "edit",
+      "id": "f9e64a931d9905cf",
+      "item": {
+        "type": "paragraph",
+        "id": "f9e64a931d9905cf",
+        "text": "With some reading around in wiki-client we were able to duplicate this result."
+      },
+      "date": 1662675339519
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4994b5bbc269bb65"
+      },
+      "id": "4994b5bbc269bb65",
+      "type": "add",
+      "after": "f9e64a931d9905cf",
+      "date": 1662675350531
+    },
+    {
+      "type": "edit",
+      "id": "4994b5bbc269bb65",
+      "item": {
+        "type": "code",
+        "id": "4994b5bbc269bb65",
+        "text": "const results = miniSearch.search('graph merge demo',{\n  boost:{\n    title: 20,\n    content: 2},\n  prefix: true,\n  combineWith: 'AND'\n})"
+      },
+      "date": 1662675354378
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c0efd40db6b8fc6d"
+      },
+      "id": "c0efd40db6b8fc6d",
+      "type": "add",
+      "after": "4994b5bbc269bb65",
+      "date": 1662675396006
+    },
+    {
+      "type": "edit",
+      "id": "c0efd40db6b8fc6d",
+      "item": {
+        "type": "html",
+        "id": "c0efd40db6b8fc6d",
+        "text": "<pre>\n[\n  {\n    id: \"travel-graph-demo\",\n    terms: [ \"graph\", \"merge\", \"demo\" ],\n    score: 804.3929281858361,\n    match: { graph: [ \"title\", \"content\" ], merge: [ \"content\" ], demo: [ \"title\" ] }\n  },\n  {\n    id: \"subgraph-creator\",\n    terms: [ \"graph\", \"graphs\", \"merge\", \"demonstrate\" ],\n    score: 377.71676225404434,\n    match: {\n      graph: [ \"content\" ],\n      graphs: [ \"content\" ],\n      merge: [ \"content\" ],\n      demonstrate: [ \"content\" ]\n    }\n  },\n  {\n    id: \"more-more-garden\",\n    terms: [ \"graphs\", \"graphviz\", \"merge\", \"demo\", \"demos\", \"democracy\" ],\n    score: 13.363907653389663,\n    match: {\n      graphs: [ \"content\" ],\n      graphviz: [ \"content\" ],\n      merge: [ \"content\" ],\n      demo: [ \"content\" ],\n      demos: [ \"content\" ],\n      democracy: [ \"content\" ]\n    }\n  }\n]"
+      },
+      "date": 1662675405952
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "22e8c6b8f6078889"
+      },
+      "id": "22e8c6b8f6078889",
+      "type": "add",
+      "after": "c0efd40db6b8fc6d",
+      "date": 1662677617405
+    },
+    {
+      "type": "edit",
+      "id": "22e8c6b8f6078889",
+      "item": {
+        "type": "paragraph",
+        "id": "22e8c6b8f6078889",
+        "text": "We try searching for all two letter combinations suspecting that for some sites this will throw an exception. For ward.dojo.fed.wiki we see no errors. For marc.tries.fed.wiki we see many."
+      },
+      "date": 1662677729915
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "27ae6925ead4360e"
+      },
+      "id": "27ae6925ead4360e",
+      "type": "add",
+      "after": "22e8c6b8f6078889",
+      "date": 1662677744411
+    },
+    {
+      "type": "edit",
+      "id": "27ae6925ead4360e",
+      "item": {
+        "type": "html",
+        "id": "27ae6925ead4360e",
+        "text": "<pre>\naa 12\nab Cannot read properties of undefined (reading '1')\nac Cannot read properties of undefined (reading '1')\nad 695\nae 69\naf 342\nag Cannot read properties of undefined (reading '1')\nah 29\nai 167\naj 3\nak 18\nal 1115\nam 434\nan Cannot read properties of undefined (reading '1')\nao 4\nap 575\naq 4\nar 1299\nas Cannot read properties of undefined (reading '1')\nat 764\nau 313\nav 254\naw 174\nax 16\nay 2\naz 4\nba 832\nbb 8\nbc 8\nbd 9\nbe 1498\nbf 1\nbg 105\nbh 3\nbi 393\nbj 7\nbk 2\nbl 224\nbm 2\nbn 2\nbo 629\nbp 4\nbq 1\nbr 503\nbs 2\nbt 6\nbu Cannot read properties of undefined (reading '1')\nbv 1\nbw 2\nbx 1\nby 821\nbz 1\nca 1320\ncb 4\ncc 34\ncd 9\nce 324\ncf 25\ncg 6\nch 1020\nci Cannot read properties of undefined (reading '1')\ncj 2\nck 1\ncl 668\ncm 4\ncn 5\nco Cannot read properties of undefined (reading '1')\ncp 14\ncq 2\ncr Cannot read properties of undefined (reading '1')\ncs 33\nct 2\ncu 613\ncv 14\ncw 1\ncx 3\ncy 162\ncz 1\nda 509\ndb 21\ndc 7\ndd 10\nde 1450\ndf 7\ndg 2\ndh 9\ndi 1325\ndj 1\ndk 1\ndl 1\ndm 38\ndn 12\ndo Cannot read properties of undefined (reading '1')\ndp 4\ndq 1\ndr 445\nds 22\ndt 3\ndu 193\ndv 3\ndw 11\ndx 1\ndy 191\ndz 2\nea 667\neb 5\nec 375\ned 455\nee 7\nef 316\neg 28\neh 2\nei 88\nej 2\nek 1\nel 405\nem 484\nen 1062\neo 2\nep 56\neq 199\ner 162\nes 340\net Cannot read properties of undefined (reading '1')\neu 27\nev 663\new 3\nex 1084\ney 23\nez 2\nfa 762\nfb 5\nfc 5\nfd 2\nfe 834\nff 15\nfg 1\nfh 1\nfi 971\nfj 2\nfk 1\nfl 256\nfm 6\nfn 4\nfo Cannot read properties of undefined (reading '1')\nfp 2\nfq 2\nfr Cannot read properties of undefined (reading '1')\nfs 1\nft 10\nfu 603\nfv 1\nfw 12\nfx 2\nfy 1\nfz 1\nga 267\ngb 1\ngc 1\ngd 11\nge 644\ngf 3\ngg 7\ngh 8\ngi 351\ngj 1\ngk 1\ngl 170\ngm 11\ngn 2\ngo Cannot read properties of undefined (reading '1')\ngp 4\ngq 2\ngr 942\ngs 3\ngt 13\ngu 243\ngv 1\ngw 2\ngx 1\ngy 7\ngz 3\nha 1121\nhb 2\nhc 2\nhd 1\nhe Cannot read properties of undefined (reading '1')\nhf 2\nhg 1\nhh 2\nhi 539\nhj 1\nhk 2\nhl 1\nhm 2\nhn 1\nho 1023\nhp 4\nhq 1\nhr 5\nhs 3\nht 376\nhu 388\nhv 1\nhw 2\nhx 1\nhy 123\nhz 1\nia 17\nib 8\nic 44\nid 520\nie 6\nif 444\nig 40\nih 10\nii 21\nij 1\nik 2\nil 192\nim 729\nin 1942\nio 55\nip 28\niq 1\nir 51\nis Cannot read properties of undefined (reading '1')\nit Cannot read properties of undefined (reading '1')\niu 3\niv 18\niw 1\nix 3\niy 1\niz 1\nja 156\njb 1\njc 1\njd 7\nje 34\njf 1\njg 2\njh 1\nji 21\njj 1\njk 1\njl 2\njm 7\njn 1\njo 397\njp 18\njq 5\njr 3\njs 67\njt 1\nju 362\njv 1\njw 3\njx 1\njy 1\njz 2\nka 63\nkb 3\nkc 1\nkd 1\nke Cannot read properties of undefined (reading '1')\nkf 1\nkg 2\nkh 2\nki 236\nkj 1\nkk 1\nkl 2\nkm 3\nkn 416\nko 23\nkp 2\nkq 1\nkr 9\nks 2\nkt 5\nku 16\nkv 2\nkw 3\nkx 1\nky 3\nkz 1\nla Cannot read properties of undefined (reading '1')\nlb 3\nlc 2\nld 1\nle Cannot read properties of undefined (reading '1')\nlf 3\nlg 1\nlh 8\nli Cannot read properties of undefined (reading '1')\nlj 1\nlk 1\nll 61\nlm 1\nln 3\nlo 970\nlp 1\nlq 1\nlr 2\nls 3\nlt 12\nlu 43\nlv 2\nlw 2\nlx 1\nly 9\nlz 1\nma 1537\nmb 11\nmc 47\nmd 49\nme 1118\nmf 2\nmg 5\nmh 1\nmi 663\nmj 1\nmk 2\nml 1\nmm 4\nmn 5\nmo Cannot read properties of undefined (reading '1')\nmp 6\nmq 1\nmr 8\nms 9\nmt 16\nmu Cannot read properties of undefined (reading '1')\nmv 2\nmw 2\nmx 2\nmy 368\nmz 1\nna Cannot read properties of undefined (reading '1')\nnb 40\nnc 105\nnd 58\nne 1339\nnf 45\nng 39\nnh 35\nni 148\nnj 16\nnk 4\nnl 54\nnm 57\nnn 22\nno 1268\nnp 79\nnq 8\nnr 64\nns Cannot read properties of undefined (reading '1')\nnt 46\nnu 291\nnv 20\nnw 30\nnx 2\nny 7\nnz 4\noa 12\nob 343\noc 151\nod 25\noe 4\nof 1848\nog 1\noh 22\noi 8\noj 2\nok 28\nol 121\nom 23\non 1251\noo 13\nop 649\noq 1\nor 1334\nos 92\not 637\nou 815\nov 499\now 305\nox 13\noy 2\noz 2\npa 1359\npb 8\npc 6\npd 45\npe 1086\npf 2\npg 6\nph 354\npi 300\npj 2\npk 1\npl 813\npm 5\npn 36\npo 1008\npp 14\npq 1\npr 1516\nps 75\npt 9\npu 600\npv 1\npw 1\npx 1\npy 9\npz 1\nqa 1\nqb 5\nqc 3\nqd 1\nqe 2\nqf 2\nqg 1\nqh 1\nqi 1\nqj 1\nqk 1\nql 2\nqm 2\nqn 1\nqo 1\nqp 1\nqq 1\nqr 1\nqs 2\nqt 3\nqu 538\nqv 1\nqw 1\nqx 1\nqy 2\nqz 2\nra 708\nrb 3\nrc 6\nrd 4\nre Cannot read properties of undefined (reading '1')\nrf 1\nrg 5\nrh 26\nri 389\nrj 1\nrk 2\nrl Cannot read properties of undefined (reading '1')\nrm 5\nrn 9\nro 555\nrp 5\nrq 1\nrr 7\nrs 10\nrt 3\nru 268\nrv 3\nrw 6\nrx 41\nry 4\nrz 1\nsa 658\nsb 15\nsc 668\nsd 31\nse Cannot read properties of undefined (reading '1')\nsf 11\nsg 1\nsh 923\nsi 991\nsj 1\nsk 196\nsl 147\nsm 254\nsn 54\nso Cannot read properties of undefined (reading '1')\nsp 723\nsq 36\nsr 14\nss 15\nst Cannot read properties of undefined (reading '1')\nsu 1106\nsv 59\nsw 71\nsx 1\nsy Cannot read properties of undefined (reading '1')\nsz 2\nta Cannot read properties of undefined (reading '1')\ntb 13\ntc 3\ntd 9\nte Cannot read properties of undefined (reading '1')\ntf 1\ntg 8\nth Cannot read properties of undefined (reading '1')\nti Cannot read properties of undefined (reading '1')\ntj 1\ntk 1\ntl 7\ntm 4\ntn 5\nto 1864\ntp 2\ntq 1\ntr 937\nts 6\ntt 1\ntu 167\ntv 3\ntw 294\ntx 8\nty 229\ntz 1\nua 2\nub 13\nuc 2\nud 8\nue 3\nuf 1\nug 13\nuh 20\nui 13\nuj 1\nuk 29\nul 55\num 32\nun Cannot read properties of undefined (reading '1')\nuo 1\nup 506\nuq 1\nur Cannot read properties of undefined (reading '1')\nus Cannot read properties of undefined (reading '1')\nut 41\nuu 1\nuv 1\nuw 3\nux 2\nuy 2\nuz 2\nva Cannot read properties of undefined (reading '1')\nvb 5\nvc 1\nvd 1\nve 474\nvf 1\nvg 1\nvh 2\nvi 640\nvj 1\nvk 1\nvl 2\nvm 3\nvn 1\nvo 145\nvp 4\nvq 1\nvr 4\nvs 203\nvt 2\nvu 17\nvv 1\nvw 2\nvx 1\nvy 1\nvz 1\nwa 980\nwb 5\nwc 4\nwd 3\nwe 1211\nwf 2\nwg 2\nwh Cannot read properties of undefined (reading '1')\nwi Cannot read properties of undefined (reading '1')\nwj 1\nwk 4\nwl 2\nwm 1\nwn 1\nwo 1015\nwp 12\nwq 2\nwr 339\nws 3\nwt 9\nwu 3\nwv 1\nww 59\nwx 1\nwy 15\nwz 1\nxa 4\nxb 1\nxc 1\nxd 1\nxe 4\nxf 2\nxg 1\nxh 1\nxi 9\nxj 1\nxk 1\nxl 5\nxm 5\nxn 2\nxo 3\nxp 11\nxq 2\nxr 2\nxs 1\nxt 2\nxu 2\nxv 3\nxw 2\nxx 6\nxy 7\nxz 1\nya 27\nyb 3\nyc 1\nyd 2\nye 286\nyf 1\nyg 1\nyh 1\nyi 36\nyj 1\nyk 1\nyl 1\nym 2\nyn 1\nyo 593\nyp 1\nyq 2\nyr 1\nys 1\nyt 3\nyu 3\nyv 1\nyw 1\nyx 1\nyy 3\nyz 1\nza 5\nzb 1\nzc 1\nzd 1\nze 40\nzf 1\nzg 1\nzh 1\nzi 6\nzj 1\nzk 1\nzl 2\nzm 1\nzn 1\nzo 44\nzp 2\nzq 1\nzr 1\nzs 1\nzt 1\nzu 7\nzv 2\nzw 1\nzx 1\nzy 2\nzz 3"
+      },
+      "date": 1662677757245
+    },
+    {
+      "type": "edit",
+      "id": "bfa7f2091185cf22",
+      "item": {
+        "type": "paragraph",
+        "id": "bfa7f2091185cf22",
+        "text": "Marc has noted that sometime wiki's incremental search result shows as a tiny white empty box. No amount of reloading clears this condition. [https://github.com/WardCunningham/assets/tree/master/pages/unexpected-search-result github]"
+      },
+      "date": 1662678457738
+    },
+    {
+      "type": "add",
+      "id": "5d1a44a544b6ccd3",
+      "item": {
+        "type": "paragraph",
+        "id": "5d1a44a544b6ccd3",
+        "text": "# Grep"
+      },
+      "after": "bfa7f2091185cf22",
+      "date": 1662678480048
+    },
+    {
+      "type": "edit",
+      "id": "5d1a44a544b6ccd3",
+      "item": {
+        "type": "markdown",
+        "id": "5d1a44a544b6ccd3",
+        "text": "# Grep"
+      },
+      "date": 1662678482954
+    },
+    {
+      "type": "add",
+      "id": "b639cadd093f8f58",
+      "item": {
+        "type": "paragraph",
+        "id": "b639cadd093f8f58",
+        "text": "# Deno"
+      },
+      "after": "4b111359f4ff1bf6",
+      "date": 1662678507530
+    },
+    {
+      "type": "edit",
+      "id": "b639cadd093f8f58",
+      "item": {
+        "type": "markdown",
+        "id": "b639cadd093f8f58",
+        "text": "# Deno"
+      },
+      "date": 1662678513563
+    },
+    {
+      "type": "add",
+      "id": "b5f7ca85b61b9bb5",
+      "item": {
+        "type": "paragraph",
+        "id": "b5f7ca85b61b9bb5",
+        "text": "A test case, search for \"graph merge demo\" on my dojo site. Then repeat for marc.tries.fed.wiki."
+      },
+      "after": "29de0e449b6dd395",
+      "date": 1662678615612
+    },
+    {
+      "type": "edit",
+      "id": "1e43e2f4d09bd4f4",
+      "item": {
+        "type": "paragraph",
+        "id": "1e43e2f4d09bd4f4",
+        "text": "I can run batch minisearch and use it to test every index stored in my server. [https://www.skypack.dev/view/minisearch skypack]"
+      },
+      "date": 1662678666862
+    },
+    {
+      "type": "edit",
+      "id": "bfa7f2091185cf22",
+      "item": {
+        "type": "paragraph",
+        "id": "bfa7f2091185cf22",
+        "text": "Marc has noted that sometime wiki's incremental search result shows as a tiny white empty box. No amount of reloading clears this condition. "
+      },
+      "date": 1662678677211
+    },
+    {
+      "type": "add",
+      "id": "a7019b8d60b3a6e6",
+      "item": {
+        "type": "paragraph",
+        "id": "a7019b8d60b3a6e6",
+        "text": "[https://github.com/WardCunningham/assets/tree/master/pages/unexpected-search-result github]"
+      },
+      "after": "1e43e2f4d09bd4f4",
+      "date": 1662678690213
+    },
+    {
+      "type": "remove",
+      "id": "a7019b8d60b3a6e6",
+      "date": 1662678700033
+    },
+    {
+      "type": "edit",
+      "id": "1e43e2f4d09bd4f4",
+      "item": {
+        "type": "paragraph",
+        "id": "1e43e2f4d09bd4f4",
+        "text": "I can run batch minisearch and use it to test every index stored in my server. [https://www.skypack.dev/view/minisearch skypack] [https://github.com/WardCunningham/assets/tree/master/pages/unexpected-search-result github]"
+      },
+      "date": 1662678706227
+    },
+    {
+      "type": "edit",
+      "id": "99546a2ff62bebfa",
+      "item": {
+        "type": "image",
+        "id": "99546a2ff62bebfa",
+        "text": "Search for \"graph merge demo\" yields three results.",
+        "size": "wide",
+        "width": 420,
+        "height": 175,
+        "url": "/assets/plugins/image/d20138cfa7b28e8b6d6bfae9925b24d3.jpg"
+      },
+      "date": 1662678749778
+    },
+    {
+      "type": "edit",
+      "id": "4994b5bbc269bb65",
+      "item": {
+        "type": "code",
+        "id": "4994b5bbc269bb65",
+        "text": "const query = 'graph merge demo'\nconst results = miniSearch.search(query,{\n  boost:{\n    title: 20,\n    content: 2},\n  prefix: true,\n  combineWith: 'AND'\n})"
+      },
+      "date": 1662696479446
+    },
+    {
+      "type": "edit",
+      "id": "bfa7f2091185cf22",
+      "item": {
+        "type": "paragraph",
+        "id": "bfa7f2091185cf22",
+        "text": "Marc has noted that sometime wiki's incremental search result shows as a tiny white empty box. No amount of reloading clears this condition."
+      },
+      "date": 1664895222471
+    },
+    {
+      "type": "add",
+      "id": "a10f21589f8ad84f",
+      "item": {
+        "type": "paragraph",
+        "id": "a10f21589f8ad84f",
+        "text": "See [[Search Result Problem Solved]]"
+      },
+      "after": "bfa7f2091185cf22",
+      "date": 1664895258375
+    },
+    {
+      "type": "fork",
+      "site": "ward.dojo.fed.wiki",
+      "date": 1664954094560
+    }
+  ]
+}
