@@ -1,0 +1,1472 @@
+{
+  "title": "Operating Systems Design Principles",
+  "story": [
+    {
+      "type": "html",
+      "text": "This page is about high-level OS concepts and desirable transcendental properties of OSes, not implementation details.",
+      "id": "a9c9aca0de4426d54a79927b1872fa8f"
+    },
+    {
+      "type": "html",
+      "text": "\nIssues such as global versus per-process address spaces have no place here, except as a derivation. Same thing with synchronous versus asynchronous communication.",
+      "id": "b5df4aa15fa3b781f528bc288629a5c4"
+    },
+    {
+      "type": "html",
+      "text": "\nPerformance has <i>no</i> place here, even as a derivation. Every OS can be made to perform well by using advanced compiler techniques, and if that fails then systematically breaking down component boundaries. Make it work, make it right, make it fast. Fast is last, always.",
+      "id": "a2b71f3cb3a0c77506687183ba1f3d24"
+    },
+    {
+      "type": "html",
+      "text": "\nPerformance is strictly a matter of engineering and so simply isn't a valid concern of OS design. The same thing with scalability; running on different kinds and classes of hardware with adequate performance on each. See [[Design Vs Engineering]].",
+      "id": "0aaf23ff4850066a77b3e94fc29688ef"
+    },
+    {
+      "type": "html",
+      "text": "<i>This turns out not to be the case. For example, [[Ell Four]] has been shown to be inherently faster than [[Mach Microkernel]], because it is a tighter design. ([[Ell Four]]'s message passing semantics are simpler, so message passing is about an order of magnitude faster; and the [[Micro Kernel]] is only about 12K, which means much less cache thrash.) Tests have shown that the performance cost of hosting Linux on [[Mach Microkernel]] is about 10 times as high as the cost of hosting it on [[Ell Four]]. This should not surprise anyone who has solved difficult performance problems; any substantial program which has not been designed for performance often has semantics which simply cannot be implemented efficiently. Consider the difference between HTTP/1.0 and HTTP/1.1; if browsers are HTTP/1.1-compliant, then an HTTP/1.0 server will never perform as well as an HTTP/1.1 server, no matter how much engineering has been put into it. -- [[John Stracke]]</i>",
+      "id": "53c4c0282627e901e9c7f0e6a2199c40"
+    },
+    {
+      "type": "html",
+      "text": "\nIt has to be understood that OS design isn't taught in \"OS design\" classes and books like \"OS concepts\" are a twisted joke. Teaching low-level implementation details of Unix in OS Design classes is the quintessence of a [[Cargo Cult]]. The material on this page comes as close to an introduction to the subject of OS design as exists either online or off. Without further ado,",
+      "id": "afe423a139523487adf8ac4d4eae87d9"
+    },
+    {
+      "type": "html",
+      "text": "\nThe big list of fundamental OS principles,",
+      "id": "d96e51deb5705747873cf8c45e940bad"
+    },
+    {
+      "type": "html",
+      "text": " [[Orthogonal Security]]",
+      "id": "7a82d0ca57a1a2eb24cea51476f28f29"
+    },
+    {
+      "type": "html",
+      "text": " Elegance",
+      "id": "e09ce13d1aa1fbdba701d19a35b29e2d"
+    },
+    {
+      "type": "html",
+      "text": " Simplicity",
+      "id": "1fa23089d158bcc41dcf8db30995fddf"
+    },
+    {
+      "type": "html",
+      "text": " Integrity = Elegance + Uniformity",
+      "id": "6ccea9ef957c4f4bc66df2ef1a321ed2"
+    },
+    {
+      "type": "html",
+      "text": " Resilience",
+      "id": "3c9f2202d6fd47f6f0a8bb2deaad384b"
+    },
+    {
+      "type": "html",
+      "text": " Robustness",
+      "id": "49ec97b349f749d66e7d852c09106279"
+    },
+    {
+      "type": "html",
+      "text": " Modularity",
+      "id": "68bb6e3b6edd209419a549d2ad316cfa"
+    },
+    {
+      "type": "html",
+      "text": " Composability",
+      "id": "e9e4672ab9bdd6a8639b8c08501e3c34"
+    },
+    {
+      "type": "html",
+      "text": " [[Name Space]] principles (eg. Connectedness)",
+      "id": "ccd6a9eb95c926063e67156cca60b577"
+    },
+    {
+      "type": "html",
+      "text": " Uniformity, or Consistency",
+      "id": "cfecfe413f6f5351f8bc647e6753ec6c"
+    },
+    {
+      "type": "html",
+      "text": " Extensibility",
+      "id": "ba77762b8ee0b0ab9bec6fcb7d5da7f0"
+    },
+    {
+      "type": "html",
+      "text": " Distribution",
+      "id": "0aa6d7d05676a3d45dca74419c5038c2"
+    },
+    {
+      "type": "html",
+      "text": " Reflection (includes Monitors)",
+      "id": "7b73e7326d53c960234ccd738e78a169"
+    },
+    {
+      "type": "html",
+      "text": " [[Object Orientation]]",
+      "id": "aa8725defd725de193d4e5fe66c26158"
+    },
+    {
+      "type": "html",
+      "text": " [[Referential Transparency]] ([[Functional Programming]])",
+      "id": "924fadea5354bca6545884bfd14bb226"
+    },
+    {
+      "type": "html",
+      "text": " Reliability",
+      "id": "1289f2a474a06725bec377b48ddf3b27"
+    },
+    {
+      "type": "html",
+      "text": " Self-documentation",
+      "id": "985cd830c22832f32ec51582487600cc"
+    },
+    {
+      "type": "html",
+      "text": " Predictability / Understandability",
+      "id": "dcc1108a51f259ef97a6cdd33b71e227"
+    },
+    {
+      "type": "html",
+      "text": " Reversibility",
+      "id": "5021ca7982f8cd655f0b2c3634f697f8"
+    },
+    {
+      "type": "html",
+      "text": " Liveness",
+      "id": "b8ceb366b7d83c58b0a54e78aaaa7bbb"
+    },
+    {
+      "type": "html",
+      "text": " Directness",
+      "id": "cde4d20a9c4b243172eb8edb3129714a"
+    },
+    {
+      "type": "html",
+      "text": " Correct(ness-proved) ",
+      "id": "cb0fe847c7db2509fbfae8f8414280e4"
+    },
+    {
+      "type": "html",
+      "text": "\nIssues requiring special attention:",
+      "id": "e39ed2dfa7b37ce8681501d63634e084"
+    },
+    {
+      "type": "html",
+      "text": " [[Transparent Persistence]]",
+      "id": "75d16c43e6769c3ccd76ed4849f9e41b"
+    },
+    {
+      "type": "html",
+      "text": " Political Economy ([[Resource Management]] / [[Resource Allocation]] / [[Real Time]] being features)",
+      "id": "faf5c928030b1becde30801dc60e4f40"
+    },
+    {
+      "type": "html",
+      "text": "<b>Relative Importance of Principles</b>",
+      "id": "47ff3c59b80f69c62513cb368d5388e7"
+    },
+    {
+      "type": "html",
+      "text": "\nNote that these are <i>ALL</i> reconcilable with each other, both in logic and in practice. IOW, it is possible to create an OS that satisfies <b>all</b> of them.",
+      "id": "cd036acf8e549a0aa3045a1bb9b02a73"
+    },
+    {
+      "type": "html",
+      "text": "\nOf course, it is wise to spend one's time satisfying the most important ones and leave out those, like correctness proofs, which provide little benefit at enormous cost. The question is, which principles are essential to include in any new OS?",
+      "id": "bd0322bb6f5bf1f51e9d03297f9fa49e"
+    },
+    {
+      "type": "html",
+      "text": "\nThe answer is that anything which every other OS project has accomplished or seeks to accomplish ... is completely non-essential. There are dozens of OS projects that sought and have achieved highly-performing, reliable, distributed, secure operating systems. If a new OS is to stand out from the crowd, to challenge the established antediluvian systems, it must do something <i>different</i>. In fact, it must do something which it is <i>impossible</i> for the established OSes to do. Performance, reliability, distribution and even security to some degree, are simply not it!",
+      "id": "e97b15ec10ecde6f149f6a1cf6dca192"
+    },
+    {
+      "type": "html",
+      "text": "\nIf you're an OS designer and someone tells you \"your OS must have so and so because every other OS already has it\", you can choose to comply with the narrow-minded idiot and be a complete loser. (What else to call someone intent on reinventing the wheel?) Or you can choose to do something difficult, risky and new.",
+      "id": "11e7dcd56a6a713254a701c39a0d9922"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "8cbaeab5ae2720bdd1901b49bc1d54ca"
+    },
+    {
+      "type": "html",
+      "text": "<b>Security</b>",
+      "id": "08fcf9794118f06839d87f5b563cd734"
+    },
+    {
+      "type": "html",
+      "text": "\nSecurity has two halves: preventing users from accessing objects they have no right to access and allowing users to access objects they have every right to access. Sometimes it seems like OSes are written by Fascists; eg, it is impossible to share any object in Unix in any meaningful way. Other times, it seems like they're written by people who don't have the faintest notion of what privacy means. Genuine security has a lot of implications. See [http://www.caplet.com/security/taxonomy/index.html www.caplet.com], [[Capability Computing]], [[Eros Os]].",
+      "id": "6fe8bcd8335afbf8e7a56202fdcb1fa9"
+    },
+    {
+      "type": "html",
+      "text": "\nNote that dealing with [[Denial Of Service]], deadlocks and the like has nothing to do with security. They are economic ([[Resource Allocation]]) problems; a user should not have so much power or money that they can secure a resource forever. And if they do, then DoS / deadlock is perfectly legitimate behaviour. ",
+      "id": "e94cbb879a367afeeb62147512066265"
+    },
+    {
+      "type": "html",
+      "text": "<i>I'm reading up on no-wait based concurrency, it strikes me that the 'no-indeterminate wait/finite number of steps to finish any operation' aspect would be a solution to the DoS problem; the worst-case is that an operation takes longer to complete... no DoS attack could hold off any arbitrary user task indefinitely. It follows that any operating system/language must provide an atomic primitive operation with a consensus number of infinity it order to provide lock-free synchronization. I need to reread the papers, but it struck me that message passing is not sufficient to do this without in-order delivery of broadcast messages. Other primitives which are sufficient include atomic test-with-conditional-swap (although this might be limited to consensus=[capacity of operand]), and atomic memory move (I'm not completely clear on this one). -- [[William Underwood]]</i>",
+      "id": "ea9147002574c815ffdfcd2eb0145100"
+    },
+    {
+      "type": "html",
+      "text": "<i>(see [[Wait Free Synchronization]] and [[Global Consensus]] for details)</i>",
+      "id": "3fcc3c0a0cc48608e0588a1469916d9f"
+    },
+    {
+      "type": "html",
+      "text": "\nI seriously doubt that DoS is a security problem in the first place. It seems to me to be an economic problem at its core. People give away an unlimited amount of money to whoever wants it and then they whine when they buy out your finitely priced CPU / network capacity. -- RK",
+      "id": "7f62cb38929a6572a40be7153ec203a4"
+    },
+    {
+      "type": "html",
+      "text": "\nDoS is in no way abated with lock-free concurrency.  DoS occurs precisely <i>because</i> things are lock-free.  To wit, the Internet.  One of the best ways to attack a website is to have millions of (scripted) clients conducting a <i>perfectly legal and fully asynchronous</i> operation like obtaining a website.  The resources consumed are completely transient -- <i>nobody</i> has exclusive rights to the server's network connection for longer than a single HTTP request.  The <i>volume</i> of the requests, however, are what denies service to other, legitimate users.  Had a legitimate user had the ability to <i>exclusively lock</i> a chunk of bandwidth for his/her purposes, then this becomes a non-issue.",
+      "id": "572fc8f26c4c3b63f57879b665c97fc3"
+    },
+    {
+      "type": "html",
+      "text": "\nHowever, the opposite situation happens.  If you allow exclusive assignment of resources, now you run into <i>deadlock</i> situations.  It's a no-win battle.  You either deal with DoS, or you deal with deadlock.  --[[Samuel Falvo]]",
+      "id": "7dc3b9a1e4b099478d7160b800f28809"
+    },
+    {
+      "type": "html",
+      "text": "<i>I disagree.  DoS would be much easier if things were lockable.  One legitimate user could far more easily deny service to other legitimate users.</i>",
+      "id": "744c2ee73de687964ad02cc3385ce95e"
+    },
+    {
+      "type": "html",
+      "text": "<b>Elegance</b>",
+      "id": "c4616d11b92837002034622955530822"
+    },
+    {
+      "type": "html",
+      "text": "\nSometimes called [[Quality Withouta Name]] or [[Right Thing]] though it is neither. Elegance is achieved when every property of the system is derived from every other property such that the number of arbitrary choices is zero. String theory is elegant, the Standard Model is not.",
+      "id": "ca580a09adb76f78be1f082b4957098d"
+    },
+    {
+      "type": "html",
+      "text": "<b>Simplicity</b>",
+      "id": "6fbbd028448d1de2eace64c8c141a54d"
+    },
+    {
+      "type": "html",
+      "text": "\nSimplicity doesn't mean that the OS is weak or that it provides few abstractions. What it means is that each abstraction is simple and components of the OS have simple sets of abstractions. In particular, it means that multiplexing is separated from abstraction. A layer either multiplexes or it abstracts, but never both. The [[Exo Kernel]] fad was an attempt to provide this simplicity in one tiny part of the OS. Providing a multiplexing layer beneath every abstraction layer is an excellent way to make an OS extensible.",
+      "id": "c6e4bce81d03e7c5a1efa3323c194ef3"
+    },
+    {
+      "type": "html",
+      "text": "<i>I detect more of RK's favored [[Blue Abyss]]-colored glasses behind the above statements.  Simplicity does NOT mean having some layers multiplex while others abstract.  However, that would be one instance of greater simplicity (as compared to service-layers that each do two orthogonal jobs).  In a broader view, simplicity in OS design needs apply to both the component-abstractions (i.e. what is a process, what is a 'file', what is a 'service', etc.) AND to the individual services.  Simple services are characterized by strong cohesion and minimal unnecessary coupling, much like any other simple software component.  Since coupling of multiplexing and abstraction is very rarely 'necessary' within a service, there should very rarely be any service-layers that do both.</i>",
+      "id": "ab79557610a64baa783548b7c377a017"
+    },
+    {
+      "type": "html",
+      "text": "<b>Resilience</b>",
+      "id": "0febc5572a1117a82980be2a248cdafd"
+    },
+    {
+      "type": "html",
+      "text": "\nThe design is resilient if the radical addition of a feature in the fundamental design causes it to be simpler, solves unexpected problems, or increases its elegance by causing a previously made choice to no longer be arbitrary.",
+      "id": "b91585fe6608986a5b1f4004a418f103"
+    },
+    {
+      "type": "html",
+      "text": "\nThis happened many, many times in the design of Blue Abyss. The latest instance was considering extending Number with classes [[Positive Infinity]] and [[Negative Infinity]] for the sake of infinite version numbers. Then actually doing it when it turns out that infinite quotas are critical to flexible resource allocation. Then finding out that having done it, you've got indeterminate-size nodes, ones whose start or end location is unknowable even by the node, <i>for free</i> without writing <i>a single line of code</i>. Which is quite a bit better than having to write message-eating [[Delayed Exceptions]].",
+      "id": "648d9ba09bf81c412f6abc03e4bdd437"
+    },
+    {
+      "type": "html",
+      "text": "\nIn opposition, the design is brittle when the addition of a feature causes a security hole or other undesirable interaction to exist.",
+      "id": "5f27b574382e802c82ec5f8c3b748800"
+    },
+    {
+      "type": "html",
+      "text": "<i>The above description of <b>resilience</b> is difficult to associate with how the word is used in systems design.  A system (network or service, for example) is called <b>resilient</b> if it can bounce back from partial or complete failures, attacks, and sabotage.  It is closely associated with graceful degredation and a necessary component of survivability, though resilience doesn't imply continuous service through the duration of the attack.  (A service that fails gracefully and is resilient will fail just a little then bounce back into original condition when the cause of the malady is resolved).  A </i>design<i>, in this line of reasoning, might be called 'resilient' if changes to it (e.g. the addition or removal of a feature) automatically shape the rest of the design, such that nothing else needs to be redesigned just to fit it in.  The above statements are symptoms of this, though resilience itself doesn't imply the overall system becomes simpler or at all more elegant - it can often go the other way, where a small addition invalidates assumptions and makes previous optimizations impossible in all other parts of the design.  Still, a resilient design would somehow 'repair' itself to working condition, so the other features live on, even if they run slower.</i>",
+      "id": "978681b50ad80ef790dd4548a86e0950"
+    },
+    {
+      "type": "html",
+      "text": "\nI face some confusion here, too.  Is 'Resilience' supposed to be a property of the operating system's <b>design</b>, or is it to be a property of the <b>[[Operating System]]</b>?  RK spoke of the wonderful 'resilience' his design possessed, but I can't help but think he grossly misinterpreted the intent in placing 'resilience' among the top design principles.  What would 'Liveness' mean when discussing 'Live' designs?",
+      "id": "77a3aff7d55ad26652beb95604b16155"
+    },
+    {
+      "type": "html",
+      "text": "\nResilience of the Operating System, as opposed to its design, would be its ability to restore service (or be restored to service) if broken or attacked.  Resilience of a Security System would be the ability to kick infiltrators out and rebuild walls that are penetrated or infiltrated (compare to notion of nearly unbreakable wall that, once penetrated, never self-repairs and is difficult to fix by hand).  Resilience is a very good property for an operating system and its orthogonal security system to possess.  Resilience doesn't prevent things from breaking (that'd be 'Robustness'), but Resilience does imply that broken things get fixed.",
+      "id": "0d73f388b69c2fcd8820cdbdd4c5494f"
+    },
+    {
+      "type": "html",
+      "text": "\nAt the level of individual process-objects, 'resilience' would be the ability to restore to working condition even if interrupted, moved to a different environment, loss of communications, etc.   In modern operating systems, most process-objects are incredibly fragile... to the point that the normal mechanism of providing resilience is to destroy the process-object entirely and create a new one every time the operating system is shut down, and getting them back into working condition after moving them to another computer or after power cycle is wishful thinking or even impossible.  One might say that a process is 'fragile' insofar as it requires information or other processes that are no longer available in order to restore it to working condition.  Thus, resilience can be obtained by maintaining this extra information.  ",
+      "id": "f798ef3ddae07dfdbcffff70a69576bf"
+    },
+    {
+      "type": "html",
+      "text": "\nI submit a hypothesis: resilient process-objects will need to provide a systematic mechanism for communicating to the hosting environment what services it need make available, where this communication is always initiated by the hosting environment (e.g. after first receiving the process-object, possibly after a restart of some sort).  This could be a script or list of sorts published with an expected name and type ('export environ-requirements = \"Give me a timer-signal on port T once every 15 minutes.  Oh, and please call my exported procedure named '[[On Destruct]]' before destroying me.\"').  More easily, it could be a simple message on a known port that tells the process-object whom its host is (for callbacks) and tells it to regenerate itself.  These aren't exclusive... the former 'script' could easily be used to simply tell the environment to send the process a special message telling it to self-regenerate.   The mechanism is, perhaps, relevant to other design principles, but what's important to resilience is that the host environment be capable of putting Humpty Dumpty back together again after dropping him, whether this be relying upon Humpty Dumpty to tell it how, or Humpty Dumpty coming with instructions.",
+      "id": "f907a791048d030f5f54a7a029cde151"
+    },
+    {
+      "type": "html",
+      "text": "\nI favor use of a script, myself, because it allows most processes to operate under the illusion that they never broke (even if they require a timer signal every 15 minutes).  The script makes '[[Transparent Persistence]]' of process-objects considerably more transparent in the great many cases where explicit regeneration isn't required, and it also allows for more transparent migration of processes.",
+      "id": "e0cd0ffe9bb2e247365a9289d7c0c274"
+    },
+    {
+      "type": "html",
+      "text": "\nResilient process-objects are possibly a necessary component of any Operating System when uniting  'Liveness' with 'Persistence' (esp. [[Transparent Persistence]]).",
+      "id": "206a441e5eb0d81fdd27e6b47762bef6"
+    },
+    {
+      "type": "html",
+      "text": "<b>Robustness</b>",
+      "id": "16eb546f23937394093693c53c43e9a6"
+    },
+    {
+      "type": "html",
+      "text": "\nThe system is robust if the addition of a feature doesn't cause the breakdown of a previous feature.",
+      "id": "ad8585d8e38d0daf6acce135b411a8d5"
+    },
+    {
+      "type": "html",
+      "text": "(But, isn't this, by definition, the same as <i>Resilience</i>?  I think a better explanation for robustness is the exact same as that used by every other vendor -- it's <i>resistance to failure from outside stimuli.</i>  In other words, no amount of user-generated or environmentally-generated input can cause the system to fail.  Since there are always cosmic rays to deal with, a system can never be 100% robust.  But we can approach it asymptotically. --[[Samuel Falvo]])",
+      "id": "6b2e778df1a98fd9318fbefb64b131f6"
+    },
+    {
+      "type": "html",
+      "text": "<i>Robust means it's hard to break.  Resilient means that it bounces back quickly when it breaks (either it self-repairs or is simply easy to fix).  They aren't the same, though the differences don't seem to be well explained on this page.  It's important to combine the two: a system can't be 100% robust unless it has no features (nothing to break), so some resilience is always necessary.  However, resilience is often far more difficult to achieve efficiently than robustness.  In the case of a robust design, there is no implication that other parts of the design (or features) would be shaped by the addition of a new one... to the contrary, robustness implies a certain rigidity, such that  the original features will be there no matter what you change in other areas.  In a good, robust OS, there's no way to crash or damage one part of the OS by crashing or adding insane features to another part.</i>",
+      "id": "74906f107ac4a235d20ba8b4d5965701"
+    },
+    {
+      "type": "html",
+      "text": "<i>It's worth noting that a robust design might simply <b>block</b> the addition of a feature, and still be called robust.  It's robust if you can't break it, and all other concerns are secondary.</i>",
+      "id": "0dc2781cc08af4b1715ae766aff62419"
+    },
+    {
+      "type": "html",
+      "text": "<b>Composability</b>",
+      "id": "8db1b8b7334e77cb7b669d1e0678b672"
+    },
+    {
+      "type": "html",
+      "text": "\nComponents should be composable with each other at the user's whim.",
+      "id": "aeec8c9a257d7c1ebab0e6e8c7701916"
+    },
+    {
+      "type": "html",
+      "text": "<i>I'd note that this one makes Robustness and Correctness-Proved considerably more difficult.  An OS that provides these other features will only allow for composition </i>within constrained limits<i>, not </i>at the user's whim<i>.  Essentially, if you're going to provide composability and these other design principles, you'll need a strongly typed (for robust) and statically typed (for correctness-proved) operating system.</i>",
+      "id": "ed2357379dc40b10efa0f323f6ff3393"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Name Space]] principles</b>",
+      "id": "faf4fe08540ef51d034c487e83fe58b3"
+    },
+    {
+      "type": "code",
+      "text": "  '''Global Consistency'''",
+      "id": "4f67e23633b8a6898e0e10fd59cb1110"
+    },
+    {
+      "type": "code",
+      "text": "  '''Connectedness'''",
+      "id": "38a0da9d119da37b2e8dfb2e47efbaab"
+    },
+    {
+      "type": "html",
+      "text": "\nComponents' accessibility from each other should be symmetric and transitive. This implies that all mounts and hardlinks (in Unix jargon) be bidirectional.",
+      "id": "659a355ceba29aeb1d89f148aab85d01"
+    },
+    {
+      "type": "html",
+      "text": "\nConnectedness allows \"the system [to] reveals itself through [[Progressive Disclosure]]\" (from [[Great Design]]).",
+      "id": "fa6dca9af42dc258d75b03fa038a6735"
+    },
+    {
+      "type": "html",
+      "text": "<b>Uniformity</b>",
+      "id": "140692367f15b23704cc1fac6e685753"
+    },
+    {
+      "type": "html",
+      "text": "\nComponents should obey the same syntax, have the same meta-interface. This implies near complete network transparency. That is, scheduling your program on a remote CPU should be no different from scheduling it on a particular one of the local CPUs (which feature must be available to comply with the [[Exo Kernel]] principle). It is not the business of the OS designer to care how the user structures their processes.",
+      "id": "43887de26940872ce35785d6d531a8f1"
+    },
+    {
+      "type": "html",
+      "text": "(Note that caching can be made available to make remote process execution tolerable. But that's a general solution to remote data transfer.)",
+      "id": "030f5123611c1ae88ec2f5279294121f"
+    },
+    {
+      "type": "html",
+      "text": "\nOne should be able to put a monitor on any object and on any operation. A monitor is just a message sent to an object to Watch for the passage of another message. Monitors are a reflection not of the OS, but of the primitive objects of which the OS is composed.",
+      "id": "b36fff6ee69dfccbca33019613df2d08"
+    },
+    {
+      "type": "html",
+      "text": "<b>Extensibility</b>",
+      "id": "a6ef2d2861f5e8e874114d306ad4e755"
+    },
+    {
+      "type": "html",
+      "text": "\nNew components can be added to the system at any time and (because of uniformity and composability) used by anyone to whom they're available from that very moment. Preferably, individual components should be extensible at run-time.",
+      "id": "80adc2c86f79acf547e54345735b9d64"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Object Orientation]] versus [[Functional Programming]]</b>",
+      "id": "c3a3c43587f8d97e147f5c5f3b972745"
+    },
+    {
+      "type": "html",
+      "text": "\nSince [[Oo Fits Our Mental Abilities]], this means user-oriented versus developer-oriented.",
+      "id": "97fbbb85f0f281cb013118cba2fe9540"
+    },
+    {
+      "type": "html",
+      "text": "<b>Political Economy</b>",
+      "id": "8380166aac2ca4aabee22a3910d7375f"
+    },
+    {
+      "type": "html",
+      "text": "(This is probably a feature any way you slice it but the issue is so often misunderstood that it's given special treatment here.)",
+      "id": "1bbc33e0b4421e686c359ae2f661fe3c"
+    },
+    {
+      "type": "html",
+      "text": "\nBy this we mean an expressive, powerful yet simple political economy. Whenever you multiplex a resource, you run into economic issues. These fundamental economic issues are usually left unresolved or only halfway resolved using some vague appeal to fairness. But fairness simply shouldn't be a designer's concern. It's a question of <i>policy</i> and building a policy (such as \"fairness\") into a basic mechanism of the OS is a grievous mistake.",
+      "id": "9c46dc85f9c50fb7e03afea0067ccdb1"
+    },
+    {
+      "type": "html",
+      "text": "\nWhat the OS designer must be concerned with is the creation of a general-purpose mechanism to allocate resources. And then to make sure that this mechanism is used to allocate resources in the OS. Obviously, this mechanism has to be secure, simple, powerful and so on.",
+      "id": "61dae689251d3ba955461e005857a1ef"
+    },
+    {
+      "type": "html",
+      "text": "<b>Predictability</b>",
+      "id": "3a821f8cf6e2e303e88536dbd81d7ffa"
+    },
+    {
+      "type": "html",
+      "text": "\nThe design must be well-defined and predictable. Not merely deterministic, nor even tractable, but tractable by a normal human being. There is a large, perhaps even total, overlap between predictability, uniformity and elegance, but saying that one set of principles is more fundamental than another is mistaken.",
+      "id": "d370e6ba8eadd560fcef543bd06a3572"
+    },
+    {
+      "type": "html",
+      "text": "<b>Liveness</b>",
+      "id": "f7c12021005609dfd9b359f1bcb02b35"
+    },
+    {
+      "type": "html",
+      "text": "\nAn object is an object is an object, not a copy or a representation. For example, [[Plan Nine]]'s proc filesystem is not live.",
+      "id": "be8a3038250f6b36ccc022cd5fcb7530"
+    },
+    {
+      "type": "html",
+      "text": "<b>Reversibility</b>",
+      "id": "7e6f4bf0c5214f30bad1adeea5da5fa3"
+    },
+    {
+      "type": "html",
+      "text": "\nThe ability to undo and redo any operation. This requires [[Transparent Persistence]]. It also requires the ability to compose primitive operations into transactions and transactions into changesets and changesets into still higher level changesets. This is because actual human users need to understand what operations to undo together to achieve what they want.",
+      "id": "8da9ca89d3ffb49a34792c282ef054a0"
+    },
+    {
+      "type": "html",
+      "text": "\nCommon implementations of reversible systems where you get a single undo stack and no ability to see that stack are simply broken.",
+      "id": "f74d7540281f547bfdfb81894a2557c4"
+    },
+    {
+      "type": "html",
+      "text": "<b>Referential transparency</b>",
+      "id": "a69c71a759a23c37ac0166b0d8473ecd"
+    },
+    {
+      "type": "html",
+      "text": "\nIt means that (cap read: 1 to: 20 version: 2) will always return the same value, and that (cap write: 'abcd' at: 20 version: 2) will either always proceed or never proceed. What it does NOT mean is that (cap read: 1 to: 20 version: #latest) will always have the same value ....",
+      "id": "a318b5207ddaa7423724d8a4828f5efc"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "8cbaeab5ae2720bdd1901b49bc1d54ca"
+    },
+    {
+      "type": "html",
+      "text": "<b>How do different OS designs compare?</b>",
+      "id": "819f2deab77554d10852cfb7d0d70cb7"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Plan Nine]] has modularity, composability, distribution and half of uniformity. You can also include reliability.",
+      "id": "e30675fea16b3c618555ae1e2f93d63e"
+    },
+    {
+      "type": "html",
+      "text": "\nUnix has only modularity and many people seem to act like it's the \"best OS of all time.\"",
+      "id": "e4f7b24862bcdb3cdecd3ed7d60f071f"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Eros Os]] satisfies Reliability, [[Transparent Persistence]] and most of security. It doesn't seem to give very practical security.",
+      "id": "4c4e03e9ea8134a60f923603a11c2336"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Blue Abyss]] aims to satisfy all of the principles to the utmost, except for Correctness Proofs, which I see as a costly fad that adds little value.",
+      "id": "4994435058b2f4b53e18109be0e21f69"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Richard Kulisz]]",
+      "id": "d866d8a2359351a346361ca467693511"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "8cbaeab5ae2720bdd1901b49bc1d54ca"
+    },
+    {
+      "type": "html",
+      "text": "<b>Discussion</b>",
+      "id": "64cbc11ac3a6cfb18572e2056ff89f85"
+    },
+    {
+      "type": "html",
+      "text": "\nIgnoring such things as \"runs application X\", as that's external to the intrinsic nature of an operating system, what about: [all refactored up]",
+      "id": "89dcdbeec2f49094aae223ceb96934bb"
+    },
+    {
+      "type": "html",
+      "text": "\nPerhaps you've lumped all of these in with \"reliability\"; it is useful to break them out.",
+      "id": "5a8e0da31beb641b5a543628b24288a1"
+    },
+    {
+      "type": "html",
+      "text": " Robustness. Does the thing crash, or come down to its knees, especially under load?",
+      "id": "dd832f779c0f3ebe3ac4a034904224a0"
+    },
+    {
+      "type": "html",
+      "text": " Availability. (Partially covered in Extensibility). Do you have to reboot it whenever you add a driver? Or new HW for that matter? <i>You should never have to reboot it. Covered under extensibility and exokernel.</i>",
+      "id": "622203c1a84df88a1ebfa3677fd3cd37"
+    },
+    {
+      "type": "html",
+      "text": " [[Fault Tolerance]]. If a disk crashes, does the OS keep on chugging. (This is more of a [[Whole System]] property - the most fault-tolerant OS in the world won't be fault-tolerant if loaded on a garden-variety PC.)",
+      "id": "032e009d632cc89296030a376c0d71b2"
+    },
+    {
+      "type": "html",
+      "text": " [[Data Integrity]]. Do crashes, unplanned/uncontrolled reboots, and other such nastiness result in data corruption? <i>This is a security problem.</i>",
+      "id": "a6f0e7e8e12152b77e3de57ab3c8d8d6"
+    },
+    {
+      "type": "html",
+      "text": "<i>So basically reliability means robustness.</i>",
+      "id": "c203e4019ea471d7b289c2c98f2241c8"
+    },
+    {
+      "type": "html",
+      "text": "\nIn addition, a few other comments:",
+      "id": "97c83faef5774e1b231627b44d7a0c6f"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Real Time]]: Many applications/environments don't need this trait. <i>Many applications don't need graphics. An OS / library / language that doesn't provide suitable abstractions in graphics simply isn't doing its job.</i>",
+      "id": "3e0b5021f7c4f991d7a0d740037e9f1c"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Proof Of Correctness]]: Likely possible for some parts of the system; but the [[General Halting Problem]] is likely to rear its ugly head if you try to prove an entire general-purpose OS correct. Assuming you have a spec with sufficient coverage and detail to prove out.",
+      "id": "e70af67af2a2674ee6a067584e3f5fe4"
+    },
+    {
+      "type": "html",
+      "text": "\nAlso, [[Exo Kernel]] seems to be a particular architecture for OS design, not a \"design principle\". [[Exo Kernel]]s may be a good way to write an OS; however they aren't a fundamental requirement or figure of merit.",
+      "id": "f116c1bc57ce185702e73c6724158e31"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Transparent Persistence]] and [[Object Orientation]] are some other items on the list that some people think would be nice, but which are not fundamental principles or general requirements. ",
+      "id": "a01cf7fa62ac57f10e9e748e633316d4"
+    },
+    {
+      "type": "html",
+      "text": "<i>I'd like you to define a \"fundamental\" principle of OS design as opposed to a \"non-fundamental\" one. The distinction is simply not useful, if it can even be defined.</i>",
+      "id": "c8233917a16992245c5707c3caec2bfa"
+    },
+    {
+      "type": "html",
+      "text": "<i>OO crosscuts all system components and that makes it a general requirement. [[Transparent Persistence]] is a feature since it doesn't crosscut across all system components. However, it's a requirement that every decent OS is obligated to meet.</i>",
+      "id": "40a7b7efd98329a913b09ebe9d36734b"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "8cbaeab5ae2720bdd1901b49bc1d54ca"
+    },
+    {
+      "type": "html",
+      "text": "One of the design principles behind the [[Incompatible Time Sharing System]] is that system calls be atomic. This means that they cannot appear to be interrupted. If they are interrupted, one of two things happens:",
+      "id": "24dfab094d819c4e67deb598d49a06dd"
+    },
+    {
+      "type": "html",
+      "text": " the system call backs out and the program counter is reset to the start of the system call, saving whatever state has been changed, so that when the process resumes, it can pick up where it left off",
+      "id": "2dc45696ab05a77867bff4d1456f519f"
+    },
+    {
+      "type": "html",
+      "text": " the system call completes if this is possible after a few more instructions.",
+      "id": "a3aad9205dee3cfedca3a27726ffb014"
+    },
+    {
+      "type": "html",
+      "text": "\nThis is called PCLSRing (or PC-lusering), and was also used by WAITS",
+      "id": "65281cab8a7dae0d340a88f820154139"
+    },
+    {
+      "type": "html",
+      "text": "(West Coast Alternative to ITS, a variant of TOPS-10).",
+      "id": "853bb5eae72afcb3b417a4fa4ebfb9ab"
+    },
+    {
+      "type": "html",
+      "text": "\nThe approach taken by most modern operating systems is to exit the system call and signal failure. EROS (IIUC) uses a variant of PCLSRing, but with the difference that system calls are constrained to take a limited time to run, and the Fluke kernel, which has multiple entry points to system calls so that they can be resumed. -- [[Donald Fisk]]",
+      "id": "2740d38d8f7b313d2983aa0cf0149af5"
+    },
+    {
+      "type": "html",
+      "text": "\nNowadays, these would no longer be called OS design principles. They would be consequences of resource allocation, security, elegance, and other such principles. System call internals are simply too low level.",
+      "id": "027d91e424f70024e3fd1213fc88c760"
+    },
+    {
+      "type": "html",
+      "text": "''Maybe some consideration should be given to system call internals\nbefore worrying about higher level issues. Avoiding this means responsibility is being passed from the operating system designer to other programmers who use the system calls.''",
+      "id": "4d12cafb13974b6835a0ff5a1412ec88"
+    },
+    {
+      "type": "html",
+      "text": "\nSystem calls (if such a thing even exists) must use PCLSRing. Elegance requires this. But worrying about system calls <i>first</i> is stupid. There are just so many much more important things.",
+      "id": "adba3d8a8fcb4f8a44ba972d0adf56c6"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "8cbaeab5ae2720bdd1901b49bc1d54ca"
+    },
+    {
+      "type": "html",
+      "text": "<b>Documentation</b>",
+      "id": "6312db31742c8a50b1148e4c32d8c5ed"
+    },
+    {
+      "type": "html",
+      "text": "\nWhy has nobody even *mentioned* the documentation? Because it's not a principle of OS design?",
+      "id": "212e915f0772632601a40efb5cb40910"
+    },
+    {
+      "type": "html",
+      "text": "\nYes, that's pretty much it. The design principles as they stand will already work towards many of the tasks for which documentation is used for in systems. The tasks which remain, although important, are not operating system design issues. Windows would be windows, with or without the manual. Its design contains many faults, and none of them could be fixed with a manual. And a major error in the manual, perhaps misrepresenting a security aspect so as to describe a system with a certain hole, doesn't by force of existence bring that hole into being. -- cwillu",
+      "id": "45358ac6de62498da2b7bf61a532a3b0"
+    },
+    {
+      "type": "html",
+      "text": "\nI'm starting to think that self-documentation is an OS principle at least as much as other derivative things like OO or [[Exo Kernel]], and more so than proper resource allocation. <i>Documentation</i> is not an OS principle, but <i>self</i>-documentation? Consider the difference between a Smalltalk system with sources and one without (as happens in [[Visual Works]] when you don't set $Home). Now imagine the difference if a component of [[Blue Abyss]] were written in Smalltalk and if it were written in assembly. I'm starting to wonder what kind of support I'll need for self-documentation in [[Blue Abyss]] ... -- RK",
+      "id": "7a312e4ece93f35fc0119ece588a982d"
+    },
+    {
+      "type": "html",
+      "text": "\nHmm... for some reason I was under the impression that the old list already included something along the lines of progressive disclosure, which combined with uniformity would result in a... I don't know. I want to say intuitive, but I don't believe that exists per say. Perhaps a system which would be understandable with a minimum of hand-holding?",
+      "id": "53381e56ac22e7492404e4e71d6b529d"
+    },
+    {
+      "type": "html",
+      "text": "\nIf the principles don't already include such that the resulting os will be self-documenting for the most part, then self-documentation belongs to os design principles as much as self-documenting code belongs to application design principles.",
+      "id": "97d379debd6e1596db9747b2f96f7d75"
+    },
+    {
+      "type": "html",
+      "text": "\nSo while Documention still doesn't have a place, but that the system should be self-documenting certainly does.",
+      "id": "7a7c33b6cc307c6892937bc772af416e"
+    },
+    {
+      "type": "html",
+      "text": "-- cwillu",
+      "id": "a1b4d36f1e5fb093790b70f138846b63"
+    },
+    {
+      "type": "html",
+      "text": "\nYou got it right the first time. Uniformity and progressive disclosure should result in a largely understandable system. But even Smalltalk has specialized mechanisms for documenting code (eg. class comment method). -- rk",
+      "id": "9763edbceddbc2e9d2e9dc10ca368dd0"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "8cbaeab5ae2720bdd1901b49bc1d54ca"
+    },
+    {
+      "type": "html",
+      "text": "\nSee also [[Killer Operating System]].",
+      "id": "54dca841913acb8790153322916b7eb2"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "8cbaeab5ae2720bdd1901b49bc1d54ca"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Operating System]] [[Category Interaction Design]]",
+      "id": "6abc8a52ae0b8c941547e06ff31f51e7"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?OperatingSystemsDesignPrinciples c2.com]",
+      "id": "0bfb4d128a10f0e1ddd5b2725a2cb13d"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1189035062000,
+      "id": "21b481e7cf9f7c25f821053321de943c",
+      "type": "create",
+      "item": {
+        "title": "Operating Systems Design Principles",
+        "story": [
+          {
+            "type": "html",
+            "text": "This page is about high-level OS concepts and desirable transcendental properties of OSes, not implementation details.",
+            "id": "a9c9aca0de4426d54a79927b1872fa8f"
+          },
+          {
+            "type": "html",
+            "text": "\nIssues such as global versus per-process address spaces have no place here, except as a derivation. Same thing with synchronous versus asynchronous communication.",
+            "id": "b5df4aa15fa3b781f528bc288629a5c4"
+          },
+          {
+            "type": "html",
+            "text": "\nPerformance has <i>no</i> place here, even as a derivation. Every OS can be made to perform well by using advanced compiler techniques, and if that fails then systematically breaking down component boundaries. Make it work, make it right, make it fast. Fast is last, always.",
+            "id": "a2b71f3cb3a0c77506687183ba1f3d24"
+          },
+          {
+            "type": "html",
+            "text": "\nPerformance is strictly a matter of engineering and so simply isn't a valid concern of OS design. The same thing with scalability; running on different kinds and classes of hardware with adequate performance on each. See [[Design Vs Engineering]].",
+            "id": "0aaf23ff4850066a77b3e94fc29688ef"
+          },
+          {
+            "type": "html",
+            "text": "<i>This turns out not to be the case. For example, [[Ell Four]] has been shown to be inherently faster than [[Mach Microkernel]], because it is a tighter design. ([[Ell Four]]'s message passing semantics are simpler, so message passing is about an order of magnitude faster; and the [[Micro Kernel]] is only about 12K, which means much less cache thrash.) Tests have shown that the performance cost of hosting Linux on [[Mach Microkernel]] is about 10 times as high as the cost of hosting it on [[Ell Four]]. This should not surprise anyone who has solved difficult performance problems; any substantial program which has not been designed for performance often has semantics which simply cannot be implemented efficiently. Consider the difference between HTTP/1.0 and HTTP/1.1; if browsers are HTTP/1.1-compliant, then an HTTP/1.0 server will never perform as well as an HTTP/1.1 server, no matter how much engineering has been put into it. -- [[John Stracke]]</i>",
+            "id": "53c4c0282627e901e9c7f0e6a2199c40"
+          },
+          {
+            "type": "html",
+            "text": "\nIt has to be understood that OS design isn't taught in \"OS design\" classes and books like \"OS concepts\" are a twisted joke. Teaching low-level implementation details of Unix in OS Design classes is the quintessence of a [[Cargo Cult]]. The material on this page comes as close to an introduction to the subject of OS design as exists either online or off. Without further ado,",
+            "id": "afe423a139523487adf8ac4d4eae87d9"
+          },
+          {
+            "type": "html",
+            "text": "\nThe big list of fundamental OS principles,",
+            "id": "d96e51deb5705747873cf8c45e940bad"
+          },
+          {
+            "type": "html",
+            "text": " [[Orthogonal Security]]",
+            "id": "7a82d0ca57a1a2eb24cea51476f28f29"
+          },
+          {
+            "type": "html",
+            "text": " Elegance",
+            "id": "e09ce13d1aa1fbdba701d19a35b29e2d"
+          },
+          {
+            "type": "html",
+            "text": " Simplicity",
+            "id": "1fa23089d158bcc41dcf8db30995fddf"
+          },
+          {
+            "type": "html",
+            "text": " Integrity = Elegance + Uniformity",
+            "id": "6ccea9ef957c4f4bc66df2ef1a321ed2"
+          },
+          {
+            "type": "html",
+            "text": " Resilience",
+            "id": "3c9f2202d6fd47f6f0a8bb2deaad384b"
+          },
+          {
+            "type": "html",
+            "text": " Robustness",
+            "id": "49ec97b349f749d66e7d852c09106279"
+          },
+          {
+            "type": "html",
+            "text": " Modularity",
+            "id": "68bb6e3b6edd209419a549d2ad316cfa"
+          },
+          {
+            "type": "html",
+            "text": " Composability",
+            "id": "e9e4672ab9bdd6a8639b8c08501e3c34"
+          },
+          {
+            "type": "html",
+            "text": " [[Name Space]] principles (eg. Connectedness)",
+            "id": "ccd6a9eb95c926063e67156cca60b577"
+          },
+          {
+            "type": "html",
+            "text": " Uniformity, or Consistency",
+            "id": "cfecfe413f6f5351f8bc647e6753ec6c"
+          },
+          {
+            "type": "html",
+            "text": " Extensibility",
+            "id": "ba77762b8ee0b0ab9bec6fcb7d5da7f0"
+          },
+          {
+            "type": "html",
+            "text": " Distribution",
+            "id": "0aa6d7d05676a3d45dca74419c5038c2"
+          },
+          {
+            "type": "html",
+            "text": " Reflection (includes Monitors)",
+            "id": "7b73e7326d53c960234ccd738e78a169"
+          },
+          {
+            "type": "html",
+            "text": " [[Object Orientation]]",
+            "id": "aa8725defd725de193d4e5fe66c26158"
+          },
+          {
+            "type": "html",
+            "text": " [[Referential Transparency]] ([[Functional Programming]])",
+            "id": "924fadea5354bca6545884bfd14bb226"
+          },
+          {
+            "type": "html",
+            "text": " Reliability",
+            "id": "1289f2a474a06725bec377b48ddf3b27"
+          },
+          {
+            "type": "html",
+            "text": " Self-documentation",
+            "id": "985cd830c22832f32ec51582487600cc"
+          },
+          {
+            "type": "html",
+            "text": " Predictability / Understandability",
+            "id": "dcc1108a51f259ef97a6cdd33b71e227"
+          },
+          {
+            "type": "html",
+            "text": " Reversibility",
+            "id": "5021ca7982f8cd655f0b2c3634f697f8"
+          },
+          {
+            "type": "html",
+            "text": " Liveness",
+            "id": "b8ceb366b7d83c58b0a54e78aaaa7bbb"
+          },
+          {
+            "type": "html",
+            "text": " Directness",
+            "id": "cde4d20a9c4b243172eb8edb3129714a"
+          },
+          {
+            "type": "html",
+            "text": " Correct(ness-proved) ",
+            "id": "cb0fe847c7db2509fbfae8f8414280e4"
+          },
+          {
+            "type": "html",
+            "text": "\nIssues requiring special attention:",
+            "id": "e39ed2dfa7b37ce8681501d63634e084"
+          },
+          {
+            "type": "html",
+            "text": " [[Transparent Persistence]]",
+            "id": "75d16c43e6769c3ccd76ed4849f9e41b"
+          },
+          {
+            "type": "html",
+            "text": " Political Economy ([[Resource Management]] / [[Resource Allocation]] / [[Real Time]] being features)",
+            "id": "faf5c928030b1becde30801dc60e4f40"
+          },
+          {
+            "type": "html",
+            "text": "<b>Relative Importance of Principles</b>",
+            "id": "47ff3c59b80f69c62513cb368d5388e7"
+          },
+          {
+            "type": "html",
+            "text": "\nNote that these are <i>ALL</i> reconcilable with each other, both in logic and in practice. IOW, it is possible to create an OS that satisfies <b>all</b> of them.",
+            "id": "cd036acf8e549a0aa3045a1bb9b02a73"
+          },
+          {
+            "type": "html",
+            "text": "\nOf course, it is wise to spend one's time satisfying the most important ones and leave out those, like correctness proofs, which provide little benefit at enormous cost. The question is, which principles are essential to include in any new OS?",
+            "id": "bd0322bb6f5bf1f51e9d03297f9fa49e"
+          },
+          {
+            "type": "html",
+            "text": "\nThe answer is that anything which every other OS project has accomplished or seeks to accomplish ... is completely non-essential. There are dozens of OS projects that sought and have achieved highly-performing, reliable, distributed, secure operating systems. If a new OS is to stand out from the crowd, to challenge the established antediluvian systems, it must do something <i>different</i>. In fact, it must do something which it is <i>impossible</i> for the established OSes to do. Performance, reliability, distribution and even security to some degree, are simply not it!",
+            "id": "e97b15ec10ecde6f149f6a1cf6dca192"
+          },
+          {
+            "type": "html",
+            "text": "\nIf you're an OS designer and someone tells you \"your OS must have so and so because every other OS already has it\", you can choose to comply with the narrow-minded idiot and be a complete loser. (What else to call someone intent on reinventing the wheel?) Or you can choose to do something difficult, risky and new.",
+            "id": "11e7dcd56a6a713254a701c39a0d9922"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "8cbaeab5ae2720bdd1901b49bc1d54ca"
+          },
+          {
+            "type": "html",
+            "text": "<b>Security</b>",
+            "id": "08fcf9794118f06839d87f5b563cd734"
+          },
+          {
+            "type": "html",
+            "text": "\nSecurity has two halves: preventing users from accessing objects they have no right to access and allowing users to access objects they have every right to access. Sometimes it seems like OSes are written by Fascists; eg, it is impossible to share any object in Unix in any meaningful way. Other times, it seems like they're written by people who don't have the faintest notion of what privacy means. Genuine security has a lot of implications. See [http://www.caplet.com/security/taxonomy/index.html www.caplet.com], [[Capability Computing]], [[Eros Os]].",
+            "id": "6fe8bcd8335afbf8e7a56202fdcb1fa9"
+          },
+          {
+            "type": "html",
+            "text": "\nNote that dealing with [[Denial Of Service]], deadlocks and the like has nothing to do with security. They are economic ([[Resource Allocation]]) problems; a user should not have so much power or money that they can secure a resource forever. And if they do, then DoS / deadlock is perfectly legitimate behaviour. ",
+            "id": "e94cbb879a367afeeb62147512066265"
+          },
+          {
+            "type": "html",
+            "text": "<i>I'm reading up on no-wait based concurrency, it strikes me that the 'no-indeterminate wait/finite number of steps to finish any operation' aspect would be a solution to the DoS problem; the worst-case is that an operation takes longer to complete... no DoS attack could hold off any arbitrary user task indefinitely. It follows that any operating system/language must provide an atomic primitive operation with a consensus number of infinity it order to provide lock-free synchronization. I need to reread the papers, but it struck me that message passing is not sufficient to do this without in-order delivery of broadcast messages. Other primitives which are sufficient include atomic test-with-conditional-swap (although this might be limited to consensus=[capacity of operand]), and atomic memory move (I'm not completely clear on this one). -- [[William Underwood]]</i>",
+            "id": "ea9147002574c815ffdfcd2eb0145100"
+          },
+          {
+            "type": "html",
+            "text": "<i>(see [[Wait Free Synchronization]] and [[Global Consensus]] for details)</i>",
+            "id": "3fcc3c0a0cc48608e0588a1469916d9f"
+          },
+          {
+            "type": "html",
+            "text": "\nI seriously doubt that DoS is a security problem in the first place. It seems to me to be an economic problem at its core. People give away an unlimited amount of money to whoever wants it and then they whine when they buy out your finitely priced CPU / network capacity. -- RK",
+            "id": "7f62cb38929a6572a40be7153ec203a4"
+          },
+          {
+            "type": "html",
+            "text": "\nDoS is in no way abated with lock-free concurrency.  DoS occurs precisely <i>because</i> things are lock-free.  To wit, the Internet.  One of the best ways to attack a website is to have millions of (scripted) clients conducting a <i>perfectly legal and fully asynchronous</i> operation like obtaining a website.  The resources consumed are completely transient -- <i>nobody</i> has exclusive rights to the server's network connection for longer than a single HTTP request.  The <i>volume</i> of the requests, however, are what denies service to other, legitimate users.  Had a legitimate user had the ability to <i>exclusively lock</i> a chunk of bandwidth for his/her purposes, then this becomes a non-issue.",
+            "id": "572fc8f26c4c3b63f57879b665c97fc3"
+          },
+          {
+            "type": "html",
+            "text": "\nHowever, the opposite situation happens.  If you allow exclusive assignment of resources, now you run into <i>deadlock</i> situations.  It's a no-win battle.  You either deal with DoS, or you deal with deadlock.  --[[Samuel Falvo]]",
+            "id": "7dc3b9a1e4b099478d7160b800f28809"
+          },
+          {
+            "type": "html",
+            "text": "<i>I disagree.  DoS would be much easier if things were lockable.  One legitimate user could far more easily deny service to other legitimate users.</i>",
+            "id": "744c2ee73de687964ad02cc3385ce95e"
+          },
+          {
+            "type": "html",
+            "text": "<b>Elegance</b>",
+            "id": "c4616d11b92837002034622955530822"
+          },
+          {
+            "type": "html",
+            "text": "\nSometimes called [[Quality Withouta Name]] or [[Right Thing]] though it is neither. Elegance is achieved when every property of the system is derived from every other property such that the number of arbitrary choices is zero. String theory is elegant, the Standard Model is not.",
+            "id": "ca580a09adb76f78be1f082b4957098d"
+          },
+          {
+            "type": "html",
+            "text": "<b>Simplicity</b>",
+            "id": "6fbbd028448d1de2eace64c8c141a54d"
+          },
+          {
+            "type": "html",
+            "text": "\nSimplicity doesn't mean that the OS is weak or that it provides few abstractions. What it means is that each abstraction is simple and components of the OS have simple sets of abstractions. In particular, it means that multiplexing is separated from abstraction. A layer either multiplexes or it abstracts, but never both. The [[Exo Kernel]] fad was an attempt to provide this simplicity in one tiny part of the OS. Providing a multiplexing layer beneath every abstraction layer is an excellent way to make an OS extensible.",
+            "id": "c6e4bce81d03e7c5a1efa3323c194ef3"
+          },
+          {
+            "type": "html",
+            "text": "<i>I detect more of RK's favored [[Blue Abyss]]-colored glasses behind the above statements.  Simplicity does NOT mean having some layers multiplex while others abstract.  However, that would be one instance of greater simplicity (as compared to service-layers that each do two orthogonal jobs).  In a broader view, simplicity in OS design needs apply to both the component-abstractions (i.e. what is a process, what is a 'file', what is a 'service', etc.) AND to the individual services.  Simple services are characterized by strong cohesion and minimal unnecessary coupling, much like any other simple software component.  Since coupling of multiplexing and abstraction is very rarely 'necessary' within a service, there should very rarely be any service-layers that do both.</i>",
+            "id": "ab79557610a64baa783548b7c377a017"
+          },
+          {
+            "type": "html",
+            "text": "<b>Resilience</b>",
+            "id": "0febc5572a1117a82980be2a248cdafd"
+          },
+          {
+            "type": "html",
+            "text": "\nThe design is resilient if the radical addition of a feature in the fundamental design causes it to be simpler, solves unexpected problems, or increases its elegance by causing a previously made choice to no longer be arbitrary.",
+            "id": "b91585fe6608986a5b1f4004a418f103"
+          },
+          {
+            "type": "html",
+            "text": "\nThis happened many, many times in the design of Blue Abyss. The latest instance was considering extending Number with classes [[Positive Infinity]] and [[Negative Infinity]] for the sake of infinite version numbers. Then actually doing it when it turns out that infinite quotas are critical to flexible resource allocation. Then finding out that having done it, you've got indeterminate-size nodes, ones whose start or end location is unknowable even by the node, <i>for free</i> without writing <i>a single line of code</i>. Which is quite a bit better than having to write message-eating [[Delayed Exceptions]].",
+            "id": "648d9ba09bf81c412f6abc03e4bdd437"
+          },
+          {
+            "type": "html",
+            "text": "\nIn opposition, the design is brittle when the addition of a feature causes a security hole or other undesirable interaction to exist.",
+            "id": "5f27b574382e802c82ec5f8c3b748800"
+          },
+          {
+            "type": "html",
+            "text": "<i>The above description of <b>resilience</b> is difficult to associate with how the word is used in systems design.  A system (network or service, for example) is called <b>resilient</b> if it can bounce back from partial or complete failures, attacks, and sabotage.  It is closely associated with graceful degredation and a necessary component of survivability, though resilience doesn't imply continuous service through the duration of the attack.  (A service that fails gracefully and is resilient will fail just a little then bounce back into original condition when the cause of the malady is resolved).  A </i>design<i>, in this line of reasoning, might be called 'resilient' if changes to it (e.g. the addition or removal of a feature) automatically shape the rest of the design, such that nothing else needs to be redesigned just to fit it in.  The above statements are symptoms of this, though resilience itself doesn't imply the overall system becomes simpler or at all more elegant - it can often go the other way, where a small addition invalidates assumptions and makes previous optimizations impossible in all other parts of the design.  Still, a resilient design would somehow 'repair' itself to working condition, so the other features live on, even if they run slower.</i>",
+            "id": "978681b50ad80ef790dd4548a86e0950"
+          },
+          {
+            "type": "html",
+            "text": "\nI face some confusion here, too.  Is 'Resilience' supposed to be a property of the operating system's <b>design</b>, or is it to be a property of the <b>[[Operating System]]</b>?  RK spoke of the wonderful 'resilience' his design possessed, but I can't help but think he grossly misinterpreted the intent in placing 'resilience' among the top design principles.  What would 'Liveness' mean when discussing 'Live' designs?",
+            "id": "77a3aff7d55ad26652beb95604b16155"
+          },
+          {
+            "type": "html",
+            "text": "\nResilience of the Operating System, as opposed to its design, would be its ability to restore service (or be restored to service) if broken or attacked.  Resilience of a Security System would be the ability to kick infiltrators out and rebuild walls that are penetrated or infiltrated (compare to notion of nearly unbreakable wall that, once penetrated, never self-repairs and is difficult to fix by hand).  Resilience is a very good property for an operating system and its orthogonal security system to possess.  Resilience doesn't prevent things from breaking (that'd be 'Robustness'), but Resilience does imply that broken things get fixed.",
+            "id": "0d73f388b69c2fcd8820cdbdd4c5494f"
+          },
+          {
+            "type": "html",
+            "text": "\nAt the level of individual process-objects, 'resilience' would be the ability to restore to working condition even if interrupted, moved to a different environment, loss of communications, etc.   In modern operating systems, most process-objects are incredibly fragile... to the point that the normal mechanism of providing resilience is to destroy the process-object entirely and create a new one every time the operating system is shut down, and getting them back into working condition after moving them to another computer or after power cycle is wishful thinking or even impossible.  One might say that a process is 'fragile' insofar as it requires information or other processes that are no longer available in order to restore it to working condition.  Thus, resilience can be obtained by maintaining this extra information.  ",
+            "id": "f798ef3ddae07dfdbcffff70a69576bf"
+          },
+          {
+            "type": "html",
+            "text": "\nI submit a hypothesis: resilient process-objects will need to provide a systematic mechanism for communicating to the hosting environment what services it need make available, where this communication is always initiated by the hosting environment (e.g. after first receiving the process-object, possibly after a restart of some sort).  This could be a script or list of sorts published with an expected name and type ('export environ-requirements = \"Give me a timer-signal on port T once every 15 minutes.  Oh, and please call my exported procedure named '[[On Destruct]]' before destroying me.\"').  More easily, it could be a simple message on a known port that tells the process-object whom its host is (for callbacks) and tells it to regenerate itself.  These aren't exclusive... the former 'script' could easily be used to simply tell the environment to send the process a special message telling it to self-regenerate.   The mechanism is, perhaps, relevant to other design principles, but what's important to resilience is that the host environment be capable of putting Humpty Dumpty back together again after dropping him, whether this be relying upon Humpty Dumpty to tell it how, or Humpty Dumpty coming with instructions.",
+            "id": "f907a791048d030f5f54a7a029cde151"
+          },
+          {
+            "type": "html",
+            "text": "\nI favor use of a script, myself, because it allows most processes to operate under the illusion that they never broke (even if they require a timer signal every 15 minutes).  The script makes '[[Transparent Persistence]]' of process-objects considerably more transparent in the great many cases where explicit regeneration isn't required, and it also allows for more transparent migration of processes.",
+            "id": "e0cd0ffe9bb2e247365a9289d7c0c274"
+          },
+          {
+            "type": "html",
+            "text": "\nResilient process-objects are possibly a necessary component of any Operating System when uniting  'Liveness' with 'Persistence' (esp. [[Transparent Persistence]]).",
+            "id": "206a441e5eb0d81fdd27e6b47762bef6"
+          },
+          {
+            "type": "html",
+            "text": "<b>Robustness</b>",
+            "id": "16eb546f23937394093693c53c43e9a6"
+          },
+          {
+            "type": "html",
+            "text": "\nThe system is robust if the addition of a feature doesn't cause the breakdown of a previous feature.",
+            "id": "ad8585d8e38d0daf6acce135b411a8d5"
+          },
+          {
+            "type": "html",
+            "text": "(But, isn't this, by definition, the same as <i>Resilience</i>?  I think a better explanation for robustness is the exact same as that used by every other vendor -- it's <i>resistance to failure from outside stimuli.</i>  In other words, no amount of user-generated or environmentally-generated input can cause the system to fail.  Since there are always cosmic rays to deal with, a system can never be 100% robust.  But we can approach it asymptotically. --[[Samuel Falvo]])",
+            "id": "6b2e778df1a98fd9318fbefb64b131f6"
+          },
+          {
+            "type": "html",
+            "text": "<i>Robust means it's hard to break.  Resilient means that it bounces back quickly when it breaks (either it self-repairs or is simply easy to fix).  They aren't the same, though the differences don't seem to be well explained on this page.  It's important to combine the two: a system can't be 100% robust unless it has no features (nothing to break), so some resilience is always necessary.  However, resilience is often far more difficult to achieve efficiently than robustness.  In the case of a robust design, there is no implication that other parts of the design (or features) would be shaped by the addition of a new one... to the contrary, robustness implies a certain rigidity, such that  the original features will be there no matter what you change in other areas.  In a good, robust OS, there's no way to crash or damage one part of the OS by crashing or adding insane features to another part.</i>",
+            "id": "74906f107ac4a235d20ba8b4d5965701"
+          },
+          {
+            "type": "html",
+            "text": "<i>It's worth noting that a robust design might simply <b>block</b> the addition of a feature, and still be called robust.  It's robust if you can't break it, and all other concerns are secondary.</i>",
+            "id": "0dc2781cc08af4b1715ae766aff62419"
+          },
+          {
+            "type": "html",
+            "text": "<b>Composability</b>",
+            "id": "8db1b8b7334e77cb7b669d1e0678b672"
+          },
+          {
+            "type": "html",
+            "text": "\nComponents should be composable with each other at the user's whim.",
+            "id": "aeec8c9a257d7c1ebab0e6e8c7701916"
+          },
+          {
+            "type": "html",
+            "text": "<i>I'd note that this one makes Robustness and Correctness-Proved considerably more difficult.  An OS that provides these other features will only allow for composition </i>within constrained limits<i>, not </i>at the user's whim<i>.  Essentially, if you're going to provide composability and these other design principles, you'll need a strongly typed (for robust) and statically typed (for correctness-proved) operating system.</i>",
+            "id": "ed2357379dc40b10efa0f323f6ff3393"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Name Space]] principles</b>",
+            "id": "faf4fe08540ef51d034c487e83fe58b3"
+          },
+          {
+            "type": "code",
+            "text": "  '''Global Consistency'''",
+            "id": "4f67e23633b8a6898e0e10fd59cb1110"
+          },
+          {
+            "type": "code",
+            "text": "  '''Connectedness'''",
+            "id": "38a0da9d119da37b2e8dfb2e47efbaab"
+          },
+          {
+            "type": "html",
+            "text": "\nComponents' accessibility from each other should be symmetric and transitive. This implies that all mounts and hardlinks (in Unix jargon) be bidirectional.",
+            "id": "659a355ceba29aeb1d89f148aab85d01"
+          },
+          {
+            "type": "html",
+            "text": "\nConnectedness allows \"the system [to] reveals itself through [[Progressive Disclosure]]\" (from [[Great Design]]).",
+            "id": "fa6dca9af42dc258d75b03fa038a6735"
+          },
+          {
+            "type": "html",
+            "text": "<b>Uniformity</b>",
+            "id": "140692367f15b23704cc1fac6e685753"
+          },
+          {
+            "type": "html",
+            "text": "\nComponents should obey the same syntax, have the same meta-interface. This implies near complete network transparency. That is, scheduling your program on a remote CPU should be no different from scheduling it on a particular one of the local CPUs (which feature must be available to comply with the [[Exo Kernel]] principle). It is not the business of the OS designer to care how the user structures their processes.",
+            "id": "43887de26940872ce35785d6d531a8f1"
+          },
+          {
+            "type": "html",
+            "text": "(Note that caching can be made available to make remote process execution tolerable. But that's a general solution to remote data transfer.)",
+            "id": "030f5123611c1ae88ec2f5279294121f"
+          },
+          {
+            "type": "html",
+            "text": "\nOne should be able to put a monitor on any object and on any operation. A monitor is just a message sent to an object to Watch for the passage of another message. Monitors are a reflection not of the OS, but of the primitive objects of which the OS is composed.",
+            "id": "b36fff6ee69dfccbca33019613df2d08"
+          },
+          {
+            "type": "html",
+            "text": "<b>Extensibility</b>",
+            "id": "a6ef2d2861f5e8e874114d306ad4e755"
+          },
+          {
+            "type": "html",
+            "text": "\nNew components can be added to the system at any time and (because of uniformity and composability) used by anyone to whom they're available from that very moment. Preferably, individual components should be extensible at run-time.",
+            "id": "80adc2c86f79acf547e54345735b9d64"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Object Orientation]] versus [[Functional Programming]]</b>",
+            "id": "c3a3c43587f8d97e147f5c5f3b972745"
+          },
+          {
+            "type": "html",
+            "text": "\nSince [[Oo Fits Our Mental Abilities]], this means user-oriented versus developer-oriented.",
+            "id": "97fbbb85f0f281cb013118cba2fe9540"
+          },
+          {
+            "type": "html",
+            "text": "<b>Political Economy</b>",
+            "id": "8380166aac2ca4aabee22a3910d7375f"
+          },
+          {
+            "type": "html",
+            "text": "(This is probably a feature any way you slice it but the issue is so often misunderstood that it's given special treatment here.)",
+            "id": "1bbc33e0b4421e686c359ae2f661fe3c"
+          },
+          {
+            "type": "html",
+            "text": "\nBy this we mean an expressive, powerful yet simple political economy. Whenever you multiplex a resource, you run into economic issues. These fundamental economic issues are usually left unresolved or only halfway resolved using some vague appeal to fairness. But fairness simply shouldn't be a designer's concern. It's a question of <i>policy</i> and building a policy (such as \"fairness\") into a basic mechanism of the OS is a grievous mistake.",
+            "id": "9c46dc85f9c50fb7e03afea0067ccdb1"
+          },
+          {
+            "type": "html",
+            "text": "\nWhat the OS designer must be concerned with is the creation of a general-purpose mechanism to allocate resources. And then to make sure that this mechanism is used to allocate resources in the OS. Obviously, this mechanism has to be secure, simple, powerful and so on.",
+            "id": "61dae689251d3ba955461e005857a1ef"
+          },
+          {
+            "type": "html",
+            "text": "<b>Predictability</b>",
+            "id": "3a821f8cf6e2e303e88536dbd81d7ffa"
+          },
+          {
+            "type": "html",
+            "text": "\nThe design must be well-defined and predictable. Not merely deterministic, nor even tractable, but tractable by a normal human being. There is a large, perhaps even total, overlap between predictability, uniformity and elegance, but saying that one set of principles is more fundamental than another is mistaken.",
+            "id": "d370e6ba8eadd560fcef543bd06a3572"
+          },
+          {
+            "type": "html",
+            "text": "<b>Liveness</b>",
+            "id": "f7c12021005609dfd9b359f1bcb02b35"
+          },
+          {
+            "type": "html",
+            "text": "\nAn object is an object is an object, not a copy or a representation. For example, [[Plan Nine]]'s proc filesystem is not live.",
+            "id": "be8a3038250f6b36ccc022cd5fcb7530"
+          },
+          {
+            "type": "html",
+            "text": "<b>Reversibility</b>",
+            "id": "7e6f4bf0c5214f30bad1adeea5da5fa3"
+          },
+          {
+            "type": "html",
+            "text": "\nThe ability to undo and redo any operation. This requires [[Transparent Persistence]]. It also requires the ability to compose primitive operations into transactions and transactions into changesets and changesets into still higher level changesets. This is because actual human users need to understand what operations to undo together to achieve what they want.",
+            "id": "8da9ca89d3ffb49a34792c282ef054a0"
+          },
+          {
+            "type": "html",
+            "text": "\nCommon implementations of reversible systems where you get a single undo stack and no ability to see that stack are simply broken.",
+            "id": "f74d7540281f547bfdfb81894a2557c4"
+          },
+          {
+            "type": "html",
+            "text": "<b>Referential transparency</b>",
+            "id": "a69c71a759a23c37ac0166b0d8473ecd"
+          },
+          {
+            "type": "html",
+            "text": "\nIt means that (cap read: 1 to: 20 version: 2) will always return the same value, and that (cap write: 'abcd' at: 20 version: 2) will either always proceed or never proceed. What it does NOT mean is that (cap read: 1 to: 20 version: #latest) will always have the same value ....",
+            "id": "a318b5207ddaa7423724d8a4828f5efc"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "8cbaeab5ae2720bdd1901b49bc1d54ca"
+          },
+          {
+            "type": "html",
+            "text": "<b>How do different OS designs compare?</b>",
+            "id": "819f2deab77554d10852cfb7d0d70cb7"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Plan Nine]] has modularity, composability, distribution and half of uniformity. You can also include reliability.",
+            "id": "e30675fea16b3c618555ae1e2f93d63e"
+          },
+          {
+            "type": "html",
+            "text": "\nUnix has only modularity and many people seem to act like it's the \"best OS of all time.\"",
+            "id": "e4f7b24862bcdb3cdecd3ed7d60f071f"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Eros Os]] satisfies Reliability, [[Transparent Persistence]] and most of security. It doesn't seem to give very practical security.",
+            "id": "4c4e03e9ea8134a60f923603a11c2336"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Blue Abyss]] aims to satisfy all of the principles to the utmost, except for Correctness Proofs, which I see as a costly fad that adds little value.",
+            "id": "4994435058b2f4b53e18109be0e21f69"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Richard Kulisz]]",
+            "id": "d866d8a2359351a346361ca467693511"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "8cbaeab5ae2720bdd1901b49bc1d54ca"
+          },
+          {
+            "type": "html",
+            "text": "<b>Discussion</b>",
+            "id": "64cbc11ac3a6cfb18572e2056ff89f85"
+          },
+          {
+            "type": "html",
+            "text": "\nIgnoring such things as \"runs application X\", as that's external to the intrinsic nature of an operating system, what about: [all refactored up]",
+            "id": "89dcdbeec2f49094aae223ceb96934bb"
+          },
+          {
+            "type": "html",
+            "text": "\nPerhaps you've lumped all of these in with \"reliability\"; it is useful to break them out.",
+            "id": "5a8e0da31beb641b5a543628b24288a1"
+          },
+          {
+            "type": "html",
+            "text": " Robustness. Does the thing crash, or come down to its knees, especially under load?",
+            "id": "dd832f779c0f3ebe3ac4a034904224a0"
+          },
+          {
+            "type": "html",
+            "text": " Availability. (Partially covered in Extensibility). Do you have to reboot it whenever you add a driver? Or new HW for that matter? <i>You should never have to reboot it. Covered under extensibility and exokernel.</i>",
+            "id": "622203c1a84df88a1ebfa3677fd3cd37"
+          },
+          {
+            "type": "html",
+            "text": " [[Fault Tolerance]]. If a disk crashes, does the OS keep on chugging. (This is more of a [[Whole System]] property - the most fault-tolerant OS in the world won't be fault-tolerant if loaded on a garden-variety PC.)",
+            "id": "032e009d632cc89296030a376c0d71b2"
+          },
+          {
+            "type": "html",
+            "text": " [[Data Integrity]]. Do crashes, unplanned/uncontrolled reboots, and other such nastiness result in data corruption? <i>This is a security problem.</i>",
+            "id": "a6f0e7e8e12152b77e3de57ab3c8d8d6"
+          },
+          {
+            "type": "html",
+            "text": "<i>So basically reliability means robustness.</i>",
+            "id": "c203e4019ea471d7b289c2c98f2241c8"
+          },
+          {
+            "type": "html",
+            "text": "\nIn addition, a few other comments:",
+            "id": "97c83faef5774e1b231627b44d7a0c6f"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Real Time]]: Many applications/environments don't need this trait. <i>Many applications don't need graphics. An OS / library / language that doesn't provide suitable abstractions in graphics simply isn't doing its job.</i>",
+            "id": "3e0b5021f7c4f991d7a0d740037e9f1c"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Proof Of Correctness]]: Likely possible for some parts of the system; but the [[General Halting Problem]] is likely to rear its ugly head if you try to prove an entire general-purpose OS correct. Assuming you have a spec with sufficient coverage and detail to prove out.",
+            "id": "e70af67af2a2674ee6a067584e3f5fe4"
+          },
+          {
+            "type": "html",
+            "text": "\nAlso, [[Exo Kernel]] seems to be a particular architecture for OS design, not a \"design principle\". [[Exo Kernel]]s may be a good way to write an OS; however they aren't a fundamental requirement or figure of merit.",
+            "id": "f116c1bc57ce185702e73c6724158e31"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Transparent Persistence]] and [[Object Orientation]] are some other items on the list that some people think would be nice, but which are not fundamental principles or general requirements. ",
+            "id": "a01cf7fa62ac57f10e9e748e633316d4"
+          },
+          {
+            "type": "html",
+            "text": "<i>I'd like you to define a \"fundamental\" principle of OS design as opposed to a \"non-fundamental\" one. The distinction is simply not useful, if it can even be defined.</i>",
+            "id": "c8233917a16992245c5707c3caec2bfa"
+          },
+          {
+            "type": "html",
+            "text": "<i>OO crosscuts all system components and that makes it a general requirement. [[Transparent Persistence]] is a feature since it doesn't crosscut across all system components. However, it's a requirement that every decent OS is obligated to meet.</i>",
+            "id": "40a7b7efd98329a913b09ebe9d36734b"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "8cbaeab5ae2720bdd1901b49bc1d54ca"
+          },
+          {
+            "type": "html",
+            "text": "One of the design principles behind the [[Incompatible Time Sharing System]] is that system calls be atomic. This means that they cannot appear to be interrupted. If they are interrupted, one of two things happens:",
+            "id": "24dfab094d819c4e67deb598d49a06dd"
+          },
+          {
+            "type": "html",
+            "text": " the system call backs out and the program counter is reset to the start of the system call, saving whatever state has been changed, so that when the process resumes, it can pick up where it left off",
+            "id": "2dc45696ab05a77867bff4d1456f519f"
+          },
+          {
+            "type": "html",
+            "text": " the system call completes if this is possible after a few more instructions.",
+            "id": "a3aad9205dee3cfedca3a27726ffb014"
+          },
+          {
+            "type": "html",
+            "text": "\nThis is called PCLSRing (or PC-lusering), and was also used by WAITS",
+            "id": "65281cab8a7dae0d340a88f820154139"
+          },
+          {
+            "type": "html",
+            "text": "(West Coast Alternative to ITS, a variant of TOPS-10).",
+            "id": "853bb5eae72afcb3b417a4fa4ebfb9ab"
+          },
+          {
+            "type": "html",
+            "text": "\nThe approach taken by most modern operating systems is to exit the system call and signal failure. EROS (IIUC) uses a variant of PCLSRing, but with the difference that system calls are constrained to take a limited time to run, and the Fluke kernel, which has multiple entry points to system calls so that they can be resumed. -- [[Donald Fisk]]",
+            "id": "2740d38d8f7b313d2983aa0cf0149af5"
+          },
+          {
+            "type": "html",
+            "text": "\nNowadays, these would no longer be called OS design principles. They would be consequences of resource allocation, security, elegance, and other such principles. System call internals are simply too low level.",
+            "id": "027d91e424f70024e3fd1213fc88c760"
+          },
+          {
+            "type": "html",
+            "text": "''Maybe some consideration should be given to system call internals\nbefore worrying about higher level issues. Avoiding this means responsibility is being passed from the operating system designer to other programmers who use the system calls.''",
+            "id": "4d12cafb13974b6835a0ff5a1412ec88"
+          },
+          {
+            "type": "html",
+            "text": "\nSystem calls (if such a thing even exists) must use PCLSRing. Elegance requires this. But worrying about system calls <i>first</i> is stupid. There are just so many much more important things.",
+            "id": "adba3d8a8fcb4f8a44ba972d0adf56c6"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "8cbaeab5ae2720bdd1901b49bc1d54ca"
+          },
+          {
+            "type": "html",
+            "text": "<b>Documentation</b>",
+            "id": "6312db31742c8a50b1148e4c32d8c5ed"
+          },
+          {
+            "type": "html",
+            "text": "\nWhy has nobody even *mentioned* the documentation? Because it's not a principle of OS design?",
+            "id": "212e915f0772632601a40efb5cb40910"
+          },
+          {
+            "type": "html",
+            "text": "\nYes, that's pretty much it. The design principles as they stand will already work towards many of the tasks for which documentation is used for in systems. The tasks which remain, although important, are not operating system design issues. Windows would be windows, with or without the manual. Its design contains many faults, and none of them could be fixed with a manual. And a major error in the manual, perhaps misrepresenting a security aspect so as to describe a system with a certain hole, doesn't by force of existence bring that hole into being. -- cwillu",
+            "id": "45358ac6de62498da2b7bf61a532a3b0"
+          },
+          {
+            "type": "html",
+            "text": "\nI'm starting to think that self-documentation is an OS principle at least as much as other derivative things like OO or [[Exo Kernel]], and more so than proper resource allocation. <i>Documentation</i> is not an OS principle, but <i>self</i>-documentation? Consider the difference between a Smalltalk system with sources and one without (as happens in [[Visual Works]] when you don't set $Home). Now imagine the difference if a component of [[Blue Abyss]] were written in Smalltalk and if it were written in assembly. I'm starting to wonder what kind of support I'll need for self-documentation in [[Blue Abyss]] ... -- RK",
+            "id": "7a312e4ece93f35fc0119ece588a982d"
+          },
+          {
+            "type": "html",
+            "text": "\nHmm... for some reason I was under the impression that the old list already included something along the lines of progressive disclosure, which combined with uniformity would result in a... I don't know. I want to say intuitive, but I don't believe that exists per say. Perhaps a system which would be understandable with a minimum of hand-holding?",
+            "id": "53381e56ac22e7492404e4e71d6b529d"
+          },
+          {
+            "type": "html",
+            "text": "\nIf the principles don't already include such that the resulting os will be self-documenting for the most part, then self-documentation belongs to os design principles as much as self-documenting code belongs to application design principles.",
+            "id": "97d379debd6e1596db9747b2f96f7d75"
+          },
+          {
+            "type": "html",
+            "text": "\nSo while Documention still doesn't have a place, but that the system should be self-documenting certainly does.",
+            "id": "7a7c33b6cc307c6892937bc772af416e"
+          },
+          {
+            "type": "html",
+            "text": "-- cwillu",
+            "id": "a1b4d36f1e5fb093790b70f138846b63"
+          },
+          {
+            "type": "html",
+            "text": "\nYou got it right the first time. Uniformity and progressive disclosure should result in a largely understandable system. But even Smalltalk has specialized mechanisms for documenting code (eg. class comment method). -- rk",
+            "id": "9763edbceddbc2e9d2e9dc10ca368dd0"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "8cbaeab5ae2720bdd1901b49bc1d54ca"
+          },
+          {
+            "type": "html",
+            "text": "\nSee also [[Killer Operating System]].",
+            "id": "54dca841913acb8790153322916b7eb2"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "8cbaeab5ae2720bdd1901b49bc1d54ca"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Operating System]] [[Category Interaction Design]]",
+            "id": "6abc8a52ae0b8c941547e06ff31f51e7"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?OperatingSystemsDesignPrinciples c2.com]",
+            "id": "0bfb4d128a10f0e1ddd5b2725a2cb13d"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1665179292045
+    }
+  ]
+}

@@ -15,6 +15,16 @@
       "type": "markdown",
       "id": "516bd856a7762caa",
       "text": "> But what about messages like `[[cross]]:`? How are we going to allow access to the object’s distinctions? What would the instance name distinctions hold in this case? What are the names of the distinctions inside an object’s form, from this point of view? ⇒ [[Smalltalk Objects]]"
+    },
+    {
+      "type": "markdown",
+      "id": "4f513004ae4a6595",
+      "text": "* it happen.\n⇒ [[Levels or Types of Meaning]]"
+    },
+    {
+      "type": "markdown",
+      "id": "ae52aa77d2cc012c",
+      "text": "> Here is the essence of SOL. The SOLer accepts responsibility for this reconstruction and development activity. It does not happen to them. They make it happen. "
     }
   ],
   "journal": [
@@ -261,6 +271,67 @@
         "text": "> But what about messages like `[[cross]]:`? How are we going to allow access to the object’s distinctions? What would the instance name distinctions hold in this case? What are the names of the distinctions inside an object’s form, from this point of view? ⇒ [[Smalltalk Objects]]"
       },
       "date": 1660814244136
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4f513004ae4a6595"
+      },
+      "id": "4f513004ae4a6595",
+      "type": "add",
+      "after": "516bd856a7762caa",
+      "date": 1665382430547
+    },
+    {
+      "type": "edit",
+      "id": "4f513004ae4a6595",
+      "item": {
+        "type": "markdown",
+        "id": "4f513004ae4a6595",
+        "text": "* it happen."
+      },
+      "date": 1665382439460
+    },
+    {
+      "type": "edit",
+      "id": "4f513004ae4a6595",
+      "item": {
+        "type": "markdown",
+        "id": "4f513004ae4a6595",
+        "text": "* it happen.\n⇒ [[Levels or Types of Meaning]]"
+      },
+      "date": 1665382452834
+    },
+    {
+      "id": "ae52aa77d2cc012c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "ae52aa77d2cc012c",
+        "text": "But the self-organised learner (SOLer) (and science) needs to do more. They can re-construct and elaborate their meanings thus continually revising, reforming and expanding their understanding and/or performance in the light of their ongoing experience; including, but not restricted to that offered by the teacher or the expert. Here is the essence of SOL. The SOLer accepts responsibility for this reconstruction and development activity. It does not happen to them. They make it happen. "
+      },
+      "after": "4f513004ae4a6595",
+      "date": 1665382467354
+    },
+    {
+      "type": "edit",
+      "id": "ae52aa77d2cc012c",
+      "item": {
+        "type": "paragraph",
+        "id": "ae52aa77d2cc012c",
+        "text": "> Here is the essence of SOL. The SOLer accepts responsibility for this reconstruction and development activity. It does not happen to them. They make it happen. "
+      },
+      "date": 1665382477461
+    },
+    {
+      "type": "edit",
+      "id": "ae52aa77d2cc012c",
+      "item": {
+        "type": "markdown",
+        "id": "ae52aa77d2cc012c",
+        "text": "> Here is the essence of SOL. The SOLer accepts responsibility for this reconstruction and development activity. It does not happen to them. They make it happen. "
+      },
+      "date": 1665382479978
     }
   ]
 }

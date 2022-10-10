@@ -1,0 +1,367 @@
+{
+  "title": "Newton's Cradle",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "9991c95791d11dad",
+      "text": "The Newton's cradle is a device that demonstrates the conservation of momentum and the conservation of energy with swinging spheres. When one sphere at the end is lifted and released, it strikes the stationary spheres, transmitting a force through the stationary spheres that pushes the last sphere upward. The last sphere swings back and strikes the nearly stationary spheres, repeating the effect in the opposite direction. The device is named after 17th-century English scientist Sir Isaac Newton and designed by French scientist Edme Mariotte. It is also known as Newton's pendulum, Newton's balls, Newton's rocker or executive ball clicker (since the device makes a click each time the balls collide, which they do repeatedly in a steady rhythm). [https://en.wikipedia.org/wiki/Newton's_cradle wikipedia]"
+    },
+    {
+      "type": "markdown",
+      "id": "dc830a642b32bd0a",
+      "text": "Trevor / Traxap — 11.07.2022\n@sebcrozet I've been trying to create a *Newton's Cradle* in the microverse using rapier, and I noticed that when the microverse loads in, the balls of the cradle are already in motion and the translation of the connecting \"rope\" is a bit strange. Also it seems as if some of the middle balls keep some of the momentum from the hit and not all the momentum is transferred from the first to the last ball. I was wondering if you had any insight on how to fix these issues (…).\n"
+    },
+    {
+      "type": "markdown",
+      "id": "af02f044df46c0d5",
+      "text": "sebcrozet — 18.07.2022\nSimulating Newton’s Cradle accurately is a somewhat difficult task for game physics engines in general. Restitution models implemented in typical game physics solver are sequential, are based on 2-bodies restitution models, may have some amount of compliance, so you don’t get perfect force propagation. A more simultaneous solver (more computationally expensive) would result in nicer results in the general case.\nIt will help if you leave a small gap between the balls and longer ropes, to remain within the 2-bodies restitution configuration as often as possible. Here is an example with:\n- Ball radius: 0.5\n- Rope length: 5\n- Gap between two consecutive balls: 0.1\n- Initial velocity of the right-most ball: 7 along the X axis.\n- Balls’ restitution: 1.0 \n"
+    },
+    {
+      "type": "paragraph",
+      "id": "d865e9b86ecdf020",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "af5fe4dcc525eac3",
+      "text": "yoshiki — 2022-07-26 via [https://discord.com/channels/694586717247635488/965416739779248158/1001570762097954846 discord]\nI started working on updating our physics system. So 0.9 is a good version to use. The way it is going to work is that you can make multiple Rapier World in one Microverse world. That is good so that you can export and import individual simulation but then a bit of thing is that you need to specify which Rapier World an object belong. Besides this 0.9 makes some API changes so the current plan is to leave 0.7 with the current implementation in the system and we load the new physics simulation framework that lives with it in the mean time."
+    },
+    {
+      "type": "paragraph",
+      "id": "7425f987bae25ad6",
+      "text": "[…] "
+    },
+    {
+      "type": "markdown",
+      "id": "b8f25a2386e493d8",
+      "text": "yoshiki — 27.07.2022\n@sebcrozet I think I understand the difference between force and impluse in the  physics sense (oh year?) but how do I think of those in Rapier (0.9.0) sense? First, addForce is a simple replacement of applyForce? when do I use addForce and when to use applyImpulse?\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "adacec47bc1d6b28",
+      "text": "sebcrozet — 27.07.2022\naddForce is not equivalent to applyForce. Before, applyForce would apply the force once, and that force would be automatically reset to zero after the next simulation step. This implied that applying a permanent force required the user to re-apply that force at each frame.\nWith addForce, the force isn’t automatically reset to zero after the next simulation step. This means that applying a permanent force no longer require the user to re-apply it at each frame. The user calls addForce once to apply the force, that’s it. And it is possible to reset to zero all the forces added to a rigid-body using resetForces.\napplyImpulse causes an instantaneous velocity change. An impulse i is mathematically equivalent to a force f being applied during a finite amount of time dt, with i = f * dt.\nSo, you could say that applyImpulse are for short, instantaneous force application (jumping, nudging, etc.) whereas addForce is for long-term forces (gravity, buyoancy, etc.)\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "a4f9a9d41fff3b17",
+      "text": "yoshiki — 27.07.2022\nok, that is the dimensions of force and impulse.  the \"dt\" in i = f * dt is independent from the timeStep, I presume?\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "d6af81bdd0b83b4a",
+      "text": "sebcrozet — 27.07.2022\nAnother way to choose is that:\n- If you find to annoying to have to call resetForces, then use applyImpulse for an instantaneous effect.\n- If you find it annoying to apply the same impulse during multiple frames, then addForce may be more suitable.\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "d29cc196074ce161",
+      "text": "sebcrozet — 27.07.2022\nYou can see it that way: applying an impulse i to a rigid-body is equivalent to calling addForce(f), world.step() and then immediately resetForces(), with f = i / world.timestep.\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "ac81a45ad6185156",
+      "text": "yoshiki — 27.07.2022\nFor a different topic, I realized that the \"handle\" of rigid body and joints now now floats and not integers. Our old code assumed that they are integer and there was a data structure for them was an Array. I hope that Map should just work as a drop-in replacement...\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "46a36134cc25e886",
+      "text": "sebcrozet — 28.07.2022\nThe handles are now two integers packed into a number. Since JS doesn’t have small integer types, it appears as a float interpretation of these packed bits.\nYeah, using a Map (or any other object you see fit to keep track of the handles really. Rapier itself doesn’t have to access your handle map) should work. \n"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Newton's Cradle",
+        "story": []
+      },
+      "date": 1665218573639
+    },
+    {
+      "id": "dc830a642b32bd0a",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "dc830a642b32bd0a",
+        "text": "Trevor / Traxap — 11.07.2022\n@sebcrozet I've been trying to create a [[Newton's Cradle]] in the microverse using rapier, and I noticed that when the microverse loads in, the balls of the cradle are already in motion and the translation of the connecting \"rope\" is a bit strange. Also it seems as if some of the middle balls keep some of the momentum from the hit and not all the momentum is transferred from the first to the last ball. I was wondering if you had any insight on how to fix these issues (posting a video in a minute).\n"
+      },
+      "date": 1665218578453
+    },
+    {
+      "type": "edit",
+      "id": "dc830a642b32bd0a",
+      "item": {
+        "type": "markdown",
+        "id": "dc830a642b32bd0a",
+        "text": "Trevor / Traxap — 11.07.2022\n@sebcrozet I've been trying to create a *Newton's Cradle* in the microverse using rapier, and I noticed that when the microverse loads in, the balls of the cradle are already in motion and the translation of the connecting \"rope\" is a bit strange. Also it seems as if some of the middle balls keep some of the momentum from the hit and not all the momentum is transferred from the first to the last ball. I was wondering if you had any insight on how to fix these issues (posting a video in a minute).\n"
+      },
+      "date": 1665218604685
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9991c95791d11dad"
+      },
+      "id": "9991c95791d11dad",
+      "type": "add",
+      "after": "dc830a642b32bd0a",
+      "date": 1665218634912
+    },
+    {
+      "id": "9991c95791d11dad",
+      "type": "move",
+      "order": [
+        "9991c95791d11dad",
+        "dc830a642b32bd0a"
+      ],
+      "date": 1665218636484
+    },
+    {
+      "type": "edit",
+      "id": "9991c95791d11dad",
+      "item": {
+        "type": "paragraph",
+        "id": "9991c95791d11dad",
+        "text": "The Newton's cradle is a device that demonstrates the conservation of momentum and the conservation of energy with swinging spheres. When one sphere at the end is lifted and released, it strikes the stationary spheres, transmitting a force through the stationary spheres that pushes the last sphere upward. The last sphere swings back and strikes the nearly stationary spheres, repeating the effect in the opposite direction. The device is named after 17th-century English scientist Sir Isaac Newton and designed by French scientist Edme Mariotte. It is also known as Newton's pendulum, Newton's balls, Newton's rocker or executive ball clicker (since the device makes a click each time the balls collide, which they do repeatedly in a steady rhythm).[1][2]"
+      },
+      "date": 1665218639840
+    },
+    {
+      "type": "edit",
+      "id": "9991c95791d11dad",
+      "item": {
+        "type": "paragraph",
+        "id": "9991c95791d11dad",
+        "text": "The Newton's cradle is a device that demonstrates the conservation of momentum and the conservation of energy with swinging spheres. When one sphere at the end is lifted and released, it strikes the stationary spheres, transmitting a force through the stationary spheres that pushes the last sphere upward. The last sphere swings back and strikes the nearly stationary spheres, repeating the effect in the opposite direction. The device is named after 17th-century English scientist Sir Isaac Newton and designed by French scientist Edme Mariotte. It is also known as Newton's pendulum, Newton's balls, Newton's rocker or executive ball clicker (since the device makes a click each time the balls collide, which they do repeatedly in a steady rhythm). [https://en.wikipedia.org/wiki/Newton's_cradle wikipedia]]"
+      },
+      "date": 1665218664736
+    },
+    {
+      "type": "edit",
+      "id": "9991c95791d11dad",
+      "item": {
+        "type": "paragraph",
+        "id": "9991c95791d11dad",
+        "text": "The Newton's cradle is a device that demonstrates the conservation of momentum and the conservation of energy with swinging spheres. When one sphere at the end is lifted and released, it strikes the stationary spheres, transmitting a force through the stationary spheres that pushes the last sphere upward. The last sphere swings back and strikes the nearly stationary spheres, repeating the effect in the opposite direction. The device is named after 17th-century English scientist Sir Isaac Newton and designed by French scientist Edme Mariotte. It is also known as Newton's pendulum, Newton's balls, Newton's rocker or executive ball clicker (since the device makes a click each time the balls collide, which they do repeatedly in a steady rhythm). [https://en.wikipedia.org/wiki/Newton's_cradle wikipedia]"
+      },
+      "date": 1665218670739
+    },
+    {
+      "type": "edit",
+      "id": "dc830a642b32bd0a",
+      "item": {
+        "type": "markdown",
+        "id": "dc830a642b32bd0a",
+        "text": "Trevor / Traxap — 11.07.2022\n@sebcrozet I've been trying to create a *Newton's Cradle* in the microverse using rapier, and I noticed that when the microverse loads in, the balls of the cradle are already in motion and the translation of the connecting \"rope\" is a bit strange. Also it seems as if some of the middle balls keep some of the momentum from the hit and not all the momentum is transferred from the first to the last ball. I was wondering if you had any insight on how to fix these issues (…).\n"
+      },
+      "date": 1665218747282
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "af02f044df46c0d5"
+      },
+      "id": "af02f044df46c0d5",
+      "type": "add",
+      "after": "dc830a642b32bd0a",
+      "date": 1665218903094
+    },
+    {
+      "type": "edit",
+      "id": "af02f044df46c0d5",
+      "item": {
+        "type": "markdown",
+        "id": "af02f044df46c0d5",
+        "text": "sebcrozet — 18.07.2022\nSimulating Newton’s Cradle accurately is a somewhat difficult task for game physics engines in general. Restitution models implemented in typical game physics solver are sequential, are based on 2-bodies restitution models, may have some amount of compliance, so you don’t get perfect force propagation. A more simultaneous solver (more computationally expensive) would result in nicer results in the general case.\nIt will help if you leave a small gap between the balls and longer ropes, to remain within the 2-bodies restitution configuration as often as possible. Here is an example with:\n- Ball radius: 0.5\n- Rope length: 5\n- Gap between two consecutive balls: 0.1\n- Initial velocity of the right-most ball: 7 along the X axis.\n- Balls’ restitution: 1.0 \n"
+      },
+      "date": 1665218906298
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d865e9b86ecdf020"
+      },
+      "id": "d865e9b86ecdf020",
+      "type": "add",
+      "after": "af02f044df46c0d5",
+      "date": 1665218970141
+    },
+    {
+      "type": "edit",
+      "id": "d865e9b86ecdf020",
+      "item": {
+        "type": "paragraph",
+        "id": "d865e9b86ecdf020",
+        "text": "[…]"
+      },
+      "date": 1665218974732
+    },
+    {
+      "type": "add",
+      "id": "af5fe4dcc525eac3",
+      "item": {
+        "type": "paragraph",
+        "id": "af5fe4dcc525eac3",
+        "text": "yoshiki — 26.07.2022\nI started working on updating our physics system. So 0.9 is a good version to use. The way it is going to work is that you can make multiple Rapier World in one Microverse world. That is good so that you can export and import individual simulation but then a bit of thing is that you need to specify which Rapier World an object belong. Besides this 0.9 makes some API changes so the current plan is to leave 0.7 with the current implementation in the system and we load the new physics simulation framework that lives with it in the mean time."
+      },
+      "after": "d865e9b86ecdf020",
+      "date": 1665218975764
+    },
+    {
+      "type": "edit",
+      "id": "af5fe4dcc525eac3",
+      "item": {
+        "type": "paragraph",
+        "id": "af5fe4dcc525eac3",
+        "text": "yoshiki — 2022-07-26 via [https://discord.com/channels/694586717247635488/965416739779248158/1001570762097954846 discord]\nI started working on updating our physics system. So 0.9 is a good version to use. The way it is going to work is that you can make multiple Rapier World in one Microverse world. That is good so that you can export and import individual simulation but then a bit of thing is that you need to specify which Rapier World an object belong. Besides this 0.9 makes some API changes so the current plan is to leave 0.7 with the current implementation in the system and we load the new physics simulation framework that lives with it in the mean time."
+      },
+      "date": 1665219013079
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7425f987bae25ad6"
+      },
+      "id": "7425f987bae25ad6",
+      "type": "add",
+      "after": "af5fe4dcc525eac3",
+      "date": 1665219190150
+    },
+    {
+      "type": "edit",
+      "id": "7425f987bae25ad6",
+      "item": {
+        "type": "paragraph",
+        "id": "7425f987bae25ad6",
+        "text": "[…] "
+      },
+      "date": 1665219194548
+    },
+    {
+      "type": "add",
+      "id": "b8f25a2386e493d8",
+      "item": {
+        "type": "paragraph",
+        "id": "b8f25a2386e493d8",
+        "text": "yoshiki — 27.07.2022\n@sebcrozet I think I understand the difference between force and impluse in the  physics sense (oh year?) but how do I think of those in Rapier (0.9.0) sense? First, addForce is a simple replacement of applyForce? when do I use addForce and when to use applyImpulse?\nsebcrozet — 27.07.2022\naddForce is not equivalent to applyForce. Before, applyForce would apply the force once, and that force would be automatically reset to zero after the next simulation step. This implied that applying a permanent force required the user to re-apply that force at each frame.\nWith addForce, the force isn’t automatically reset to zero after the next simulation step. This means that applying a permanent force no longer require the user to re-apply it at each frame. The user calls addForce once to apply the force, that’s it. And it is possible to reset to zero all the forces added to a rigid-body using resetForces.\napplyImpulse causes an instantaneous velocity change. An impulse i is mathematically equivalent to a force f being applied during a finite amount of time dt, with i = f * dt.\nSo, you could say that applyImpulse are for short, instantaneous force application (jumping, nudging, etc.) whereas addForce is for long-term forces (gravity, buyoancy, etc.)\nyoshiki — 27.07.2022\nok, that is the dimensions of force and impulse.  the \"dt\" in i = f * dt is independent from the timeStep, I presume?\nsebcrozet — 27.07.2022\nAnother way to choose is that:\n- If you find to annoying to have to call resetForces, then use applyImpulse for an instantaneous effect.\n- If you find it annoying to apply the same impulse during multiple frames, then addForce may be more suitable.\nsebcrozet — 27.07.2022\nYou can see it that way: applying an impulse i to a rigid-body is equivalent to calling addForce(f), world.step() and then immediately resetForces(), with f = i / world.timestep.\nyoshiki — 27.07.2022\nFor a different topic, I realized that the \"handle\" of rigid body and joints now now floats and not integers. Our old code assumed that they are integer and there was a data structure for them was an Array. I hope that Map should just work as a drop-in replacement...\nsebcrozet — 28.07.2022\nThe handles are now two integers packed into a number. Since JS doesn’t have small integer types, it appears as a float interpretation of these packed bits.\nYeah, using a Map (or any other object you see fit to keep track of the handles really. Rapier itself doesn’t have to access your handle map) should work. \n"
+      },
+      "after": "7425f987bae25ad6",
+      "date": 1665219195283
+    },
+    {
+      "type": "edit",
+      "id": "b8f25a2386e493d8",
+      "item": {
+        "type": "markdown",
+        "id": "b8f25a2386e493d8",
+        "text": "yoshiki — 27.07.2022\n@sebcrozet I think I understand the difference between force and impluse in the  physics sense (oh year?) but how do I think of those in Rapier (0.9.0) sense? First, addForce is a simple replacement of applyForce? when do I use addForce and when to use applyImpulse?\nsebcrozet — 27.07.2022\naddForce is not equivalent to applyForce. Before, applyForce would apply the force once, and that force would be automatically reset to zero after the next simulation step. This implied that applying a permanent force required the user to re-apply that force at each frame.\nWith addForce, the force isn’t automatically reset to zero after the next simulation step. This means that applying a permanent force no longer require the user to re-apply it at each frame. The user calls addForce once to apply the force, that’s it. And it is possible to reset to zero all the forces added to a rigid-body using resetForces.\napplyImpulse causes an instantaneous velocity change. An impulse i is mathematically equivalent to a force f being applied during a finite amount of time dt, with i = f * dt.\nSo, you could say that applyImpulse are for short, instantaneous force application (jumping, nudging, etc.) whereas addForce is for long-term forces (gravity, buyoancy, etc.)\nyoshiki — 27.07.2022\nok, that is the dimensions of force and impulse.  the \"dt\" in i = f * dt is independent from the timeStep, I presume?\nsebcrozet — 27.07.2022\nAnother way to choose is that:\n- If you find to annoying to have to call resetForces, then use applyImpulse for an instantaneous effect.\n- If you find it annoying to apply the same impulse during multiple frames, then addForce may be more suitable.\nsebcrozet — 27.07.2022\nYou can see it that way: applying an impulse i to a rigid-body is equivalent to calling addForce(f), world.step() and then immediately resetForces(), with f = i / world.timestep.\nyoshiki — 27.07.2022\nFor a different topic, I realized that the \"handle\" of rigid body and joints now now floats and not integers. Our old code assumed that they are integer and there was a data structure for them was an Array. I hope that Map should just work as a drop-in replacement...\nsebcrozet — 28.07.2022\nThe handles are now two integers packed into a number. Since JS doesn’t have small integer types, it appears as a float interpretation of these packed bits.\nYeah, using a Map (or any other object you see fit to keep track of the handles really. Rapier itself doesn’t have to access your handle map) should work. \n"
+      },
+      "date": 1665219202607
+    },
+    {
+      "type": "edit",
+      "id": "b8f25a2386e493d8",
+      "item": {
+        "type": "markdown",
+        "id": "b8f25a2386e493d8",
+        "text": "yoshiki — 27.07.2022\n@sebcrozet I think I understand the difference between force and impluse in the  physics sense (oh year?) but how do I think of those in Rapier (0.9.0) sense? First, addForce is a simple replacement of applyForce? when do I use addForce and when to use applyImpulse?\n\n"
+      },
+      "date": 1665219218436
+    },
+    {
+      "type": "add",
+      "id": "adacec47bc1d6b28",
+      "item": {
+        "type": "markdown",
+        "id": "adacec47bc1d6b28",
+        "text": "sebcrozet — 27.07.2022\naddForce is not equivalent to applyForce. Before, applyForce would apply the force once, and that force would be automatically reset to zero after the next simulation step. This implied that applying a permanent force required the user to re-apply that force at each frame.\nWith addForce, the force isn’t automatically reset to zero after the next simulation step. This means that applying a permanent force no longer require the user to re-apply it at each frame. The user calls addForce once to apply the force, that’s it. And it is possible to reset to zero all the forces added to a rigid-body using resetForces.\napplyImpulse causes an instantaneous velocity change. An impulse i is mathematically equivalent to a force f being applied during a finite amount of time dt, with i = f * dt.\nSo, you could say that applyImpulse are for short, instantaneous force application (jumping, nudging, etc.) whereas addForce is for long-term forces (gravity, buyoancy, etc.)\nyoshiki — 27.07.2022\nok, that is the dimensions of force and impulse.  the \"dt\" in i = f * dt is independent from the timeStep, I presume?\n\n"
+      },
+      "after": "b8f25a2386e493d8",
+      "date": 1665219224407
+    },
+    {
+      "type": "add",
+      "id": "d6af81bdd0b83b4a",
+      "item": {
+        "type": "markdown",
+        "id": "d6af81bdd0b83b4a",
+        "text": "sebcrozet — 27.07.2022\nAnother way to choose is that:\n- If you find to annoying to have to call resetForces, then use applyImpulse for an instantaneous effect.\n- If you find it annoying to apply the same impulse during multiple frames, then addForce may be more suitable.\nsebcrozet — 27.07.2022\nYou can see it that way: applying an impulse i to a rigid-body is equivalent to calling addForce(f), world.step() and then immediately resetForces(), with f = i / world.timestep.\nyoshiki — 27.07.2022\nFor a different topic, I realized that the \"handle\" of rigid body and joints now now floats and not integers. Our old code assumed that they are integer and there was a data structure for them was an Array. I hope that Map should just work as a drop-in replacement...\nsebcrozet — 28.07.2022\nThe handles are now two integers packed into a number. Since JS doesn’t have small integer types, it appears as a float interpretation of these packed bits.\nYeah, using a Map (or any other object you see fit to keep track of the handles really. Rapier itself doesn’t have to access your handle map) should work. \n"
+      },
+      "after": "adacec47bc1d6b28",
+      "date": 1665219245544
+    },
+    {
+      "type": "edit",
+      "id": "d6af81bdd0b83b4a",
+      "item": {
+        "type": "markdown",
+        "id": "d6af81bdd0b83b4a",
+        "text": "sebcrozet — 27.07.2022\nAnother way to choose is that:\n- If you find to annoying to have to call resetForces, then use applyImpulse for an instantaneous effect.\n- If you find it annoying to apply the same impulse during multiple frames, then addForce may be more suitable.\n\n"
+      },
+      "date": 1665219255453
+    },
+    {
+      "type": "add",
+      "id": "d29cc196074ce161",
+      "item": {
+        "type": "markdown",
+        "id": "d29cc196074ce161",
+        "text": "sebcrozet — 27.07.2022\nYou can see it that way: applying an impulse i to a rigid-body is equivalent to calling addForce(f), world.step() and then immediately resetForces(), with f = i / world.timestep.\n\n"
+      },
+      "after": "d6af81bdd0b83b4a",
+      "date": 1665219258607
+    },
+    {
+      "type": "add",
+      "id": "ac81a45ad6185156",
+      "item": {
+        "type": "markdown",
+        "id": "ac81a45ad6185156",
+        "text": "yoshiki — 27.07.2022\nFor a different topic, I realized that the \"handle\" of rigid body and joints now now floats and not integers. Our old code assumed that they are integer and there was a data structure for them was an Array. I hope that Map should just work as a drop-in replacement...\nsebcrozet — 28.07.2022\nThe handles are now two integers packed into a number. Since JS doesn’t have small integer types, it appears as a float interpretation of these packed bits.\nYeah, using a Map (or any other object you see fit to keep track of the handles really. Rapier itself doesn’t have to access your handle map) should work. \n"
+      },
+      "after": "d29cc196074ce161",
+      "date": 1665219263284
+    },
+    {
+      "type": "edit",
+      "id": "adacec47bc1d6b28",
+      "item": {
+        "type": "markdown",
+        "id": "adacec47bc1d6b28",
+        "text": "sebcrozet — 27.07.2022\naddForce is not equivalent to applyForce. Before, applyForce would apply the force once, and that force would be automatically reset to zero after the next simulation step. This implied that applying a permanent force required the user to re-apply that force at each frame.\nWith addForce, the force isn’t automatically reset to zero after the next simulation step. This means that applying a permanent force no longer require the user to re-apply it at each frame. The user calls addForce once to apply the force, that’s it. And it is possible to reset to zero all the forces added to a rigid-body using resetForces.\napplyImpulse causes an instantaneous velocity change. An impulse i is mathematically equivalent to a force f being applied during a finite amount of time dt, with i = f * dt.\nSo, you could say that applyImpulse are for short, instantaneous force application (jumping, nudging, etc.) whereas addForce is for long-term forces (gravity, buyoancy, etc.)\n\n"
+      },
+      "date": 1665219268214
+    },
+    {
+      "type": "add",
+      "id": "a4f9a9d41fff3b17",
+      "item": {
+        "type": "markdown",
+        "id": "a4f9a9d41fff3b17",
+        "text": "yoshiki — 27.07.2022\nok, that is the dimensions of force and impulse.  the \"dt\" in i = f * dt is independent from the timeStep, I presume?\n\n"
+      },
+      "after": "adacec47bc1d6b28",
+      "date": 1665219268711
+    },
+    {
+      "type": "edit",
+      "id": "ac81a45ad6185156",
+      "item": {
+        "type": "markdown",
+        "id": "ac81a45ad6185156",
+        "text": "yoshiki — 27.07.2022\nFor a different topic, I realized that the \"handle\" of rigid body and joints now now floats and not integers. Our old code assumed that they are integer and there was a data structure for them was an Array. I hope that Map should just work as a drop-in replacement...\n\n"
+      },
+      "date": 1665219349399
+    },
+    {
+      "type": "add",
+      "id": "46a36134cc25e886",
+      "item": {
+        "type": "markdown",
+        "id": "46a36134cc25e886",
+        "text": "sebcrozet — 28.07.2022\nThe handles are now two integers packed into a number. Since JS doesn’t have small integer types, it appears as a float interpretation of these packed bits.\nYeah, using a Map (or any other object you see fit to keep track of the handles really. Rapier itself doesn’t have to access your handle map) should work. \n"
+      },
+      "after": "ac81a45ad6185156",
+      "date": 1665219350253
+    }
+  ]
+}
