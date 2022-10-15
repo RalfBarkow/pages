@@ -1,0 +1,590 @@
+{
+  "title": "Information Flow",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "1959332c80711482",
+      "text": "We observe some surprise in a conversation between Ward and Yoshiki regarding the direction of the information flow in our [[Hypertext Super Collaborator]]."
+    },
+    {
+      "type": "markdown",
+      "id": "8e4e1bb203cfc122",
+      "text": "Ward — 2022-10-10 [https://discord.com/channels/694586717247635488/966071402526543924/1028840627439411231 discord]\nI have an app that is built on Croquet OS that is coming along nicely. I wonder, is it possible to field an occasional REST request for JSON payloads of my own design? I'm thinking that I would launch my Session, Model and View inside some server-side V8 javascript like Deno or Deno Deploy. I might be able to come up with some virtual DOM if that is strictly necessary. Will this work? What should I watch out for when deploying this? \n"
+    },
+    {
+      "type": "markdown",
+      "id": "a380244d4b662cc3",
+      "text": "yoshiki — 10.10.2022\nSo the idea is to have a server, which doubles as a headless client? that would accept REST requests convert the requests into Croquet view to model event (and compute the state)?\n"
+    },
+    {
+      "type": "markdown",
+      "id": "372cb3f5b9580711",
+      "text": "Ward — 11.10.2022\nYes, though I wouldn't expect the REST clients to get any more than an instantaneous view at the time that the request was filled.  My app offers to download the same information now. This would just short-circuit the download-to-upload that we do now.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "d06c15bccbafa0e6",
+      "text": "Ward — 11.10.2022\nSome history: for a few months we have been developing property graph applications in federated wiki. We thought we had gotten far enough with this work that we wanted to try more instantaneous collaboration that offered by wiki. Croquet has been rewarding having supercharged our development efforts. However, all of us still write and share in federated wiki so having Croquet join the federation makes sense.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "ef3fc82beb3f418f",
+      "text": "To participate in the wiki federation a server is expected deliver pages in json when asked. As a bonus it might offer a list of available pages, also in json. http://admin.asia.wiki.org/federating-foreign-servers.html\n\n"
+    },
+    {
+      "type": "reference",
+      "id": "d75b92f16890614d",
+      "site": "admin.asia.wiki.org",
+      "slug": "federating-foreign-servers",
+      "title": "Federating Foreign Servers",
+      "text": "We consider what requests a server must handle in order to participate in wiki's federation. Such a server provides pages without taking responsibility for the client-side javascript conventionally used by federated wiki."
+    },
+    {
+      "type": "markdown",
+      "id": "30ba4467346e9731",
+      "text": "yoshiki — 11.10.2022\nSo the main direction of the *information flow* is actually getting data out of a Croquet session when requested, rather than injecting information into a running Croquet session? For the former, yes, it'd be a new peer joining to the specified session upon request, and then replies the HTTP request that triggered it. The other direction is also possible. The main thing is that while the model has to be identical among all participating peers to a session, the view can be different. This special view does not have to have DOM stuff.... I believe that we have done an example of a session with different views like this with node.js version of client... but I don't have a reference that is readily available.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "aba699307407cf21",
+      "text": "Ward — 11.10.2022\nI have a repo with a version of the count tutorial that uses a version of croquet.js with an export added.\nhttps://github.com/WardCunningham/assets/tree/master/pages/super-collaborator/croquet-in-modules\n"
+    },
+    {
+      "type": "markdown",
+      "id": "8726aece9350afbe",
+      "text": "Following this model, I've started on a command-line version of count called (aspirationally) wikicount.js.\nThe import fails looking for hostname. But Deno has a command line option to provide a location.\nThe import then fails on reference to document. I believe this happens before I have the chance to stub out document.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "92bd0cd884385051",
+      "text": "I'm tempted to approach the Deno authors who have been very helpful in the past. I want to first make sure I'm not missing something that you already know. Screen shot of failure follows.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "813f2f72a56a8f80",
+      "text": "yoshiki\n — \ngestern um 22:11 Uhr\nSorry for a slow response. The default package has references to DOM stuff so it is not a good starting point. I have not tried this by myself but we have the Croquet library packaged for node js use: https://discord.com/channels/694586717247635488/966071402526543924/1012816033800798238\nso that might be a good starting point.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "753437f88e689c8e",
+      "text": "Ward\n — \nheute um 03:08 Uhr\nHa. I remember reading that discussion but didn't understand the problem being solved back then. This is the perfect lead for me now. Thanks."
+    },
+    {
+      "type": "markdown",
+      "id": "96525b27968f2103",
+      "text": "---"
+    },
+    {
+      "type": "paragraph",
+      "id": "29bb290f9d6e206b",
+      "text": "Here's a complete example for a [[Croquet]] app on Node. [https://discord.com/channels/694586717247635488/966071402526543924/1012816033800798238 discord]"
+    },
+    {
+      "type": "paragraph",
+      "id": "317e5f66140e962c",
+      "text": "package.json:"
+    },
+    {
+      "type": "code",
+      "id": "09edbbed204eea96",
+      "text": "{\n  \"name\": \"croquet-node\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Node test for Croquet\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\n  },\n  \"author\": \"Croquet Corp\",\n  \"license\": \"ISC\",\n  \"dependencies\": {\n    \"@croquet/croquet\": \"^1.1.0-12\"\n  }\n}\n\n\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "29899e059e1ee5cc",
+      "text": "index.js:\n\n\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "3cbe314b2ec4722c",
+      "text": "Just paste your API key and it should work \n"
+    },
+    {
+      "type": "code",
+      "id": "af506e16f7d3a630",
+      "text": "const Croquet = require(\"@croquet/croquet\");\n\nclass MyModel extends Croquet.Model {\n\n    init() {\n        this.counter = 0;\n        this.future(1000).tick();\n    }\n\n    tick() {\n        this.counter++;\n        this.publish(\"counter\", \"update\");\n        this.future(1000).tick();\n    }\n\n}\nMyModel.register(\"MyModel\");\n\nconst name = process.argv[2] || \"noname\";\nconst password = process.argv[3] || \"nopassword\";\n\nCroquet.Session.join({\n    apiKey: \"your key here\",\n    appId: \"io.croquet.hello\",\n    name,\n    password,\n    model: MyModel,\n    step: \"manual\",\n}).then(({ step, model, view }) => {\n    setInterval(step, 100);\n    view.subscribe(\"counter\", \"update\", () => console.log(model.counter));\n});"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Information Flow",
+        "story": []
+      },
+      "date": 1665697636953
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1959332c80711482"
+      },
+      "id": "1959332c80711482",
+      "type": "add",
+      "date": 1665697638890
+    },
+    {
+      "type": "edit",
+      "id": "1959332c80711482",
+      "item": {
+        "type": "paragraph",
+        "id": "1959332c80711482",
+        "text": "We observe some surprise in a conversation between Ward and Y"
+      },
+      "date": 1665697661886
+    },
+    {
+      "type": "edit",
+      "id": "1959332c80711482",
+      "item": {
+        "type": "paragraph",
+        "id": "1959332c80711482",
+        "text": "We observe some surprise in a conversation between Ward and Yoshiki regarding the direction of the information flow in our [[Hypertext Super Collaborator]]."
+      },
+      "date": 1665697712065
+    },
+    {
+      "id": "8e4e1bb203cfc122",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "8e4e1bb203cfc122",
+        "text": "Ward — 2022-10-10 [https://discord.com/channels/694586717247635488/966071402526543924/1028840627439411231 discord]\nI have an app that is built on Croquet OS that is coming along nicely. I wonder, is it possible to field an occasional REST request for JSON payloads of my own design? I'm thinking that I would launch my Session, Model and View inside some server-side V8 javascript like Deno or Deno Deploy. I might be able to come up with some virtual DOM if that is strictly necessary. Will this work? What should I watch out for when deploying this? \n"
+      },
+      "after": "1959332c80711482",
+      "date": 1665697754327
+    },
+    {
+      "id": "a380244d4b662cc3",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "a380244d4b662cc3",
+        "text": "yoshiki — 10.10.2022\nSo the idea is to have a server, which doubles as a headless client? that would accept REST requests convert the requests into Croquet view to model event (and compute the state)?\n"
+      },
+      "after": "8e4e1bb203cfc122",
+      "date": 1665697769881
+    },
+    {
+      "id": "372cb3f5b9580711",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "372cb3f5b9580711",
+        "text": "Ward — 11.10.2022\nYes, though I wouldn't expect the REST clients to get any more than an instantaneous view at the time that the request was filled.  My app offers to download the same information now. This would just short-circuit the download-to-upload that we do now.\n"
+      },
+      "after": "a380244d4b662cc3",
+      "date": 1665697773660
+    },
+    {
+      "id": "d06c15bccbafa0e6",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "d06c15bccbafa0e6",
+        "text": "Ward — 11.10.2022\nSome history: for a few months we have been developing property graph applications in federated wiki. We thought we had gotten far enough with this work that we wanted to try more instantaneous collaboration that offered by wiki. Croquet has been rewarding having supercharged our development efforts. However, all of us still write and share in federated wiki so having Croquet join the federation makes sense.\n"
+      },
+      "after": "372cb3f5b9580711",
+      "date": 1665697780179
+    },
+    {
+      "id": "30ba4467346e9731",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "30ba4467346e9731",
+        "text": "yoshiki — 11.10.2022\nSo the main direction of the [[Information Flow]] is actually getting data out of a Croquet session when requested, rather than injecting information into a running Croquet session? For the former, yes, it'd be a new peer joining to the specified session upon request, and then replies the HTTP request that triggered it. The other direction is also possible. The main thing is that while the model has to be identical among all participating peers to a session, the view can be different. This special view does not have to have DOM stuff.... I believe that we have done an example of a session with different views like this with node.js version of client... but I don't have a reference that is readily available.\n"
+      },
+      "after": "d06c15bccbafa0e6",
+      "date": 1665697791922
+    },
+    {
+      "type": "edit",
+      "id": "30ba4467346e9731",
+      "item": {
+        "type": "markdown",
+        "id": "30ba4467346e9731",
+        "text": "yoshiki — 11.10.2022\nSo the main direction of the *information flow* is actually getting data out of a Croquet session when requested, rather than injecting information into a running Croquet session? For the former, yes, it'd be a new peer joining to the specified session upon request, and then replies the HTTP request that triggered it. The other direction is also possible. The main thing is that while the model has to be identical among all participating peers to a session, the view can be different. This special view does not have to have DOM stuff.... I believe that we have done an example of a session with different views like this with node.js version of client... but I don't have a reference that is readily available.\n"
+      },
+      "date": 1665697805898
+    },
+    {
+      "id": "ef3fc82beb3f418f",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "ef3fc82beb3f418f",
+        "text": "To participate in the wiki federation a server is expected deliver pages in json when asked. As a bonus it might offer a list of available pages, also in json. http://admin.asia.wiki.org/federating-foreign-servers.html\n\n"
+      },
+      "after": "d06c15bccbafa0e6",
+      "date": 1665697907469
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d75b92f16890614d"
+      },
+      "id": "d75b92f16890614d",
+      "type": "add",
+      "after": "30ba4467346e9731",
+      "date": 1665697946207
+    },
+    {
+      "id": "d75b92f16890614d",
+      "type": "move",
+      "order": [
+        "1959332c80711482",
+        "8e4e1bb203cfc122",
+        "a380244d4b662cc3",
+        "372cb3f5b9580711",
+        "d06c15bccbafa0e6",
+        "ef3fc82beb3f418f",
+        "d75b92f16890614d",
+        "30ba4467346e9731"
+      ],
+      "date": 1665697950695
+    },
+    {
+      "type": "edit",
+      "id": "d75b92f16890614d",
+      "item": {
+        "type": "reference",
+        "id": "d75b92f16890614d",
+        "site": "admin.asia.wiki.org",
+        "slug": "federating-foreign-servers",
+        "title": "Federating Foreign Servers",
+        "text": "We consider what requests a server must handle in order to participate in wiki's federation. Such a server provides pages without taking responsibility for the client-side javascript conventionally used by federated wiki."
+      },
+      "date": 1665697955466
+    },
+    {
+      "id": "aba699307407cf21",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "aba699307407cf21",
+        "text": "Ward — 11.10.2022\nNow reporting back, as promised.\nI have a repo with a version of the count tutorial that uses a version of croquet.js with an export added.\nhttps://github.com/WardCunningham/assets/tree/master/pages/super-collaborator/croquet-in-modules\nFollowing this model, I've started on a command-line version of count called (aspirationally) wikicount.js.\nThe import fails looking for hostname. But Deno has a command line option to provide a location.\nThe import then fails on reference to document. I believe this happens before I have the chance to stub out document.\nI'm tempted to approach the Deno authors who have been very helpful in the past. I want to first make sure I'm not missing something that you already know. Screen shot of failure follows.\n"
+      },
+      "after": "30ba4467346e9731",
+      "date": 1665698035224
+    },
+    {
+      "type": "edit",
+      "id": "aba699307407cf21",
+      "item": {
+        "type": "markdown",
+        "id": "aba699307407cf21",
+        "text": "Ward — 11.10.2022\n\nI have a repo with a version of the count tutorial that uses a version of croquet.js with an export added.\nhttps://github.com/WardCunningham/assets/tree/master/pages/super-collaborator/croquet-in-modules\nFollowing this model, I've started on a command-line version of count called (aspirationally) wikicount.js.\nThe import fails looking for hostname. But Deno has a command line option to provide a location.\nThe import then fails on reference to document. I believe this happens before I have the chance to stub out document.\nI'm tempted to approach the Deno authors who have been very helpful in the past. I want to first make sure I'm not missing something that you already know. Screen shot of failure follows.\n"
+      },
+      "date": 1665698043023
+    },
+    {
+      "type": "edit",
+      "id": "aba699307407cf21",
+      "item": {
+        "type": "markdown",
+        "id": "aba699307407cf21",
+        "text": "Ward — 11.10.2022\nI have a repo with a version of the count tutorial that uses a version of croquet.js with an export added.\nhttps://github.com/WardCunningham/assets/tree/master/pages/super-collaborator/croquet-in-modules\nFollowing this model, I've started on a command-line version of count called (aspirationally) wikicount.js.\nThe import fails looking for hostname. But Deno has a command line option to provide a location.\nThe import then fails on reference to document. I believe this happens before I have the chance to stub out document.\nI'm tempted to approach the Deno authors who have been very helpful in the past. I want to first make sure I'm not missing something that you already know. Screen shot of failure follows.\n"
+      },
+      "date": 1665698048115
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "813f2f72a56a8f80"
+      },
+      "id": "813f2f72a56a8f80",
+      "type": "add",
+      "after": "aba699307407cf21",
+      "date": 1665698123467
+    },
+    {
+      "type": "edit",
+      "id": "813f2f72a56a8f80",
+      "item": {
+        "type": "markdown",
+        "id": "813f2f72a56a8f80",
+        "text": "yoshiki\n — \ngestern um 22:11 Uhr\nSorry for a slow response. The default package has references to DOM stuff so it is not a good starting point. I have not tried this by myself but we have the Croquet library packaged for node js use: https://discord.com/channels/694586717247635488/966071402526543924/1012816033800798238\nso that might be a good starting point.\nWard\n — \nheute um 03:08 Uhr\nHa. I remember reading that discussion but didn't understand the problem being solved back then. This is the perfect lead for me now. Thanks."
+      },
+      "date": 1665698128936
+    },
+    {
+      "id": "29bb290f9d6e206b",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "29bb290f9d6e206b",
+        "text": "Here's a complete example for a [[Croquet]] app on Node. [https://discord.com/channels/694586717247635488/966071402526543924/1012816033800798238 discord]"
+      },
+      "after": "813f2f72a56a8f80",
+      "date": 1665698151769
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "96525b27968f2103"
+      },
+      "id": "96525b27968f2103",
+      "type": "add",
+      "after": "29bb290f9d6e206b",
+      "date": 1665698178583
+    },
+    {
+      "id": "96525b27968f2103",
+      "type": "move",
+      "order": [
+        "1959332c80711482",
+        "8e4e1bb203cfc122",
+        "a380244d4b662cc3",
+        "372cb3f5b9580711",
+        "d06c15bccbafa0e6",
+        "ef3fc82beb3f418f",
+        "d75b92f16890614d",
+        "30ba4467346e9731",
+        "aba699307407cf21",
+        "813f2f72a56a8f80",
+        "96525b27968f2103",
+        "29bb290f9d6e206b"
+      ],
+      "date": 1665698181919
+    },
+    {
+      "type": "edit",
+      "id": "96525b27968f2103",
+      "item": {
+        "type": "markdown",
+        "id": "96525b27968f2103",
+        "text": "---"
+      },
+      "date": 1665698190998
+    },
+    {
+      "type": "edit",
+      "id": "aba699307407cf21",
+      "item": {
+        "type": "markdown",
+        "id": "aba699307407cf21",
+        "text": "Ward — 11.10.2022\nI have a repo with a version of the count tutorial that uses a version of croquet.js with an export added.\nhttps://github.com/WardCunningham/assets/tree/master/pages/super-collaborator/croquet-in-modules\n"
+      },
+      "date": 1665733457700
+    },
+    {
+      "type": "add",
+      "id": "8726aece9350afbe",
+      "item": {
+        "type": "markdown",
+        "id": "8726aece9350afbe",
+        "text": "Following this model, I've started on a command-line version of count called (aspirationally) wikicount.js.\nThe import fails looking for hostname. But Deno has a command line option to provide a location.\nThe import then fails on reference to document. I believe this happens before I have the chance to stub out document.\nI'm tempted to approach the Deno authors who have been very helpful in the past. I want to first make sure I'm not missing something that you already know. Screen shot of failure follows.\n"
+      },
+      "after": "aba699307407cf21",
+      "date": 1665733458954
+    },
+    {
+      "type": "edit",
+      "id": "8726aece9350afbe",
+      "item": {
+        "type": "markdown",
+        "id": "8726aece9350afbe",
+        "text": "Following this model, I've started on a command-line version of count called (aspirationally) wikicount.js.\nThe import fails looking for hostname. But Deno has a command line option to provide a location.\nThe import then fails on reference to document. I believe this happens before I have the chance to stub out document.\n"
+      },
+      "date": 1665733466196
+    },
+    {
+      "type": "add",
+      "id": "92bd0cd884385051",
+      "item": {
+        "type": "markdown",
+        "id": "92bd0cd884385051",
+        "text": "I'm tempted to approach the Deno authors who have been very helpful in the past. I want to first make sure I'm not missing something that you already know. Screen shot of failure follows.\n"
+      },
+      "after": "8726aece9350afbe",
+      "date": 1665733467163
+    },
+    {
+      "type": "edit",
+      "id": "813f2f72a56a8f80",
+      "item": {
+        "type": "markdown",
+        "id": "813f2f72a56a8f80",
+        "text": "yoshiki\n — \ngestern um 22:11 Uhr\nSorry for a slow response. The default package has references to DOM stuff so it is not a good starting point. I have not tried this by myself but we have the Croquet library packaged for node js use: https://discord.com/channels/694586717247635488/966071402526543924/1012816033800798238\nso that might be a good starting point.\n"
+      },
+      "date": 1665733551256
+    },
+    {
+      "type": "add",
+      "id": "753437f88e689c8e",
+      "item": {
+        "type": "markdown",
+        "id": "753437f88e689c8e",
+        "text": "Ward\n — \nheute um 03:08 Uhr\nHa. I remember reading that discussion but didn't understand the problem being solved back then. This is the perfect lead for me now. Thanks."
+      },
+      "after": "813f2f72a56a8f80",
+      "date": 1665733554008
+    },
+    {
+      "type": "add",
+      "id": "317e5f66140e962c",
+      "item": {
+        "type": "paragraph",
+        "id": "317e5f66140e962c",
+        "text": "package.json:\n\n{\n  \"name\": \"croquet-node\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Node test for Croquet\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\n  },\n  \"author\": \"Croquet Corp\",\n  \"license\": \"ISC\",\n  \"dependencies\": {\n    \"@croquet/croquet\": \"^1.1.0-12\"\n  }\n}\n\n\n\n"
+      },
+      "after": "29bb290f9d6e206b",
+      "date": 1665733566678
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "09edbbed204eea96"
+      },
+      "id": "09edbbed204eea96",
+      "type": "add",
+      "after": "29899e059e1ee5cc",
+      "date": 1665733569262
+    },
+    {
+      "type": "add",
+      "id": "29899e059e1ee5cc",
+      "item": {
+        "type": "paragraph",
+        "id": "29899e059e1ee5cc",
+        "text": "index.js:\n\nconst Croquet = require(\"@croquet/croquet\");\n\nclass MyModel extends Croquet.Model {\n\n    init() {\n        this.counter = 0;\n        this.future(1000).tick();\n    }\n\n    tick() {\n        this.counter++;\n        this.publish(\"counter\", \"update\");\n        this.future(1000).tick();\n    }\n\n}\nMyModel.register(\"MyModel\");\n\nconst name = process.argv[2] || \"noname\";\nconst password = process.argv[3] || \"nopassword\";\n\nCroquet.Session.join({\n    apiKey: \"your key here\",\n    appId: \"io.croquet.hello\",\n    name,\n    password,\n    model: MyModel,\n    step: \"manual\",\n}).then(({ step, model, view }) => {\n    setInterval(step, 100);\n    view.subscribe(\"counter\", \"update\", () => console.log(model.counter));\n});\n\n\nJust paste your API key and it should work \n"
+      },
+      "after": "317e5f66140e962c",
+      "date": 1665733572478
+    },
+    {
+      "type": "edit",
+      "id": "317e5f66140e962c",
+      "item": {
+        "type": "paragraph",
+        "id": "317e5f66140e962c",
+        "text": "package.json:"
+      },
+      "date": 1665733576720
+    },
+    {
+      "type": "edit",
+      "id": "09edbbed204eea96",
+      "item": {
+        "type": "code",
+        "id": "09edbbed204eea96",
+        "text": "{\n  \"name\": \"croquet-node\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Node test for Croquet\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\n  },\n  \"author\": \"Croquet Corp\",\n  \"license\": \"ISC\",\n  \"dependencies\": {\n    \"@croquet/croquet\": \"^1.1.0-12\"\n  }\n}\n\n\n\n"
+      },
+      "date": 1665733590592
+    },
+    {
+      "id": "09edbbed204eea96",
+      "type": "move",
+      "order": [
+        "1959332c80711482",
+        "8e4e1bb203cfc122",
+        "a380244d4b662cc3",
+        "372cb3f5b9580711",
+        "d06c15bccbafa0e6",
+        "ef3fc82beb3f418f",
+        "d75b92f16890614d",
+        "30ba4467346e9731",
+        "aba699307407cf21",
+        "8726aece9350afbe",
+        "92bd0cd884385051",
+        "813f2f72a56a8f80",
+        "753437f88e689c8e",
+        "96525b27968f2103",
+        "29bb290f9d6e206b",
+        "317e5f66140e962c",
+        "09edbbed204eea96",
+        "29899e059e1ee5cc"
+      ],
+      "date": 1665733648935
+    },
+    {
+      "type": "edit",
+      "id": "29899e059e1ee5cc",
+      "item": {
+        "type": "paragraph",
+        "id": "29899e059e1ee5cc",
+        "text": "index.js:\n\n\n\n"
+      },
+      "date": 1665733679390
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "af506e16f7d3a630",
+        "text": "const Croquet = require(\"@croquet/croquet\");\n\nclass MyModel extends Croquet.Model {\n\n    init() {\n        this.counter = 0;\n        this.future(1000).tick();\n    }\n\n    tick() {\n        this.counter++;\n        this.publish(\"counter\", \"update\");\n        this.future(1000).tick();\n    }\n\n}\nMyModel.register(\"MyModel\");\n\nconst name = process.argv[2] || \"noname\";\nconst password = process.argv[3] || \"nopassword\";\n\nCroquet.Session.join({\n    apiKey: \"your key here\",\n    appId: \"io.croquet.hello\",\n    name,\n    password,\n    model: MyModel,\n    step: \"manual\",\n}).then(({ step, model, view }) => {\n    setInterval(step, 100);\n    view.subscribe(\"counter\", \"update\", () => console.log(model.counter));\n});"
+      },
+      "id": "af506e16f7d3a630",
+      "type": "add",
+      "after": "3cbe314b2ec4722c",
+      "date": 1665733683031
+    },
+    {
+      "id": "af506e16f7d3a630",
+      "type": "move",
+      "order": [
+        "1959332c80711482",
+        "8e4e1bb203cfc122",
+        "a380244d4b662cc3",
+        "372cb3f5b9580711",
+        "d06c15bccbafa0e6",
+        "ef3fc82beb3f418f",
+        "d75b92f16890614d",
+        "30ba4467346e9731",
+        "aba699307407cf21",
+        "8726aece9350afbe",
+        "92bd0cd884385051",
+        "813f2f72a56a8f80",
+        "753437f88e689c8e",
+        "96525b27968f2103",
+        "29bb290f9d6e206b",
+        "317e5f66140e962c",
+        "09edbbed204eea96",
+        "29899e059e1ee5cc",
+        "af506e16f7d3a630",
+        "3cbe314b2ec4722c"
+      ],
+      "date": 1665733689631,
+      "error": {
+        "type": "error",
+        "msg": "Internal Server Error",
+        "response": "Server Ignoring move. Try reload."
+      }
+    },
+    {
+      "type": "add",
+      "id": "3cbe314b2ec4722c",
+      "item": {
+        "type": "paragraph",
+        "id": "3cbe314b2ec4722c",
+        "text": "Just paste your API key and it should work \n"
+      },
+      "after": "29899e059e1ee5cc",
+      "date": 1665733692386
+    },
+    {
+      "type": "edit",
+      "id": "29899e059e1ee5cc",
+      "item": {
+        "type": "paragraph",
+        "id": "29899e059e1ee5cc",
+        "text": "index.js:\n\n\n\n"
+      },
+      "date": 1665733699165
+    },
+    {
+      "type": "edit",
+      "id": "af506e16f7d3a630",
+      "item": {
+        "type": "code",
+        "id": "af506e16f7d3a630",
+        "text": "const Croquet = require(\"@croquet/croquet\");\n\nclass MyModel extends Croquet.Model {\n\n    init() {\n        this.counter = 0;\n        this.future(1000).tick();\n    }\n\n    tick() {\n        this.counter++;\n        this.publish(\"counter\", \"update\");\n        this.future(1000).tick();\n    }\n\n}\nMyModel.register(\"MyModel\");\n\nconst name = process.argv[2] || \"noname\";\nconst password = process.argv[3] || \"nopassword\";\n\nCroquet.Session.join({\n    apiKey: \"your key here\",\n    appId: \"io.croquet.hello\",\n    name,\n    password,\n    model: MyModel,\n    step: \"manual\",\n}).then(({ step, model, view }) => {\n    setInterval(step, 100);\n    view.subscribe(\"counter\", \"update\", () => console.log(model.counter));\n});"
+      },
+      "date": 1665733701878
+    },
+    {
+      "type": "fork",
+      "date": 1665733704460
+    }
+  ]
+}
