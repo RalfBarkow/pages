@@ -1,0 +1,201 @@
+{
+  "title": "2022-10-21",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "2ef06b61d2173848",
+      "text": "⇒ [[World Beyond Your Head]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "a464c65241113b86",
+      "text": "⇒ [[Exhibition Room]]"
+    },
+    {
+      "type": "markdown",
+      "id": "b56bd9e679a38c44",
+      "text": "yoshiki — 2022-08-13 via [https://discord.com/channels/694586717247635488/966071402526543924/1008078919041290373 discord]\nMicroverse certainly lets you create more cards programmatically and easily. Just as you would write a card definition in the world/template file, you can call a method called createCard() from your actor-side behavior to make a new card (an example is found here: https://github.com/croquet/microverse/blob/91dc580e422693702c0518e39c84b96e446366a7/behaviors/default/cascade.js#L287) So I could imagine to have a in world button to create a new \"stock\" object, which effectively calls createCard() to make a new card.\nGitHub\nmicroverse/cascade.js at 91dc580e422693702c0518e39c84b96e446366a7 ·...\nCroquet Microverse (Beta). Contribute to croquet/microverse development by creating an account on GitHub.\nmicroverse/cascade.js at 91dc580e422693702c0518e39c84b96e446366a7 ·...\nJust for fun, if you go to croquet.io/microverse, and do a shift double-click to create a sticky note. If you paste the following text (it won't fit in the visible area but that is okay) and hit Cmd-S, you can create a new card, in this case a portal, right there.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "90dbfcef861c04d1",
+      "text": "Steve Sanderson — 13.08.2022\nthanks, I'll do that!\n@yoshiki do you anticipate any abstractions above publish/subscribe for \"inter-card communication\" ? For instance, I'm anticipating a design that when a user creates a slow then they \"wire\" it between two stocks. Today, I would implement this \"wiring\" via publish/subscribe and perhaps make some abstraction to help a user do this. Do you anticipate Croquet providing anything like this?\nyoshiki — 13.08.2022\nInteresting! My feeling right now is that those upper layer abstractions can be very easily implemented at the same time the requirements for those could be widely different from one application to another so it might be better for developers to make up rather than Croquet dictates how it should be done.  As for the wire and node idea, though, I think publish and subscribe may not cover what is actually needed. In my past lives I was playing with functional reactive programming and dataflow languages, and one key there is that you want to have a sound dependency graph in that computation model. I could imagine that wires and nodes may form a cyclic graph (things certainly would depend on each other), yet you want to have exactly one value for an exact logical time for a node. If you implement this kind of propagation with publish and subscribe, one node would receive multiple events at one logical time, and it'd publish multiple events and the results would not have well formed state. I think the simulation should do its computation deterministically, and updates the model values only once per \"cycle\".\nSteve Sanderson — 13.08.2022\ngood to know. and appreciate your insights re: simulation, thx\nclearly, THUYDOAN (she/her) — 15.08.2022\nedit: for whatever reason it resolved itself 👀 . all good for now. had to jump to another world then return.\n\nstarted trying out the microverse builder today. went through the tutorials to understand all the components. but, when i went to make a very small change i.e. change the external link for the croquet logo card to some other link, the change did not take effect. is there a step i'm missing here to have changes in my editor reflect? \n\ni tried things like saving the world and loading it again, stopping the application and restarting, as well as hard refreshes 🤔  i am currently just modifying cards by adding to the set or altering existing cards in the default world. \nclearly, THUYDOAN (she/her) — 15.08.2022\nsupport question: am i correct in understanding that the microverse builder currently only supports two of three.js' textures? image and canvas? i wanted to see if the builder supports video textures/cards so i could add a video card but i did some digging and saw the card spec\n\nType TextureType = \"image\"|\"canvas\"\nTextureType|undefined\n\n\n### Description\nWhen it is \"image\", it loads an image data from `textureLocation` and creates Texture of Three.js.\nWhen it is \"canvas\", it creates a DOM canvas and binds it to CanvasTexture of Three.js.\nWhen it is undefined, it does not allocate a texture\n\nThe created texture is assigned to `this.texture` property of the `CardPawn`.\n \ncodefrau 🦩 — 15.08.2022\nWe don't right now support video textures out of the box because we would want to have the video be synchronized. You can, however, modify a three.js object's material to set it to a video texture. It would play at a different timestamp on every client though\nclearly, THUYDOAN (she/her) — 15.08.2022\no wait something promising in card.js\n\n        if (textureType === \"video\") {\n            this.video = document.createElement('video');\ncodefrau 🦩 — 15.08.2022\n... maybe it's implemented but not documented because it works unsynced?\nclearly, THUYDOAN (she/her) — 15.08.2022\npossible! i'll play around. thanks Vanessa 🙂\nyoshiki — 15.08.2022\nAnd yes. That is the case. It was implemented as a simple non-synced videos (and we still have VideoManager that handles global click to try to start videos). But yeah, we removed it from the docs as we don't want to have unsynced video.\nclearly, THUYDOAN (she/her) — 15.08.2022\nvoila: it's possible with a new video asset in the directory. https://www.loom.com/share/b2219d9a485247dba7bb776e4a48911c\n\nnext i'm gonna attempt to make the video source a video tag instead of an asset we add to /assets/videos/[video] :cutedevil: probably gotta franken stein some three.js docs on video textures with the current card implementation. i'm guessing instead of making the video texture source the textureLocation that was passed, make it grab a video tag by an id in some html file 🤔 \n\nthis is all for fun so no pressure here. i'm mainly trying to see if i can stream a live video within croquet's microverse builder. baby steps to the end goal. \nLoom\n?world=mux&q=4ob42zrgve#pw=vDXJvCQQqZaxjnhUD6Mbqw - 15 August 2022\nyoshiki — 15.08.2022\nA file in the worlds directory is considered a template. If you start a fresh session either not specify the ?q= parameter and letting the system create a random one, or you supply one that had never used before, the template is used to populate the world.  But if you modify the template afterwards, and reloading a page with the same ?q= value, it continues to go with the state that is already created.\ncodefrau 🦩 — 15.08.2022\nOh yeah live video would be already sort-of synchronized. Should be fun!\nyoshiki — 15.08.2022\nSave and Load of the three bar menu are probably confusing. We will reorganize the menu soon.\nclearly, THUYDOAN (she/her) — 15.08.2022\nspeaking of video, i read a fun thing in the croquet docs. that croquet os is extremely low latency. how low latency are we talking?\ncodefrau 🦩 — 15.08.2022\nDepends on your distance to the nearest reflector. Here in LA we get under 10ms. With an on premises reflector it would be even lower. It’s lower latency than traditional client/server because there is essentially no processing delay on the server, because your app does not run on the server.\nclearly, THUYDOAN (she/her) — 15.08.2022\ni wonder how significant the dif in latency would be from say, New York :thinkxel: but that's pretty neat.\ncodefrau 🦩 — 15.08.2022\nWhat latency do you get? It should pick one of our East Coast clusters (we do have reflectors around the world) \nclearly, THUYDOAN (she/her) — 15.08.2022\nlooks like 20-30ms in my region :partycat: \ncodefrau 🦩 — 15.08.2022\nNot bad. Depends on your ISP and their connectivity to our data center too.\nDennis — 17.08.2022\nHi Thuy - Were you able to stream a live video to a card in the Microverse?  Or did you use a static video?  It would be interesting to have a template card that enables streaming content from the Mux platform directly to a card in the Microverse."
+    },
+    {
+      "type": "code",
+      "id": "f4db99155479d18a",
+      "text": "layers: [\"pointer\"],\n            className: \"PortalActor\",\n            color: 16737996,\n            cornerRadius: 0.05,\n            depth: 0.05,\n            frameColor: 8947848,\n            portalURL: \"?world=factory\",\n            type: \"2d\",\n            width: 1.8,\n            height: 2.4,\n"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "2022-10-21",
+        "story": []
+      },
+      "date": 1666343757369
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2ef06b61d2173848"
+      },
+      "id": "2ef06b61d2173848",
+      "type": "add",
+      "date": 1666343758927
+    },
+    {
+      "type": "edit",
+      "id": "2ef06b61d2173848",
+      "item": {
+        "type": "paragraph",
+        "id": "2ef06b61d2173848",
+        "text": "– [[World Beyond Your Head]]"
+      },
+      "date": 1666343766695
+    },
+    {
+      "type": "edit",
+      "id": "2ef06b61d2173848",
+      "item": {
+        "type": "paragraph",
+        "id": "2ef06b61d2173848",
+        "text": "⇒ [[World Beyond Your Head]]"
+      },
+      "date": 1666343773063
+    },
+    {
+      "type": "add",
+      "id": "a464c65241113b86",
+      "item": {
+        "type": "paragraph",
+        "id": "a464c65241113b86",
+        "text": "Exhibition Room"
+      },
+      "after": "2ef06b61d2173848",
+      "date": 1666350185150
+    },
+    {
+      "type": "edit",
+      "id": "a464c65241113b86",
+      "item": {
+        "type": "paragraph",
+        "id": "a464c65241113b86",
+        "text": "⇒ [[Exhibition Room]]"
+      },
+      "date": 1666350194540
+    },
+    {
+      "item": {
+        "type": "markdown",
+        "id": "b56bd9e679a38c44",
+        "text": "yoshiki — 2022-08-13 via [https://discord.com/channels/694586717247635488/966071402526543924/1008078919041290373 discord]\nMicroverse certainly lets you create more cards programmatically and easily. Just as you would write a card definition in the world/template file, you can call a method called createCard() from your actor-side behavior to make a new card (an example is found here: https://github.com/croquet/microverse/blob/91dc580e422693702c0518e39c84b96e446366a7/behaviors/default/cascade.js#L287) So I could imagine to have a in world button to create a new \"stock\" object, which effectively calls createCard() to make a new card.\nGitHub\nmicroverse/cascade.js at 91dc580e422693702c0518e39c84b96e446366a7 ·...\nCroquet Microverse (Beta). Contribute to croquet/microverse development by creating an account on GitHub.\nmicroverse/cascade.js at 91dc580e422693702c0518e39c84b96e446366a7 ·...\nJust for fun, if you go to croquet.io/microverse, and do a shift double-click to create a sticky note. If you paste the following text (it won't fit in the visible area but that is okay) and hit Cmd-S, you can create a new card, in this case a portal, right there.\n"
+      },
+      "id": "b56bd9e679a38c44",
+      "type": "add",
+      "after": "a464c65241113b86",
+      "date": 1666363533571
+    },
+    {
+      "type": "edit",
+      "id": "b56bd9e679a38c44",
+      "item": {
+        "type": "markdown",
+        "id": "b56bd9e679a38c44",
+        "text": "yoshiki — 2022-08-13 via [https://discord.com/channels/694586717247635488/966071402526543924/1008078919041290373 discord]\nMicroverse certainly lets you create more cards programmatically and easily. Just as you would write a card definition in the world/template file, you can call a method called createCard() from your actor-side behavior to make a new card (an example is found here: https://github.com/croquet/microverse/blob/91dc580e422693702c0518e39c84b96e446366a7/behaviors/default/cascade.js#L287) So I could imagine to have a in world button to create a new \"stock\" object, which effectively calls createCard() to make a new card.\nGitHub\nmicroverse/cascade.js at 91dc580e422693702c0518e39c84b96e446366a7 ·...\nCroquet Microverse (Beta). Contribute to croquet/microverse development by creating an account on GitHub.\nmicroverse/cascade.js at 91dc580e422693702c0518e39c84b96e446366a7 ·...\nJust for fun, if you go to croquet.io/microverse, and do a shift double-click to create a sticky note. If you paste the following text (it won't fit in the visible area but that is okay) and hit Cmd-S, you can create a new card, in this case a portal, right there.\n"
+      },
+      "date": 1666363538553
+    },
+    {
+      "type": "edit",
+      "id": "b56bd9e679a38c44",
+      "item": {
+        "type": "markdown",
+        "id": "b56bd9e679a38c44",
+        "text": "yoshiki — 2022-08-13 via [https://discord.com/channels/694586717247635488/966071402526543924/1008078919041290373 discord]\nMicroverse certainly lets you create more cards programmatically and easily. Just as you would write a card definition in the world/template file, you can call a method called createCard() from your actor-side behavior to make a new card (an example is found here: https://github.com/croquet/microverse/blob/91dc580e422693702c0518e39c84b96e446366a7/behaviors/default/cascade.js#L287) So I could imagine to have a in world button to create a new \"stock\" object, which effectively calls createCard() to make a new card.\nGitHub\nmicroverse/cascade.js at 91dc580e422693702c0518e39c84b96e446366a7 ·...\nCroquet Microverse (Beta). Contribute to croquet/microverse development by creating an account on GitHub.\nmicroverse/cascade.js at 91dc580e422693702c0518e39c84b96e446366a7 ·...\nJust for fun, if you go to croquet.io/microverse, and do a shift double-click to create a sticky note. If you paste the following text (it won't fit in the visible area but that is okay) and hit Cmd-S, you can create a new card, in this case a portal, right there.\n"
+      },
+      "date": 1666363571997
+    },
+    {
+      "type": "edit",
+      "id": "b56bd9e679a38c44",
+      "item": {
+        "type": "markdown",
+        "id": "b56bd9e679a38c44",
+        "text": "yoshiki — 2022-08-13 via [https://discord.com/channels/694586717247635488/966071402526543924/1008078919041290373 discord]\nMicroverse certainly lets you create more cards programmatically and easily. Just as you would write a card definition in the world/template file, you can call a method called createCard() from your actor-side behavior to make a new card (an example is found here: https://github.com/croquet/microverse/blob/91dc580e422693702c0518e39c84b96e446366a7/behaviors/default/cascade.js#L287) So I could imagine to have a in world button to create a new \"stock\" object, which effectively calls createCard() to make a new card.\nGitHub\nmicroverse/cascade.js at 91dc580e422693702c0518e39c84b96e446366a7 ·...\nCroquet Microverse (Beta). Contribute to croquet/microverse development by creating an account on GitHub.\nmicroverse/cascade.js at 91dc580e422693702c0518e39c84b96e446366a7 ·...\nJust for fun, if you go to croquet.io/microverse, and do a shift double-click to create a sticky note. If you paste the following text (it won't fit in the visible area but that is okay) and hit Cmd-S, you can create a new card, in this case a portal, right there.\n"
+      },
+      "date": 1666363592860
+    },
+    {
+      "type": "add",
+      "id": "0e879dc49bba8f7c",
+      "item": {
+        "type": "markdown",
+        "id": "0e879dc49bba8f7c",
+        "text": ""
+      },
+      "after": "b56bd9e679a38c44",
+      "date": 1666363598908
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "f4db99155479d18a",
+        "text": "layers: [\"pointer\"],\n            className: \"PortalActor\",\n            color: 16737996,\n            cornerRadius: 0.05,\n            depth: 0.05,\n            frameColor: 8947848,\n            portalURL: \"?world=factory\",\n            type: \"2d\",\n            width: 1.8,\n            height: 2.4,\n"
+      },
+      "id": "f4db99155479d18a",
+      "type": "add",
+      "after": "90dbfcef861c04d1",
+      "date": 1666363602632
+    },
+    {
+      "id": "f4db99155479d18a",
+      "type": "move",
+      "order": [
+        "2ef06b61d2173848",
+        "a464c65241113b86",
+        "b56bd9e679a38c44",
+        "0e879dc49bba8f7c",
+        "f4db99155479d18a",
+        "90dbfcef861c04d1"
+      ],
+      "date": 1666363607123,
+      "error": {
+        "type": "error",
+        "msg": "Internal Server Error",
+        "response": "Server Ignoring move. Try reload."
+      }
+    },
+    {
+      "type": "add",
+      "id": "90dbfcef861c04d1",
+      "item": {
+        "type": "markdown",
+        "id": "90dbfcef861c04d1",
+        "text": "Steve Sanderson — 13.08.2022\nthanks, I'll do that!\n@yoshiki do you anticipate any abstractions above publish/subscribe for \"inter-card communication\" ? For instance, I'm anticipating a design that when a user creates a slow then they \"wire\" it between two stocks. Today, I would implement this \"wiring\" via publish/subscribe and perhaps make some abstraction to help a user do this. Do you anticipate Croquet providing anything like this?\nyoshiki — 13.08.2022\nInteresting! My feeling right now is that those upper layer abstractions can be very easily implemented at the same time the requirements for those could be widely different from one application to another so it might be better for developers to make up rather than Croquet dictates how it should be done.  As for the wire and node idea, though, I think publish and subscribe may not cover what is actually needed. In my past lives I was playing with functional reactive programming and dataflow languages, and one key there is that you want to have a sound dependency graph in that computation model. I could imagine that wires and nodes may form a cyclic graph (things certainly would depend on each other), yet you want to have exactly one value for an exact logical time for a node. If you implement this kind of propagation with publish and subscribe, one node would receive multiple events at one logical time, and it'd publish multiple events and the results would not have well formed state. I think the simulation should do its computation deterministically, and updates the model values only once per \"cycle\".\nSteve Sanderson — 13.08.2022\ngood to know. and appreciate your insights re: simulation, thx\nclearly, THUYDOAN (she/her) — 15.08.2022\nedit: for whatever reason it resolved itself 👀 . all good for now. had to jump to another world then return.\n\nstarted trying out the microverse builder today. went through the tutorials to understand all the components. but, when i went to make a very small change i.e. change the external link for the croquet logo card to some other link, the change did not take effect. is there a step i'm missing here to have changes in my editor reflect? \n\ni tried things like saving the world and loading it again, stopping the application and restarting, as well as hard refreshes 🤔  i am currently just modifying cards by adding to the set or altering existing cards in the default world. \nclearly, THUYDOAN (she/her) — 15.08.2022\nsupport question: am i correct in understanding that the microverse builder currently only supports two of three.js' textures? image and canvas? i wanted to see if the builder supports video textures/cards so i could add a video card but i did some digging and saw the card spec\n\nType TextureType = \"image\"|\"canvas\"\nTextureType|undefined\n\n\n### Description\nWhen it is \"image\", it loads an image data from `textureLocation` and creates Texture of Three.js.\nWhen it is \"canvas\", it creates a DOM canvas and binds it to CanvasTexture of Three.js.\nWhen it is undefined, it does not allocate a texture\n\nThe created texture is assigned to `this.texture` property of the `CardPawn`.\n \ncodefrau 🦩 — 15.08.2022\nWe don't right now support video textures out of the box because we would want to have the video be synchronized. You can, however, modify a three.js object's material to set it to a video texture. It would play at a different timestamp on every client though\nclearly, THUYDOAN (she/her) — 15.08.2022\no wait something promising in card.js\n\n        if (textureType === \"video\") {\n            this.video = document.createElement('video');\ncodefrau 🦩 — 15.08.2022\n... maybe it's implemented but not documented because it works unsynced?\nclearly, THUYDOAN (she/her) — 15.08.2022\npossible! i'll play around. thanks Vanessa 🙂\nyoshiki — 15.08.2022\nAnd yes. That is the case. It was implemented as a simple non-synced videos (and we still have VideoManager that handles global click to try to start videos). But yeah, we removed it from the docs as we don't want to have unsynced video.\nclearly, THUYDOAN (she/her) — 15.08.2022\nvoila: it's possible with a new video asset in the directory. https://www.loom.com/share/b2219d9a485247dba7bb776e4a48911c\n\nnext i'm gonna attempt to make the video source a video tag instead of an asset we add to /assets/videos/[video] :cutedevil: probably gotta franken stein some three.js docs on video textures with the current card implementation. i'm guessing instead of making the video texture source the textureLocation that was passed, make it grab a video tag by an id in some html file 🤔 \n\nthis is all for fun so no pressure here. i'm mainly trying to see if i can stream a live video within croquet's microverse builder. baby steps to the end goal. \nLoom\n?world=mux&q=4ob42zrgve#pw=vDXJvCQQqZaxjnhUD6Mbqw - 15 August 2022\nyoshiki — 15.08.2022\nA file in the worlds directory is considered a template. If you start a fresh session either not specify the ?q= parameter and letting the system create a random one, or you supply one that had never used before, the template is used to populate the world.  But if you modify the template afterwards, and reloading a page with the same ?q= value, it continues to go with the state that is already created.\ncodefrau 🦩 — 15.08.2022\nOh yeah live video would be already sort-of synchronized. Should be fun!\nyoshiki — 15.08.2022\nSave and Load of the three bar menu are probably confusing. We will reorganize the menu soon.\nclearly, THUYDOAN (she/her) — 15.08.2022\nspeaking of video, i read a fun thing in the croquet docs. that croquet os is extremely low latency. how low latency are we talking?\ncodefrau 🦩 — 15.08.2022\nDepends on your distance to the nearest reflector. Here in LA we get under 10ms. With an on premises reflector it would be even lower. It’s lower latency than traditional client/server because there is essentially no processing delay on the server, because your app does not run on the server.\nclearly, THUYDOAN (she/her) — 15.08.2022\ni wonder how significant the dif in latency would be from say, New York :thinkxel: but that's pretty neat.\ncodefrau 🦩 — 15.08.2022\nWhat latency do you get? It should pick one of our East Coast clusters (we do have reflectors around the world) \nclearly, THUYDOAN (she/her) — 15.08.2022\nlooks like 20-30ms in my region :partycat: \ncodefrau 🦩 — 15.08.2022\nNot bad. Depends on your ISP and their connectivity to our data center too.\nDennis — 17.08.2022\nHi Thuy - Were you able to stream a live video to a card in the Microverse?  Or did you use a static video?  It would be interesting to have a template card that enables streaming content from the Mux platform directly to a card in the Microverse."
+      },
+      "after": "0e879dc49bba8f7c",
+      "date": 1666363610318
+    },
+    {
+      "type": "remove",
+      "id": "0e879dc49bba8f7c",
+      "date": 1666363612856
+    },
+    {
+      "type": "edit",
+      "id": "f4db99155479d18a",
+      "item": {
+        "type": "code",
+        "id": "f4db99155479d18a",
+        "text": "layers: [\"pointer\"],\n            className: \"PortalActor\",\n            color: 16737996,\n            cornerRadius: 0.05,\n            depth: 0.05,\n            frameColor: 8947848,\n            portalURL: \"?world=factory\",\n            type: \"2d\",\n            width: 1.8,\n            height: 2.4,\n"
+      },
+      "date": 1666363614288
+    },
+    {
+      "type": "fork",
+      "date": 1666363618519
+    }
+  ]
+}
