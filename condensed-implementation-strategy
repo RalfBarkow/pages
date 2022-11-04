@@ -1,0 +1,1134 @@
+{
+  "title": "Condensed Implementation Strategy",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "24f81fafee40eb0f",
+      "text": "Now that all the supporting pieces are in place, we are in a position to finally approach the actual implementation of matches: as a circuit, the evaluation contexts of which reside in class based characters."
+    },
+    {
+      "type": "paragraph",
+      "id": "4f27699f66582783",
+      "text": "[…]"
+    },
+    {
+      "type": "markdown",
+      "id": "b3a69b88c577cdd0",
+      "text": "At this point, there are three different cases to consider: that the current pattern character is a star, that the current pattern character is a pound, and that the current pattern character is something other than a star or a pound. Of course, since we have a distinct class per case, we will let polymorphism deal with this. But how do we phrase the question that needs to be asked? We should ask ourselves first what is it that needs to be distinguished.\n\n> From a simplistic point of view, we are moving the execution of ifTrue:ifFalse: down to the implementation of PICs in the virtual machine."
+    },
+    {
+      "type": "markdown",
+      "id": "92dcff111b228f8d",
+      "text": "Most interestingly, upon quick inspection, we will find that every potential direction in which to move is known at this point. Actually, there is a quite limited amount of them. So much so, in fact, that there is just one of them: the only thing that can happen is that patternIndex and matchIndex are decremented, because matches: is going from right to left. If this step can be taken, then matches: would continue matching backwards with different end points. If it cannot be taken, it is because the context is a star character and matching needs to continue in a left-to-right fashion from the beginning of the pattern and the string. Therefore, we should let the corresponding characters tell the string what to do according to their identity. […]\n\n> The constraints squeeze the answer, quite literally, from nothing. It is almost a miracle."
+    },
+    {
+      "type": "paragraph",
+      "id": "d94e8224c63c8e73",
+      "text": "[…] And that is it. Yes, this rather tiny bit of behavior completes the implementation of the message startingAt:continueBackwardsMatches:from:. We can do this because the complexity of the problem is encoded in the information space being traversed. Note how the particular structure of the space lets our implementation decide quite simple things. Given a unique traversal direction, should it be taken? Not only that is a rather simple thing to determine — the decision is done by polymorphism so ifTrue:ifFalse: does not even enter the picture at all! There is nothing to say because there is nothing to do. This is a mark of proper, artful design."
+    },
+    {
+      "type": "paragraph",
+      "id": "2f3b05d288f358ea",
+      "text": "We could even start suspecting that this implementation might be quite fast. But let’s not get ahead of ourselves. We still need to complete the implementation traversal of matches: first. Now we need to implement ifYouMatch:. . . for stars, pounds, and the other characters."
+    },
+    {
+      "type": "markdown",
+      "id": "3ac9137e8c355173",
+      "text": "And here, it is at this exact point that the full benefit of classes comes to fruition. Because it is due to the existence of the classes we created, and to the fact that the contexts they imply are specific enough, that behavior can proceed without asking any unnecessary questions. It just runs like electrons flowing down a copper wire. They do not ask for permission. They do not get into ifTrue:ifFalse: existential considerations. They just behave that way because *they cannot help themselves*.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "a85dc7f7485c63aa",
+      "text": "This is how we have designed our implementation. Now we will see our guiding principles in action. As before, let’s spell out the shape of the message we are trying to implement first, so we can refer to things by their names."
+    },
+    {
+      "type": "code",
+      "id": "bf9718aa7e7d07e9",
+      "text": "CondensedClassBasedCharacter>> \n  ifYouMatch: aCharacter \n  let: aPatternString \n  startingAt: aNewPatternIndex\n  continueBackwardsMatches: aMatchString \n  from: aNewMatchIndex"
+    },
+    {
+      "type": "paragraph",
+      "id": "35bcccf248faf4bc",
+      "text": "This message will have three implementations: one for “ordinary” characters, implemented in the class shown above, one for pound characters implemented in the class of pound characters, and one for star characters implemented in the class of star characters. "
+    },
+    {
+      "type": "paragraph",
+      "id": "671ea0d2a3932b5c",
+      "text": "So, if the receiver is a pound character, how should this be implemented? Clearly, no checking needs to be done because the pound character matches everything. In this case, the unique traversal step can always be taken. Therefore, we simply let the intervals shrink and pass the baton to the string again. In other words,"
+    },
+    {
+      "type": "code",
+      "id": "b356b5443c409dd2",
+      "text": "CondensedPoundCharacter>>\nifYouMatch: aCharacter \nlet: aPatternString \nstartingAt: aNewPatternIndex \ncontinueBackwardsMatches: aMatchString \nfrom: aNewMatchIndex\n\n  ^ aPatternString\n    startingAt: aNewPatternIndex\n    continueBackwardsMatches: aMatchString\n    from: aNewMatchIndex"
+    },
+    {
+      "type": "markdown",
+      "id": "0303f3c6e1ebd7e4",
+      "text": "This implementation does pretty much nothing. And here, nothing is meant quite literally. In particular, note that *there is not even a single send of* ==! Also, pay attention to how the existence of a context representing the pound character makes it possible to let things happen in a *mandatory* fashion, without it being necessary to forcefully tell objects what to do nor to draw any distinctions whatsoever.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "d9668838f7070a59",
+      "text": "But what if the receiver was an “ordinary” character? In that case, the context may determine that the step should not be taken. This would occur only when the receiver and the character passed as an argument do not match. Therefore, a simple refinement to the implementation above would let the traversal carry on without difficulty.\n"
+    },
+    {
+      "type": "code",
+      "id": "89594be948378119",
+      "text": "CondensedClassBasedCharacter>> \n  ifYouMatch: aCharacter \n  let: aPatternString \n  startingAt: aNewPatternIndex\n  continueBackwardsMatches: aMatchString \n  from: aNewMatchIndex \n\n    ^(self matches: aCharacter) and: \n      [ \n        aPatternString \n          startingAt: aNewPatternIndex\n          continueBackwardsMatches: aMatchString \n          from: aNewMatchIndex \n      ]"
+    },
+    {
+      "type": "paragraph",
+      "id": "cf3074357151c18c",
+      "text": "Again, not a single occurrence of ifTrue:ifFalse:. Now, it could argued that eventually there will be sends of ==, happening somewhere in the implementation of matches: for characters. However, they will only occur because the value of the comparison cannot be determined at design time. In other words, those == sends will draw distinctions the value of which can only be known at run time. Finally, how should this message be implemented for star characters? Clearly,"
+    },
+    {
+      "type": "markdown",
+      "id": "418825bf8fe584d2",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d381acadff14b85e",
+      "text": "This completes the implementation of backwards matches:. "
+    },
+    {
+      "type": "paragraph",
+      "id": "44ce7d8ad54a53be",
+      "text": "Let’s take a quick break and go over our example to see how what we wrote so far would work."
+    },
+    {
+      "type": "code",
+      "id": "9a166915c9dc0825",
+      "text": "’a#c*fg#ij*x#z’ matches: ’abcQQfgfghijQQxyz’ \"true\" "
+    },
+    {
+      "type": "paragraph",
+      "id": "1d510514cf33db06",
+      "text": "The pattern would receive matches:. As per the implementation of matches:, the pattern would begin matching backwards. The first step of this process is to ask the pattern’s $z to continue backwards matching if it matches the string’s $z. The character receiving this request is an ordinary character because it represents $z. Because of how ordinary characters are designed to fulfil the request from the pattern, the pattern’s $z checks whether it matches the string’s $z or not. Since it does, it tells the pattern to continue backwards matching within the constrained range provided by the pattern in the first place. Thus, our example has been reduced by one character, as shown below."
+    },
+    {
+      "type": "code",
+      "id": "ba32576a623ac767",
+      "text": "’a#c*fg#ij*x#’ matches: ’abcQQfgfghijQQxy’"
+    },
+    {
+      "type": "paragraph",
+      "id": "5277967a74e80d7d",
+      "text": "[…]"
+    },
+    {
+      "type": "markdown",
+      "id": "f88154eeb966a07b",
+      "text": "[…] By means of polymorphism alone, the matching direction has been switched from backwards to forward. This can be done because, as all potential cases are modeled by classes, it is possible to just do what needs to be done for every particular situation without needing to do any thinking whatsoever — in other words, *it is possible to take action without having to rediscover what the context is, because that knowledge is implied by the very context in which action takes place to begin with.*\n"
+    },
+    {
+      "type": "markdown",
+      "id": "f14610dc21c9a182",
+      "text": "Now that matching backwards is taken care of, we need to implement how patterns will match forward. In order to continue painting the implementation of matches:, then, the first thing we need to do is to provide a method for the message below."
+    },
+    {
+      "type": "code",
+      "id": "4a2136c5216c77ec",
+      "text": "ClassBasedCharacterArray>> \n  startingAt: patternIndex \n  upTo: maxPatternIndex \n  continueForwardMatches: aMatchString \n  from: matchIndex \n  upTo: maxMatchIndex"
+    },
+    {
+      "type": "paragraph",
+      "id": "5947035cf528fa3c",
+      "text": "The first we need to do is to distinguish whether the traversal has arrived at an interesting attractor or not. Fortunately, we can easily adapt the checks we performed when the traversal was going backwards. In a similar manner, we can reuse our strategy for letting the characters make a decision. Therefore we write:"
+    },
+    {
+      "type": "paragraph",
+      "id": "d9257c4d667efd6f",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "7233ad665ee7b699",
+      "text": "[…] Things look decent so far. But you may have noticed that these objects are being extremely lazy. Where is the piece that actually does something?"
+    },
+    {
+      "type": "paragraph",
+      "id": "95c6a0e19721c12e",
+      "text": "Well, here it is. Let’s examine ordinary character receivers now. We are in the context of having just seen a star, and now we have two possible outcomes: either the receiver matches aCharacter, or it does not. If it does not, we cannot conclude anything because it may be that we need to go over a few characters to find a match. So what we need to do is try to skip one character in the string and try again by delegating the job back to the pattern. This is perfectly fine because we have just seen a star. The receiver knows this because it has received this message, not any other message."
+    },
+    {
+      "type": "paragraph",
+      "id": "242b76112d6bfcdd",
+      "text": "[…]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Condensed Implementation Strategy",
+        "story": []
+      },
+      "date": 1667365700384
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "24f81fafee40eb0f"
+      },
+      "id": "24f81fafee40eb0f",
+      "type": "add",
+      "date": 1667365720627
+    },
+    {
+      "type": "edit",
+      "id": "24f81fafee40eb0f",
+      "item": {
+        "type": "paragraph",
+        "id": "24f81fafee40eb0f",
+        "text": "Now that all the supporting pieces are in place, we are in a position to finally approach the actual implementation of matches: as a circuit, the evaluation contexts of which reside in class based characters."
+      },
+      "date": 1667365722530
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4f27699f66582783"
+      },
+      "id": "4f27699f66582783",
+      "type": "add",
+      "after": "24f81fafee40eb0f",
+      "date": 1667365726991
+    },
+    {
+      "type": "edit",
+      "id": "4f27699f66582783",
+      "item": {
+        "type": "paragraph",
+        "id": "4f27699f66582783",
+        "text": "[…]"
+      },
+      "date": 1667365730239
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b3a69b88c577cdd0"
+      },
+      "id": "b3a69b88c577cdd0",
+      "type": "add",
+      "after": "4f27699f66582783",
+      "date": 1667365799548
+    },
+    {
+      "type": "edit",
+      "id": "b3a69b88c577cdd0",
+      "item": {
+        "type": "paragraph",
+        "id": "b3a69b88c577cdd0",
+        "text": "At this point, there are three different cases to consider: that the current pattern character is a star, that the current pattern character is a pound, and that the current pattern character is something other than a star or a pound. Of course, since we have a distinct class per case, we will let polymorphism deal with this. But how do we phrase the question that needs to be asked? We should ask ourselves first what is it that needs to be distinguished.\n\n> From a simplistic point of view, we are moving the execution of ifTrue:ifFalse: down to the implementation of PICs in the virtual machine."
+      },
+      "date": 1667365801321
+    },
+    {
+      "type": "edit",
+      "id": "b3a69b88c577cdd0",
+      "item": {
+        "type": "markdown",
+        "id": "b3a69b88c577cdd0",
+        "text": "At this point, there are three different cases to consider: that the current pattern character is a star, that the current pattern character is a pound, and that the current pattern character is something other than a star or a pound. Of course, since we have a distinct class per case, we will let polymorphism deal with this. But how do we phrase the question that needs to be asked? We should ask ourselves first what is it that needs to be distinguished.\n\n> From a simplistic point of view, we are moving the execution of ifTrue:ifFalse: down to the implementation of PICs in the virtual machine."
+      },
+      "date": 1667365802973
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "92dcff111b228f8d"
+      },
+      "id": "92dcff111b228f8d",
+      "type": "add",
+      "after": "b3a69b88c577cdd0",
+      "date": 1667365880760
+    },
+    {
+      "type": "edit",
+      "id": "92dcff111b228f8d",
+      "item": {
+        "type": "paragraph",
+        "id": "92dcff111b228f8d",
+        "text": "Most interestingly, upon quick inspection, we will find that every potential direction in which to move is known at this point. Actually, there is a quite limited amount of them. So much so, in fact, that there is just one of them: the only thing that can happen is that patternIndex and matchIndex are decremented, because matches: is going from right to left. If this step can be taken, then matches: would continue matching backwards with different end points. If it cannot be taken, it is because the context is a star character and matching needs to continue in a left-to-right fashion from the beginning of the pattern and the string. Therefore, we should let the corresponding characters tell the string what\n\n> The constraints squeeze the answer, quite literally, from nothing. It is almost a miracle."
+      },
+      "date": 1667365882313
+    },
+    {
+      "type": "edit",
+      "id": "92dcff111b228f8d",
+      "item": {
+        "type": "markdown",
+        "id": "92dcff111b228f8d",
+        "text": "Most interestingly, upon quick inspection, we will find that every potential direction in which to move is known at this point. Actually, there is a quite limited amount of them. So much so, in fact, that there is just one of them: the only thing that can happen is that patternIndex and matchIndex are decremented, because matches: is going from right to left. If this step can be taken, then matches: would continue matching backwards with different end points. If it cannot be taken, it is because the context is a star character and matching needs to continue in a left-to-right fashion from the beginning of the pattern and the string. Therefore, we should let the corresponding characters tell the string what\n\n> The constraints squeeze the answer, quite literally, from nothing. It is almost a miracle."
+      },
+      "date": 1667365884770
+    },
+    {
+      "type": "edit",
+      "id": "92dcff111b228f8d",
+      "item": {
+        "type": "markdown",
+        "id": "92dcff111b228f8d",
+        "text": "Most interestingly, upon quick inspection, we will find that every potential direction in which to move is known at this point. Actually, there is a quite limited amount of them. So much so, in fact, that there is just one of them: the only thing that can happen is that patternIndex and matchIndex are decremented, because matches: is going from right to left. If this step can be taken, then matches: would continue matching backwards with different end points. If it cannot be taken, it is because the context is a star character and matching needs to continue in a left-to-right fashion from the beginning of the pattern and the string. Therefore, we should let the corresponding characters tell the string what to do according their identity. […]\n\n> The constraints squeeze the answer, quite literally, from nothing. It is almost a miracle."
+      },
+      "date": 1667365942865
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d94e8224c63c8e73"
+      },
+      "id": "d94e8224c63c8e73",
+      "type": "add",
+      "after": "92dcff111b228f8d",
+      "date": 1667366555887
+    },
+    {
+      "type": "edit",
+      "id": "d94e8224c63c8e73",
+      "item": {
+        "type": "paragraph",
+        "id": "d94e8224c63c8e73",
+        "text": "[…] And that is it. Yes, this rather tiny bit of behavior completes the implementation of the message startingAt:continueBackwardsMatches:from:. We can do this because the complexity of the problem is encoded in the information space being traversed. Note how the particular structure of the space lets our implementation decide quite simple things. Given a unique traversal direction, should it be taken? Not only that is a rather simple thing to determine — the decision is done by polymorphism so ifTrue:ifFalse: does not even enter the picture at all! There is nothing to say because there is nothing to do. This is a mark of proper, artful design."
+      },
+      "date": 1667366559792
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2f3b05d288f358ea"
+      },
+      "id": "2f3b05d288f358ea",
+      "type": "add",
+      "after": "d94e8224c63c8e73",
+      "date": 1667366637497
+    },
+    {
+      "type": "edit",
+      "id": "2f3b05d288f358ea",
+      "item": {
+        "type": "paragraph",
+        "id": "2f3b05d288f358ea",
+        "text": "We could even start suspecting that this implementation might be quite fast. But let’s not get ahead of ourselves. We still need to complete the implementation traversal of matches: first. Now we need to implement ifYouMatch:. . . for stars, pounds, and the other characters."
+      },
+      "date": 1667366639209
+    },
+    {
+      "type": "add",
+      "id": "3ac9137e8c355173",
+      "item": {
+        "type": "paragraph",
+        "id": "3ac9137e8c355173",
+        "text": "And here, it is at this exact point that the full benefit of classes comes to fruition. Because it is due to the existence of the classes we created, and to the fact that the contexts they imply are specific enough, that behavior can proceed without asking any unnecessary questions. It just runs like electrons flowing down a copper wire. They do not ask for permission. They do not get into ifTrue:ifFalse: existential considerations. They just behave that way because they cannot help themselves."
+      },
+      "after": "2f3b05d288f358ea",
+      "date": 1667366674728
+    },
+    {
+      "type": "edit",
+      "id": "3ac9137e8c355173",
+      "item": {
+        "type": "paragraph",
+        "id": "3ac9137e8c355173",
+        "text": "And here, it is at this exact point that the full benefit of classes comes to fruition. Because it is due to the existence of the classes we created, and to the fact that the contexts they imply are specific enough, that behavior can proceed without asking any unnecessary questions. It just runs like electrons flowing down a copper wire. They do not ask for permission. They do not get into ifTrue:ifFalse: existential considerations. They just behave that way because *they cannot help themselves*."
+      },
+      "date": 1667366715932
+    },
+    {
+      "type": "edit",
+      "id": "3ac9137e8c355173",
+      "item": {
+        "type": "markdown",
+        "id": "3ac9137e8c355173",
+        "text": "And here, it is at this exact point that the full benefit of classes comes to fruition. Because it is due to the existence of the classes we created, and to the fact that the contexts they imply are specific enough, that behavior can proceed without asking any unnecessary questions. It just runs like electrons flowing down a copper wire. They do not ask for permission. They do not get into ifTrue:ifFalse: existential considerations. They just behave that way because *they cannot help themselves*."
+      },
+      "date": 1667366717126
+    },
+    {
+      "type": "edit",
+      "id": "3ac9137e8c355173",
+      "item": {
+        "type": "markdown",
+        "id": "3ac9137e8c355173",
+        "text": "And here, it is at this exact point that the full benefit of classes comes to fruition. Because it is due to the existence of the classes we created, and to the fact that the contexts they imply are specific enough, that behavior can proceed without asking any unnecessary questions. It just runs like electrons flowing down a copper wire. They do not ask for permission. They do not get into ifTrue:ifFalse: existential considerations. They just behave that way because *they cannot help themselves*.\n"
+      },
+      "date": 1667366760331
+    },
+    {
+      "type": "add",
+      "id": "a85dc7f7485c63aa",
+      "item": {
+        "type": "markdown",
+        "id": "a85dc7f7485c63aa",
+        "text": "This is how we have designed our implementation. Now we will see our guiding principles in action."
+      },
+      "after": "3ac9137e8c355173",
+      "date": 1667366761951
+    },
+    {
+      "type": "edit",
+      "id": "a85dc7f7485c63aa",
+      "item": {
+        "type": "markdown",
+        "id": "a85dc7f7485c63aa",
+        "text": "This is how we have designed our implementation. Now we will see our guiding principles in action. As before, let’s spell out the shape of the message we are"
+      },
+      "date": 1667366780248
+    },
+    {
+      "type": "edit",
+      "id": "a85dc7f7485c63aa",
+      "item": {
+        "type": "markdown",
+        "id": "a85dc7f7485c63aa",
+        "text": "This is how we have designed our implementation. Now we will see our guiding principles in action. As before, let’s spell out the shape of the message we are trying to implement first, so we can refer to things by their names."
+      },
+      "date": 1667366789266
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bf9718aa7e7d07e9"
+      },
+      "id": "bf9718aa7e7d07e9",
+      "type": "add",
+      "after": "a85dc7f7485c63aa",
+      "date": 1667366797451
+    },
+    {
+      "type": "edit",
+      "id": "bf9718aa7e7d07e9",
+      "item": {
+        "type": "code",
+        "id": "bf9718aa7e7d07e9",
+        "text": "CondensedClassBasedCharacter>> ifYouMatch: aCharacter let: aPatternString startingAt: aNewPatternIndex continueBackwardsMatches: aMatchString from: aNewMatchIndex"
+      },
+      "date": 1667366799472
+    },
+    {
+      "type": "edit",
+      "id": "bf9718aa7e7d07e9",
+      "item": {
+        "type": "code",
+        "id": "bf9718aa7e7d07e9",
+        "text": "CondensedClassBasedCharacter>> \n  ifYouMatch: aCharacter \n  let: aPatternString \n  startingAt: aNewPatternIndex\n  continueBackwardsMatches: aMatchString \n  from: aNewMatchIndex"
+      },
+      "date": 1667366832544
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "35bcccf248faf4bc"
+      },
+      "id": "35bcccf248faf4bc",
+      "type": "add",
+      "after": "bf9718aa7e7d07e9",
+      "date": 1667366855281
+    },
+    {
+      "type": "edit",
+      "id": "35bcccf248faf4bc",
+      "item": {
+        "type": "paragraph",
+        "id": "35bcccf248faf4bc",
+        "text": "This message will have three implementations: one for “ordinary” characters, implemented in the class shown above, one for pound characters implemented in the class of pound characters, and one for star characters implemented in the class of star characters. So, if the receiver is a pound character, how should this be implemented? Clearly, no checking needs to be done because the pound character matches everything. In this case, the unique traversal step can always be taken. Therefore, we simply let the intervals shrink and pass the baton to the string again. In other words,"
+      },
+      "date": 1667366857303
+    },
+    {
+      "type": "edit",
+      "id": "35bcccf248faf4bc",
+      "item": {
+        "type": "paragraph",
+        "id": "35bcccf248faf4bc",
+        "text": "This message will have three implementations: one for “ordinary” characters, implemented in the class shown above, one for pound characters implemented in the class of pound characters, and one for star characters implemented in the class of star characters. "
+      },
+      "date": 1667366862821
+    },
+    {
+      "type": "add",
+      "id": "671ea0d2a3932b5c",
+      "item": {
+        "type": "paragraph",
+        "id": "671ea0d2a3932b5c",
+        "text": "So, if the receiver is a pound character, how should this be implemented? Clearly, no checking needs to be done because the pound character matches everything. In this case, the unique traversal step can always be taken. Therefore, we simply let the intervals shrink and pass the baton to the string again. In other words,"
+      },
+      "after": "35bcccf248faf4bc",
+      "date": 1667366864368
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b356b5443c409dd2"
+      },
+      "id": "b356b5443c409dd2",
+      "type": "add",
+      "after": "671ea0d2a3932b5c",
+      "date": 1667367001971
+    },
+    {
+      "type": "edit",
+      "id": "b356b5443c409dd2",
+      "item": {
+        "type": "code",
+        "id": "b356b5443c409dd2",
+        "text": "ifYouMatch: aCharacter let: aPatternString startingAt: aNewPatternIndex continueBackwardsMatches: aMatchString from: aNewMatchIndex\n\t^ aPatternString\n\t\tstartingAt: aNewPatternIndex\n\t\tcontinueBackwardsMatches: aMatchString\n\t\tfrom: aNewMatchIndex"
+      },
+      "date": 1667367008872
+    },
+    {
+      "type": "edit",
+      "id": "b356b5443c409dd2",
+      "item": {
+        "type": "code",
+        "id": "b356b5443c409dd2",
+        "text": "CondensedPoundCharacter>>\nifYouMatch: aCharacter let: aPatternString startingAt: aNewPatternIndex continueBackwardsMatches: aMatchString from: aNewMatchIndex\n\t^ aPatternString\n\t\tstartingAt: aNewPatternIndex\n\t\tcontinueBackwardsMatches: aMatchString\n\t\tfrom: aNewMatchIndex"
+      },
+      "date": 1667367017809
+    },
+    {
+      "type": "edit",
+      "id": "b356b5443c409dd2",
+      "item": {
+        "type": "code",
+        "id": "b356b5443c409dd2",
+        "text": "CondensedPoundCharacter>>\nifYouMatch: aCharacter \nlet: aPatternString \nstartingAt: aNewPatternIndex \ncontinueBackwardsMatches: aMatchString \nfrom: aNewMatchIndex\n  ^ aPatternString\n    startingAt: aNewPatternIndex\n    continueBackwardsMatches: aMatchString\n    from: aNewMatchIndex"
+      },
+      "date": 1667367074723
+    },
+    {
+      "type": "edit",
+      "id": "b356b5443c409dd2",
+      "item": {
+        "type": "code",
+        "id": "b356b5443c409dd2",
+        "text": "CondensedPoundCharacter>>\nifYouMatch: aCharacter \nlet: aPatternString \nstartingAt: aNewPatternIndex \ncontinueBackwardsMatches: aMatchString \nfrom: aNewMatchIndex\n\n  ^ aPatternString\n    startingAt: aNewPatternIndex\n    continueBackwardsMatches: aMatchString\n    from: aNewMatchIndex"
+      },
+      "date": 1667367080611
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0303f3c6e1ebd7e4"
+      },
+      "id": "0303f3c6e1ebd7e4",
+      "type": "add",
+      "after": "b356b5443c409dd2",
+      "date": 1667367100575
+    },
+    {
+      "type": "edit",
+      "id": "0303f3c6e1ebd7e4",
+      "item": {
+        "type": "paragraph",
+        "id": "0303f3c6e1ebd7e4",
+        "text": "This implementation does pretty much nothing. And here, nothing is meant quite literally. In particular, note that there is not even a single send of == ! Also, pay attention to how the existence of a context representing the pound character makes it possible to let things happen in a mandatory fashion, without it being necessary to forcefully tell objects what to do nor to draw any distinctions whatsoever."
+      },
+      "date": 1667367103174
+    },
+    {
+      "type": "edit",
+      "id": "0303f3c6e1ebd7e4",
+      "item": {
+        "type": "paragraph",
+        "id": "0303f3c6e1ebd7e4",
+        "text": "This implementation does pretty much nothing. And here, nothing is meant quite literally. In particular, note that *there is not even a single send of* ==! Also, pay attention to how the existence of a context representing the pound character makes it possible to let things happen in a mandatory fashion, without it being necessary to forcefully tell objects what to do nor to draw any distinctions whatsoever."
+      },
+      "date": 1667367140126
+    },
+    {
+      "type": "edit",
+      "id": "0303f3c6e1ebd7e4",
+      "item": {
+        "type": "markdown",
+        "id": "0303f3c6e1ebd7e4",
+        "text": "This implementation does pretty much nothing. And here, nothing is meant quite literally. In particular, note that *there is not even a single send of* ==! Also, pay attention to how the existence of a context representing the pound character makes it possible to let things happen in a mandatory fashion, without it being necessary to forcefully tell objects what to do nor to draw any distinctions whatsoever."
+      },
+      "date": 1667367143265
+    },
+    {
+      "type": "edit",
+      "id": "0303f3c6e1ebd7e4",
+      "item": {
+        "type": "markdown",
+        "id": "0303f3c6e1ebd7e4",
+        "text": "This implementation does pretty much nothing. And here, nothing is meant quite literally. In particular, note that *there is not even a single send of* ==! Also, pay attention to how the existence of a context representing the pound character makes it possible to let things happen in a *mandatory* fashion, without it being necessary to forcefully tell objects what to do nor to draw any distinctions whatsoever."
+      },
+      "date": 1667367162686
+    },
+    {
+      "type": "edit",
+      "id": "0303f3c6e1ebd7e4",
+      "item": {
+        "type": "markdown",
+        "id": "0303f3c6e1ebd7e4",
+        "text": "This implementation does pretty much nothing. And here, nothing is meant quite literally. In particular, note that *there is not even a single send of* ==! Also, pay attention to how the existence of a context representing the pound character makes it possible to let things happen in a *mandatory* fashion, without it being necessary to forcefully tell objects what to do nor to draw any distinctions whatsoever.\n"
+      },
+      "date": 1667367217187
+    },
+    {
+      "type": "add",
+      "id": "d9668838f7070a59",
+      "item": {
+        "type": "markdown",
+        "id": "d9668838f7070a59",
+        "text": "But what if the receiver was an “ordinary” character? In that case, the context may determine that the step should not be taken. This would occur only when"
+      },
+      "after": "0303f3c6e1ebd7e4",
+      "date": 1667367223983
+    },
+    {
+      "type": "edit",
+      "id": "d9668838f7070a59",
+      "item": {
+        "type": "markdown",
+        "id": "d9668838f7070a59",
+        "text": "But what if the receiver was an “ordinary” character? In that case, the context may determine that the step should not be taken. This would occur only when the receiver and the character passed as an argument do not match. Therefore, a simple refinement to the implementation above would let the traversal carry on without difficulty.\n"
+      },
+      "date": 1667367232994
+    },
+    {
+      "type": "add",
+      "id": "418825bf8fe584d2",
+      "item": {
+        "type": "markdown",
+        "id": "418825bf8fe584d2",
+        "text": "[…]"
+      },
+      "after": "d9668838f7070a59",
+      "date": 1667367234919
+    },
+    {
+      "type": "edit",
+      "id": "92dcff111b228f8d",
+      "item": {
+        "type": "markdown",
+        "id": "92dcff111b228f8d",
+        "text": "Most interestingly, upon quick inspection, we will find that every potential direction in which to move is known at this point. Actually, there is a quite limited amount of them. So much so, in fact, that there is just one of them: the only thing that can happen is that patternIndex and matchIndex are decremented, because matches: is going from right to left. If this step can be taken, then matches: would continue matching backwards with different end points. If it cannot be taken, it is because the context is a star character and matching needs to continue in a left-to-right fashion from the beginning of the pattern and the string. Therefore, we should let the corresponding characters tell the string what to do according to their identity. […]\n\n> The constraints squeeze the answer, quite literally, from nothing. It is almost a miracle."
+      },
+      "date": 1667369898317
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "89594be948378119"
+      },
+      "id": "89594be948378119",
+      "type": "add",
+      "after": "418825bf8fe584d2",
+      "date": 1667424637623
+    },
+    {
+      "type": "edit",
+      "id": "89594be948378119",
+      "item": {
+        "type": "code",
+        "id": "89594be948378119",
+        "text": "CondensedClassBasedCharacter>> ifYouMatch: aCharacter let: aPatternString startingAt: aNewPatternIndex continueBackwardsMatches: aMatchString from: aNewMatchIndex ^(self matches: aCharacter) and: [ aPatternString startingAt: aNewPatternIndex continueBackwardsMatches: aMatchString from: aNewMatchIndex ]"
+      },
+      "date": 1667424640043
+    },
+    {
+      "id": "89594be948378119",
+      "type": "move",
+      "order": [
+        "24f81fafee40eb0f",
+        "4f27699f66582783",
+        "b3a69b88c577cdd0",
+        "92dcff111b228f8d",
+        "d94e8224c63c8e73",
+        "2f3b05d288f358ea",
+        "3ac9137e8c355173",
+        "a85dc7f7485c63aa",
+        "bf9718aa7e7d07e9",
+        "35bcccf248faf4bc",
+        "671ea0d2a3932b5c",
+        "b356b5443c409dd2",
+        "0303f3c6e1ebd7e4",
+        "d9668838f7070a59",
+        "89594be948378119",
+        "418825bf8fe584d2"
+      ],
+      "date": 1667424644847
+    },
+    {
+      "type": "edit",
+      "id": "89594be948378119",
+      "item": {
+        "type": "code",
+        "id": "89594be948378119",
+        "text": "CondensedClassBasedCharacter>> \n  ifYouMatch: aCharacter \n  let: aPatternString \n  startingAt: aNewPatternIndex continueBackwardsMatches: aMatchString from: aNewMatchIndex ^(self matches: aCharacter) and: [ aPatternString startingAt: aNewPatternIndex continueBackwardsMatches: aMatchString from: aNewMatchIndex ]"
+      },
+      "date": 1667424671105
+    },
+    {
+      "type": "edit",
+      "id": "89594be948378119",
+      "item": {
+        "type": "code",
+        "id": "89594be948378119",
+        "text": "CondensedClassBasedCharacter>> \n  ifYouMatch: aCharacter \n  let: aPatternString \n  startingAt: aNewPatternIndex\n  continueBackwardsMatches: aMatchString from: aNewMatchIndex ^(self matches: aCharacter) and: [ aPatternString startingAt: aNewPatternIndex continueBackwardsMatches: aMatchString from: aNewMatchIndex ]"
+      },
+      "date": 1667424679411
+    },
+    {
+      "type": "edit",
+      "id": "89594be948378119",
+      "item": {
+        "type": "code",
+        "id": "89594be948378119",
+        "text": "CondensedClassBasedCharacter>> \n  ifYouMatch: aCharacter \n  let: aPatternString \n  startingAt: aNewPatternIndex\n  continueBackwardsMatches: aMatchString \n  from: aNewMatchIndex \n\n    ^(self matches: aCharacter) and: \n      [ \n        aPatternString \n          startingAt: aNewPatternIndex\n          continueBackwardsMatches: aMatchString \n          from: aNewMatchIndex \n      ]"
+      },
+      "date": 1667424767640
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "cf3074357151c18c"
+      },
+      "id": "cf3074357151c18c",
+      "type": "add",
+      "after": "418825bf8fe584d2",
+      "date": 1667424810370
+    },
+    {
+      "id": "cf3074357151c18c",
+      "type": "move",
+      "order": [
+        "24f81fafee40eb0f",
+        "4f27699f66582783",
+        "b3a69b88c577cdd0",
+        "92dcff111b228f8d",
+        "d94e8224c63c8e73",
+        "2f3b05d288f358ea",
+        "3ac9137e8c355173",
+        "a85dc7f7485c63aa",
+        "bf9718aa7e7d07e9",
+        "35bcccf248faf4bc",
+        "671ea0d2a3932b5c",
+        "b356b5443c409dd2",
+        "0303f3c6e1ebd7e4",
+        "d9668838f7070a59",
+        "89594be948378119",
+        "cf3074357151c18c",
+        "418825bf8fe584d2"
+      ],
+      "date": 1667424813213
+    },
+    {
+      "type": "edit",
+      "id": "cf3074357151c18c",
+      "item": {
+        "type": "paragraph",
+        "id": "cf3074357151c18c",
+        "text": "Again, not a single occurrence of ifTrue:ifFalse:. Now, it could argued that eventually there will be sends of ==, happening somewhere in the implementation of matches: for characters. However, they will only occur because the value of the comparison cannot be determined at design time. In other words, those == sends will draw distinctions the value of which can only be known at run time. Finally, how should this message be implemented for star characters? Clearly,"
+      },
+      "date": 1667424815148
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "d381acadff14b85e",
+        "text": "This completes the implementation of backwards matches:. "
+      },
+      "id": "d381acadff14b85e",
+      "type": "add",
+      "after": "418825bf8fe584d2",
+      "date": 1667436032513
+    },
+    {
+      "type": "edit",
+      "id": "d381acadff14b85e",
+      "item": {
+        "type": "paragraph",
+        "id": "d381acadff14b85e",
+        "text": "This completes the implementation of backwards matches:. "
+      },
+      "date": 1667436035443
+    },
+    {
+      "type": "edit",
+      "id": "d381acadff14b85e",
+      "item": {
+        "type": "paragraph",
+        "id": "d381acadff14b85e",
+        "text": "This completes the implementation of backwards matches:. "
+      },
+      "date": 1667436043389
+    },
+    {
+      "type": "add",
+      "id": "44ce7d8ad54a53be",
+      "item": {
+        "type": "paragraph",
+        "id": "44ce7d8ad54a53be",
+        "text": "Let’s take a quick break and go over our example to see how what we wrote so far would work."
+      },
+      "after": "d381acadff14b85e",
+      "date": 1667436044370
+    },
+    {
+      "type": "edit",
+      "id": "44ce7d8ad54a53be",
+      "item": {
+        "type": "paragraph",
+        "id": "44ce7d8ad54a53be",
+        "text": "Let’s take a quick break and go over our example to see how what we wrote so far would work."
+      },
+      "date": 1667436053993
+    },
+    {
+      "type": "add",
+      "id": "09be1d3d0d24e069",
+      "item": {
+        "type": "paragraph",
+        "id": "09be1d3d0d24e069",
+        "text": ""
+      },
+      "after": "44ce7d8ad54a53be",
+      "date": 1667436055607
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "9a166915c9dc0825",
+        "text": "’a#c*fg#ij*x#z’ matches: ’abcQQfgfghijQQxyz’ \"true\" "
+      },
+      "id": "9a166915c9dc0825",
+      "type": "add",
+      "after": "1d510514cf33db06",
+      "date": 1667436058285
+    },
+    {
+      "id": "9a166915c9dc0825",
+      "type": "move",
+      "order": [
+        "24f81fafee40eb0f",
+        "4f27699f66582783",
+        "b3a69b88c577cdd0",
+        "92dcff111b228f8d",
+        "d94e8224c63c8e73",
+        "2f3b05d288f358ea",
+        "3ac9137e8c355173",
+        "a85dc7f7485c63aa",
+        "bf9718aa7e7d07e9",
+        "35bcccf248faf4bc",
+        "671ea0d2a3932b5c",
+        "b356b5443c409dd2",
+        "0303f3c6e1ebd7e4",
+        "d9668838f7070a59",
+        "89594be948378119",
+        "cf3074357151c18c",
+        "418825bf8fe584d2",
+        "d381acadff14b85e",
+        "44ce7d8ad54a53be",
+        "09be1d3d0d24e069",
+        "9a166915c9dc0825",
+        "1d510514cf33db06"
+      ],
+      "date": 1667436060574,
+      "error": {
+        "type": "error",
+        "msg": "Internal Server Error",
+        "response": "Server Ignoring move. Try reload."
+      }
+    },
+    {
+      "type": "add",
+      "id": "1d510514cf33db06",
+      "item": {
+        "type": "paragraph",
+        "id": "1d510514cf33db06",
+        "text": "The pattern would receive matches:. As per the implementation of matches:, the pattern would begin matching backwards. The first step of this process is to ask the pattern’s $z to continue backwards matching if it matches the string’s $z. The character receiving this request is an ordinary character because it represents $z. Because of how ordinary characters are designed to fulfil the request from the pattern, the pattern’s $z checks whether it matches the string’s $z or not. Since it does, it tells the pattern to continue backwards matching within the constrained range provided by the pattern in the first place. Thus, our example has been reduced by one character, as shown below."
+      },
+      "after": "09be1d3d0d24e069",
+      "date": 1667436061510
+    },
+    {
+      "type": "remove",
+      "id": "09be1d3d0d24e069",
+      "date": 1667436064247
+    },
+    {
+      "type": "edit",
+      "id": "9a166915c9dc0825",
+      "item": {
+        "type": "code",
+        "id": "9a166915c9dc0825",
+        "text": "’a#c*fg#ij*x#z’ matches: ’abcQQfgfghijQQxyz’ \"true\" "
+      },
+      "date": 1667436067823
+    },
+    {
+      "type": "fork",
+      "date": 1667436073350
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ba32576a623ac767"
+      },
+      "id": "ba32576a623ac767",
+      "type": "add",
+      "after": "1d510514cf33db06",
+      "date": 1667436113595
+    },
+    {
+      "type": "edit",
+      "id": "ba32576a623ac767",
+      "item": {
+        "type": "code",
+        "id": "ba32576a623ac767",
+        "text": "’a#c*fg#ij*x#’ matches: ’abcQQfgfghijQQxy’"
+      },
+      "date": 1667436115681
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5277967a74e80d7d"
+      },
+      "id": "5277967a74e80d7d",
+      "type": "add",
+      "after": "ba32576a623ac767",
+      "date": 1667436117070
+    },
+    {
+      "type": "edit",
+      "id": "5277967a74e80d7d",
+      "item": {
+        "type": "paragraph",
+        "id": "5277967a74e80d7d",
+        "text": "[…]"
+      },
+      "date": 1667436120124
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f88154eeb966a07b"
+      },
+      "id": "f88154eeb966a07b",
+      "type": "add",
+      "after": "5277967a74e80d7d",
+      "date": 1667436248605
+    },
+    {
+      "type": "edit",
+      "id": "f88154eeb966a07b",
+      "item": {
+        "type": "paragraph",
+        "id": "f88154eeb966a07b",
+        "text": "[…] "
+      },
+      "date": 1667436254871
+    },
+    {
+      "type": "edit",
+      "id": "f88154eeb966a07b",
+      "item": {
+        "type": "paragraph",
+        "id": "f88154eeb966a07b",
+        "text": "[…] By means of polymorphism alone, the matching direction has been switched from backwards to forward. This can be done because, as all potential cases are modeled by classes, it is possible to just do what needs to be done for every particular situation without needing to do any thinking whatsoever — in other words, it is possible to take action without having to rediscover what the context is, because that knowledge is implied by the very context in which action takes place to begin with."
+      },
+      "date": 1667436266369
+    },
+    {
+      "type": "edit",
+      "id": "f88154eeb966a07b",
+      "item": {
+        "type": "paragraph",
+        "id": "f88154eeb966a07b",
+        "text": "[…] By means of polymorphism alone, the matching direction has been switched from backwards to forward. This can be done because, as all potential cases are modeled by classes, it is possible to just do what needs to be done for every particular situation without needing to do any thinking whatsoever — in other words, *it is possible to take action without having to rediscover what the context is, because that knowledge is implied by the very context in which action takes place to begin with."
+      },
+      "date": 1667436294343
+    },
+    {
+      "type": "edit",
+      "id": "f88154eeb966a07b",
+      "item": {
+        "type": "paragraph",
+        "id": "f88154eeb966a07b",
+        "text": "[…] By means of polymorphism alone, the matching direction has been switched from backwards to forward. This can be done because, as all potential cases are modeled by classes, it is possible to just do what needs to be done for every particular situation without needing to do any thinking whatsoever — in other words, *it is possible to take action without having to rediscover what the context is, because that knowledge is implied by the very context in which action takes place to begin with.*"
+      },
+      "date": 1667436302033
+    },
+    {
+      "type": "edit",
+      "id": "f88154eeb966a07b",
+      "item": {
+        "type": "markdown",
+        "id": "f88154eeb966a07b",
+        "text": "[…] By means of polymorphism alone, the matching direction has been switched from backwards to forward. This can be done because, as all potential cases are modeled by classes, it is possible to just do what needs to be done for every particular situation without needing to do any thinking whatsoever — in other words, *it is possible to take action without having to rediscover what the context is, because that knowledge is implied by the very context in which action takes place to begin with.*"
+      },
+      "date": 1667436303002
+    },
+    {
+      "id": "9a166915c9dc0825",
+      "type": "move",
+      "order": [
+        "24f81fafee40eb0f",
+        "4f27699f66582783",
+        "b3a69b88c577cdd0",
+        "92dcff111b228f8d",
+        "d94e8224c63c8e73",
+        "2f3b05d288f358ea",
+        "3ac9137e8c355173",
+        "a85dc7f7485c63aa",
+        "bf9718aa7e7d07e9",
+        "35bcccf248faf4bc",
+        "671ea0d2a3932b5c",
+        "b356b5443c409dd2",
+        "0303f3c6e1ebd7e4",
+        "d9668838f7070a59",
+        "89594be948378119",
+        "cf3074357151c18c",
+        "418825bf8fe584d2",
+        "d381acadff14b85e",
+        "44ce7d8ad54a53be",
+        "9a166915c9dc0825",
+        "1d510514cf33db06",
+        "ba32576a623ac767",
+        "5277967a74e80d7d",
+        "f88154eeb966a07b"
+      ],
+      "date": 1667436356304
+    },
+    {
+      "type": "edit",
+      "id": "f88154eeb966a07b",
+      "item": {
+        "type": "markdown",
+        "id": "f88154eeb966a07b",
+        "text": "[…] By means of polymorphism alone, the matching direction has been switched from backwards to forward. This can be done because, as all potential cases are modeled by classes, it is possible to just do what needs to be done for every particular situation without needing to do any thinking whatsoever — in other words, *it is possible to take action without having to rediscover what the context is, because that knowledge is implied by the very context in which action takes place to begin with.*\n"
+      },
+      "date": 1667436494328
+    },
+    {
+      "type": "add",
+      "id": "f14610dc21c9a182",
+      "item": {
+        "type": "markdown",
+        "id": "f14610dc21c9a182",
+        "text": "Now that matching backwards is taken care of, we need to implement how patterns will match forward. In order to continue painting the implementation of matches:, then, the first thing we need to do is to provide a method for the message below."
+      },
+      "after": "f88154eeb966a07b",
+      "date": 1667436495285
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4a2136c5216c77ec"
+      },
+      "id": "4a2136c5216c77ec",
+      "type": "add",
+      "after": "f14610dc21c9a182",
+      "date": 1667436503258
+    },
+    {
+      "type": "edit",
+      "id": "4a2136c5216c77ec",
+      "item": {
+        "type": "code",
+        "id": "4a2136c5216c77ec",
+        "text": "ClassBasedCharacterArray>> startingAt: patternIndex upTo: maxPatternIndex continueForwardMatches: aMatchString from: matchIndex upTo: maxMatchIndex"
+      },
+      "date": 1667436505797
+    },
+    {
+      "type": "edit",
+      "id": "4a2136c5216c77ec",
+      "item": {
+        "type": "code",
+        "id": "4a2136c5216c77ec",
+        "text": "ClassBasedCharacterArray>> \n  startingAt: patternIndex \n  upTo: maxPatternIndex \n  continueForwardMatches: aMatchString from: matchIndex upTo: maxMatchIndex"
+      },
+      "date": 1667436522533
+    },
+    {
+      "type": "edit",
+      "id": "4a2136c5216c77ec",
+      "item": {
+        "type": "code",
+        "id": "4a2136c5216c77ec",
+        "text": "ClassBasedCharacterArray>> \n  startingAt: patternIndex \n  upTo: maxPatternIndex \n  continueForwardMatches: aMatchString \n  from: matchIndex \n  upTo: maxMatchIndex"
+      },
+      "date": 1667436533079
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5947035cf528fa3c"
+      },
+      "id": "5947035cf528fa3c",
+      "type": "add",
+      "after": "4a2136c5216c77ec",
+      "date": 1667436544849
+    },
+    {
+      "type": "edit",
+      "id": "5947035cf528fa3c",
+      "item": {
+        "type": "paragraph",
+        "id": "5947035cf528fa3c",
+        "text": "The first we need to do is to distinguish whether the traversal has arrived at an interesting attractor or not. Fortunately, we can easily adapt the checks we performed when the traversal was going backwards. In a similar manner, we can reuse our strategy for letting the characters make a decision. Therefore we write:"
+      },
+      "date": 1667436547510
+    },
+    {
+      "type": "add",
+      "id": "d9257c4d667efd6f",
+      "item": {
+        "type": "paragraph",
+        "id": "d9257c4d667efd6f",
+        "text": "[…]"
+      },
+      "after": "5947035cf528fa3c",
+      "date": 1667436549734
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7233ad665ee7b699"
+      },
+      "id": "7233ad665ee7b699",
+      "type": "add",
+      "after": "d9257c4d667efd6f",
+      "date": 1667436915109
+    },
+    {
+      "type": "edit",
+      "id": "7233ad665ee7b699",
+      "item": {
+        "type": "paragraph",
+        "id": "7233ad665ee7b699",
+        "text": "[…] Things look decent so far. But you may have noticed that these objects are being extremely lazy. Where is the piece that actually does something?"
+      },
+      "date": 1667436918690
+    },
+    {
+      "type": "add",
+      "id": "242b76112d6bfcdd",
+      "item": {
+        "type": "paragraph",
+        "id": "242b76112d6bfcdd",
+        "text": "[…]"
+      },
+      "after": "7233ad665ee7b699",
+      "date": 1667436928892
+    },
+    {
+      "type": "add",
+      "id": "95c6a0e19721c12e",
+      "item": {
+        "type": "paragraph",
+        "id": "95c6a0e19721c12e",
+        "text": "Well, here it is. Let’s examine ordinary character receivers now. We are in the context of having just seen a star, and now we have two possible outcomes: either the receiver matches aCharacter, or it does not. If it does not, we cannot conclude anything because it may be that we need to go over a few characters to find a match. So what we need to do is try to skip one character in the string and try again by delegating the job back to the pattern. This is perfectly fine because we have just seen a star. The receiver knows this because it has received this message, not any other message."
+      },
+      "after": "7233ad665ee7b699",
+      "date": 1667436939868
+    }
+  ]
+}

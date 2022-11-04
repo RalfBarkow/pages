@@ -1,0 +1,254 @@
+{
+  "title": "StartupLoader",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "35bcc62926893349",
+      "text": "See Mariano Martinez Peck's [post](https://marianopeck.wordpress.com/2012/05/12/startuploader-running-startup-scripts-in-pharo/)"
+    },
+    {
+      "type": "code",
+      "id": "49fd3856f9f64151",
+      "text": "StartupPreferencesLoader"
+    },
+    {
+      "type": "markdown",
+      "id": "c70417413831bfd0",
+      "text": "StartupPreferencesLoader searches for and executes .st files from certain locations such as Library/Preferences/pharo on Mac OS X.  \n\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "4099906b359c510d",
+      "text": "StartupPreferencesLoader looks within such locations for a 'pharo' folder. This contains the startup scripts common to all versions of [[Pharo]], and also optionally a folder per Pharo version holding startup scripts suitable for that version only.  So a typical directory layout might be...\n\n.../some/folders/pharo/Content/Resources/pharo.image.\n.../some/folders/pharo/Content/Resources/startup.st\n.../some/folders/.config/pharo/author.st\n.../some/folders/.config/pharo/useSharedCache.st\n.../some/folders/.config/pharo/1.4/mystartupFor14only.st\n.../some/folders/.config/pharo/2.0/mystartupFor20only.st\n\n(**Note however that '.config' is an invalid filename on Windows, so '..config' is used instead)"
+    },
+    {
+      "type": "markdown",
+      "id": "ec7569a7c1b15e80",
+      "text": "To know the real values for you...\nPrint the result of \"StartupPreferencesLoader preferencesGeneralFolder\" which holds the startup scripts common to all versions of Pharo.\n"
+    },
+    {
+      "type": "code",
+      "id": "e3d4f9460dc3595c",
+      "text": "StartupPreferencesLoader preferencesGeneralFolder"
+    },
+    {
+      "type": "markdown",
+      "id": "0c3c3c378bab75ea",
+      "text": "Print the result of \"StartupPreferencesLoader preferencesVersionFolder\" which holds the startup scripts specific to the version of the current image.\n\n-----------\n\n\nStartupPreferencesLoader example\n\nwill define a script sample startup.st in your unix root on unix \n\nIts contents is \n\nStartupPreferencesLoader default executeAtomicItems: {\n\tStartupAtomicItem name: 'Open Help' code: 'Workspace openContents: ''Here is just an example of how to use the StartupPreferencesLoader.\nI should only be displayed once.\n\t\nYou can also see StartupPreferencesLoader class>>#example'' label: ''Help''' isSingleton: true.\n\tStartupAtomicItem name: 'Open Workspace' code: 'Workspace openContents: ''I should be displayed each time'''.\n}\n\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "71cf6a28c1630357",
+      "text": "EXAMPLE 1\n============\n\n\t\" an example of script generation \"\n\t| item1 item2 |\n\titem1 := StartupAction name: 'Open Help' code: 'Smalltalk tools workspace openContents: ''Here is just an example of how to use the StartupPreferencesLoader.\nI should only be displayed once.\n\t\n You can also see StartupPreferencesLoader class>>#example'' label: ''Help''' runOnce: true.\n\titem2 := StartupAction name: 'Open Workspace' code:  [ Workspace openContents: 'I should be displayed each time' ].\n\tStartupPreferencesLoader default addAtStartupInGeneralPreferenceFolder: {item1. item2}.\n\t\n\tStartupPreferencesLoader default loadFromDefaultLocations.\n\tStartupPreferencesLoader default loadFromDefaultLocations.\n\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "b4be64c3a9f6999e",
+      "text": "EXAMPLE 2\n============\n\n\t\" it's my personal script provided as example\"\n\t| items |\n\titems := OrderedCollection new.\n\titems add: (StartupAction name: 'Set the Author' code: [ Author fullName: Author fullName printString ]). \"replace it by your name\"\n\t\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'author.st'.\n\titems removeAll.\n\t\n\titems add: (StartupAction name: 'Dragging Option' code: [ UITheme defaultSettings fastDragging: true ]).\n\titems add: (StartupAction name: 'Dialog Auto Accept' code: [ TextEditorDialogWindow autoAccept: true ]).\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'settings.st'.\n\titems removeAll.\n\t\n\titems add: (StartupAction name: 'Fonts option' code: [ FreeTypeSystemSettings loadFt2Library: true.\t\n\tFreeTypeFontProvider current updateFromSystem.\n\tStandardFonts defaultFont: (LogicalFont familyName: 'Lucida Grande' pointSize: 10) forceNotBold.\n\tGraphicFontSettings resetAllFontToDefault.\n\tStandardFonts codeFont: (LogicalFont familyName: 'Consolas' pointSize: 10).] runOnce: true).\n\t\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'fonts.st'.\n\titems removeAll.\n\tStartupPreferencesLoader default addAtStartupInImageDirectory: items.\n\t\n\tStartupPreferencesLoader default loadFromDefaultLocations.\n\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "3bf755adbaae5cb6",
+      "text": "EXAMPLE 3\n============\n\n\t| items |\n\titems := OrderedCollection new.\n\t\n\titems add: (StartupAction name: 'General Preferences for all Pharo versions' code: [ \n\t\tFileStream stdout lf; nextPutAll: 'Setting general preferences for all Pharo versions'; lf.\n\t\tFileStream stdout lf; nextPutAll: 'Finished'; lf.\n\t\t ]).\n\tStartupPreferencesLoader default addAtStartupInGeneralPreferenceFolder: items named: 'generalSettings.st'.\n\t\n\titems removeAll.\n\titems add: (StartupAction name: 'Settings' code: [ \n\t\tFileStream stdout lf; nextPutAll: 'Setting general preferences for Pharo 2.0'; lf.\n\t\tFileStream stdout lf; nextPutAll: 'Finished'; lf.\n\t\t ]).\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'settings.st'.\n\t\n\titems removeAll.\n\titems add: (StartupAction name: 'Image diretory' code: [ \n\t\tFileStream stdout lf; nextPutAll: 'Setting preferences for image directory'; lf.\n\t\tFileStream stdout lf; nextPutAll: 'Finished'; lf.\n\t\t ]).\n\tStartupPreferencesLoader default addAtStartupInImageDirectory: items "
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "StartupLoader",
+        "story": []
+      },
+      "date": 1667208104528
+    },
+    {
+      "id": "35bcc62926893349",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "35bcc62926893349",
+        "text": "See Mariano Martinez Peck's [post](https://marianopeck.wordpress.com/2012/05/12/startuploader-running-startup-scripts-in-pharo/)"
+      },
+      "date": 1667208107527
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "49fd3856f9f64151"
+      },
+      "id": "49fd3856f9f64151",
+      "type": "add",
+      "after": "35bcc62926893349",
+      "date": 1667208172707
+    },
+    {
+      "type": "edit",
+      "id": "49fd3856f9f64151",
+      "item": {
+        "type": "code",
+        "id": "49fd3856f9f64151",
+        "text": "StartupPreferencesLoader"
+      },
+      "date": 1667208174362
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c70417413831bfd0"
+      },
+      "id": "c70417413831bfd0",
+      "type": "add",
+      "after": "49fd3856f9f64151",
+      "date": 1667208182584
+    },
+    {
+      "type": "edit",
+      "id": "c70417413831bfd0",
+      "item": {
+        "type": "markdown",
+        "id": "c70417413831bfd0",
+        "text": "StartupPreferencesLoader searches for and executes .st files from certain locations such as Library/Preferences/pharo on Mac OS X.  \n\nStartupPreferencesLoader looks within such locations for a 'pharo' folder. This contains the startup scripts common to all versions of Pharo, and also optionally a folder per Pharo version holding startup scripts suitable for that version only.  So a typical directory layout might be...\n\n.../some/folders/pharo/Content/Resources/pharo.image.\n.../some/folders/pharo/Content/Resources/startup.st\n.../some/folders/.config/pharo/author.st\n.../some/folders/.config/pharo/useSharedCache.st\n.../some/folders/.config/pharo/1.4/mystartupFor14only.st\n.../some/folders/.config/pharo/2.0/mystartupFor20only.st\n\n(**Note however that '.config' is an invalid filename on Windows, so '..config' is used instead)\n\nTo know the real values for you...\nPrint the result of \"StartupPreferencesLoader preferencesGeneralFolder\" which holds the startup scripts common to all versions of Pharo.\nPrint the result of \"StartupPreferencesLoader preferencesVersionFolder\" which holds the startup scripts specific to the version of the current image.\n\n-----------\n\n\nStartupPreferencesLoader example\n\nwill define a script sample startup.st in your unix root on unix \n\nIts contents is \n\nStartupPreferencesLoader default executeAtomicItems: {\n\tStartupAtomicItem name: 'Open Help' code: 'Workspace openContents: ''Here is just an example of how to use the StartupPreferencesLoader.\nI should only be displayed once.\n\t\nYou can also see StartupPreferencesLoader class>>#example'' label: ''Help''' isSingleton: true.\n\tStartupAtomicItem name: 'Open Workspace' code: 'Workspace openContents: ''I should be displayed each time'''.\n}\n\nEXAMPLE 1\n============\n\n\t\" an example of script generation \"\n\t| item1 item2 |\n\titem1 := StartupAction name: 'Open Help' code: 'Smalltalk tools workspace openContents: ''Here is just an example of how to use the StartupPreferencesLoader.\nI should only be displayed once.\n\t\n You can also see StartupPreferencesLoader class>>#example'' label: ''Help''' runOnce: true.\n\titem2 := StartupAction name: 'Open Workspace' code:  [ Workspace openContents: 'I should be displayed each time' ].\n\tStartupPreferencesLoader default addAtStartupInGeneralPreferenceFolder: {item1. item2}.\n\t\n\tStartupPreferencesLoader default loadFromDefaultLocations.\n\tStartupPreferencesLoader default loadFromDefaultLocations.\n\nEXAMPLE 2\n============\n\n\t\" it's my personal script provided as example\"\n\t| items |\n\titems := OrderedCollection new.\n\titems add: (StartupAction name: 'Set the Author' code: [ Author fullName: Author fullName printString ]). \"replace it by your name\"\n\t\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'author.st'.\n\titems removeAll.\n\t\n\titems add: (StartupAction name: 'Dragging Option' code: [ UITheme defaultSettings fastDragging: true ]).\n\titems add: (StartupAction name: 'Dialog Auto Accept' code: [ TextEditorDialogWindow autoAccept: true ]).\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'settings.st'.\n\titems removeAll.\n\t\n\titems add: (StartupAction name: 'Fonts option' code: [ FreeTypeSystemSettings loadFt2Library: true.\t\n\tFreeTypeFontProvider current updateFromSystem.\n\tStandardFonts defaultFont: (LogicalFont familyName: 'Lucida Grande' pointSize: 10) forceNotBold.\n\tGraphicFontSettings resetAllFontToDefault.\n\tStandardFonts codeFont: (LogicalFont familyName: 'Consolas' pointSize: 10).] runOnce: true).\n\t\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'fonts.st'.\n\titems removeAll.\n\tStartupPreferencesLoader default addAtStartupInImageDirectory: items.\n\t\n\tStartupPreferencesLoader default loadFromDefaultLocations.\n\nEXAMPLE 3\n============\n\n\t| items |\n\titems := OrderedCollection new.\n\t\n\titems add: (StartupAction name: 'General Preferences for all Pharo versions' code: [ \n\t\tFileStream stdout lf; nextPutAll: 'Setting general preferences for all Pharo versions'; lf.\n\t\tFileStream stdout lf; nextPutAll: 'Finished'; lf.\n\t\t ]).\n\tStartupPreferencesLoader default addAtStartupInGeneralPreferenceFolder: items named: 'generalSettings.st'.\n\t\n\titems removeAll.\n\titems add: (StartupAction name: 'Settings' code: [ \n\t\tFileStream stdout lf; nextPutAll: 'Setting general preferences for Pharo 2.0'; lf.\n\t\tFileStream stdout lf; nextPutAll: 'Finished'; lf.\n\t\t ]).\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'settings.st'.\n\t\n\titems removeAll.\n\titems add: (StartupAction name: 'Image diretory' code: [ \n\t\tFileStream stdout lf; nextPutAll: 'Setting preferences for image directory'; lf.\n\t\tFileStream stdout lf; nextPutAll: 'Finished'; lf.\n\t\t ]).\n\tStartupPreferencesLoader default addAtStartupInImageDirectory: items "
+      },
+      "date": 1667208184672
+    },
+    {
+      "type": "edit",
+      "id": "c70417413831bfd0",
+      "item": {
+        "type": "markdown",
+        "id": "c70417413831bfd0",
+        "text": "StartupPreferencesLoader searches for and executes .st files from certain locations such as Library/Preferences/pharo on Mac OS X.  \n\nStartupPreferencesLoader looks within such locations for a 'pharo' folder. This contains the startup scripts common to all versions of Pharo, and also optionally a folder per Pharo version holding startup scripts suitable for that version only.  So a typical directory layout might be...\n\n.../some/folders/pharo/Content/Resources/pharo.image.\n.../some/folders/pharo/Content/Resources/startup.st\n.../some/folders/.config/pharo/author.st\n.../some/folders/.config/pharo/useSharedCache.st\n.../some/folders/.config/pharo/1.4/mystartupFor14only.st\n.../some/folders/.config/pharo/2.0/mystartupFor20only.st\n\n(**Note however that '.config' is an invalid filename on Windows, so '..config' is used instead)\n\n\n"
+      },
+      "date": 1667208232284
+    },
+    {
+      "type": "add",
+      "id": "ec7569a7c1b15e80",
+      "item": {
+        "type": "markdown",
+        "id": "ec7569a7c1b15e80",
+        "text": "To know the real values for you...\nPrint the result of \"StartupPreferencesLoader preferencesGeneralFolder\" which holds the startup scripts common to all versions of Pharo.\nPrint the result of \"StartupPreferencesLoader preferencesVersionFolder\" which holds the startup scripts specific to the version of the current image.\n\n-----------\n\n\nStartupPreferencesLoader example\n\nwill define a script sample startup.st in your unix root on unix \n\nIts contents is \n\nStartupPreferencesLoader default executeAtomicItems: {\n\tStartupAtomicItem name: 'Open Help' code: 'Workspace openContents: ''Here is just an example of how to use the StartupPreferencesLoader.\nI should only be displayed once.\n\t\nYou can also see StartupPreferencesLoader class>>#example'' label: ''Help''' isSingleton: true.\n\tStartupAtomicItem name: 'Open Workspace' code: 'Workspace openContents: ''I should be displayed each time'''.\n}\n\nEXAMPLE 1\n============\n\n\t\" an example of script generation \"\n\t| item1 item2 |\n\titem1 := StartupAction name: 'Open Help' code: 'Smalltalk tools workspace openContents: ''Here is just an example of how to use the StartupPreferencesLoader.\nI should only be displayed once.\n\t\n You can also see StartupPreferencesLoader class>>#example'' label: ''Help''' runOnce: true.\n\titem2 := StartupAction name: 'Open Workspace' code:  [ Workspace openContents: 'I should be displayed each time' ].\n\tStartupPreferencesLoader default addAtStartupInGeneralPreferenceFolder: {item1. item2}.\n\t\n\tStartupPreferencesLoader default loadFromDefaultLocations.\n\tStartupPreferencesLoader default loadFromDefaultLocations.\n\nEXAMPLE 2\n============\n\n\t\" it's my personal script provided as example\"\n\t| items |\n\titems := OrderedCollection new.\n\titems add: (StartupAction name: 'Set the Author' code: [ Author fullName: Author fullName printString ]). \"replace it by your name\"\n\t\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'author.st'.\n\titems removeAll.\n\t\n\titems add: (StartupAction name: 'Dragging Option' code: [ UITheme defaultSettings fastDragging: true ]).\n\titems add: (StartupAction name: 'Dialog Auto Accept' code: [ TextEditorDialogWindow autoAccept: true ]).\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'settings.st'.\n\titems removeAll.\n\t\n\titems add: (StartupAction name: 'Fonts option' code: [ FreeTypeSystemSettings loadFt2Library: true.\t\n\tFreeTypeFontProvider current updateFromSystem.\n\tStandardFonts defaultFont: (LogicalFont familyName: 'Lucida Grande' pointSize: 10) forceNotBold.\n\tGraphicFontSettings resetAllFontToDefault.\n\tStandardFonts codeFont: (LogicalFont familyName: 'Consolas' pointSize: 10).] runOnce: true).\n\t\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'fonts.st'.\n\titems removeAll.\n\tStartupPreferencesLoader default addAtStartupInImageDirectory: items.\n\t\n\tStartupPreferencesLoader default loadFromDefaultLocations.\n\nEXAMPLE 3\n============\n\n\t| items |\n\titems := OrderedCollection new.\n\t\n\titems add: (StartupAction name: 'General Preferences for all Pharo versions' code: [ \n\t\tFileStream stdout lf; nextPutAll: 'Setting general preferences for all Pharo versions'; lf.\n\t\tFileStream stdout lf; nextPutAll: 'Finished'; lf.\n\t\t ]).\n\tStartupPreferencesLoader default addAtStartupInGeneralPreferenceFolder: items named: 'generalSettings.st'.\n\t\n\titems removeAll.\n\titems add: (StartupAction name: 'Settings' code: [ \n\t\tFileStream stdout lf; nextPutAll: 'Setting general preferences for Pharo 2.0'; lf.\n\t\tFileStream stdout lf; nextPutAll: 'Finished'; lf.\n\t\t ]).\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'settings.st'.\n\t\n\titems removeAll.\n\titems add: (StartupAction name: 'Image diretory' code: [ \n\t\tFileStream stdout lf; nextPutAll: 'Setting preferences for image directory'; lf.\n\t\tFileStream stdout lf; nextPutAll: 'Finished'; lf.\n\t\t ]).\n\tStartupPreferencesLoader default addAtStartupInImageDirectory: items "
+      },
+      "after": "c70417413831bfd0",
+      "date": 1667208239278
+    },
+    {
+      "type": "edit",
+      "id": "ec7569a7c1b15e80",
+      "item": {
+        "type": "markdown",
+        "id": "ec7569a7c1b15e80",
+        "text": "To know the real values for you...\nPrint the result of \"StartupPreferencesLoader preferencesGeneralFolder\" which holds the startup scripts common to all versions of Pharo.\n"
+      },
+      "date": 1667208279633
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e3d4f9460dc3595c"
+      },
+      "id": "e3d4f9460dc3595c",
+      "type": "add",
+      "after": "0c3c3c378bab75ea",
+      "date": 1667208281982
+    },
+    {
+      "type": "add",
+      "id": "0c3c3c378bab75ea",
+      "item": {
+        "type": "markdown",
+        "id": "0c3c3c378bab75ea",
+        "text": "Print the result of \"StartupPreferencesLoader preferencesVersionFolder\" which holds the startup scripts specific to the version of the current image.\n\n-----------\n\n\nStartupPreferencesLoader example\n\nwill define a script sample startup.st in your unix root on unix \n\nIts contents is \n\nStartupPreferencesLoader default executeAtomicItems: {\n\tStartupAtomicItem name: 'Open Help' code: 'Workspace openContents: ''Here is just an example of how to use the StartupPreferencesLoader.\nI should only be displayed once.\n\t\nYou can also see StartupPreferencesLoader class>>#example'' label: ''Help''' isSingleton: true.\n\tStartupAtomicItem name: 'Open Workspace' code: 'Workspace openContents: ''I should be displayed each time'''.\n}\n\nEXAMPLE 1\n============\n\n\t\" an example of script generation \"\n\t| item1 item2 |\n\titem1 := StartupAction name: 'Open Help' code: 'Smalltalk tools workspace openContents: ''Here is just an example of how to use the StartupPreferencesLoader.\nI should only be displayed once.\n\t\n You can also see StartupPreferencesLoader class>>#example'' label: ''Help''' runOnce: true.\n\titem2 := StartupAction name: 'Open Workspace' code:  [ Workspace openContents: 'I should be displayed each time' ].\n\tStartupPreferencesLoader default addAtStartupInGeneralPreferenceFolder: {item1. item2}.\n\t\n\tStartupPreferencesLoader default loadFromDefaultLocations.\n\tStartupPreferencesLoader default loadFromDefaultLocations.\n\nEXAMPLE 2\n============\n\n\t\" it's my personal script provided as example\"\n\t| items |\n\titems := OrderedCollection new.\n\titems add: (StartupAction name: 'Set the Author' code: [ Author fullName: Author fullName printString ]). \"replace it by your name\"\n\t\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'author.st'.\n\titems removeAll.\n\t\n\titems add: (StartupAction name: 'Dragging Option' code: [ UITheme defaultSettings fastDragging: true ]).\n\titems add: (StartupAction name: 'Dialog Auto Accept' code: [ TextEditorDialogWindow autoAccept: true ]).\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'settings.st'.\n\titems removeAll.\n\t\n\titems add: (StartupAction name: 'Fonts option' code: [ FreeTypeSystemSettings loadFt2Library: true.\t\n\tFreeTypeFontProvider current updateFromSystem.\n\tStandardFonts defaultFont: (LogicalFont familyName: 'Lucida Grande' pointSize: 10) forceNotBold.\n\tGraphicFontSettings resetAllFontToDefault.\n\tStandardFonts codeFont: (LogicalFont familyName: 'Consolas' pointSize: 10).] runOnce: true).\n\t\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'fonts.st'.\n\titems removeAll.\n\tStartupPreferencesLoader default addAtStartupInImageDirectory: items.\n\t\n\tStartupPreferencesLoader default loadFromDefaultLocations.\n\nEXAMPLE 3\n============\n\n\t| items |\n\titems := OrderedCollection new.\n\t\n\titems add: (StartupAction name: 'General Preferences for all Pharo versions' code: [ \n\t\tFileStream stdout lf; nextPutAll: 'Setting general preferences for all Pharo versions'; lf.\n\t\tFileStream stdout lf; nextPutAll: 'Finished'; lf.\n\t\t ]).\n\tStartupPreferencesLoader default addAtStartupInGeneralPreferenceFolder: items named: 'generalSettings.st'.\n\t\n\titems removeAll.\n\titems add: (StartupAction name: 'Settings' code: [ \n\t\tFileStream stdout lf; nextPutAll: 'Setting general preferences for Pharo 2.0'; lf.\n\t\tFileStream stdout lf; nextPutAll: 'Finished'; lf.\n\t\t ]).\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'settings.st'.\n\t\n\titems removeAll.\n\titems add: (StartupAction name: 'Image diretory' code: [ \n\t\tFileStream stdout lf; nextPutAll: 'Setting preferences for image directory'; lf.\n\t\tFileStream stdout lf; nextPutAll: 'Finished'; lf.\n\t\t ]).\n\tStartupPreferencesLoader default addAtStartupInImageDirectory: items "
+      },
+      "after": "ec7569a7c1b15e80",
+      "date": 1667208283287
+    },
+    {
+      "type": "edit",
+      "id": "e3d4f9460dc3595c",
+      "item": {
+        "type": "code",
+        "id": "e3d4f9460dc3595c",
+        "text": "StartupPreferencesLoader preferencesGeneralFolder"
+      },
+      "date": 1667208286300
+    },
+    {
+      "id": "e3d4f9460dc3595c",
+      "type": "move",
+      "order": [
+        "35bcc62926893349",
+        "49fd3856f9f64151",
+        "c70417413831bfd0",
+        "ec7569a7c1b15e80",
+        "e3d4f9460dc3595c",
+        "0c3c3c378bab75ea"
+      ],
+      "date": 1667208300308
+    },
+    {
+      "type": "edit",
+      "id": "0c3c3c378bab75ea",
+      "item": {
+        "type": "markdown",
+        "id": "0c3c3c378bab75ea",
+        "text": "Print the result of \"StartupPreferencesLoader preferencesVersionFolder\" which holds the startup scripts specific to the version of the current image.\n\n-----------\n\n\nStartupPreferencesLoader example\n\nwill define a script sample startup.st in your unix root on unix \n\nIts contents is \n\nStartupPreferencesLoader default executeAtomicItems: {\n\tStartupAtomicItem name: 'Open Help' code: 'Workspace openContents: ''Here is just an example of how to use the StartupPreferencesLoader.\nI should only be displayed once.\n\t\nYou can also see StartupPreferencesLoader class>>#example'' label: ''Help''' isSingleton: true.\n\tStartupAtomicItem name: 'Open Workspace' code: 'Workspace openContents: ''I should be displayed each time'''.\n}\n\n\n"
+      },
+      "date": 1667208334245
+    },
+    {
+      "type": "add",
+      "id": "71cf6a28c1630357",
+      "item": {
+        "type": "markdown",
+        "id": "71cf6a28c1630357",
+        "text": "EXAMPLE 1\n============\n\n\t\" an example of script generation \"\n\t| item1 item2 |\n\titem1 := StartupAction name: 'Open Help' code: 'Smalltalk tools workspace openContents: ''Here is just an example of how to use the StartupPreferencesLoader.\nI should only be displayed once.\n\t\n You can also see StartupPreferencesLoader class>>#example'' label: ''Help''' runOnce: true.\n\titem2 := StartupAction name: 'Open Workspace' code:  [ Workspace openContents: 'I should be displayed each time' ].\n\tStartupPreferencesLoader default addAtStartupInGeneralPreferenceFolder: {item1. item2}.\n\t\n\tStartupPreferencesLoader default loadFromDefaultLocations.\n\tStartupPreferencesLoader default loadFromDefaultLocations.\n\n\n"
+      },
+      "after": "0c3c3c378bab75ea",
+      "date": 1667208341310
+    },
+    {
+      "type": "add",
+      "id": "b4be64c3a9f6999e",
+      "item": {
+        "type": "markdown",
+        "id": "b4be64c3a9f6999e",
+        "text": "EXAMPLE 2\n============\n\n\t\" it's my personal script provided as example\"\n\t| items |\n\titems := OrderedCollection new.\n\titems add: (StartupAction name: 'Set the Author' code: [ Author fullName: Author fullName printString ]). \"replace it by your name\"\n\t\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'author.st'.\n\titems removeAll.\n\t\n\titems add: (StartupAction name: 'Dragging Option' code: [ UITheme defaultSettings fastDragging: true ]).\n\titems add: (StartupAction name: 'Dialog Auto Accept' code: [ TextEditorDialogWindow autoAccept: true ]).\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'settings.st'.\n\titems removeAll.\n\t\n\titems add: (StartupAction name: 'Fonts option' code: [ FreeTypeSystemSettings loadFt2Library: true.\t\n\tFreeTypeFontProvider current updateFromSystem.\n\tStandardFonts defaultFont: (LogicalFont familyName: 'Lucida Grande' pointSize: 10) forceNotBold.\n\tGraphicFontSettings resetAllFontToDefault.\n\tStandardFonts codeFont: (LogicalFont familyName: 'Consolas' pointSize: 10).] runOnce: true).\n\t\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'fonts.st'.\n\titems removeAll.\n\tStartupPreferencesLoader default addAtStartupInImageDirectory: items.\n\t\n\tStartupPreferencesLoader default loadFromDefaultLocations.\n\n\n"
+      },
+      "after": "71cf6a28c1630357",
+      "date": 1667208349888
+    },
+    {
+      "type": "add",
+      "id": "3bf755adbaae5cb6",
+      "item": {
+        "type": "markdown",
+        "id": "3bf755adbaae5cb6",
+        "text": "EXAMPLE 3\n============\n\n\t| items |\n\titems := OrderedCollection new.\n\t\n\titems add: (StartupAction name: 'General Preferences for all Pharo versions' code: [ \n\t\tFileStream stdout lf; nextPutAll: 'Setting general preferences for all Pharo versions'; lf.\n\t\tFileStream stdout lf; nextPutAll: 'Finished'; lf.\n\t\t ]).\n\tStartupPreferencesLoader default addAtStartupInGeneralPreferenceFolder: items named: 'generalSettings.st'.\n\t\n\titems removeAll.\n\titems add: (StartupAction name: 'Settings' code: [ \n\t\tFileStream stdout lf; nextPutAll: 'Setting general preferences for Pharo 2.0'; lf.\n\t\tFileStream stdout lf; nextPutAll: 'Finished'; lf.\n\t\t ]).\n\tStartupPreferencesLoader default addAtStartupInPreferenceVersionFolder: items named: 'settings.st'.\n\t\n\titems removeAll.\n\titems add: (StartupAction name: 'Image diretory' code: [ \n\t\tFileStream stdout lf; nextPutAll: 'Setting preferences for image directory'; lf.\n\t\tFileStream stdout lf; nextPutAll: 'Finished'; lf.\n\t\t ]).\n\tStartupPreferencesLoader default addAtStartupInImageDirectory: items "
+      },
+      "after": "b4be64c3a9f6999e",
+      "date": 1667208355845
+    },
+    {
+      "type": "edit",
+      "id": "c70417413831bfd0",
+      "item": {
+        "type": "markdown",
+        "id": "c70417413831bfd0",
+        "text": "StartupPreferencesLoader searches for and executes .st files from certain locations such as Library/Preferences/pharo on Mac OS X.  \n\n\n"
+      },
+      "date": 1667208419812
+    },
+    {
+      "type": "add",
+      "id": "4099906b359c510d",
+      "item": {
+        "type": "markdown",
+        "id": "4099906b359c510d",
+        "text": "StartupPreferencesLoader looks within such locations for a 'pharo' folder. This contains the startup scripts common to all versions of [[Pharo]], and also optionally a folder per Pharo version holding startup scripts suitable for that version only.  So a typical directory layout might be...\n\n.../some/folders/pharo/Content/Resources/pharo.image.\n.../some/folders/pharo/Content/Resources/startup.st\n.../some/folders/.config/pharo/author.st\n.../some/folders/.config/pharo/useSharedCache.st\n.../some/folders/.config/pharo/1.4/mystartupFor14only.st\n.../some/folders/.config/pharo/2.0/mystartupFor20only.st\n\n(**Note however that '.config' is an invalid filename on Windows, so '..config' is used instead)"
+      },
+      "after": "c70417413831bfd0",
+      "date": 1667208435732
+    }
+  ]
+}
