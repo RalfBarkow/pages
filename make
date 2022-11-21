@@ -3,6 +3,16 @@
   "story": [
     {
       "type": "markdown",
+      "id": "a4c47c7e4aa5c4d1",
+      "text": "* [[Meaning]]\n⇒ [[Being an Inquiry Teacher]]"
+    },
+    {
+      "type": "markdown",
+      "id": "4f513004ae4a6595",
+      "text": "* it happen.\n⇒ [[Levels or Types of Meaning]]\n> Here is the essence of SOL. The SOLer accepts responsibility for this reconstruction and development activity. It does not happen to them. They make it happen. "
+    },
+    {
+      "type": "markdown",
       "id": "951043e9f323a071",
       "text": "* a 3D model"
     },
@@ -15,16 +25,6 @@
       "type": "markdown",
       "id": "516bd856a7762caa",
       "text": "> But what about messages like `[[cross]]:`? How are we going to allow access to the object’s distinctions? What would the instance name distinctions hold in this case? What are the names of the distinctions inside an object’s form, from this point of view? ⇒ [[Smalltalk Objects]]"
-    },
-    {
-      "type": "markdown",
-      "id": "4f513004ae4a6595",
-      "text": "* it happen.\n⇒ [[Levels or Types of Meaning]]"
-    },
-    {
-      "type": "markdown",
-      "id": "ae52aa77d2cc012c",
-      "text": "> Here is the essence of SOL. The SOLer accepts responsibility for this reconstruction and development activity. It does not happen to them. They make it happen. "
     }
   ],
   "journal": [
@@ -332,6 +332,76 @@
         "text": "> Here is the essence of SOL. The SOLer accepts responsibility for this reconstruction and development activity. It does not happen to them. They make it happen. "
       },
       "date": 1665382479978
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a4c47c7e4aa5c4d1"
+      },
+      "id": "a4c47c7e4aa5c4d1",
+      "type": "add",
+      "after": "ae52aa77d2cc012c",
+      "date": 1669053762839
+    },
+    {
+      "type": "edit",
+      "id": "a4c47c7e4aa5c4d1",
+      "item": {
+        "type": "markdown",
+        "id": "a4c47c7e4aa5c4d1",
+        "text": "* [[Meaning]]"
+      },
+      "date": 1669053769928
+    },
+    {
+      "type": "edit",
+      "id": "a4c47c7e4aa5c4d1",
+      "item": {
+        "type": "markdown",
+        "id": "a4c47c7e4aa5c4d1",
+        "text": "* [[Meaning]]\n⇒ [[Being an Inquiry Teacher]]"
+      },
+      "date": 1669053775550
+    },
+    {
+      "id": "a4c47c7e4aa5c4d1",
+      "type": "move",
+      "order": [
+        "a4c47c7e4aa5c4d1",
+        "951043e9f323a071",
+        "a2517289bc49b4a1",
+        "516bd856a7762caa",
+        "4f513004ae4a6595",
+        "ae52aa77d2cc012c"
+      ],
+      "date": 1669054065334
+    },
+    {
+      "type": "remove",
+      "id": "ae52aa77d2cc012c",
+      "date": 1669054079245
+    },
+    {
+      "type": "edit",
+      "id": "4f513004ae4a6595",
+      "item": {
+        "type": "markdown",
+        "id": "4f513004ae4a6595",
+        "text": "* it happen.\n⇒ [[Levels or Types of Meaning]]\n> Here is the essence of SOL. The SOLer accepts responsibility for this reconstruction and development activity. It does not happen to them. They make it happen. "
+      },
+      "date": 1669054081301
+    },
+    {
+      "id": "4f513004ae4a6595",
+      "type": "move",
+      "order": [
+        "a4c47c7e4aa5c4d1",
+        "4f513004ae4a6595",
+        "951043e9f323a071",
+        "a2517289bc49b4a1",
+        "516bd856a7762caa"
+      ],
+      "date": 1669054086370
     }
   ]
 }
