@@ -2,6 +2,11 @@
   "title": "I",
   "story": [
     {
+      "type": "paragraph",
+      "id": "2c3032d99ad234a0",
+      "text": "The problem is “[[I]],” the shortest selfreferential loop. When speaking about oneself, using “I,” [[magic]] is performed. One creates oneself by creating oneself. “I” is the [[Operator]] who is the result of the [[Operation]]. -- [[Heinz von Foerster]] ⇒ [[The Ethical Imperative]]"
+    },
+    {
       "type": "markdown",
       "id": "db3c92863d9358c5",
       "text": "What [[we]] signify by the word '[[I]]' is a complex that is also notable for being exclusively 'psychical', and it is the most stable complex in the series of our experiences. How can we understand *this* particular grouping of experiences? ([[Bogdanov]], [[Empiriomonism]], p. 13) "
@@ -345,6 +350,66 @@
         "text": "What [[we]] signify by the word '[[I]]' is a complex that is also notable for being exclusively 'psychical', and it is the most stable complex in the series of our experiences. How can we understand *this* particular grouping of experiences? ([[Bogdanov]], [[Empiriomonism]], p. 13) "
       },
       "date": 1656222192351
+    },
+    {
+      "id": "2c3032d99ad234a0",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "2c3032d99ad234a0",
+        "text": "H. Easily! You remember paradox? It yields one meaning when apprehended one way, and one meaning when apprehended the other. What do you do when I say “I am a liar,” do you believe me? If you do, then I must have spoken the truth; but if I had spoken the truth, I must have lied, etc., etc. \n\nWhat is the problem here? Lying? No, the problem is “[[I]],” the shortest selfreferential loop. When speaking about oneself, using “I,” magic is performed. One creates oneself by creating oneself. “I” is the operator who is the result of the operation. "
+      },
+      "date": 1669371484150
+    },
+    {
+      "type": "edit",
+      "id": "2c3032d99ad234a0",
+      "item": {
+        "type": "paragraph",
+        "id": "2c3032d99ad234a0",
+        "text": "The problem is “[[I]],” the shortest selfreferential loop. When speaking about oneself, using “I,” magic is performed. One creates oneself by creating oneself. “I” is the operator who is the result of the operation. "
+      },
+      "date": 1669371495569
+    },
+    {
+      "type": "edit",
+      "id": "2c3032d99ad234a0",
+      "item": {
+        "type": "paragraph",
+        "id": "2c3032d99ad234a0",
+        "text": "The problem is “[[I]],” the shortest selfreferential loop. When speaking about oneself, using “I,” [[magic]] is performed. One creates oneself by creating oneself. “I” is the operator who is the result of the operation. "
+      },
+      "date": 1669371510788
+    },
+    {
+      "type": "edit",
+      "id": "2c3032d99ad234a0",
+      "item": {
+        "type": "paragraph",
+        "id": "2c3032d99ad234a0",
+        "text": "The problem is “[[I]],” the shortest selfreferential loop. When speaking about oneself, using “I,” [[magic]] is performed. One creates oneself by creating oneself. “I” is the operator who is the result of the operation. -- [[Heinz von Foerster]] ⇒ [[The Ethical Imperative]]"
+      },
+      "date": 1669371565279
+    },
+    {
+      "type": "edit",
+      "id": "2c3032d99ad234a0",
+      "item": {
+        "type": "paragraph",
+        "id": "2c3032d99ad234a0",
+        "text": "The problem is “[[I]],” the shortest selfreferential loop. When speaking about oneself, using “I,” [[magic]] is performed. One creates oneself by creating oneself. “I” is the [[Operator]] who is the result of the operation. -- [[Heinz von Foerster]] ⇒ [[The Ethical Imperative]]"
+      },
+      "date": 1669371617534
+    },
+    {
+      "type": "edit",
+      "id": "2c3032d99ad234a0",
+      "item": {
+        "type": "paragraph",
+        "id": "2c3032d99ad234a0",
+        "text": "The problem is “[[I]],” the shortest selfreferential loop. When speaking about oneself, using “I,” [[magic]] is performed. One creates oneself by creating oneself. “I” is the [[Operator]] who is the result of the [[Operation]]. -- [[Heinz von Foerster]] ⇒ [[The Ethical Imperative]]"
+      },
+      "date": 1669371631313
     }
   ]
 }
