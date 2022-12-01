@@ -14,7 +14,17 @@
     {
       "type": "markdown",
       "id": "e2a2e11ed3f4023b",
-      "text": "*  something by hand and by voice ⇒ [[Annotation vs FedWiki]] ⇒ [[The Augmented Conversation]]"
+      "text": "*  something by hand and by voice \n⇒ [[Annotation vs FedWiki]] ⇒ [[The Augmented Conversation]]  ⇒ [[Verbs, Not Nouns]]"
+    },
+    {
+      "type": "markdown",
+      "id": "fd1623e0caedf603",
+      "text": "* edit and observer style development\n⇒ [[Scene.vrse File]] "
+    },
+    {
+      "type": "graphviz",
+      "id": "bfdd5c75e233ca2c",
+      "text": "DOT FROM lambda-browsing"
     }
   ],
   "journal": [
@@ -162,6 +172,96 @@
         "e2a2e11ed3f4023b"
       ],
       "date": 1661411495029
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fd1623e0caedf603"
+      },
+      "id": "fd1623e0caedf603",
+      "type": "add",
+      "after": "e2a2e11ed3f4023b",
+      "date": 1669901232208
+    },
+    {
+      "type": "edit",
+      "id": "fd1623e0caedf603",
+      "item": {
+        "type": "paragraph",
+        "id": "fd1623e0caedf603",
+        "text": "* [[do]] edit and observer style development "
+      },
+      "date": 1669901236090
+    },
+    {
+      "type": "edit",
+      "id": "fd1623e0caedf603",
+      "item": {
+        "type": "markdown",
+        "id": "fd1623e0caedf603",
+        "text": "* [[do]] edit and observer style development "
+      },
+      "date": 1669901238629
+    },
+    {
+      "type": "edit",
+      "id": "fd1623e0caedf603",
+      "item": {
+        "type": "markdown",
+        "id": "fd1623e0caedf603",
+        "text": "* edit and observer style development "
+      },
+      "date": 1669901251709
+    },
+    {
+      "type": "edit",
+      "id": "fd1623e0caedf603",
+      "item": {
+        "type": "markdown",
+        "id": "fd1623e0caedf603",
+        "text": "* edit and observer style development\n⇒ [[Scene.vrse File]] "
+      },
+      "date": 1669901390721
+    },
+    {
+      "type": "edit",
+      "id": "e2a2e11ed3f4023b",
+      "item": {
+        "type": "markdown",
+        "id": "e2a2e11ed3f4023b",
+        "text": "*  something by hand and by voice \n⇒ [[Annotation vs FedWiki]] ⇒ [[The Augmented Conversation]]"
+      },
+      "date": 1669901401201
+    },
+    {
+      "type": "edit",
+      "id": "e2a2e11ed3f4023b",
+      "item": {
+        "type": "markdown",
+        "id": "e2a2e11ed3f4023b",
+        "text": "*  something by hand and by voice \n⇒ [[Annotation vs FedWiki]] ⇒ [[The Augmented Conversation]]  ⇒ [[Verbs, Not Nouns]]"
+      },
+      "date": 1669901725259
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bfdd5c75e233ca2c"
+      },
+      "id": "bfdd5c75e233ca2c",
+      "type": "add",
+      "after": "fd1623e0caedf603",
+      "date": 1669901726279
+    },
+    {
+      "type": "edit",
+      "id": "bfdd5c75e233ca2c",
+      "item": {
+        "type": "graphviz",
+        "id": "bfdd5c75e233ca2c",
+        "text": "DOT FROM lambda-browsing"
+      },
+      "date": 1669901732777
     }
   ]
 }

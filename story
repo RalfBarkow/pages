@@ -34,7 +34,7 @@
     {
       "type": "paragraph",
       "id": "c3adcf74d22aa79e",
-      "text": "[[David's Story]]"
+      "text": "[[David's Final]]"
     },
     {
       "type": "pagefold",
@@ -3188,14 +3188,19 @@
       "date": 1624923400664
     },
     {
-      "type": "fork",
-      "site": "david.reimage.fed.wiki",
-      "date": 1625510012511
+      "type": "edit",
+      "id": "c3adcf74d22aa79e",
+      "item": {
+        "type": "paragraph",
+        "id": "c3adcf74d22aa79e",
+        "text": "[[David's Final]]"
+      },
+      "date": 1667237371249
     },
     {
       "type": "fork",
-      "site": "thompson.reimage.fed.wiki",
-      "date": 1627078168920
+      "site": "david.reimage.fed.wiki",
+      "date": 1669815223646
     }
   ]
 }
