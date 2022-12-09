@@ -2,6 +2,14 @@
   "title": "Story",
   "story": [
     {
+      "type": "reference",
+      "id": "638601223433c1df",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "story-and-life",
+      "title": "Story and Life",
+      "text": "There is no [[Distinction]] between [[Story]] and [[Life]]."
+    },
+    {
       "type": "paragraph",
       "id": "9ca2d627e704e7fc",
       "text": "Into this space we are walking, listening, and waiting for the story to emerge. A story that illuminates new meaning for us and for others. "
@@ -3201,6 +3209,48 @@
       "type": "fork",
       "site": "david.reimage.fed.wiki",
       "date": 1669815223646
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "638601223433c1df"
+      },
+      "id": "638601223433c1df",
+      "type": "add",
+      "after": "f80adaee5751ad1e",
+      "date": 1670606590323
+    },
+    {
+      "id": "638601223433c1df",
+      "type": "move",
+      "order": [
+        "638601223433c1df",
+        "9ca2d627e704e7fc",
+        "944447e0d9cefd90",
+        "a91f3fca49423c68",
+        "a7dc00ef5e652d6d",
+        "90e8e96083111cd4",
+        "3b9c9db7efaec3ce",
+        "c3adcf74d22aa79e",
+        "92d6b8647c453b93",
+        "71a4cc4237b5fc90",
+        "f876998f71273a09",
+        "f80adaee5751ad1e"
+      ],
+      "date": 1670606598637
+    },
+    {
+      "type": "edit",
+      "id": "638601223433c1df",
+      "item": {
+        "type": "reference",
+        "id": "638601223433c1df",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "story-and-life",
+        "title": "Story and Life",
+        "text": "There is no [[Distinction]] between [[Story]] and [[Life]]."
+      },
+      "date": 1670606601839
     }
   ]
 }
