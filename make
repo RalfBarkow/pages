@@ -24,7 +24,12 @@
     {
       "type": "markdown",
       "id": "516bd856a7762caa",
-      "text": "> But what about messages like `[[cross]]:`? How are we going to allow access to the object’s distinctions? What would the instance name distinctions hold in this case? What are the names of the distinctions inside an object’s form, from this point of view? ⇒ [[Smalltalk Objects]]"
+      "text": "> But what about messages like `[[cross]]:`? How are we going to allow access to the object’s distinctions? What would the instance name distinctions hold in this case? What are the names of the distinctions inside an object’s form, from this point of view? ⇒ [[Smalltalk Objects]]\n"
+    },
+    {
+      "type": "markdown",
+      "id": "65703c50c65cc0a4",
+      "text": "* a compiler\n⇒ [[Make a Compiler]] ⇒ [[META-II]]"
     }
   ],
   "journal": [
@@ -402,6 +407,67 @@
         "516bd856a7762caa"
       ],
       "date": 1669054086370
+    },
+    {
+      "type": "edit",
+      "id": "516bd856a7762caa",
+      "item": {
+        "type": "markdown",
+        "id": "516bd856a7762caa",
+        "text": "> But what about messages like `[[cross]]:`? How are we going to allow access to the object’s distinctions? What would the instance name distinctions hold in this case? What are the names of the distinctions inside an object’s form, from this point of view? ⇒ [[Smalltalk Objects]]\n"
+      },
+      "date": 1670971262910
+    },
+    {
+      "type": "add",
+      "id": "65703c50c65cc0a4",
+      "item": {
+        "type": "markdown",
+        "id": "65703c50c65cc0a4",
+        "text": "* a compiler"
+      },
+      "after": "516bd856a7762caa",
+      "date": 1670971267694
+    },
+    {
+      "type": "edit",
+      "id": "65703c50c65cc0a4",
+      "item": {
+        "type": "markdown",
+        "id": "65703c50c65cc0a4",
+        "text": "* a compiler\n[[Make a Compiler]]"
+      },
+      "date": 1670971300120
+    },
+    {
+      "type": "edit",
+      "id": "65703c50c65cc0a4",
+      "item": {
+        "type": "markdown",
+        "id": "65703c50c65cc0a4",
+        "text": "* a compiler\n⇒ [[Make a Compiler]]"
+      },
+      "date": 1670971310410
+    },
+    {
+      "type": "edit",
+      "id": "65703c50c65cc0a4",
+      "item": {
+        "type": "markdown",
+        "id": "65703c50c65cc0a4",
+        "text": "* a compiler\n⇒ [[Make a Compiler]] ⇒ [META-II]]"
+      },
+      "date": 1670971328414
+    },
+    {
+      "type": "edit",
+      "id": "65703c50c65cc0a4",
+      "item": {
+        "type": "markdown",
+        "id": "65703c50c65cc0a4",
+        "text": "* a compiler\n⇒ [[Make a Compiler]] ⇒ [[META-II]]"
+      },
+      "date": 1670971477264
     }
   ]
 }

@@ -23,7 +23,7 @@
       "site": "wiki.ralfbarkow.ch",
       "slug": "what-is-elm-pages",
       "title": "What is elm-pages?",
-      "text": "elm-pages is a framework for building an [[Elm]] single-page app with pre-rendered HTML pages. [https://elm-pages.com/docs docs]"
+      "text": "elm-pages is a framework for building an Elm single-page app with pre-rendered HTML pages. [https://elm-pages.com/docs docs]"
     }
   ],
   "journal": [
@@ -115,6 +115,19 @@
         "text": "elm-pages is a framework for building an [[Elm]] single-page app with pre-rendered HTML pages. [https://elm-pages.com/docs docs]"
       },
       "date": 1638561266438
+    },
+    {
+      "type": "edit",
+      "id": "ffbac7981a937118",
+      "item": {
+        "type": "reference",
+        "id": "ffbac7981a937118",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "what-is-elm-pages",
+        "title": "What is elm-pages?",
+        "text": "elm-pages is a framework for building an Elm single-page app with pre-rendered HTML pages. [https://elm-pages.com/docs docs]"
+      },
+      "date": 1671009841266
     }
   ]
 }
