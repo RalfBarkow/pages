@@ -1,0 +1,1160 @@
+{
+  "title": "Cleaning the Search Index",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "6108c033efedd17f",
+      "text": "Search has gotten slow because we have inadvertently indexed base64 text as words filling our words.txt indices with junk. [https://github.com/fedwiki/wiki-client/issues/283 issue] [http://search.fed.wiki.org:3030/counts.html plot]"
+    },
+    {
+      "type": "html",
+      "id": "37d32908b011b869",
+      "text": "<img width=100% src=https://user-images.githubusercontent.com/12127/204685764-c8dea30f-6b22-4811-ad4c-c65d63bfe684.png>"
+    },
+    {
+      "type": "markdown",
+      "id": "7f71896c87744eee",
+      "text": "# Examples"
+    },
+    {
+      "type": "paragraph",
+      "id": "d3362fe20a2cf7e4",
+      "text": "Type html with anything in tags, especially image data."
+    },
+    {
+      "type": "code",
+      "id": "0e4e88239fca27e6",
+      "text": "{\n      \"id\": \"79704000\",\n      \"type\": \"html\",\n      \"text\": \"<img width=\\\"100%\\\" alt=\\\"NREL 2022-03-26T22:44-0700 winds 10-25mph<br>\\\" src=\\\"data:image/png;base64,iVBORw0KG...AiRAYII=\\\"><p>NREL 2022-03-26T22:44-0700 winds 10-25mph<br></p>\"\n    },"
+    },
+    {
+      "type": "paragraph",
+      "id": "604de4f436f3515f",
+      "text": "Type markdown with bare urls. Or any [... word] url."
+    },
+    {
+      "type": "code",
+      "id": "f76a07fae7efb9a9",
+      "text": "{\n      \"type\": \"markdown\",\n      \"id\": \"7bbc463a08dc611b\",\n      \"text\": \"Just heard his talk at Chicago CTO Summit. https://www.bizjournals.com/baltimore/news/2021/06/25/best-in-tech-awards-2021-jonathan-moore-rowdyorbit.html via [https://matrix.to/#/!ORfrUEFeWFcHAMLFLr:matrix.org/$1652386834135345SycLV:matrix.org?via=matrix.org&via=matrix.allmende.io&via=diglife.coop matrix]\"\n    },"
+    },
+    {
+      "type": "markdown",
+      "id": "8604a93b063dfd9f",
+      "text": "# Scripts"
+    },
+    {
+      "type": "paragraph",
+      "id": "aa2fd94568c22693",
+      "text": "We look for the largest site words.txt and then the largest pages words.txt in the largest sites."
+    },
+    {
+      "type": "code",
+      "id": "42a1bf2a617533d5",
+      "text": "ls sites | while read s; do echo `cat sites/$s/words.txt | wc -c` $s; done | sort -n >yy"
+    },
+    {
+      "type": "code",
+      "id": "edea39a9e6361ece",
+      "text": "(cd sites/dreyeck.ch/pages; ls | while read p; do echo `cat $p/words.txt | wc -c` $p; done | sort -n)"
+    },
+    {
+      "type": "paragraph",
+      "id": "5f37e59b044071b2",
+      "text": "By this measure most sites are under 100K, five sites exceed 1M, some substantially more."
+    },
+    {
+      "type": "code",
+      "id": "00285381b590b842",
+      "text": "2249677 old.viki.wiki\n29143944 nixos.ralfbarkow.ch\n65888443 http.wiki.ralfbarkow.ch\n93449511 wiki.ralfbarkow.ch\n94484063 dreyeck.ch\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "83e5464434ab5d32",
+      "text": "We will try running scrape on one page from one site that has my own work at its source. It has three pages with words.txt over 10K."
+    },
+    {
+      "type": "code",
+      "id": "ce4f94e05fb9f4f0",
+      "text": "19452 boulder-wind-captured\n105396 ncar-fire-2022-03-21\n692156 tiny-habits"
+    },
+    {
+      "type": "code",
+      "id": "48bd2d5edd527d62",
+      "text": "cat sites/wiki.dbbs.co/pages/tiny-habits/words.txt"
+    },
+    {
+      "type": "paragraph",
+      "id": "a6dbdc362e4e3dcb",
+      "text": "We've found that ruby gsub fails for a very long match. We don't get an exception but the intended replacement doesn't happen."
+    },
+    {
+      "type": "code",
+      "id": "b522472e04029aea",
+      "text": "find sites -name words.txt -size +1M"
+    },
+    {
+      "type": "markdown",
+      "id": "d687ad949279e680",
+      "text": "# Resolution"
+    },
+    {
+      "type": "paragraph",
+      "id": "1fa3bb1b6cc1b306",
+      "text": "We found that our <tag> regex needed to explicitly allow newline within the tag. 692156 ⇒ 556 improvement."
+    },
+    {
+      "type": "code",
+      "id": "94bc580913a295f0",
+      "text": " text.gsub! /<(.|\\n)*?>/,'' if item['type']=='html'\n text.gsub! /\\[((http|https|ftp):.*?) (.*?)\\]/, '\\3'\n text.scan /[A-Za-z]+/ do |word|\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "6a96e34cc6499ab3",
+      "text": "We could possibly improve the scan to see base64 as a single word and then reject it as being too long. Or just remove base64 when longer than the longest English word, pneumonoultramicroscopicsilicovolcanoconiosis."
+    },
+    {
+      "type": "code",
+      "id": "45ca89efb78e4265",
+      "text": "  text.gsub! /[A-Za-z0-9+\\//]{46,},''"
+    },
+    {
+      "type": "paragraph",
+      "id": "d0e25087f5ce8cbf",
+      "text": "We can force a full site scrape by erasing the date-of-last-scrape flag. We try this for dreyeck.ch. "
+    },
+    {
+      "type": "code",
+      "id": "2f878f4f0de63902",
+      "text": "  mark = \"sites/#{site}/scraped\"\n  if File.exist? mark\n    since = File.mtime(mark).to_i*1000\n  else\n    since = 0\n  end\n"
+    },
+    {
+      "type": "markdown",
+      "id": "98842adc933d1749",
+      "text": "# Scrape"
+    },
+    {
+      "type": "paragraph",
+      "id": "f2673e81b209329d",
+      "text": "We had an unusual scrape after making the above change and some housecleaning of empty sites. We'll keep some records should we want to analyze later."
+    },
+    {
+      "type": "assets",
+      "id": "3ad2f82234d3ff5c",
+      "text": "pages/cleaning-the-search-index"
+    },
+    {
+      "type": "paragraph",
+      "id": "cab30052f64b35e2",
+      "text": "We tried removing sites entries for sites with no pages. They seem to have come back or appeared in recent changes somehow. Beware using this list as it seems to have one legitimate site in the list.  "
+    },
+    {
+      "type": "roster",
+      "id": "27d59f1c5499b152",
+      "text": "7800ec3b.ngrok.io\n810699.pmint.fed.wiki.org\n944b5652.ngrok.io\na6ccfbc0.ngrok.io\naaron.asia.wiki.org\nach.asia.wiki.org\nallen.fed.wiki\nallmende.io\nalmereyda.de\nalyson.sf2.fedwikihappening.net\nanders.outlandish.academy\nandysylvester.com\nannalisamanca.uk2.fedwikihappening.net\naribadernatal.com\nattricia.asia.wiki.org\nbill.seitz.fed.wiki.org\nblendedworkshop.fed.wiki\nboggie.fed.wiki\nbookmark-outpost-proof.glitch.me\nc2.com\ncascade-sys.net\ncaulfield.pw\nchn.io\nchohag.asia.wiki.org\nchris.asia.wiki.org\nchrisellis.me\nchristiqn.fed.wiki.org\ncl.blendedworkshop.fed.wiki\nclay.ny2.fedwikihappening.net\ncocultures.federated.wik\ncoevolving.com\ncontroverse.asia.wiki.org\ncontrovese.asia.wiki.org\ncool-bat-29.deno.dev\ncreativefinance.io\ndao.lexon.wiki\ndata.fed.wiki.org\ndavid.agency.pods.wiki.org\ndavid.lexon.wiki\ndavid.reimage.fed.wiki.fed.wiki\ndavid.reimage.fed.wikiig.fed.wiki\ndbbs.co\ndilgreenarchitect.co.uk\ndjon.es\ndlm.hapgood.net\ndon.noyes.asia.fed.wiki\ndots.asia.wiki.org\ndrone.dork.wiki.org\nebike.fed.wiki\nec83aa54.ngrok.io\nego.ebike.fed.wiki\neterprobertson.tries.fed.wiki\netudianutt.asia.wiki.org\neugene.agency.pods.wiki.org\nfandsuamprep.outlandish.academy\nfautsuamprep.outlandish.academy\nfeast.fm\nfed.wikabout.fed.wiki\nfederation.asia.wiki.org\nfedwiki.maxlath.eu\nfedwikihappening.net\nfoo.dojo.fed.wiki\nfoo.sofi.dojo.fed.wiki\nfoo.tries.fed.wiki\nforage.ward.fed.wiki\nfrances.uk2.fedwikihappening.net\nfrankmcpherson.net\nfreedombone.net\nfullmoon.academy\nfuturelaw.org\ngarden.ward.asia.wiki.org\nglitch.me\ngraziano.ic.wiki.openlearning.cc\ngyuri.ic.wiki.openlearning.cc\nhapgood.net\nhashbase.io\nhaythemben.asia.wiki.org\nhello.asia.wiki.org\nhello.ward.asia.wiki.org\nhi.asia.wiki.org\nhome.asia.wiki.org\nif.fed.wiki.org\ninnovateoregon.org\niscon.fed.wiki.org\nittybittyfedwiki.com\njack.agency.pods.wiki.org\njack.ries.fed.wiki\njasongreen.net\nje.fedwiki.ssatuk.co.uk\njeffist.com\njhp.mike.asia.wiki.org\njillstudent.gpacw.asia.wiki.org\njournal.asia.wiki.org\njournal19a:3000\njph.asia.wiki.org\njph.mike.asia.wiki.org\njupidu.uk2.fedwikihappening.net\nkaren.mitte.tries.fed.wiki\nkelley.asia.wiki.org\nkerry.fed.wiki\nkerry.sofi.tries.fed.wiki\nknuth.fed.wiki.org\nlao.lexon.wiki\nlexon.wiki\nlibre.sh\nlife.asia.wiki.org\nlife.org.asia.wiki.org\nlife.war.asia.wiki.org\nlifeward.asia.wiki.orglinda.fed.wiki.org\nlivecode.viral.academ\nlph.asia.wiki.org\nmartinlindner.uk2.fedwikihappening.net\nmatslats.net\nmatts.wiki\nmcmorgan.org\nmisinfo:3000\nmk.asia.wiki.org\nmks.asia.wiki.org\nmodels.asia.wiki\nmonlien.asia.wiki.org\nndevil.asia.wiki.org\nnik.tries.fed.wiki\nnlafferty.uk2.fedwikihappening.net\nnrm-io-paul90.hashbase.io\nnwiki.synesthesia.co.uk\nolaf.fed.wiki\nolafbrugman.dojo.fed.wiki\nort.fed.wiki.org\npamela.podclub.cc\npatternwork.federated.wikidance.proto.institute\npaul.agency.pods.wiki.org\npax.academy\npermaculture.daviding.openlearning.cc\npete.agency.pods.wiki.org\npeterdaguru.dojo.fed.wiki\nphilip.cryptoacademy.org\nplugin.dork.wiki.org\nplugin.fed.wiki\nplugins.dork.wiki.org\nread.fed.wiki\nrecycler\nrest.livecode.world\nrest.liveworld.org\nrevgniter.livecode.world\nsearch.asia.wiki.org\nsilke.fed.wiki\nsimnet.ward.asia.wiki\nsmallest.fed.wiki\nstephanie.fed.wiki.org\nstyle.fed.wiki.fed.wiki\nsurvival.mk.asia.wiki.org\nswarm.cryptoacademy.org\ntamara.asia.wiki.org\ntech-cico.fr\ntest.about.fed.wiki\ntest.paul.asia.wiki.org\ntest2.ward.dojo.fed.wiki\nthing.richardbatty.fed.wiki\nthompson.dayton.fed.wiki\ntips.noyes.asia.wiki.org\ntol.noyes.asia.wiki.org\ntomaskafka.uk2.fedwikihappening.net\ntopics.don.noyes.asia.wiki.org\ntrails.asia.wiki.org\ntransformap.co\ntyler.goaljam.org\nuser1.helmul.tries.fed.wiki\nutt.sfw.trials.asia.wiki.org\nuttyassine.asia.wiki.org\nvideo.fed.wiki\nward.goals.pods.wiki.org\nwardcunningham.dork.wiki.org\nwiki.borgesianrhapsody.com\nwiki.geosemantik.de\nwiki.org\nwilliam.ward.asia.wiki.org\nwsuv.wiki\nwvengen.fed.wiki.org\nww1.newspeak.cc\nyala.fed.wiki\nyassachqir.asia.wiki.org\nyassinachqir.asia.wiki.org\nyourname.write.asia.wiki.org"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Cleaning the Search Index",
+        "story": []
+      },
+      "date": 1671846101871
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6108c033efedd17f"
+      },
+      "id": "6108c033efedd17f",
+      "type": "add",
+      "date": 1671846181631
+    },
+    {
+      "type": "edit",
+      "id": "6108c033efedd17f",
+      "item": {
+        "type": "paragraph",
+        "id": "6108c033efedd17f",
+        "text": "Search has gotten slow because we have inadvertently indexed base64 text as words filling our word.txt indices with junk."
+      },
+      "date": 1671846280197
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "37d32908b011b869"
+      },
+      "id": "37d32908b011b869",
+      "type": "add",
+      "after": "6108c033efedd17f",
+      "date": 1671846430976
+    },
+    {
+      "type": "edit",
+      "id": "6108c033efedd17f",
+      "item": {
+        "type": "paragraph",
+        "id": "6108c033efedd17f",
+        "text": "Search has gotten slow because we have inadvertently indexed base64 text as words filling our word.txt indices with junk. [https://github.com/fedwiki/wiki-client/issues/283 issue]"
+      },
+      "date": 1671846526415
+    },
+    {
+      "type": "edit",
+      "id": "37d32908b011b869",
+      "item": {
+        "type": "html",
+        "id": "37d32908b011b869",
+        "text": "<img width=100% src=https://user-images.githubusercontent.com/12127/204685764-c8dea30f-6b22-4811-ad4c-c65d63bfe684.png>"
+      },
+      "date": 1671846572676
+    },
+    {
+      "type": "edit",
+      "id": "6108c033efedd17f",
+      "item": {
+        "type": "paragraph",
+        "id": "6108c033efedd17f",
+        "text": "Search has gotten slow because we have inadvertently indexed base64 text as words filling our words.txt indices with junk. [https://github.com/fedwiki/wiki-client/issues/283 issue]"
+      },
+      "date": 1671846604874
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7f71896c87744eee"
+      },
+      "id": "7f71896c87744eee",
+      "type": "add",
+      "after": "37d32908b011b869",
+      "date": 1671846642190
+    },
+    {
+      "type": "edit",
+      "id": "7f71896c87744eee",
+      "item": {
+        "type": "markdown",
+        "id": "7f71896c87744eee",
+        "text": "# Examples"
+      },
+      "date": 1671846673814
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0e4e88239fca27e6"
+      },
+      "id": "0e4e88239fca27e6",
+      "type": "add",
+      "after": "7f71896c87744eee",
+      "date": 1671846676052
+    },
+    {
+      "type": "edit",
+      "id": "0e4e88239fca27e6",
+      "item": {
+        "type": "code",
+        "id": "0e4e88239fca27e6",
+        "text": "{\n      \"id\": \"79704000\",\n      \"type\": \"html\",\n      \"text\": \"<img width=\\\"100%\\\" alt=\\\"NREL 2022-03-26T22:44-0700 winds 10-25mph<br>\\\" src=\\\"data:image/png;base64,iVBORw0KG...AiRAYII=\\\"><p>NREL 2022-03-26T22:44-0700 winds 10-25mph<br></p>\"\n    },"
+      },
+      "date": 1671847229345
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d3362fe20a2cf7e4"
+      },
+      "id": "d3362fe20a2cf7e4",
+      "type": "add",
+      "after": "0e4e88239fca27e6",
+      "date": 1671847263261
+    },
+    {
+      "type": "edit",
+      "id": "d3362fe20a2cf7e4",
+      "item": {
+        "type": "paragraph",
+        "id": "d3362fe20a2cf7e4",
+        "text": "Type html with anything in tags, especially image data."
+      },
+      "date": 1671847338603
+    },
+    {
+      "id": "d3362fe20a2cf7e4",
+      "type": "move",
+      "order": [
+        "6108c033efedd17f",
+        "37d32908b011b869",
+        "7f71896c87744eee",
+        "d3362fe20a2cf7e4",
+        "0e4e88239fca27e6"
+      ],
+      "date": 1671847341995
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f76a07fae7efb9a9"
+      },
+      "id": "f76a07fae7efb9a9",
+      "type": "add",
+      "after": "0e4e88239fca27e6",
+      "date": 1671848098102
+    },
+    {
+      "type": "edit",
+      "id": "f76a07fae7efb9a9",
+      "item": {
+        "type": "code",
+        "id": "f76a07fae7efb9a9",
+        "text": "{\n      \"type\": \"markdown\",\n      \"id\": \"7bbc463a08dc611b\",\n      \"text\": \"Just heard his talk at Chicago CTO Summit. https://www.bizjournals.com/baltimore/news/2021/06/25/best-in-tech-awards-2021-jonathan-moore-rowdyorbit.html via [https://matrix.to/#/!ORfrUEFeWFcHAMLFLr:matrix.org/$1652386834135345SycLV:matrix.org?via=matrix.org&via=matrix.allmende.io&via=diglife.coop matrix]\"\n    },"
+      },
+      "date": 1671848185811
+    },
+    {
+      "type": "add",
+      "id": "604de4f436f3515f",
+      "item": {
+        "type": "paragraph",
+        "id": "604de4f436f3515f",
+        "text": "Type markdown with bare urls. Or any [... word] url."
+      },
+      "after": "d3362fe20a2cf7e4",
+      "date": 1671848266672
+    },
+    {
+      "id": "604de4f436f3515f",
+      "type": "move",
+      "order": [
+        "6108c033efedd17f",
+        "37d32908b011b869",
+        "7f71896c87744eee",
+        "d3362fe20a2cf7e4",
+        "0e4e88239fca27e6",
+        "604de4f436f3515f",
+        "f76a07fae7efb9a9"
+      ],
+      "date": 1671848269795
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8604a93b063dfd9f"
+      },
+      "id": "8604a93b063dfd9f",
+      "type": "add",
+      "after": "f76a07fae7efb9a9",
+      "date": 1671848350860
+    },
+    {
+      "type": "edit",
+      "id": "8604a93b063dfd9f",
+      "item": {
+        "type": "markdown",
+        "id": "8604a93b063dfd9f",
+        "text": "# Scripts"
+      },
+      "date": 1671848361273
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "edea39a9e6361ece"
+      },
+      "id": "edea39a9e6361ece",
+      "type": "add",
+      "after": "8604a93b063dfd9f",
+      "date": 1671848368445
+    },
+    {
+      "type": "edit",
+      "id": "edea39a9e6361ece",
+      "item": {
+        "type": "code",
+        "id": "edea39a9e6361ece",
+        "text": "(cd sites/dreyeck.ch/pages; ls | while read p; do echo `cat $p/words.txt | wc -c` $p; done | sort -n)"
+      },
+      "date": 1671848374788
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "42a1bf2a617533d5"
+      },
+      "id": "42a1bf2a617533d5",
+      "type": "add",
+      "after": "edea39a9e6361ece",
+      "date": 1671848408179
+    },
+    {
+      "type": "edit",
+      "id": "42a1bf2a617533d5",
+      "item": {
+        "type": "code",
+        "id": "42a1bf2a617533d5",
+        "text": "ls sites | while read s; do echo `cat sites/$s/words.txt | wc -c` $s; done | sort -n >yy"
+      },
+      "date": 1671848414349
+    },
+    {
+      "id": "42a1bf2a617533d5",
+      "type": "move",
+      "order": [
+        "6108c033efedd17f",
+        "37d32908b011b869",
+        "7f71896c87744eee",
+        "d3362fe20a2cf7e4",
+        "0e4e88239fca27e6",
+        "604de4f436f3515f",
+        "f76a07fae7efb9a9",
+        "8604a93b063dfd9f",
+        "42a1bf2a617533d5",
+        "edea39a9e6361ece"
+      ],
+      "date": 1671848418892
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "aa2fd94568c22693"
+      },
+      "id": "aa2fd94568c22693",
+      "type": "add",
+      "after": "edea39a9e6361ece",
+      "date": 1671848458095
+    },
+    {
+      "type": "edit",
+      "id": "aa2fd94568c22693",
+      "item": {
+        "type": "paragraph",
+        "id": "aa2fd94568c22693",
+        "text": "We look for the largest site words.txt and then the largest pages words.txt in the largest sites."
+      },
+      "date": 1671848502020
+    },
+    {
+      "id": "aa2fd94568c22693",
+      "type": "move",
+      "order": [
+        "6108c033efedd17f",
+        "37d32908b011b869",
+        "7f71896c87744eee",
+        "d3362fe20a2cf7e4",
+        "0e4e88239fca27e6",
+        "604de4f436f3515f",
+        "f76a07fae7efb9a9",
+        "8604a93b063dfd9f",
+        "aa2fd94568c22693",
+        "42a1bf2a617533d5",
+        "edea39a9e6361ece"
+      ],
+      "date": 1671848504901
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5f37e59b044071b2"
+      },
+      "id": "5f37e59b044071b2",
+      "type": "add",
+      "after": "edea39a9e6361ece",
+      "date": 1671848799250
+    },
+    {
+      "type": "edit",
+      "id": "5f37e59b044071b2",
+      "item": {
+        "type": "paragraph",
+        "id": "5f37e59b044071b2",
+        "text": "By this measure most sites are under 100K, five sites exceed 1M, some substantially more."
+      },
+      "date": 1671848883636
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "00285381b590b842"
+      },
+      "id": "00285381b590b842",
+      "type": "add",
+      "after": "5f37e59b044071b2",
+      "date": 1671848904165
+    },
+    {
+      "type": "edit",
+      "id": "00285381b590b842",
+      "item": {
+        "type": "code",
+        "id": "00285381b590b842",
+        "text": "2249677 old.viki.wiki\n29143944 nixos.ralfbarkow.ch\n65888443 http.wiki.ralfbarkow.ch\n93449511 wiki.ralfbarkow.ch\n94484063 dreyeck.ch\n"
+      },
+      "date": 1671848909050
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "48bd2d5edd527d62"
+      },
+      "id": "48bd2d5edd527d62",
+      "type": "add",
+      "after": "00285381b590b842",
+      "date": 1671850746126
+    },
+    {
+      "type": "edit",
+      "id": "48bd2d5edd527d62",
+      "item": {
+        "type": "code",
+        "id": "48bd2d5edd527d62",
+        "text": "cat sites/wiki.dbbs.co/pages/tiny-habits/words.txt"
+      },
+      "date": 1671850756337
+    },
+    {
+      "type": "add",
+      "id": "83e5464434ab5d32",
+      "item": {
+        "type": "paragraph",
+        "id": "83e5464434ab5d32",
+        "text": "We will try running scrape on one page from one site that has my own work at its source."
+      },
+      "after": "5f37e59b044071b2",
+      "date": 1671850856681
+    },
+    {
+      "id": "83e5464434ab5d32",
+      "type": "move",
+      "order": [
+        "6108c033efedd17f",
+        "37d32908b011b869",
+        "7f71896c87744eee",
+        "d3362fe20a2cf7e4",
+        "0e4e88239fca27e6",
+        "604de4f436f3515f",
+        "f76a07fae7efb9a9",
+        "8604a93b063dfd9f",
+        "aa2fd94568c22693",
+        "42a1bf2a617533d5",
+        "edea39a9e6361ece",
+        "5f37e59b044071b2",
+        "00285381b590b842",
+        "83e5464434ab5d32",
+        "48bd2d5edd527d62"
+      ],
+      "date": 1671850859172
+    },
+    {
+      "type": "edit",
+      "id": "83e5464434ab5d32",
+      "item": {
+        "type": "paragraph",
+        "id": "83e5464434ab5d32",
+        "text": "We will try running scrape on one page from one site that has my own work at its source. It has three pages with words.txt over 10K."
+      },
+      "date": 1671850937760
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ce4f94e05fb9f4f0"
+      },
+      "id": "ce4f94e05fb9f4f0",
+      "type": "add",
+      "after": "48bd2d5edd527d62",
+      "date": 1671850943865
+    },
+    {
+      "type": "edit",
+      "id": "ce4f94e05fb9f4f0",
+      "item": {
+        "type": "code",
+        "id": "ce4f94e05fb9f4f0",
+        "text": "19452 boulder-wind-captured\n105396 ncar-fire-2022-03-21\n692156 tiny-habits"
+      },
+      "date": 1671850947590
+    },
+    {
+      "id": "ce4f94e05fb9f4f0",
+      "type": "move",
+      "order": [
+        "6108c033efedd17f",
+        "37d32908b011b869",
+        "7f71896c87744eee",
+        "d3362fe20a2cf7e4",
+        "0e4e88239fca27e6",
+        "604de4f436f3515f",
+        "f76a07fae7efb9a9",
+        "8604a93b063dfd9f",
+        "aa2fd94568c22693",
+        "42a1bf2a617533d5",
+        "edea39a9e6361ece",
+        "5f37e59b044071b2",
+        "00285381b590b842",
+        "83e5464434ab5d32",
+        "ce4f94e05fb9f4f0",
+        "48bd2d5edd527d62"
+      ],
+      "date": 1671850949737
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d687ad949279e680"
+      },
+      "id": "d687ad949279e680",
+      "type": "add",
+      "after": "48bd2d5edd527d62",
+      "date": 1671861712337
+    },
+    {
+      "type": "edit",
+      "id": "d687ad949279e680",
+      "item": {
+        "type": "markdown",
+        "id": "d687ad949279e680",
+        "text": "# Fix"
+      },
+      "date": 1671861721554
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1fa3bb1b6cc1b306"
+      },
+      "id": "1fa3bb1b6cc1b306",
+      "type": "add",
+      "after": "d687ad949279e680",
+      "date": 1671861786101
+    },
+    {
+      "type": "edit",
+      "id": "1fa3bb1b6cc1b306",
+      "item": {
+        "type": "paragraph",
+        "id": "1fa3bb1b6cc1b306",
+        "text": "We found that our <tag> regex needed to explicitly allow newline within the tag."
+      },
+      "date": 1671861891293
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "94bc580913a295f0"
+      },
+      "id": "94bc580913a295f0",
+      "type": "add",
+      "after": "1fa3bb1b6cc1b306",
+      "date": 1671861894302
+    },
+    {
+      "type": "edit",
+      "id": "94bc580913a295f0",
+      "item": {
+        "type": "code",
+        "id": "94bc580913a295f0",
+        "text": " text.gsub! /<(.|\\n)*?>/, '' if item['type'] == 'html'\n text.gsub! /\\[((http|https|ftp):.*?) (.*?)\\]/, '\\3'\n text.scan /[A-Za-z]+/ do |word|\n"
+      },
+      "date": 1671861909414
+    },
+    {
+      "type": "edit",
+      "id": "94bc580913a295f0",
+      "item": {
+        "type": "code",
+        "id": "94bc580913a295f0",
+        "text": " text.gsub! /<(.|\\n)*?>/,'' if item['type']=='html'\n text.gsub! /\\[((http|https|ftp):.*?) (.*?)\\]/, '\\3'\n text.scan /[A-Za-z]+/ do |word|\n"
+      },
+      "date": 1671861941320
+    },
+    {
+      "type": "add",
+      "id": "6a96e34cc6499ab3",
+      "item": {
+        "type": "paragraph",
+        "id": "6a96e34cc6499ab3",
+        "text": "We could possibly improve the scan to see base64 as a single word and then reject it as being too long."
+      },
+      "after": "1fa3bb1b6cc1b306",
+      "date": 1671862085795
+    },
+    {
+      "id": "6a96e34cc6499ab3",
+      "type": "move",
+      "order": [
+        "6108c033efedd17f",
+        "37d32908b011b869",
+        "7f71896c87744eee",
+        "d3362fe20a2cf7e4",
+        "0e4e88239fca27e6",
+        "604de4f436f3515f",
+        "f76a07fae7efb9a9",
+        "8604a93b063dfd9f",
+        "aa2fd94568c22693",
+        "42a1bf2a617533d5",
+        "edea39a9e6361ece",
+        "5f37e59b044071b2",
+        "00285381b590b842",
+        "83e5464434ab5d32",
+        "ce4f94e05fb9f4f0",
+        "48bd2d5edd527d62",
+        "d687ad949279e680",
+        "1fa3bb1b6cc1b306",
+        "94bc580913a295f0",
+        "6a96e34cc6499ab3"
+      ],
+      "date": 1671862088523
+    },
+    {
+      "type": "add",
+      "id": "d0e25087f5ce8cbf",
+      "item": {
+        "type": "paragraph",
+        "id": "d0e25087f5ce8cbf",
+        "text": "We can force a full site scrape by erasing the date-of-last-scrape flag."
+      },
+      "after": "6a96e34cc6499ab3",
+      "date": 1671862330694
+    },
+    {
+      "type": "edit",
+      "id": "d0e25087f5ce8cbf",
+      "item": {
+        "type": "paragraph",
+        "id": "d0e25087f5ce8cbf",
+        "text": "We can force a full site scrape by erasing the date-of-last-scrape flag. "
+      },
+      "date": 1671862340779
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2f878f4f0de63902"
+      },
+      "id": "2f878f4f0de63902",
+      "type": "add",
+      "after": "d0e25087f5ce8cbf",
+      "date": 1671862379989
+    },
+    {
+      "type": "edit",
+      "id": "2f878f4f0de63902",
+      "item": {
+        "type": "code",
+        "id": "2f878f4f0de63902",
+        "text": "  mark = \"sites/#{site}/scraped\"\n  if File.exist? mark\n    since = File.mtime(mark).to_i*1000\n  else\n    since = 0\n  end\n"
+      },
+      "date": 1671862384455
+    },
+    {
+      "type": "edit",
+      "id": "d0e25087f5ce8cbf",
+      "item": {
+        "type": "paragraph",
+        "id": "d0e25087f5ce8cbf",
+        "text": "We can force a full site scrape by erasing the date-of-last-scrape flag. We try this for dreyeck.ch. "
+      },
+      "date": 1671862458864
+    },
+    {
+      "type": "edit",
+      "id": "1fa3bb1b6cc1b306",
+      "item": {
+        "type": "paragraph",
+        "id": "1fa3bb1b6cc1b306",
+        "text": "We found that our <tag> regex needed to explicitly allow newline within the tag. 692156 => 556"
+      },
+      "date": 1671862640993
+    },
+    {
+      "type": "edit",
+      "id": "1fa3bb1b6cc1b306",
+      "item": {
+        "type": "paragraph",
+        "id": "1fa3bb1b6cc1b306",
+        "text": "We found that our <tag> regex needed to explicitly allow newline within the tag. 692156 ⇒ 556"
+      },
+      "date": 1671862666510
+    },
+    {
+      "type": "edit",
+      "id": "1fa3bb1b6cc1b306",
+      "item": {
+        "type": "paragraph",
+        "id": "1fa3bb1b6cc1b306",
+        "text": "We found that our <tag> regex needed to explicitly allow newline within the tag. 692156 ⇒ 556 improvement."
+      },
+      "date": 1671862675441
+    },
+    {
+      "type": "edit",
+      "id": "d687ad949279e680",
+      "item": {
+        "type": "markdown",
+        "id": "d687ad949279e680",
+        "text": "# Resolution"
+      },
+      "date": 1671862707808
+    },
+    {
+      "type": "edit",
+      "id": "6108c033efedd17f",
+      "item": {
+        "type": "paragraph",
+        "id": "6108c033efedd17f",
+        "text": "Search has gotten slow because we have inadvertently indexed base64 text as words filling our words.txt indices with junk. [https://github.com/fedwiki/wiki-client/issues/283 issue] [http://search.fed.wiki.org:3030/counts.html plot]"
+      },
+      "date": 1671862953223
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "45ca89efb78e4265"
+      },
+      "id": "45ca89efb78e4265",
+      "type": "add",
+      "after": "2f878f4f0de63902",
+      "date": 1671863438212
+    },
+    {
+      "type": "edit",
+      "id": "45ca89efb78e4265",
+      "item": {
+        "type": "code",
+        "id": "45ca89efb78e4265",
+        "text": "  text.gsub! /[A-Za-z"
+      },
+      "date": 1671863473217
+    },
+    {
+      "type": "edit",
+      "id": "45ca89efb78e4265",
+      "item": {
+        "type": "code",
+        "id": "45ca89efb78e4265",
+        "text": "  text.gsub! /[A-Za-z0-9+\\//"
+      },
+      "date": 1671863511615
+    },
+    {
+      "type": "edit",
+      "id": "45ca89efb78e4265",
+      "item": {
+        "type": "code",
+        "id": "45ca89efb78e4265",
+        "text": "  text.gsub! /[A-Za-z0-9+\\]{20,}//,''"
+      },
+      "date": 1671863603343
+    },
+    {
+      "type": "edit",
+      "id": "45ca89efb78e4265",
+      "item": {
+        "type": "code",
+        "id": "45ca89efb78e4265",
+        "text": "  text.gsub! /[A-Za-z0-9+\\]{46,}//,''"
+      },
+      "date": 1671863686221
+    },
+    {
+      "id": "45ca89efb78e4265",
+      "type": "move",
+      "order": [
+        "6108c033efedd17f",
+        "37d32908b011b869",
+        "7f71896c87744eee",
+        "d3362fe20a2cf7e4",
+        "0e4e88239fca27e6",
+        "604de4f436f3515f",
+        "f76a07fae7efb9a9",
+        "8604a93b063dfd9f",
+        "aa2fd94568c22693",
+        "42a1bf2a617533d5",
+        "edea39a9e6361ece",
+        "5f37e59b044071b2",
+        "00285381b590b842",
+        "83e5464434ab5d32",
+        "ce4f94e05fb9f4f0",
+        "48bd2d5edd527d62",
+        "d687ad949279e680",
+        "1fa3bb1b6cc1b306",
+        "94bc580913a295f0",
+        "6a96e34cc6499ab3",
+        "45ca89efb78e4265",
+        "d0e25087f5ce8cbf",
+        "2f878f4f0de63902"
+      ],
+      "date": 1671863701679
+    },
+    {
+      "type": "edit",
+      "id": "6a96e34cc6499ab3",
+      "item": {
+        "type": "paragraph",
+        "id": "6a96e34cc6499ab3",
+        "text": "We could possibly improve the scan to see base64 as a single word and then reject it as being too long. Or just remove base64 when longer than the longest English word."
+      },
+      "date": 1671863755264
+    },
+    {
+      "type": "edit",
+      "id": "6a96e34cc6499ab3",
+      "item": {
+        "type": "paragraph",
+        "id": "6a96e34cc6499ab3",
+        "text": "We could possibly improve the scan to see base64 as a single word and then reject it as being too long. Or just remove base64 when longer than the longest English word, pneumonoultramicroscopicsilicovolcanoconiosis"
+      },
+      "date": 1671863775385
+    },
+    {
+      "type": "edit",
+      "id": "6a96e34cc6499ab3",
+      "item": {
+        "type": "paragraph",
+        "id": "6a96e34cc6499ab3",
+        "text": "We could possibly improve the scan to see base64 as a single word and then reject it as being too long. Or just remove base64 when longer than the longest English word, pneumonoultramicroscopicsilicovolcanoconiosis."
+      },
+      "date": 1671863781977
+    },
+    {
+      "type": "edit",
+      "id": "45ca89efb78e4265",
+      "item": {
+        "type": "code",
+        "id": "45ca89efb78e4265",
+        "text": "  text.gsub! /[A-Za-z0-9+\\//]{46,},''"
+      },
+      "date": 1671863830321
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "98842adc933d1749"
+      },
+      "id": "98842adc933d1749",
+      "type": "add",
+      "after": "2f878f4f0de63902",
+      "date": 1671988786536
+    },
+    {
+      "type": "edit",
+      "id": "98842adc933d1749",
+      "item": {
+        "type": "markdown",
+        "id": "98842adc933d1749",
+        "text": "# Scrape"
+      },
+      "date": 1671988844289
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f2673e81b209329d"
+      },
+      "id": "f2673e81b209329d",
+      "type": "add",
+      "after": "98842adc933d1749",
+      "date": 1671988849945
+    },
+    {
+      "type": "edit",
+      "id": "f2673e81b209329d",
+      "item": {
+        "type": "paragraph",
+        "id": "f2673e81b209329d",
+        "text": "We had an unusual scrape after making the above change and some housecleaning of empty sites. We'll keep some records."
+      },
+      "date": 1671988952423
+    },
+    {
+      "type": "edit",
+      "id": "f2673e81b209329d",
+      "item": {
+        "type": "paragraph",
+        "id": "f2673e81b209329d",
+        "text": "We had an unusual scrape after making the above change and some housecleaning of empty sites. We'll keep some records should we want to analyze later."
+      },
+      "date": 1671988971226
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3ad2f82234d3ff5c"
+      },
+      "id": "3ad2f82234d3ff5c",
+      "type": "add",
+      "after": "f2673e81b209329d",
+      "date": 1671989004376
+    },
+    {
+      "type": "edit",
+      "id": "3ad2f82234d3ff5c",
+      "item": {
+        "type": "assets",
+        "id": "3ad2f82234d3ff5c",
+        "text": "pages/cleaning-the-search-index"
+      },
+      "date": 1671989011715
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "27d59f1c5499b152"
+      },
+      "id": "27d59f1c5499b152",
+      "type": "add",
+      "after": "3ad2f82234d3ff5c",
+      "date": 1672013612725
+    },
+    {
+      "type": "edit",
+      "id": "27d59f1c5499b152",
+      "item": {
+        "type": "roster",
+        "id": "27d59f1c5499b152",
+        "text": "7800ec3b.ngrok.io\n810699.pmint.fed.wiki.org\n944b5652.ngrok.io\na6ccfbc0.ngrok.io\naaron.asia.wiki.org\nach.asia.wiki.org\nallen.fed.wiki\nallmende.io\nalmereyda.de\nalyson.sf2.fedwikihappening.net\nanders.outlandish.academy\nandysylvester.com\nannalisamanca.uk2.fedwikihappening.net\naribadernatal.com\nattricia.asia.wiki.org\nbill.seitz.fed.wiki.org\nblendedworkshop.fed.wiki\nboggie.fed.wiki\nbookmark-outpost-proof.glitch.me\nc2.com\ncascade-sys.net\ncaulfield.pw\nchn.io\nchohag.asia.wiki.org\nchris.asia.wiki.org\nchrisellis.me\nchristiqn.fed.wiki.org\ncl.blendedworkshop.fed.wiki\nclay.ny2.fedwikihappening.net\ncocultures.federated.wik\ncoevolving.com\ncommonsverse.commoning.wiki\ncontroverse.asia.wiki.org\ncontrovese.asia.wiki.org\ncool-bat-29.deno.dev\ncreativefinance.io\ndao.lexon.wiki\ndata.fed.wiki.org\ndavid.agency.pods.wiki.org\ndavid.lexon.wiki\ndavid.reimage.fed.wiki.fed.wiki\ndavid.reimage.fed.wikiig.fed.wiki\ndbbs.co\ndilgreenarchitect.co.uk\ndjon.es\ndlm.hapgood.net\ndon.noyes.asia.fed.wiki\ndots.asia.wiki.org\ndrone.dork.wiki.org\nebike.fed.wiki\nec83aa54.ngrok.io\nego.ebike.fed.wiki\neterprobertson.tries.fed.wiki\netudianutt.asia.wiki.org\neugene.agency.pods.wiki.org\nfandsuamprep.outlandish.academy\nfautsuamprep.outlandish.academy\nfeast.fm\nfed.wikabout.fed.wiki\nfederation.asia.wiki.org\nfedwiki.maxlath.eu\nfedwikihappening.net\nfoo.dojo.fed.wiki\nfoo.sofi.dojo.fed.wiki\nfoo.tries.fed.wiki\nforage.ward.fed.wiki\nfrances.uk2.fedwikihappening.net\nfrankmcpherson.net\nfreedombone.net\nfullmoon.academy\nfuturelaw.org\ngarden.ward.asia.wiki.org\nglitch.me\ngraziano.ic.wiki.openlearning.cc\ngyuri.ic.wiki.openlearning.cc\nhapgood.net\nhashbase.io\nhaythemben.asia.wiki.org\nhello.asia.wiki.org\nhello.ward.asia.wiki.org\nhi.asia.wiki.org\nhome.asia.wiki.org\nif.fed.wiki.org\ninnovateoregon.org\niscon.fed.wiki.org\nittybittyfedwiki.com\njack.agency.pods.wiki.org\njack.ries.fed.wiki\njasongreen.net\nje.fedwiki.ssatuk.co.uk\njeffist.com\njhp.mike.asia.wiki.org\njillstudent.gpacw.asia.wiki.org\njournal.asia.wiki.org\njournal19a:3000\njph.asia.wiki.org\njph.mike.asia.wiki.org\njupidu.uk2.fedwikihappening.net\nkaren.mitte.tries.fed.wiki\nkelley.asia.wiki.org\nkerry.fed.wiki\nkerry.sofi.tries.fed.wiki\nknuth.fed.wiki.org\nlao.lexon.wiki\nlexon.wiki\nlibre.sh\nlife.asia.wiki.org\nlife.org.asia.wiki.org\nlife.war.asia.wiki.org\nlifeward.asia.wiki.orglinda.fed.wiki.org\nlivecode.viral.academ\nlph.asia.wiki.org\nmartinlindner.uk2.fedwikihappening.net\nmatslats.net\nmatts.wiki\nmcmorgan.org\nmisinfo:3000\nmk.asia.wiki.org\nmks.asia.wiki.org\nmodels.asia.wiki\nmonlien.asia.wiki.org\nndevil.asia.wiki.org\nnik.tries.fed.wiki\nnlafferty.uk2.fedwikihappening.net\nnrm-io-paul90.hashbase.io\nnwiki.synesthesia.co.uk\nolaf.fed.wiki\nolafbrugman.dojo.fed.wiki\nort.fed.wiki.org\npamela.podclub.cc\npatternwork.federated.wikidance.proto.institute\npaul.agency.pods.wiki.org\npax.academy\npermaculture.daviding.openlearning.cc\npete.agency.pods.wiki.org\npeterdaguru.dojo.fed.wiki\nphilip.cryptoacademy.org\nplugin.dork.wiki.org\nplugin.fed.wiki\nplugins.dork.wiki.org\nread.fed.wiki\nrecycler\nrest.livecode.world\nrest.liveworld.org\nrevgniter.livecode.world\nsearch.asia.wiki.org\nsilke.fed.wiki\nsimnet.ward.asia.wiki\nsmallest.fed.wiki\nstephanie.fed.wiki.org\nstyle.fed.wiki.fed.wiki\nsurvival.mk.asia.wiki.org\nswarm.cryptoacademy.org\ntamara.asia.wiki.org\ntech-cico.fr\ntest.about.fed.wiki\ntest.paul.asia.wiki.org\ntest2.ward.dojo.fed.wiki\nthing.richardbatty.fed.wiki\nthompson.dayton.fed.wiki\ntips.noyes.asia.wiki.org\ntol.noyes.asia.wiki.org\ntomaskafka.uk2.fedwikihappening.net\ntopics.don.noyes.asia.wiki.org\ntrails.asia.wiki.org\ntransformap.co\ntyler.goaljam.org\nuser1.helmul.tries.fed.wiki\nutt.sfw.trials.asia.wiki.org\nuttyassine.asia.wiki.org\nvideo.fed.wiki\nward.goals.pods.wiki.org\nwardcunningham.dork.wiki.org\nwiki.borgesianrhapsody.com\nwiki.geosemantik.de\nwiki.org\nwilliam.ward.asia.wiki.org\nwsuv.wiki\nwvengen.fed.wiki.org\nww1.newspeak.cc\nyala.fed.wiki\nyassachqir.asia.wiki.org\nyassinachqir.asia.wiki.org\nyourname.write.asia.wiki.org"
+      },
+      "date": 1672013622225
+    },
+    {
+      "type": "add",
+      "id": "cab30052f64b35e2",
+      "item": {
+        "type": "paragraph",
+        "id": "cab30052f64b35e2",
+        "text": "We tried removing sites entries for sites with no pages. They seem to have come back or appeared in recent changes somehow. Beware using this list as it seems to have one legitimate site in the list.  "
+      },
+      "after": "f2673e81b209329d",
+      "date": 1672013833061
+    },
+    {
+      "id": "cab30052f64b35e2",
+      "type": "move",
+      "order": [
+        "6108c033efedd17f",
+        "37d32908b011b869",
+        "7f71896c87744eee",
+        "d3362fe20a2cf7e4",
+        "0e4e88239fca27e6",
+        "604de4f436f3515f",
+        "f76a07fae7efb9a9",
+        "8604a93b063dfd9f",
+        "aa2fd94568c22693",
+        "42a1bf2a617533d5",
+        "edea39a9e6361ece",
+        "5f37e59b044071b2",
+        "00285381b590b842",
+        "83e5464434ab5d32",
+        "ce4f94e05fb9f4f0",
+        "48bd2d5edd527d62",
+        "d687ad949279e680",
+        "1fa3bb1b6cc1b306",
+        "94bc580913a295f0",
+        "6a96e34cc6499ab3",
+        "45ca89efb78e4265",
+        "d0e25087f5ce8cbf",
+        "2f878f4f0de63902",
+        "98842adc933d1749",
+        "f2673e81b209329d",
+        "3ad2f82234d3ff5c",
+        "cab30052f64b35e2",
+        "27d59f1c5499b152"
+      ],
+      "date": 1672013835379
+    },
+    {
+      "type": "edit",
+      "id": "27d59f1c5499b152",
+      "item": {
+        "type": "roster",
+        "id": "27d59f1c5499b152",
+        "text": "7800ec3b.ngrok.io\n810699.pmint.fed.wiki.org\n944b5652.ngrok.io\na6ccfbc0.ngrok.io\naaron.asia.wiki.org\nach.asia.wiki.org\nallen.fed.wiki\nallmende.io\nalmereyda.de\nalyson.sf2.fedwikihappening.net\nanders.outlandish.academy\nandysylvester.com\nannalisamanca.uk2.fedwikihappening.net\naribadernatal.com\nattricia.asia.wiki.org\nbill.seitz.fed.wiki.org\nblendedworkshop.fed.wiki\nboggie.fed.wiki\nbookmark-outpost-proof.glitch.me\nc2.com\ncascade-sys.net\ncaulfield.pw\nchn.io\nchohag.asia.wiki.org\nchris.asia.wiki.org\nchrisellis.me\nchristiqn.fed.wiki.org\ncl.blendedworkshop.fed.wiki\nclay.ny2.fedwikihappening.net\ncocultures.federated.wik\ncoevolving.com\ncontroverse.asia.wiki.org\ncontrovese.asia.wiki.org\ncool-bat-29.deno.dev\ncreativefinance.io\ndao.lexon.wiki\ndata.fed.wiki.org\ndavid.agency.pods.wiki.org\ndavid.lexon.wiki\ndavid.reimage.fed.wiki.fed.wiki\ndavid.reimage.fed.wikiig.fed.wiki\ndbbs.co\ndilgreenarchitect.co.uk\ndjon.es\ndlm.hapgood.net\ndon.noyes.asia.fed.wiki\ndots.asia.wiki.org\ndrone.dork.wiki.org\nebike.fed.wiki\nec83aa54.ngrok.io\nego.ebike.fed.wiki\neterprobertson.tries.fed.wiki\netudianutt.asia.wiki.org\neugene.agency.pods.wiki.org\nfandsuamprep.outlandish.academy\nfautsuamprep.outlandish.academy\nfeast.fm\nfed.wikabout.fed.wiki\nfederation.asia.wiki.org\nfedwiki.maxlath.eu\nfedwikihappening.net\nfoo.dojo.fed.wiki\nfoo.sofi.dojo.fed.wiki\nfoo.tries.fed.wiki\nforage.ward.fed.wiki\nfrances.uk2.fedwikihappening.net\nfrankmcpherson.net\nfreedombone.net\nfullmoon.academy\nfuturelaw.org\ngarden.ward.asia.wiki.org\nglitch.me\ngraziano.ic.wiki.openlearning.cc\ngyuri.ic.wiki.openlearning.cc\nhapgood.net\nhashbase.io\nhaythemben.asia.wiki.org\nhello.asia.wiki.org\nhello.ward.asia.wiki.org\nhi.asia.wiki.org\nhome.asia.wiki.org\nif.fed.wiki.org\ninnovateoregon.org\niscon.fed.wiki.org\nittybittyfedwiki.com\njack.agency.pods.wiki.org\njack.ries.fed.wiki\njasongreen.net\nje.fedwiki.ssatuk.co.uk\njeffist.com\njhp.mike.asia.wiki.org\njillstudent.gpacw.asia.wiki.org\njournal.asia.wiki.org\njournal19a:3000\njph.asia.wiki.org\njph.mike.asia.wiki.org\njupidu.uk2.fedwikihappening.net\nkaren.mitte.tries.fed.wiki\nkelley.asia.wiki.org\nkerry.fed.wiki\nkerry.sofi.tries.fed.wiki\nknuth.fed.wiki.org\nlao.lexon.wiki\nlexon.wiki\nlibre.sh\nlife.asia.wiki.org\nlife.org.asia.wiki.org\nlife.war.asia.wiki.org\nlifeward.asia.wiki.orglinda.fed.wiki.org\nlivecode.viral.academ\nlph.asia.wiki.org\nmartinlindner.uk2.fedwikihappening.net\nmatslats.net\nmatts.wiki\nmcmorgan.org\nmisinfo:3000\nmk.asia.wiki.org\nmks.asia.wiki.org\nmodels.asia.wiki\nmonlien.asia.wiki.org\nndevil.asia.wiki.org\nnik.tries.fed.wiki\nnlafferty.uk2.fedwikihappening.net\nnrm-io-paul90.hashbase.io\nnwiki.synesthesia.co.uk\nolaf.fed.wiki\nolafbrugman.dojo.fed.wiki\nort.fed.wiki.org\npamela.podclub.cc\npatternwork.federated.wikidance.proto.institute\npaul.agency.pods.wiki.org\npax.academy\npermaculture.daviding.openlearning.cc\npete.agency.pods.wiki.org\npeterdaguru.dojo.fed.wiki\nphilip.cryptoacademy.org\nplugin.dork.wiki.org\nplugin.fed.wiki\nplugins.dork.wiki.org\nread.fed.wiki\nrecycler\nrest.livecode.world\nrest.liveworld.org\nrevgniter.livecode.world\nsearch.asia.wiki.org\nsilke.fed.wiki\nsimnet.ward.asia.wiki\nsmallest.fed.wiki\nstephanie.fed.wiki.org\nstyle.fed.wiki.fed.wiki\nsurvival.mk.asia.wiki.org\nswarm.cryptoacademy.org\ntamara.asia.wiki.org\ntech-cico.fr\ntest.about.fed.wiki\ntest.paul.asia.wiki.org\ntest2.ward.dojo.fed.wiki\nthing.richardbatty.fed.wiki\nthompson.dayton.fed.wiki\ntips.noyes.asia.wiki.org\ntol.noyes.asia.wiki.org\ntomaskafka.uk2.fedwikihappening.net\ntopics.don.noyes.asia.wiki.org\ntrails.asia.wiki.org\ntransformap.co\ntyler.goaljam.org\nuser1.helmul.tries.fed.wiki\nutt.sfw.trials.asia.wiki.org\nuttyassine.asia.wiki.org\nvideo.fed.wiki\nward.goals.pods.wiki.org\nwardcunningham.dork.wiki.org\nwiki.borgesianrhapsody.com\nwiki.geosemantik.de\nwiki.org\nwilliam.ward.asia.wiki.org\nwsuv.wiki\nwvengen.fed.wiki.org\nww1.newspeak.cc\nyala.fed.wiki\nyassachqir.asia.wiki.org\nyassinachqir.asia.wiki.org\nyourname.write.asia.wiki.org"
+      },
+      "date": 1672013903469
+    },
+    {
+      "type": "add",
+      "id": "a6dbdc362e4e3dcb",
+      "item": {
+        "type": "paragraph",
+        "id": "a6dbdc362e4e3dcb",
+        "text": "We've found that ruby gsub fails for very long match."
+      },
+      "after": "83e5464434ab5d32",
+      "date": 1672095227142
+    },
+    {
+      "id": "a6dbdc362e4e3dcb",
+      "type": "move",
+      "order": [
+        "6108c033efedd17f",
+        "37d32908b011b869",
+        "7f71896c87744eee",
+        "d3362fe20a2cf7e4",
+        "0e4e88239fca27e6",
+        "604de4f436f3515f",
+        "f76a07fae7efb9a9",
+        "8604a93b063dfd9f",
+        "aa2fd94568c22693",
+        "42a1bf2a617533d5",
+        "edea39a9e6361ece",
+        "5f37e59b044071b2",
+        "00285381b590b842",
+        "83e5464434ab5d32",
+        "ce4f94e05fb9f4f0",
+        "48bd2d5edd527d62",
+        "a6dbdc362e4e3dcb",
+        "d687ad949279e680",
+        "1fa3bb1b6cc1b306",
+        "94bc580913a295f0",
+        "6a96e34cc6499ab3",
+        "45ca89efb78e4265",
+        "d0e25087f5ce8cbf",
+        "2f878f4f0de63902",
+        "98842adc933d1749",
+        "f2673e81b209329d",
+        "3ad2f82234d3ff5c",
+        "cab30052f64b35e2",
+        "27d59f1c5499b152"
+      ],
+      "date": 1672095230463
+    },
+    {
+      "type": "edit",
+      "id": "a6dbdc362e4e3dcb",
+      "item": {
+        "type": "paragraph",
+        "id": "a6dbdc362e4e3dcb",
+        "text": "We've found that ruby gsub fails for a very long match. We don't get an exception but the intended replacement doesn't happen."
+      },
+      "date": 1672095360912
+    },
+    {
+      "type": "add",
+      "id": "b522472e04029aea",
+      "item": {
+        "type": "factory",
+        "id": "b522472e04029aea",
+        "text": "k"
+      },
+      "after": "a6dbdc362e4e3dcb",
+      "date": 1672095388139
+    },
+    {
+      "type": "edit",
+      "id": "b522472e04029aea",
+      "item": {
+        "type": "code",
+        "id": "b522472e04029aea",
+        "text": "find sites -name words.txt -size +1M"
+      },
+      "date": 1672095396066
+    },
+    {
+      "type": "fork",
+      "site": "ward.asia.wiki.org",
+      "date": 1672132480030
+    }
+  ]
+}
