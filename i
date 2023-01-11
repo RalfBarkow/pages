@@ -4,7 +4,7 @@
     {
       "type": "paragraph",
       "id": "2c3032d99ad234a0",
-      "text": "The problem is “[[I]],” the shortest selfreferential loop. When speaking about oneself, using “I,” [[magic]] is performed. One creates oneself by creating oneself. “I” is the [[Operator]] who is the result of the [[Operation]]. -- [[Heinz von Foerster]] ⇒ [[The Ethical Imperative]]"
+      "text": "The problem is “[[I]],” the shortest selfreferential loop. When speaking about oneself, using “I,” [[Magic]] is performed. One creates oneself by creating oneself. “I” is the [[Operator]] who is the result of the [[Operation]]. -- [[Heinz von Foerster]] ⇒ [[The Ethical Imperative]]"
     },
     {
       "type": "markdown",
@@ -410,6 +410,16 @@
         "text": "The problem is “[[I]],” the shortest selfreferential loop. When speaking about oneself, using “I,” [[magic]] is performed. One creates oneself by creating oneself. “I” is the [[Operator]] who is the result of the [[Operation]]. -- [[Heinz von Foerster]] ⇒ [[The Ethical Imperative]]"
       },
       "date": 1669371631313
+    },
+    {
+      "type": "edit",
+      "id": "2c3032d99ad234a0",
+      "item": {
+        "type": "paragraph",
+        "id": "2c3032d99ad234a0",
+        "text": "The problem is “[[I]],” the shortest selfreferential loop. When speaking about oneself, using “I,” [[Magic]] is performed. One creates oneself by creating oneself. “I” is the [[Operator]] who is the result of the [[Operation]]. -- [[Heinz von Foerster]] ⇒ [[The Ethical Imperative]]"
+      },
+      "date": 1673373049313
     }
   ]
 }
