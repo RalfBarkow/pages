@@ -4,12 +4,12 @@
     {
       "type": "paragraph",
       "id": "2c3032d99ad234a0",
-      "text": "The problem is “[[I]],” the shortest selfreferential loop. When speaking about oneself, using “I,” [[Magic]] is performed. One creates oneself by creating oneself. “I” is the [[Operator]] who is the result of the [[Operation]]. -- [[Heinz von Foerster]] ⇒ [[The Ethical Imperative]]"
+      "text": "The problem is “I,” the shortest selfreferential loop. When speaking about oneself, using “I,” [[Magic]] is performed. One creates oneself by creating oneself. “I” is the [[Operator]] who is the result of the [[Operation]]. -- [[Heinz von Foerster]] ⇒ [[The Ethical Imperative]]"
     },
     {
       "type": "markdown",
       "id": "db3c92863d9358c5",
-      "text": "What [[we]] signify by the word '[[I]]' is a complex that is also notable for being exclusively 'psychical', and it is the most stable complex in the series of our experiences. How can we understand *this* particular grouping of experiences? ([[Bogdanov]], [[Empiriomonism]], p. 13) "
+      "text": "What [[We]] signify by the word 'I' is a complex that is also notable for being exclusively 'psychical', and it is the most stable complex in the series of our experiences. How can we understand *this* particular grouping of experiences? ([[Bogdanov]], [[Empiriomonism]], p. 13) "
     },
     {
       "type": "reference",
@@ -55,7 +55,7 @@
     {
       "type": "markdown",
       "id": "19dc83d8db855799",
-      "text": "One has begun to analyze the psychic processes - not only perceptions, but also sensations, desires, judgments, decisions, etc. - of the human being. - etc. It has been found that the \"conscious\" mental processes - the so-called \"[[I]]\" - do not form a definable unit. They are processes which are based on a tissue of \"unconscious\" collective psychic processes and which are not only fed by this tissue but are also largely controlled by it. This fabric reaches far beyond the human being, easily encompasses all living things and frays downward. The \"I\" proves to be a kind of tip of an iceberg dissolving in the collective and crystallizing from there. It turns out to be an ideological reification of psychological processes. Moreover, it becomes clear that even on the \"conscious\" level there is no question of a definable identity. Rather, it is an inter-subjective networking through which information is produced in constant exchange. From this point of view, the \"I\" is to be seen as a reservoir into which information flows, where it is processed and provisionally stored in order to be passed on. In this respect, the \"I\" appears as a constantly shifting node of an intersubjective tissue, which sits on top of a collective \"unconscious\" psychic tissue."
+      "text": "One has begun to analyze the psychic processes - not only perceptions, but also sensations, desires, judgments, decisions, etc. - of the human being. - etc. It has been found that the \"conscious\" mental processes - the so-called \"I\" - do not form a definable unit. They are processes which are based on a tissue of \"unconscious\" collective psychic processes and which are not only fed by this tissue but are also largely controlled by it. This fabric reaches far beyond the human being, easily encompasses all living things and frays downward. The \"I\" proves to be a kind of tip of an iceberg dissolving in the collective and crystallizing from there. It turns out to be an ideological reification of psychological processes. Moreover, it becomes clear that even on the \"conscious\" level there is no question of a definable identity. Rather, it is an inter-subjective networking through which information is produced in constant exchange. From this point of view, the \"I\" is to be seen as a reservoir into which information flows, where it is processed and provisionally stored in order to be passed on. In this respect, the \"I\" appears as a constantly shifting node of an intersubjective tissue, which sits on top of a collective \"unconscious\" psychic tissue."
     }
   ],
   "journal": [
@@ -420,6 +420,46 @@
         "text": "The problem is “[[I]],” the shortest selfreferential loop. When speaking about oneself, using “I,” [[Magic]] is performed. One creates oneself by creating oneself. “I” is the [[Operator]] who is the result of the [[Operation]]. -- [[Heinz von Foerster]] ⇒ [[The Ethical Imperative]]"
       },
       "date": 1673373049313
+    },
+    {
+      "type": "edit",
+      "id": "2c3032d99ad234a0",
+      "item": {
+        "type": "paragraph",
+        "id": "2c3032d99ad234a0",
+        "text": "The problem is “I,” the shortest selfreferential loop. When speaking about oneself, using “I,” [[Magic]] is performed. One creates oneself by creating oneself. “I” is the [[Operator]] who is the result of the [[Operation]]. -- [[Heinz von Foerster]] ⇒ [[The Ethical Imperative]]"
+      },
+      "date": 1673492778601
+    },
+    {
+      "type": "edit",
+      "id": "db3c92863d9358c5",
+      "item": {
+        "type": "markdown",
+        "id": "db3c92863d9358c5",
+        "text": "What [[we]] signify by the word 'I' is a complex that is also notable for being exclusively 'psychical', and it is the most stable complex in the series of our experiences. How can we understand *this* particular grouping of experiences? ([[Bogdanov]], [[Empiriomonism]], p. 13) "
+      },
+      "date": 1673492891369
+    },
+    {
+      "type": "edit",
+      "id": "19dc83d8db855799",
+      "item": {
+        "type": "markdown",
+        "id": "19dc83d8db855799",
+        "text": "One has begun to analyze the psychic processes - not only perceptions, but also sensations, desires, judgments, decisions, etc. - of the human being. - etc. It has been found that the \"conscious\" mental processes - the so-called \"I\" - do not form a definable unit. They are processes which are based on a tissue of \"unconscious\" collective psychic processes and which are not only fed by this tissue but are also largely controlled by it. This fabric reaches far beyond the human being, easily encompasses all living things and frays downward. The \"I\" proves to be a kind of tip of an iceberg dissolving in the collective and crystallizing from there. It turns out to be an ideological reification of psychological processes. Moreover, it becomes clear that even on the \"conscious\" level there is no question of a definable identity. Rather, it is an inter-subjective networking through which information is produced in constant exchange. From this point of view, the \"I\" is to be seen as a reservoir into which information flows, where it is processed and provisionally stored in order to be passed on. In this respect, the \"I\" appears as a constantly shifting node of an intersubjective tissue, which sits on top of a collective \"unconscious\" psychic tissue."
+      },
+      "date": 1673492972133
+    },
+    {
+      "type": "edit",
+      "id": "db3c92863d9358c5",
+      "item": {
+        "type": "markdown",
+        "id": "db3c92863d9358c5",
+        "text": "What [[We]] signify by the word 'I' is a complex that is also notable for being exclusively 'psychical', and it is the most stable complex in the series of our experiences. How can we understand *this* particular grouping of experiences? ([[Bogdanov]], [[Empiriomonism]], p. 13) "
+      },
+      "date": 1673528161916
     }
   ]
 }
