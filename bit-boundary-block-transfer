@@ -1,0 +1,442 @@
+{
+  "title": "Bit-Boundary Block Transfer",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "f04a87fc422ce255",
+      "text": "In the 1980s, bitmap graphics used a powerful primitive called bitblt. [[Bitblt]] combined a rectangle of a source image with a similarly-sized rectangle in a destination image using a boolean function and replaced the destination rectangle with the boolean result.\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "d434a2db5b46f18d",
+      "text": "[[Dan Ingalls]] invented bitblt for the Alto workstation developed at Xerox PARC. [[Rob Pike]] and [[Bart Locanthi]] used bitblt as the graphics primitive and the name for the Blit, the first graphical terminal for Unix.\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "48a1dec26c47102e",
+      "text": "At the 1984 SIGGRAPH conference, Ingalls, Leo Guibas (also at Xerox PARC), and Pike gave a course on the history, use, and implementation of bitblt. The course notes from 1984 (pdf, 68 pages, 5MB) have a wealth of information about bitblt, including area-filling, bitmap rotation, bitmap magnification, implementation via on-the-fly code generation, line-drawing, text manipulation, and more."
+    },
+    {
+      "type": "paragraph",
+      "id": "cb976e63aa9e80ac",
+      "text": "Posted on Monday, January 7, 2008. [https://research.swtch.com/bitblt page] by [[Russ Cox]]"
+    },
+    {
+      "type": "pagefold",
+      "id": "dcb2cd1d6a64009e",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "0157afdaf965a487",
+      "text": "Bitmap Graphics SIGGRAPH’84 Course Notes"
+    },
+    {
+      "type": "paragraph",
+      "id": "453d4e03943a2ff0",
+      "text": "When the bitmap display on the Alto, Xerox's personal computer, was first being used, its programmers wrote a number of subroutines for special purpose tasks such as character draw­ing, highlighting, and copying rectangles. These subroutines all contained similar code to deal with problems such as bitfield insertion and rectangles with edges within words. Dealing with all these problems in a single, general operator looked forbidding, but the time spent reinvent­ ing the inner loops was becoming frustrating, so in 1975 [[Dan Ingalls]] and [[Diana Merry]] at Xerox PARC encapsulated the operation of copying a bit string from one location to another in a prim­itive they called bitbit for [[bit-boundary block transfer. "
+    },
+    {
+      "type": "paragraph",
+      "id": "3c6c3cd81426d7f6",
+      "text": "The first bitbit operated on a single scan line, but the outer loop was later added, making bitbit a rectangle operator. As bitbit was experimented with, it proved to be so useful that it is now the central graphics primitive on a number of bitmap displays."
+    },
+    {
+      "type": "paragraph",
+      "id": "280e89b860ff8fe2",
+      "text": "These notes explain why bitbit is so successful. They are an overview of our understanding of bitmap graphics based on bitbit. They address the basic properties of bitmap displays, bitbit itself, and associated operators such as line-drawing primitives. Because the pixels on 'bitmap displays are usually represented by a single bit, Boolean algebra applies to the pixels, and the rectangular operators form a simple algebra. Using this algebra, the primitives may be com­ posed to build algorithms for rotation, magnification, area filling and other traditional graphics applications."
+    },
+    {
+      "type": "paragraph",
+      "id": "ddc9b1e7b312c33e",
+      "text": "Bitmap displays demand large amounts of memory and processing power. It is important that bitbit be implemented efficiently, since inefficiencies can result in (literally) visible degrada­tions of performance, even for a single invocation. Unfortunately, though, implementing bitbit efficiently is a difficult problem. Later, we will present a complete, correct, very slow imple­mentation of bitbit, but one simple and small enough to be understood easily. The following sections discuss techniques for improving its performance, and illustrate these by showing how they have been used, and how well they worked, in actual systems."
+    },
+    {
+      "type": "paragraph",
+      "id": "b9ec75523be0b0b0",
+      "text": "Next, we discuss how bitbit can be used for programming interactive graphics applications. Structured picture elements such as text, menus and windows are easily implemented using bitbit, but using them well requires some understanding of how bitbit itself behaves. Applica­tions such as bitmap paint programs also depend critically on the semantics of bitbit."
+    },
+    {
+      "type": "paragraph",
+      "id": "85379383a672e55c",
+      "text": "The most important consideration through all these discussions is the integrated [[Viewpoint]] that bitbit provides. The details of hardware and software implementation focus on a single operator that provides a rational, powerful model for raster graphics. Bitmap devices are popu­lar because their style of graphics is convenient and flexible, but it is bitbit that makes that style, manageable. By simultaneously addressing the issues of efficiency, representation and access, bitbit makes it possible to ignore the low-level detail inherent in bitmap displays, and attend to the more important and useful task of building an interactive graphics environment. Represen­ tative displays from some of the systems that have been built using bitbit are shown in Figure 1."
+    },
+    {
+      "type": "paragraph",
+      "id": "09ffdb8f543f4822",
+      "text": "The reason we have assembled these notes is that, despite its importance, little has been written about bitblt in the literature, to the point that hardware manufacturers who are not 'in the know' make serious mistakes in the implementation of their systems. Until now, too much information about bitblt has been available only as folklore. By discussing the algorithmic, implementation and systems-level basics and implications of bitblt, we hope to enlarge the com­munity of bitblt-knowledgeable people, and prevent the development of bitblt-antagonistic hardware."
+    },
+    {
+      "type": "paragraph",
+      "id": "f706075bc74077f1",
+      "text": "⇒ [[Raster Graphics]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Bit-Boundary Block Transfer",
+        "story": []
+      },
+      "date": 1673758836114
+    },
+    {
+      "id": "cb976e63aa9e80ac",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "cb976e63aa9e80ac",
+        "text": "Posted on Monday, January 7, 2008.\n\nIn the 1980s, bitmap graphics used a powerful primitive called bitblt. Bitblt combined a rectangle of a source image with a similarly-sized rectangle in a destination image using a boolean function and replaced the destination rectangle with the boolean result.\n\nDan Ingalls invented bitblt for the Alto workstation developed at Xerox PARC. Rob Pike and Bart Locanthi used bitblt as the graphics primitive and the name for the Blit, the first graphical terminal for Unix.\n\nAt the 1984 SIGGRAPH conference, Ingalls, Leo Guibas (also at Xerox PARC), and Pike gave a course on the history, use, and implementation of bitblt. The course notes from 1984 (pdf, 68 pages, 5MB) have a wealth of information about bitblt, including area-filling, bitmap rotation, bitmap magnification, implementation via on-the-fly code generation, line-drawing, text manipulation, and more."
+      },
+      "date": 1673758839684
+    },
+    {
+      "type": "edit",
+      "id": "cb976e63aa9e80ac",
+      "item": {
+        "type": "paragraph",
+        "id": "cb976e63aa9e80ac",
+        "text": "Posted on Monday, January 7, 2008."
+      },
+      "date": 1673758845774
+    },
+    {
+      "type": "add",
+      "id": "f04a87fc422ce255",
+      "item": {
+        "type": "paragraph",
+        "id": "f04a87fc422ce255",
+        "text": "In the 1980s, bitmap graphics used a powerful primitive called bitblt. Bitblt combined a rectangle of a source image with a similarly-sized rectangle in a destination image using a boolean function and replaced the destination rectangle with the boolean result.\n\nDan Ingalls invented bitblt for the Alto workstation developed at Xerox PARC. Rob Pike and Bart Locanthi used bitblt as the graphics primitive and the name for the Blit, the first graphical terminal for Unix.\n\nAt the 1984 SIGGRAPH conference, Ingalls, Leo Guibas (also at Xerox PARC), and Pike gave a course on the history, use, and implementation of bitblt. The course notes from 1984 (pdf, 68 pages, 5MB) have a wealth of information about bitblt, including area-filling, bitmap rotation, bitmap magnification, implementation via on-the-fly code generation, line-drawing, text manipulation, and more."
+      },
+      "after": "cb976e63aa9e80ac",
+      "date": 1673758847816
+    },
+    {
+      "id": "f04a87fc422ce255",
+      "type": "move",
+      "order": [
+        "f04a87fc422ce255",
+        "cb976e63aa9e80ac"
+      ],
+      "date": 1673758849938
+    },
+    {
+      "type": "edit",
+      "id": "cb976e63aa9e80ac",
+      "item": {
+        "type": "paragraph",
+        "id": "cb976e63aa9e80ac",
+        "text": "Posted on Monday, January 7, 2008. [https://research.swtch.com/bitblt page]"
+      },
+      "date": 1673758868762
+    },
+    {
+      "type": "edit",
+      "id": "cb976e63aa9e80ac",
+      "item": {
+        "type": "paragraph",
+        "id": "cb976e63aa9e80ac",
+        "text": "Posted on Monday, January 7, 2008. [https://research.swtch.com/bitblt page] by [[Russ Cox]]"
+      },
+      "date": 1673758904298
+    },
+    {
+      "type": "edit",
+      "id": "f04a87fc422ce255",
+      "item": {
+        "type": "paragraph",
+        "id": "f04a87fc422ce255",
+        "text": "In the 1980s, bitmap graphics used a powerful primitive called bitblt. [[Bitblt]] combined a rectangle of a source image with a similarly-sized rectangle in a destination image using a boolean function and replaced the destination rectangle with the boolean result.\n\nDan Ingalls invented bitblt for the Alto workstation developed at Xerox PARC. Rob Pike and Bart Locanthi used bitblt as the graphics primitive and the name for the Blit, the first graphical terminal for Unix.\n\nAt the 1984 SIGGRAPH conference, Ingalls, Leo Guibas (also at Xerox PARC), and Pike gave a course on the history, use, and implementation of bitblt. The course notes from 1984 (pdf, 68 pages, 5MB) have a wealth of information about bitblt, including area-filling, bitmap rotation, bitmap magnification, implementation via on-the-fly code generation, line-drawing, text manipulation, and more."
+      },
+      "date": 1673758927164
+    },
+    {
+      "type": "edit",
+      "id": "f04a87fc422ce255",
+      "item": {
+        "type": "paragraph",
+        "id": "f04a87fc422ce255",
+        "text": "In the 1980s, bitmap graphics used a powerful primitive called bitblt. [[Bitblt]] combined a rectangle of a source image with a similarly-sized rectangle in a destination image using a boolean function and replaced the destination rectangle with the boolean result.\n\n"
+      },
+      "date": 1673759008449
+    },
+    {
+      "type": "add",
+      "id": "d434a2db5b46f18d",
+      "item": {
+        "type": "paragraph",
+        "id": "d434a2db5b46f18d",
+        "text": "[[Dan Ingalls]] invented bitblt for the Alto workstation developed at Xerox PARC. [[Rob Pike]] and [[Bart Locanthi]] used bitblt as the graphics primitive and the name for the Blit, the first graphical terminal for Unix.\n\n"
+      },
+      "after": "f04a87fc422ce255",
+      "date": 1673759034378
+    },
+    {
+      "type": "add",
+      "id": "48a1dec26c47102e",
+      "item": {
+        "type": "paragraph",
+        "id": "48a1dec26c47102e",
+        "text": "At the 1984 SIGGRAPH conference, Ingalls, Leo Guibas (also at Xerox PARC), and Pike gave a course on the history, use, and implementation of bitblt. The course notes from 1984 (pdf, 68 pages, 5MB) have a wealth of information about bitblt, including area-filling, bitmap rotation, bitmap magnification, implementation via on-the-fly code generation, line-drawing, text manipulation, and more."
+      },
+      "after": "d434a2db5b46f18d",
+      "date": 1673759035013
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dcb2cd1d6a64009e"
+      },
+      "id": "dcb2cd1d6a64009e",
+      "type": "add",
+      "after": "cb976e63aa9e80ac",
+      "date": 1673759586765
+    },
+    {
+      "type": "edit",
+      "id": "dcb2cd1d6a64009e",
+      "item": {
+        "type": "pagefold",
+        "id": "dcb2cd1d6a64009e",
+        "text": "~"
+      },
+      "date": 1673759593085
+    },
+    {
+      "id": "0157afdaf965a487",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "0157afdaf965a487",
+        "text": "Bitmap Graphics SIGGRAPH’84 Course Notes"
+      },
+      "after": "dcb2cd1d6a64009e",
+      "date": 1673759600519
+    },
+    {
+      "id": "453d4e03943a2ff0",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "453d4e03943a2ff0",
+        "text": "When the bitmap display on the Alto, Xerox's personal computer, was first being used, its programmers wrote a number of subroutines for special purpose tasks such as character draw­ing, highlighting, and copying rectangles. These subroutines all contained similar code to deal with problems such as bitfield insertion and rectangles with edges within words. Dealing with all these problems in a single, general operator looked forbidding, but the time spent reinvent­ ing the inner loops was becoming frustrating, so in 1975 [[Dan Ingalls]] and [[Diana Merry]] at Xerox PARC encapsulated the operation of copying a bit string from one location to another in a prim­itive they called bitbit for [[bit-boundary block transfer. "
+      },
+      "after": "0157afdaf965a487",
+      "date": 1673759605708
+    },
+    {
+      "id": "3c6c3cd81426d7f6",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "3c6c3cd81426d7f6",
+        "text": "The first bitbit operated on a single scan line, but the outer loop was later added, making bitbit a rectangle operator. As bitbit was experimented with, it proved to be so useful that it is now the central graphics primitive on a number of bitmap displays."
+      },
+      "after": "453d4e03943a2ff0",
+      "date": 1673759615363
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "280e89b860ff8fe2"
+      },
+      "id": "280e89b860ff8fe2",
+      "type": "add",
+      "after": "3c6c3cd81426d7f6",
+      "date": 1673786120344
+    },
+    {
+      "type": "edit",
+      "id": "280e89b860ff8fe2",
+      "item": {
+        "type": "paragraph",
+        "id": "280e89b860ff8fe2",
+        "text": "These notes explain why bitbit is so successful. They are an overview of our understanding of bitmap graphics based on bitbit. They address the basic properties of bitmap displays, bitbit itself, and associated operators such as line-drawing primitives. Because the pixels on 'bitmap displays are usually represented by a single bit, Boolean algebra applies to the pixels, and the rectangular operators form a simple algebra. Using this algebra, the primitives may be com­ posed to build algorithms for rotation, magnification, area filling and other traditional graphics applications."
+      },
+      "date": 1673786122875
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ddc9b1e7b312c33e"
+      },
+      "id": "ddc9b1e7b312c33e",
+      "type": "add",
+      "after": "280e89b860ff8fe2",
+      "date": 1673786149021
+    },
+    {
+      "type": "edit",
+      "id": "ddc9b1e7b312c33e",
+      "item": {
+        "type": "paragraph",
+        "id": "ddc9b1e7b312c33e",
+        "text": "Bitmap displays demand large amounts of memory and processing power. It is important that bitbit be implemented efficiently, since inefficiencies can result in (literally) visible degrada­ tions of performance, even for a single invocation. Unfortunately, though, implementing bitbit efficiently is a difficult problem. Later, we will present a complete, correct, very slow imple­ mentation of bitbit, but one simple and small enough to be understood easily. The following sections discuss techniques for improving its performance, and illustrate these by showing how they have been used, and how well they worked, in actual systems."
+      },
+      "date": 1673786150483
+    },
+    {
+      "type": "edit",
+      "id": "ddc9b1e7b312c33e",
+      "item": {
+        "type": "paragraph",
+        "id": "ddc9b1e7b312c33e",
+        "text": "Bitmap displays demand large amounts of memory and processing power. It is important that bitbit be implemented efficiently, since inefficiencies can result in (literally) visible degrada­tions of performance, even for a single invocation. Unfortunately, though, implementing bitbit efficiently is a difficult problem. Later, we will present a complete, correct, very slow imple­ mentation of bitbit, but one simple and small enough to be understood easily. The following sections discuss techniques for improving its performance, and illustrate these by showing how they have been used, and how well they worked, in actual systems."
+      },
+      "date": 1673786167897
+    },
+    {
+      "type": "edit",
+      "id": "ddc9b1e7b312c33e",
+      "item": {
+        "type": "paragraph",
+        "id": "ddc9b1e7b312c33e",
+        "text": "Bitmap displays demand large amounts of memory and processing power. It is important that bitbit be implemented efficiently, since inefficiencies can result in (literally) visible degrada­tions of performance, even for a single invocation. Unfortunately, though, implementing bitbit efficiently is a difficult problem. Later, we will present a complete, correct, very slow imple­mentation of bitbit, but one simple and small enough to be understood easily. The following sections discuss techniques for improving its performance, and illustrate these by showing how they have been used, and how well they worked, in actual systems."
+      },
+      "date": 1673786184007
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b9ec75523be0b0b0"
+      },
+      "id": "b9ec75523be0b0b0",
+      "type": "add",
+      "after": "ddc9b1e7b312c33e",
+      "date": 1673786206542
+    },
+    {
+      "type": "edit",
+      "id": "b9ec75523be0b0b0",
+      "item": {
+        "type": "paragraph",
+        "id": "b9ec75523be0b0b0",
+        "text": "Next, we discuss how bitbit can be used for programming interactive graphics applications. Structured picture elements such as text, menus and windows are easily implemented using bitbit, but using them well requires some understanding of how bitbit itself behaves. Applica­ tions such as bitmap paint programs also depend critically on the semantics of bitbit."
+      },
+      "date": 1673786208340
+    },
+    {
+      "type": "edit",
+      "id": "b9ec75523be0b0b0",
+      "item": {
+        "type": "paragraph",
+        "id": "b9ec75523be0b0b0",
+        "text": "Next, we discuss how bitbit can be used for programming interactive graphics applications. Structured picture elements such as text, menus and windows are easily implemented using bitbit, but using them well requires some understanding of how bitbit itself behaves. Applica­tions such as bitmap paint programs also depend critically on the semantics of bitbit."
+      },
+      "date": 1673786223350
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "85379383a672e55c"
+      },
+      "id": "85379383a672e55c",
+      "type": "add",
+      "after": "b9ec75523be0b0b0",
+      "date": 1673786237438
+    },
+    {
+      "type": "edit",
+      "id": "85379383a672e55c",
+      "item": {
+        "type": "paragraph",
+        "id": "85379383a672e55c",
+        "text": "The most important consideration through all these discussions is the integrated viewpoint that bitbit provides. The details of hardware and software implementation focus on a single operator that provides a rational, powerful model for raster graphics. Bitmap devices are popu­ lar because their style of graphics is convenient and flexible, but it is bitbit that makes that style, manageable. By simultaneously addressing the issues of efficiency, representation and access, bitbit makes it possible to ignore the low-level detail inherent in bitmap displays, and attend to the more important and useful task of building an interactive graphics environment. Represen­ tative displays from some of the systems that have been built using bitbit are shown in Figure 1."
+      },
+      "date": 1673786240021
+    },
+    {
+      "type": "add",
+      "id": "f706075bc74077f1",
+      "item": {
+        "type": "paragraph",
+        "id": "f706075bc74077f1",
+        "text": "[…]"
+      },
+      "after": "85379383a672e55c",
+      "date": 1673786244711
+    },
+    {
+      "type": "edit",
+      "id": "85379383a672e55c",
+      "item": {
+        "type": "paragraph",
+        "id": "85379383a672e55c",
+        "text": "The most important consideration through all these discussions is the integrated [[viewpoint]] that bitbit provides. The details of hardware and software implementation focus on a single operator that provides a rational, powerful model for raster graphics. Bitmap devices are popu­ lar because their style of graphics is convenient and flexible, but it is bitbit that makes that style, manageable. By simultaneously addressing the issues of efficiency, representation and access, bitbit makes it possible to ignore the low-level detail inherent in bitmap displays, and attend to the more important and useful task of building an interactive graphics environment. Represen­ tative displays from some of the systems that have been built using bitbit are shown in Figure 1."
+      },
+      "date": 1673786251462
+    },
+    {
+      "type": "edit",
+      "id": "85379383a672e55c",
+      "item": {
+        "type": "paragraph",
+        "id": "85379383a672e55c",
+        "text": "The most important consideration through all these discussions is the integrated [[Viewpoint]] that bitbit provides. The details of hardware and software implementation focus on a single operator that provides a rational, powerful model for raster graphics. Bitmap devices are popu­ lar because their style of graphics is convenient and flexible, but it is bitbit that makes that style, manageable. By simultaneously addressing the issues of efficiency, representation and access, bitbit makes it possible to ignore the low-level detail inherent in bitmap displays, and attend to the more important and useful task of building an interactive graphics environment. Represen­ tative displays from some of the systems that have been built using bitbit are shown in Figure 1."
+      },
+      "date": 1673786258057
+    },
+    {
+      "type": "edit",
+      "id": "85379383a672e55c",
+      "item": {
+        "type": "paragraph",
+        "id": "85379383a672e55c",
+        "text": "The most important consideration through all these discussions is the integrated [[Viewpoint]] that bitbit provides. The details of hardware and software implementation focus on a single operator that provides a rational, powerful model for raster graphics. Bitmap devices are popu­lar because their style of graphics is convenient and flexible, but it is bitbit that makes that style, manageable. By simultaneously addressing the issues of efficiency, representation and access, bitbit makes it possible to ignore the low-level detail inherent in bitmap displays, and attend to the more important and useful task of building an interactive graphics environment. Represen­ tative displays from some of the systems that have been built using bitbit are shown in Figure 1."
+      },
+      "date": 1673786273526
+    },
+    {
+      "type": "add",
+      "id": "09ffdb8f543f4822",
+      "item": {
+        "type": "paragraph",
+        "id": "09ffdb8f543f4822",
+        "text": "\nThe reason we have assembled these notes is that, despite its importance, little has been written about bitbit in the literature, to the point that hardware manufacturers who are not 'in the know' make serious mistakes in the implementation of their systems. Until now, too much information about bitbit has been available only as folklore. By discussing the algorithmic, implementation and systems-level basics and implications of bitbit, we hope to enlarge the com­ munity of bitbit-knowledgeable people, and prevent the development of bitbit-antagonistic hardware."
+      },
+      "after": "85379383a672e55c",
+      "date": 1673786307930
+    },
+    {
+      "type": "edit",
+      "id": "f706075bc74077f1",
+      "item": {
+        "type": "paragraph",
+        "id": "f706075bc74077f1",
+        "text": "⇒ [[Raster Graphics]]"
+      },
+      "date": 1673795020579
+    },
+    {
+      "type": "edit",
+      "id": "09ffdb8f543f4822",
+      "item": {
+        "type": "paragraph",
+        "id": "09ffdb8f543f4822",
+        "text": "The reason we have assembled these notes is that, despite its importance, little has been written about bitblt in the literature, to the point that hardware manufacturers who are not 'in the know' make serious mistakes in the implementation of their systems. Until now, too much information about bitbit has been available only as folklore. By discussing the algorithmic, implementation and systems-level basics and implications of bitbit, we hope to enlarge the com­ munity of bitbit-knowledgeable people, and prevent the development of bitbit-antagonistic hardware."
+      },
+      "date": 1673884529122
+    },
+    {
+      "type": "edit",
+      "id": "09ffdb8f543f4822",
+      "item": {
+        "type": "paragraph",
+        "id": "09ffdb8f543f4822",
+        "text": "The reason we have assembled these notes is that, despite its importance, little has been written about bitblt in the literature, to the point that hardware manufacturers who are not 'in the know' make serious mistakes in the implementation of their systems. Until now, too much information about bitblt has been available only as folklore. By discussing the algorithmic, implementation and systems-level basics and implications of bitblt, we hope to enlarge the com­ munity of bitblt-knowledgeable people, and prevent the development of bitblt-antagonistic hardware."
+      },
+      "date": 1673884569361
+    },
+    {
+      "type": "edit",
+      "id": "09ffdb8f543f4822",
+      "item": {
+        "type": "paragraph",
+        "id": "09ffdb8f543f4822",
+        "text": "The reason we have assembled these notes is that, despite its importance, little has been written about bitblt in the literature, to the point that hardware manufacturers who are not 'in the know' make serious mistakes in the implementation of their systems. Until now, too much information about bitblt has been available only as folklore. By discussing the algorithmic, implementation and systems-level basics and implications of bitblt, we hope to enlarge the com­munity of bitblt-knowledgeable people, and prevent the development of bitblt-antagonistic hardware."
+      },
+      "date": 1673884585847
+    }
+  ]
+}

@@ -1,0 +1,721 @@
+{
+  "title": "Raster Graphics",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "a70af12d67e853fe",
+      "text": "The earliest computer displays, developed from the oscilloscope industry, plotted individual points, and drew all higher-level objects as sequences of dots. "
+    },
+    {
+      "type": "paragraph",
+      "id": "f76f039a6701c4a3",
+      "text": "Later generations of displays were controlled by a display list: a list of instructions to the display, typically encoding the (x, y) coordinates of each point and its intensity. Subroutines in the display list allowed more complicated pictures — even beyond the capability of the display to draw quickly — to be displayed and dynamically changed. "
+    },
+    {
+      "type": "paragraph",
+      "id": "e69aae300a5b91f7",
+      "text": "An obvious improvement was to interpret descriptions of lines and other simple [[curves]] directly by the hardware, so the display list was more compact and less expensive to compute. From this background has grown the vector graphics or display segment model of computer graphics, described in Newman and Sproull and currently represented by the GKS standard.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "16cd71f523a0ecce",
+      "text": "The frame buffer model, also called raster graphics, is rooted in the television industry, and instead represents an image as a two-dimensional array of intensities mapped onto a television tube to create the image. Frame buffers have one great advantage: the complexity of the displayed image does not affect the amount of memory consumed to display it. "
+    },
+    {
+      "type": "paragraph",
+      "id": "77283c4241d8089c",
+      "text": "They have disadvantages, too, of course. The most obvious is economic: to store a reasonably complex picture might take 8 bits per pixel on a 512x512 display, which requires a quarter megabyte of relatively expensive high-speed memory. Also, the processing required for dynamic graphics on a frame buffer demands a dedicated CPU for reasonable performance, again because of the large amount of memory that must be updated. In time, though, the cost of TV tubes and memories has dropped, so a frame buffer is now less expensive to make than a vector display, and personal computers with frame buffers are becoming common.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "2147b6999522ef6d",
+      "text": "During the early 1970's, researchers at Xerox PARC built a small personal computer called the Alto, and gave it a frame buffer with only a single bit per pixel — a bitmap display. Although binary pixels are clearly incapable of high-quality graphics, at least at typical frame buffer resolutions, the Alto's frame buffer was intended to simulate paper, for which only two values are required (print and background, or black and white). Unfortunately, the simple segmented graphics model that works well on vector displays is clumsy on bitmap displays. Perhaps surprisingly, the graphics model that has arisen to take the place of segments on bitmap displays capitalizes upon the lowest level of representation of single-bit-per-pixel images, rather than hiding it.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "8935d8b2aa3d8387",
+      "text": "Traditionally, bitmaps have been viewed as imperfect approximations to the ideal images one would like to display. Such ideal images are assumed to be described by continuous variation in color, intensity and so forth. The imperfection is brought about by the discrete nature of the imaging devices we possess, as well as the digital nature of the computers themselves, which forces us to quantize these continuous variables into a discrete (but possibly very large) set of values. In particular, bitmap coordinates are integral, as are the pixel values within them. From this 'imperfect viewpoint, bitmaps are essentially an implementation artifact, and the graphics programmer should not be exposed to them. Instead, the programmer should be given access to the ideal shapes of plane geometry, plus continuous functions for describing color and intensity modulation. The operators available in such a package always correspond to operations on these ideal objects. It is the responsibility of the package's implementor to discretize all these continuous functions internally and transform the ideal continuous operators into their discrete counterparts.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "dbd0012eacc60f30",
+      "text": "For a variety of reasons, though, no such package can hide fully the discrete representation involved beneath the surface. Perhaps the most fundamental reason is that certain laws that hold in the continuous domain cannot be made to hold in the discrete domain, no matter how careful one is about quantization. (We will have more to say about this shortly.) Also, good quantized approximations to continuous tone images naturally involve very large bitmaps. Such large bitmaps are expensive to store and manipulate. Thus efficiency considerations often force the graphics programmer to be aware of the implementation underneath.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "853828ac7d18ab54",
+      "text": "As anyone who has taken a course in numerical methods knows, floating-point numbers do not satisfy many of the identities that hold true for real numbers (in the mathematical sense of 'real'). The science of numerical computing is largely devoted to compensating for these fundamental imperfections in floating-point arithmetic. Similarly, when images are discretized, certain errors are unavoidable. For example, consider the picket fence example shown in Figure 2. Suppose each picket is 1 pixel wide, but the pickets are spaced 2.5 pixels apart. One reasonable quantization method would rasterize the picket spacing to an alternating thickness of 2 and 3 pixels respectively, so as to make the overall length of the fence as close to its real value as possible, thereby maintaining the criterion of global faithfulness. Another method would simply choose either 2 or 3 pixels and make all spacings that thickness, maintaining local faithfulness. It is impossible to satisfy both criteria simultaneously.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "b5de86b6214c90df",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "4592181d1cb13f2d",
+      "text": "Figure 2. A picket fence image (a) and two discretized versions of it: (b) globally faithful, and (c) locally faithful.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "301c772ee9ee0425",
+      "text": "Another reason bitmaps seep through to higher levels of system design is efficiency. Dynamic raster graphics require very high-speed manipulations of the raster memory, where the image being displayed is stored. In every case, the contents of the raster memory can be computed by scan conversion algorithms from higher level shape, illumination and color descriptions. Such algorithms are rarely, however, fast enough to cope with incremental updating of the display, as is often required in interactive applications. "
+    },
+    {
+      "type": "paragraph",
+      "id": "1a174cb60aa6f151",
+      "text": "Although, as we remarked earlier, ideal image manipulations do not always have exact counterparts in discrete form, they sometimes do. For instance, the operation of copying or translating a subimage on the screen has an exact counterpart in the discretized form. There are immense speed advantages to be gained by doing these manipulations in the raster representations, rather than in the ideal ones and then repeating the scan conversion.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "4fe6c6244d6ff5e6",
+      "text": "Any attempt to ban bitmaps from anything other than a temporary low-level representation for computer images is bound to encounter difficulties.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "3c45b629e0655efd",
+      "text": "To facilitate raster manipulations, several novel computer systems have used specialized instructions dealing with the raster memory. Typically these systems have been personal computers, such as the Xerox Alto or the M.I.T. Lisp Machine, where a premium is placed on interactive graphics facilities. Their raster instructions are powerful primitives, often implemented in a combination of hardware and micro-code. Such an instruction is known as [[bitblt]] (bit boundary block transfer), or [[RasterOp]] in Newman and Sproull's terminology.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "8fcdcdca25328c78",
+      "text": "The most common form of this instruction is a bitwise Boolean operation between two conformable (i.e., having the same dimensions), possibly overlapping, rectangles of pixels. If we call one rectangle S for source and the other D for destination, then bitbit performs the operation d ← d * s for corresponding bits d and s in D and S. Here * denotes some two-argument Boolean operation, which is a parameter to bitbit. Such an instruction can obviously be used to move rectangles of bits around the screen, by setting both D and S to the display bitmap.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "f2726fab994dca2f",
+      "text": "There are many subtle issues regarding bitbit. How are the two rectangles to be specified? In whose coordinate system? What if they are not conformable? Useful stipple and grey-scale patterns can be obtained by replicating the image in a small rectangle across a large one. There are also several interesting issues about the implementation of the bitbit instruction itself.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "48c23dacbbeb9e5e",
+      "text": "Bitblt has been found to have an amazing number of uses, far beyond simple rectangle copying. (This fact has been part of the raster graphics folklore for some time.) For example, it is possible to rotate or transpose an n × n bitmap using a small constant times n bitblts, each of which touches O(n) bits. "
+    },
+    {
+      "type": "paragraph",
+      "id": "08289ca7fc0de340",
+      "text": "Bitblt can also be used to fill in areas, count connected components, and do other interesting and useful bitmap computations in ingenious ways. Part of the reason for this power is that many interesting bitmap computations can be done entirely through local operations, that is, by uniformly replacing each pixel with a function of itself and its neighboring pixels. Such algorithms have been used to a certain extent in the theory of [[iterative arrays]] (though not especially in a graphics context) and correspond naturally to invocations of bitblt. We will see some examples later.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "16dc251af7595d6e",
+      "text": "Although bitblt was born of necessity, it has become the center of a powerful and convenient graphics model. The most important attribute of this model is conceptual economy. Bitmaps are a general representation of an image, and bitblt is a general primitive for manipulating them. Graphical algorithms based on bitblt work identically on bitmaps containing characters, synthetic shapes, lines, scanned images or any combination thereof.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "18806f5ca414a446",
+      "text": "Because bitblt operates at the lowest level of the representation, the hardware for a bitmap graphics system can be very simple. This simplicity can result in high performance; indeed, some of file most dynamic, interactive graphics systems have been developed for bitmap displays. And although bitblt uses the image representation directly, it hides that representation from the programmer and is general enough to be the only access to the display on well-designed systems.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "d42293109dcf2599",
+      "text": "There are other advantages to doing all raster manipulations through a single primitive. There is an economy of implementation: the details of accessing the bitmap need be expressed in only one place, and any performance improvements in bitblt benefit every application. Also, applications that use bitblt are portable from one display to another, and can take advantage, without change, of better hardware as it becomes available. From a software engineering viewpoint, if all the applications are based on a common data structure and operation, different applications coexist and compose more effectively.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "d6d0ef4daed7b582",
+      "text": "⇒ [[Definitions and Data Types]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Raster Graphics",
+        "story": []
+      },
+      "date": 1673795030315
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a70af12d67e853fe"
+      },
+      "id": "a70af12d67e853fe",
+      "type": "add",
+      "date": 1673795032906
+    },
+    {
+      "type": "edit",
+      "id": "a70af12d67e853fe",
+      "item": {
+        "type": "paragraph",
+        "id": "a70af12d67e853fe",
+        "text": "The earliest computer displays, developed from the oscilloscope industry, plotted individual points, and drew all higher-level objects as sequences of dots. Later generations of displays were controlled by a display list: a list of instructions to the display, typically encoding the (x, y) coordinates of each point and its intensity. Subroutines in the display list allowed more complicated pictures — even beyond the capability of the display to draw quickly — to be displayed and dynamically changed. An obvious improvement was to interpret descriptions of lines and other simple curves directly by the hardware, so the display list was more compact and less expensive to compute. From this background has grown the vector graphics or display segment model of computer graphics, described in Newman and Sproull19 and currently represented by the GKS standard.1\n"
+      },
+      "date": 1673795034733
+    },
+    {
+      "type": "edit",
+      "id": "a70af12d67e853fe",
+      "item": {
+        "type": "paragraph",
+        "id": "a70af12d67e853fe",
+        "text": "The earliest computer displays, developed from the oscilloscope industry, plotted individual points, and drew all higher-level objects as sequences of dots. Later generations of displays were controlled by a display list: a list of instructions to the display, typically encoding the (x, y) coordinates of each point and its intensity. Subroutines in the display list allowed more complicated pictures — even beyond the capability of the display to draw quickly — to be displayed and dynamically changed. An obvious improvement was to interpret descriptions of lines and other simple curves directly by the hardware, so the display list was more compact and less expensive to compute. From this background has grown the vector graphics or display segment model of computer graphics, described in Newman and Sproull19 and currently represented by the GKS standard.\n"
+      },
+      "date": 1673795048341
+    },
+    {
+      "type": "edit",
+      "id": "a70af12d67e853fe",
+      "item": {
+        "type": "paragraph",
+        "id": "a70af12d67e853fe",
+        "text": "The earliest computer displays, developed from the oscilloscope industry, plotted individual points, and drew all higher-level objects as sequences of dots. "
+      },
+      "date": 1673795063142
+    },
+    {
+      "type": "add",
+      "id": "f76f039a6701c4a3",
+      "item": {
+        "type": "paragraph",
+        "id": "f76f039a6701c4a3",
+        "text": "Later generations of displays were controlled by a display list: a list of instructions to the display, typically encoding the (x, y) coordinates of each point and its intensity. Subroutines in the display list allowed more complicated pictures — even beyond the capability of the display to draw quickly — to be displayed and dynamically changed. An obvious improvement was to interpret descriptions of lines and other simple curves directly by the hardware, so the display list was more compact and less expensive to compute. From this background has grown the vector graphics or display segment model of computer graphics, described in Newman and Sproull19 and currently represented by the GKS standard.\n"
+      },
+      "after": "a70af12d67e853fe",
+      "date": 1673795063990
+    },
+    {
+      "type": "edit",
+      "id": "f76f039a6701c4a3",
+      "item": {
+        "type": "paragraph",
+        "id": "f76f039a6701c4a3",
+        "text": "Later generations of displays were controlled by a display list: a list of instructions to the display, typically encoding the (x, y) coordinates of each point and its intensity. Subroutines in the display list allowed more complicated pictures — even beyond the capability of the display to draw quickly — to be displayed and dynamically changed. "
+      },
+      "date": 1673795092280
+    },
+    {
+      "type": "add",
+      "id": "e69aae300a5b91f7",
+      "item": {
+        "type": "paragraph",
+        "id": "e69aae300a5b91f7",
+        "text": "An obvious improvement was to interpret descriptions of lines and other simple curves directly by the hardware, so the display list was more compact and less expensive to compute. From this background has grown the vector graphics or display segment model of computer graphics, described in Newman and Sproull19 and currently represented by the GKS standard.\n"
+      },
+      "after": "f76f039a6701c4a3",
+      "date": 1673795093019
+    },
+    {
+      "type": "edit",
+      "id": "e69aae300a5b91f7",
+      "item": {
+        "type": "paragraph",
+        "id": "e69aae300a5b91f7",
+        "text": "An obvious improvement was to interpret descriptions of lines and other simple [[curves]] directly by the hardware, so the display list was more compact and less expensive to compute. From this background has grown the vector graphics or display segment model of computer graphics, described in Newman and Sproull19 and currently represented by the GKS standard.\n"
+      },
+      "date": 1673795110851
+    },
+    {
+      "type": "edit",
+      "id": "e69aae300a5b91f7",
+      "item": {
+        "type": "paragraph",
+        "id": "e69aae300a5b91f7",
+        "text": "An obvious improvement was to interpret descriptions of lines and other simple [[curves]] directly by the hardware, so the display list was more compact and less expensive to compute. From this background has grown the vector graphics or display segment model of computer graphics, described in Newman and Sproull and currently represented by the GKS standard.\n"
+      },
+      "date": 1673795131855
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "16cd71f523a0ecce"
+      },
+      "id": "16cd71f523a0ecce",
+      "type": "add",
+      "after": "e69aae300a5b91f7",
+      "date": 1673795140993
+    },
+    {
+      "type": "edit",
+      "id": "16cd71f523a0ecce",
+      "item": {
+        "type": "paragraph",
+        "id": "16cd71f523a0ecce",
+        "text": "The frame buffer model, also called raster graphics, is rooted in the television industry, and instead represents an image as a two-dimensional array of intensities mapped onto a television tube to create the image. Frame buffers have one great advantage: the complexity of the displayed image does not affect the amount of memory consumed to display it. They have disadvantages, too, of course. The most obvious is economic: to store a reasonably complex picture might take 8 bits per pixel on a 512x512 display, which requires a quarter megabyte of relatively expensive high-speed memory. Also, the processing required for dynamic graphics on a frame buffer demands a dedicated CPU for reasonable performance, again because of the large amount of memory that must be updated. In time, though, the cost of TV tubes and memories has dropped, so a frame buffer is now less expensive to make than a vector display, and personal computers with frame buffers are becoming common.\n"
+      },
+      "date": 1673795142608
+    },
+    {
+      "type": "edit",
+      "id": "16cd71f523a0ecce",
+      "item": {
+        "type": "paragraph",
+        "id": "16cd71f523a0ecce",
+        "text": "The frame buffer model, also called raster graphics, is rooted in the television industry, and instead represents an image as a two-dimensional array of intensities mapped onto a television tube to create the image. Frame buffers have one great advantage: the complexity of the displayed image does not affect the amount of memory consumed to display it. "
+      },
+      "date": 1673795167118
+    },
+    {
+      "type": "add",
+      "id": "77283c4241d8089c",
+      "item": {
+        "type": "paragraph",
+        "id": "77283c4241d8089c",
+        "text": "They have disadvantages, too, of course. The most obvious is economic: to store a reasonably complex picture might take 8 bits per pixel on a 512x512 display, which requires a quarter megabyte of relatively expensive high-speed memory. Also, the processing required for dynamic graphics on a frame buffer demands a dedicated CPU for reasonable performance, again because of the large amount of memory that must be updated. In time, though, the cost of TV tubes and memories has dropped, so a frame buffer is now less expensive to make than a vector display, and personal computers with frame buffers are becoming common.\n"
+      },
+      "after": "16cd71f523a0ecce",
+      "date": 1673795167735
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2147b6999522ef6d"
+      },
+      "id": "2147b6999522ef6d",
+      "type": "add",
+      "after": "77283c4241d8089c",
+      "date": 1673795202514
+    },
+    {
+      "type": "edit",
+      "id": "2147b6999522ef6d",
+      "item": {
+        "type": "paragraph",
+        "id": "2147b6999522ef6d",
+        "text": "During the early 1970's, researchers at Xerox PARC built a small personal computer called the Alto, and gave it a frame buffer with only a single bit per pixel — a bitmap display. Although binary pixels are clearly incapable of high-quality graphics, at least at typical frame buffer resolutions, the Alto's frame buffer was intended to simulate paper, for which only two values are required (print and background, or black and white). Unfortunately, the simple segmented graphics model that works well on vector displays is clumsy on bitmap displays. Perhaps surprisingly, the graphics model that has arisen to take the place of segments on bitmap displays capitalizes upon the lowest level of representation of single-bit-per-pixel images, rather than hiding it.\n"
+      },
+      "date": 1673795204069
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8935d8b2aa3d8387"
+      },
+      "id": "8935d8b2aa3d8387",
+      "type": "add",
+      "after": "2147b6999522ef6d",
+      "date": 1673795246798
+    },
+    {
+      "type": "edit",
+      "id": "8935d8b2aa3d8387",
+      "item": {
+        "type": "paragraph",
+        "id": "8935d8b2aa3d8387",
+        "text": "Traditionally, bitmaps have been viewed as imperfect approximations to the ideal images one would like to display. Such ideal images are assumed to be described by continuous variation in color, intensity and so forth. The imperfection is brought about by the discrete nature of the imaging devices we possess, as well as the digital nature of the computers themselves, which forces us to quantize these continuous variables into a discrete (but possibly very large) set of values. In particular, bitmap coordinates are integral, as are the pixel values within them. From this 'imperfect viewpoint, bitmaps are essentially an implementation artifact, and the graphics programmer should not be exposed to them. Instead, the programmer should be given access to the ideal shapes of plane geometry, plus continuous functions for describing color and intensity modulation. The operators available in such a package always correspond to operations on these ideal objects. It is the responsibility of the package's implementor to discretize all these continuous functions internally and transform the ideal continuous operators into their discrete counterparts.\n"
+      },
+      "date": 1673795248318
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dbd0012eacc60f30"
+      },
+      "id": "dbd0012eacc60f30",
+      "type": "add",
+      "after": "8935d8b2aa3d8387",
+      "date": 1673795317668
+    },
+    {
+      "type": "edit",
+      "id": "dbd0012eacc60f30",
+      "item": {
+        "type": "paragraph",
+        "id": "dbd0012eacc60f30",
+        "text": "For a variety of reasons, though, no such package can hide fully the discrete representation involved beneath the surface. Perhaps the most fundamental reason is that certain laws that hold in the continuous domain cannot be made to hold in the discrete domain, no matter how careful one is about quantization. (We will have more to say about this shortly.) Also, good quantized approximations to continuous tone images naturally involve very large bitmaps. Such\n"
+      },
+      "date": 1673795319189
+    },
+    {
+      "type": "edit",
+      "id": "dbd0012eacc60f30",
+      "item": {
+        "type": "paragraph",
+        "id": "dbd0012eacc60f30",
+        "text": "For a variety of reasons, though, no such package can hide fully the discrete representation involved beneath the surface. Perhaps the most fundamental reason is that certain laws that hold in the continuous domain cannot be made to hold in the discrete domain, no matter how careful one is about quantization. (We will have more to say about this shortly.) Also, good quantized approximations to continuous tone images naturally involve very large bitmaps. Such large bitmaps are expensive to store and manipulate. Thus efficiency considerations often force the graphics programmer to be aware of the implementation underneath.\n"
+      },
+      "date": 1673795397339
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "853828ac7d18ab54"
+      },
+      "id": "853828ac7d18ab54",
+      "type": "add",
+      "after": "dbd0012eacc60f30",
+      "date": 1673795419392
+    },
+    {
+      "type": "edit",
+      "id": "853828ac7d18ab54",
+      "item": {
+        "type": "paragraph",
+        "id": "853828ac7d18ab54",
+        "text": "As anyone who has taken a course in numerical methods knows, floating-point numbers do not satisfy many of the identities that hold true for real numbers (in the mathematical sense of 'real'). The science of numerical computing is largely devoted to compensating for these fundamental imperfections in floating-point arithmetic. Similarly, when images are discretized, certain errors are unavoidable. For example, consider the picket fence example shown in Figure 2. Suppose each picket is 1 pixel wide, but the pickets are spaced 2.5 pixels apart. One reasonable quantization method would rasterize the picket spacing to an alternating thickness of 2 and 3 pixels respectively, so as to make the overall length of the fence as close to its real value as possible, thereby maintaining the criterion of global faithfulness. Another method would simply choose either 2 or 3 pixels and make all spacings that thickness, maintaining local faithfulness. It is impossible to satisfy both criteria simultaneously.\n"
+      },
+      "date": 1673795421062
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b5de86b6214c90df"
+      },
+      "id": "b5de86b6214c90df",
+      "type": "add",
+      "after": "853828ac7d18ab54",
+      "date": 1673795525706
+    },
+    {
+      "type": "edit",
+      "id": "b5de86b6214c90df",
+      "item": {
+        "type": "paragraph",
+        "id": "b5de86b6214c90df",
+        "text": "[…]"
+      },
+      "date": 1673795528187
+    },
+    {
+      "type": "add",
+      "id": "4592181d1cb13f2d",
+      "item": {
+        "type": "paragraph",
+        "id": "4592181d1cb13f2d",
+        "text": "Figure 2. A picket fence image (a) and two discretized versions of it: (b) globally faithful, and (c) locally faithful.\n"
+      },
+      "after": "b5de86b6214c90df",
+      "date": 1673795528934
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "301c772ee9ee0425"
+      },
+      "id": "301c772ee9ee0425",
+      "type": "add",
+      "after": "4592181d1cb13f2d",
+      "date": 1673795547173
+    },
+    {
+      "type": "edit",
+      "id": "301c772ee9ee0425",
+      "item": {
+        "type": "paragraph",
+        "id": "301c772ee9ee0425",
+        "text": "Another reason bitmaps seep through to higher levels of system design is efficiency. Dynamic raster graphics require very high-speed manipulations of the raster memory, where the image being displayed is stored. In every case, the contents of the raster memory can be computed by scan conversion algorithms from higher level shape, illumination and color descriptions. Such algorithms are rarely, however, fast enough to cope with incremental updating of the display, as is often required in interactive applications. Although, as we remarked earlier, ideal image manipulations do not always have exact counterparts in discrete form, they sometimes do. For instance, the operation of copying or translating a subimage on the screen has an exact counterpart in the discretized form. There are immense speed advantages to be gained by doing these manipulations in the raster representations, rather than in the ideal ones and then repeating the scan conversion.\n"
+      },
+      "date": 1673795549078
+    },
+    {
+      "type": "edit",
+      "id": "301c772ee9ee0425",
+      "item": {
+        "type": "paragraph",
+        "id": "301c772ee9ee0425",
+        "text": "Another reason bitmaps seep through to higher levels of system design is efficiency. Dynamic raster graphics require very high-speed manipulations of the raster memory, where the image being displayed is stored. In every case, the contents of the raster memory can be computed by scan conversion algorithms from higher level shape, illumination and color descriptions. Such algorithms are rarely, however, fast enough to cope with incremental updating of the display, as is often required in interactive applications. "
+      },
+      "date": 1673795586204
+    },
+    {
+      "type": "add",
+      "id": "1a174cb60aa6f151",
+      "item": {
+        "type": "paragraph",
+        "id": "1a174cb60aa6f151",
+        "text": "Although, as we remarked earlier, ideal image manipulations do not always have exact counterparts in discrete form, they sometimes do. For instance, the operation of copying or translating a subimage on the screen has an exact counterpart in the discretized form. There are immense speed advantages to be gained by doing these manipulations in the raster representations, rather than in the ideal ones and then repeating the scan conversion.\n"
+      },
+      "after": "301c772ee9ee0425",
+      "date": 1673795587273
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4fe6c6244d6ff5e6"
+      },
+      "id": "4fe6c6244d6ff5e6",
+      "type": "add",
+      "after": "1a174cb60aa6f151",
+      "date": 1673795617536
+    },
+    {
+      "type": "edit",
+      "id": "4fe6c6244d6ff5e6",
+      "item": {
+        "type": "paragraph",
+        "id": "4fe6c6244d6ff5e6",
+        "text": "Any attempt to ban bitmaps from anything other than a temporary low-level representation for computer images is bound to encounter difficulties.\n"
+      },
+      "date": 1673795619161
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3c45b629e0655efd"
+      },
+      "id": "3c45b629e0655efd",
+      "type": "add",
+      "after": "4fe6c6244d6ff5e6",
+      "date": 1673795633060
+    },
+    {
+      "type": "edit",
+      "id": "3c45b629e0655efd",
+      "item": {
+        "type": "paragraph",
+        "id": "3c45b629e0655efd",
+        "text": "To facilitate raster manipulations, several novel computer systems have used specialized instructions dealing with the raster memory. Typically these systems have been personal computers, such as the Xerox Alto25 or the M.I.T. lisp Machine,2® where a premium is placed on interactive graphics facilities. Their raster instructions are powerful primitives, often implemented in a combination of hardware and micro-code. Such an instruction is known as bitbit (bit boundary block transfer), or RasterOp in Newman and Sproull's terminology.\n"
+      },
+      "date": 1673795634383
+    },
+    {
+      "type": "edit",
+      "id": "3c45b629e0655efd",
+      "item": {
+        "type": "paragraph",
+        "id": "3c45b629e0655efd",
+        "text": "To facilitate raster manipulations, several novel computer systems have used specialized instructions dealing with the raster memory. Typically these systems have been personal computers, such as the Xerox Alto or the M.I.T. lisp Machine,2® where a premium is placed on interactive graphics facilities. Their raster instructions are powerful primitives, often implemented in a combination of hardware and micro-code. Such an instruction is known as bitbit (bit boundary block transfer), or RasterOp in Newman and Sproull's terminology.\n"
+      },
+      "date": 1673795668519
+    },
+    {
+      "type": "edit",
+      "id": "3c45b629e0655efd",
+      "item": {
+        "type": "paragraph",
+        "id": "3c45b629e0655efd",
+        "text": "To facilitate raster manipulations, several novel computer systems have used specialized instructions dealing with the raster memory. Typically these systems have been personal computers, such as the Xerox Alto or the M.I.T. Lisp Machine, where a premium is placed on interactive graphics facilities. Their raster instructions are powerful primitives, often implemented in a combination of hardware and micro-code. Such an instruction is known as bitbit (bit boundary block transfer), or RasterOp in Newman and Sproull's terminology.\n"
+      },
+      "date": 1673795679479
+    },
+    {
+      "type": "edit",
+      "id": "3c45b629e0655efd",
+      "item": {
+        "type": "paragraph",
+        "id": "3c45b629e0655efd",
+        "text": "To facilitate raster manipulations, several novel computer systems have used specialized instructions dealing with the raster memory. Typically these systems have been personal computers, such as the Xerox Alto or the M.I.T. Lisp Machine, where a premium is placed on interactive graphics facilities. Their raster instructions are powerful primitives, often implemented in a combination of hardware and micro-code. Such an instruction is known as [[bitbit (bit boundary block transfer), or RasterOp in Newman and Sproull's terminology.\n"
+      },
+      "date": 1673795705089
+    },
+    {
+      "type": "edit",
+      "id": "3c45b629e0655efd",
+      "item": {
+        "type": "paragraph",
+        "id": "3c45b629e0655efd",
+        "text": "To facilitate raster manipulations, several novel computer systems have used specialized instructions dealing with the raster memory. Typically these systems have been personal computers, such as the Xerox Alto or the M.I.T. Lisp Machine, where a premium is placed on interactive graphics facilities. Their raster instructions are powerful primitives, often implemented in a combination of hardware and micro-code. Such an instruction is known as [[bitblit]] (bit boundary block transfer), or RasterOp in Newman and Sproull's terminology.\n"
+      },
+      "date": 1673795726162
+    },
+    {
+      "type": "edit",
+      "id": "3c45b629e0655efd",
+      "item": {
+        "type": "paragraph",
+        "id": "3c45b629e0655efd",
+        "text": "To facilitate raster manipulations, several novel computer systems have used specialized instructions dealing with the raster memory. Typically these systems have been personal computers, such as the Xerox Alto or the M.I.T. Lisp Machine, where a premium is placed on interactive graphics facilities. Their raster instructions are powerful primitives, often implemented in a combination of hardware and micro-code. Such an instruction is known as [[bitblt]] (bit boundary block transfer), or RasterOp in Newman and Sproull's terminology.\n"
+      },
+      "date": 1673795737248
+    },
+    {
+      "type": "edit",
+      "id": "3c45b629e0655efd",
+      "item": {
+        "type": "paragraph",
+        "id": "3c45b629e0655efd",
+        "text": "To facilitate raster manipulations, several novel computer systems have used specialized instructions dealing with the raster memory. Typically these systems have been personal computers, such as the Xerox Alto or the M.I.T. Lisp Machine, where a premium is placed on interactive graphics facilities. Their raster instructions are powerful primitives, often implemented in a combination of hardware and micro-code. Such an instruction is known as [[bitblt]] (bit boundary block transfer), or [[RasterOp]] in Newman and Sproull's terminology.\n"
+      },
+      "date": 1673795860268
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8fcdcdca25328c78"
+      },
+      "id": "8fcdcdca25328c78",
+      "type": "add",
+      "after": "3c45b629e0655efd",
+      "date": 1673795937205
+    },
+    {
+      "type": "edit",
+      "id": "8fcdcdca25328c78",
+      "item": {
+        "type": "paragraph",
+        "id": "8fcdcdca25328c78",
+        "text": "The most common form of this instruction is a bitwise Boolean operation between two conformable (i.e., having the same dimensions), possibly overlapping, rectangles of pixels. If we call one rectangle S for source and the other D for destination, then bitbit performs the operation d- d* s for corresponding bits d and s in D and S. Here * denotes some two-argument Boolean operation, which is a parameter to bitbit. Such an instruction can obviously be used to move rectangles of bits around the screen, by setting both D and S to the display bitmap.\n"
+      },
+      "date": 1673795938589
+    },
+    {
+      "type": "edit",
+      "id": "8fcdcdca25328c78",
+      "item": {
+        "type": "paragraph",
+        "id": "8fcdcdca25328c78",
+        "text": "The most common form of this instruction is a bitwise Boolean operation between two conformable (i.e., having the same dimensions), possibly overlapping, rectangles of pixels. If we call one rectangle S for source and the other D for destination, then bitbit performs the operation d ← d* s for corresponding bits d and s in D and S. Here * denotes some two-argument Boolean operation, which is a parameter to bitbit. Such an instruction can obviously be used to move rectangles of bits around the screen, by setting both D and S to the display bitmap.\n"
+      },
+      "date": 1673796007177
+    },
+    {
+      "type": "edit",
+      "id": "8fcdcdca25328c78",
+      "item": {
+        "type": "paragraph",
+        "id": "8fcdcdca25328c78",
+        "text": "The most common form of this instruction is a bitwise Boolean operation between two conformable (i.e., having the same dimensions), possibly overlapping, rectangles of pixels. If we call one rectangle S for source and the other D for destination, then bitbit performs the operation d ← d * s for corresponding bits d and s in D and S. Here * denotes some two-argument Boolean operation, which is a parameter to bitbit. Such an instruction can obviously be used to move rectangles of bits around the screen, by setting both D and S to the display bitmap.\n"
+      },
+      "date": 1673796014656
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f2726fab994dca2f"
+      },
+      "id": "f2726fab994dca2f",
+      "type": "add",
+      "after": "8fcdcdca25328c78",
+      "date": 1673796083719
+    },
+    {
+      "type": "edit",
+      "id": "f2726fab994dca2f",
+      "item": {
+        "type": "paragraph",
+        "id": "f2726fab994dca2f",
+        "text": "There are many subtle issues regarding bitbit. How are the two rectangles to be specified? In whose coordinate system? What if they are not conformable? Useful stipple and grey-scale patterns can be obtained by replicating the image in a small rectangle across a large one. There are also several interesting issues about the implementation of the bitbit instruction itself.\n"
+      },
+      "date": 1673796085202
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "48c23dacbbeb9e5e"
+      },
+      "id": "48c23dacbbeb9e5e",
+      "type": "add",
+      "after": "f2726fab994dca2f",
+      "date": 1673796110834
+    },
+    {
+      "type": "edit",
+      "id": "48c23dacbbeb9e5e",
+      "item": {
+        "type": "paragraph",
+        "id": "48c23dacbbeb9e5e",
+        "text": "Bitbit has been found to have an amazing number of uses, far beyond simple rectangle copying. (This fact has been part of the raster graphics folklore for some time.) For example, it is possible to rotate or transpose an n*n bitmap using a small constant times n bitbits, each of which touches O(n) bits. Bitbit can also be used to fill in areas, count connected components, and do other interesting and useful bitmap computations in ingenious ways. Part of the reason for this power is that many interesting bitmap computations can be done entirely through local operations, that is, by uniformly replacing each pixel with a function of itself and its neighboring pixels. Such algorithms have been used to a certain extent in the theory of iterative arrays18 (though not especially in a graphics context) and correspond naturally to invocations of bitbit. We will see some examples later.\n"
+      },
+      "date": 1673796112345
+    },
+    {
+      "type": "edit",
+      "id": "48c23dacbbeb9e5e",
+      "item": {
+        "type": "paragraph",
+        "id": "48c23dacbbeb9e5e",
+        "text": "Bitbit has been found to have an amazing number of uses, far beyond simple rectangle copying. (This fact has been part of the raster graphics folklore for some time.) For example, it is possible to rotate or transpose an n × n bitmap using a small constant times n bitbits, each of which touches O(n) bits. Bitbit can also be used to fill in areas, count connected components, and do other interesting and useful bitmap computations in ingenious ways. Part of the reason for this power is that many interesting bitmap computations can be done entirely through local operations, that is, by uniformly replacing each pixel with a function of itself and its neighboring pixels. Such algorithms have been used to a certain extent in the theory of iterative arrays18 (though not especially in a graphics context) and correspond naturally to invocations of bitbit. We will see some examples later.\n"
+      },
+      "date": 1673796174490
+    },
+    {
+      "type": "edit",
+      "id": "48c23dacbbeb9e5e",
+      "item": {
+        "type": "paragraph",
+        "id": "48c23dacbbeb9e5e",
+        "text": "Bitblt has been found to have an amazing number of uses, far beyond simple rectangle copying. (This fact has been part of the raster graphics folklore for some time.) For example, it is possible to rotate or transpose an n × n bitmap using a small constant times n bitblts, each of which touches O(n) bits. "
+      },
+      "date": 1673796232516
+    },
+    {
+      "type": "add",
+      "id": "08289ca7fc0de340",
+      "item": {
+        "type": "paragraph",
+        "id": "08289ca7fc0de340",
+        "text": "Bitblt can also be used to fill in areas, count connected components, and do other interesting and useful bitmap computations in ingenious ways. Part of the reason for this power is that many interesting bitmap computations can be done entirely through local operations, that is, by uniformly replacing each pixel with a function of itself and its neighboring pixels. Such algorithms have been used to a certain extent in the theory of [[iterative arrays]] (though not especially in a graphics context) and correspond naturally to invocations of bitblt. We will see some examples later.\n"
+      },
+      "after": "48c23dacbbeb9e5e",
+      "date": 1673796298138
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "16dc251af7595d6e"
+      },
+      "id": "16dc251af7595d6e",
+      "type": "add",
+      "after": "08289ca7fc0de340",
+      "date": 1673796352020
+    },
+    {
+      "type": "edit",
+      "id": "16dc251af7595d6e",
+      "item": {
+        "type": "paragraph",
+        "id": "16dc251af7595d6e",
+        "text": "Although bitblt was born of necessity, it has become the center of a powerful and convenient graphics model. The most important attribute of this model is conceptual economy. Bitmaps are a general representation of an image, and bitblt is a general primitive for manipulating them. Graphical algorithms based on bitblt work identically on bitmaps containing characters, synthetic shapes, lines, scanned images or any combination thereof.\n"
+      },
+      "date": 1673796353586
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "18806f5ca414a446"
+      },
+      "id": "18806f5ca414a446",
+      "type": "add",
+      "after": "16dc251af7595d6e",
+      "date": 1673796399971
+    },
+    {
+      "type": "edit",
+      "id": "18806f5ca414a446",
+      "item": {
+        "type": "paragraph",
+        "id": "18806f5ca414a446",
+        "text": "Because bitblt operates at the lowest level of the representation, the hardware for a bitmap graphics system can be very simple. This simplicity can result in high performance; indeed, some of file most dynamic, interactive graphics systems have been developed for bitmap displays. And although bitblt uses the image representation directly, it hides that representation from the programmer and is general enough to be the only access to the display on well-designed systems.\n"
+      },
+      "date": 1673796402137
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d42293109dcf2599"
+      },
+      "id": "d42293109dcf2599",
+      "type": "add",
+      "after": "18806f5ca414a446",
+      "date": 1673796438888
+    },
+    {
+      "type": "edit",
+      "id": "d42293109dcf2599",
+      "item": {
+        "type": "paragraph",
+        "id": "d42293109dcf2599",
+        "text": "There are other advantages to doing all raster manipulations through a single primitive. There is an economy of implementation: the details of accessing the bitmap need be expressed in only one place, and any performance improvements in bitblt benefit every application. Also, applications that use bitblt are portable from one display to another, and can take advantage, without change, of better hardware as it becomes available. From a software engineering viewpoint, if all the applications are based on a common data structure and operation, different applications coexist and compose more effectively.\n"
+      },
+      "date": 1673796440477
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0b98c08685100a3c"
+      },
+      "id": "0b98c08685100a3c",
+      "type": "add",
+      "after": "d42293109dcf2599",
+      "date": 1673796481078
+    },
+    {
+      "type": "remove",
+      "id": "0b98c08685100a3c",
+      "date": 1673796484586
+    },
+    {
+      "type": "add",
+      "id": "d6d0ef4daed7b582",
+      "item": {
+        "type": "paragraph",
+        "id": "d6d0ef4daed7b582",
+        "text": "⇒ [[Definitions and Data Types]]"
+      },
+      "after": "d42293109dcf2599",
+      "date": 1673796497240
+    }
+  ]
+}
