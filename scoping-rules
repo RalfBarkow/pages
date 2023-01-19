@@ -1,0 +1,402 @@
+{
+  "title": "Scoping Rules",
+  "story": [
+    {
+      "type": "html",
+      "text": "The <i>scoping rules</i> of a [[Programming Language]] dictate how [[Free Variable]]s - symbol names which are found in the body of a scope (a function, macro, class, whatever) but not defined there - are resolved.",
+      "id": "032bc2845eccf49223e4f9bbaedb5468"
+    },
+    {
+      "type": "html",
+      "text": "\nSeveral different strategies exist:",
+      "id": "592c0964ce52ff916efc750f43f104e1"
+    },
+    {
+      "type": "html",
+      "text": " Disallowing them altogether. Very rare; though some languages may disallow free references to all but a pre-defined set of symbols (often called <i>keywords</i> or <i>special forms</i>) which are provided by the language.  ",
+      "id": "f5abeb303ae94e9a5a0374bedf4ccb03"
+    },
+    {
+      "type": "html",
+      "text": " Only two scoping levels - global and local. [[Cee Language]] and many assemblers use this rule. A [[Free Variable]] defined in a C function must refer to a \"global\" symbol (meaning defined either at file or global scope; as opposed to within a function body). This simplifies the implementation of C greatly (and many C programmers don't miss more advanced scope rules at all). [[Cee Plus Plus]] sticks to the C tradition in many ways, though the presence of features such as classes and namespaces cause C++ to relax the scoping rules quite a bit. (Still, no C++ function can bind to the local variables of another C++ function). Java, with [[Inner Class]]es, relaxes the scoping rules further.",
+      "id": "46302ee4bc31cddbd93bf31b16612de4"
+    },
+    {
+      "type": "html",
+      "text": " [[Lexical Scoping]]. Used by [[Common Lisp]], [[Scheme Language]], [[Algol Language]], [[Pascal Language]], and many others. If a variable isn't found in a given scope, the enclosing scope is searched; repeating until the outermost scope is reached. Two important variants of this are [[Deep Binding]] and [[Shallow Binding]]. With [[Deep Binding]], variables are bound to the environment of where the function is defined; with shallow binding variables are bound to the environment of where the function is called. Most languages which support [[Lexical Scoping]] support [[Deep Binding]] for functions; most macro systems (excluding Scheme's [[Define Syntax]]) use shallow binding. It is possible to divide [[Deep Binding]] further into two separate forms (I am not aware of any generally accepted terminology to describe these forms). In one form, a [[Free Variable]] essentially is an alias for the actual variable in the enclosing scope; if that variable changes than the value of the variable in the function being considered also changes. (If the enclosing scope has exited, possible if [[First Class]] functions are mixed in with [[Lexical Scoping]], then the value the variable had at exit changes). Most languages which support [[Deep Binding]] support this form. In the other form; the [[Free Variable]] takes the value that it has at the point when the function in question is first defined; and does not change. (In other words, the function using the [[Free Variable]] makes a copy of the value provided by the enclosing scope). I'm not aware of any languages which do this for [[Free Variables]]; though objects used as closures have this behavior.  Java [[Inner Class]]es (when defined within a function) sidestep this issue by only allowing references to variables in the enclosing function which are declared to be <i>final</i> - in other words, those whose value does not change. ",
+      "id": "e611433b2504745cd10a25bb7e9acaa3"
+    },
+    {
+      "type": "html",
+      "text": " [[Dynamic Scoping]] (early dialects of Lisp, [[Common Lisp]] special variables, exported environment variables in [[Unix Os]]): The caller is checked for a binding for the variable; if one is found, it is used. Otherwise, the caller's caller is checked, and so on. If no definition is found, it is either an error or a default value is used, depending on the semantics of the language.  ",
+      "id": "d91458f8bc607e520e4173943df874f9"
+    },
+    {
+      "type": "html",
+      "text": "\nThe following C-like program illustrates the different scoping rules. Apply a different rule, that's that what would print. Of course, this is not legal C in real life, as [[Cee Language]] doesn't allow nested functions.",
+      "id": "bbc51e8641542406d564401fdb3e36ae"
+    },
+    {
+      "type": "code",
+      "text": " int main (void)\n {\n     const char *scope = \"Lexical, deep, by copy \";\n     \n     void print_scope (void)\n     {\n          printf (\"%s\\n\", scope);\n     }",
+      "id": "761c334d625c575240924686fe3da920"
+    },
+    {
+      "type": "code",
+      "text": "     scope = \"Lexical, deep, aliasing\";",
+      "id": "05f58b77f84ab8d32b619fb44fe70905"
+    },
+    {
+      "type": "code",
+      "text": "     void (*)(void) helper_func (void) /* Returns ptr to function; pretend its a closure */\n     {\n         const char *scope = \"Lexical, shallow scoping\";\n         \n         void do_print_scope (void)\n         {\n             print_scope();\n         }\n         return do_print_scope;  \n     }",
+      "id": "363348560473db63a9949b778908dac7"
+    },
+    {
+      "type": "code",
+      "text": "     void do_it (void)\n     {\n         const char *scope = \"Dynamic Scoping\";\n         helper_func()(); /* Call the function returned by helper_func(); */\n     }\n     do_it();  /* Print what scoping we are using */\n }",
+      "id": "b208bbabdb9ccc9321effd90f48f68e7"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "7080ed007a93e06cfe2c735f09448b86"
+    },
+    {
+      "type": "html",
+      "text": "Another example, in pseudo [[Pascal Language]]: (from 'Compilers: Principles, Techniques, and Tools')",
+      "id": "6442d7fec39af194bc6e47e0a8b4ea7e"
+    },
+    {
+      "type": "code",
+      "text": " program scoping;\n var r : string;\n procedure show;\n   begin\n   writeln(r);\n   end;\n procedure scope;\n   var r : string;\n   begin\n   r:='Dynamic';\n   show;\n   end;\n begin \n r:='Scope';\n show;\n r:='Lexical';\n scope;\n end.",
+      "id": "02173beba12d1f2169aba4b8a0274561"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "7080ed007a93e06cfe2c735f09448b86"
+    },
+    {
+      "type": "html",
+      "text": "Note: C <i>does</i> use [[Lexical Scoping]] but does not allow function definitions to be nested (<i>Standard C doesn't, but GNU C does</i>). C++ also uses [[Lexical Scoping]]. Namespaces and classes are just lexical scopes, like any other, as are Java [[Inner Class]]es.  ",
+      "id": "c5f4771c21bed612713e37a1352e8353"
+    },
+    {
+      "type": "html",
+      "text": "\nFor example:",
+      "id": "4ddd1be972c1e55fff4a772a0df55f9e"
+    },
+    {
+      "type": "code",
+      "text": " int func() {\n     int outer_local = 1;\n     \n     { // this block introduces a new lexical scope\n         int inner_local = 2;",
+      "id": "97cebf7b5a71243fea6bd61c6492f85c"
+    },
+    {
+      "type": "code",
+      "text": "         printf( \"%i %i\\n\", inner_local, outer_local );\n     }\n     \n     // inner_local is no longer in scope.\n }",
+      "id": "09f592c724ead60e9998b1718199c9f9"
+    },
+    {
+      "type": "html",
+      "text": "Will print:",
+      "id": "013794da6bb2fe6874ef8ecf58dabf45"
+    },
+    {
+      "type": "html",
+      "text": " 1",
+      "id": "6a4a0de1394cabe00b6e5c0c331f6810"
+    },
+    {
+      "type": "html",
+      "text": "<i>The important point about C/C++ is that it doesn't allow [[Free Variables]] in one function to refer to anything defined in another function; this eliminates the need for a [[Static Chain]] and/or closures.</i>",
+      "id": "1fc2540f48e114b75c0eba295861444c"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "7080ed007a93e06cfe2c735f09448b86"
+    },
+    {
+      "type": "html",
+      "text": "<i>So this perfectly valid ISO 9899:1999 does not use [[Lexical Scoping]]?</i>",
+      "id": "37937d86e4a156899f423fd9ddce2168"
+    },
+    {
+      "type": "code",
+      "text": " int main() {",
+      "id": "0980ebb1e5b450e9dccbe239f089c5f9"
+    },
+    {
+      "type": "code",
+      "text": "   for (int i = 0; i < 10; i++) {\n     dosomething(i);\n     }\n   // i is no longer accessible.\n }",
+      "id": "0b49ad18c0fcbd92f1e95a4572d1175f"
+    },
+    {
+      "type": "html",
+      "text": "\nThis is not a GNU extension, this is valid C99.\nAFAIK the standard does say that blocks group a set of declarations and statements into\na syntactic unit, and a compound statement is a block.",
+      "id": "394730c92ecfbab78796a143f87d07b7"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "7080ed007a93e06cfe2c735f09448b86"
+    },
+    {
+      "type": "html",
+      "text": "\nActually, C++ does allow nested functions; you just have to spell the internal function differently. The following is not legal in C++:",
+      "id": "fbc943a75ec8ddca9d1d7afcfc56ed47"
+    },
+    {
+      "type": "code",
+      "text": " void outer (int x) \n {\n     void inner (int y);\n     {\n          cout << y+1;\n     }",
+      "id": "4bc9fa346f5bbec192d0d3ca39002008"
+    },
+    {
+      "type": "code",
+      "text": "     inner(x);\n }",
+      "id": "e7bde7e27a990d46bb5ad1a6d266617d"
+    },
+    {
+      "type": "html",
+      "text": "\nThe following, however, is.",
+      "id": "2afc376a1aa5334db55e1e3753226353"
+    },
+    {
+      "type": "code",
+      "text": " void outer (int x)\n {\n      class { void operator () (int y) \n      {\n         cout << y+1;\n      } inner;",
+      "id": "fb2153056e11a8f7d4b1cf59d59d9136"
+    },
+    {
+      "type": "code",
+      "text": "      inner(x);\n }",
+      "id": "b5e750f04e9abff3e4f41b9e2fa19643"
+    },
+    {
+      "type": "html",
+      "text": "\nIn other words, functors are a great way of faking nesting functions. Of course, the functor (still) has no access to the variables defined in outer.",
+      "id": "56fcd5f4196ec76cbb248122f396981c"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "7080ed007a93e06cfe2c735f09448b86"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Language Feature]] [[Scope And Closures]]",
+      "id": "d4b1effbe4cc9815ed848fb74f327847"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?ScopingRules c2.com]",
+      "id": "71730653dca0b757c2f2572487bae1b4"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1156793855000,
+      "id": "8126328d4462ac03caba8486544f3304",
+      "type": "create",
+      "item": {
+        "title": "Scoping Rules",
+        "story": [
+          {
+            "type": "html",
+            "text": "The <i>scoping rules</i> of a [[Programming Language]] dictate how [[Free Variable]]s - symbol names which are found in the body of a scope (a function, macro, class, whatever) but not defined there - are resolved.",
+            "id": "032bc2845eccf49223e4f9bbaedb5468"
+          },
+          {
+            "type": "html",
+            "text": "\nSeveral different strategies exist:",
+            "id": "592c0964ce52ff916efc750f43f104e1"
+          },
+          {
+            "type": "html",
+            "text": " Disallowing them altogether. Very rare; though some languages may disallow free references to all but a pre-defined set of symbols (often called <i>keywords</i> or <i>special forms</i>) which are provided by the language.  ",
+            "id": "f5abeb303ae94e9a5a0374bedf4ccb03"
+          },
+          {
+            "type": "html",
+            "text": " Only two scoping levels - global and local. [[Cee Language]] and many assemblers use this rule. A [[Free Variable]] defined in a C function must refer to a \"global\" symbol (meaning defined either at file or global scope; as opposed to within a function body). This simplifies the implementation of C greatly (and many C programmers don't miss more advanced scope rules at all). [[Cee Plus Plus]] sticks to the C tradition in many ways, though the presence of features such as classes and namespaces cause C++ to relax the scoping rules quite a bit. (Still, no C++ function can bind to the local variables of another C++ function). Java, with [[Inner Class]]es, relaxes the scoping rules further.",
+            "id": "46302ee4bc31cddbd93bf31b16612de4"
+          },
+          {
+            "type": "html",
+            "text": " [[Lexical Scoping]]. Used by [[Common Lisp]], [[Scheme Language]], [[Algol Language]], [[Pascal Language]], and many others. If a variable isn't found in a given scope, the enclosing scope is searched; repeating until the outermost scope is reached. Two important variants of this are [[Deep Binding]] and [[Shallow Binding]]. With [[Deep Binding]], variables are bound to the environment of where the function is defined; with shallow binding variables are bound to the environment of where the function is called. Most languages which support [[Lexical Scoping]] support [[Deep Binding]] for functions; most macro systems (excluding Scheme's [[Define Syntax]]) use shallow binding. It is possible to divide [[Deep Binding]] further into two separate forms (I am not aware of any generally accepted terminology to describe these forms). In one form, a [[Free Variable]] essentially is an alias for the actual variable in the enclosing scope; if that variable changes than the value of the variable in the function being considered also changes. (If the enclosing scope has exited, possible if [[First Class]] functions are mixed in with [[Lexical Scoping]], then the value the variable had at exit changes). Most languages which support [[Deep Binding]] support this form. In the other form; the [[Free Variable]] takes the value that it has at the point when the function in question is first defined; and does not change. (In other words, the function using the [[Free Variable]] makes a copy of the value provided by the enclosing scope). I'm not aware of any languages which do this for [[Free Variables]]; though objects used as closures have this behavior.  Java [[Inner Class]]es (when defined within a function) sidestep this issue by only allowing references to variables in the enclosing function which are declared to be <i>final</i> - in other words, those whose value does not change. ",
+            "id": "e611433b2504745cd10a25bb7e9acaa3"
+          },
+          {
+            "type": "html",
+            "text": " [[Dynamic Scoping]] (early dialects of Lisp, [[Common Lisp]] special variables, exported environment variables in [[Unix Os]]): The caller is checked for a binding for the variable; if one is found, it is used. Otherwise, the caller's caller is checked, and so on. If no definition is found, it is either an error or a default value is used, depending on the semantics of the language.  ",
+            "id": "d91458f8bc607e520e4173943df874f9"
+          },
+          {
+            "type": "html",
+            "text": "\nThe following C-like program illustrates the different scoping rules. Apply a different rule, that's that what would print. Of course, this is not legal C in real life, as [[Cee Language]] doesn't allow nested functions.",
+            "id": "bbc51e8641542406d564401fdb3e36ae"
+          },
+          {
+            "type": "code",
+            "text": " int main (void)\n {\n     const char *scope = \"Lexical, deep, by copy \";\n     \n     void print_scope (void)\n     {\n          printf (\"%s\\n\", scope);\n     }",
+            "id": "761c334d625c575240924686fe3da920"
+          },
+          {
+            "type": "code",
+            "text": "     scope = \"Lexical, deep, aliasing\";",
+            "id": "05f58b77f84ab8d32b619fb44fe70905"
+          },
+          {
+            "type": "code",
+            "text": "     void (*)(void) helper_func (void) /* Returns ptr to function; pretend its a closure */\n     {\n         const char *scope = \"Lexical, shallow scoping\";\n         \n         void do_print_scope (void)\n         {\n             print_scope();\n         }\n         return do_print_scope;  \n     }",
+            "id": "363348560473db63a9949b778908dac7"
+          },
+          {
+            "type": "code",
+            "text": "     void do_it (void)\n     {\n         const char *scope = \"Dynamic Scoping\";\n         helper_func()(); /* Call the function returned by helper_func(); */\n     }\n     do_it();  /* Print what scoping we are using */\n }",
+            "id": "b208bbabdb9ccc9321effd90f48f68e7"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "7080ed007a93e06cfe2c735f09448b86"
+          },
+          {
+            "type": "html",
+            "text": "Another example, in pseudo [[Pascal Language]]: (from 'Compilers: Principles, Techniques, and Tools')",
+            "id": "6442d7fec39af194bc6e47e0a8b4ea7e"
+          },
+          {
+            "type": "code",
+            "text": " program scoping;\n var r : string;\n procedure show;\n   begin\n   writeln(r);\n   end;\n procedure scope;\n   var r : string;\n   begin\n   r:='Dynamic';\n   show;\n   end;\n begin \n r:='Scope';\n show;\n r:='Lexical';\n scope;\n end.",
+            "id": "02173beba12d1f2169aba4b8a0274561"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "7080ed007a93e06cfe2c735f09448b86"
+          },
+          {
+            "type": "html",
+            "text": "Note: C <i>does</i> use [[Lexical Scoping]] but does not allow function definitions to be nested (<i>Standard C doesn't, but GNU C does</i>). C++ also uses [[Lexical Scoping]]. Namespaces and classes are just lexical scopes, like any other, as are Java [[Inner Class]]es.  ",
+            "id": "c5f4771c21bed612713e37a1352e8353"
+          },
+          {
+            "type": "html",
+            "text": "\nFor example:",
+            "id": "4ddd1be972c1e55fff4a772a0df55f9e"
+          },
+          {
+            "type": "code",
+            "text": " int func() {\n     int outer_local = 1;\n     \n     { // this block introduces a new lexical scope\n         int inner_local = 2;",
+            "id": "97cebf7b5a71243fea6bd61c6492f85c"
+          },
+          {
+            "type": "code",
+            "text": "         printf( \"%i %i\\n\", inner_local, outer_local );\n     }\n     \n     // inner_local is no longer in scope.\n }",
+            "id": "09f592c724ead60e9998b1718199c9f9"
+          },
+          {
+            "type": "html",
+            "text": "Will print:",
+            "id": "013794da6bb2fe6874ef8ecf58dabf45"
+          },
+          {
+            "type": "html",
+            "text": " 1",
+            "id": "6a4a0de1394cabe00b6e5c0c331f6810"
+          },
+          {
+            "type": "html",
+            "text": "<i>The important point about C/C++ is that it doesn't allow [[Free Variables]] in one function to refer to anything defined in another function; this eliminates the need for a [[Static Chain]] and/or closures.</i>",
+            "id": "1fc2540f48e114b75c0eba295861444c"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "7080ed007a93e06cfe2c735f09448b86"
+          },
+          {
+            "type": "html",
+            "text": "<i>So this perfectly valid ISO 9899:1999 does not use [[Lexical Scoping]]?</i>",
+            "id": "37937d86e4a156899f423fd9ddce2168"
+          },
+          {
+            "type": "code",
+            "text": " int main() {",
+            "id": "0980ebb1e5b450e9dccbe239f089c5f9"
+          },
+          {
+            "type": "code",
+            "text": "   for (int i = 0; i < 10; i++) {\n     dosomething(i);\n     }\n   // i is no longer accessible.\n }",
+            "id": "0b49ad18c0fcbd92f1e95a4572d1175f"
+          },
+          {
+            "type": "html",
+            "text": "\nThis is not a GNU extension, this is valid C99.\nAFAIK the standard does say that blocks group a set of declarations and statements into\na syntactic unit, and a compound statement is a block.",
+            "id": "394730c92ecfbab78796a143f87d07b7"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "7080ed007a93e06cfe2c735f09448b86"
+          },
+          {
+            "type": "html",
+            "text": "\nActually, C++ does allow nested functions; you just have to spell the internal function differently. The following is not legal in C++:",
+            "id": "fbc943a75ec8ddca9d1d7afcfc56ed47"
+          },
+          {
+            "type": "code",
+            "text": " void outer (int x) \n {\n     void inner (int y);\n     {\n          cout << y+1;\n     }",
+            "id": "4bc9fa346f5bbec192d0d3ca39002008"
+          },
+          {
+            "type": "code",
+            "text": "     inner(x);\n }",
+            "id": "e7bde7e27a990d46bb5ad1a6d266617d"
+          },
+          {
+            "type": "html",
+            "text": "\nThe following, however, is.",
+            "id": "2afc376a1aa5334db55e1e3753226353"
+          },
+          {
+            "type": "code",
+            "text": " void outer (int x)\n {\n      class { void operator () (int y) \n      {\n         cout << y+1;\n      } inner;",
+            "id": "fb2153056e11a8f7d4b1cf59d59d9136"
+          },
+          {
+            "type": "code",
+            "text": "      inner(x);\n }",
+            "id": "b5e750f04e9abff3e4f41b9e2fa19643"
+          },
+          {
+            "type": "html",
+            "text": "\nIn other words, functors are a great way of faking nesting functions. Of course, the functor (still) has no access to the variables defined in outer.",
+            "id": "56fcd5f4196ec76cbb248122f396981c"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "7080ed007a93e06cfe2c735f09448b86"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Language Feature]] [[Scope And Closures]]",
+            "id": "d4b1effbe4cc9815ed848fb74f327847"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?ScopingRules c2.com]",
+            "id": "71730653dca0b757c2f2572487bae1b4"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "language.sfw.c2.com",
+      "date": 1674055448334
+    }
+  ]
+}

@@ -2,6 +2,14 @@
   "title": "do",
   "story": [
     {
+      "type": "reference",
+      "id": "b41c3c0de7a2c0e8",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "art-criticism",
+      "title": "Art Criticism",
+      "text": "We are currently in a catastrophe, at a point from which things will be different than before."
+    },
+    {
       "type": "markdown",
       "id": "d329f8b82671936a",
       "text": "* [[Learning Cycles]]"
@@ -262,6 +270,42 @@
         "text": "DOT FROM lambda-browsing"
       },
       "date": 1669901732777
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b41c3c0de7a2c0e8"
+      },
+      "id": "b41c3c0de7a2c0e8",
+      "type": "add",
+      "after": "bfdd5c75e233ca2c",
+      "date": 1674035001239
+    },
+    {
+      "type": "edit",
+      "id": "b41c3c0de7a2c0e8",
+      "item": {
+        "type": "reference",
+        "id": "b41c3c0de7a2c0e8",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "art-criticism",
+        "title": "Art Criticism",
+        "text": "We are currently in a catastrophe, at a point from which things will be different than before."
+      },
+      "date": 1674035003509
+    },
+    {
+      "id": "b41c3c0de7a2c0e8",
+      "type": "move",
+      "order": [
+        "b41c3c0de7a2c0e8",
+        "d329f8b82671936a",
+        "f0b39c54002d8da8",
+        "e2a2e11ed3f4023b",
+        "fd1623e0caedf603",
+        "bfdd5c75e233ca2c"
+      ],
+      "date": 1674035007811
     }
   ]
 }

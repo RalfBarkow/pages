@@ -1,0 +1,282 @@
+{
+  "title": "Scheme Requests For Implementation",
+  "story": [
+    {
+      "type": "html",
+      "text": "The set of useful programs one can easily write in standard [[Common Lisp]] is a lot larger than the set of useful programs one can write in R5RS [[Scheme Language]] [[[Revised Report On Algorithmic Language Scheme]]]. The Scheme community is solving this by a layered standards approach (see [http://srfi.schemers.org srfi.schemers.org]).",
+      "id": "ee5849be8f108b603aedd53fdd66e2db"
+    },
+    {
+      "type": "html",
+      "text": "<i>I find it significant that many of their SRFI's are reinventions of [[Common Lisp]] functionality. -- Lieven</i>",
+      "id": "a3e490e62c785c5103faf4cc2c1fd7d1"
+    },
+    {
+      "type": "html",
+      "text": "\nI disagree. Most of the SRFI's are completely unlike [[Common Lisp]], even if they address a similar application area. E.g. SRFI-9 records are very different beasts from CL's structs (for one, they are generative). -- [[Stephan Houben]]",
+      "id": "992e84f6be594dc621e1f3a37ee5f352"
+    },
+    {
+      "type": "html",
+      "text": "<i>What do you mean by \"generative\"? The fact that all identifiers introduced have to be explicitly provided so that define-record-type can be implemented with a syntax-case? Common Lisp's defstruct has this with the :conc-name-option.</i>",
+      "id": "aa85b8c8c6508a2a5db1455209d8d343"
+    },
+    {
+      "type": "html",
+      "text": "\nGenerative means it generates a new type.  So two structures with the same values made from two identical structure definitions are not equal? to one another as they are different types (though the name of the types may be the same).",
+      "id": "9d2b5900d610e0955850b1b72e34a8ce"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "fa071a89e297fb79cf982bd4dcc04aa8"
+    },
+    {
+      "type": "html",
+      "text": "I just did some reading of the [[Common Lisp]] standard, and some experimentation with clisp 2.30 as well as cmucl 2.5.1 - I had to use two implementations because at first I thought the behaviour I was seeing was a bug!  The explanation turns out to be pretty complicated, and it might make sense to refactor discussion of generative semantics onto a new page - but for now, since this page doesn't have much other content, it's not getting in the way of anything.",
+      "id": "1e677f2798593d92b66eb82e01c3c42b"
+    },
+    {
+      "type": "html",
+      "text": "\nNow, here's the deal.  CL has both structs and classes; all struct types are also classes.  This does not mean that there is a class for each struct type; rather, the struct type itself is the class.  Classes are what CL calls \"first-class objects\", which means that their names are not an intrinsic part of them; you may assign a class - the class itself, not an instance of it - to a variable; you may compare two classes for equality; you may create a class which does not have a name.",
+      "id": "90ba02c3a9d22ee377dd4cb4e23dfd8a"
+    },
+    {
+      "type": "html",
+      "text": "\nCL only has one standardized comparison predicate which recurses into structs, (equalp).  Two structs cannot be the same under (equalp) unless they are of \"the same class\", which, as the glossary will tell you, means that their classes are not merely identical but in fact a single class, created by the same declaration or instantiation.",
+      "id": "6a06ea95ef2503df1c383e0a155e264b"
+    },
+    {
+      "type": "html",
+      "text": "\nThere's no standard comparison predicate which tests whether two instances of arbitrary classes are equal, for the excellent reason that there is (deliberately) no standard way to retrieve a guaranteed-complete list of all the slots of any given class.  I'm not entirely sure what purpose this serves, but no doubt it makes implementation easier.  However, it is completely portable to test whether two objects belong to the same class: (eq (class-of a) (class-of b)).  This, too, gives generative semantics: it will only be true if the classes of a and b were created by the same declaration or instantiation.",
+      "id": "2ac93f9d57eeb3c9155413d1207bb420"
+    },
+    {
+      "type": "html",
+      "text": "\nTwice now I've said \"declaration or instantiation,\" which probably lost some people.  That needs explanation, and it's at the root of why the standard is a little hard to read.",
+      "id": "85eacf25d0fd9089b64f07a632bbf16e"
+    },
+    {
+      "type": "html",
+      "text": "\nYou can create a named struct type with (defstruct name ...), or a named class with (defclass name ...).  In both cases, the name becomes a globally-visible type name (which doesn't result in namespace pollution, due to the package system, which I won't explain here).  Type names are used only by certain functions which test type membership and the like; they are not variable names.  If you need to directly reference the class again, you can get it by calling (find-class 'name).",
+      "id": "d48258e01af6074ac1cb38cfda333c92"
+    },
+    {
+      "type": "html",
+      "text": "\nYou can also create an unnamed struct type with (make-instance 'structure-class), or an unnamed class with (make-instance 'standard-class).  Both these calls are passing symbols to (make-instance), which it interprets as type names - that's right, every class is itself an instance of another class!  standard-class, if you wonder, is usually an instance of itself.  You can also pass the class itself, rather than a type name, to (make-instance); this is how you create an instance of your new anonymous class.",
+      "id": "e8dd933fa7eac4355f9741e5fe7cd67f"
+    },
+    {
+      "type": "html",
+      "text": "\nThe tricky bit is that when you call (defclass name ...) twice for the same name, it doesn't create a new class at all; it updates the old one.  It's a little less clear what happens when (defstruct name ...) is invoked twice, though it's most likely the same.",
+      "id": "706d8c595610b36e39a0e77cf6d90cfb"
+    },
+    {
+      "type": "html",
+      "text": "\nSo - are these generative semantics, or aren't they?!  I don't think the description given directly above my explanation is sufficient to say.",
+      "id": "e7856d3980672352ccee983f85f324f4"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Daniel Knapp]]",
+      "id": "113c9d9ab92e32382f03eae6c2d0cbc8"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "fa071a89e297fb79cf982bd4dcc04aa8"
+    },
+    {
+      "type": "html",
+      "text": "One of the biggest problems with the SRFIs is that in order to file an official SRFI you have to submit an implementation. While the requirement is intended to prevent people from submitting unimplementable requests, it biases the submissions toward extensions to Scheme that can be easily implemented (such as those that can be written as simple Scheme macros on top of some existing Scheme implementation), and away from the extensions that <i>really</i> need to be defined (such as say, GUI programming, or working with a web server or an SQL database, or perhaps importing arbitrary API functions from C libraries). I hear that Guile offers bindings to [[Open Gl]], why isn't that a SRFI?",
+      "id": "fd5256aed518cda7d335bef3e157df1e"
+    },
+    {
+      "type": "html",
+      "text": "\nScheme isn't widely used because it's impractical. But the only reason it's impractical is that, in its standard form, it lacks I/O capabilities. Standard Scheme can open a file and read characters sequentially, but lacks random-access. It can read Scheme objects from files (represented as text), but if there is a lexical error in the file, the Scheme program cannot handle the error; the standard requires the implementation to stop and report an error.",
+      "id": "c7a1b69055067b65f4c2390f8e840c72"
+    },
+    {
+      "type": "html",
+      "text": "<i>I think you're missing the purpose of SRFIs.  Not all SRFIs have a sufficient reference implementation (for an example, see SRFI 4 and SRFI 18).  The purpose of SRFIs isn't to provide bindings to any specific libraries, such as OpenGL; it's to provide new base functionality for Scheme.  They're almost like RFCs, except they wield no real power, so implementation is completely optional.  You wouldn't make an RFC about an OpenGL binding, would you?</i>",
+      "id": "5171dce252d5f6496a70c91b6f84b815"
+    },
+    {
+      "type": "html",
+      "text": "<i>You give two examples of shortages of Scheme, the lack of a mechanism for mixing Scheme and C and the lack of I/O conditions. However, these are both available as SRFIs 36 and 50 respecively.</i>",
+      "id": "55b0064af9c584084823f1e8e989601f"
+    },
+    {
+      "type": "html",
+      "text": "<i>--[[Little Dan]]</i>",
+      "id": "dfac902f991d2813e47ca48a7b0ac433"
+    },
+    {
+      "type": "html",
+      "text": "\nThe comment above about Guile libs and practical extensions brings up a good point. Those features and a host of similar practicality concerns are why I consider Guile to be a sort of poor man's CL. Despite it being the most powerful/consistent/simple control language readily available for embedding in a \"primary\" program the primary use it finds around my shop is giving practical wings to otherwise idealistic Schemer dreams. Its a lot easier to go from an executable high-level Scheme phrasing of a solution to a practical, effective program in Guile than standard-compliant Scheme. This reflects highly on Scheme and the Guile implementation; they have both done an uncanny job of satisfying their initial, and very different, design goals. This also makes me wonder why more folks haven't caught on to how easy Guile makes many things in the real world, as opposed to writing Scheme off entirely (or anything Lispy) the way most folks do when first they try to solve a practical programming problem. --[[Craig Everett]]",
+      "id": "a1fb9f3c7280931341f423a671c2e272"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "fa071a89e297fb79cf982bd4dcc04aa8"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Scheme]]",
+      "id": "60508d32218ea7479544093882f326b0"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?SchemeRequestsForImplementation c2.com]",
+      "id": "af43d6218ce56def32c20ec285b6a16a"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1400490386000,
+      "id": "18db7f0e33cc9121daa73a52f72b1e77",
+      "type": "create",
+      "item": {
+        "title": "Scheme Requests For Implementation",
+        "story": [
+          {
+            "type": "html",
+            "text": "The set of useful programs one can easily write in standard [[Common Lisp]] is a lot larger than the set of useful programs one can write in R5RS [[Scheme Language]] [[[Revised Report On Algorithmic Language Scheme]]]. The Scheme community is solving this by a layered standards approach (see [http://srfi.schemers.org srfi.schemers.org]).",
+            "id": "ee5849be8f108b603aedd53fdd66e2db"
+          },
+          {
+            "type": "html",
+            "text": "<i>I find it significant that many of their SRFI's are reinventions of [[Common Lisp]] functionality. -- Lieven</i>",
+            "id": "a3e490e62c785c5103faf4cc2c1fd7d1"
+          },
+          {
+            "type": "html",
+            "text": "\nI disagree. Most of the SRFI's are completely unlike [[Common Lisp]], even if they address a similar application area. E.g. SRFI-9 records are very different beasts from CL's structs (for one, they are generative). -- [[Stephan Houben]]",
+            "id": "992e84f6be594dc621e1f3a37ee5f352"
+          },
+          {
+            "type": "html",
+            "text": "<i>What do you mean by \"generative\"? The fact that all identifiers introduced have to be explicitly provided so that define-record-type can be implemented with a syntax-case? Common Lisp's defstruct has this with the :conc-name-option.</i>",
+            "id": "aa85b8c8c6508a2a5db1455209d8d343"
+          },
+          {
+            "type": "html",
+            "text": "\nGenerative means it generates a new type.  So two structures with the same values made from two identical structure definitions are not equal? to one another as they are different types (though the name of the types may be the same).",
+            "id": "9d2b5900d610e0955850b1b72e34a8ce"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "fa071a89e297fb79cf982bd4dcc04aa8"
+          },
+          {
+            "type": "html",
+            "text": "I just did some reading of the [[Common Lisp]] standard, and some experimentation with clisp 2.30 as well as cmucl 2.5.1 - I had to use two implementations because at first I thought the behaviour I was seeing was a bug!  The explanation turns out to be pretty complicated, and it might make sense to refactor discussion of generative semantics onto a new page - but for now, since this page doesn't have much other content, it's not getting in the way of anything.",
+            "id": "1e677f2798593d92b66eb82e01c3c42b"
+          },
+          {
+            "type": "html",
+            "text": "\nNow, here's the deal.  CL has both structs and classes; all struct types are also classes.  This does not mean that there is a class for each struct type; rather, the struct type itself is the class.  Classes are what CL calls \"first-class objects\", which means that their names are not an intrinsic part of them; you may assign a class - the class itself, not an instance of it - to a variable; you may compare two classes for equality; you may create a class which does not have a name.",
+            "id": "90ba02c3a9d22ee377dd4cb4e23dfd8a"
+          },
+          {
+            "type": "html",
+            "text": "\nCL only has one standardized comparison predicate which recurses into structs, (equalp).  Two structs cannot be the same under (equalp) unless they are of \"the same class\", which, as the glossary will tell you, means that their classes are not merely identical but in fact a single class, created by the same declaration or instantiation.",
+            "id": "6a06ea95ef2503df1c383e0a155e264b"
+          },
+          {
+            "type": "html",
+            "text": "\nThere's no standard comparison predicate which tests whether two instances of arbitrary classes are equal, for the excellent reason that there is (deliberately) no standard way to retrieve a guaranteed-complete list of all the slots of any given class.  I'm not entirely sure what purpose this serves, but no doubt it makes implementation easier.  However, it is completely portable to test whether two objects belong to the same class: (eq (class-of a) (class-of b)).  This, too, gives generative semantics: it will only be true if the classes of a and b were created by the same declaration or instantiation.",
+            "id": "2ac93f9d57eeb3c9155413d1207bb420"
+          },
+          {
+            "type": "html",
+            "text": "\nTwice now I've said \"declaration or instantiation,\" which probably lost some people.  That needs explanation, and it's at the root of why the standard is a little hard to read.",
+            "id": "85eacf25d0fd9089b64f07a632bbf16e"
+          },
+          {
+            "type": "html",
+            "text": "\nYou can create a named struct type with (defstruct name ...), or a named class with (defclass name ...).  In both cases, the name becomes a globally-visible type name (which doesn't result in namespace pollution, due to the package system, which I won't explain here).  Type names are used only by certain functions which test type membership and the like; they are not variable names.  If you need to directly reference the class again, you can get it by calling (find-class 'name).",
+            "id": "d48258e01af6074ac1cb38cfda333c92"
+          },
+          {
+            "type": "html",
+            "text": "\nYou can also create an unnamed struct type with (make-instance 'structure-class), or an unnamed class with (make-instance 'standard-class).  Both these calls are passing symbols to (make-instance), which it interprets as type names - that's right, every class is itself an instance of another class!  standard-class, if you wonder, is usually an instance of itself.  You can also pass the class itself, rather than a type name, to (make-instance); this is how you create an instance of your new anonymous class.",
+            "id": "e8dd933fa7eac4355f9741e5fe7cd67f"
+          },
+          {
+            "type": "html",
+            "text": "\nThe tricky bit is that when you call (defclass name ...) twice for the same name, it doesn't create a new class at all; it updates the old one.  It's a little less clear what happens when (defstruct name ...) is invoked twice, though it's most likely the same.",
+            "id": "706d8c595610b36e39a0e77cf6d90cfb"
+          },
+          {
+            "type": "html",
+            "text": "\nSo - are these generative semantics, or aren't they?!  I don't think the description given directly above my explanation is sufficient to say.",
+            "id": "e7856d3980672352ccee983f85f324f4"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Daniel Knapp]]",
+            "id": "113c9d9ab92e32382f03eae6c2d0cbc8"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "fa071a89e297fb79cf982bd4dcc04aa8"
+          },
+          {
+            "type": "html",
+            "text": "One of the biggest problems with the SRFIs is that in order to file an official SRFI you have to submit an implementation. While the requirement is intended to prevent people from submitting unimplementable requests, it biases the submissions toward extensions to Scheme that can be easily implemented (such as those that can be written as simple Scheme macros on top of some existing Scheme implementation), and away from the extensions that <i>really</i> need to be defined (such as say, GUI programming, or working with a web server or an SQL database, or perhaps importing arbitrary API functions from C libraries). I hear that Guile offers bindings to [[Open Gl]], why isn't that a SRFI?",
+            "id": "fd5256aed518cda7d335bef3e157df1e"
+          },
+          {
+            "type": "html",
+            "text": "\nScheme isn't widely used because it's impractical. But the only reason it's impractical is that, in its standard form, it lacks I/O capabilities. Standard Scheme can open a file and read characters sequentially, but lacks random-access. It can read Scheme objects from files (represented as text), but if there is a lexical error in the file, the Scheme program cannot handle the error; the standard requires the implementation to stop and report an error.",
+            "id": "c7a1b69055067b65f4c2390f8e840c72"
+          },
+          {
+            "type": "html",
+            "text": "<i>I think you're missing the purpose of SRFIs.  Not all SRFIs have a sufficient reference implementation (for an example, see SRFI 4 and SRFI 18).  The purpose of SRFIs isn't to provide bindings to any specific libraries, such as OpenGL; it's to provide new base functionality for Scheme.  They're almost like RFCs, except they wield no real power, so implementation is completely optional.  You wouldn't make an RFC about an OpenGL binding, would you?</i>",
+            "id": "5171dce252d5f6496a70c91b6f84b815"
+          },
+          {
+            "type": "html",
+            "text": "<i>You give two examples of shortages of Scheme, the lack of a mechanism for mixing Scheme and C and the lack of I/O conditions. However, these are both available as SRFIs 36 and 50 respecively.</i>",
+            "id": "55b0064af9c584084823f1e8e989601f"
+          },
+          {
+            "type": "html",
+            "text": "<i>--[[Little Dan]]</i>",
+            "id": "dfac902f991d2813e47ca48a7b0ac433"
+          },
+          {
+            "type": "html",
+            "text": "\nThe comment above about Guile libs and practical extensions brings up a good point. Those features and a host of similar practicality concerns are why I consider Guile to be a sort of poor man's CL. Despite it being the most powerful/consistent/simple control language readily available for embedding in a \"primary\" program the primary use it finds around my shop is giving practical wings to otherwise idealistic Schemer dreams. Its a lot easier to go from an executable high-level Scheme phrasing of a solution to a practical, effective program in Guile than standard-compliant Scheme. This reflects highly on Scheme and the Guile implementation; they have both done an uncanny job of satisfying their initial, and very different, design goals. This also makes me wonder why more folks haven't caught on to how easy Guile makes many things in the real world, as opposed to writing Scheme off entirely (or anything Lispy) the way most folks do when first they try to solve a practical programming problem. --[[Craig Everett]]",
+            "id": "a1fb9f3c7280931341f423a671c2e272"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "fa071a89e297fb79cf982bd4dcc04aa8"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Scheme]]",
+            "id": "60508d32218ea7479544093882f326b0"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?SchemeRequestsForImplementation c2.com]",
+            "id": "af43d6218ce56def32c20ec285b6a16a"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "language.sfw.c2.com",
+      "date": 1674055789094
+    }
+  ]
+}
