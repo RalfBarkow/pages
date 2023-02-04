@@ -12,7 +12,7 @@
     {
       "type": "paragraph",
       "id": "cc5411b6980e2170",
-      "text": "⇒ [[Lambdatalk]]"
+      "text": "⇒ [[Lambdatalk]] ⇒ [[Lambda Browsing]]"
     }
   ],
   "journal": [
@@ -89,6 +89,16 @@
       "type": "remove",
       "id": "f6bdb6774054ea21",
       "date": 1645095280584
+    },
+    {
+      "type": "edit",
+      "id": "cc5411b6980e2170",
+      "item": {
+        "type": "paragraph",
+        "id": "cc5411b6980e2170",
+        "text": "⇒ [[Lambdatalk]] ⇒ [[Lambda Browsing]]"
+      },
+      "date": 1675260679152
     }
   ]
 }

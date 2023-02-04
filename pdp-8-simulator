@@ -1,0 +1,590 @@
+{
+  "title": "PDP-8 Simulator",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "4766cfc87c07f4be",
+      "text": "I got tired waiting for DEC's PAL assembler to run on a friends home [[DEC PDP-8e]] so I wrote this [[CDC 6500]] simulator and ran the assembler binary there."
+    },
+    {
+      "type": "paragraph",
+      "id": "c6c611df7341b4e9",
+      "text": "See [[PDP-8 Simulator Explained]]."
+    },
+    {
+      "type": "paragraph",
+      "id": "c10be7999a8c8dc9",
+      "text": "There were only eight instructions to simulate. I wrote seven of them in assembly language and one more in Fortran, the I/O transfer instruction (IOT)."
+    },
+    {
+      "type": "paragraph",
+      "id": "aa02e67a215bf197",
+      "text": "The logical AND instruction coded up as three lines. One to fetch the argument, a second to perform the boolean operation, and a third to jump back into the interpreter's instruction fetching loop."
+    },
+    {
+      "type": "code",
+      "id": "dff95a655eb5e174",
+      "text": " AND      FETCH  X3,X4  \n          BX2    X2*X4  \n          EQ     INT1   "
+    },
+    {
+      "type": "paragraph",
+      "id": "004ae47d6b6c9aba",
+      "text": "The two's complement add (TAD) instruction required one line to perform the integer add and two more to isolate the 12 PDP result bits and carry from the 60 provided by the CDC computer."
+    },
+    {
+      "type": "code",
+      "id": "d05e151d3e2f42cc",
+      "text": " TAD      FETCH  X3,X4  \n          MX6    -13  \n          IX2    X2+X4  \n          BX2    -X6*X2   \n          EQ     INT1   "
+    },
+    {
+      "type": "paragraph",
+      "id": "a401fe894f402c19",
+      "text": "The CDC had eight general purpose registers. Four of these were allocated to hold PDP registers."
+    },
+    {
+      "type": "code",
+      "id": "2c477f7924d0ce44",
+      "text": "X2   PDP-8 Link and Accumulator\nX3   PDP-8 Memory Address Register (most times)\nX4   PDP-8 Memory Data Register (most times)\nX5   PDP-8 Program Counter\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "81319a1322b83c74",
+      "text": "Each PDP instruction occupied a single word. The program counter (X5) pointed to the next instruction which could be skipped by incrementing X5 inside an instruction."
+    },
+    {
+      "type": "paragraph",
+      "id": "7eaf03a87ef15841",
+      "text": "The increment and skip if zero (ISZ) instruction had two parts. First the argument would be fetched, incremented and stored. Then the incremented result would be tested and the next instruction skipped if the result were zero."
+    },
+    {
+      "type": "code",
+      "id": "081a99e7cf4e3287",
+      "text": " ISZ      FETCH  X3,X4  \n          SX4    X4+B1  \n          BX4    X0*X4  \n          STORE  ,X4  \n          NZ     X4,INT1  \n          SX5    X5+B1  \n          BX5    X0*X5  \n          EQ     INT1   "
+    },
+    {
+      "type": "paragraph",
+      "id": "70c66e7400db2d81",
+      "text": "I loaded DEC's PAL assembler into my simulator and tried to use it without success. My simulator had a bug. It was as if there were a real PDP-8 with a bug and I had simulated it."
+    },
+    {
+      "type": "paragraph",
+      "id": "22842851c363ad8b",
+      "text": "I borrowed the hardware diagnostics tape from a friend who maintained real PDP-8s for the university. When I ran this on my simulator the diagnostic identified a malfunctioning ISZ instruction."
+    },
+    {
+      "type": "paragraph",
+      "id": "6434f5fd54d65ce0",
+      "text": "It was right. I had coded the test of the incremented result backwards. Where I skip the skip if not zero (CDC NZ instruction) I had coded a jump on zero (CDC ZR instruction) by mistake. I'd been tripped up by the double-negative. To skip on zero I needed to jump on non-zero, thereby skipping the code that skipped."
+    },
+    {
+      "type": "paragraph",
+      "id": "62b2215feca6e771",
+      "text": "I found my only bug. I was proud to have written something of this complexity while only making one mistake. I was also proud to have found it using software meant to test hardware, not my software."
+    },
+    {
+      "type": "paragraph",
+      "id": "15c3099c1b954966",
+      "text": "I used this simulator to develop a [[Morse Transceiver]] application over a month with testing on real hardware once a week."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "PDP-8 Simulator"
+      },
+      "date": 1353691676642
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4766cfc87c07f4be"
+      },
+      "id": "4766cfc87c07f4be",
+      "type": "add",
+      "date": 1353691686552
+    },
+    {
+      "type": "edit",
+      "id": "4766cfc87c07f4be",
+      "item": {
+        "type": "paragraph",
+        "id": "4766cfc87c07f4be",
+        "text": "I got tired waiting for DEC's PAL assembler to run on a friends home [[DEC PDP-8e]] so I wrote this [[CDC 6500]] simulator and ran the assembler binary there."
+      },
+      "date": 1353691809448
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "c6c611df7341b4e9",
+        "text": ""
+      },
+      "id": "c6c611df7341b4e9",
+      "type": "add",
+      "after": "4766cfc87c07f4be",
+      "date": 1353691809954
+    },
+    {
+      "type": "edit",
+      "id": "c6c611df7341b4e9",
+      "item": {
+        "type": "paragraph",
+        "id": "c6c611df7341b4e9",
+        "text": "See [[PDP-8 Simulator Explained]]."
+      },
+      "date": 1353691824279
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dff95a655eb5e174"
+      },
+      "id": "dff95a655eb5e174",
+      "type": "add",
+      "after": "c6c611df7341b4e9",
+      "date": 1378057527658
+    },
+    {
+      "type": "edit",
+      "id": "dff95a655eb5e174",
+      "item": {
+        "type": "code",
+        "id": "dff95a655eb5e174",
+        "text": " AND      FETCH  X3,X4  \n          BX2    X2*X4  \n          EQ     INT1   "
+      },
+      "date": 1378057536732
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d05e151d3e2f42cc"
+      },
+      "id": "d05e151d3e2f42cc",
+      "type": "add",
+      "after": "dff95a655eb5e174",
+      "date": 1378057546029
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "081a99e7cf4e3287"
+      },
+      "id": "081a99e7cf4e3287",
+      "type": "add",
+      "after": "d05e151d3e2f42cc",
+      "date": 1378057553053
+    },
+    {
+      "type": "edit",
+      "id": "d05e151d3e2f42cc",
+      "item": {
+        "type": "code",
+        "id": "d05e151d3e2f42cc",
+        "text": " TAD      FETCH  X3,X4  \n          MX6    -13  \n          IX2    X2+X4  \n          BX2    -X6*X2   \n          EQ     INT1   "
+      },
+      "date": 1378057576470
+    },
+    {
+      "type": "edit",
+      "id": "081a99e7cf4e3287",
+      "item": {
+        "type": "code",
+        "id": "081a99e7cf4e3287",
+        "text": " ISZ      FETCH  X3,X4  \n          SX4    X4+B1  \n          BX4    X0*X4  \n          STORE  ,X4  \n          NZ     X4,INT1  \n          SX5    X5+B1  \n          BX5    X0*X5  \n          EQ     INT1   "
+      },
+      "date": 1378057600220
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2c477f7924d0ce44"
+      },
+      "id": "2c477f7924d0ce44",
+      "type": "add",
+      "after": "081a99e7cf4e3287",
+      "date": 1378057782253
+    },
+    {
+      "type": "edit",
+      "id": "2c477f7924d0ce44",
+      "item": {
+        "type": "code",
+        "id": "2c477f7924d0ce44",
+        "text": "X2   PDP-8 Link and Accumulator\nX3   PDP-8 Memory Address Register (most times)\nX4   PDP-8 Memory Data Register (most times)\nX5   PDP-8 Program Counter\n"
+      },
+      "date": 1378057789241
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "c10be7999a8c8dc9",
+        "text": ""
+      },
+      "id": "c10be7999a8c8dc9",
+      "type": "add",
+      "after": "c6c611df7341b4e9",
+      "date": 1378057843091
+    },
+    {
+      "type": "edit",
+      "id": "c10be7999a8c8dc9",
+      "item": {
+        "type": "paragraph",
+        "id": "c10be7999a8c8dc9",
+        "text": "There were only eight instructions to simulate. I wrote six of them in assembly language and two more in Fortran."
+      },
+      "date": 1378058079320
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "aa02e67a215bf197",
+        "text": ""
+      },
+      "id": "aa02e67a215bf197",
+      "type": "add",
+      "after": "c10be7999a8c8dc9",
+      "date": 1378058079832
+    },
+    {
+      "type": "edit",
+      "id": "aa02e67a215bf197",
+      "item": {
+        "type": "paragraph",
+        "id": "aa02e67a215bf197",
+        "text": "The logical AND instruction coded up as three lines. One to fetch the argument, a second to perform the boolean operation, and a third to jump back into the interpreter's instruction fetching loop."
+      },
+      "date": 1378058302130
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "004ae47d6b6c9aba",
+        "text": ""
+      },
+      "id": "004ae47d6b6c9aba",
+      "type": "add",
+      "after": "aa02e67a215bf197",
+      "date": 1378058320574
+    },
+    {
+      "type": "edit",
+      "id": "004ae47d6b6c9aba",
+      "item": {
+        "type": "paragraph",
+        "id": "004ae47d6b6c9aba",
+        "text": "The two's complement add (TAD) instruction required one line to perform the integer add and two more to isolate the 12 PDP result bits from the 60 provided by the CDC computer."
+      },
+      "date": 1378058491307
+    },
+    {
+      "type": "move",
+      "order": [
+        "4766cfc87c07f4be",
+        "c6c611df7341b4e9",
+        "c10be7999a8c8dc9",
+        "aa02e67a215bf197",
+        "dff95a655eb5e174",
+        "004ae47d6b6c9aba",
+        "d05e151d3e2f42cc",
+        "081a99e7cf4e3287",
+        "2c477f7924d0ce44"
+      ],
+      "id": "004ae47d6b6c9aba",
+      "date": 1378058494776
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a401fe894f402c19"
+      },
+      "id": "a401fe894f402c19",
+      "type": "add",
+      "after": "2c477f7924d0ce44",
+      "date": 1378058561156
+    },
+    {
+      "type": "move",
+      "order": [
+        "4766cfc87c07f4be",
+        "c6c611df7341b4e9",
+        "c10be7999a8c8dc9",
+        "aa02e67a215bf197",
+        "dff95a655eb5e174",
+        "004ae47d6b6c9aba",
+        "d05e151d3e2f42cc",
+        "a401fe894f402c19",
+        "081a99e7cf4e3287",
+        "2c477f7924d0ce44"
+      ],
+      "id": "a401fe894f402c19",
+      "date": 1378058564380
+    },
+    {
+      "type": "move",
+      "order": [
+        "4766cfc87c07f4be",
+        "c6c611df7341b4e9",
+        "c10be7999a8c8dc9",
+        "aa02e67a215bf197",
+        "dff95a655eb5e174",
+        "004ae47d6b6c9aba",
+        "d05e151d3e2f42cc",
+        "a401fe894f402c19",
+        "2c477f7924d0ce44",
+        "081a99e7cf4e3287"
+      ],
+      "id": "2c477f7924d0ce44",
+      "date": 1378058571464
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "81319a1322b83c74"
+      },
+      "id": "81319a1322b83c74",
+      "type": "add",
+      "after": "081a99e7cf4e3287",
+      "date": 1378058574639
+    },
+    {
+      "type": "move",
+      "order": [
+        "4766cfc87c07f4be",
+        "c6c611df7341b4e9",
+        "c10be7999a8c8dc9",
+        "aa02e67a215bf197",
+        "dff95a655eb5e174",
+        "004ae47d6b6c9aba",
+        "d05e151d3e2f42cc",
+        "a401fe894f402c19",
+        "2c477f7924d0ce44",
+        "81319a1322b83c74",
+        "081a99e7cf4e3287"
+      ],
+      "id": "81319a1322b83c74",
+      "date": 1378058577408
+    },
+    {
+      "type": "edit",
+      "id": "004ae47d6b6c9aba",
+      "item": {
+        "type": "paragraph",
+        "id": "004ae47d6b6c9aba",
+        "text": "The two's complement add (TAD) instruction required one line to perform the integer add and two more to isolate the 12 PDP result bits and carry from the 60 provided by the CDC computer."
+      },
+      "date": 1378058622321
+    },
+    {
+      "type": "edit",
+      "id": "a401fe894f402c19",
+      "item": {
+        "type": "paragraph",
+        "id": "a401fe894f402c19",
+        "text": "The CDC had eight general purpose registers. Four of these were allocated to hold (mostly special purpose) PDP registers. "
+      },
+      "date": 1378058823170
+    },
+    {
+      "type": "edit",
+      "id": "a401fe894f402c19",
+      "item": {
+        "type": "paragraph",
+        "id": "a401fe894f402c19",
+        "text": "The CDC had eight general purpose registers. Four of these were allocated to hold PDP registers."
+      },
+      "date": 1378058872386
+    },
+    {
+      "type": "edit",
+      "id": "81319a1322b83c74",
+      "item": {
+        "type": "paragraph",
+        "id": "81319a1322b83c74",
+        "text": "Each PDP instruction occupied a single word. The program counter (X5) pointed to the next instruction which could be skipped by incrementing X5 inside an instruction."
+      },
+      "date": 1378059146674
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "7eaf03a87ef15841",
+        "text": ""
+      },
+      "id": "7eaf03a87ef15841",
+      "type": "add",
+      "after": "81319a1322b83c74",
+      "date": 1378059147184
+    },
+    {
+      "type": "edit",
+      "id": "7eaf03a87ef15841",
+      "item": {
+        "type": "paragraph",
+        "id": "7eaf03a87ef15841",
+        "text": "The increment and skip if zero (ISZ) instruction had two parts. First the argument would be fetched, incremented and stored. Then the incremented result would be tested and the next instruction skipped if the result were zero."
+      },
+      "date": 1378059295301
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "70c66e7400db2d81"
+      },
+      "id": "70c66e7400db2d81",
+      "type": "add",
+      "after": "081a99e7cf4e3287",
+      "date": 1378059315800
+    },
+    {
+      "type": "edit",
+      "id": "70c66e7400db2d81",
+      "item": {
+        "type": "paragraph",
+        "id": "70c66e7400db2d81",
+        "text": "I loaded the PAL assembler into my simulator and tried to use it without success. My simulator had a bug. It was as if there were a real PDP-8 with a bug and I had simulated it."
+      },
+      "date": 1378059562736
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "22842851c363ad8b",
+        "text": ""
+      },
+      "id": "22842851c363ad8b",
+      "type": "add",
+      "after": "70c66e7400db2d81",
+      "date": 1378059563245
+    },
+    {
+      "type": "edit",
+      "id": "22842851c363ad8b",
+      "item": {
+        "type": "paragraph",
+        "id": "22842851c363ad8b",
+        "text": "I borrowed the hardware diagnostics tape from a friend who maintained real PDP-8s for the university. When I ran this on my simulator it identified a malfunctioning ISZ instruction."
+      },
+      "date": 1378059712504
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "6434f5fd54d65ce0",
+        "text": ""
+      },
+      "id": "6434f5fd54d65ce0",
+      "type": "add",
+      "after": "22842851c363ad8b",
+      "date": 1378059713013
+    },
+    {
+      "type": "edit",
+      "id": "6434f5fd54d65ce0",
+      "item": {
+        "type": "paragraph",
+        "id": "6434f5fd54d65ce0",
+        "text": "It was right. I had coded the test of the incremented result backwards. Where I skip the skip if not zero (CDC NZ instruction) I had coded a jump on zero (CDC ZR instruction) by mistake. "
+      },
+      "date": 1378059942824
+    },
+    {
+      "type": "edit",
+      "id": "70c66e7400db2d81",
+      "item": {
+        "type": "paragraph",
+        "id": "70c66e7400db2d81",
+        "text": "I loaded DEC's PAL assembler into my simulator and tried to use it without success. My simulator had a bug. It was as if there were a real PDP-8 with a bug and I had simulated it."
+      },
+      "date": 1378059977272
+    },
+    {
+      "type": "edit",
+      "id": "22842851c363ad8b",
+      "item": {
+        "type": "paragraph",
+        "id": "22842851c363ad8b",
+        "text": "I borrowed the hardware diagnostics tape from a friend who maintained real PDP-8s for the university. When I ran this on my simulator the diagnostic identified a malfunctioning ISZ instruction."
+      },
+      "date": 1378060078867
+    },
+    {
+      "type": "edit",
+      "id": "6434f5fd54d65ce0",
+      "item": {
+        "type": "paragraph",
+        "id": "6434f5fd54d65ce0",
+        "text": "It was right. I had coded the test of the incremented result backwards. Where I skip the skip if not zero (CDC NZ instruction) I had coded a jump on zero (CDC ZR instruction) by mistake. I'd been tripped up by the double-negative. To skip on zero I needed to jump on non-zero, thereby skipping the code that skipped."
+      },
+      "date": 1378060224520
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "62b2215feca6e771",
+        "text": ""
+      },
+      "id": "62b2215feca6e771",
+      "type": "add",
+      "after": "6434f5fd54d65ce0",
+      "date": 1378060382794
+    },
+    {
+      "type": "edit",
+      "id": "62b2215feca6e771",
+      "item": {
+        "type": "paragraph",
+        "id": "62b2215feca6e771",
+        "text": "I found my only bug. I was proud to have written something of this complexity while only making one mistake. I was also proud to have found it using software meant to test hardware, not my software."
+      },
+      "date": 1378060588541
+    },
+    {
+      "type": "edit",
+      "id": "c10be7999a8c8dc9",
+      "item": {
+        "type": "paragraph",
+        "id": "c10be7999a8c8dc9",
+        "text": "There were only eight instructions to simulate. I wrote seven of them in assembly language and one more in Fortran."
+      },
+      "date": 1378060903166
+    },
+    {
+      "type": "edit",
+      "id": "c10be7999a8c8dc9",
+      "item": {
+        "type": "paragraph",
+        "id": "c10be7999a8c8dc9",
+        "text": "There were only eight instructions to simulate. I wrote seven of them in assembly language and one more in Fortran, the I/O transfer instruction (IOT)."
+      },
+      "date": 1378060933626
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "15c3099c1b954966",
+        "text": ""
+      },
+      "id": "15c3099c1b954966",
+      "type": "add",
+      "after": "62b2215feca6e771",
+      "date": 1378063035246
+    },
+    {
+      "type": "edit",
+      "id": "15c3099c1b954966",
+      "item": {
+        "type": "paragraph",
+        "id": "15c3099c1b954966",
+        "text": "I used this simulator to develop a [[Morse Transceiver]] application over a month with testing on real hardware once a week."
+      },
+      "date": 1378063113968
+    },
+    {
+      "type": "fork",
+      "site": "code.fed.wiki.org",
+      "date": 1674824056055
+    }
+  ]
+}
