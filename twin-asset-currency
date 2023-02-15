@@ -1,0 +1,755 @@
+{
+  "title": "Twin Asset Currency",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "9534a70b9ed60b29",
+      "text": "The Assets plugin will report the presence of duplicated files in twin locations based on the fork history in the journal pages within which it resides. We propose that this should indicate which files are older, newer or the same as those on the origin."
+    },
+    {
+      "type": "paragraph",
+      "id": "2c95a2b2e3889362",
+      "text": "Here there is one file that might be usefully forked as it has a newer version in the remote site."
+    },
+    {
+      "type": "html",
+      "id": "966d0ccbc529e288",
+      "text": "<div style=\"background-color:#eee; padding:8px;\">\n<dl style=\"margin:0;color:gray\">\n<dt><img width=\"12\" src=\"http://seattle.fed.wiki/favicon.png\"> seattle.fed.wiki</dt>\n<dd style=\"margin:8px;\">\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5696.jpg\">IMG_5696.jpg</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5719.jpg\">IMG_5719.jpg</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5720.jpg\">IMG_5720.jpg</a></span> newer<br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5722.jpg\">IMG_5722.jpg</a></span> same<br>\n\n</dd>\n\n<dt><img width=\"12\" src=\"http://found.ward.bay.wiki.org/favicon.png\"> found.ward.bay.wiki.org</dt>\n<dd style=\"margin:8px;\">\n\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5720.jpg\">IMG_5720.jpg</a> older</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5722.jpg\">IMG_5722.jpg</a> same</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5604.jpg\">IMG_5604.jpg</a></span><br>\n\n</dd></dl>\n\n<center><button class=\"upload\">upload</button></center>\n</div>\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "79a26c00924ca42a",
+      "text": "Comparison will be against metadata from files on the origin. No judgement will be passed on files not duplicated."
+    },
+    {
+      "type": "paragraph",
+      "id": "91652b66b5bebf3b",
+      "text": "We could consider creating hover logic that would quote more details like actual dates and sizes for any file listed."
+    },
+    {
+      "type": "markdown",
+      "id": "a7e7b8271c4ce921",
+      "text": "# Request"
+    },
+    {
+      "type": "paragraph",
+      "id": "6412330c3cefe35e",
+      "text": "A server-side component provides a file list for any known asset folder. No mechanism other than convention provides for discovery of folders."
+    },
+    {
+      "type": "code",
+      "id": "c230952cd6736629",
+      "text": "/plugin/assets/list?assets=<folder>"
+    },
+    {
+      "type": "code",
+      "id": "9eee404587298616",
+      "text": "{\"error\":null,\"files\":[<filenames>, ...]}"
+    },
+    {
+      "type": "paragraph",
+      "id": "5baec3d37d425402",
+      "text": "Plugins from independently managed sites will expect this much to work if any version of Assets plugin has been installed. There are other users of this api so any change should be upward compatible."
+    },
+    {
+      "type": "paragraph",
+      "id": "02f836c1626248e1",
+      "text": "Note: The wiki-server can serve from an assets folder even if the Assets plugin has not been installed."
+    },
+    {
+      "type": "paragraph",
+      "id": "a07b8f7ac3d7972c",
+      "text": "The simplest extension would be to report a parallel array of metadata if this were available from the installed plugin."
+    },
+    {
+      "type": "code",
+      "id": "3236a772b99e9f43",
+      "text": "\"metadata\":[\n  {\n    \"created\":<epoch>,\n    \"modified\":<epoch>,\n    \"size\":<bytes>\n  }, ...\n]"
+    },
+    {
+      "type": "markdown",
+      "id": "e372789663365884",
+      "text": "# Implementation"
+    },
+    {
+      "type": "paragraph",
+      "id": "220556c875f53d96",
+      "text": "The server-side component adds a route to the wiki-server app and handles all requests for assets for the origin. Constructing the parallel arrays might require some adjustment of async calling sequence but the require stat for metadata appears in place. [https://github.com/fedwiki/wiki-plugin-assets/blob/4a55426665d59d018954afa4874a0f2e2f17d046/server/server.coffee#L18-L29 github]"
+    },
+    {
+      "type": "paragraph",
+      "id": "5d2517b64ba68199",
+      "text": "The client-side changes will be more extensive. Emit iterates over the contexts sequentially not expecting to make comparisons. A better sequence would be to fetch all, annotate, and then report. [https://github.com/fedwiki/wiki-plugin-assets/blob/4a55426665d59d018954afa4874a0f2e2f17d046/server/server.coffee#L18-L29 github]`"
+    },
+    {
+      "type": "markdown",
+      "id": "7816617281f3a693",
+      "text": "# Limitation"
+    },
+    {
+      "type": "paragraph",
+      "id": "5daf0bead6f399b4",
+      "text": "Upon upload, a file marked older will become newer since the dates compared will be filesystem dates on the respective servers. This will be true even if file chosen to upload is an old and obsolete version of the file."
+    },
+    {
+      "type": "paragraph",
+      "id": "3443cf327b7d9375",
+      "text": "A file forked should be timestamped to match the remote site using the utime system call. Only this way will they ever be reported as same. Current time will have to be used if the remote site lacks metadata."
+    },
+    {
+      "type": "paragraph",
+      "id": "004c527bffe73aa1",
+      "text": "An application that expects more reliable provenance should embed reliable dates into files and the fetch the files to read them. For example, see the Sofi administrator rollup. [http://sofi.dojo.fed.wiki/view/sofi-administration/view/administrator-assessment wiki]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Twin Asset Currency",
+        "story": []
+      },
+      "date": 1632599728862
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9534a70b9ed60b29"
+      },
+      "id": "9534a70b9ed60b29",
+      "type": "add",
+      "date": 1632599735390
+    },
+    {
+      "type": "edit",
+      "id": "9534a70b9ed60b29",
+      "item": {
+        "type": "paragraph",
+        "id": "9534a70b9ed60b29",
+        "text": "The Assets plugin will report the presence of duplicated files in twin locations based on the fork history in the journal pages within which it resides. We propose that this should indicate which files are older, newer or the same as those on the origin."
+      },
+      "date": 1632599929594
+    },
+    {
+      "type": "add",
+      "id": "79a26c00924ca42a",
+      "item": {
+        "type": "paragraph",
+        "id": "79a26c00924ca42a",
+        "text": "Comparison will be against metadata from files on the origin. No judgement will be passed on files not duplicated."
+      },
+      "after": "9534a70b9ed60b29",
+      "date": 1632600049037
+    },
+    {
+      "type": "add",
+      "id": "91652b66b5bebf3b",
+      "item": {
+        "type": "paragraph",
+        "id": "91652b66b5bebf3b",
+        "text": "We could consider creating hover logic that would quote more details like actual dates and sizes for any file listed."
+      },
+      "after": "79a26c00924ca42a",
+      "date": 1632600143602
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a7e7b8271c4ce921"
+      },
+      "id": "a7e7b8271c4ce921",
+      "type": "add",
+      "after": "91652b66b5bebf3b",
+      "date": 1632600174523
+    },
+    {
+      "type": "edit",
+      "id": "a7e7b8271c4ce921",
+      "item": {
+        "type": "markdown",
+        "id": "a7e7b8271c4ce921",
+        "text": "# Request"
+      },
+      "date": 1632600183345
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6412330c3cefe35e"
+      },
+      "id": "6412330c3cefe35e",
+      "type": "add",
+      "after": "a7e7b8271c4ce921",
+      "date": 1632600185296
+    },
+    {
+      "type": "edit",
+      "id": "6412330c3cefe35e",
+      "item": {
+        "type": "paragraph",
+        "id": "6412330c3cefe35e",
+        "text": "A server-side component provides a file list for any known asset folder. No mechanism other than convention provides for discovery of folders."
+      },
+      "date": 1632600304995
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c230952cd6736629"
+      },
+      "id": "c230952cd6736629",
+      "type": "add",
+      "after": "6412330c3cefe35e",
+      "date": 1632600311945
+    },
+    {
+      "type": "edit",
+      "id": "c230952cd6736629",
+      "item": {
+        "type": "code",
+        "id": "c230952cd6736629",
+        "text": "http"
+      },
+      "date": 1632600318261
+    },
+    {
+      "type": "edit",
+      "id": "c230952cd6736629",
+      "item": {
+        "type": "code",
+        "id": "c230952cd6736629",
+        "text": "/plugin/assets/list?assets=<folder>"
+      },
+      "date": 1632600372014
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9eee404587298616"
+      },
+      "id": "9eee404587298616",
+      "type": "add",
+      "after": "c230952cd6736629",
+      "date": 1632600428855
+    },
+    {
+      "type": "edit",
+      "id": "9eee404587298616",
+      "item": {
+        "type": "code",
+        "id": "9eee404587298616",
+        "text": "{\"error\":null,\"files\":[<filenames>]}"
+      },
+      "date": 1632600449331
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5baec3d37d425402"
+      },
+      "id": "5baec3d37d425402",
+      "type": "add",
+      "after": "9eee404587298616",
+      "date": 1632600553855
+    },
+    {
+      "type": "edit",
+      "id": "5baec3d37d425402",
+      "item": {
+        "type": "paragraph",
+        "id": "5baec3d37d425402",
+        "text": "Plugins from independently managed sites will expect this much to work if any version of Assets plugin has been installed. "
+      },
+      "date": 1632600743426
+    },
+    {
+      "type": "add",
+      "id": "02f836c1626248e1",
+      "item": {
+        "type": "paragraph",
+        "id": "02f836c1626248e1",
+        "text": "Note: The wiki-server can serve from an assets folder even if the Assets plugin has not been installed."
+      },
+      "after": "5baec3d37d425402",
+      "date": 1632600761969
+    },
+    {
+      "type": "edit",
+      "id": "5baec3d37d425402",
+      "item": {
+        "type": "paragraph",
+        "id": "5baec3d37d425402",
+        "text": "Plugins from independently managed sites will expect this much to work if any version of Assets plugin has been installed. There are other users of this api so any change should be upward compatible."
+      },
+      "date": 1632600797503
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a07b8f7ac3d7972c"
+      },
+      "id": "a07b8f7ac3d7972c",
+      "type": "add",
+      "after": "02f836c1626248e1",
+      "date": 1632600952108
+    },
+    {
+      "type": "edit",
+      "id": "a07b8f7ac3d7972c",
+      "item": {
+        "type": "paragraph",
+        "id": "a07b8f7ac3d7972c",
+        "text": "The simplest extension would be to report a parallel array of metadata if this was available from the installed plugin."
+      },
+      "date": 1632601012134
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3236a772b99e9f43"
+      },
+      "id": "3236a772b99e9f43",
+      "type": "add",
+      "after": "a07b8f7ac3d7972c",
+      "date": 1632601014588
+    },
+    {
+      "type": "edit",
+      "id": "3236a772b99e9f43",
+      "item": {
+        "type": "code",
+        "id": "3236a772b99e9f43",
+        "text": "\"metadata\":[\n  {\"created\":epoch, \"modified\":epoch, \"size\":bytes},\n  ...\n]"
+      },
+      "date": 1632601158531
+    },
+    {
+      "type": "edit",
+      "id": "9eee404587298616",
+      "item": {
+        "type": "code",
+        "id": "9eee404587298616",
+        "text": "{\"error\":null,\"files\":[<filenames>, ...]}"
+      },
+      "date": 1632601168801
+    },
+    {
+      "type": "edit",
+      "id": "3236a772b99e9f43",
+      "item": {
+        "type": "code",
+        "id": "3236a772b99e9f43",
+        "text": "\"metadata\":[\n  {\n    \"created\":<epoch>,\n    \"modified\":<epoch>,\n    \"size\":<bytes>\n  }, ...\n]"
+      },
+      "date": 1632601269016
+    },
+    {
+      "type": "edit",
+      "id": "a07b8f7ac3d7972c",
+      "item": {
+        "type": "paragraph",
+        "id": "a07b8f7ac3d7972c",
+        "text": "The simplest extension would be to report a parallel array of metadata if this were available from the installed plugin."
+      },
+      "date": 1632601292049
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "966d0ccbc529e288"
+      },
+      "id": "966d0ccbc529e288",
+      "type": "add",
+      "after": "3236a772b99e9f43",
+      "date": 1632602215115
+    },
+    {
+      "type": "edit",
+      "id": "966d0ccbc529e288",
+      "item": {
+        "type": "html",
+        "id": "966d0ccbc529e288",
+        "text": "<dl style=\"margin:0;color:gray\"><dt><img width=\"12\" src=\"//seattle.fed.wiki/favicon.png\"> seattle.fed.wiki</dt>\n<dd style=\"margin:8px;\">\n<span><button class=\"copy\">⚑</button> <a href=\"IMG_5696.jpg\">IMG_5696.jpg</a></span><br>\n<span><button class=\"copy\">⚑</button> <a href=\"IMG_5719.JPG\">IMG_5719.JPG</a></span><br>\n<span><button class=\"copy\">⚑</button> <a href=\"IMG_5720.JPG\">IMG_5720.JPG</a></span> older<br>\n<span><button class=\"copy\">⚑</button> <a href=\"IMG_5722.JPG\">IMG_5722.JPG</a></span> same<br>\n\n</dd>\n\n<dt><img width=\"12\" src=\"/favicon.png\"> found.ward.bay.wiki.org</dt>\n<dd style=\"margin:8px;\">\n\n<span><button class=\"delete\">✕</button> <a href=\"IMG_5720.JPG\">IMG_5720.JPG</a> newer</span><br>\n<span><button class=\"delete\">✕</button> <a href=\"IMG_f722.JPG\">IMG_f722.JPG</a> same</span><br>\n<span><button class=\"delete\">✕</button> <a href=\"IMG_5604.JPG\">IMG_5604.JPG</a></span><br>\n<span><button class=\"delete\">✕</button> <a href=\"IMG_5605.JPG\">IMG_5605.JPG</a></span><br>\n<span><button class=\"delete\">✕</button> <a href=\"IMG_5606.JPG\">IMG_5606.JPG</a></span>\n\n</dd></dl>\n  <div style=\"background-color:#ddd;\" class=\"progress-bar\" role=\"progressbar\"></div>\n<center><button class=\"upload\">upload</button></center>\n<input style=\"display: none;\" type=\"file\" name=\"uploads[]\" multiple=\"multiple\">"
+      },
+      "date": 1632602218871
+    },
+    {
+      "type": "edit",
+      "id": "966d0ccbc529e288",
+      "item": {
+        "type": "html",
+        "id": "966d0ccbc529e288",
+        "text": "\n<dl style=\"margin:0;color:gray\"><dt><img width=\"12\" src=\"http://seattle.fed.wiki/favicon.png\"> seattle.fed.wiki</dt>\n<dd style=\"margin:8px;\">\n<span><button class=\"copy\">⚑</button> <a href=\"IMG_5696.jpg\">IMG_5696.jpg</a></span><br>\n<span><button class=\"copy\">⚑</button> <a href=\"IMG_5719.JPG\">IMG_5719.JPG</a></span><br>\n<span><button class=\"copy\">⚑</button> <a href=\"IMG_5720.JPG\">IMG_5720.JPG</a></span> older<br>\n<span><button class=\"copy\">⚑</button> <a href=\"IMG_5722.JPG\">IMG_5722.JPG</a></span> same<br>\n\n</dd>\n\n<dt><img width=\"12\" src=\"http://found.ward.bay.wiki.org/favicon.png\"> found.ward.bay.wiki.org</dt>\n<dd style=\"margin:8px;\">\n\n<span><button class=\"delete\">✕</button> <a href=\"IMG_5720.JPG\">IMG_5720.JPG</a> newer</span><br>\n<span><button class=\"delete\">✕</button> <a href=\"IMG_f722.JPG\">IMG_f722.JPG</a> same</span><br>\n<span><button class=\"delete\">✕</button> <a href=\"IMG_5604.JPG\">IMG_5604.JPG</a></span><br>\n<span><button class=\"delete\">✕</button> <a href=\"IMG_5605.JPG\">IMG_5605.JPG</a></span><br>\n<span><button class=\"delete\">✕</button> <a href=\"IMG_5606.JPG\">IMG_5606.JPG</a></span>\n\n</dd></dl>\n\n<center><button class=\"upload\">upload</button></center>\n\n"
+      },
+      "date": 1632602389153
+    },
+    {
+      "type": "edit",
+      "id": "966d0ccbc529e288",
+      "item": {
+        "type": "html",
+        "id": "966d0ccbc529e288",
+        "text": "\n<dl style=\"margin:0;color:gray\"><dt><img width=\"12\" src=\"http://seattle.fed.wiki/favicon.png\"> seattle.fed.wiki</dt>\n<dd style=\"margin:8px;\">\n<span><button class=\"copy\">⚑</button> <a href=\"#IMG_5696.jpg\">IMG_5696.jpg</a></span><br>\n<span><button class=\"copy\">⚑</button> <a href=\"#IMG_5719.JPG\">IMG_5719.JPG</a></span><br>\n<span><button class=\"copy\">⚑</button> <a href=\"#IMG_5720.JPG\">IMG_5720.JPG</a></span> older<br>\n<span><button class=\"copy\">⚑</button> <a href=\"#IMG_5722.JPG\">IMG_5722.JPG</a></span> same<br>\n\n</dd>\n\n<dt><img width=\"12\" src=\"http://found.ward.bay.wiki.org/favicon.png\"> found.ward.bay.wiki.org</dt>\n<dd style=\"margin:8px;\">\n\n<span><button class=\"delete\">✕</button> <a href=\"#IMG_5720.JPG\">IMG_5720.JPG</a> newer</span><br>\n<span><button class=\"delete\">✕</button> <a href=\"#IMG_5722.JPG\">IMG_f722.JPG</a> same</span><br>\n<span><button class=\"delete\">✕</button> <a href=\"#IMG_5604.JPG\">IMG_5604.JPG</a></span><br>\n<span><button class=\"delete\">✕</button> <a href=\"#IMG_5605.JPG\">IMG_5605.JPG</a></span><br>\n<span><button class=\"delete\">✕</button> <a href=\"#IMG_5606.JPG\">IMG_5606.JPG</a></span>\n\n</dd></dl>\n\n<center><button class=\"upload\">upload</button></center>\n\n"
+      },
+      "date": 1632602489132
+    },
+    {
+      "type": "edit",
+      "id": "966d0ccbc529e288",
+      "item": {
+        "type": "html",
+        "id": "966d0ccbc529e288",
+        "text": "\n<dl style=\"margin:0;color:gray\"><dt><img width=\"12\" src=\"http://seattle.fed.wiki/favicon.png\"> seattle.fed.wiki</dt>\n<dd style=\"margin:8px;\">\n<span><button>⚑</button> <a color=blue href=\"#IMG_5696.jpg\">IMG_5696.jpg</a></span><br>\n<span><button>⚑</button> <a color=blue href=\"#IMG_5719.JPG\">IMG_5719.JPG</a></span><br>\n<span><button>⚑</button> <a color=blue href=\"#IMG_5720.JPG\">IMG_5720.JPG</a></span> older<br>\n<span><button>⚑</button> <a color=blue href=\"#IMG_5722.JPG\">IMG_5722.JPG</a></span> same<br>\n\n</dd>\n\n<dt><img width=\"12\" src=\"http://found.ward.bay.wiki.org/favicon.png\"> found.ward.bay.wiki.org</dt>\n<dd style=\"margin:8px;\">\n\n<span><button>✕</button> <a color=blue href=\"#IMG_5720.JPG\">IMG_5720.JPG</a> newer</span><br>\n<span><button>✕</button> <a color=blue href=\"#IMG_5722.JPG\">IMG_5722.JPG</a> same</span><br>\n<span><button>✕</button> <a color=blue href=\"#IMG_5604.JPG\">IMG_5604.JPG</a></span><br>\n<span><button>✕</button> <a color=blue href=\"#IMG_5605.JPG\">IMG_5605.JPG</a></span><br>\n<span><button>✕</button> <a color=blue href=\"#IMG_5606.JPG\">IMG_5606.JPG</a></span>\n\n</dd></dl>\n\n<center><button class=\"upload\">upload</button></center>\n\n"
+      },
+      "date": 1632602614738
+    },
+    {
+      "type": "edit",
+      "id": "966d0ccbc529e288",
+      "item": {
+        "type": "html",
+        "id": "966d0ccbc529e288",
+        "text": "\n<dl style=\"margin:0;color:gray\">\n<dt><img width=\"12\" src=\"http://seattle.fed.wiki/favicon.png\"> seattle.fed.wiki</dt>\n<dd style=\"margin:8px;\">\n<span><button>⚑</button> <a style=\"color:blue\" href=\"#IMG_5696.jpg\">IMG_5696.jpg</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"#IMG_5719.JPG\">IMG_5719.JPG</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"#IMG_5720.JPG\">IMG_5720.JPG</a></span> older<br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"#IMG_5722.JPG\">IMG_5722.JPG</a></span> same<br>\n\n</dd>\n\n<dt><img width=\"12\" src=\"http://found.ward.bay.wiki.org/favicon.png\"> found.ward.bay.wiki.org</dt>\n<dd style=\"margin:8px;\">\n\n<span><button>✕</button> <a style=\"color:blue\" href=\"#IMG_5720.JPG\">IMG_5720.JPG</a> newer</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"#IMG_5722.JPG\">IMG_5722.JPG</a> same</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"#IMG_5604.JPG\">IMG_5604.JPG</a></span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"#IMG_5605.JPG\">IMG_5605.JPG</a></span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"#IMG_5606.JPG\">IMG_5606.JPG</a></span>\n\n</dd></dl>\n\n<center><button class=\"upload\">upload</button></center>\n\n"
+      },
+      "date": 1632602847308
+    },
+    {
+      "type": "edit",
+      "id": "966d0ccbc529e288",
+      "item": {
+        "type": "html",
+        "id": "966d0ccbc529e288",
+        "text": "<div style=\"background-color:gray\">\n<dl style=\"margin:0;color:gray\">\n<dt><img width=\"12\" src=\"http://seattle.fed.wiki/favicon.png\"> seattle.fed.wiki</dt>\n<dd style=\"margin:8px;\">\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5696.jpg\">IMG_5696.jpg</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5719.jpg\">IMG_5719.jpg</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5720.jpg\">IMG_5720.jpg</a></span> older<br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5722.jpg\">IMG_5722.jpg</a></span> same<br>\n\n</dd>\n\n<dt><img width=\"12\" src=\"http://found.ward.bay.wiki.org/favicon.png\"> found.ward.bay.wiki.org</dt>\n<dd style=\"margin:8px;\">\n\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5720.jpg\">IMG_5720.jpg</a> newer</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5722.jpg\">IMG_5722.jpg</a> same</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5604.jpg\">IMG_5604.jpg</a></span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5605.jpg\">IMG_5605.jpg</a></span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5606.jpg\">IMG_5606.jpg</a></span>\n\n</dd></dl>\n\n<center><button class=\"upload\">upload</button></center>\n</div>\n"
+      },
+      "date": 1632603003156
+    },
+    {
+      "type": "edit",
+      "id": "966d0ccbc529e288",
+      "item": {
+        "type": "html",
+        "id": "966d0ccbc529e288",
+        "text": "<div style=\"background-color:#ccc\">\n<dl style=\"margin:0;color:gray\">\n<dt><img width=\"12\" src=\"http://seattle.fed.wiki/favicon.png\"> seattle.fed.wiki</dt>\n<dd style=\"margin:8px;\">\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5696.jpg\">IMG_5696.jpg</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5719.jpg\">IMG_5719.jpg</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5720.jpg\">IMG_5720.jpg</a></span> older<br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5722.jpg\">IMG_5722.jpg</a></span> same<br>\n\n</dd>\n\n<dt><img width=\"12\" src=\"http://found.ward.bay.wiki.org/favicon.png\"> found.ward.bay.wiki.org</dt>\n<dd style=\"margin:8px;\">\n\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5720.jpg\">IMG_5720.jpg</a> newer</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5722.jpg\">IMG_5722.jpg</a> same</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5604.jpg\">IMG_5604.jpg</a></span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5605.jpg\">IMG_5605.jpg</a></span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5606.jpg\">IMG_5606.jpg</a></span>\n\n</dd></dl>\n\n<center><button class=\"upload\">upload</button></center>\n</div>\n"
+      },
+      "date": 1632603041288
+    },
+    {
+      "type": "edit",
+      "id": "966d0ccbc529e288",
+      "item": {
+        "type": "html",
+        "id": "966d0ccbc529e288",
+        "text": "<div style=\"background-color:#eee; padding:4px;\">\n<dl style=\"margin:0;color:gray\">\n<dt><img width=\"12\" src=\"http://seattle.fed.wiki/favicon.png\"> seattle.fed.wiki</dt>\n<dd style=\"margin:8px;\">\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5696.jpg\">IMG_5696.jpg</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5719.jpg\">IMG_5719.jpg</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5720.jpg\">IMG_5720.jpg</a></span> older<br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5722.jpg\">IMG_5722.jpg</a></span> same<br>\n\n</dd>\n\n<dt><img width=\"12\" src=\"http://found.ward.bay.wiki.org/favicon.png\"> found.ward.bay.wiki.org</dt>\n<dd style=\"margin:8px;\">\n\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5720.jpg\">IMG_5720.jpg</a> newer</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5722.jpg\">IMG_5722.jpg</a> same</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5604.jpg\">IMG_5604.jpg</a></span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5605.jpg\">IMG_5605.jpg</a></span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5606.jpg\">IMG_5606.jpg</a></span>\n\n</dd></dl>\n\n<center><button class=\"upload\">upload</button></center>\n</div>\n"
+      },
+      "date": 1632603077357
+    },
+    {
+      "type": "edit",
+      "id": "966d0ccbc529e288",
+      "item": {
+        "type": "html",
+        "id": "966d0ccbc529e288",
+        "text": "<div style=\"background-color:#eee; padding:8px;\">\n<dl style=\"margin:0;color:gray\">\n<dt><img width=\"12\" src=\"http://seattle.fed.wiki/favicon.png\"> seattle.fed.wiki</dt>\n<dd style=\"margin:8px;\">\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5696.jpg\">IMG_5696.jpg</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5719.jpg\">IMG_5719.jpg</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5720.jpg\">IMG_5720.jpg</a></span> older<br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5722.jpg\">IMG_5722.jpg</a></span> same<br>\n\n</dd>\n\n<dt><img width=\"12\" src=\"http://found.ward.bay.wiki.org/favicon.png\"> found.ward.bay.wiki.org</dt>\n<dd style=\"margin:8px;\">\n\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5720.jpg\">IMG_5720.jpg</a> newer</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5722.jpg\">IMG_5722.jpg</a> same</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5604.jpg\">IMG_5604.jpg</a></span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5605.jpg\">IMG_5605.jpg</a></span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5606.jpg\">IMG_5606.jpg</a></span>\n\n</dd></dl>\n\n<center><button class=\"upload\">upload</button></center>\n</div>\n"
+      },
+      "date": 1632603110970
+    },
+    {
+      "type": "edit",
+      "id": "966d0ccbc529e288",
+      "item": {
+        "type": "html",
+        "id": "966d0ccbc529e288",
+        "text": "<div style=\"background-color:#eee; padding:8px;\">\n<dl style=\"margin:0;color:gray\">\n<dt><img width=\"12\" src=\"http://seattle.fed.wiki/favicon.png\"> seattle.fed.wiki</dt>\n<dd style=\"margin:8px;\">\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5696.jpg\">IMG_5696.jpg</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5719.jpg\">IMG_5719.jpg</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5720.jpg\">IMG_5720.jpg</a></span> older<br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5722.jpg\">IMG_5722.jpg</a></span> same<br>\n\n</dd>\n\n<dt><img width=\"12\" src=\"http://found.ward.bay.wiki.org/favicon.png\"> found.ward.bay.wiki.org</dt>\n<dd style=\"margin:8px;\">\n\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5720.jpg\">IMG_5720.jpg</a> newer</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5722.jpg\">IMG_5722.jpg</a> same</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5604.jpg\">IMG_5604.jpg</a></span><br>\n\n</dd></dl>\n\n<center><button class=\"upload\">upload</button></center>\n</div>\n"
+      },
+      "date": 1632603195681
+    },
+    {
+      "id": "966d0ccbc529e288",
+      "type": "move",
+      "order": [
+        "9534a70b9ed60b29",
+        "966d0ccbc529e288",
+        "79a26c00924ca42a",
+        "91652b66b5bebf3b",
+        "a7e7b8271c4ce921",
+        "6412330c3cefe35e",
+        "c230952cd6736629",
+        "9eee404587298616",
+        "5baec3d37d425402",
+        "02f836c1626248e1",
+        "a07b8f7ac3d7972c",
+        "3236a772b99e9f43"
+      ],
+      "date": 1632603230649
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e372789663365884"
+      },
+      "id": "e372789663365884",
+      "type": "add",
+      "after": "3236a772b99e9f43",
+      "date": 1632603572443
+    },
+    {
+      "type": "edit",
+      "id": "e372789663365884",
+      "item": {
+        "type": "markdown",
+        "id": "e372789663365884",
+        "text": "# Implementation"
+      },
+      "date": 1632603583489
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "220556c875f53d96"
+      },
+      "id": "220556c875f53d96",
+      "type": "add",
+      "after": "e372789663365884",
+      "date": 1632603585521
+    },
+    {
+      "type": "edit",
+      "id": "220556c875f53d96",
+      "item": {
+        "type": "paragraph",
+        "id": "220556c875f53d96",
+        "text": "The server-side component adds a route to the wiki-server app and handles all requests for assets for the origin. [https://github.com/fedwiki/wiki-plugin-assets/blob/4a55426665d59d018954afa4874a0f2e2f17d046/server/server.coffee#L18-L29 github]"
+      },
+      "date": 1632603710521
+    },
+    {
+      "type": "edit",
+      "id": "220556c875f53d96",
+      "item": {
+        "type": "paragraph",
+        "id": "220556c875f53d96",
+        "text": "The server-side component adds a route to the wiki-server app and handles all requests for assets for the origin. Constructing the parallel arrays might require some adjustment of async calling sequence but the require stat for metadata appears in place. [https://github.com/fedwiki/wiki-plugin-assets/blob/4a55426665d59d018954afa4874a0f2e2f17d046/server/server.coffee#L18-L29 github]"
+      },
+      "date": 1632603827594
+    },
+    {
+      "type": "add",
+      "id": "5d2517b64ba68199",
+      "item": {
+        "type": "paragraph",
+        "id": "5d2517b64ba68199",
+        "text": "The client-side"
+      },
+      "after": "220556c875f53d96",
+      "date": 1632603860234
+    },
+    {
+      "type": "edit",
+      "id": "5d2517b64ba68199",
+      "item": {
+        "type": "paragraph",
+        "id": "5d2517b64ba68199",
+        "text": "The client-side changes could be more extensive. The "
+      },
+      "date": 1632604389406
+    },
+    {
+      "type": "edit",
+      "id": "5d2517b64ba68199",
+      "item": {
+        "type": "paragraph",
+        "id": "5d2517b64ba68199",
+        "text": "The client-side changes could be more extensive. The emit function iterates over all sites in the context sequentially not expecting to make comparisons. [https://github.com/fedwiki/wiki-plugin-assets/blob/4a55426665d59d018954afa4874a0f2e2f17d046/server/server.coffee#L18-L29 github]"
+      },
+      "date": 1632604488570
+    },
+    {
+      "type": "edit",
+      "id": "5d2517b64ba68199",
+      "item": {
+        "type": "paragraph",
+        "id": "5d2517b64ba68199",
+        "text": "The client-side changes could be more extensive. The emit function iterates over all sites in the context sequentially not expecting to make comparisons. [https://github.com/fedwiki/wiki-plugin-assets/blob/4a55426665d59d018954afa4874a0f2e2f17d046/server/server.coffee#L18-L29 github]`"
+      },
+      "date": 1632604507020
+    },
+    {
+      "type": "edit",
+      "id": "5d2517b64ba68199",
+      "item": {
+        "type": "paragraph",
+        "id": "5d2517b64ba68199",
+        "text": "The client-side changes could be more extensive. Emit iterates over the context sequentially not expecting to make comparisons. [https://github.com/fedwiki/wiki-plugin-assets/blob/4a55426665d59d018954afa4874a0f2e2f17d046/server/server.coffee#L18-L29 github]`"
+      },
+      "date": 1632604578442
+    },
+    {
+      "type": "edit",
+      "id": "5d2517b64ba68199",
+      "item": {
+        "type": "paragraph",
+        "id": "5d2517b64ba68199",
+        "text": "The client-side changes will be more extensive. Emit iterates over the contexts sequentially not expecting to make comparisons. A better sequence would be to fetch all, annotate, and then report. [https://github.com/fedwiki/wiki-plugin-assets/blob/4a55426665d59d018954afa4874a0f2e2f17d046/server/server.coffee#L18-L29 github]`"
+      },
+      "date": 1632604798578
+    },
+    {
+      "type": "edit",
+      "id": "966d0ccbc529e288",
+      "item": {
+        "type": "html",
+        "id": "966d0ccbc529e288",
+        "text": "<div style=\"background-color:#eee; padding:8px;\">\n<dl style=\"margin:0;color:gray\">\n<dt><img width=\"12\" src=\"http://seattle.fed.wiki/favicon.png\"> seattle.fed.wiki</dt>\n<dd style=\"margin:8px;\">\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5696.jpg\">IMG_5696.jpg</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5719.jpg\">IMG_5719.jpg</a></span><br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5720.jpg\">IMG_5720.jpg</a></span> newer<br>\n<span><button>⚑</button> <a style=\"color:blue\" href=\"IMG_5722.jpg\">IMG_5722.jpg</a></span> same<br>\n\n</dd>\n\n<dt><img width=\"12\" src=\"http://found.ward.bay.wiki.org/favicon.png\"> found.ward.bay.wiki.org</dt>\n<dd style=\"margin:8px;\">\n\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5720.jpg\">IMG_5720.jpg</a> older</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5722.jpg\">IMG_5722.jpg</a> same</span><br>\n<span><button>✕</button> <a style=\"color:blue\" href=\"IMG_5604.jpg\">IMG_5604.jpg</a></span><br>\n\n</dd></dl>\n\n<center><button class=\"upload\">upload</button></center>\n</div>\n"
+      },
+      "date": 1632604929380
+    },
+    {
+      "type": "add",
+      "id": "2c95a2b2e3889362",
+      "item": {
+        "type": "paragraph",
+        "id": "2c95a2b2e3889362",
+        "text": "Here there is one file that might be usefully forked as it has a newer version in the remote site."
+      },
+      "after": "9534a70b9ed60b29",
+      "date": 1632605064824
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7816617281f3a693"
+      },
+      "id": "7816617281f3a693",
+      "type": "add",
+      "after": "5d2517b64ba68199",
+      "date": 1632605562060
+    },
+    {
+      "type": "edit",
+      "id": "7816617281f3a693",
+      "item": {
+        "type": "markdown",
+        "id": "7816617281f3a693",
+        "text": "# Limitation"
+      },
+      "date": 1632605578490
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5daf0bead6f399b4"
+      },
+      "id": "5daf0bead6f399b4",
+      "type": "add",
+      "after": "7816617281f3a693",
+      "date": 1632605580814
+    },
+    {
+      "type": "edit",
+      "id": "5daf0bead6f399b4",
+      "item": {
+        "type": "paragraph",
+        "id": "5daf0bead6f399b4",
+        "text": "Upon upload file marked older will become newer since the dates compared will be filesystem dates on the servers. This will be true even if file chosen to upload is an old and obsolete version of the file in question."
+      },
+      "date": 1632605756620
+    },
+    {
+      "type": "edit",
+      "id": "5daf0bead6f399b4",
+      "item": {
+        "type": "paragraph",
+        "id": "5daf0bead6f399b4",
+        "text": "Upon upload, file marked older will become newer since the dates compared will be filesystem dates on the servers. This will be true even if file chosen to upload is an old and obsolete version of the file in question."
+      },
+      "date": 1632605766567
+    },
+    {
+      "type": "edit",
+      "id": "5daf0bead6f399b4",
+      "item": {
+        "type": "paragraph",
+        "id": "5daf0bead6f399b4",
+        "text": "Upon upload, a file marked older will become newer since the dates compared will be filesystem dates on the servers. This will be true even if file chosen to upload is an old and obsolete version of the file in question."
+      },
+      "date": 1632605775886
+    },
+    {
+      "type": "edit",
+      "id": "5daf0bead6f399b4",
+      "item": {
+        "type": "paragraph",
+        "id": "5daf0bead6f399b4",
+        "text": "Upon upload, a file marked older will become newer since the dates compared will be filesystem dates on the respective servers. This will be true even if file chosen to upload is an old and obsolete version of the file in question."
+      },
+      "date": 1632605796396
+    },
+    {
+      "type": "edit",
+      "id": "5daf0bead6f399b4",
+      "item": {
+        "type": "paragraph",
+        "id": "5daf0bead6f399b4",
+        "text": "Upon upload, a file marked older will become newer since the dates compared will be filesystem dates on the respective servers. This will be true even if file chosen to upload is an old and obsolete version of the file."
+      },
+      "date": 1632605812409
+    },
+    {
+      "type": "add",
+      "id": "3443cf327b7d9375",
+      "item": {
+        "type": "paragraph",
+        "id": "3443cf327b7d9375",
+        "text": "A file forked from a remote site should be timestamped to match the remote site using the utime system call. Only this way will they ever be reported as same. Current time will have to be used if the remote site does not report metadata."
+      },
+      "after": "5daf0bead6f399b4",
+      "date": 1632606394434
+    },
+    {
+      "type": "edit",
+      "id": "3443cf327b7d9375",
+      "item": {
+        "type": "paragraph",
+        "id": "3443cf327b7d9375",
+        "text": "A file forked from a remote site should be timestamped to match the remote site using the utime system call. Only this way will they ever be reported as same. Current time will have to be used if the remote site lacks metadata."
+      },
+      "date": 1632606411538
+    },
+    {
+      "type": "edit",
+      "id": "3443cf327b7d9375",
+      "item": {
+        "type": "paragraph",
+        "id": "3443cf327b7d9375",
+        "text": "A file forked should be timestamped to match the remote site using the utime system call. Only this way will they ever be reported as same. Current time will have to be used if the remote site lacks metadata."
+      },
+      "date": 1632606437048
+    },
+    {
+      "type": "add",
+      "id": "004c527bffe73aa1",
+      "item": {
+        "type": "paragraph",
+        "id": "004c527bffe73aa1",
+        "text": "An application that expects more reliable provonance should embed reliable dates into files and the fetch the files to read them. For example, see the Sofi administrator rollup. [http://sofi.dojo.fed.wiki/view/sofi-administration/view/administrator-assessment wiki]"
+      },
+      "after": "3443cf327b7d9375",
+      "date": 1632607014884
+    },
+    {
+      "type": "edit",
+      "id": "004c527bffe73aa1",
+      "item": {
+        "type": "paragraph",
+        "id": "004c527bffe73aa1",
+        "text": "An application that expects more reliable provenance should embed reliable dates into files and the fetch the files to read them. For example, see the Sofi administrator rollup. [http://sofi.dojo.fed.wiki/view/sofi-administration/view/administrator-assessment wiki]"
+      },
+      "date": 1632607030660
+    },
+    {
+      "type": "fork",
+      "site": "ward.asia.wiki.org",
+      "date": 1676009752921
+    }
+  ]
+}
