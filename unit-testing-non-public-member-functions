@@ -1,0 +1,1162 @@
+{
+  "title": "Unit Testing Non Public Member Functions",
+  "story": [
+    {
+      "type": "html",
+      "text": "[[Unit Test]]ing non-public member functions is somewhat tricky in C++ (and, I guess, in Java and other languages, too).",
+      "id": "ec8adc300c30a47247c72696290adb4e"
+    },
+    {
+      "type": "html",
+      "text": "\nIn C++, we have the following options:",
+      "id": "5e45a1148d3a9b7d8b7d5ffe3ac66e46"
+    },
+    {
+      "type": "html",
+      "text": " Make the test class a friend of the class to be tested. This breaks encapsulation and enables fraud (call me paranoid, but clients of the class can define their own 'test class' and access the internals of the class to be tested -- see Lakos [[Large Scale Cpp Software Design]]). Possibly we could use conditional compilation (ugly) to remove the friend declaration in production code. Variation: use conditional compilation to remove the access restrictions.",
+      "id": "904967ac358b7697f0eea23d215bcaf8"
+    },
+    {
+      "type": "html",
+      "text": " Of course, if you define class Foo and declare class [[Foo Test]] to be a friend, and someone on your team writes a (non-test) class called [[Foo Test]] just to frob Foo's internals, this is a <i>management</i> problem.  There are many other ways to subvert the [[Cee Plus Plus]] access controls (via casting, etc.)--all of these are in the category of <i>cheating</i>.  In other words, <i>don't do them</i>.",
+      "id": "a78ecca134e85c55c80c228b7beda529"
+    },
+    {
+      "type": "html",
+      "text": " Create a subclass of the class to be tested for test purposes only. Make all member functions public in the subclass. This is even uglier than option 1 and adds quite some overhead. Apart from that, there are issues with non-virtual functions.",
+      "id": "8d1ad1baaa02d48c9877164e1aa05b56"
+    },
+    {
+      "type": "html",
+      "text": " Delegate the methods to a private class.  The methods would be public for testing of the new class, but would remain private for the use of the existing class.",
+      "id": "440ada059f530092f5e95c40398a7774"
+    },
+    {
+      "type": "html",
+      "text": " Just make everything public, use some other [[Naming Convention]] (like [[Python Language]]) to mark the private bits.  Works, goes a bit against the C++ grain.",
+      "id": "47dfe1db99b190c937bfa52e4c8bb6c7"
+    },
+    {
+      "type": "html",
+      "text": " Write the tests at the level of what is declared public.  After all, if the private method is not invoked from a public method, one does not need it all.",
+      "id": "a99ee30919bb2a0e4a423754a63824b2"
+    },
+    {
+      "type": "html",
+      "text": "\nOne could argue only to unit test public member functions -- this is impractical when you try to unit test classes with complex non-public member functions, such as [[Application Command]] or [[Business Transaction]] objects.",
+      "id": "455ffb15fc473e2fc12d94570bfa8099"
+    },
+    {
+      "type": "html",
+      "text": "\nOption 1 seems to be the easiest solution from an implementation point of view, but friend declarations tend to make me nervous.",
+      "id": "dea677349605a7f84ddcb3590f607449"
+    },
+    {
+      "type": "html",
+      "text": "\nWhat's your opinions/suggestions on this?",
+      "id": "ad8f4be9fe78894d184cea28306c88a7"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Oliver Kamps]]",
+      "id": "74ebb4151afffa1bb5069ce8559183a9"
+    },
+    {
+      "type": "html",
+      "text": "\nThere's actually one more, simpler method for C++ that does not require decorating the class header; in the unit test:",
+      "id": "c6a4dca8edf21f10534a998c00eb38b3"
+    },
+    {
+      "type": "code",
+      "text": " #define protected public\n #define private   public\n #include \"headeroftheclassbeingtested.h\"\n #undef protected\n #undef private",
+      "id": "4c6a2dca70b1b433a435ebb2e44ff1a0"
+    },
+    {
+      "type": "html",
+      "text": "\nand now the entire class is exposed.",
+      "id": "baf5dde1966c8cfdad89579dfda42c84"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Ron Fox]]",
+      "id": "b7ca056d0549d6a5457fbd44e44d8743"
+    },
+    {
+      "type": "html",
+      "text": "\nI'm a [[Unit Test]]s newbie, but I consider private methods to be just that -- private.  [[Unit Test]]s track the public API of a class, not the internals.  At some point, I may need to test protected methods, in which case I'd use a subclass.  I program in Java, so I'd probably use an inner class for the subclass, since the outer class is already a subclass of junit.framework.[[Test Case]].  In C++, you could just use multiple inheritance.",
+      "id": "724034d0340ba1179a9c7fcb6935c66b"
+    },
+    {
+      "type": "html",
+      "text": "<i>Public interfaces of classes may sometimes be too coarse-grained to be unit tested effectively -- for example, we use a variation of the [[Command Pattern]] to implement [[Application Command]] or [[Business Transaction]] classes. Such a class may implement a large chunk of functionality (possibly using layering and inheritance to keep the code organized etc.), but may only have a few public accessors to set and get domain objects and a public execute function. The functions implementing the business logic may very well be private. What would you use the subclass for? To implement the test or to make the functions to be tested accessible to a test class? -- [[Oliver Kamps]]</i>",
+      "id": "53bcd4ff42b9da599f4402ceccd21ec2"
+    },
+    {
+      "type": "html",
+      "text": "\nAs far as friend functions go, if you can't trust your fellow developers not to forge friend functions, maybe that lack of trust is the problem. -- [[John Brewer]]",
+      "id": "370949ce3480802b9ac3bcb1d75027a5"
+    },
+    {
+      "type": "html",
+      "text": "<i>I possibly don't trust them not to get carried away with friend declarations... But I agree, that might be the underlying problem. -- [[Oliver Kamps]]</i>",
+      "id": "65b63a8cb710194acfb60a75aa8a1ca4"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nOliver, I'm not sure I see why <b>friend</b> classes make you so nervous.  Sure somebody could abuse it, but since you are programming in C++, your clients must have access to the header file that declares your class, friends and all.  They could edit your class and add all the friends they wanted, not to mention changing private members to public, and the like. <i>I see your point. --ok</i>",
+      "id": "eb4ed5a239bc23bee36a28e9b677d869"
+    },
+    {
+      "type": "html",
+      "text": "\nPublic, protected, and private are in C++ to protect you from innocent mistakes.  They are not there to protect you from deliberate abuse, nor can they.",
+      "id": "b6aadd36f5b3ef58a39416ead3552745"
+    },
+    {
+      "type": "html",
+      "text": "\nI see the <b>friend</b> solution as simple and clean -- this is exactly the kind of problem that <b>friend</b> is in the language to solve.",
+      "id": "fa25b7dec4dc59640a04443ff1da86d5"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Curtis Bartley]]",
+      "id": "9a7a6a608f358cebec66e791bbcb25f9"
+    },
+    {
+      "type": "html",
+      "text": "\nWould you bother to use conditional compilation to remove friend declarations for test purposes from production code? -- [[Oliver Kamps]]",
+      "id": "5ce8677fa003681f1294a15c0cfb36ce"
+    },
+    {
+      "type": "html",
+      "text": "<i>I would just leave them in, since they don't actually generate any code.  Conditional compilation can be really useful, but it also clutters up the code a lot, so I'm inclined to use it sparingly just on that basis alone.  I would however use it to remove the test classes themselves if (for example) they were declared in the same file as the main class. -- CB</i>",
+      "id": "0315921a783d0deab9a6bb64bbdf99a2"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nYou want to be able to refactor a class's internals without changing the [[Unit Test]] -- it's a bad idea to have to change the class and its test at the same time.  For that reason, don't reach into the class and test its internals. <i>Sometimes you may have to. See above for [[Application Command]] example. --ok</i>",
+      "id": "b0e15d70b34f7fb921620ef6aac6889b"
+    },
+    {
+      "type": "html",
+      "text": "\nFriend functions are generally inferior to alternatives such as Observer or [[Private Interface]].  The big problem is that a friend function or class has access to a class's entire footprint, not just to the parts that you want it to have access to.  [[Private Interface]] let you control exactly what parts of a class are visible to whom.  This makes refactoring the class easier, because you have explicit knowledge of what parts of the class are visible to the outside world. -- [[Wayne Conrad]]",
+      "id": "a57c20d7656be8174382cc625b7e1596"
+    },
+    {
+      "type": "html",
+      "text": "\nThank you for pointing out [[Private Interface]] to me. I agree with you on the problems of friend functions/classes. I can see me using [[Private Interface]] in production code if the only alternative were to use friend declarations, but isn't it too much overhead to implement just for [[Unit Test]]ing? (That's potentially two extra classes and trying to remove it from production code is probably a pain?) -- [[Oliver Kamps]]",
+      "id": "56b0f11e67a1d238963d329f144d5a70"
+    },
+    {
+      "type": "html",
+      "text": "\nIf testing is difficult, it won't be done. [[Do The Simplest Thing That Could Possibly Work]]. For now, I'd suggest to use a friend declaration unless you can think of something better, then later upgrade the code when you learn a better solution. But then again, do you really need to test the non-public member functions? Why are they non-public? Why aren't they being flexed from the public interface? If you're supposed to subclass, subclass and test. -- [[Sunir Shah]]",
+      "id": "e4431c13578d88f09368cb4a9779636a"
+    },
+    {
+      "type": "html",
+      "text": "\nSuppose you have a telecoms billing system. A customer has been in default for a period of time. The business rules dictate the customer's services have to be suspended (e.g., phone lines have to be disconnected) and that the customer won't be able to subscribe to new services until the debts are settled. All these things can be triggered from a single [[Application Command]] object whose public interface may consist only of a setter for the customer number (or a reference to the customer domain object) and an execute function. All other functions implementing the business logic may and should be non-public. This [[Application Command]] would most probably delegate sub-tasks to lower-level [[Application Command]] object whose public interface would also be very small. -- [[Oliver Kamps]]",
+      "id": "2dfc8a82209bc23b18f2035da80ac523"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nFrom [[Who Is Using Junit]]:",
+      "id": "860f42eb3c610cd0fca1467046e025b5"
+    },
+    {
+      "type": "html",
+      "text": "\nWe've found that [[Testing Private Methods]] seems to be of [[Code Smell]]s. [[Testing Private Methods]] smells of debugging. [[Testing Private Methods]] also prevents us from being able to [[Refactor Mercilessly]]. If you [[Listen To The Code]], you learn that [[Methods Should Be Public]]. Therefore, execute the [[Extract Class]] refactoring, have all the former private methods be publicly\naccessible, and test them ruthlessly. You may end up with a reusable abstraction whose responsibilities will grow over time. -- [[Frank Westphal]]",
+      "id": "0b71eb130f2ecbbcf31e15c13b2ab7a6"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nObviously, I wasn't able to made myself understood on the use of the [[Application Command]]. Let me try to both improve that and prove I've done my bit of reading Wiki and Martin Fowler's book: Complex functionality was implemented in big controller classes operating on dumb data objects. We've found that the complex functionality was often implemented in a single [[Long Method]] which we found to be a [[Bad Smell]]. We decided to [[Refactor Mercilessly]] and applied [[Move Method]] to move the [[Long Method]] to a newly created [[Method Object]]. Then we applied [[Extract Method]] several times and created new methods for parts of the functionality of the original [[Long Method]].",
+      "id": "d3ba14e46d0a083a2f971c07d2d68937"
+    },
+    {
+      "type": "html",
+      "text": "\nOr, to make a long story short, the non-public methods don't have any reason to be public. Clients of the [[Application Command]] need to know what happens, but not how it happens. The point of applying [[Gof Command]] is to have a single execute function (plus some accessors to set the receiver etc.) to trigger some behaviour. The non-public functions may just be implementation details, but the public execute function may be too coarse-grained to be [[Unit Test]]ed alone. (Don't think I mentioned that the first time.) -- [[Oliver Kamps]]",
+      "id": "040f607e3260b1eb0d34628826c565b1"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nSo, you're saying you can't possibly extract the details?  Let me elaborate on what I had in mind:",
+      "id": "b06ed823a8ec11108f368031f6c8749a"
+    },
+    {
+      "type": "code",
+      "text": "  public class Application''''''Command {\n  public Application''''''Command(Command''''''Method''''''Object methodObject) {\n  _methodObject = methodObject;\n  }\n  private Command''''''Method''''''Object _methodObject;\n  public void execute() {\n  _methodObject.method1();\n  _methodObject.method2();\n  _methodObject.method3();\n  }\n  }",
+      "id": "24b175eca0fde0a5c63d4b06d5797c5b"
+    },
+    {
+      "type": "html",
+      "text": "\nNow, you should be able to easily write tests for your implementation details since those features will be public member functions on your [[Method Object]]:",
+      "id": "077438332757bf652389c3b66617fd43"
+    },
+    {
+      "type": "code",
+      "text": "  public class Command''''''Method''''''Object''''''Test extends TestCase {\n  public Command''''''Method''''''Object''''''Test(String name) {\n  super(name);\n  }\n  public void testMethod1() {...}\n  public void testMethod2() {...}\n  public void testMethod3() {...}\n  }",
+      "id": "20687ccde878a09cdb3fbcf318c25f92"
+    },
+    {
+      "type": "html",
+      "text": "\nSometimes you have to apply this refactoring recursively, so that you'll end up with [[Lots Of Little Pieces]].  Hope this helps. -- [[Frank Westphal]]",
+      "id": "2914ed483dabb9b3edb470e9e5a62e2d"
+    },
+    {
+      "type": "html",
+      "text": "<i>I posted a variation of this to [[Hiding By Delegating]]. -- [[Dave Harris]]</i>.",
+      "id": "42d6fc8ef777c012b26bd70ef825bfe9"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nNo, I'm saying I possibly can't extract the details. (<i>I'm not being picky here, but I think the location of 'possibly' makes a difference here.</i>) Or, maybe, I don't want to expose the details. method1, method2 and method3 may not be supposed to be called directly in production code, so I don't want to break encapsulation and make them public. What's more, member data of [[Application Command]] is not accessible for [[Command Method Object]], so I might have to duplicate this. IMHO, exposing implementation detail smells a lot more than [[Testing Non Public Methods]]. I can't detect the smell of debugging here. I disagree that [[Testing Non Public Methods]] prevents us from being able to [[Refactor Mercilessly]]. Testing any method makes refactoring this method more difficult or, rather, more expensive, but this is not a good reason not to refactor or not to test. Limiting visibility of a method doesn't affect the number of tests that need to be modified when refactoring this method. Therefore, I can't see that refactoring a non-public method is any more expensive than refactoring a public one.",
+      "id": "d8f70305708bd8bc9548f3e5db43f180"
+    },
+    {
+      "type": "html",
+      "text": "\nSo, even though I disagree with it, your reply was definitely helpful. Thanks. -- [[Oliver Kamps]]",
+      "id": "05b7fec91740a8fe6519d820a2f7a288"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nOliver, you don't have to expose method1, method2 and method3 to the public. Package privacy would be sufficient. For not being able to access [[Application Command]]'s member data, just pass it to your [[Method Object]]. Writing tests will become easier if you make your methods more fine-grained.  Your mileage may vary, though. -- [[Frank Westphal]]",
+      "id": "36c187feb14aa17b566e70846b3e86b2"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nExcept that Oliver is writing in C++, which doesn't have a package-level access.  He's stuck with public, private, protected and friend.",
+      "id": "ff72d9ffba4604ef88c56f54a6227f68"
+    },
+    {
+      "type": "html",
+      "text": "\nBTW, I don't use package visibility at all in my Java code.  I explicitly place my [[Unit Test]]s in a separate package, just to be certain that I'm only testing the public interface. -- [[John Brewer]]",
+      "id": "158e37aa3832bb34a091a4a63ed43e2f"
+    },
+    {
+      "type": "html",
+      "text": "<i>The cost is having to make every class public, even those which you don't intend to be called from outside the package.</i> -- [[Wayne Conrad]]",
+      "id": "98ce5405a1f8151ddad1c31c77f72196"
+    },
+    {
+      "type": "html",
+      "text": "\nWhat exactly is the cost you're speaking of?  What are your fears? -- [[Frank Westphal]]",
+      "id": "dac2ff80a8b6ae03650520cb56424be3"
+    },
+    {
+      "type": "html",
+      "text": "\nI do not like to make classes public unless they are part of the package's API, for the same reasons I do not like to make methods public unless they are part of the class's API:",
+      "id": "ded440f61caa7a878051b1f7c2272d08"
+    },
+    {
+      "type": "html",
+      "text": " <b>Documentation</b>:<br>Having only externally usable classes be 'public' documents which classes are part of the package's API.  If all of the package's classes are public, the programmer has to work hard to figure out which classes are for part of the package's API and which are internal to the package.",
+      "id": "13eba7e1ca059d3d62d17109cf238fa0"
+    },
+    {
+      "type": "html",
+      "text": " <b>Coupling</b>:<br>If all of a package's classes are public, the programmer can use the package's internal classes, either intentionally, or because the programmer guessed wrong about which classes were part of the API.  Coupling to internal classes inhibits refactoring -- you can't eliminate or change an internal class without first discovering whether it has been used by another package.  Also, it is harder to create a package that works if other packages can reach into its internals and mess with them.",
+      "id": "c37dbfe30f9a0ba336a171bb6c56183c"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Wayne Conrad]]",
+      "id": "9941f0258cb9b79a6fa9bfdc390a3883"
+    },
+    {
+      "type": "html",
+      "text": "<i>I don't see the problem. Why would you directly test package-level classes any more than you would test private methods? The unit tests are there to verify that the public behavior of classes - and packages - works as advertised. How it does it, what internals it uses, should not be relevant to such testing. -- [[Russell Gold]]</i>",
+      "id": "face7ac7fe24150319df1b83a1eafbd5"
+    },
+    {
+      "type": "html",
+      "text": "\nRussell, Are you responding to what I wrote, or to this page in general?  I'm in the same camp as you -- only [[Unit Test]] the public methods of a class. -- [[Wayne Conrad]]",
+      "id": "61ba16a3b8e2c20f6c4962a57840cff2"
+    },
+    {
+      "type": "html",
+      "text": "\nI'm curious, are you guys (Wayne and Russell) proposing that private methods shouldn't be tested directly at all, or are you saying only that they shouldn't be \"unit\" tested? -- [[Curtis Bartley]]",
+      "id": "752b455f855fe48cbb4078501460114b"
+    },
+    {
+      "type": "html",
+      "text": "\nCurtis, I claim that it's better to have the unit test only call the public methods of the class, letting the private methods be tested only indirectly.  My reasons are:",
+      "id": "7168e8f366d23e119e93ce5daf01e6a3"
+    },
+    {
+      "type": "html",
+      "text": " Having the [[Unit Test]] call private methods presents a problem when refactoring.  If your unit test is directly testing private methods of the class, then refactoring the internals of the class may require you to change the unit test, and when the test fails you won't know whether the class or the unit test is at fault.",
+      "id": "8c560342246c6a3ca4bca0c3d3902ccf"
+    },
+    {
+      "type": "html",
+      "text": " It is my experience that when a private method \"wants\" to be tested, it is probably not tightly coupled to the class's internal state (because methods that are tightly coupled to the class's internal state tend to be much harder to test, and being lazy, I don't like testing the hard parts as much as I like testing the easy parts).  In this case, it may be best to make the method a public method of a different (possibly a new) class.  For example, if a class is doing some string manipulation and finds itself with a private method called changeTabsToSpaces, that is an excellent candidate to be made a public static method of some other class, where it can then be properly tested <i>and</i> easily used from other classes.  You may also find that there are several methods which operate upon a common subset of the class's state -- these may be a good candidate to become a new object.  Although you might think that these refactorings are silly, being done just so that you can test these methods, they are not -- they are design improvements that needed to happen anyhow, and your desire to reach into the private methods to test them was simply a warning sign that the design was probably not factored as well as it could be.",
+      "id": "524f6fa9f432d28270a23033202fcfe7"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Wayne Conrad]]",
+      "id": "9941f0258cb9b79a6fa9bfdc390a3883"
+    },
+    {
+      "type": "html",
+      "text": "\nWayne, would you say then that only methods that are tightly coupled to to their class's internal state should be private? -- CB",
+      "id": "36e43f6a07feee75406348408e9dfdde"
+    },
+    {
+      "type": "html",
+      "text": "\nNo, I wouldn't say that.  Public as well as private methods should deal with as much of the class's state as they need to.  What I'm saying is that a private method that deals with little or none of the class's state can often be moved into another class, both improving the design <i>and</i> making it public so that it can be tested.  -- [[Wayne Conrad]]",
+      "id": "a6f084ba24e52be79bdfd9b94e417af0"
+    },
+    {
+      "type": "html",
+      "text": "\nUsually, I find that when there are complex private methods, it indicates that there is an internal class begging to be broken out.  Once one does this, the methods in the new class will need to be public and testable, but by including the new class as a private object within the old class (encapsulation!), the methods remain private at the higher scope.  This partition allows full testing of the functionality without the frustration of access through more general purpose methods.  It is worthwhile to let testing requirements drive some of the design (in hardware development, this was called \"design for testability\"), and I usually have found that I may have fought the intial decomposition, that when I did it, it improved the application code design as well.  --[[Wayne Mack]]",
+      "id": "1648a2e00868be9eaba8130b4e0b8a57"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nI don't think I follow how Application<b></b>Command is being used here. When I use the [[Command Pattern]], most of the code ends talking to the base class - here presumably Application<b></b>Command. All the specific method1()s end up in a derived class - which seems to be missing here, say Application<b></b>[[Command Imp]]. It doesn't much matter if they are public there, because so few places need to know about Application<b></b>[[Command Imp]]. (If necessary, we can push them down into another subclass.) -- [[Dave Harris]]",
+      "id": "d373a3a3274365805bf1d066b4c406a0"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nWhat an amazing bunfight! Lookit, here's the easy way to [[Unit Test Cpp]].",
+      "id": "7a0e6eae19922c8d3f513910988724e6"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nI don't think that it is necessary to ever test anything beyond the public interface. If something is internally complex, and its producing errors, have it provide an accurate error report for debugging and repair.",
+      "id": "ccdac8a89b189a270c607e2fa50dd58e"
+    },
+    {
+      "type": "html",
+      "text": "\nIf I were to test a method I'd check various things, primarily its post conditions (although in certain circumstances I'd also check things like performance). When testing this method I don't care about its internals, only that it does what it should.",
+      "id": "b61b68c897a4dfc0e1ca0076b0872ee5"
+    },
+    {
+      "type": "html",
+      "text": "\nThis can be extended to a class. When testing a class I am only interested in its doing what it should, what it says that it does. I am only interested in its fulfilling its contract. Therefore I only test its public interface. -- Bryan",
+      "id": "5cca2120100c7d0e1fba78e415c8e256"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nI think this issue is all about scope & visibility. Most programs have several levels of interfaces: An external interface (GUI, command-line, protocol etc), and deeper inside, a package or library interface, followed by classes, and then their private members. Each level has an internal implementation that the outside world doesn't need to know about, and each level needs to be tested thoroughly and equally.",
+      "id": "0173dc7e9a19f766f348ef77656fc2e4"
+    },
+    {
+      "type": "html",
+      "text": "\nFrom most of the posters above it would seem that testing classes internal to a package is fine, if so then it follows that testing members internally to a class is also fine, as long as those tests themselves are internal to the class. If the internal implementation of the class changes, then so do the class's *internal* tests to support those changes (ouch! I mean if the tests change then the implementation changes...).",
+      "id": "ae46fe990c3f9429de352e72a63ce6f1"
+    },
+    {
+      "type": "html",
+      "text": "\nAs far as i can tell, whether or not a complex class needs to be broken down into smaller simpler classes is an orthogonal issue, and not to be confused with how you decide to test it. -- Tim Macfarlane",
+      "id": "ad3c5f1db6930a180a6e80e12c295edb"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": ">Make the test class a friend of the class to be tested. This breaks encapsulation and enables fraud.",
+      "id": "edd6c04c74c8687fca39492bf8ecb786"
+    },
+    {
+      "type": "html",
+      "text": "\nI consider the unit of deployment to be a package/library, not the class. Anything in the\npackage can be assumed to be safe to access the internals of other classes in the package.\nA class isn't of sufficient deployment granularity, especially if you make a lot of\nclasses that must cooperate. Making things public that shouldn't is far worse because\nanyone can screw you up. With the package access you know the package developers have\ncontrol.",
+      "id": "a7b22db9b54c727ef1a4dc048f130ce6"
+    },
+    {
+      "type": "html",
+      "text": "\nAnd yes, test what needs testing. It's not a smell. Often a private method will be used by\nseveral other public methods, there's no reason not to test the base functionality\nindependently. If you are afraid of not being able to refactor mercelessly then don't\nwrite that damn tests to start with. Tests aren't any good unless they are actually\nwritten.",
+      "id": "582f732f9d4a4a877eca92a297ffdb23"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "Language itself rather than stand-alone application should provide unit testing features. \nEither the language may have *testable* access modifier or all methods should be testable by default. -- Alex Aizikovsky",
+      "id": "695e6e922dd40b45174c9c5520eb7146"
+    },
+    {
+      "type": "html",
+      "text": "\nThat requires that the language have the ability to designate certain code as test code...",
+      "id": "6d3027d763e15bda447c73fccf19474c"
+    },
+    {
+      "type": "html",
+      "text": "...which is a really good idea.  I like it! -- [[Jonathan Tang]]",
+      "id": "d99bacc0ef6d6a9912181423d6eae015"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nThis is how I do unit testing in Java:",
+      "id": "09bd7ff51ef710d050a9ae57790c2342"
+    },
+    {
+      "type": "html",
+      "text": "\n1. Use the test-first approach to test the public methods before they are implemented, use Unit Testing to drive the design of the class.",
+      "id": "2fde7ff24a983d4ddaabe828ea8b23ba"
+    },
+    {
+      "type": "html",
+      "text": "\n2. A series of private methods were implemented when implementing the public method, the private methods were driven by the public method instead of the [[Test Case]].",
+      "id": "fac3ef632098adb7d6f2466b2dd98b9b"
+    },
+    {
+      "type": "html",
+      "text": "\n3. Normally I do not unit test the private method because it breaks the encapsulation and also impedes refactoring.",
+      "id": "79fe3e3df60ba68412b1d7c24865eac1"
+    },
+    {
+      "type": "html",
+      "text": "\n4. I change the private visibility to package visibility to test the private method only if the private method is complex and I need the unit testing to give me the confidence.",
+      "id": "a8f57691322d3d1f3822d5f00e438b98"
+    },
+    {
+      "type": "html",
+      "text": "-- Yaxin Wang",
+      "id": "e00424e5f0d0d5236b0172985d282bf0"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nI feel that everyone here is missing the point of gaining access to private and protected parts of a class. The problem isn't accessible functions, it's accessing the members themselves. When I'm testing a function, I'm testing the internal state of the class during and after the execution of the said function. I've been making my members protected only, so I should be able to just subclass to access, but I'm looking for a better way that DOESN\"T involve friends. I find that syntax so ugly and will only use it in the most desperate occasion (aka, if I don't have time to refactor). So what do you guys think of this problem? How do you access the members of a class? Please also note that I'm using TUT, and thus can not use the friend syntax because my tests aren't classes.",
+      "id": "1a31f2dcf0d29686a95f8b845815e872"
+    },
+    {
+      "type": "html",
+      "text": "-- Jason Roelofs",
+      "id": "82a10e95b81be9eb0fdf4f11e3cf4064"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "See also: [[Methods Should Be Public]]",
+      "id": "8d843a6fbb1ef70cebc70409fc552808"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nAfter reading the above, another, perhaps more elegant solution came to my mind. We usually want to test just the interface of the class, as its user. In some rarer cases we need to test its internal implementation. Most but the radicals agree on that. The solution might be in defining an interface, say Testable, that defines a single runInternalTests() function and any internal tests that we want to conduct. The test can use [[Test Case]]'s assertTrue and such as they are static (at least in JUnit) to check test conditions and be called from an external [[Test Case]]. If runInternalTest is too long - it's a clear bad smell, but even then, it's possible to break it up into several methods.",
+      "id": "03e7149937d4d713d937ca7e08d7ce46"
+    },
+    {
+      "type": "html",
+      "text": "\nThis way we have a clear separation of implementation testing and interface testing, and the implementation testng resides where it should - within the code of the class itself, without breaking any of that precious encapsulation.\nA special interface for internal testing ensures consistency across the project/projects and could maybe allow an automated implementation test to run on all classes.",
+      "id": "1f877ecc2255443e458536ab3762ada2"
+    },
+    {
+      "type": "html",
+      "text": "-- Eli Golovinsky",
+      "id": "a393a246767a66042dc6a68323875653"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+    },
+    {
+      "type": "html",
+      "text": "\nI am writing a nontrivial code in C++ for the first time, trying to follow \"the rules\" for OOP, and using cppunit for unit testing. I immediately ran into this issue. I am finding it extremely useful to write unit tests and code simultaneously, but the tests are often MUCH simpler to write at the early stages of development if you allow yourself to test the internal state of an object. I agree with the comment that unit testing is useful both for initial development, during which it is convenient to have full access, and final verification of the public interface, during which you arguably should not, and that the two uses should be distinguished. In practice, the convenience of the unit tests as a tool for early development has been driving me to keep everything public initially (mea culpa) with the thought that I will later turn them to private. Aside from other problems, this would force meto remvoe or rewrite many of my unit tests, which I consider a giant waste.  I am considering the following variant of the conditional compilation solution, and am curious what others think:",
+      "id": "d38ab7f7eb4c080a4405e4b9fb0ced82"
+    },
+    {
+      "type": "html",
+      "text": "\n1) Include in all source files a file DEBUG.h, that can be edited to include a #define NDEBUG line to turn off C assertions. The same macro can aslo be used in",
+      "id": "1b2eea4fc2c482ece142da2fcf886d3c"
+    },
+    {
+      "type": "html",
+      "text": "#ifndef NDEBUG ... #endif blocks to conditionally compile other fragments of \"testing\" code. ",
+      "id": "d7b9007ae12fd643b11fc58531473b77"
+    },
+    {
+      "type": "html",
+      "text": "\n2) Within DEBUG.h, define preprocessor macros PROTECTED and PRIVATE that both have values \"public\" when NDEBUG is not defined (testing code) and that have values \"private\" and \"protected\", respectively, when NDEBUG is defined (production code). Use these macros consistently as replacements for the protected and private keywords in class declarations for classes with members or methods that I would like to keep accessible during testing. Also use the NDEBUG macro to conditionally compile any tests that require access to protected or private members in the unit tests. ",
+      "id": "f2c8a81ff8b396ff9a8f0038001ecf15"
+    },
+    {
+      "type": "html",
+      "text": "\nOne objection, made above to other uses of conditional compilation, is that this means that you are not actually testing the production code, you are only testing the \"testing\" version. This is a potential problem with any approach that uses access to private members, whether you gain access by conditional compilation by testing a subclass. It is not clear to me, howover, what sort of errors can be missed as a result of testing code that allows more promiscuous access to internals than that allowed in the production code. Can anyone give me a realistic example of a type of bug that you might miss as a result of this procedure if: i) Your classes pass all unit tests with some private members or methods converted to private, ii) The \"production\" code compiles correctly, despite the additional restrictions on access.  -David Morse",
+      "id": "e27929c01a242fb25dd6fe2075b80455"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Category Testing]]",
+      "id": "995481b8e1003e8314b850db44726a63"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?UnitTestingNonPublicMemberFunctions c2.com]",
+      "id": "9ed970723741ae5a21d1467da13e1992"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1213366443000,
+      "id": "6c3f7af34f57480e163d2795ebb98285",
+      "type": "create",
+      "item": {
+        "title": "Unit Testing Non Public Member Functions",
+        "story": [
+          {
+            "type": "html",
+            "text": "[[Unit Test]]ing non-public member functions is somewhat tricky in C++ (and, I guess, in Java and other languages, too).",
+            "id": "ec8adc300c30a47247c72696290adb4e"
+          },
+          {
+            "type": "html",
+            "text": "\nIn C++, we have the following options:",
+            "id": "5e45a1148d3a9b7d8b7d5ffe3ac66e46"
+          },
+          {
+            "type": "html",
+            "text": " Make the test class a friend of the class to be tested. This breaks encapsulation and enables fraud (call me paranoid, but clients of the class can define their own 'test class' and access the internals of the class to be tested -- see Lakos [[Large Scale Cpp Software Design]]). Possibly we could use conditional compilation (ugly) to remove the friend declaration in production code. Variation: use conditional compilation to remove the access restrictions.",
+            "id": "904967ac358b7697f0eea23d215bcaf8"
+          },
+          {
+            "type": "html",
+            "text": " Of course, if you define class Foo and declare class [[Foo Test]] to be a friend, and someone on your team writes a (non-test) class called [[Foo Test]] just to frob Foo's internals, this is a <i>management</i> problem.  There are many other ways to subvert the [[Cee Plus Plus]] access controls (via casting, etc.)--all of these are in the category of <i>cheating</i>.  In other words, <i>don't do them</i>.",
+            "id": "a78ecca134e85c55c80c228b7beda529"
+          },
+          {
+            "type": "html",
+            "text": " Create a subclass of the class to be tested for test purposes only. Make all member functions public in the subclass. This is even uglier than option 1 and adds quite some overhead. Apart from that, there are issues with non-virtual functions.",
+            "id": "8d1ad1baaa02d48c9877164e1aa05b56"
+          },
+          {
+            "type": "html",
+            "text": " Delegate the methods to a private class.  The methods would be public for testing of the new class, but would remain private for the use of the existing class.",
+            "id": "440ada059f530092f5e95c40398a7774"
+          },
+          {
+            "type": "html",
+            "text": " Just make everything public, use some other [[Naming Convention]] (like [[Python Language]]) to mark the private bits.  Works, goes a bit against the C++ grain.",
+            "id": "47dfe1db99b190c937bfa52e4c8bb6c7"
+          },
+          {
+            "type": "html",
+            "text": " Write the tests at the level of what is declared public.  After all, if the private method is not invoked from a public method, one does not need it all.",
+            "id": "a99ee30919bb2a0e4a423754a63824b2"
+          },
+          {
+            "type": "html",
+            "text": "\nOne could argue only to unit test public member functions -- this is impractical when you try to unit test classes with complex non-public member functions, such as [[Application Command]] or [[Business Transaction]] objects.",
+            "id": "455ffb15fc473e2fc12d94570bfa8099"
+          },
+          {
+            "type": "html",
+            "text": "\nOption 1 seems to be the easiest solution from an implementation point of view, but friend declarations tend to make me nervous.",
+            "id": "dea677349605a7f84ddcb3590f607449"
+          },
+          {
+            "type": "html",
+            "text": "\nWhat's your opinions/suggestions on this?",
+            "id": "ad8f4be9fe78894d184cea28306c88a7"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Oliver Kamps]]",
+            "id": "74ebb4151afffa1bb5069ce8559183a9"
+          },
+          {
+            "type": "html",
+            "text": "\nThere's actually one more, simpler method for C++ that does not require decorating the class header; in the unit test:",
+            "id": "c6a4dca8edf21f10534a998c00eb38b3"
+          },
+          {
+            "type": "code",
+            "text": " #define protected public\n #define private   public\n #include \"headeroftheclassbeingtested.h\"\n #undef protected\n #undef private",
+            "id": "4c6a2dca70b1b433a435ebb2e44ff1a0"
+          },
+          {
+            "type": "html",
+            "text": "\nand now the entire class is exposed.",
+            "id": "baf5dde1966c8cfdad89579dfda42c84"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Ron Fox]]",
+            "id": "b7ca056d0549d6a5457fbd44e44d8743"
+          },
+          {
+            "type": "html",
+            "text": "\nI'm a [[Unit Test]]s newbie, but I consider private methods to be just that -- private.  [[Unit Test]]s track the public API of a class, not the internals.  At some point, I may need to test protected methods, in which case I'd use a subclass.  I program in Java, so I'd probably use an inner class for the subclass, since the outer class is already a subclass of junit.framework.[[Test Case]].  In C++, you could just use multiple inheritance.",
+            "id": "724034d0340ba1179a9c7fcb6935c66b"
+          },
+          {
+            "type": "html",
+            "text": "<i>Public interfaces of classes may sometimes be too coarse-grained to be unit tested effectively -- for example, we use a variation of the [[Command Pattern]] to implement [[Application Command]] or [[Business Transaction]] classes. Such a class may implement a large chunk of functionality (possibly using layering and inheritance to keep the code organized etc.), but may only have a few public accessors to set and get domain objects and a public execute function. The functions implementing the business logic may very well be private. What would you use the subclass for? To implement the test or to make the functions to be tested accessible to a test class? -- [[Oliver Kamps]]</i>",
+            "id": "53bcd4ff42b9da599f4402ceccd21ec2"
+          },
+          {
+            "type": "html",
+            "text": "\nAs far as friend functions go, if you can't trust your fellow developers not to forge friend functions, maybe that lack of trust is the problem. -- [[John Brewer]]",
+            "id": "370949ce3480802b9ac3bcb1d75027a5"
+          },
+          {
+            "type": "html",
+            "text": "<i>I possibly don't trust them not to get carried away with friend declarations... But I agree, that might be the underlying problem. -- [[Oliver Kamps]]</i>",
+            "id": "65b63a8cb710194acfb60a75aa8a1ca4"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nOliver, I'm not sure I see why <b>friend</b> classes make you so nervous.  Sure somebody could abuse it, but since you are programming in C++, your clients must have access to the header file that declares your class, friends and all.  They could edit your class and add all the friends they wanted, not to mention changing private members to public, and the like. <i>I see your point. --ok</i>",
+            "id": "eb4ed5a239bc23bee36a28e9b677d869"
+          },
+          {
+            "type": "html",
+            "text": "\nPublic, protected, and private are in C++ to protect you from innocent mistakes.  They are not there to protect you from deliberate abuse, nor can they.",
+            "id": "b6aadd36f5b3ef58a39416ead3552745"
+          },
+          {
+            "type": "html",
+            "text": "\nI see the <b>friend</b> solution as simple and clean -- this is exactly the kind of problem that <b>friend</b> is in the language to solve.",
+            "id": "fa25b7dec4dc59640a04443ff1da86d5"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Curtis Bartley]]",
+            "id": "9a7a6a608f358cebec66e791bbcb25f9"
+          },
+          {
+            "type": "html",
+            "text": "\nWould you bother to use conditional compilation to remove friend declarations for test purposes from production code? -- [[Oliver Kamps]]",
+            "id": "5ce8677fa003681f1294a15c0cfb36ce"
+          },
+          {
+            "type": "html",
+            "text": "<i>I would just leave them in, since they don't actually generate any code.  Conditional compilation can be really useful, but it also clutters up the code a lot, so I'm inclined to use it sparingly just on that basis alone.  I would however use it to remove the test classes themselves if (for example) they were declared in the same file as the main class. -- CB</i>",
+            "id": "0315921a783d0deab9a6bb64bbdf99a2"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nYou want to be able to refactor a class's internals without changing the [[Unit Test]] -- it's a bad idea to have to change the class and its test at the same time.  For that reason, don't reach into the class and test its internals. <i>Sometimes you may have to. See above for [[Application Command]] example. --ok</i>",
+            "id": "b0e15d70b34f7fb921620ef6aac6889b"
+          },
+          {
+            "type": "html",
+            "text": "\nFriend functions are generally inferior to alternatives such as Observer or [[Private Interface]].  The big problem is that a friend function or class has access to a class's entire footprint, not just to the parts that you want it to have access to.  [[Private Interface]] let you control exactly what parts of a class are visible to whom.  This makes refactoring the class easier, because you have explicit knowledge of what parts of the class are visible to the outside world. -- [[Wayne Conrad]]",
+            "id": "a57c20d7656be8174382cc625b7e1596"
+          },
+          {
+            "type": "html",
+            "text": "\nThank you for pointing out [[Private Interface]] to me. I agree with you on the problems of friend functions/classes. I can see me using [[Private Interface]] in production code if the only alternative were to use friend declarations, but isn't it too much overhead to implement just for [[Unit Test]]ing? (That's potentially two extra classes and trying to remove it from production code is probably a pain?) -- [[Oliver Kamps]]",
+            "id": "56b0f11e67a1d238963d329f144d5a70"
+          },
+          {
+            "type": "html",
+            "text": "\nIf testing is difficult, it won't be done. [[Do The Simplest Thing That Could Possibly Work]]. For now, I'd suggest to use a friend declaration unless you can think of something better, then later upgrade the code when you learn a better solution. But then again, do you really need to test the non-public member functions? Why are they non-public? Why aren't they being flexed from the public interface? If you're supposed to subclass, subclass and test. -- [[Sunir Shah]]",
+            "id": "e4431c13578d88f09368cb4a9779636a"
+          },
+          {
+            "type": "html",
+            "text": "\nSuppose you have a telecoms billing system. A customer has been in default for a period of time. The business rules dictate the customer's services have to be suspended (e.g., phone lines have to be disconnected) and that the customer won't be able to subscribe to new services until the debts are settled. All these things can be triggered from a single [[Application Command]] object whose public interface may consist only of a setter for the customer number (or a reference to the customer domain object) and an execute function. All other functions implementing the business logic may and should be non-public. This [[Application Command]] would most probably delegate sub-tasks to lower-level [[Application Command]] object whose public interface would also be very small. -- [[Oliver Kamps]]",
+            "id": "2dfc8a82209bc23b18f2035da80ac523"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nFrom [[Who Is Using Junit]]:",
+            "id": "860f42eb3c610cd0fca1467046e025b5"
+          },
+          {
+            "type": "html",
+            "text": "\nWe've found that [[Testing Private Methods]] seems to be of [[Code Smell]]s. [[Testing Private Methods]] smells of debugging. [[Testing Private Methods]] also prevents us from being able to [[Refactor Mercilessly]]. If you [[Listen To The Code]], you learn that [[Methods Should Be Public]]. Therefore, execute the [[Extract Class]] refactoring, have all the former private methods be publicly\naccessible, and test them ruthlessly. You may end up with a reusable abstraction whose responsibilities will grow over time. -- [[Frank Westphal]]",
+            "id": "0b71eb130f2ecbbcf31e15c13b2ab7a6"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nObviously, I wasn't able to made myself understood on the use of the [[Application Command]]. Let me try to both improve that and prove I've done my bit of reading Wiki and Martin Fowler's book: Complex functionality was implemented in big controller classes operating on dumb data objects. We've found that the complex functionality was often implemented in a single [[Long Method]] which we found to be a [[Bad Smell]]. We decided to [[Refactor Mercilessly]] and applied [[Move Method]] to move the [[Long Method]] to a newly created [[Method Object]]. Then we applied [[Extract Method]] several times and created new methods for parts of the functionality of the original [[Long Method]].",
+            "id": "d3ba14e46d0a083a2f971c07d2d68937"
+          },
+          {
+            "type": "html",
+            "text": "\nOr, to make a long story short, the non-public methods don't have any reason to be public. Clients of the [[Application Command]] need to know what happens, but not how it happens. The point of applying [[Gof Command]] is to have a single execute function (plus some accessors to set the receiver etc.) to trigger some behaviour. The non-public functions may just be implementation details, but the public execute function may be too coarse-grained to be [[Unit Test]]ed alone. (Don't think I mentioned that the first time.) -- [[Oliver Kamps]]",
+            "id": "040f607e3260b1eb0d34628826c565b1"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nSo, you're saying you can't possibly extract the details?  Let me elaborate on what I had in mind:",
+            "id": "b06ed823a8ec11108f368031f6c8749a"
+          },
+          {
+            "type": "code",
+            "text": "  public class Application''''''Command {\n  public Application''''''Command(Command''''''Method''''''Object methodObject) {\n  _methodObject = methodObject;\n  }\n  private Command''''''Method''''''Object _methodObject;\n  public void execute() {\n  _methodObject.method1();\n  _methodObject.method2();\n  _methodObject.method3();\n  }\n  }",
+            "id": "24b175eca0fde0a5c63d4b06d5797c5b"
+          },
+          {
+            "type": "html",
+            "text": "\nNow, you should be able to easily write tests for your implementation details since those features will be public member functions on your [[Method Object]]:",
+            "id": "077438332757bf652389c3b66617fd43"
+          },
+          {
+            "type": "code",
+            "text": "  public class Command''''''Method''''''Object''''''Test extends TestCase {\n  public Command''''''Method''''''Object''''''Test(String name) {\n  super(name);\n  }\n  public void testMethod1() {...}\n  public void testMethod2() {...}\n  public void testMethod3() {...}\n  }",
+            "id": "20687ccde878a09cdb3fbcf318c25f92"
+          },
+          {
+            "type": "html",
+            "text": "\nSometimes you have to apply this refactoring recursively, so that you'll end up with [[Lots Of Little Pieces]].  Hope this helps. -- [[Frank Westphal]]",
+            "id": "2914ed483dabb9b3edb470e9e5a62e2d"
+          },
+          {
+            "type": "html",
+            "text": "<i>I posted a variation of this to [[Hiding By Delegating]]. -- [[Dave Harris]]</i>.",
+            "id": "42d6fc8ef777c012b26bd70ef825bfe9"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nNo, I'm saying I possibly can't extract the details. (<i>I'm not being picky here, but I think the location of 'possibly' makes a difference here.</i>) Or, maybe, I don't want to expose the details. method1, method2 and method3 may not be supposed to be called directly in production code, so I don't want to break encapsulation and make them public. What's more, member data of [[Application Command]] is not accessible for [[Command Method Object]], so I might have to duplicate this. IMHO, exposing implementation detail smells a lot more than [[Testing Non Public Methods]]. I can't detect the smell of debugging here. I disagree that [[Testing Non Public Methods]] prevents us from being able to [[Refactor Mercilessly]]. Testing any method makes refactoring this method more difficult or, rather, more expensive, but this is not a good reason not to refactor or not to test. Limiting visibility of a method doesn't affect the number of tests that need to be modified when refactoring this method. Therefore, I can't see that refactoring a non-public method is any more expensive than refactoring a public one.",
+            "id": "d8f70305708bd8bc9548f3e5db43f180"
+          },
+          {
+            "type": "html",
+            "text": "\nSo, even though I disagree with it, your reply was definitely helpful. Thanks. -- [[Oliver Kamps]]",
+            "id": "05b7fec91740a8fe6519d820a2f7a288"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nOliver, you don't have to expose method1, method2 and method3 to the public. Package privacy would be sufficient. For not being able to access [[Application Command]]'s member data, just pass it to your [[Method Object]]. Writing tests will become easier if you make your methods more fine-grained.  Your mileage may vary, though. -- [[Frank Westphal]]",
+            "id": "36c187feb14aa17b566e70846b3e86b2"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nExcept that Oliver is writing in C++, which doesn't have a package-level access.  He's stuck with public, private, protected and friend.",
+            "id": "ff72d9ffba4604ef88c56f54a6227f68"
+          },
+          {
+            "type": "html",
+            "text": "\nBTW, I don't use package visibility at all in my Java code.  I explicitly place my [[Unit Test]]s in a separate package, just to be certain that I'm only testing the public interface. -- [[John Brewer]]",
+            "id": "158e37aa3832bb34a091a4a63ed43e2f"
+          },
+          {
+            "type": "html",
+            "text": "<i>The cost is having to make every class public, even those which you don't intend to be called from outside the package.</i> -- [[Wayne Conrad]]",
+            "id": "98ce5405a1f8151ddad1c31c77f72196"
+          },
+          {
+            "type": "html",
+            "text": "\nWhat exactly is the cost you're speaking of?  What are your fears? -- [[Frank Westphal]]",
+            "id": "dac2ff80a8b6ae03650520cb56424be3"
+          },
+          {
+            "type": "html",
+            "text": "\nI do not like to make classes public unless they are part of the package's API, for the same reasons I do not like to make methods public unless they are part of the class's API:",
+            "id": "ded440f61caa7a878051b1f7c2272d08"
+          },
+          {
+            "type": "html",
+            "text": " <b>Documentation</b>:<br>Having only externally usable classes be 'public' documents which classes are part of the package's API.  If all of the package's classes are public, the programmer has to work hard to figure out which classes are for part of the package's API and which are internal to the package.",
+            "id": "13eba7e1ca059d3d62d17109cf238fa0"
+          },
+          {
+            "type": "html",
+            "text": " <b>Coupling</b>:<br>If all of a package's classes are public, the programmer can use the package's internal classes, either intentionally, or because the programmer guessed wrong about which classes were part of the API.  Coupling to internal classes inhibits refactoring -- you can't eliminate or change an internal class without first discovering whether it has been used by another package.  Also, it is harder to create a package that works if other packages can reach into its internals and mess with them.",
+            "id": "c37dbfe30f9a0ba336a171bb6c56183c"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Wayne Conrad]]",
+            "id": "9941f0258cb9b79a6fa9bfdc390a3883"
+          },
+          {
+            "type": "html",
+            "text": "<i>I don't see the problem. Why would you directly test package-level classes any more than you would test private methods? The unit tests are there to verify that the public behavior of classes - and packages - works as advertised. How it does it, what internals it uses, should not be relevant to such testing. -- [[Russell Gold]]</i>",
+            "id": "face7ac7fe24150319df1b83a1eafbd5"
+          },
+          {
+            "type": "html",
+            "text": "\nRussell, Are you responding to what I wrote, or to this page in general?  I'm in the same camp as you -- only [[Unit Test]] the public methods of a class. -- [[Wayne Conrad]]",
+            "id": "61ba16a3b8e2c20f6c4962a57840cff2"
+          },
+          {
+            "type": "html",
+            "text": "\nI'm curious, are you guys (Wayne and Russell) proposing that private methods shouldn't be tested directly at all, or are you saying only that they shouldn't be \"unit\" tested? -- [[Curtis Bartley]]",
+            "id": "752b455f855fe48cbb4078501460114b"
+          },
+          {
+            "type": "html",
+            "text": "\nCurtis, I claim that it's better to have the unit test only call the public methods of the class, letting the private methods be tested only indirectly.  My reasons are:",
+            "id": "7168e8f366d23e119e93ce5daf01e6a3"
+          },
+          {
+            "type": "html",
+            "text": " Having the [[Unit Test]] call private methods presents a problem when refactoring.  If your unit test is directly testing private methods of the class, then refactoring the internals of the class may require you to change the unit test, and when the test fails you won't know whether the class or the unit test is at fault.",
+            "id": "8c560342246c6a3ca4bca0c3d3902ccf"
+          },
+          {
+            "type": "html",
+            "text": " It is my experience that when a private method \"wants\" to be tested, it is probably not tightly coupled to the class's internal state (because methods that are tightly coupled to the class's internal state tend to be much harder to test, and being lazy, I don't like testing the hard parts as much as I like testing the easy parts).  In this case, it may be best to make the method a public method of a different (possibly a new) class.  For example, if a class is doing some string manipulation and finds itself with a private method called changeTabsToSpaces, that is an excellent candidate to be made a public static method of some other class, where it can then be properly tested <i>and</i> easily used from other classes.  You may also find that there are several methods which operate upon a common subset of the class's state -- these may be a good candidate to become a new object.  Although you might think that these refactorings are silly, being done just so that you can test these methods, they are not -- they are design improvements that needed to happen anyhow, and your desire to reach into the private methods to test them was simply a warning sign that the design was probably not factored as well as it could be.",
+            "id": "524f6fa9f432d28270a23033202fcfe7"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Wayne Conrad]]",
+            "id": "9941f0258cb9b79a6fa9bfdc390a3883"
+          },
+          {
+            "type": "html",
+            "text": "\nWayne, would you say then that only methods that are tightly coupled to to their class's internal state should be private? -- CB",
+            "id": "36e43f6a07feee75406348408e9dfdde"
+          },
+          {
+            "type": "html",
+            "text": "\nNo, I wouldn't say that.  Public as well as private methods should deal with as much of the class's state as they need to.  What I'm saying is that a private method that deals with little or none of the class's state can often be moved into another class, both improving the design <i>and</i> making it public so that it can be tested.  -- [[Wayne Conrad]]",
+            "id": "a6f084ba24e52be79bdfd9b94e417af0"
+          },
+          {
+            "type": "html",
+            "text": "\nUsually, I find that when there are complex private methods, it indicates that there is an internal class begging to be broken out.  Once one does this, the methods in the new class will need to be public and testable, but by including the new class as a private object within the old class (encapsulation!), the methods remain private at the higher scope.  This partition allows full testing of the functionality without the frustration of access through more general purpose methods.  It is worthwhile to let testing requirements drive some of the design (in hardware development, this was called \"design for testability\"), and I usually have found that I may have fought the intial decomposition, that when I did it, it improved the application code design as well.  --[[Wayne Mack]]",
+            "id": "1648a2e00868be9eaba8130b4e0b8a57"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nI don't think I follow how Application<b></b>Command is being used here. When I use the [[Command Pattern]], most of the code ends talking to the base class - here presumably Application<b></b>Command. All the specific method1()s end up in a derived class - which seems to be missing here, say Application<b></b>[[Command Imp]]. It doesn't much matter if they are public there, because so few places need to know about Application<b></b>[[Command Imp]]. (If necessary, we can push them down into another subclass.) -- [[Dave Harris]]",
+            "id": "d373a3a3274365805bf1d066b4c406a0"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nWhat an amazing bunfight! Lookit, here's the easy way to [[Unit Test Cpp]].",
+            "id": "7a0e6eae19922c8d3f513910988724e6"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nI don't think that it is necessary to ever test anything beyond the public interface. If something is internally complex, and its producing errors, have it provide an accurate error report for debugging and repair.",
+            "id": "ccdac8a89b189a270c607e2fa50dd58e"
+          },
+          {
+            "type": "html",
+            "text": "\nIf I were to test a method I'd check various things, primarily its post conditions (although in certain circumstances I'd also check things like performance). When testing this method I don't care about its internals, only that it does what it should.",
+            "id": "b61b68c897a4dfc0e1ca0076b0872ee5"
+          },
+          {
+            "type": "html",
+            "text": "\nThis can be extended to a class. When testing a class I am only interested in its doing what it should, what it says that it does. I am only interested in its fulfilling its contract. Therefore I only test its public interface. -- Bryan",
+            "id": "5cca2120100c7d0e1fba78e415c8e256"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nI think this issue is all about scope & visibility. Most programs have several levels of interfaces: An external interface (GUI, command-line, protocol etc), and deeper inside, a package or library interface, followed by classes, and then their private members. Each level has an internal implementation that the outside world doesn't need to know about, and each level needs to be tested thoroughly and equally.",
+            "id": "0173dc7e9a19f766f348ef77656fc2e4"
+          },
+          {
+            "type": "html",
+            "text": "\nFrom most of the posters above it would seem that testing classes internal to a package is fine, if so then it follows that testing members internally to a class is also fine, as long as those tests themselves are internal to the class. If the internal implementation of the class changes, then so do the class's *internal* tests to support those changes (ouch! I mean if the tests change then the implementation changes...).",
+            "id": "ae46fe990c3f9429de352e72a63ce6f1"
+          },
+          {
+            "type": "html",
+            "text": "\nAs far as i can tell, whether or not a complex class needs to be broken down into smaller simpler classes is an orthogonal issue, and not to be confused with how you decide to test it. -- Tim Macfarlane",
+            "id": "ad3c5f1db6930a180a6e80e12c295edb"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": ">Make the test class a friend of the class to be tested. This breaks encapsulation and enables fraud.",
+            "id": "edd6c04c74c8687fca39492bf8ecb786"
+          },
+          {
+            "type": "html",
+            "text": "\nI consider the unit of deployment to be a package/library, not the class. Anything in the\npackage can be assumed to be safe to access the internals of other classes in the package.\nA class isn't of sufficient deployment granularity, especially if you make a lot of\nclasses that must cooperate. Making things public that shouldn't is far worse because\nanyone can screw you up. With the package access you know the package developers have\ncontrol.",
+            "id": "a7b22db9b54c727ef1a4dc048f130ce6"
+          },
+          {
+            "type": "html",
+            "text": "\nAnd yes, test what needs testing. It's not a smell. Often a private method will be used by\nseveral other public methods, there's no reason not to test the base functionality\nindependently. If you are afraid of not being able to refactor mercelessly then don't\nwrite that damn tests to start with. Tests aren't any good unless they are actually\nwritten.",
+            "id": "582f732f9d4a4a877eca92a297ffdb23"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "Language itself rather than stand-alone application should provide unit testing features. \nEither the language may have *testable* access modifier or all methods should be testable by default. -- Alex Aizikovsky",
+            "id": "695e6e922dd40b45174c9c5520eb7146"
+          },
+          {
+            "type": "html",
+            "text": "\nThat requires that the language have the ability to designate certain code as test code...",
+            "id": "6d3027d763e15bda447c73fccf19474c"
+          },
+          {
+            "type": "html",
+            "text": "...which is a really good idea.  I like it! -- [[Jonathan Tang]]",
+            "id": "d99bacc0ef6d6a9912181423d6eae015"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nThis is how I do unit testing in Java:",
+            "id": "09bd7ff51ef710d050a9ae57790c2342"
+          },
+          {
+            "type": "html",
+            "text": "\n1. Use the test-first approach to test the public methods before they are implemented, use Unit Testing to drive the design of the class.",
+            "id": "2fde7ff24a983d4ddaabe828ea8b23ba"
+          },
+          {
+            "type": "html",
+            "text": "\n2. A series of private methods were implemented when implementing the public method, the private methods were driven by the public method instead of the [[Test Case]].",
+            "id": "fac3ef632098adb7d6f2466b2dd98b9b"
+          },
+          {
+            "type": "html",
+            "text": "\n3. Normally I do not unit test the private method because it breaks the encapsulation and also impedes refactoring.",
+            "id": "79fe3e3df60ba68412b1d7c24865eac1"
+          },
+          {
+            "type": "html",
+            "text": "\n4. I change the private visibility to package visibility to test the private method only if the private method is complex and I need the unit testing to give me the confidence.",
+            "id": "a8f57691322d3d1f3822d5f00e438b98"
+          },
+          {
+            "type": "html",
+            "text": "-- Yaxin Wang",
+            "id": "e00424e5f0d0d5236b0172985d282bf0"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nI feel that everyone here is missing the point of gaining access to private and protected parts of a class. The problem isn't accessible functions, it's accessing the members themselves. When I'm testing a function, I'm testing the internal state of the class during and after the execution of the said function. I've been making my members protected only, so I should be able to just subclass to access, but I'm looking for a better way that DOESN\"T involve friends. I find that syntax so ugly and will only use it in the most desperate occasion (aka, if I don't have time to refactor). So what do you guys think of this problem? How do you access the members of a class? Please also note that I'm using TUT, and thus can not use the friend syntax because my tests aren't classes.",
+            "id": "1a31f2dcf0d29686a95f8b845815e872"
+          },
+          {
+            "type": "html",
+            "text": "-- Jason Roelofs",
+            "id": "82a10e95b81be9eb0fdf4f11e3cf4064"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "See also: [[Methods Should Be Public]]",
+            "id": "8d843a6fbb1ef70cebc70409fc552808"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nAfter reading the above, another, perhaps more elegant solution came to my mind. We usually want to test just the interface of the class, as its user. In some rarer cases we need to test its internal implementation. Most but the radicals agree on that. The solution might be in defining an interface, say Testable, that defines a single runInternalTests() function and any internal tests that we want to conduct. The test can use [[Test Case]]'s assertTrue and such as they are static (at least in JUnit) to check test conditions and be called from an external [[Test Case]]. If runInternalTest is too long - it's a clear bad smell, but even then, it's possible to break it up into several methods.",
+            "id": "03e7149937d4d713d937ca7e08d7ce46"
+          },
+          {
+            "type": "html",
+            "text": "\nThis way we have a clear separation of implementation testing and interface testing, and the implementation testng resides where it should - within the code of the class itself, without breaking any of that precious encapsulation.\nA special interface for internal testing ensures consistency across the project/projects and could maybe allow an automated implementation test to run on all classes.",
+            "id": "1f877ecc2255443e458536ab3762ada2"
+          },
+          {
+            "type": "html",
+            "text": "-- Eli Golovinsky",
+            "id": "a393a246767a66042dc6a68323875653"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6b8502631f4a0e23ef3bc6840f16d5fa"
+          },
+          {
+            "type": "html",
+            "text": "\nI am writing a nontrivial code in C++ for the first time, trying to follow \"the rules\" for OOP, and using cppunit for unit testing. I immediately ran into this issue. I am finding it extremely useful to write unit tests and code simultaneously, but the tests are often MUCH simpler to write at the early stages of development if you allow yourself to test the internal state of an object. I agree with the comment that unit testing is useful both for initial development, during which it is convenient to have full access, and final verification of the public interface, during which you arguably should not, and that the two uses should be distinguished. In practice, the convenience of the unit tests as a tool for early development has been driving me to keep everything public initially (mea culpa) with the thought that I will later turn them to private. Aside from other problems, this would force meto remvoe or rewrite many of my unit tests, which I consider a giant waste.  I am considering the following variant of the conditional compilation solution, and am curious what others think:",
+            "id": "d38ab7f7eb4c080a4405e4b9fb0ced82"
+          },
+          {
+            "type": "html",
+            "text": "\n1) Include in all source files a file DEBUG.h, that can be edited to include a #define NDEBUG line to turn off C assertions. The same macro can aslo be used in",
+            "id": "1b2eea4fc2c482ece142da2fcf886d3c"
+          },
+          {
+            "type": "html",
+            "text": "#ifndef NDEBUG ... #endif blocks to conditionally compile other fragments of \"testing\" code. ",
+            "id": "d7b9007ae12fd643b11fc58531473b77"
+          },
+          {
+            "type": "html",
+            "text": "\n2) Within DEBUG.h, define preprocessor macros PROTECTED and PRIVATE that both have values \"public\" when NDEBUG is not defined (testing code) and that have values \"private\" and \"protected\", respectively, when NDEBUG is defined (production code). Use these macros consistently as replacements for the protected and private keywords in class declarations for classes with members or methods that I would like to keep accessible during testing. Also use the NDEBUG macro to conditionally compile any tests that require access to protected or private members in the unit tests. ",
+            "id": "f2c8a81ff8b396ff9a8f0038001ecf15"
+          },
+          {
+            "type": "html",
+            "text": "\nOne objection, made above to other uses of conditional compilation, is that this means that you are not actually testing the production code, you are only testing the \"testing\" version. This is a potential problem with any approach that uses access to private members, whether you gain access by conditional compilation by testing a subclass. It is not clear to me, howover, what sort of errors can be missed as a result of testing code that allows more promiscuous access to internals than that allowed in the production code. Can anyone give me a realistic example of a type of bug that you might miss as a result of this procedure if: i) Your classes pass all unit tests with some private members or methods converted to private, ii) The \"production\" code compiles correctly, despite the additional restrictions on access.  -David Morse",
+            "id": "e27929c01a242fb25dd6fe2075b80455"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Category Testing]]",
+            "id": "995481b8e1003e8314b850db44726a63"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?UnitTestingNonPublicMemberFunctions c2.com]",
+            "id": "9ed970723741ae5a21d1467da13e1992"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "test.sfw.c2.com",
+      "date": 1676891270906
+    }
+  ]
+}
