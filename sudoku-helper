@@ -1,0 +1,563 @@
+{
+  "title": "Sudoku Helper",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "b7c0fd57123594d2",
+      "text": "We've taken a step back from the increasing complexity driven by our early experiments in [[Outpost Thinking]]. We set the client aside for a moment and ask if we can hack an existing deno server to run executable helpers as if they were CGI scripts. [https://github.com/joshuabenuck/seran-sudoku github]"
+    },
+    {
+      "type": "paragraph",
+      "id": "7f27e6cb7e0b3ef2",
+      "text": "We took deno's std/http/server.ts and added the simple logic: if a file to be served is executable, execute it and serve the result. Content type will be inferred from the suffix so we discard usual language conventions and rely on the #! interpreter convention to launch the right engine."
+    },
+    {
+      "type": "paragraph",
+      "id": "7e475d8c225398eb",
+      "text": "We've used sample applications to drive our work. For this sprint we chose an existing perl script with a colorful history: the sudoku servant. See [[Sudokant]]"
+    },
+    {
+      "type": "pagefold",
+      "id": "b0e1ba6e735502b3",
+      "text": "."
+    },
+    {
+      "type": "paragraph",
+      "id": "74eb54cbeb3a566e",
+      "text": "In order to compare implementations we follow the same general structure of the original perl."
+    },
+    {
+      "type": "paragraph",
+      "id": "d820838812edb353",
+      "text": "Input. We retrieve the current board configuration from the query portion of the url. The 81 board positions are represented by digits when known (givens) and dot when yet to be determined (choices)."
+    },
+    {
+      "type": "paragraph",
+      "id": "6c8450d25e68b4b4",
+      "text": "Subsets. The rules specify that specific nine element subsets must be filled with digits without duplication. We enumerate the indices of all subsets first by row, then column and square. We can check these in any order so we run them all together."
+    },
+    {
+      "type": "paragraph",
+      "id": "87f3236c4ab19247",
+      "text": "Rules. We eliminate choices no longer available in a subset based on the board state, the givens from input. We have two versions: at-most-one of every digit and at-least-one of every digit."
+    },
+    {
+      "type": "code",
+      "id": "effb49896955e672",
+      "text": "for every subset\n  for every index in the subset\n    remove or otherwise mark unavailable choices"
+    },
+    {
+      "type": "paragraph",
+      "id": "8e8074ed3d0e956a",
+      "text": "Tables. We construct the visual frame for our output as a nested 3x3 square of 3x3 squares, each an \"X\" that we will soon replace. It is not a coincidence that these markers will appear in the html in the same order as we have numbered the givens and choices."
+    },
+    {
+      "type": "paragraph",
+      "id": "33ce8dadf5a29b45",
+      "text": "Choices. We now assemble everything we have learned into html for each place on the board. If the place is a given digit, we show that in a large font. Otherwise we do a little more case analysis to assemble up the desired display."
+    },
+    {
+      "type": "paragraph",
+      "id": "34bec731f557c5cc",
+      "text": "Output. We finish up by displaying the html version of the board just constructed along with some explanation and credits."
+    },
+    {
+      "type": "pagefold",
+      "id": "b607dbfb86a7f8b1",
+      "text": "."
+    },
+    {
+      "type": "paragraph",
+      "id": "2da4c35177d2bc53",
+      "text": "We've cast this javascript code into a Deno Deploy service and added a \"forced moves\" shortcut. [https://github.com/WardCunningham/sudokuku github] [https://sudokuku.deno.dev/ deploy] [https://one.newrelic.com/-/0BoQD7ZVNjy nr1]"
+    },
+    {
+      "type": "paragraph",
+      "id": "078d587252c3abd7",
+      "text": "The New York Times now offers daily sudoku that are reasonably retrieved with a bit of javascript. [https://www.nytimes.com/puzzles/sudoku/medium nyt]"
+    },
+    {
+      "type": "code",
+      "id": "10c76783eadcbace",
+      "text": "[...document.querySelectorAll('.su-cell')]\n  .map(e => e.ariaLabel.replace('empty','.'))\n  .join('')"
+    },
+    {
+      "type": "paragraph",
+      "id": "a9e5c7da9b77df17",
+      "text": "To be useful this needs to reorder cells to match that of the solver and then call the helper from a bookmarklet."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Sudoku Helper",
+        "story": []
+      },
+      "date": 1593189592986
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b7c0fd57123594d2"
+      },
+      "id": "b7c0fd57123594d2",
+      "type": "add",
+      "date": 1593189606073
+    },
+    {
+      "type": "edit",
+      "id": "b7c0fd57123594d2",
+      "item": {
+        "type": "paragraph",
+        "id": "b7c0fd57123594d2",
+        "text": "We've taken a step back from the increasingly complexity a series of experiments had led our [[Outpost Thinking]]. Setting the client aside for a moment we asked if we could hack an existing server to run executable helpers as if they were CGI scripts."
+      },
+      "date": 1593189867391
+    },
+    {
+      "type": "add",
+      "id": "7f27e6cb7e0b3ef2",
+      "item": {
+        "type": "paragraph",
+        "id": "7f27e6cb7e0b3ef2",
+        "text": "We took deno's std/http/server.ts and added the simple logic: if a file to be served is executable, execute it and serve the result. Content type will be inferred from the suffix so we discard usual language conventions and rely on the #! interpreter convention to launch the right engine."
+      },
+      "after": "b7c0fd57123594d2",
+      "date": 1593190168628
+    },
+    {
+      "type": "add",
+      "id": "7e475d8c225398eb",
+      "item": {
+        "type": "paragraph",
+        "id": "7e475d8c225398eb",
+        "text": "We've used sample applications to drive our work. For this sprint we chose an existing perl script with a colorful history."
+      },
+      "after": "7f27e6cb7e0b3ef2",
+      "date": 1593190287302
+    },
+    {
+      "type": "edit",
+      "id": "7e475d8c225398eb",
+      "item": {
+        "type": "paragraph",
+        "id": "7e475d8c225398eb",
+        "text": "We've used sample applications to drive our work. For this sprint we chose an existing perl script with a colorful history: the sudoku servant. See [[Sudokant]]"
+      },
+      "date": 1593190377872
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b0e1ba6e735502b3"
+      },
+      "id": "b0e1ba6e735502b3",
+      "type": "add",
+      "after": "7e475d8c225398eb",
+      "date": 1593190424656
+    },
+    {
+      "type": "edit",
+      "id": "b0e1ba6e735502b3",
+      "item": {
+        "type": "pagefold",
+        "id": "b0e1ba6e735502b3",
+        "text": "."
+      },
+      "date": 1593190438927
+    },
+    {
+      "type": "edit",
+      "id": "b7c0fd57123594d2",
+      "item": {
+        "type": "paragraph",
+        "id": "b7c0fd57123594d2",
+        "text": "We've taken a step back from the increasingly complexity a series of experiments had led our [[Outpost Thinking]]. Setting the client aside for a moment we asked if we could hack an existing server to run executable helpers as if they were CGI scripts. [https://github.com/joshuabenuck/seran-sudoku github]"
+      },
+      "date": 1593191094637
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "74eb54cbeb3a566e"
+      },
+      "id": "74eb54cbeb3a566e",
+      "type": "add",
+      "after": "b0e1ba6e735502b3",
+      "date": 1593191111852
+    },
+    {
+      "type": "edit",
+      "id": "74eb54cbeb3a566e",
+      "item": {
+        "type": "paragraph",
+        "id": "74eb54cbeb3a566e",
+        "text": "In order to compare implementations we follow the same general structure of the original perl."
+      },
+      "date": 1593191164444
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d820838812edb353"
+      },
+      "id": "d820838812edb353",
+      "type": "add",
+      "after": "74eb54cbeb3a566e",
+      "date": 1593191167199
+    },
+    {
+      "type": "edit",
+      "id": "d820838812edb353",
+      "item": {
+        "type": "paragraph",
+        "id": "d820838812edb353",
+        "text": "Input. We retrieve the current board configuration from the query portion of the url. The 81 board positions are represented by digits when known and dot when yet to be determined."
+      },
+      "date": 1593191307990
+    },
+    {
+      "type": "edit",
+      "id": "d820838812edb353",
+      "item": {
+        "type": "paragraph",
+        "id": "d820838812edb353",
+        "text": "Input. We retrieve the current board configuration from the query portion of the url. The 81 board positions are represented by digits when known (givens) and dot when yet to be determined (choices)."
+      },
+      "date": 1593191391554
+    },
+    {
+      "type": "add",
+      "id": "6c8450d25e68b4b4",
+      "item": {
+        "type": "paragraph",
+        "id": "6c8450d25e68b4b4",
+        "text": "Subsets. The rules specify that specific nine element subsets must be filled with digits without duplication. We enumerate the index "
+      },
+      "after": "d820838812edb353",
+      "date": 1593191648163
+    },
+    {
+      "type": "edit",
+      "id": "6c8450d25e68b4b4",
+      "item": {
+        "type": "paragraph",
+        "id": "6c8450d25e68b4b4",
+        "text": "Subsets. The rules specify that specific nine element subsets must be filled with digits without duplication. We enumerate the indices of all subsets first by row, then column and square. We can check these in any order so we run them all together."
+      },
+      "date": 1593191762060
+    },
+    {
+      "type": "add",
+      "id": "87f3236c4ab19247",
+      "item": {
+        "type": "paragraph",
+        "id": "87f3236c4ab19247",
+        "text": "Rules. We eliminate choices no longer available in a subset based on the board state, the givens from input. We have two versions: at-most-one of every digit and at-least-one of every digit."
+      },
+      "after": "6c8450d25e68b4b4",
+      "date": 1593192336363
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "effb49896955e672"
+      },
+      "id": "effb49896955e672",
+      "type": "add",
+      "after": "87f3236c4ab19247",
+      "date": 1593192375148
+    },
+    {
+      "type": "edit",
+      "id": "effb49896955e672",
+      "item": {
+        "type": "code",
+        "id": "effb49896955e672",
+        "text": "for every subset\n  for every index in the subset\n    remove or otherwise mark unavailable choices"
+      },
+      "date": 1593192559929
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8e8074ed3d0e956a"
+      },
+      "id": "8e8074ed3d0e956a",
+      "type": "add",
+      "after": "effb49896955e672",
+      "date": 1593192721050
+    },
+    {
+      "type": "edit",
+      "id": "8e8074ed3d0e956a",
+      "item": {
+        "type": "paragraph",
+        "id": "8e8074ed3d0e956a",
+        "text": "Tables. We construct the visual frame for our output as a nested 3x3 square of 3x3 squares, each an \"X\" that we will soon replace. It is not a coincidence that these markers will appear in the html in the same order as we have numbered the givens and choices."
+      },
+      "date": 1593193166971
+    },
+    {
+      "type": "add",
+      "id": "33ce8dadf5a29b45",
+      "item": {
+        "type": "paragraph",
+        "id": "33ce8dadf5a29b45",
+        "text": "Choices. We now assemble everything we have learned into html for each place on the board. "
+      },
+      "after": "8e8074ed3d0e956a",
+      "date": 1593193473249
+    },
+    {
+      "type": "edit",
+      "id": "33ce8dadf5a29b45",
+      "item": {
+        "type": "paragraph",
+        "id": "33ce8dadf5a29b45",
+        "text": "Choices. We now assemble everything we have learned into html for each place on the board. If the place is a given digit, we show that in a large font. Otherwise we do a little more case analysis to assemble up the desired display."
+      },
+      "date": 1593193712103
+    },
+    {
+      "type": "add",
+      "id": "34bec731f557c5cc",
+      "item": {
+        "type": "paragraph",
+        "id": "34bec731f557c5cc",
+        "text": "Output. We finish up by displaying the html version of the board just constructed along with some explanation and credits."
+      },
+      "after": "33ce8dadf5a29b45",
+      "date": 1593193773263
+    },
+    {
+      "type": "edit",
+      "id": "b7c0fd57123594d2",
+      "item": {
+        "type": "paragraph",
+        "id": "b7c0fd57123594d2",
+        "text": "We've taken a step back from the increasing complexity driven by our early experiments [[Outpost Thinking]]. We set the client aside for a moment and ask if we can hack an existing deno server to run executable helpers as if they were CGI scripts. [https://github.com/joshuabenuck/seran-sudoku github]"
+      },
+      "date": 1593194946857
+    },
+    {
+      "type": "edit",
+      "id": "b7c0fd57123594d2",
+      "item": {
+        "type": "paragraph",
+        "id": "b7c0fd57123594d2",
+        "text": "We've taken a step back from the increasing complexity driven by our early experiments in [[Outpost Thinking]]. We set the client aside for a moment and ask if we can hack an existing deno server to run executable helpers as if they were CGI scripts. [https://github.com/joshuabenuck/seran-sudoku github]"
+      },
+      "date": 1593194969445
+    },
+    {
+      "type": "fork",
+      "site": "ward.asia.wiki.org",
+      "date": 1593197333815
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b607dbfb86a7f8b1"
+      },
+      "id": "b607dbfb86a7f8b1",
+      "type": "add",
+      "after": "34bec731f557c5cc",
+      "date": 1625597196591
+    },
+    {
+      "type": "edit",
+      "id": "b607dbfb86a7f8b1",
+      "item": {
+        "type": "pagefold",
+        "id": "b607dbfb86a7f8b1",
+        "text": "."
+      },
+      "date": 1625597202114
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2da4c35177d2bc53"
+      },
+      "id": "2da4c35177d2bc53",
+      "type": "add",
+      "after": "b607dbfb86a7f8b1",
+      "date": 1625597292822
+    },
+    {
+      "type": "edit",
+      "id": "2da4c35177d2bc53",
+      "item": {
+        "type": "paragraph",
+        "id": "2da4c35177d2bc53",
+        "text": "We've cast this javascript code into a Deno Deploy service and added a \"forced moves\" shortcut. [https://github.com/WardCunningham/sudokuku github]"
+      },
+      "date": 1625597377218
+    },
+    {
+      "type": "edit",
+      "id": "2da4c35177d2bc53",
+      "item": {
+        "type": "paragraph",
+        "id": "2da4c35177d2bc53",
+        "text": "We've cast this javascript code into a Deno Deploy service and added a \"forced moves\" shortcut. [https://github.com/WardCunningham/sudokuku github] [https://sudokuku.deno.dev/ deploy]"
+      },
+      "date": 1625597400996
+    },
+    {
+      "type": "edit",
+      "id": "2da4c35177d2bc53",
+      "item": {
+        "type": "paragraph",
+        "id": "2da4c35177d2bc53",
+        "text": "We've cast this javascript code into a Deno Deploy service and added a \"forced moves\" shortcut. [https://github.com/WardCunningham/sudokuku github] [https://sudokuku.deno.dev/ deploy] [https://one.newrelic.com/-/0BoQD7ZVNjy nr1]"
+      },
+      "date": 1625597586909
+    },
+    {
+      "type": "fork",
+      "site": "code.fed.wiki.org"
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "078d587252c3abd7"
+      },
+      "id": "078d587252c3abd7",
+      "type": "add",
+      "after": "2da4c35177d2bc53",
+      "date": 1677348845199
+    },
+    {
+      "type": "edit",
+      "id": "078d587252c3abd7",
+      "item": {
+        "type": "paragraph",
+        "id": "078d587252c3abd7",
+        "text": "The New York Times now offers daily sudoku."
+      },
+      "date": 1677348877211
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "10c76783eadcbace"
+      },
+      "id": "10c76783eadcbace",
+      "type": "add",
+      "after": "078d587252c3abd7",
+      "date": 1677348887972
+    },
+    {
+      "type": "edit",
+      "id": "10c76783eadcbace",
+      "item": {
+        "type": "code",
+        "id": "10c76783eadcbace",
+        "text": "[...document.querySelectorAll('.su-cell')].map(e => e.ariaLabel).join(',')"
+      },
+      "date": 1677348892150
+    },
+    {
+      "type": "edit",
+      "id": "10c76783eadcbace",
+      "item": {
+        "type": "code",
+        "id": "10c76783eadcbace",
+        "text": "[...document.querySelectorAll('.su-cell')]\n  .map(e => e.ariaLabel)\n  .join(',')"
+      },
+      "date": 1677348914897
+    },
+    {
+      "type": "edit",
+      "id": "078d587252c3abd7",
+      "item": {
+        "type": "paragraph",
+        "id": "078d587252c3abd7",
+        "text": "The New York Times now offers daily sudoku. [https://www.nytimes.com/puzzles/sudoku/medium nyt]"
+      },
+      "date": 1677348967352
+    },
+    {
+      "type": "edit",
+      "id": "078d587252c3abd7",
+      "item": {
+        "type": "paragraph",
+        "id": "078d587252c3abd7",
+        "text": "The New York Times now offers daily sudoku that are reasonably retrieved with a bit of javascript. [https://www.nytimes.com/puzzles/sudoku/medium nyt]"
+      },
+      "date": 1677349020191
+    },
+    {
+      "type": "fork",
+      "date": 1677349277356
+    },
+    {
+      "type": "edit",
+      "id": "10c76783eadcbace",
+      "item": {
+        "type": "code",
+        "id": "10c76783eadcbace",
+        "text": "[...document.querySelectorAll('.su-cell')]\n  .map(e => e.ariaLabel.replace('empty','.'))\n  .join('')"
+      },
+      "date": 1677349311915
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a9e5c7da9b77df17"
+      },
+      "id": "a9e5c7da9b77df17",
+      "type": "add",
+      "after": "10c76783eadcbace",
+      "date": 1677386632712
+    },
+    {
+      "type": "edit",
+      "id": "a9e5c7da9b77df17",
+      "item": {
+        "type": "paragraph",
+        "id": "a9e5c7da9b77df17",
+        "text": "To be useful this needs to reorder cells to match that of the solver and to call the solver with a bookmarklet."
+      },
+      "date": 1677386682992
+    },
+    {
+      "type": "edit",
+      "id": "a9e5c7da9b77df17",
+      "item": {
+        "type": "paragraph",
+        "id": "a9e5c7da9b77df17",
+        "text": "To be useful this needs to reorder cells to match that of the solver and to call the helper with a bookmarklet."
+      },
+      "date": 1677386696773
+    },
+    {
+      "type": "edit",
+      "id": "a9e5c7da9b77df17",
+      "item": {
+        "type": "paragraph",
+        "id": "a9e5c7da9b77df17",
+        "text": "To be useful this needs to reorder cells to match that of the solver and then call the helper with a bookmarklet."
+      },
+      "date": 1677386721007
+    },
+    {
+      "type": "edit",
+      "id": "a9e5c7da9b77df17",
+      "item": {
+        "type": "paragraph",
+        "id": "a9e5c7da9b77df17",
+        "text": "To be useful this needs to reorder cells to match that of the solver and then call the helper from a bookmarklet."
+      },
+      "date": 1677386729748
+    },
+    {
+      "type": "fork",
+      "site": "found.ward.fed.wiki",
+      "date": 1677411823210
+    }
+  ]
+}
