@@ -1,0 +1,1083 @@
+{
+  "title": "2023-03-11",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "d6f2204c3e578abd",
+      "text": "⇒ [[Software Fish]] ⇒ [[Eric Dobbs]] ⇒ [[Pressures Conflicts Adaptations]] ⇒ [[Cognition in Software]] ⇒ [[Ding und Medium]] ⇒ [[Recognize the Water We Swim In]]"
+    },
+    {
+      "type": "pagefold",
+      "id": "7055bf455748a907",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "8b0cbc6fef92b4fb",
+      "text": "@Ward via [https://matrix.to/#/!ORfrUEFeWFcHAMLFLr:matrix.org/$16785354076qKMcp:dreyeck.freedombox.rocks?via=matrix.org&via=matrix.allmende.io&via=chat.weho.st matrix]\n: I am currently playing with a visualization of patrilineal inheritance of property and family names (keyword: family tree), see 2023-03-11 page. Now I would like to achieve that the data is not on the same page, but e.g. taken from a page on the left side of the lineup. Are there already examples for this use case on which I could build?\n"
+    },
+    {
+      "type": "code",
+      "id": "c15d01a2c1e44f0a",
+      "text": "import * as d3 from 'https://cdn.skypack.dev/d3';\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "92e1c098d89fb051",
+      "text": "⇒ [[Static Import Snippet]], Frame:"
+    },
+    {
+      "type": "frame",
+      "id": "87b0811ac2b889e1",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 256"
+    },
+    {
+      "type": "pagefold",
+      "id": "f460dd69f12c909a",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "73dcbc867dd2ae72",
+      "text": "Data for the [[Family Tree]]:"
+    },
+    {
+      "type": "code",
+      "id": "240c908257d15eb0",
+      "text": "var data = {\n  name: \"Adam\",\n  children: [\n    {\n      name: \"Seth\",\n      children: [\n        {\n          name: \"Enos\",\n          children: [\n            {\n              name: \"Kenan\",\n              children: []\n            },\n            {\n              name: \"Mahalalel\",\n              children: []\n            },\n            {\n              name: \"Jared\",\n              children: []\n            },\n            {\n              name: \"Enoch\",\n              children: []\n            },\n            {\n              name: \"Methuselah\",\n              children: []\n            },\n            {\n              name: \"Lamech\",\n              children: []\n            },\n            {\n              name: \"Noah\",\n              children: []\n            }\n          ]\n        }\n      ]\n    }\n  ]\n};\n\n"
+    },
+    {
+      "type": "pagefold",
+      "id": "84a97b21580f935d",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "a33e0e79c70dc638",
+      "text": "Creating the SVG element:"
+    },
+    {
+      "type": "code",
+      "id": "4f8b0c5431eb3bf3",
+      "text": "var svg = d3.select(\"body\")\n  .append(\"svg\")\n  .attr(\"width\", 800)\n  .attr(\"height\", 600);"
+    },
+    {
+      "type": "paragraph",
+      "id": "d1d68cd3229f431e",
+      "text": "Creating the family tree:"
+    },
+    {
+      "type": "code",
+      "id": "4a709027ce64527a",
+      "text": "var treeLayout = d3.tree().size([600, 400]);\nvar rootNode = d3.hierarchy(data);\nvar tree = treeLayout(rootNode);\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "0fdb8f8bcf2bcbe1",
+      "text": "Creating the lines for connecting nodes:"
+    },
+    {
+      "type": "code",
+      "id": "427dfc74a5abf251",
+      "text": "var link = svg.selectAll(\".link\")\n  .data(tree.links())\n  .enter()\n  .append(\"line\")\n  .attr(\"class\", \"link\")\n  .attr(\"x1\", function(d) { return d.source.x; })\n  .attr(\"y1\", function(d) { return d.source.y; })\n  .attr(\"x2\", function(d) { return d.target.x; })\n  .attr(\"y2\", function(d) { return d.target.y; });\n\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "869ea1f58af5542e",
+      "text": "Note: Creating the lines to connect nodes does not seem to work yet."
+    },
+    {
+      "type": "paragraph",
+      "id": "336ebb987ed2f2c5",
+      "text": "Create the nodes:"
+    },
+    {
+      "type": "code",
+      "id": "fc428b3c6d1a391e",
+      "text": "var node = svg.selectAll(\".node\")\n  .data(tree.descendants())\n  .enter()\n  .append(\"g\")\n  .attr(\"class\", \"node\")\n  .attr(\"transform\", function(d) { return \"translate(\" + d.x + \",\" + d.y + \")\"; });\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "1bb65337f1a58b29",
+      "text": "Creating the circles for the nodes:"
+    },
+    {
+      "type": "code",
+      "id": "d4dadecba4383da3",
+      "text": "node.append(\"circle\")\n  .attr(\"r\", 20);\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "85765477ed78f6f9",
+      "text": "Adding the name of the persons to the nodes:"
+    },
+    {
+      "type": "code",
+      "id": "57474b49597d551b",
+      "text": "node.append(\"text\")\n  .attr(\"dx\", -10)\n  .attr(\"dy\", 30)\n  .text(function(d) { return d.data.name; });"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "2023-03-11",
+        "story": []
+      },
+      "date": 1678513665953
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d6f2204c3e578abd"
+      },
+      "id": "d6f2204c3e578abd",
+      "type": "add",
+      "date": 1678513667272
+    },
+    {
+      "type": "edit",
+      "id": "d6f2204c3e578abd",
+      "item": {
+        "type": "paragraph",
+        "id": "d6f2204c3e578abd",
+        "text": "⇒ [[Software Fish]]"
+      },
+      "date": 1678513680662
+    },
+    {
+      "id": "653aa8c474125386",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "653aa8c474125386",
+        "text": "⇒ [[Eric Dobbs]] ⇒ [[Pressures Conflicts Adaptations]]: The visual, iconographic representation of a sequence of shapes piqued my interest in connection with your earlier page [[Above and Below the Line]]. I can relate this well to my current work in the context of our [[Graph Collaborator]], where I am trying to apply an idea from the Wolfram Physics Project:"
+      },
+      "after": "d6f2204c3e578abd",
+      "attribution": {
+        "page": "2023-03-10"
+      },
+      "date": 1678513699631
+    },
+    {
+      "type": "remove",
+      "id": "653aa8c474125386",
+      "date": 1678513703230
+    },
+    {
+      "type": "edit",
+      "id": "d6f2204c3e578abd",
+      "item": {
+        "type": "paragraph",
+        "id": "d6f2204c3e578abd",
+        "text": "⇒ [[Software Fish]] ⇒ [[Eric Dobbs]] ⇒ [[Pressures Conflicts Adaptations]]"
+      },
+      "date": 1678513710230
+    },
+    {
+      "type": "edit",
+      "id": "d6f2204c3e578abd",
+      "item": {
+        "type": "paragraph",
+        "id": "d6f2204c3e578abd",
+        "text": "⇒ [[Software Fish]] ⇒ [[Eric Dobbs]] ⇒ [[Pressures Conflicts Adaptations]] ⇒ [[Cognition in Software]]"
+      },
+      "date": 1678513728575
+    },
+    {
+      "type": "edit",
+      "id": "d6f2204c3e578abd",
+      "item": {
+        "type": "paragraph",
+        "id": "d6f2204c3e578abd",
+        "text": "⇒ [[Software Fish]] ⇒ [[Eric Dobbs]] ⇒ [[Pressures Conflicts Adaptations]] ⇒ [[Cognition in Software]] ⇒ [[Ding und Medium]]"
+      },
+      "date": 1678513761866
+    },
+    {
+      "type": "edit",
+      "id": "d6f2204c3e578abd",
+      "item": {
+        "type": "paragraph",
+        "id": "d6f2204c3e578abd",
+        "text": "⇒ [[Software Fish]] ⇒ [[Eric Dobbs]] ⇒ [[Pressures Conflicts Adaptations]] ⇒ [[Cognition in Software]] ⇒ [[Ding und Medium]] ⇒ [[Recognize the Water We Swim In]]"
+      },
+      "date": 1678513791824
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "240c908257d15eb0"
+      },
+      "id": "240c908257d15eb0",
+      "type": "add",
+      "after": "d6f2204c3e578abd",
+      "date": 1678534459716
+    },
+    {
+      "type": "edit",
+      "id": "240c908257d15eb0",
+      "item": {
+        "type": "code",
+        "id": "240c908257d15eb0",
+        "text": "// Daten für den Stammbaum\nvar data = {\n  name: \"Adam\",\n  children: [\n    {\n      name: \"Seth\",\n      children: [\n        {\n          name: \"Enos\",\n          children: [\n            {\n              name: \"Kenan\",\n              children: []\n            },\n            {\n              name: \"Mahalalel\",\n              children: []\n            },\n            {\n              name: \"Jared\",\n              children: []\n            },\n            {\n              name: \"Enoch\",\n              children: []\n            },\n            {\n              name: \"Methuselah\",\n              children: []\n            },\n            {\n              name: \"Lamech\",\n              children: []\n            },\n            {\n              name: \"Noah\",\n              children: []\n            }\n          ]\n        }\n      ]\n    }\n  ]\n};\n\n// Erstellen des SVG-Elements\nvar svg = d3.select(\"body\")\n  .append(\"svg\")\n  .attr(\"width\", 800)\n  .attr(\"height\", 600);\n\n// Erstellen des Stammbaums\nvar treeLayout = d3.tree().size([600, 400]);\nvar rootNode = d3.hierarchy(data);\nvar tree = treeLayout(rootNode);\n\n// Erstellen der Linien für die Verbindung von Knoten\nvar link = svg.selectAll(\".link\")\n  .data(tree.links())\n  .enter()\n  .append(\"line\")\n  .attr(\"class\", \"link\")\n  .attr(\"x1\", function(d) { return d.source.x; })\n  .attr(\"y1\", function(d) { return d.source.y; })\n  .attr(\"x2\", function(d) { return d.target.x; })\n  .attr(\"y2\", function(d) { return d.target.y; });\n\n// Erstellen der Knoten\nvar node = svg.selectAll(\".node\")\n  .data(tree.descendants())\n  .enter()\n  .append(\"g\")\n  .attr(\"class\", \"node\")\n  .attr(\"transform\", function(d) { return \"translate(\" + d.x + \",\" + d.y + \")\"; });\n\n// Erstellen der Kreise für die Knoten\nnode.append(\"circle\")\n  .attr(\"r\", 20);\n\n// Hinzufügen des Namens der Personen zu den Knoten\nnode.append(\"text\")\n  .attr(\"dx\", -10)\n  .attr(\"dy\", 30)\n  .text(function(d) { return d.data.name; });\n"
+      },
+      "date": 1678534461930
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "92e1c098d89fb051"
+      },
+      "id": "92e1c098d89fb051",
+      "type": "add",
+      "after": "240c908257d15eb0",
+      "date": 1678534465522
+    },
+    {
+      "type": "edit",
+      "id": "92e1c098d89fb051",
+      "item": {
+        "type": "paragraph",
+        "id": "92e1c098d89fb051",
+        "text": "⇒"
+      },
+      "date": 1678534480505
+    },
+    {
+      "type": "edit",
+      "id": "92e1c098d89fb051",
+      "item": {
+        "type": "paragraph",
+        "id": "92e1c098d89fb051",
+        "text": "⇒ [[Static Import Snippet]]"
+      },
+      "date": 1678534502227
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c15d01a2c1e44f0a"
+      },
+      "id": "c15d01a2c1e44f0a",
+      "type": "add",
+      "after": "92e1c098d89fb051",
+      "date": 1678534605723
+    },
+    {
+      "id": "c15d01a2c1e44f0a",
+      "type": "move",
+      "order": [
+        "d6f2204c3e578abd",
+        "c15d01a2c1e44f0a",
+        "240c908257d15eb0",
+        "92e1c098d89fb051"
+      ],
+      "date": 1678534613414
+    },
+    {
+      "type": "edit",
+      "id": "c15d01a2c1e44f0a",
+      "item": {
+        "type": "code",
+        "id": "c15d01a2c1e44f0a",
+        "text": "import * as d3 from 'd3';"
+      },
+      "date": 1678534618275
+    },
+    {
+      "id": "92e1c098d89fb051",
+      "type": "move",
+      "order": [
+        "d6f2204c3e578abd",
+        "c15d01a2c1e44f0a",
+        "92e1c098d89fb051",
+        "240c908257d15eb0"
+      ],
+      "date": 1678534723276
+    },
+    {
+      "type": "edit",
+      "id": "c15d01a2c1e44f0a",
+      "item": {
+        "type": "code",
+        "id": "c15d01a2c1e44f0a",
+        "text": "import * as d3 from 'https://cdn.skypack.dev/d3@7.2.0';\n"
+      },
+      "date": 1678534724606
+    },
+    {
+      "id": "87b0811ac2b889e1",
+      "type": "add",
+      "item": {
+        "type": "frame",
+        "id": "87b0811ac2b889e1",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 75"
+      },
+      "after": "240c908257d15eb0",
+      "attribution": {
+        "page": "Static Import Snippet"
+      },
+      "date": 1678534739144
+    },
+    {
+      "type": "edit",
+      "id": "87b0811ac2b889e1",
+      "item": {
+        "type": "frame",
+        "id": "87b0811ac2b889e1",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 256"
+      },
+      "date": 1678534756741
+    },
+    {
+      "id": "87b0811ac2b889e1",
+      "type": "move",
+      "order": [
+        "d6f2204c3e578abd",
+        "c15d01a2c1e44f0a",
+        "92e1c098d89fb051",
+        "87b0811ac2b889e1",
+        "240c908257d15eb0"
+      ],
+      "date": 1678534775784
+    },
+    {
+      "type": "add",
+      "id": "8b0cbc6fef92b4fb",
+      "item": {
+        "type": "paragraph",
+        "id": "8b0cbc6fef92b4fb",
+        "text": "⇒ [[Stammbaum]]"
+      },
+      "after": "d6f2204c3e578abd",
+      "date": 1678534889795
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7055bf455748a907"
+      },
+      "id": "7055bf455748a907",
+      "type": "add",
+      "after": "240c908257d15eb0",
+      "date": 1678534956184
+    },
+    {
+      "id": "7055bf455748a907",
+      "type": "move",
+      "order": [
+        "d6f2204c3e578abd",
+        "7055bf455748a907",
+        "8b0cbc6fef92b4fb",
+        "c15d01a2c1e44f0a",
+        "92e1c098d89fb051",
+        "87b0811ac2b889e1",
+        "240c908257d15eb0"
+      ],
+      "date": 1678534965029
+    },
+    {
+      "type": "edit",
+      "id": "7055bf455748a907",
+      "item": {
+        "type": "pagefold",
+        "id": "7055bf455748a907",
+        "text": "~"
+      },
+      "date": 1678534969107
+    },
+    {
+      "type": "add",
+      "id": "73dcbc867dd2ae72",
+      "item": {
+        "type": "paragraph",
+        "id": "73dcbc867dd2ae72",
+        "text": "Data for the family tree"
+      },
+      "after": "92e1c098d89fb051",
+      "date": 1678535026859
+    },
+    {
+      "id": "73dcbc867dd2ae72",
+      "type": "move",
+      "order": [
+        "d6f2204c3e578abd",
+        "7055bf455748a907",
+        "8b0cbc6fef92b4fb",
+        "c15d01a2c1e44f0a",
+        "92e1c098d89fb051",
+        "87b0811ac2b889e1",
+        "73dcbc867dd2ae72",
+        "240c908257d15eb0"
+      ],
+      "date": 1678535030940
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4f8b0c5431eb3bf3"
+      },
+      "id": "4f8b0c5431eb3bf3",
+      "type": "add",
+      "after": "240c908257d15eb0",
+      "date": 1678535035664
+    },
+    {
+      "type": "edit",
+      "id": "240c908257d15eb0",
+      "item": {
+        "type": "code",
+        "id": "240c908257d15eb0",
+        "text": "// Daten für den Stammbaum\nvar data = {\n  name: \"Adam\",\n  children: [\n    {\n      name: \"Seth\",\n      children: [\n        {\n          name: \"Enos\",\n          children: [\n            {\n              name: \"Kenan\",\n              children: []\n            },\n            {\n              name: \"Mahalalel\",\n              children: []\n            },\n            {\n              name: \"Jared\",\n              children: []\n            },\n            {\n              name: \"Enoch\",\n              children: []\n            },\n            {\n              name: \"Methuselah\",\n              children: []\n            },\n            {\n              name: \"Lamech\",\n              children: []\n            },\n            {\n              name: \"Noah\",\n              children: []\n            }\n          ]\n        }\n      ]\n    }\n  ]\n};\n\n"
+      },
+      "date": 1678535056900
+    },
+    {
+      "type": "edit",
+      "id": "4f8b0c5431eb3bf3",
+      "item": {
+        "type": "code",
+        "id": "4f8b0c5431eb3bf3",
+        "text": "// Erstellen des SVG-Elements\nvar svg = d3.select(\"body\")\n  .append(\"svg\")\n  .attr(\"width\", 800)\n  .attr(\"height\", 600);\n\n// Erstellen des Stammbaums\nvar treeLayout = d3.tree().size([600, 400]);\nvar rootNode = d3.hierarchy(data);\nvar tree = treeLayout(rootNode);\n\n// Erstellen der Linien für die Verbindung von Knoten\nvar link = svg.selectAll(\".link\")\n  .data(tree.links())\n  .enter()\n  .append(\"line\")\n  .attr(\"class\", \"link\")\n  .attr(\"x1\", function(d) { return d.source.x; })\n  .attr(\"y1\", function(d) { return d.source.y; })\n  .attr(\"x2\", function(d) { return d.target.x; })\n  .attr(\"y2\", function(d) { return d.target.y; });\n\n// Erstellen der Knoten\nvar node = svg.selectAll(\".node\")\n  .data(tree.descendants())\n  .enter()\n  .append(\"g\")\n  .attr(\"class\", \"node\")\n  .attr(\"transform\", function(d) { return \"translate(\" + d.x + \",\" + d.y + \")\"; });\n\n// Erstellen der Kreise für die Knoten\nnode.append(\"circle\")\n  .attr(\"r\", 20);\n\n// Hinzufügen des Namens der Personen zu den Knoten\nnode.append(\"text\")\n  .attr(\"dx\", -10)\n  .attr(\"dy\", 30)\n  .text(function(d) { return d.data.name; });\n"
+      },
+      "date": 1678535060077
+    },
+    {
+      "type": "edit",
+      "id": "73dcbc867dd2ae72",
+      "item": {
+        "type": "paragraph",
+        "id": "73dcbc867dd2ae72",
+        "text": "Data for the [[Family Tree]]"
+      },
+      "date": 1678535109762
+    },
+    {
+      "type": "edit",
+      "id": "8b0cbc6fef92b4fb",
+      "item": {
+        "type": "paragraph",
+        "id": "8b0cbc6fef92b4fb",
+        "text": "⇒ [[Stammbaum]] / [[Family Tree]]"
+      },
+      "date": 1678535559794
+    },
+    {
+      "type": "edit",
+      "id": "73dcbc867dd2ae72",
+      "item": {
+        "type": "paragraph",
+        "id": "73dcbc867dd2ae72",
+        "text": "Data for the [[Family Tree]]:"
+      },
+      "date": 1678535575788
+    },
+    {
+      "type": "edit",
+      "id": "8b0cbc6fef92b4fb",
+      "item": {
+        "type": "paragraph",
+        "id": "8b0cbc6fef92b4fb",
+        "text": "Ward\n: I am currently playing with a visualization of patrilineal inheritance of property and family names (keyword: family tree), see 2023-03-11 page. Now I would like to achieve that the data is not on the same page, but e.g. taken from a page on the left side of the lineup. Are there already examples for this use case on which I could build?\n"
+      },
+      "date": 1678535662218
+    },
+    {
+      "type": "add",
+      "id": "a24d27b8fc5a17ed",
+      "item": {
+        "type": "paragraph",
+        "id": "a24d27b8fc5a17ed",
+        "text": "⇒ [[Stammbaum]] / [[Family Tree]]"
+      },
+      "after": "8b0cbc6fef92b4fb",
+      "date": 1678535664356
+    },
+    {
+      "type": "edit",
+      "id": "8b0cbc6fef92b4fb",
+      "item": {
+        "type": "paragraph",
+        "id": "8b0cbc6fef92b4fb",
+        "text": "@Ward via [matrix]\n: I am currently playing with a visualization of patrilineal inheritance of property and family names (keyword: family tree), see 2023-03-11 page. Now I would like to achieve that the data is not on the same page, but e.g. taken from a page on the left side of the lineup. Are there already examples for this use case on which I could build?\n"
+      },
+      "date": 1678535677326
+    },
+    {
+      "type": "edit",
+      "id": "8b0cbc6fef92b4fb",
+      "item": {
+        "type": "paragraph",
+        "id": "8b0cbc6fef92b4fb",
+        "text": "@Ward via [https://matrix.to/#/!ORfrUEFeWFcHAMLFLr:matrix.org/$16785354076qKMcp:dreyeck.freedombox.rocks?via=matrix.org&via=matrix.allmende.io&via=chat.weho.st matrix]\n: I am currently playing with a visualization of patrilineal inheritance of property and family names (keyword: family tree), see 2023-03-11 page. Now I would like to achieve that the data is not on the same page, but e.g. taken from a page on the left side of the lineup. Are there already examples for this use case on which I could build?\n"
+      },
+      "date": 1678535687432
+    },
+    {
+      "type": "edit",
+      "id": "c15d01a2c1e44f0a",
+      "item": {
+        "type": "code",
+        "id": "c15d01a2c1e44f0a",
+        "text": "import * as d3 from 'https://cdn.skypack.dev/d3';\n"
+      },
+      "date": 1678535795783
+    },
+    {
+      "type": "edit",
+      "id": "73dcbc867dd2ae72",
+      "item": {
+        "type": "paragraph",
+        "id": "73dcbc867dd2ae72",
+        "text": "Data for the [[Family Tree]]:"
+      },
+      "date": 1678535858041
+    },
+    {
+      "type": "add",
+      "id": "a33e0e79c70dc638",
+      "item": {
+        "type": "paragraph",
+        "id": "a33e0e79c70dc638",
+        "text": "Creating the SVG element"
+      },
+      "after": "73dcbc867dd2ae72",
+      "date": 1678535859710
+    },
+    {
+      "id": "a33e0e79c70dc638",
+      "type": "move",
+      "order": [
+        "d6f2204c3e578abd",
+        "7055bf455748a907",
+        "8b0cbc6fef92b4fb",
+        "c15d01a2c1e44f0a",
+        "92e1c098d89fb051",
+        "87b0811ac2b889e1",
+        "73dcbc867dd2ae72",
+        "240c908257d15eb0",
+        "a33e0e79c70dc638",
+        "4f8b0c5431eb3bf3"
+      ],
+      "date": 1678535868855
+    },
+    {
+      "type": "edit",
+      "id": "a33e0e79c70dc638",
+      "item": {
+        "type": "paragraph",
+        "id": "a33e0e79c70dc638",
+        "text": "Creating the SVG element:"
+      },
+      "date": 1678535871730
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d1d68cd3229f431e"
+      },
+      "id": "d1d68cd3229f431e",
+      "type": "add",
+      "after": "4f8b0c5431eb3bf3",
+      "date": 1678535891790
+    },
+    {
+      "type": "edit",
+      "id": "d1d68cd3229f431e",
+      "item": {
+        "type": "paragraph",
+        "id": "d1d68cd3229f431e",
+        "text": "Creating the family tree"
+      },
+      "date": 1678535897646
+    },
+    {
+      "type": "edit",
+      "id": "4f8b0c5431eb3bf3",
+      "item": {
+        "type": "code",
+        "id": "4f8b0c5431eb3bf3",
+        "text": "// Erstellen des SVG-Elements\nvar svg = d3.select(\"body\")\n  .append(\"svg\")\n  .attr(\"width\", 800)\n  .attr(\"height\", 600);"
+      },
+      "date": 1678535908848
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4a709027ce64527a"
+      },
+      "id": "4a709027ce64527a",
+      "type": "add",
+      "after": "d1d68cd3229f431e",
+      "date": 1678535910229
+    },
+    {
+      "type": "edit",
+      "id": "4a709027ce64527a",
+      "item": {
+        "type": "code",
+        "id": "4a709027ce64527a",
+        "text": "// Erstellen des Stammbaums\nvar treeLayout = d3.tree().size([600, 400]);\nvar rootNode = d3.hierarchy(data);\nvar tree = treeLayout(rootNode);\n\n// Erstellen der Linien für die Verbindung von Knoten\nvar link = svg.selectAll(\".link\")\n  .data(tree.links())\n  .enter()\n  .append(\"line\")\n  .attr(\"class\", \"link\")\n  .attr(\"x1\", function(d) { return d.source.x; })\n  .attr(\"y1\", function(d) { return d.source.y; })\n  .attr(\"x2\", function(d) { return d.target.x; })\n  .attr(\"y2\", function(d) { return d.target.y; });\n\n// Erstellen der Knoten\nvar node = svg.selectAll(\".node\")\n  .data(tree.descendants())\n  .enter()\n  .append(\"g\")\n  .attr(\"class\", \"node\")\n  .attr(\"transform\", function(d) { return \"translate(\" + d.x + \",\" + d.y + \")\"; });\n\n// Erstellen der Kreise für die Knoten\nnode.append(\"circle\")\n  .attr(\"r\", 20);\n\n// Hinzufügen des Namens der Personen zu den Knoten\nnode.append(\"text\")\n  .attr(\"dx\", -10)\n  .attr(\"dy\", 30)\n  .text(function(d) { return d.data.name; });\n"
+      },
+      "date": 1678535912711
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0fdb8f8bcf2bcbe1"
+      },
+      "id": "0fdb8f8bcf2bcbe1",
+      "type": "add",
+      "after": "4a709027ce64527a",
+      "date": 1678535944769
+    },
+    {
+      "type": "edit",
+      "id": "0fdb8f8bcf2bcbe1",
+      "item": {
+        "type": "paragraph",
+        "id": "0fdb8f8bcf2bcbe1",
+        "text": "Creating the lines for connecting nodes:"
+      },
+      "date": 1678535948618
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "427dfc74a5abf251"
+      },
+      "id": "427dfc74a5abf251",
+      "type": "add",
+      "after": "0fdb8f8bcf2bcbe1",
+      "date": 1678535950796
+    },
+    {
+      "type": "edit",
+      "id": "4a709027ce64527a",
+      "item": {
+        "type": "code",
+        "id": "4a709027ce64527a",
+        "text": "// Erstellen des Stammbaums\nvar treeLayout = d3.tree().size([600, 400]);\nvar rootNode = d3.hierarchy(data);\nvar tree = treeLayout(rootNode);\n\n"
+      },
+      "date": 1678535961722
+    },
+    {
+      "type": "edit",
+      "id": "427dfc74a5abf251",
+      "item": {
+        "type": "code",
+        "id": "427dfc74a5abf251",
+        "text": "// Erstellen der Linien für die Verbindung von Knoten\nvar link = svg.selectAll(\".link\")\n  .data(tree.links())\n  .enter()\n  .append(\"line\")\n  .attr(\"class\", \"link\")\n  .attr(\"x1\", function(d) { return d.source.x; })\n  .attr(\"y1\", function(d) { return d.source.y; })\n  .attr(\"x2\", function(d) { return d.target.x; })\n  .attr(\"y2\", function(d) { return d.target.y; });\n\n// Erstellen der Knoten\nvar node = svg.selectAll(\".node\")\n  .data(tree.descendants())\n  .enter()\n  .append(\"g\")\n  .attr(\"class\", \"node\")\n  .attr(\"transform\", function(d) { return \"translate(\" + d.x + \",\" + d.y + \")\"; });\n\n// Erstellen der Kreise für die Knoten\nnode.append(\"circle\")\n  .attr(\"r\", 20);\n\n// Hinzufügen des Namens der Personen zu den Knoten\nnode.append(\"text\")\n  .attr(\"dx\", -10)\n  .attr(\"dy\", 30)\n  .text(function(d) { return d.data.name; });\n"
+      },
+      "date": 1678535965131
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "336ebb987ed2f2c5"
+      },
+      "id": "336ebb987ed2f2c5",
+      "type": "add",
+      "after": "427dfc74a5abf251",
+      "date": 1678535978145
+    },
+    {
+      "type": "edit",
+      "id": "336ebb987ed2f2c5",
+      "item": {
+        "type": "paragraph",
+        "id": "336ebb987ed2f2c5",
+        "text": "Create the nodes:"
+      },
+      "date": 1678535981461
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fc428b3c6d1a391e"
+      },
+      "id": "fc428b3c6d1a391e",
+      "type": "add",
+      "after": "336ebb987ed2f2c5",
+      "date": 1678535982881
+    },
+    {
+      "type": "edit",
+      "id": "427dfc74a5abf251",
+      "item": {
+        "type": "code",
+        "id": "427dfc74a5abf251",
+        "text": "// Erstellen der Linien für die Verbindung von Knoten\nvar link = svg.selectAll(\".link\")\n  .data(tree.links())\n  .enter()\n  .append(\"line\")\n  .attr(\"class\", \"link\")\n  .attr(\"x1\", function(d) { return d.source.x; })\n  .attr(\"y1\", function(d) { return d.source.y; })\n  .attr(\"x2\", function(d) { return d.target.x; })\n  .attr(\"y2\", function(d) { return d.target.y; });\n\n\n"
+      },
+      "date": 1678535993871
+    },
+    {
+      "type": "edit",
+      "id": "fc428b3c6d1a391e",
+      "item": {
+        "type": "code",
+        "id": "fc428b3c6d1a391e",
+        "text": "// Erstellen der Knoten\nvar node = svg.selectAll(\".node\")\n  .data(tree.descendants())\n  .enter()\n  .append(\"g\")\n  .attr(\"class\", \"node\")\n  .attr(\"transform\", function(d) { return \"translate(\" + d.x + \",\" + d.y + \")\"; });\n\n// Erstellen der Kreise für die Knoten\nnode.append(\"circle\")\n  .attr(\"r\", 20);\n\n// Hinzufügen des Namens der Personen zu den Knoten\nnode.append(\"text\")\n  .attr(\"dx\", -10)\n  .attr(\"dy\", 30)\n  .text(function(d) { return d.data.name; });"
+      },
+      "date": 1678535994720
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1bb65337f1a58b29"
+      },
+      "id": "1bb65337f1a58b29",
+      "type": "add",
+      "after": "fc428b3c6d1a391e",
+      "date": 1678536018073
+    },
+    {
+      "type": "edit",
+      "id": "1bb65337f1a58b29",
+      "item": {
+        "type": "paragraph",
+        "id": "1bb65337f1a58b29",
+        "text": "Creating the circles for the nodes:"
+      },
+      "date": 1678536021734
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d4dadecba4383da3"
+      },
+      "id": "d4dadecba4383da3",
+      "type": "add",
+      "after": "1bb65337f1a58b29",
+      "date": 1678536023121
+    },
+    {
+      "type": "edit",
+      "id": "fc428b3c6d1a391e",
+      "item": {
+        "type": "code",
+        "id": "fc428b3c6d1a391e",
+        "text": "// Erstellen der Knoten\nvar node = svg.selectAll(\".node\")\n  .data(tree.descendants())\n  .enter()\n  .append(\"g\")\n  .attr(\"class\", \"node\")\n  .attr(\"transform\", function(d) { return \"translate(\" + d.x + \",\" + d.y + \")\"; });\n\n"
+      },
+      "date": 1678536029065
+    },
+    {
+      "type": "edit",
+      "id": "d4dadecba4383da3",
+      "item": {
+        "type": "code",
+        "id": "d4dadecba4383da3",
+        "text": "// Erstellen der Kreise für die Knoten\nnode.append(\"circle\")\n  .attr(\"r\", 20);\n\n// Hinzufügen des Namens der Personen zu den Knoten\nnode.append(\"text\")\n  .attr(\"dx\", -10)\n  .attr(\"dy\", 30)\n  .text(function(d) { return d.data.name; });"
+      },
+      "date": 1678536030082
+    },
+    {
+      "type": "edit",
+      "id": "d1d68cd3229f431e",
+      "item": {
+        "type": "paragraph",
+        "id": "d1d68cd3229f431e",
+        "text": "Creating the family tree:"
+      },
+      "date": 1678536076790
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "85765477ed78f6f9"
+      },
+      "id": "85765477ed78f6f9",
+      "type": "add",
+      "after": "d4dadecba4383da3",
+      "date": 1678536099172
+    },
+    {
+      "type": "edit",
+      "id": "85765477ed78f6f9",
+      "item": {
+        "type": "paragraph",
+        "id": "85765477ed78f6f9",
+        "text": "Adding the name of the persons to the nodes:"
+      },
+      "date": 1678536101963
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "57474b49597d551b"
+      },
+      "id": "57474b49597d551b",
+      "type": "add",
+      "after": "85765477ed78f6f9",
+      "date": 1678536103592
+    },
+    {
+      "type": "edit",
+      "id": "d4dadecba4383da3",
+      "item": {
+        "type": "code",
+        "id": "d4dadecba4383da3",
+        "text": "// Erstellen der Kreise für die Knoten\nnode.append(\"circle\")\n  .attr(\"r\", 20);\n\n"
+      },
+      "date": 1678536108762
+    },
+    {
+      "type": "edit",
+      "id": "57474b49597d551b",
+      "item": {
+        "type": "code",
+        "id": "57474b49597d551b",
+        "text": "// Hinzufügen des Namens der Personen zu den Knoten\nnode.append(\"text\")\n  .attr(\"dx\", -10)\n  .attr(\"dy\", 30)\n  .text(function(d) { return d.data.name; });"
+      },
+      "date": 1678536109601
+    },
+    {
+      "type": "add",
+      "id": "869ea1f58af5542e",
+      "item": {
+        "type": "paragraph",
+        "id": "869ea1f58af5542e",
+        "text": "Note: Creating the lines to connect nodes does not seem to work yet."
+      },
+      "after": "0fdb8f8bcf2bcbe1",
+      "date": 1678536335239
+    },
+    {
+      "id": "869ea1f58af5542e",
+      "type": "move",
+      "order": [
+        "d6f2204c3e578abd",
+        "7055bf455748a907",
+        "8b0cbc6fef92b4fb",
+        "c15d01a2c1e44f0a",
+        "92e1c098d89fb051",
+        "87b0811ac2b889e1",
+        "73dcbc867dd2ae72",
+        "240c908257d15eb0",
+        "a33e0e79c70dc638",
+        "4f8b0c5431eb3bf3",
+        "d1d68cd3229f431e",
+        "4a709027ce64527a",
+        "0fdb8f8bcf2bcbe1",
+        "427dfc74a5abf251",
+        "869ea1f58af5542e",
+        "336ebb987ed2f2c5",
+        "fc428b3c6d1a391e",
+        "1bb65337f1a58b29",
+        "d4dadecba4383da3",
+        "85765477ed78f6f9",
+        "57474b49597d551b"
+      ],
+      "date": 1678536337456
+    },
+    {
+      "type": "edit",
+      "id": "240c908257d15eb0",
+      "item": {
+        "type": "code",
+        "id": "240c908257d15eb0",
+        "text": "var data = {\n  name: \"Adam\",\n  children: [\n    {\n      name: \"Seth\",\n      children: [\n        {\n          name: \"Enos\",\n          children: [\n            {\n              name: \"Kenan\",\n              children: []\n            },\n            {\n              name: \"Mahalalel\",\n              children: []\n            },\n            {\n              name: \"Jared\",\n              children: []\n            },\n            {\n              name: \"Enoch\",\n              children: []\n            },\n            {\n              name: \"Methuselah\",\n              children: []\n            },\n            {\n              name: \"Lamech\",\n              children: []\n            },\n            {\n              name: \"Noah\",\n              children: []\n            }\n          ]\n        }\n      ]\n    }\n  ]\n};\n\n"
+      },
+      "date": 1678536404129
+    },
+    {
+      "type": "edit",
+      "id": "4f8b0c5431eb3bf3",
+      "item": {
+        "type": "code",
+        "id": "4f8b0c5431eb3bf3",
+        "text": "var svg = d3.select(\"body\")\n  .append(\"svg\")\n  .attr(\"width\", 800)\n  .attr(\"height\", 600);"
+      },
+      "date": 1678536409793
+    },
+    {
+      "type": "edit",
+      "id": "4a709027ce64527a",
+      "item": {
+        "type": "code",
+        "id": "4a709027ce64527a",
+        "text": "var treeLayout = d3.tree().size([600, 400]);\nvar rootNode = d3.hierarchy(data);\nvar tree = treeLayout(rootNode);\n\n"
+      },
+      "date": 1678536415786
+    },
+    {
+      "type": "edit",
+      "id": "427dfc74a5abf251",
+      "item": {
+        "type": "code",
+        "id": "427dfc74a5abf251",
+        "text": "var link = svg.selectAll(\".link\")\n  .data(tree.links())\n  .enter()\n  .append(\"line\")\n  .attr(\"class\", \"link\")\n  .attr(\"x1\", function(d) { return d.source.x; })\n  .attr(\"y1\", function(d) { return d.source.y; })\n  .attr(\"x2\", function(d) { return d.target.x; })\n  .attr(\"y2\", function(d) { return d.target.y; });\n\n\n"
+      },
+      "date": 1678536423125
+    },
+    {
+      "type": "edit",
+      "id": "fc428b3c6d1a391e",
+      "item": {
+        "type": "code",
+        "id": "fc428b3c6d1a391e",
+        "text": "var node = svg.selectAll(\".node\")\n  .data(tree.descendants())\n  .enter()\n  .append(\"g\")\n  .attr(\"class\", \"node\")\n  .attr(\"transform\", function(d) { return \"translate(\" + d.x + \",\" + d.y + \")\"; });\n\n"
+      },
+      "date": 1678536430526
+    },
+    {
+      "type": "edit",
+      "id": "d4dadecba4383da3",
+      "item": {
+        "type": "code",
+        "id": "d4dadecba4383da3",
+        "text": "node.append(\"circle\")\n  .attr(\"r\", 20);\n\n"
+      },
+      "date": 1678536436492
+    },
+    {
+      "type": "edit",
+      "id": "57474b49597d551b",
+      "item": {
+        "type": "code",
+        "id": "57474b49597d551b",
+        "text": "node.append(\"text\")\n  .attr(\"dx\", -10)\n  .attr(\"dy\", 30)\n  .text(function(d) { return d.data.name; });"
+      },
+      "date": 1678536441449
+    },
+    {
+      "type": "edit",
+      "id": "92e1c098d89fb051",
+      "item": {
+        "type": "paragraph",
+        "id": "92e1c098d89fb051",
+        "text": "⇒ [[Static Import Snippet]], Frame:"
+      },
+      "date": 1678536608859
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f460dd69f12c909a"
+      },
+      "id": "f460dd69f12c909a",
+      "type": "add",
+      "after": "57474b49597d551b",
+      "date": 1678536645466
+    },
+    {
+      "type": "edit",
+      "id": "f460dd69f12c909a",
+      "item": {
+        "type": "pagefold",
+        "id": "f460dd69f12c909a",
+        "text": "~"
+      },
+      "date": 1678536648177
+    },
+    {
+      "id": "f460dd69f12c909a",
+      "type": "move",
+      "order": [
+        "d6f2204c3e578abd",
+        "7055bf455748a907",
+        "8b0cbc6fef92b4fb",
+        "c15d01a2c1e44f0a",
+        "92e1c098d89fb051",
+        "87b0811ac2b889e1",
+        "73dcbc867dd2ae72",
+        "240c908257d15eb0",
+        "f460dd69f12c909a",
+        "a33e0e79c70dc638",
+        "4f8b0c5431eb3bf3",
+        "d1d68cd3229f431e",
+        "4a709027ce64527a",
+        "0fdb8f8bcf2bcbe1",
+        "427dfc74a5abf251",
+        "869ea1f58af5542e",
+        "336ebb987ed2f2c5",
+        "fc428b3c6d1a391e",
+        "1bb65337f1a58b29",
+        "d4dadecba4383da3",
+        "85765477ed78f6f9",
+        "57474b49597d551b"
+      ],
+      "date": 1678536653862
+    },
+    {
+      "id": "f460dd69f12c909a",
+      "type": "move",
+      "order": [
+        "d6f2204c3e578abd",
+        "7055bf455748a907",
+        "8b0cbc6fef92b4fb",
+        "c15d01a2c1e44f0a",
+        "92e1c098d89fb051",
+        "87b0811ac2b889e1",
+        "f460dd69f12c909a",
+        "73dcbc867dd2ae72",
+        "240c908257d15eb0",
+        "a33e0e79c70dc638",
+        "4f8b0c5431eb3bf3",
+        "d1d68cd3229f431e",
+        "4a709027ce64527a",
+        "0fdb8f8bcf2bcbe1",
+        "427dfc74a5abf251",
+        "869ea1f58af5542e",
+        "336ebb987ed2f2c5",
+        "fc428b3c6d1a391e",
+        "1bb65337f1a58b29",
+        "d4dadecba4383da3",
+        "85765477ed78f6f9",
+        "57474b49597d551b"
+      ],
+      "date": 1678536660009
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "84a97b21580f935d"
+      },
+      "id": "84a97b21580f935d",
+      "type": "add",
+      "after": "57474b49597d551b",
+      "date": 1678536664114
+    },
+    {
+      "type": "edit",
+      "id": "84a97b21580f935d",
+      "item": {
+        "type": "pagefold",
+        "id": "84a97b21580f935d",
+        "text": "~"
+      },
+      "date": 1678536668685
+    },
+    {
+      "id": "84a97b21580f935d",
+      "type": "move",
+      "order": [
+        "d6f2204c3e578abd",
+        "7055bf455748a907",
+        "8b0cbc6fef92b4fb",
+        "c15d01a2c1e44f0a",
+        "92e1c098d89fb051",
+        "87b0811ac2b889e1",
+        "f460dd69f12c909a",
+        "73dcbc867dd2ae72",
+        "240c908257d15eb0",
+        "84a97b21580f935d",
+        "a33e0e79c70dc638",
+        "4f8b0c5431eb3bf3",
+        "d1d68cd3229f431e",
+        "4a709027ce64527a",
+        "0fdb8f8bcf2bcbe1",
+        "427dfc74a5abf251",
+        "869ea1f58af5542e",
+        "336ebb987ed2f2c5",
+        "fc428b3c6d1a391e",
+        "1bb65337f1a58b29",
+        "d4dadecba4383da3",
+        "85765477ed78f6f9",
+        "57474b49597d551b"
+      ],
+      "date": 1678536674265
+    }
+  ]
+}
