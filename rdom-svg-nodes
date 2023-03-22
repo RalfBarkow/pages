@@ -1,0 +1,303 @@
+{
+  "title": "rdom-svg-nodes",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "d43e58c831c65a5e",
+      "text": "[[rdom]] powered SVG graph with draggable nodes [https://github.com/thi-ng/umbrella/tree/develop/examples/rdom-svg-nodes#rdom-svg-nodes github], [https://github.com/thi-ng/umbrella/blob/8ab2cbfe2f59b7ef672b6e1cf2a43368f8437ddf/packages/rdom/README.md#usage-examples github]"
+    },
+    {
+      "type": "code",
+      "id": "b465cd9a1c52e801",
+      "text": "import { defAtom } from \"https://cdn.skypack.dev/@thi.ng/atom\";\nimport { equivArrayLike } from \"https://cdn.skypack.dev/@thi.ng/equiv\";\nimport { circle, line, svg } from \"https://cdn.skypack.dev/@thi.ng/hiccup-svg\";\nimport { $compile, $list } from \"https://cdn.skypack.dev/@thi.ng/rdom\";\nimport { fromAtom } from \"https://cdn.skypack.dev/@thi.ng/rstream\";\nimport { indexed, partition, repeatedly } from \"https://cdn.skypack.dev/@thi.ng/transducers\";\nimport { random2 } from \"https://cdn.skypack.dev/@thi.ng/vectors\";"
+    },
+    {
+      "type": "frame",
+      "id": "5396a0b4e33715c0",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 256"
+    },
+    {
+      "type": "code",
+      "id": "60e74ecdab330abb",
+      "text": "const WIDTH = 600;\nconst NUM = 10;\nconst R = 20;\n// define atom of NUM random points\nconst db = defAtom([...repeatedly(() => random2([], R, WIDTH - R), NUM)]);\n// ID of currently dragged point\nlet clicked = -1;\n"
+    },
+    {
+      "type": "code",
+      "id": "91e8dabb74c01aca",
+      "text": "$compile(svg({\n    width: WIDTH,\n    height: WIDTH,\n    viewBox: `0 0 ${WIDTH} ${WIDTH}`,\n    // mouse drag & release handlers are on SVG element itself\n    // for better UX when fast dragging\n    onmousemove: (e) => clicked !== -1 && db.resetIn([clicked], [e.clientX, e.clientY]),\n    onmouseup: () => (clicked = -1),\n    // add new point on double click\n    ondblclick: (e) => db.swap((pts) => [...pts, [e.clientX, e.clientY]]),\n}, \n// reactive \"list\" of lines\n$list(\n// transform atom view into consecutive pairs:\n// e.g. [a,b,c,d] => [[a,b],[b,c],[c,d]]\nfromAtom(db).map((pts) => [...partition(2, 1, pts)]), \n// list wrapper element & its attribs\n\"g\", { stroke: \"#00f\" }, \n// list item constructor (here an SVG line)\n([a, b]) => line(a, b), \n// value based equivalence predicate\n// applied to raw values from stream (here point pairs)\n// item ctors are only called if predicate returns false\nequivArrayLike), \n// reactive list of circles\n$list(\n// transform atom view to label each point with its array index\n// (needed to determine point selection in mouse event handler)\nfromAtom(db).map((pts) => [...indexed(0, pts)]), \n// list wrapper element & its attribs\n\"g\", { fill: \"#00f\" }, \n// list items here are SVG circles\n// update selection & point position in atom on mouse click\n([i, p]) => circle(p, R, {\n    onmousedown: (e) => {\n        clicked = i;\n        db.resetIn([i], [e.clientX, e.clientY]);\n    },\n}), \n// value based equivalence predicate\nequivArrayLike))).mount(document.getElementById(\"output\"));"
+    },
+    {
+      "type": "paragraph",
+      "id": "bdf54d76a84ff46a",
+      "text": "Note: The id property has been changed from \"app\" to \"output\"."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "rdom-svg-nodes",
+        "story": []
+      },
+      "date": 1678775247800
+    },
+    {
+      "id": "5396a0b4e33715c0",
+      "type": "add",
+      "item": {
+        "type": "frame",
+        "id": "5396a0b4e33715c0",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 256"
+      },
+      "attribution": {
+        "page": "ellipse-proximity"
+      },
+      "date": 1678775257233
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "60e74ecdab330abb"
+      },
+      "id": "60e74ecdab330abb",
+      "type": "add",
+      "after": "5396a0b4e33715c0",
+      "date": 1678775289994
+    },
+    {
+      "type": "edit",
+      "id": "60e74ecdab330abb",
+      "item": {
+        "type": "code",
+        "id": "60e74ecdab330abb",
+        "text": "import { defAtom } from \"@thi.ng/atom\";\nimport { equivArrayLike } from \"@thi.ng/equiv\";\nimport { circle, line, svg } from \"@thi.ng/hiccup-svg\";\nimport { $compile, $list } from \"@thi.ng/rdom\";\nimport { fromAtom } from \"@thi.ng/rstream\";\nimport { indexed, partition, repeatedly } from \"@thi.ng/transducers\";\nimport { random2 } from \"@thi.ng/vectors\";\nconst WIDTH = 600;\nconst NUM = 10;\nconst R = 20;\n// define atom of NUM random points\nconst db = defAtom([...repeatedly(() => random2([], R, WIDTH - R), NUM)]);\n// ID of currently dragged point\nlet clicked = -1;\n$compile(svg({\n    width: WIDTH,\n    height: WIDTH,\n    viewBox: `0 0 ${WIDTH} ${WIDTH}`,\n    // mouse drag & release handlers are on SVG element itself\n    // for better UX when fast dragging\n    onmousemove: (e) => clicked !== -1 && db.resetIn([clicked], [e.clientX, e.clientY]),\n    onmouseup: () => (clicked = -1),\n    // add new point on double click\n    ondblclick: (e) => db.swap((pts) => [...pts, [e.clientX, e.clientY]]),\n}, \n// reactive \"list\" of lines\n$list(\n// transform atom view into consecutive pairs:\n// e.g. [a,b,c,d] => [[a,b],[b,c],[c,d]]\nfromAtom(db).map((pts) => [...partition(2, 1, pts)]), \n// list wrapper element & its attribs\n\"g\", { stroke: \"#00f\" }, \n// list item constructor (here an SVG line)\n([a, b]) => line(a, b), \n// value based equivalence predicate\n// applied to raw values from stream (here point pairs)\n// item ctors are only called if predicate returns false\nequivArrayLike), \n// reactive list of circles\n$list(\n// transform atom view to label each point with its array index\n// (needed to determine point selection in mouse event handler)\nfromAtom(db).map((pts) => [...indexed(0, pts)]), \n// list wrapper element & its attribs\n\"g\", { fill: \"#00f\" }, \n// list items here are SVG circles\n// update selection & point position in atom on mouse click\n([i, p]) => circle(p, R, {\n    onmousedown: (e) => {\n        clicked = i;\n        db.resetIn([i], [e.clientX, e.clientY]);\n    },\n}), \n// value based equivalence predicate\nequivArrayLike))).mount(document.getElementById(\"app\"));"
+      },
+      "date": 1678775292379
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b465cd9a1c52e801"
+      },
+      "id": "b465cd9a1c52e801",
+      "type": "add",
+      "after": "60e74ecdab330abb",
+      "date": 1678775297936
+    },
+    {
+      "id": "b465cd9a1c52e801",
+      "type": "move",
+      "order": [
+        "b465cd9a1c52e801",
+        "5396a0b4e33715c0",
+        "60e74ecdab330abb"
+      ],
+      "date": 1678775303168
+    },
+    {
+      "type": "edit",
+      "id": "60e74ecdab330abb",
+      "item": {
+        "type": "code",
+        "id": "60e74ecdab330abb",
+        "text": "const WIDTH = 600;\nconst NUM = 10;\nconst R = 20;\n// define atom of NUM random points\nconst db = defAtom([...repeatedly(() => random2([], R, WIDTH - R), NUM)]);\n// ID of currently dragged point\nlet clicked = -1;\n$compile(svg({\n    width: WIDTH,\n    height: WIDTH,\n    viewBox: `0 0 ${WIDTH} ${WIDTH}`,\n    // mouse drag & release handlers are on SVG element itself\n    // for better UX when fast dragging\n    onmousemove: (e) => clicked !== -1 && db.resetIn([clicked], [e.clientX, e.clientY]),\n    onmouseup: () => (clicked = -1),\n    // add new point on double click\n    ondblclick: (e) => db.swap((pts) => [...pts, [e.clientX, e.clientY]]),\n}, \n// reactive \"list\" of lines\n$list(\n// transform atom view into consecutive pairs:\n// e.g. [a,b,c,d] => [[a,b],[b,c],[c,d]]\nfromAtom(db).map((pts) => [...partition(2, 1, pts)]), \n// list wrapper element & its attribs\n\"g\", { stroke: \"#00f\" }, \n// list item constructor (here an SVG line)\n([a, b]) => line(a, b), \n// value based equivalence predicate\n// applied to raw values from stream (here point pairs)\n// item ctors are only called if predicate returns false\nequivArrayLike), \n// reactive list of circles\n$list(\n// transform atom view to label each point with its array index\n// (needed to determine point selection in mouse event handler)\nfromAtom(db).map((pts) => [...indexed(0, pts)]), \n// list wrapper element & its attribs\n\"g\", { fill: \"#00f\" }, \n// list items here are SVG circles\n// update selection & point position in atom on mouse click\n([i, p]) => circle(p, R, {\n    onmousedown: (e) => {\n        clicked = i;\n        db.resetIn([i], [e.clientX, e.clientY]);\n    },\n}), \n// value based equivalence predicate\nequivArrayLike))).mount(document.getElementById(\"app\"));"
+      },
+      "date": 1678775313290
+    },
+    {
+      "type": "edit",
+      "id": "b465cd9a1c52e801",
+      "item": {
+        "type": "code",
+        "id": "b465cd9a1c52e801",
+        "text": "import { defAtom } from \"@thi.ng/atom\";\nimport { equivArrayLike } from \"@thi.ng/equiv\";\nimport { circle, line, svg } from \"@thi.ng/hiccup-svg\";\nimport { $compile, $list } from \"@thi.ng/rdom\";\nimport { fromAtom } from \"@thi.ng/rstream\";\nimport { indexed, partition, repeatedly } from \"@thi.ng/transducers\";\nimport { random2 } from \"@thi.ng/vectors\";"
+      },
+      "date": 1678775314705
+    },
+    {
+      "type": "edit",
+      "id": "b465cd9a1c52e801",
+      "item": {
+        "type": "code",
+        "id": "b465cd9a1c52e801",
+        "text": "import { defAtom } from \"https://cdn.skypack.dev/@thi.ng/atom\";\nimport { equivArrayLike } from \"https://cdn.skypack.dev/@thi.ng/equiv\";\nimport { circle, line, svg } from \"https://cdn.skypack.dev/@thi.ng/hiccup-svg\";\nimport { $compile, $list } from \"https://cdn.skypack.dev/@thi.ng/rdom\";\nimport { fromAtom } from \"https://cdn.skypack.dev/@thi.ng/rstream\";\nimport { indexed, partition, repeatedly } from \"https://cdn.skypack.dev/@thi.ng/transducers\";\nimport { random2 } from \"https://cdn.skypack.dev/@thi.ng/vectors\";"
+      },
+      "date": 1678775345968
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d43e58c831c65a5e"
+      },
+      "id": "d43e58c831c65a5e",
+      "type": "add",
+      "after": "60e74ecdab330abb",
+      "date": 1678775421031
+    },
+    {
+      "id": "d43e58c831c65a5e",
+      "type": "move",
+      "order": [
+        "d43e58c831c65a5e",
+        "b465cd9a1c52e801",
+        "5396a0b4e33715c0",
+        "60e74ecdab330abb"
+      ],
+      "date": 1678775426814
+    },
+    {
+      "type": "edit",
+      "id": "d43e58c831c65a5e",
+      "item": {
+        "type": "paragraph",
+        "id": "d43e58c831c65a5e",
+        "text": "rdom powered SVG graph with draggable nodes"
+      },
+      "date": 1678775429699
+    },
+    {
+      "type": "edit",
+      "id": "d43e58c831c65a5e",
+      "item": {
+        "type": "paragraph",
+        "id": "d43e58c831c65a5e",
+        "text": "rdom powered SVG graph with draggable nodes [https://github.com/thi-ng/umbrella/tree/develop/examples/rdom-svg-nodes#rdom-svg-nodes github]"
+      },
+      "date": 1678775457109
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b7fa8259221c75b8"
+      },
+      "id": "b7fa8259221c75b8",
+      "type": "add",
+      "after": "60e74ecdab330abb",
+      "date": 1678775469537
+    },
+    {
+      "id": "b7fa8259221c75b8",
+      "type": "move",
+      "order": [
+        "d43e58c831c65a5e",
+        "b7fa8259221c75b8",
+        "b465cd9a1c52e801",
+        "5396a0b4e33715c0",
+        "60e74ecdab330abb"
+      ],
+      "date": 1678775476760
+    },
+    {
+      "type": "edit",
+      "id": "b7fa8259221c75b8",
+      "item": {
+        "type": "html",
+        "id": "b7fa8259221c75b8",
+        "text": "<img\n  src=\"https://raw.githubusercontent.com/thi-ng/umbrella/develop/assets/examples/rdom-svg-nodes.png\"\n  width=\"100%\"\n>"
+      },
+      "date": 1678775492087
+    },
+    {
+      "type": "edit",
+      "id": "d43e58c831c65a5e",
+      "item": {
+        "type": "paragraph",
+        "id": "d43e58c831c65a5e",
+        "text": "[[rdom]] powered SVG graph with draggable nodes [https://github.com/thi-ng/umbrella/tree/develop/examples/rdom-svg-nodes#rdom-svg-nodes github]"
+      },
+      "date": 1678775507596
+    },
+    {
+      "type": "edit",
+      "id": "60e74ecdab330abb",
+      "item": {
+        "type": "code",
+        "id": "60e74ecdab330abb",
+        "text": "const WIDTH = 600;\nconst NUM = 10;\nconst R = 20;\n// define atom of NUM random points\nconst db = defAtom([...repeatedly(() => random2([], R, WIDTH - R), NUM)]);\n// ID of currently dragged point\nlet clicked = -1;\n$compile(svg({\n    width: WIDTH,\n    height: WIDTH,\n    viewBox: `0 0 ${WIDTH} ${WIDTH}`,\n    // mouse drag & release handlers are on SVG element itself\n    // for better UX when fast dragging\n    onmousemove: (e) => clicked !== -1 && db.resetIn([clicked], [e.clientX, e.clientY]),\n    onmouseup: () => (clicked = -1),\n    // add new point on double click\n    ondblclick: (e) => db.swap((pts) => [...pts, [e.clientX, e.clientY]]),\n}, \n// reactive \"list\" of lines\n$list(\n// transform atom view into consecutive pairs:\n// e.g. [a,b,c,d] => [[a,b],[b,c],[c,d]]\nfromAtom(db).map((pts) => [...partition(2, 1, pts)]), \n// list wrapper element & its attribs\n\"g\", { stroke: \"#00f\" }, \n// list item constructor (here an SVG line)\n([a, b]) => line(a, b), \n// value based equivalence predicate\n// applied to raw values from stream (here point pairs)\n// item ctors are only called if predicate returns false\nequivArrayLike), \n// reactive list of circles\n$list(\n// transform atom view to label each point with its array index\n// (needed to determine point selection in mouse event handler)\nfromAtom(db).map((pts) => [...indexed(0, pts)]), \n// list wrapper element & its attribs\n\"g\", { fill: \"#00f\" }, \n// list items here are SVG circles\n// update selection & point position in atom on mouse click\n([i, p]) => circle(p, R, {\n    onmousedown: (e) => {\n        clicked = i;\n        db.resetIn([i], [e.clientX, e.clientY]);\n    },\n}), \n// value based equivalence predicate\nequivArrayLike))).mount(document.getElementById(\"pre\"));"
+      },
+      "date": 1678775986961
+    },
+    {
+      "type": "edit",
+      "id": "60e74ecdab330abb",
+      "item": {
+        "type": "code",
+        "id": "60e74ecdab330abb",
+        "text": "const WIDTH = 600;\nconst NUM = 10;\nconst R = 20;\n// define atom of NUM random points\nconst db = defAtom([...repeatedly(() => random2([], R, WIDTH - R), NUM)]);\n// ID of currently dragged point\nlet clicked = -1;\n$compile(svg({\n    width: WIDTH,\n    height: WIDTH,\n    viewBox: `0 0 ${WIDTH} ${WIDTH}`,\n    // mouse drag & release handlers are on SVG element itself\n    // for better UX when fast dragging\n    onmousemove: (e) => clicked !== -1 && db.resetIn([clicked], [e.clientX, e.clientY]),\n    onmouseup: () => (clicked = -1),\n    // add new point on double click\n    ondblclick: (e) => db.swap((pts) => [...pts, [e.clientX, e.clientY]]),\n}, \n// reactive \"list\" of lines\n$list(\n// transform atom view into consecutive pairs:\n// e.g. [a,b,c,d] => [[a,b],[b,c],[c,d]]\nfromAtom(db).map((pts) => [...partition(2, 1, pts)]), \n// list wrapper element & its attribs\n\"g\", { stroke: \"#00f\" }, \n// list item constructor (here an SVG line)\n([a, b]) => line(a, b), \n// value based equivalence predicate\n// applied to raw values from stream (here point pairs)\n// item ctors are only called if predicate returns false\nequivArrayLike), \n// reactive list of circles\n$list(\n// transform atom view to label each point with its array index\n// (needed to determine point selection in mouse event handler)\nfromAtom(db).map((pts) => [...indexed(0, pts)]), \n// list wrapper element & its attribs\n\"g\", { fill: \"#00f\" }, \n// list items here are SVG circles\n// update selection & point position in atom on mouse click\n([i, p]) => circle(p, R, {\n    onmousedown: (e) => {\n        clicked = i;\n        db.resetIn([i], [e.clientX, e.clientY]);\n    },\n}), \n// value based equivalence predicate\nequivArrayLike))).mount(document.getElementById(\"output\"));"
+      },
+      "date": 1678776125775
+    },
+    {
+      "type": "remove",
+      "id": "b7fa8259221c75b8",
+      "date": 1678776155435
+    },
+    {
+      "type": "edit",
+      "id": "d43e58c831c65a5e",
+      "item": {
+        "type": "paragraph",
+        "id": "d43e58c831c65a5e",
+        "text": "[[rdom]] powered SVG graph with draggable nodes [https://github.com/thi-ng/umbrella/tree/develop/examples/rdom-svg-nodes#rdom-svg-nodes github], [https://github.com/thi-ng/umbrella/blob/8ab2cbfe2f59b7ef672b6e1cf2a43368f8437ddf/packages/rdom/README.md#usage-examples github]"
+      },
+      "date": 1678776589562
+    },
+    {
+      "id": "bdf54d76a84ff46a",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "bdf54d76a84ff46a",
+        "text": "Note: The id property has been changed from \"app\" to \"output\"."
+      },
+      "after": "60e74ecdab330abb",
+      "attribution": {
+        "page": "Closest Points on Ellipses"
+      },
+      "date": 1678809436282
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "91e8dabb74c01aca"
+      },
+      "id": "91e8dabb74c01aca",
+      "type": "add",
+      "after": "bdf54d76a84ff46a",
+      "date": 1679318168975
+    },
+    {
+      "type": "edit",
+      "id": "60e74ecdab330abb",
+      "item": {
+        "type": "code",
+        "id": "60e74ecdab330abb",
+        "text": "const WIDTH = 600;\nconst NUM = 10;\nconst R = 20;\n// define atom of NUM random points\nconst db = defAtom([...repeatedly(() => random2([], R, WIDTH - R), NUM)]);\n// ID of currently dragged point\nlet clicked = -1;\n"
+      },
+      "date": 1679318186248
+    },
+    {
+      "type": "edit",
+      "id": "91e8dabb74c01aca",
+      "item": {
+        "type": "code",
+        "id": "91e8dabb74c01aca",
+        "text": "$compile(svg({\n    width: WIDTH,\n    height: WIDTH,\n    viewBox: `0 0 ${WIDTH} ${WIDTH}`,\n    // mouse drag & release handlers are on SVG element itself\n    // for better UX when fast dragging\n    onmousemove: (e) => clicked !== -1 && db.resetIn([clicked], [e.clientX, e.clientY]),\n    onmouseup: () => (clicked = -1),\n    // add new point on double click\n    ondblclick: (e) => db.swap((pts) => [...pts, [e.clientX, e.clientY]]),\n}, \n// reactive \"list\" of lines\n$list(\n// transform atom view into consecutive pairs:\n// e.g. [a,b,c,d] => [[a,b],[b,c],[c,d]]\nfromAtom(db).map((pts) => [...partition(2, 1, pts)]), \n// list wrapper element & its attribs\n\"g\", { stroke: \"#00f\" }, \n// list item constructor (here an SVG line)\n([a, b]) => line(a, b), \n// value based equivalence predicate\n// applied to raw values from stream (here point pairs)\n// item ctors are only called if predicate returns false\nequivArrayLike), \n// reactive list of circles\n$list(\n// transform atom view to label each point with its array index\n// (needed to determine point selection in mouse event handler)\nfromAtom(db).map((pts) => [...indexed(0, pts)]), \n// list wrapper element & its attribs\n\"g\", { fill: \"#00f\" }, \n// list items here are SVG circles\n// update selection & point position in atom on mouse click\n([i, p]) => circle(p, R, {\n    onmousedown: (e) => {\n        clicked = i;\n        db.resetIn([i], [e.clientX, e.clientY]);\n    },\n}), \n// value based equivalence predicate\nequivArrayLike))).mount(document.getElementById(\"output\"));"
+      },
+      "date": 1679318187667
+    },
+    {
+      "id": "91e8dabb74c01aca",
+      "type": "move",
+      "order": [
+        "d43e58c831c65a5e",
+        "b465cd9a1c52e801",
+        "5396a0b4e33715c0",
+        "60e74ecdab330abb",
+        "91e8dabb74c01aca",
+        "bdf54d76a84ff46a"
+      ],
+      "date": 1679318190070
+    }
+  ]
+}

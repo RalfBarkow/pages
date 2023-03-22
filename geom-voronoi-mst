@@ -1,0 +1,181 @@
+{
+  "title": "geom-voronoi-mst",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "4b511f752654180d",
+      "text": "Poisson-disk shape-aware sampling, Voronoi & Minimum Spanning Tree visualization [https://github.com/thi-ng/umbrella/tree/develop/examples/geom-voronoi-mst#geom-voronoi-mst github]"
+    },
+    {
+      "type": "code",
+      "id": "5cb77ac2aee04e96",
+      "text": "import { mst } from \"https://cdn.skypack.dev/@thi.ng/adjacency\";\nimport { timed } from \"https://cdn.skypack.dev/@thi.ng/bench\";\nimport { center, closestPoint, group, line, points, polygon, rect, scatter, star, vertices, } from \"https://cdn.skypack.dev/@thi.ng/geom\";\nimport { KdTreeMap, KdTreeSet } from \"https://cdn.skypack.dev/@thi.ng/geom-accel\";\nimport { DVMesh } from \"https://cdn.skypack.dev/@thi.ng/geom-voronoi\";\nimport { clearDOM, renderOnce } from \"https://cdn.skypack.dev/@thi.ng/hdom\";\nimport { canvas } from \"https://cdn.skypack.dev/@thi.ng/hdom-canvas\";\nimport { fit } from \"https://cdn.skypack.dev/@thi.ng/math\";\nimport { samplePoisson } from \"https://cdn.skypack.dev/@thi.ng/poisson\";\nimport { comp, map, mapcat, mapIndexed, push, transduce, } from \"https://cdn.skypack.dev/@thi.ng/transducers\";\nimport { dist, floor, Vec } from \"https://cdn.skypack.dev/@thi.ng/vectors\";\n"
+    },
+    {
+      "type": "frame",
+      "id": "87b0811ac2b889e1",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 75"
+    },
+    {
+      "type": "code",
+      "id": "ad3a7877fd469f08",
+      "text": "const W = 500;\nconst R = W / 2;\nconst poly = star(R, 8, [0.7, 1, 1, 0.7]);\nconst bounds = center(rect(W));\nconst pts = timed(() => samplePoisson({\n    points: () => scatter(poly, 1)[0],\n    density: (p) => fit(dist(p, closestPoint(poly, p)), 0, R, 1, 20),\n    max: 10000,\n    quality: 1000,\n    index: new KdTreeSet(2),\n}));\nconst mesh = timed(() => new DVMesh(pts, 1e4));\nconst _mst = timed(() => {\n    const edges = [\n        ...map((e) => [floor(null, e[0]), floor(null, e[1])], mesh.edges(false, [\n            [-R, -R],\n            [R, R],\n        ])),\n    ];\n    const idx = new KdTreeMap(2);\n    const rawVerts = transduce(comp(mapcat((e) => e), mapIndexed((i, v) => [v, i])), push(), edges);\n    idx.into(rawVerts, 0);\n    const edgeVertexIDs = edges.map(([a, b]) => {\n        const ia = idx.queryValues(a, Infinity, 1)[0];\n        const ib = idx.queryValues(b, Infinity, 1)[0];\n        return [ia, ib, a, b, dist(a, b)];\n    });\n    return mst(edgeVertexIDs, rawVerts.length, (e) => e[4], (e) => [e[0], e[1]]).map((e) => line(e[2], e[3]));\n});\n"
+    },
+    {
+      "type": "code",
+      "id": "88edf2bbf0c9f066",
+      "text": "clearDOM(document.getElementById(\"output\"));\nrenderOnce([\n    canvas,\n    { width: W, height: W },\n    group({ translate: [R, R] }, [\n        group({ stroke: \"#9dd\", weight: 0.25 }, mesh.voronoi(vertices(bounds)).map((p) => polygon(p))),\n        points(pts, { fill: \"#f09\", size: 2 }),\n        group({ stroke: \"#000\", weight: 1 }, _mst),\n    ]),\n]);"
+    },
+    {
+      "type": "pagefold",
+      "id": "78b4ee51bf62fc6c",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "3d9e4f03796f154e",
+      "text": "⇒ [[Static Import Snippet]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "geom-voronoi-mst",
+        "story": []
+      },
+      "date": 1679218595459
+    },
+    {
+      "id": "5cb77ac2aee04e96",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "5cb77ac2aee04e96",
+        "text": "import { mst } from \"https://cdn.skypack.dev/@thi.ng/adjacency\";\nimport { timed } from \"https://cdn.skypack.dev/@thi.ng/bench\";\nimport { center, closestPoint, group, line, points, polygon, rect, scatter, star, vertices, } from \"https://cdn.skypack.dev/@thi.ng/geom\";\nimport { KdTreeMap, KdTreeSet } from \"https://cdn.skypack.dev/@thi.ng/geom-accel\";\nimport { DVMesh } from \"https://cdn.skypack.dev/@thi.ng/geom-voronoi\";\nimport { clearDOM, renderOnce } from \"https://cdn.skypack.dev/@thi.ng/hdom\";\nimport { canvas } from \"https://cdn.skypack.dev/@thi.ng/hdom-canvas\";\nimport { fit } from \"https://cdn.skypack.dev/@thi.ng/math\";\nimport { samplePoisson } from \"https://cdn.skypack.dev/@thi.ng/poisson\";\nimport { comp, map, mapcat, mapIndexed, push, transduce, } from \"https://cdn.skypack.dev/@thi.ng/transducers\";\nimport { dist, floor, Vec } from \"https://cdn.skypack.dev/@thi.ng/vectors\";\n"
+      },
+      "attribution": {
+        "page": "2023-03-19"
+      },
+      "date": 1679218597961
+    },
+    {
+      "id": "87b0811ac2b889e1",
+      "type": "add",
+      "item": {
+        "type": "frame",
+        "id": "87b0811ac2b889e1",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 75"
+      },
+      "after": "5cb77ac2aee04e96",
+      "attribution": {
+        "page": "2023-03-19"
+      },
+      "date": 1679218600134
+    },
+    {
+      "id": "ad3a7877fd469f08",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "ad3a7877fd469f08",
+        "text": "const W = 500;\nconst R = W / 2;\nconst poly = star(R, 8, [0.7, 1, 1, 0.7]);\nconst bounds = center(rect(W));\nconst pts = timed(() => samplePoisson({\n    points: () => scatter(poly, 1)[0],\n    density: (p) => fit(dist(p, closestPoint(poly, p)), 0, R, 1, 20),\n    max: 10000,\n    quality: 1000,\n    index: new KdTreeSet(2),\n}));\nconst mesh = timed(() => new DVMesh(pts, 1e4));\nconst _mst = timed(() => {\n    const edges = [\n        ...map((e) => [floor(null, e[0]), floor(null, e[1])], mesh.edges(false, [\n            [-R, -R],\n            [R, R],\n        ])),\n    ];\n    const idx = new KdTreeMap(2);\n    const rawVerts = transduce(comp(mapcat((e) => e), mapIndexed((i, v) => [v, i])), push(), edges);\n    idx.into(rawVerts, 0);\n    const edgeVertexIDs = edges.map(([a, b]) => {\n        const ia = idx.queryValues(a, Infinity, 1)[0];\n        const ib = idx.queryValues(b, Infinity, 1)[0];\n        return [ia, ib, a, b, dist(a, b)];\n    });\n    return mst(edgeVertexIDs, rawVerts.length, (e) => e[4], (e) => [e[0], e[1]]).map((e) => line(e[2], e[3]));\n});\n"
+      },
+      "after": "87b0811ac2b889e1",
+      "attribution": {
+        "page": "2023-03-19"
+      },
+      "date": 1679218606223
+    },
+    {
+      "id": "88edf2bbf0c9f066",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "88edf2bbf0c9f066",
+        "text": "clearDOM(document.getElementById(\"output\"));\nrenderOnce([\n    canvas,\n    { width: W, height: W },\n    group({ translate: [R, R] }, [\n        group({ stroke: \"#9dd\", weight: 0.25 }, mesh.voronoi(vertices(bounds)).map((p) => polygon(p))),\n        points(pts, { fill: \"#f09\", size: 2 }),\n        group({ stroke: \"#000\", weight: 1 }, _mst),\n    ]),\n]);"
+      },
+      "after": "ad3a7877fd469f08",
+      "attribution": {
+        "page": "2023-03-19"
+      },
+      "date": 1679218611687
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4b511f752654180d"
+      },
+      "id": "4b511f752654180d",
+      "type": "add",
+      "after": "88edf2bbf0c9f066",
+      "date": 1679218624182
+    },
+    {
+      "id": "4b511f752654180d",
+      "type": "move",
+      "order": [
+        "4b511f752654180d",
+        "5cb77ac2aee04e96",
+        "87b0811ac2b889e1",
+        "ad3a7877fd469f08",
+        "88edf2bbf0c9f066"
+      ],
+      "date": 1679218627578
+    },
+    {
+      "type": "edit",
+      "id": "4b511f752654180d",
+      "item": {
+        "type": "paragraph",
+        "id": "4b511f752654180d",
+        "text": "[https://github.com/thi-ng/umbrella/tree/develop/examples/geom-voronoi-mst#geom-voronoi-mst github]"
+      },
+      "date": 1679218630140
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "78b4ee51bf62fc6c"
+      },
+      "id": "78b4ee51bf62fc6c",
+      "type": "add",
+      "after": "88edf2bbf0c9f066",
+      "date": 1679218633906
+    },
+    {
+      "type": "edit",
+      "id": "78b4ee51bf62fc6c",
+      "item": {
+        "type": "pagefold",
+        "id": "78b4ee51bf62fc6c",
+        "text": "~"
+      },
+      "date": 1679218636496
+    },
+    {
+      "id": "3d9e4f03796f154e",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "3d9e4f03796f154e",
+        "text": "⇒ [[Static Import Snippet]]"
+      },
+      "after": "78b4ee51bf62fc6c",
+      "attribution": {
+        "page": "2023-03-19"
+      },
+      "date": 1679218641903
+    },
+    {
+      "type": "edit",
+      "id": "4b511f752654180d",
+      "item": {
+        "type": "paragraph",
+        "id": "4b511f752654180d",
+        "text": "Poisson-disk shape-aware sampling, Voronoi & Minimum Spanning Tree visualization [https://github.com/thi-ng/umbrella/tree/develop/examples/geom-voronoi-mst#geom-voronoi-mst github]"
+      },
+      "date": 1679218725984
+    }
+  ]
+}
