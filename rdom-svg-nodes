@@ -7,9 +7,34 @@
       "text": "[[rdom]] powered SVG graph with draggable nodes [https://github.com/thi-ng/umbrella/tree/develop/examples/rdom-svg-nodes#rdom-svg-nodes github], [https://github.com/thi-ng/umbrella/blob/8ab2cbfe2f59b7ef672b6e1cf2a43368f8437ddf/packages/rdom/README.md#usage-examples github]"
     },
     {
+      "type": "paragraph",
+      "id": "efa4727f75dbd37a",
+      "text": "The program starts by importing several functions from different modules via CDN. These functions include defAtom, equivArrayLike, circle, line, svg, $compile, $list, fromAtom, indexed, partition, repeatedly and random2. "
+    },
+    {
       "type": "code",
       "id": "b465cd9a1c52e801",
       "text": "import { defAtom } from \"https://cdn.skypack.dev/@thi.ng/atom\";\nimport { equivArrayLike } from \"https://cdn.skypack.dev/@thi.ng/equiv\";\nimport { circle, line, svg } from \"https://cdn.skypack.dev/@thi.ng/hiccup-svg\";\nimport { $compile, $list } from \"https://cdn.skypack.dev/@thi.ng/rdom\";\nimport { fromAtom } from \"https://cdn.skypack.dev/@thi.ng/rstream\";\nimport { indexed, partition, repeatedly } from \"https://cdn.skypack.dev/@thi.ng/transducers\";\nimport { random2 } from \"https://cdn.skypack.dev/@thi.ng/vectors\";"
+    },
+    {
+      "type": "paragraph",
+      "id": "0cbd06841a788433",
+      "text": "The defAtom function creates a new reactive atom with an initial value of an array of NUM random points within a square area with a side length of WIDTH.\n\n"
+    },
+    {
+      "type": "code",
+      "id": "60e74ecdab330abb",
+      "text": "const WIDTH = 600;\nconst NUM = 10;\nconst R = 20;\n// define atom of NUM random points\nconst db = defAtom([...repeatedly(() => random2([], R, WIDTH - R), NUM)]);\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "bdee7b00cd4c7a8f",
+      "text": "The program then defines a clicked variable to keep track of which point is currently being dragged (initialized to -1).\n\n"
+    },
+    {
+      "type": "code",
+      "id": "280017167942d56d",
+      "text": "// ID of currently dragged point\nlet clicked = -1;\n"
     },
     {
       "type": "frame",
@@ -17,19 +42,49 @@
       "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 256"
     },
     {
-      "type": "code",
-      "id": "60e74ecdab330abb",
-      "text": "const WIDTH = 600;\nconst NUM = 10;\nconst R = 20;\n// define atom of NUM random points\nconst db = defAtom([...repeatedly(() => random2([], R, WIDTH - R), NUM)]);\n// ID of currently dragged point\nlet clicked = -1;\n"
+      "type": "paragraph",
+      "id": "11198dff8340dece",
+      "text": "The $compile function creates an SVG element with width, height, and viewBox attributes to be displayed in the frame above, and mouse event handlers for drag-and-drop interaction. "
     },
     {
       "type": "code",
       "id": "91e8dabb74c01aca",
-      "text": "$compile(svg({\n    width: WIDTH,\n    height: WIDTH,\n    viewBox: `0 0 ${WIDTH} ${WIDTH}`,\n    // mouse drag & release handlers are on SVG element itself\n    // for better UX when fast dragging\n    onmousemove: (e) => clicked !== -1 && db.resetIn([clicked], [e.clientX, e.clientY]),\n    onmouseup: () => (clicked = -1),\n    // add new point on double click\n    ondblclick: (e) => db.swap((pts) => [...pts, [e.clientX, e.clientY]]),\n}, \n// reactive \"list\" of lines\n$list(\n// transform atom view into consecutive pairs:\n// e.g. [a,b,c,d] => [[a,b],[b,c],[c,d]]\nfromAtom(db).map((pts) => [...partition(2, 1, pts)]), \n// list wrapper element & its attribs\n\"g\", { stroke: \"#00f\" }, \n// list item constructor (here an SVG line)\n([a, b]) => line(a, b), \n// value based equivalence predicate\n// applied to raw values from stream (here point pairs)\n// item ctors are only called if predicate returns false\nequivArrayLike), \n// reactive list of circles\n$list(\n// transform atom view to label each point with its array index\n// (needed to determine point selection in mouse event handler)\nfromAtom(db).map((pts) => [...indexed(0, pts)]), \n// list wrapper element & its attribs\n\"g\", { fill: \"#00f\" }, \n// list items here are SVG circles\n// update selection & point position in atom on mouse click\n([i, p]) => circle(p, R, {\n    onmousedown: (e) => {\n        clicked = i;\n        db.resetIn([i], [e.clientX, e.clientY]);\n    },\n}), \n// value based equivalence predicate\nequivArrayLike))).mount(document.getElementById(\"output\"));"
+      "text": "$compile(svg({\n    width: WIDTH,\n    height: WIDTH,\n    viewBox: `0 0 ${WIDTH} ${WIDTH}`,\n    // mouse drag & release handlers are on SVG element itself\n    // for better UX when fast dragging\n    onmousemove: (e) => clicked !== -1 && db.resetIn([clicked], [e.clientX, e.clientY]),\n    onmouseup: () => (clicked = -1),\n    // add new point on double click\n    ondblclick: (e) => db.swap((pts) => [...pts, [e.clientX, e.clientY]]),\n}, "
+    },
+    {
+      "type": "paragraph",
+      "id": "7c14437485c60cf5",
+      "text": "The $list function is used to create two reactive lists, one for lines and one for circles, each with a corresponding set of attributes and mouse event handlers.\n\n"
+    },
+    {
+      "type": "code",
+      "id": "13d464f27ff39579",
+      "text": "// reactive \"list\" of lines\n$list(\n// transform atom view into consecutive pairs:\n// e.g. [a,b,c,d] => [[a,b],[b,c],[c,d]]\nfromAtom(db).map((pts) => [...partition(2, 1, pts)]), \n// list wrapper element & its attribs\n\"g\", { stroke: \"#00f\" }, \n// list item constructor (here an SVG line)\n([a, b]) => line(a, b), \n// value based equivalence predicate\n// applied to raw values from stream (here point pairs)\n// item ctors are only called if predicate returns false\nequivArrayLike), \n// reactive list of circles\n$list(\n// transform atom view to label each point with its array index\n// (needed to determine point selection in mouse event handler)\nfromAtom(db).map((pts) => [...indexed(0, pts)]), \n// list wrapper element & its attribs\n\"g\", { fill: \"#00f\" }, \n// list items here are SVG circles\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "0c28a449b913b44c",
+      "text": "To create the line and circle elements, the program uses a combination of the map and indexed functions to transform the array of points into consecutive pairs for lines, and to assign a unique index to each point for circles. The circle and line functions are used to create the corresponding SVG elements for each point pair.\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "3d2b79b8de993c43",
+      "text": "When the user clicks on a circle element, it becomes selected, and the mousedown event handler updates the clicked variable with its index. When the user drags a selected circle element, the mousemove event handler updates its position in the reactive atom. When the user releases the mouse button, the mouseup event handler sets clicked back to -1.\n\n"
+    },
+    {
+      "type": "code",
+      "id": "36b6796b53efae63",
+      "text": "// update selection & point position in atom on mouse click\n([i, p]) => circle(p, R, {\n    onmousedown: (e) => {\n        clicked = i;\n        db.resetIn([i], [e.clientX, e.clientY]);\n    },\n}), \n// value based equivalence predicate\nequivArrayLike))).mount(document.getElementById(\"output\"));"
     },
     {
       "type": "paragraph",
       "id": "bdf54d76a84ff46a",
       "text": "Note: The id property has been changed from \"app\" to \"output\"."
+    },
+    {
+      "type": "paragraph",
+      "id": "bffc0c9dee4cb5a6",
+      "text": "Overall, the program creates a simple interactive SVG graph with draggable nodes that can be used for various applications, such as data visualization or interactive art."
     }
   ],
   "journal": [
@@ -298,6 +353,521 @@
         "bdf54d76a84ff46a"
       ],
       "date": 1679318190070
+    },
+    {
+      "id": "efa4727f75dbd37a",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "efa4727f75dbd37a",
+        "text": "The program starts by importing several functions from different modules via CDN. These functions include defAtom, equivArrayLike, circle, line, svg, $compile, $list, fromAtom, indexed, partition, repeatedly and random2. "
+      },
+      "after": "d43e58c831c65a5e",
+      "attribution": {
+        "page": "2023-03-22"
+      },
+      "date": 1679502280538
+    },
+    {
+      "id": "0cbd06841a788433",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "0cbd06841a788433",
+        "text": "The defAtom function creates a new reactive atom with an initial value of an array of NUM random points within a square area with a side length of WIDTH.\n\n"
+      },
+      "after": "5396a0b4e33715c0",
+      "attribution": {
+        "page": "2023-03-22"
+      },
+      "date": 1679502290978
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0ee184edc2af38ca"
+      },
+      "id": "0ee184edc2af38ca",
+      "type": "add",
+      "after": "bdf54d76a84ff46a",
+      "date": 1679502341724
+    },
+    {
+      "id": "0ee184edc2af38ca",
+      "type": "move",
+      "order": [
+        "d43e58c831c65a5e",
+        "efa4727f75dbd37a",
+        "b465cd9a1c52e801",
+        "5396a0b4e33715c0",
+        "0cbd06841a788433",
+        "0ee184edc2af38ca",
+        "60e74ecdab330abb",
+        "91e8dabb74c01aca",
+        "bdf54d76a84ff46a"
+      ],
+      "date": 1679502350635
+    },
+    {
+      "id": "60e74ecdab330abb",
+      "type": "move",
+      "order": [
+        "d43e58c831c65a5e",
+        "efa4727f75dbd37a",
+        "b465cd9a1c52e801",
+        "5396a0b4e33715c0",
+        "0cbd06841a788433",
+        "60e74ecdab330abb",
+        "0ee184edc2af38ca",
+        "91e8dabb74c01aca",
+        "bdf54d76a84ff46a"
+      ],
+      "date": 1679502357801
+    },
+    {
+      "type": "edit",
+      "id": "60e74ecdab330abb",
+      "item": {
+        "type": "code",
+        "id": "60e74ecdab330abb",
+        "text": "const WIDTH = 600;\nconst NUM = 10;\nconst R = 20;\n// define atom of NUM random points\nconst db = defAtom([...repeatedly(() => random2([], R, WIDTH - R), NUM)]);\n"
+      },
+      "date": 1679502363720
+    },
+    {
+      "id": "bdee7b00cd4c7a8f",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "bdee7b00cd4c7a8f",
+        "text": "The program then defines a clicked variable to keep track of which point is currently being dragged (initialized to -1).\n\n"
+      },
+      "after": "60e74ecdab330abb",
+      "attribution": {
+        "page": "2023-03-22"
+      },
+      "date": 1679502368477
+    },
+    {
+      "id": "11198dff8340dece",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "11198dff8340dece",
+        "text": "The $compile function creates an SVG element with width, height, and viewBox attributes, and mouse event handlers for drag-and-drop interaction. The $list function is used to create two reactive lists, one for lines and one for circles, each with a corresponding set of attributes and mouse event handlers.\n\n"
+      },
+      "after": "0ee184edc2af38ca",
+      "attribution": {
+        "page": "2023-03-22"
+      },
+      "date": 1679502393926
+    },
+    {
+      "id": "0c28a449b913b44c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "0c28a449b913b44c",
+        "text": "To create the line and circle elements, the program uses a combination of the map and indexed functions to transform the array of points into consecutive pairs for lines, and to assign a unique index to each point for circles. The circle and line functions are used to create the corresponding SVG elements for each point pair.\n\nWhen the user clicks on a circle element, it becomes selected, and the mousedown event handler updates the clicked variable with its index. When the user drags a selected circle element, the mousemove event handler updates its position in the reactive atom. When the user releases the mouse button, the mouseup event handler sets clicked back to -1.\n\nOverall, the program creates a simple interactive SVG graph with draggable nodes that can be used for various applications, such as data visualization or interactive art."
+      },
+      "after": "bdf54d76a84ff46a",
+      "attribution": {
+        "page": "2023-03-22"
+      },
+      "date": 1679502454829
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "36b6796b53efae63"
+      },
+      "id": "36b6796b53efae63",
+      "type": "add",
+      "after": "0c28a449b913b44c",
+      "date": 1679502498118
+    },
+    {
+      "type": "edit",
+      "id": "91e8dabb74c01aca",
+      "item": {
+        "type": "code",
+        "id": "91e8dabb74c01aca",
+        "text": "$compile(svg({\n    width: WIDTH,\n    height: WIDTH,\n    viewBox: `0 0 ${WIDTH} ${WIDTH}`,\n    // mouse drag & release handlers are on SVG element itself\n    // for better UX when fast dragging\n    onmousemove: (e) => clicked !== -1 && db.resetIn([clicked], [e.clientX, e.clientY]),\n    onmouseup: () => (clicked = -1),\n    // add new point on double click\n    ondblclick: (e) => db.swap((pts) => [...pts, [e.clientX, e.clientY]]),\n}, \n// reactive \"list\" of lines\n$list(\n// transform atom view into consecutive pairs:\n// e.g. [a,b,c,d] => [[a,b],[b,c],[c,d]]\nfromAtom(db).map((pts) => [...partition(2, 1, pts)]), \n// list wrapper element & its attribs\n\"g\", { stroke: \"#00f\" }, \n// list item constructor (here an SVG line)\n([a, b]) => line(a, b), \n// value based equivalence predicate\n// applied to raw values from stream (here point pairs)\n// item ctors are only called if predicate returns false\nequivArrayLike), \n// reactive list of circles\n$list(\n// transform atom view to label each point with its array index\n// (needed to determine point selection in mouse event handler)\nfromAtom(db).map((pts) => [...indexed(0, pts)]), \n// list wrapper element & its attribs\n\"g\", { fill: \"#00f\" }, \n// list items here are SVG circles\n"
+      },
+      "date": 1679502515052
+    },
+    {
+      "type": "edit",
+      "id": "36b6796b53efae63",
+      "item": {
+        "type": "code",
+        "id": "36b6796b53efae63",
+        "text": "// update selection & point position in atom on mouse click\n([i, p]) => circle(p, R, {\n    onmousedown: (e) => {\n        clicked = i;\n        db.resetIn([i], [e.clientX, e.clientY]);\n    },\n}), \n// value based equivalence predicate\nequivArrayLike))).mount(document.getElementById(\"output\"));"
+      },
+      "date": 1679502516654
+    },
+    {
+      "id": "bdf54d76a84ff46a",
+      "type": "move",
+      "order": [
+        "d43e58c831c65a5e",
+        "efa4727f75dbd37a",
+        "b465cd9a1c52e801",
+        "5396a0b4e33715c0",
+        "0cbd06841a788433",
+        "60e74ecdab330abb",
+        "bdee7b00cd4c7a8f",
+        "0ee184edc2af38ca",
+        "11198dff8340dece",
+        "91e8dabb74c01aca",
+        "0c28a449b913b44c",
+        "36b6796b53efae63",
+        "bdf54d76a84ff46a"
+      ],
+      "date": 1679502522731
+    },
+    {
+      "id": "0c28a449b913b44c",
+      "type": "move",
+      "order": [
+        "d43e58c831c65a5e",
+        "efa4727f75dbd37a",
+        "b465cd9a1c52e801",
+        "5396a0b4e33715c0",
+        "0cbd06841a788433",
+        "60e74ecdab330abb",
+        "bdee7b00cd4c7a8f",
+        "0ee184edc2af38ca",
+        "11198dff8340dece",
+        "91e8dabb74c01aca",
+        "36b6796b53efae63",
+        "0c28a449b913b44c",
+        "bdf54d76a84ff46a"
+      ],
+      "date": 1679502527097
+    },
+    {
+      "type": "edit",
+      "id": "0c28a449b913b44c",
+      "item": {
+        "type": "paragraph",
+        "id": "0c28a449b913b44c",
+        "text": "To create the line and circle elements, the program uses a combination of the map and indexed functions to transform the array of points into consecutive pairs for lines, and to assign a unique index to each point for circles. The circle and line functions are used to create the corresponding SVG elements for each point pair.\n\n"
+      },
+      "date": 1679502535970
+    },
+    {
+      "type": "add",
+      "id": "3d2b79b8de993c43",
+      "item": {
+        "type": "paragraph",
+        "id": "3d2b79b8de993c43",
+        "text": "When the user clicks on a circle element, it becomes selected, and the mousedown event handler updates the clicked variable with its index. When the user drags a selected circle element, the mousemove event handler updates its position in the reactive atom. When the user releases the mouse button, the mouseup event handler sets clicked back to -1.\n\nOverall, the program creates a simple interactive SVG graph with draggable nodes that can be used for various applications, such as data visualization or interactive art."
+      },
+      "after": "0c28a449b913b44c",
+      "date": 1679502536554
+    },
+    {
+      "id": "0c28a449b913b44c",
+      "type": "move",
+      "order": [
+        "d43e58c831c65a5e",
+        "efa4727f75dbd37a",
+        "b465cd9a1c52e801",
+        "5396a0b4e33715c0",
+        "0cbd06841a788433",
+        "60e74ecdab330abb",
+        "bdee7b00cd4c7a8f",
+        "0ee184edc2af38ca",
+        "11198dff8340dece",
+        "91e8dabb74c01aca",
+        "0c28a449b913b44c",
+        "36b6796b53efae63",
+        "3d2b79b8de993c43",
+        "bdf54d76a84ff46a"
+      ],
+      "date": 1679502543542
+    },
+    {
+      "type": "edit",
+      "id": "3d2b79b8de993c43",
+      "item": {
+        "type": "paragraph",
+        "id": "3d2b79b8de993c43",
+        "text": "When the user clicks on a circle element, it becomes selected, and the mousedown event handler updates the clicked variable with its index. When the user drags a selected circle element, the mousemove event handler updates its position in the reactive atom. When the user releases the mouse button, the mouseup event handler sets clicked back to -1.\n\n"
+      },
+      "date": 1679502550501
+    },
+    {
+      "type": "add",
+      "id": "bffc0c9dee4cb5a6",
+      "item": {
+        "type": "paragraph",
+        "id": "bffc0c9dee4cb5a6",
+        "text": "Overall, the program creates a simple interactive SVG graph with draggable nodes that can be used for various applications, such as data visualization or interactive art."
+      },
+      "after": "3d2b79b8de993c43",
+      "date": 1679502551138
+    },
+    {
+      "type": "remove",
+      "id": "0ee184edc2af38ca",
+      "date": 1679502606523
+    },
+    {
+      "id": "5396a0b4e33715c0",
+      "type": "move",
+      "order": [
+        "d43e58c831c65a5e",
+        "efa4727f75dbd37a",
+        "b465cd9a1c52e801",
+        "0cbd06841a788433",
+        "60e74ecdab330abb",
+        "bdee7b00cd4c7a8f",
+        "11198dff8340dece",
+        "5396a0b4e33715c0",
+        "91e8dabb74c01aca",
+        "0c28a449b913b44c",
+        "36b6796b53efae63",
+        "3d2b79b8de993c43",
+        "bffc0c9dee4cb5a6",
+        "bdf54d76a84ff46a"
+      ],
+      "date": 1679502623606
+    },
+    {
+      "id": "11198dff8340dece",
+      "type": "move",
+      "order": [
+        "d43e58c831c65a5e",
+        "efa4727f75dbd37a",
+        "b465cd9a1c52e801",
+        "0cbd06841a788433",
+        "60e74ecdab330abb",
+        "bdee7b00cd4c7a8f",
+        "5396a0b4e33715c0",
+        "11198dff8340dece",
+        "91e8dabb74c01aca",
+        "0c28a449b913b44c",
+        "36b6796b53efae63",
+        "3d2b79b8de993c43",
+        "bffc0c9dee4cb5a6",
+        "bdf54d76a84ff46a"
+      ],
+      "date": 1679502633879
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "280017167942d56d",
+        "text": "// ID of currently dragged point\nlet clicked = -1;\n"
+      },
+      "id": "280017167942d56d",
+      "type": "add",
+      "after": "bdf54d76a84ff46a",
+      "date": 1679502730303
+    },
+    {
+      "id": "280017167942d56d",
+      "type": "move",
+      "order": [
+        "d43e58c831c65a5e",
+        "efa4727f75dbd37a",
+        "b465cd9a1c52e801",
+        "0cbd06841a788433",
+        "60e74ecdab330abb",
+        "bdee7b00cd4c7a8f",
+        "280017167942d56d",
+        "5396a0b4e33715c0",
+        "11198dff8340dece",
+        "91e8dabb74c01aca",
+        "0c28a449b913b44c",
+        "36b6796b53efae63",
+        "3d2b79b8de993c43",
+        "bffc0c9dee4cb5a6",
+        "bdf54d76a84ff46a"
+      ],
+      "date": 1679502738343
+    },
+    {
+      "type": "edit",
+      "id": "280017167942d56d",
+      "item": {
+        "type": "code",
+        "id": "280017167942d56d",
+        "text": "// ID of currently dragged point\nlet clicked = -1;\n"
+      },
+      "date": 1679502741255
+    },
+    {
+      "type": "edit",
+      "id": "11198dff8340dece",
+      "item": {
+        "type": "paragraph",
+        "id": "11198dff8340dece",
+        "text": "The $compile function creates an SVG element with width, height, and viewBox attributes to be displayed in the frame above, and mouse event handlers for drag-and-drop interaction. "
+      },
+      "date": 1679502810053
+    },
+    {
+      "type": "add",
+      "id": "7c14437485c60cf5",
+      "item": {
+        "type": "paragraph",
+        "id": "7c14437485c60cf5",
+        "text": "The $list function is used to create two reactive lists, one for lines and one for circles, each with a corresponding set of attributes and mouse event handlers.\n\n"
+      },
+      "after": "11198dff8340dece",
+      "date": 1679502811763
+    },
+    {
+      "id": "bffc0c9dee4cb5a6",
+      "type": "move",
+      "order": [
+        "d43e58c831c65a5e",
+        "efa4727f75dbd37a",
+        "b465cd9a1c52e801",
+        "0cbd06841a788433",
+        "60e74ecdab330abb",
+        "bdee7b00cd4c7a8f",
+        "280017167942d56d",
+        "5396a0b4e33715c0",
+        "11198dff8340dece",
+        "7c14437485c60cf5",
+        "91e8dabb74c01aca",
+        "0c28a449b913b44c",
+        "36b6796b53efae63",
+        "3d2b79b8de993c43",
+        "bdf54d76a84ff46a",
+        "bffc0c9dee4cb5a6"
+      ],
+      "date": 1679502824258
+    },
+    {
+      "id": "3d2b79b8de993c43",
+      "type": "move",
+      "order": [
+        "d43e58c831c65a5e",
+        "efa4727f75dbd37a",
+        "b465cd9a1c52e801",
+        "0cbd06841a788433",
+        "60e74ecdab330abb",
+        "bdee7b00cd4c7a8f",
+        "280017167942d56d",
+        "5396a0b4e33715c0",
+        "11198dff8340dece",
+        "7c14437485c60cf5",
+        "91e8dabb74c01aca",
+        "0c28a449b913b44c",
+        "3d2b79b8de993c43",
+        "36b6796b53efae63",
+        "bdf54d76a84ff46a",
+        "bffc0c9dee4cb5a6"
+      ],
+      "date": 1679502829791
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "13d464f27ff39579",
+        "text": "// reactive \"list\" of lines\n$list(\n// transform atom view into consecutive pairs:\n// e.g. [a,b,c,d] => [[a,b],[b,c],[c,d]]\nfromAtom(db).map((pts) => [...partition(2, 1, pts)]), \n// list wrapper element & its attribs\n\"g\", { stroke: \"#00f\" }, \n// list item constructor (here an SVG line)\n([a, b]) => line(a, b), \n// value based equivalence predicate\n// applied to raw values from stream (here point pairs)\n// item ctors are only called if predicate returns false\nequivArrayLike), \n// reactive list of circles\n$list(\n// transform atom view to label each point with its array index\n// (needed to determine point selection in mouse event handler)\nfromAtom(db).map((pts) => [...indexed(0, pts)]), \n// list wrapper element & its attribs\n\"g\", { fill: \"#00f\" }, \n// list items here are SVG circles\n"
+      },
+      "id": "13d464f27ff39579",
+      "type": "add",
+      "after": "bffc0c9dee4cb5a6",
+      "date": 1679502860302
+    },
+    {
+      "id": "13d464f27ff39579",
+      "type": "move",
+      "order": [
+        "d43e58c831c65a5e",
+        "efa4727f75dbd37a",
+        "b465cd9a1c52e801",
+        "0cbd06841a788433",
+        "60e74ecdab330abb",
+        "bdee7b00cd4c7a8f",
+        "280017167942d56d",
+        "5396a0b4e33715c0",
+        "11198dff8340dece",
+        "7c14437485c60cf5",
+        "13d464f27ff39579",
+        "91e8dabb74c01aca",
+        "0c28a449b913b44c",
+        "3d2b79b8de993c43",
+        "36b6796b53efae63",
+        "bdf54d76a84ff46a",
+        "bffc0c9dee4cb5a6"
+      ],
+      "date": 1679502865816
+    },
+    {
+      "id": "91e8dabb74c01aca",
+      "type": "move",
+      "order": [
+        "d43e58c831c65a5e",
+        "efa4727f75dbd37a",
+        "b465cd9a1c52e801",
+        "0cbd06841a788433",
+        "60e74ecdab330abb",
+        "bdee7b00cd4c7a8f",
+        "280017167942d56d",
+        "5396a0b4e33715c0",
+        "11198dff8340dece",
+        "91e8dabb74c01aca",
+        "7c14437485c60cf5",
+        "13d464f27ff39579",
+        "0c28a449b913b44c",
+        "3d2b79b8de993c43",
+        "36b6796b53efae63",
+        "bdf54d76a84ff46a",
+        "bffc0c9dee4cb5a6"
+      ],
+      "date": 1679502879204
+    },
+    {
+      "type": "edit",
+      "id": "91e8dabb74c01aca",
+      "item": {
+        "type": "code",
+        "id": "91e8dabb74c01aca",
+        "text": "$compile(svg({\n    width: WIDTH,\n    height: WIDTH,\n    viewBox: `0 0 ${WIDTH} ${WIDTH}`,\n    // mouse drag & release handlers are on SVG element itself\n    // for better UX when fast dragging\n    onmousemove: (e) => clicked !== -1 && db.resetIn([clicked], [e.clientX, e.clientY]),\n    onmouseup: () => (clicked = -1),\n    // add new point on double click\n    ondblclick: (e) => db.swap((pts) => [...pts, [e.clientX, e.clientY]]),\n}, "
+      },
+      "date": 1679502892171
+    },
+    {
+      "type": "edit",
+      "id": "13d464f27ff39579",
+      "item": {
+        "type": "code",
+        "id": "13d464f27ff39579",
+        "text": "// reactive \"list\" of lines\n$list(\n// transform atom view into consecutive pairs:\n// e.g. [a,b,c,d] => [[a,b],[b,c],[c,d]]\nfromAtom(db).map((pts) => [...partition(2, 1, pts)]), \n// list wrapper element & its attribs\n\"g\", { stroke: \"#00f\" }, \n// list item constructor (here an SVG line)\n([a, b]) => line(a, b), \n// value based equivalence predicate\n// applied to raw values from stream (here point pairs)\n// item ctors are only called if predicate returns false\nequivArrayLike), \n// reactive list of circles\n$list(\n// transform atom view to label each point with its array index\n// (needed to determine point selection in mouse event handler)\nfromAtom(db).map((pts) => [...indexed(0, pts)]), \n// list wrapper element & its attribs\n\"g\", { fill: \"#00f\" }, \n// list items here are SVG circles\n"
+      },
+      "date": 1679502893689
+    },
+    {
+      "type": "edit",
+      "id": "13d464f27ff39579",
+      "item": {
+        "type": "code",
+        "id": "13d464f27ff39579",
+        "text": "// reactive \"list\" of lines\n$list(\n// transform atom view into consecutive pairs:\n// e.g. [a,b,c,d] => [[a,b],[b,c],[c,d]]\nfromAtom(db).map((pts) => [...partition(2, 1, pts)]), \n// list wrapper element & its attribs\n\"g\", { stroke: \"#00f\" }, \n// list item constructor (here an SVG line)\n([a, b]) => line(a, b), \n// value based equivalence predicate\n// applied to raw values from stream (here point pairs)\n// item ctors are only called if predicate returns false\nequivArrayLike), \n// reactive list of circles\n$list(\n// transform atom view to label each point with its array index\n// (needed to determine point selection in mouse event handler)\nfromAtom(db).map((pts) => [...indexed(0, pts)]), \n// list wrapper element & its attribs\n\"g\", { fill: \"#00f\" }, \n// list items here are SVG circles\n"
+      },
+      "date": 1679502897480
+    },
+    {
+      "type": "edit",
+      "id": "11198dff8340dece",
+      "item": {
+        "type": "paragraph",
+        "id": "11198dff8340dece",
+        "text": "The $compile function creates an SVG element with width, height, and viewBox attributes to be displayed in the frame above, and mouse event handlers for drag-and-drop interaction. "
+      },
+      "date": 1679503063255
+    },
+    {
+      "type": "fork",
+      "date": 1679503313190
     }
   ]
 }

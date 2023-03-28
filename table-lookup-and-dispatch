@@ -1,0 +1,1707 @@
+{
+  "title": "Table Lookup and Dispatch",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "ef44266ef8110a38",
+      "text": "The following code implements a [[Table Lookup]] and dispatch function using [[JavaScript]]. The purpose of this function is to handle interrupts, that is, signals indicating the occurrence of an [[Event]]."
+    },
+    {
+      "type": "paragraph",
+      "id": "6b71e3ff1d979a62",
+      "text": "Context: ⇒ [[Task Location]] ⇒ [[Interrupt Vector Table]] (IVT) ⇒ [[Dispatch Table]] ⇒ [[Memoization]]: The basic idea is just to keep a table of previously computed input/result pairs."
+    },
+    {
+      "type": "code",
+      "id": "22acf4f9975a39ca",
+      "text": "// Define an array to hold the interrupt vector table\nlet ivt = [];"
+    },
+    {
+      "type": "paragraph",
+      "id": "32b09dca4f8697cf",
+      "text": "The code defines an array called ivt, which represents the [[Interrupt Vector Table]]. This table contains entries that map interrupt numbers to corresponding [[Task]] functions. The handleInterrupt function takes an interrupt number as input, looks up the corresponding task function in the ivt array, and calls the function if it exists. If no task is assigned to the interrupt, the function outputs a message indicating that no task is assigned.\n\n"
+    },
+    {
+      "type": "code",
+      "id": "10893239e255c334",
+      "text": "import { $compile } from \"https://cdn.skypack.dev/@thi.ng/rdom\";"
+    },
+    {
+      "type": "code",
+      "id": "e9e19641417d6dd8",
+      "text": "// Define a function to perform table lookup and dispatch\nfunction handleInterrupt(interruptNumber, ...args) {\n  let taskFunction = ivt[interruptNumber];\n  if (taskFunction) {\n    taskFunction(...args); // pass the arguments using the spread syntax\n  } else {\n    console.log(`No task assigned to interrupt ${interruptNumber}.`);\n    $compile(\n      [\"pre\", {}, \"No task assigned to interrupt \", interruptNumber, \".\"]\n    ).mount(document.getElementById(\"output\"));\n  }\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "5195bfa67c3156d2",
+      "text": "⇒ [[Rest and Spread Operators]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d417d590341da753",
+      "text": "Output frame: [⇒ [[Static Import Snippet]], importjs.html]"
+    },
+    {
+      "type": "frame",
+      "id": "ddedbbab48a1c800",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 150"
+    },
+    {
+      "type": "reference",
+      "id": "6e7adca8a4947ee9",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "read-context-of-frame",
+      "title": "Read Context of Frame",
+      "text": "We send a message to the Frame asking it to send us info about the page surrounding it. [https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage mdn]"
+    },
+    {
+      "type": "code",
+      "id": "c8963fb39e7da82f",
+      "text": "window.addEventListener(\"message\", handler)\nlet message = { action:\"sendFrameContext\" }\nwindow.parent.postMessage(message, \"*\")"
+    },
+    {
+      "type": "paragraph",
+      "id": "433e0069aa2ef6ee",
+      "text": "We stop listening then process the data we got."
+    },
+    {
+      "type": "code",
+      "id": "00e55c113558b626",
+      "text": "function handler ({data}) {\n  if (data.action == \"frameContext\") {\n    window.removeEventListener(\"message\", handler)\n    const {slug, item, page} = data\n\n"
+    },
+    {
+      "type": "code",
+      "id": "d7574718b64878e4",
+      "text": "// Define a function to add a new entry to the interrupt vector table\nfunction addEntry(ivtIndex, taskFunction) {\n  ivt[ivtIndex] = taskFunction;\n}\n\n// Define task functions\nfunction task1() {\n  console.log(\"Task 1 executed.\");\n  $compile(\n    [\"pre\", {}, \"Task 1 executed.\"]\n  ).mount(document.getElementById(\"output\"));\n}\n\nfunction task2() {\n  console.log(\"Task 2 executed.\");\n  $compile(\n    [\"pre\", {}, \"Task 2 executed.\"]\n  ).mount(document.getElementById(\"output\"));\n}\n\nfunction task3() {\n  console.log(\"Task 3 executed.\");\n  $compile(\n    [\"pre\", {}, \"Task 3 executed.\"]\n  ).mount(document.getElementById(\"output\"));\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "cc33560c9f3e9e55",
+      "text": "The code defines three task functions called task1, task2, and task3. These functions simply output a message indicating that they have been executed."
+    },
+    {
+      "type": "paragraph",
+      "id": "b0cab9b25501a3ea",
+      "text": "We add another task function that opens a [[Ghost Page]]. See also [[Create a Ghost Page]]. >> script ghost"
+    },
+    {
+      "type": "code",
+      "id": "2422523ae085e73e",
+      "text": "// http://code.fed.wiki/frame-integration-promises.html\nfunction open(page, keepLineup=false, forks=[]) {\n      const asCopy = obj => JSON.parse(JSON.stringify(obj))\n      let date = Date.now()\n      page.journal ||= [{type:'create', date, item:asCopy(page)}, ...forks.map(site => ({type:'fork',date,site}))]\n      let message = {action: \"showResult\", page, keepLineup}\n      window.parent.postMessage(message, \"*\")\n    }"
+    },
+    {
+      "type": "code",
+      "id": "0b2fedbb4590b796",
+      "text": "function ghost() {\n        const title = `a Ghost Page`\n        const story = [\n            {type:'paragraph',text:`[[Ghost Page]] created at ${new Date().toLocaleTimeString()}`}\n        ]\n        open({title,story},event.shiftKey)\n   }"
+    },
+    {
+      "type": "paragraph",
+      "id": "dd62f2a9b7878352",
+      "text": "The addEntry function is used to add entries to the ivt array. This function takes an index and a task function as input and adds the task function to the ivt array at the specified index.\n"
+    },
+    {
+      "type": "code",
+      "id": "ffa8a37d180c60bb",
+      "text": "// Add entries to the interrupt vector table\naddEntry(0, task1);\naddEntry(1, task2);\naddEntry(2, task3);\naddEntry(3, ghost);\n\n"
+    },
+    {
+      "type": "code",
+      "id": "8859f8ab344d4f31",
+      "text": "    show(page)\n  } // end if\n"
+    },
+    {
+      "type": "code",
+      "id": "4f012f477cadcea9",
+      "text": "} // end of function handler"
+    },
+    {
+      "type": "paragraph",
+      "id": "0aed69fb7fb65dbd",
+      "text": "The show function calls the handleInterrupt function with different interrupt numbers to demonstrate how the function works. The outputs of these function calls are displayed in the output frame above using the $compile function from the [[@thi.ng/rdom]] library.\n\n"
+    },
+    {
+      "type": "code",
+      "id": "cff317c5386f7b33",
+      "text": "function show (page) {\n\n"
+    },
+    {
+      "type": "code",
+      "id": "3b414cfd84b3491d",
+      "text": "// Call the handleInterrupt function with different interrupt numbers\nhandleInterrupt(0); // Output: Task 1 executed.\nhandleInterrupt(1); // Output: Task 2 executed.\nhandleInterrupt(2); // Output: Task 3 executed.\nhandleInterrupt(3); // Output: a Ghost Page\nhandleInterrupt(4); // Output: No task assigned to interrupt 4.\n"
+    },
+    {
+      "type": "code",
+      "id": "0130fe33b11c4037",
+      "text": "} // end of function show"
+    },
+    {
+      "type": "pagefold",
+      "id": "2e1e4a25e40d4f92",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "0b42bc5f7084f306",
+      "text": "⇒ .innerHTML body generation use case ⇒ [[@thi.ng/hiccup]] ⇒ [[@thi.ng/rdom]] ⇒ [[User Interaction Graph]] ⇒ [[Journal to Graph]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Table Lookup and Dispatch",
+        "story": []
+      },
+      "date": 1679587422140
+    },
+    {
+      "id": "ef44266ef8110a38",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "ef44266ef8110a38",
+        "text": "⇒ [[Task Location]] ⇒ [[Table Lookup]] ⇒ [[Interrupt Vector Table]] ⇒ [[Dispatch Table]] ⇒ [[Table Lookup and Dispatch]]"
+      },
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587430759
+    },
+    {
+      "type": "edit",
+      "id": "ef44266ef8110a38",
+      "item": {
+        "type": "paragraph",
+        "id": "ef44266ef8110a38",
+        "text": "⇒ [[Task Location]] ⇒ [[Table Lookup]] ⇒ [[Interrupt Vector Table]] ⇒ [[Dispatch Table]] ⇒ Table Lookup and Dispatch"
+      },
+      "date": 1679587439288
+    },
+    {
+      "id": "10893239e255c334",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "10893239e255c334",
+        "text": "import { $compile } from \"https://cdn.skypack.dev/@thi.ng/rdom\";"
+      },
+      "after": "ef44266ef8110a38",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587447037
+    },
+    {
+      "id": "22acf4f9975a39ca",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "22acf4f9975a39ca",
+        "text": "// Define an array to hold the interrupt vector table\nlet ivt = [];"
+      },
+      "after": "10893239e255c334",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587454985
+    },
+    {
+      "id": "4986a1da64967ed1",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "4986a1da64967ed1",
+        "text": "// Define a function to perform table lookup and dispatch\nfunction handleInterrupt(interruptNumber) {\n  let taskFunction = ivt[interruptNumber];\n  if (taskFunction) {\n    taskFunction();\n  } else {\n    console.log(`No task assigned to interrupt ${interruptNumber}.`);\n    $compile(\n      [\"pre\", {}, \"No task assigned to interrupt \", interruptNumber, \".\"]\n    ).mount(document.getElementById(\"output\"));\n  }\n}\n"
+      },
+      "after": "22acf4f9975a39ca",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587458799
+    },
+    {
+      "id": "5195bfa67c3156d2",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "5195bfa67c3156d2",
+        "text": "Output frame: [⇒ [[Static Import Snippet]], importjs.html]"
+      },
+      "after": "4986a1da64967ed1",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587466493
+    },
+    {
+      "id": "ddedbbab48a1c800",
+      "type": "add",
+      "item": {
+        "type": "frame",
+        "id": "ddedbbab48a1c800",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 150"
+      },
+      "after": "5195bfa67c3156d2",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587480493
+    },
+    {
+      "id": "6e7adca8a4947ee9",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "6e7adca8a4947ee9",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "read-context-of-frame",
+        "title": "Read Context of Frame",
+        "text": "We send a message to the Frame asking it to send us info about the page surrounding it. [https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage mdn]"
+      },
+      "after": "ddedbbab48a1c800",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587486070
+    },
+    {
+      "id": "c8963fb39e7da82f",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "c8963fb39e7da82f",
+        "text": "window.addEventListener(\"message\", handler)\nlet message = { action:\"sendFrameContext\" }\nwindow.parent.postMessage(message, \"*\")"
+      },
+      "after": "6e7adca8a4947ee9",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587488860
+    },
+    {
+      "id": "433e0069aa2ef6ee",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "433e0069aa2ef6ee",
+        "text": "We stop listening then process the data we got."
+      },
+      "after": "c8963fb39e7da82f",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587492279
+    },
+    {
+      "id": "00e55c113558b626",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "00e55c113558b626",
+        "text": "function handler ({data}) {\n  if (data.action == \"frameContext\") {\n    window.removeEventListener(\"message\", handler)\n    const {slug, item, page} = data\n\n"
+      },
+      "after": "433e0069aa2ef6ee",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587494319
+    },
+    {
+      "id": "d7574718b64878e4",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "d7574718b64878e4",
+        "text": "// Define a function to add a new entry to the interrupt vector table\nfunction addEntry(ivtIndex, taskFunction) {\n  ivt[ivtIndex] = taskFunction;\n}\n\n// Define task functions\nfunction task1() {\n  console.log(\"Task 1 executed.\");\n  $compile(\n    [\"pre\", {}, \"Task 1 executed.\"]\n  ).mount(document.getElementById(\"output\"));\n}\n\nfunction task2() {\n  console.log(\"Task 2 executed.\");\n  $compile(\n    [\"pre\", {}, \"Task 2 executed.\"]\n  ).mount(document.getElementById(\"output\"));\n}\n\nfunction task3() {\n  console.log(\"Task 3 executed.\");\n  $compile(\n    [\"pre\", {}, \"Task 3 executed.\"]\n  ).mount(document.getElementById(\"output\"));\n}"
+      },
+      "after": "00e55c113558b626",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587504518
+    },
+    {
+      "id": "ffa8a37d180c60bb",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "ffa8a37d180c60bb",
+        "text": "// Add entries to the interrupt vector table\naddEntry(0, task1);\naddEntry(1, task2);\naddEntry(2, task3);"
+      },
+      "after": "d7574718b64878e4",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587512096
+    },
+    {
+      "id": "8859f8ab344d4f31",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "8859f8ab344d4f31",
+        "text": "    show(page)\n  }\n"
+      },
+      "after": "ffa8a37d180c60bb",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587516294
+    },
+    {
+      "id": "4f012f477cadcea9",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "4f012f477cadcea9",
+        "text": "} // end of function handler"
+      },
+      "after": "8859f8ab344d4f31",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587519997
+    },
+    {
+      "id": "cff317c5386f7b33",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "cff317c5386f7b33",
+        "text": "function show (page) {\n\n"
+      },
+      "after": "4f012f477cadcea9",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587525804
+    },
+    {
+      "id": "3b414cfd84b3491d",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "3b414cfd84b3491d",
+        "text": "// Call the handleInterrupt function with different interrupt numbers\nhandleInterrupt(0); // Output: Task 1 executed.\nhandleInterrupt(1); // Output: Task 2 executed.\nhandleInterrupt(2); // Output: Task 3 executed.\nhandleInterrupt(3); // Output: No task assigned to interrupt 3.\n"
+      },
+      "after": "cff317c5386f7b33",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587529121
+    },
+    {
+      "id": "0130fe33b11c4037",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "0130fe33b11c4037",
+        "text": "} // end of function show"
+      },
+      "after": "3b414cfd84b3491d",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587537864
+    },
+    {
+      "id": "0b42bc5f7084f306",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "0b42bc5f7084f306",
+        "text": "⇒ .innerHTML body generation use case ⇒ [[@thi.ng/hiccup]] ⇒ [[@thi.ng/rdom]] ⇒ [[User Interaction Graph]]"
+      },
+      "after": "0130fe33b11c4037",
+      "attribution": {
+        "page": "2023-03-23"
+      },
+      "date": 1679587550152
+    },
+    {
+      "type": "edit",
+      "id": "0b42bc5f7084f306",
+      "item": {
+        "type": "paragraph",
+        "id": "0b42bc5f7084f306",
+        "text": "⇒ .innerHTML body generation use case ⇒ [[@thi.ng/hiccup]] ⇒ [[@thi.ng/rdom]] ⇒ [[User Interaction Graph]] ⇒ [[Journal to Graph]]"
+      },
+      "date": 1679587589189
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1679587650797
+    },
+    {
+      "type": "edit",
+      "id": "ddedbbab48a1c800",
+      "item": {
+        "type": "frame",
+        "id": "ddedbbab48a1c800",
+        "text": "//code.dreyeck.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 150"
+      },
+      "date": 1679587672815
+    },
+    {
+      "type": "edit",
+      "id": "ef44266ef8110a38",
+      "item": {
+        "type": "paragraph",
+        "id": "ef44266ef8110a38",
+        "text": "Define a function to perform table lookup and dispatch"
+      },
+      "date": 1679592660176
+    },
+    {
+      "type": "add",
+      "id": "6b71e3ff1d979a62",
+      "item": {
+        "type": "paragraph",
+        "id": "6b71e3ff1d979a62",
+        "text": "⇒ [[Task Location]] ⇒ [[Table Lookup]] ⇒ [[Interrupt Vector Table]] ⇒ [[Dispatch Table]] ⇒ Table Lookup and Dispatch"
+      },
+      "after": "ef44266ef8110a38",
+      "date": 1679592661784
+    },
+    {
+      "type": "edit",
+      "id": "ef44266ef8110a38",
+      "item": {
+        "type": "paragraph",
+        "id": "ef44266ef8110a38",
+        "text": "We test a function to perform table lookup and dispatch."
+      },
+      "date": 1679592681727
+    },
+    {
+      "type": "edit",
+      "id": "ef44266ef8110a38",
+      "item": {
+        "type": "paragraph",
+        "id": "ef44266ef8110a38",
+        "text": "We experiment with table search and dispatch."
+      },
+      "date": 1679592711015
+    },
+    {
+      "type": "edit",
+      "id": "ef44266ef8110a38",
+      "item": {
+        "type": "paragraph",
+        "id": "ef44266ef8110a38",
+        "text": "We experiment with table lookup and dispatch."
+      },
+      "date": 1679592718156
+    },
+    {
+      "type": "edit",
+      "id": "ef44266ef8110a38",
+      "item": {
+        "type": "paragraph",
+        "id": "ef44266ef8110a38",
+        "text": "We experiment with table lookup and dispatch function."
+      },
+      "date": 1679592756299
+    },
+    {
+      "type": "edit",
+      "id": "ef44266ef8110a38",
+      "item": {
+        "type": "paragraph",
+        "id": "ef44266ef8110a38",
+        "text": "We experiment with a table lookup and dispatch function."
+      },
+      "date": 1679592761660
+    },
+    {
+      "type": "edit",
+      "id": "6b71e3ff1d979a62",
+      "item": {
+        "type": "paragraph",
+        "id": "6b71e3ff1d979a62",
+        "text": "⇒ [[Task Location]] ⇒ [[Table Lookup]] ⇒ [[Interrupt Vector Table]] ⇒ [[Dispatch Table]] "
+      },
+      "date": 1679592780043
+    },
+    {
+      "id": "10893239e255c334",
+      "type": "move",
+      "order": [
+        "ef44266ef8110a38",
+        "6b71e3ff1d979a62",
+        "22acf4f9975a39ca",
+        "10893239e255c334",
+        "4986a1da64967ed1",
+        "5195bfa67c3156d2",
+        "ddedbbab48a1c800",
+        "6e7adca8a4947ee9",
+        "c8963fb39e7da82f",
+        "433e0069aa2ef6ee",
+        "00e55c113558b626",
+        "d7574718b64878e4",
+        "ffa8a37d180c60bb",
+        "8859f8ab344d4f31",
+        "4f012f477cadcea9",
+        "cff317c5386f7b33",
+        "3b414cfd84b3491d",
+        "0130fe33b11c4037",
+        "0b42bc5f7084f306"
+      ],
+      "date": 1679592818027
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e9e19641417d6dd8"
+      },
+      "id": "e9e19641417d6dd8",
+      "type": "add",
+      "after": "0b42bc5f7084f306",
+      "date": 1679592865898
+    },
+    {
+      "id": "e9e19641417d6dd8",
+      "type": "move",
+      "order": [
+        "ef44266ef8110a38",
+        "6b71e3ff1d979a62",
+        "22acf4f9975a39ca",
+        "10893239e255c334",
+        "e9e19641417d6dd8",
+        "4986a1da64967ed1",
+        "5195bfa67c3156d2",
+        "ddedbbab48a1c800",
+        "6e7adca8a4947ee9",
+        "c8963fb39e7da82f",
+        "433e0069aa2ef6ee",
+        "00e55c113558b626",
+        "d7574718b64878e4",
+        "ffa8a37d180c60bb",
+        "8859f8ab344d4f31",
+        "4f012f477cadcea9",
+        "cff317c5386f7b33",
+        "3b414cfd84b3491d",
+        "0130fe33b11c4037",
+        "0b42bc5f7084f306"
+      ],
+      "date": 1679592873715
+    },
+    {
+      "type": "edit",
+      "id": "4986a1da64967ed1",
+      "item": {
+        "type": "code",
+        "id": "4986a1da64967ed1",
+        "text": "\n    console.log(`No task assigned to interrupt ${interruptNumber}.`);\n    $compile(\n      [\"pre\", {}, \"No task assigned to interrupt \", interruptNumber, \".\"]\n    ).mount(document.getElementById(\"output\"));\n  }\n}\n"
+      },
+      "date": 1679592896216
+    },
+    {
+      "type": "edit",
+      "id": "e9e19641417d6dd8",
+      "item": {
+        "type": "code",
+        "id": "e9e19641417d6dd8",
+        "text": "// Define a function to perform table lookup and dispatch\nfunction handleInterrupt(interruptNumber) {\n  let taskFunction = ivt[interruptNumber];\n  if (taskFunction) {\n    taskFunction();\n  } else {"
+      },
+      "date": 1679592897168
+    },
+    {
+      "id": "10893239e255c334",
+      "type": "move",
+      "order": [
+        "ef44266ef8110a38",
+        "6b71e3ff1d979a62",
+        "22acf4f9975a39ca",
+        "e9e19641417d6dd8",
+        "10893239e255c334",
+        "4986a1da64967ed1",
+        "5195bfa67c3156d2",
+        "ddedbbab48a1c800",
+        "6e7adca8a4947ee9",
+        "c8963fb39e7da82f",
+        "433e0069aa2ef6ee",
+        "00e55c113558b626",
+        "d7574718b64878e4",
+        "ffa8a37d180c60bb",
+        "8859f8ab344d4f31",
+        "4f012f477cadcea9",
+        "cff317c5386f7b33",
+        "3b414cfd84b3491d",
+        "0130fe33b11c4037",
+        "0b42bc5f7084f306"
+      ],
+      "date": 1679592900604
+    },
+    {
+      "type": "edit",
+      "id": "4986a1da64967ed1",
+      "item": {
+        "type": "code",
+        "id": "4986a1da64967ed1",
+        "text": "    console.log(`No task assigned to interrupt ${interruptNumber}.`);\n    $compile(\n      [\"pre\", {}, \"No task assigned to interrupt \", interruptNumber, \".\"]\n    ).mount(document.getElementById(\"output\"));\n  }\n}\n"
+      },
+      "date": 1679592919422
+    },
+    {
+      "id": "10893239e255c334",
+      "type": "move",
+      "order": [
+        "ef44266ef8110a38",
+        "6b71e3ff1d979a62",
+        "22acf4f9975a39ca",
+        "10893239e255c334",
+        "e9e19641417d6dd8",
+        "4986a1da64967ed1",
+        "5195bfa67c3156d2",
+        "ddedbbab48a1c800",
+        "6e7adca8a4947ee9",
+        "c8963fb39e7da82f",
+        "433e0069aa2ef6ee",
+        "00e55c113558b626",
+        "d7574718b64878e4",
+        "ffa8a37d180c60bb",
+        "8859f8ab344d4f31",
+        "4f012f477cadcea9",
+        "cff317c5386f7b33",
+        "3b414cfd84b3491d",
+        "0130fe33b11c4037",
+        "0b42bc5f7084f306"
+      ],
+      "date": 1679592928404
+    },
+    {
+      "type": "fork",
+      "date": 1679592958112
+    },
+    {
+      "type": "fork",
+      "date": 1679593130912
+    },
+    {
+      "type": "fork",
+      "date": 1679593507288
+    },
+    {
+      "type": "fork",
+      "date": 1679593611536
+    },
+    {
+      "type": "edit",
+      "id": "8859f8ab344d4f31",
+      "item": {
+        "type": "code",
+        "id": "8859f8ab344d4f31",
+        "text": "    show(page)\n  } // end if\n"
+      },
+      "date": 1679593632251
+    },
+    {
+      "type": "fork",
+      "site": "code.dreyeck.ch",
+      "date": 1679593742307
+    },
+    {
+      "type": "edit",
+      "id": "ddedbbab48a1c800",
+      "item": {
+        "type": "frame",
+        "id": "ddedbbab48a1c800",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 150"
+      },
+      "date": 1679593757993
+    },
+    {
+      "type": "remove",
+      "id": "4986a1da64967ed1",
+      "date": 1679593851679
+    },
+    {
+      "type": "edit",
+      "id": "e9e19641417d6dd8",
+      "item": {
+        "type": "code",
+        "id": "e9e19641417d6dd8",
+        "text": "// Define a function to perform table lookup and dispatch\nfunction handleInterrupt(interruptNumber) {\n  let taskFunction = ivt[interruptNumber];\n  if (taskFunction) {\n    taskFunction();\n  } else {\n    console.log(`No task assigned to interrupt ${interruptNumber}.`);\n    $compile(\n      [\"pre\", {}, \"No task assigned to interrupt \", interruptNumber, \".\"]\n    ).mount(document.getElementById(\"output\"));\n  }\n}\n"
+      },
+      "date": 1679593855504
+    },
+    {
+      "type": "edit",
+      "id": "6b71e3ff1d979a62",
+      "item": {
+        "type": "paragraph",
+        "id": "6b71e3ff1d979a62",
+        "text": "⇒ [[Task Location]] ⇒  ⇒ [[Interrupt Vector Table]] ⇒ [[Dispatch Table]] "
+      },
+      "date": 1679593921231
+    },
+    {
+      "type": "edit",
+      "id": "ef44266ef8110a38",
+      "item": {
+        "type": "paragraph",
+        "id": "ef44266ef8110a38",
+        "text": "We experiment with a [[Table Lookup]] and dispatch function."
+      },
+      "date": 1679593924836
+    },
+    {
+      "type": "edit",
+      "id": "6b71e3ff1d979a62",
+      "item": {
+        "type": "paragraph",
+        "id": "6b71e3ff1d979a62",
+        "text": "⇒ [[Task Location]] ⇒  ⇒ [[Interrupt Vector Table]] (IVT) ⇒ [[Dispatch Table]] "
+      },
+      "date": 1679593960245
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch"
+    },
+    {
+      "type": "edit",
+      "id": "6b71e3ff1d979a62",
+      "item": {
+        "type": "paragraph",
+        "id": "6b71e3ff1d979a62",
+        "text": "⇒ [[Task Location]] ⇒ [[Interrupt Vector Table]] (IVT) ⇒ [[Dispatch Table]] "
+      },
+      "date": 1679594025130
+    },
+    {
+      "type": "edit",
+      "id": "ddedbbab48a1c800",
+      "item": {
+        "type": "frame",
+        "id": "ddedbbab48a1c800",
+        "text": "//code.dreyeck.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 150"
+      },
+      "date": 1679594134308
+    },
+    {
+      "type": "fork",
+      "site": "code.dreyeck.ch",
+      "date": 1679602627630
+    },
+    {
+      "type": "edit",
+      "id": "ddedbbab48a1c800",
+      "item": {
+        "type": "frame",
+        "id": "ddedbbab48a1c800",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 150"
+      },
+      "date": 1679602670146
+    },
+    {
+      "type": "edit",
+      "id": "6b71e3ff1d979a62",
+      "item": {
+        "type": "paragraph",
+        "id": "6b71e3ff1d979a62",
+        "text": "Context: ⇒ [[Task Location]] ⇒ [[Interrupt Vector Table]] (IVT) ⇒ [[Dispatch Table]] "
+      },
+      "date": 1679605160040
+    },
+    {
+      "type": "edit",
+      "id": "6b71e3ff1d979a62",
+      "item": {
+        "type": "paragraph",
+        "id": "6b71e3ff1d979a62",
+        "text": "Context: ⇒ [[Task Location]] ⇒ [[Interrupt Vector Table]] (IVT) ⇒ [[Dispatch Table]]"
+      },
+      "date": 1679605169507
+    },
+    {
+      "type": "add",
+      "id": "9b4d3513491f805c",
+      "item": {
+        "type": "paragraph",
+        "id": "9b4d3513491f805c",
+        "text": "The following code implements a Table Lookup and Dispatch function using JavaScript. The purpose of this function is to handle interrupts, which are signals to the computer's operating system that indicate the occurrence of an event that requires the operating system's attention."
+      },
+      "after": "6b71e3ff1d979a62",
+      "date": 1679605181206
+    },
+    {
+      "type": "edit",
+      "id": "9b4d3513491f805c",
+      "item": {
+        "type": "paragraph",
+        "id": "9b4d3513491f805c",
+        "text": "The following code implements a Table Lookup and Dispatch function using JavaScript. The purpose of this function is to handle interrupts, that is, signals indicating the occurrence of an [[Event]]."
+      },
+      "date": 1679605267046
+    },
+    {
+      "type": "edit",
+      "id": "9b4d3513491f805c",
+      "item": {
+        "type": "paragraph",
+        "id": "9b4d3513491f805c",
+        "text": "a table lookup and Dispatch function using JavaScript. The purpose of this function is to handle interrupts, that is, signals indicating the occurrence of an [[Event]]."
+      },
+      "date": 1679605429233
+    },
+    {
+      "type": "edit",
+      "id": "ef44266ef8110a38",
+      "item": {
+        "type": "paragraph",
+        "id": "ef44266ef8110a38",
+        "text": "The following code implements a [[Table Lookup]] and dispatch function."
+      },
+      "date": 1679605437470
+    },
+    {
+      "type": "edit",
+      "id": "9b4d3513491f805c",
+      "item": {
+        "type": "paragraph",
+        "id": "9b4d3513491f805c",
+        "text": "a table lookup and Dispatch "
+      },
+      "date": 1679605443881
+    },
+    {
+      "type": "edit",
+      "id": "ef44266ef8110a38",
+      "item": {
+        "type": "paragraph",
+        "id": "ef44266ef8110a38",
+        "text": "The following code implements a [[Table Lookup]] and dispatch function using JavaScript. The purpose of this function is to handle interrupts, that is, signals indicating the occurrence of an [[Event]]."
+      },
+      "date": 1679605448419
+    },
+    {
+      "type": "remove",
+      "id": "9b4d3513491f805c",
+      "date": 1679605450821
+    },
+    {
+      "type": "edit",
+      "id": "ef44266ef8110a38",
+      "item": {
+        "type": "paragraph",
+        "id": "ef44266ef8110a38",
+        "text": "The following code implements a [[Table Lookup]] and dispatch function using [[JavaScript]]. The purpose of this function is to handle interrupts, that is, signals indicating the occurrence of an [[Event]]."
+      },
+      "date": 1679605532469
+    },
+    {
+      "type": "add",
+      "id": "32b09dca4f8697cf",
+      "item": {
+        "type": "paragraph",
+        "id": "32b09dca4f8697cf",
+        "text": "The code defines an array called ivt, which represents the Interrupt Vector Table. This table contains entries that map interrupt numbers to corresponding task functions. The handleInterrupt function takes an interrupt number as input, looks up the corresponding task function in the ivt array, and calls the function if it exists. If no task is assigned to the interrupt, the function outputs a message indicating that no task is assigned.\n\n"
+      },
+      "after": "6b71e3ff1d979a62",
+      "date": 1679605786525
+    },
+    {
+      "id": "22acf4f9975a39ca",
+      "type": "move",
+      "order": [
+        "ef44266ef8110a38",
+        "6b71e3ff1d979a62",
+        "22acf4f9975a39ca",
+        "32b09dca4f8697cf",
+        "10893239e255c334",
+        "e9e19641417d6dd8",
+        "5195bfa67c3156d2",
+        "ddedbbab48a1c800",
+        "6e7adca8a4947ee9",
+        "c8963fb39e7da82f",
+        "433e0069aa2ef6ee",
+        "00e55c113558b626",
+        "d7574718b64878e4",
+        "ffa8a37d180c60bb",
+        "8859f8ab344d4f31",
+        "4f012f477cadcea9",
+        "cff317c5386f7b33",
+        "3b414cfd84b3491d",
+        "0130fe33b11c4037",
+        "0b42bc5f7084f306"
+      ],
+      "date": 1679605792171
+    },
+    {
+      "type": "add",
+      "id": "cc33560c9f3e9e55",
+      "item": {
+        "type": "paragraph",
+        "id": "cc33560c9f3e9e55",
+        "text": "The code defines three task functions called task1, task2, and task3. These functions simply output a message indicating that they have been executed."
+      },
+      "after": "433e0069aa2ef6ee",
+      "date": 1679605924937
+    },
+    {
+      "id": "cc33560c9f3e9e55",
+      "type": "move",
+      "order": [
+        "ef44266ef8110a38",
+        "6b71e3ff1d979a62",
+        "22acf4f9975a39ca",
+        "32b09dca4f8697cf",
+        "10893239e255c334",
+        "e9e19641417d6dd8",
+        "5195bfa67c3156d2",
+        "ddedbbab48a1c800",
+        "6e7adca8a4947ee9",
+        "c8963fb39e7da82f",
+        "433e0069aa2ef6ee",
+        "00e55c113558b626",
+        "d7574718b64878e4",
+        "cc33560c9f3e9e55",
+        "ffa8a37d180c60bb",
+        "8859f8ab344d4f31",
+        "4f012f477cadcea9",
+        "cff317c5386f7b33",
+        "3b414cfd84b3491d",
+        "0130fe33b11c4037",
+        "0b42bc5f7084f306"
+      ],
+      "date": 1679605928571
+    },
+    {
+      "type": "add",
+      "id": "dd62f2a9b7878352",
+      "item": {
+        "type": "paragraph",
+        "id": "dd62f2a9b7878352",
+        "text": "The addEntry function is used to add entries to the ivt array. This function takes an index and a task function as input and adds the task function to the ivt array at the specified index.\n\n"
+      },
+      "after": "cc33560c9f3e9e55",
+      "date": 1679605949940
+    },
+    {
+      "type": "edit",
+      "id": "dd62f2a9b7878352",
+      "item": {
+        "type": "paragraph",
+        "id": "dd62f2a9b7878352",
+        "text": "The addEntry function is used to add entries to the ivt array. This function takes an index and a task function as input and adds the task function to the ivt array at the specified index.\n"
+      },
+      "date": 1679605978039
+    },
+    {
+      "type": "add",
+      "id": "0aed69fb7fb65dbd",
+      "item": {
+        "type": "paragraph",
+        "id": "0aed69fb7fb65dbd",
+        "text": "The show function calls the handleInterrupt function with different interrupt numbers to demonstrate how the function works. The outputs of these function calls are displayed in an output frame using the $compile function from the @thi.ng/rdom library.\n\n"
+      },
+      "after": "dd62f2a9b7878352",
+      "date": 1679605979066
+    },
+    {
+      "id": "0aed69fb7fb65dbd",
+      "type": "move",
+      "order": [
+        "ef44266ef8110a38",
+        "6b71e3ff1d979a62",
+        "22acf4f9975a39ca",
+        "32b09dca4f8697cf",
+        "10893239e255c334",
+        "e9e19641417d6dd8",
+        "5195bfa67c3156d2",
+        "ddedbbab48a1c800",
+        "6e7adca8a4947ee9",
+        "c8963fb39e7da82f",
+        "433e0069aa2ef6ee",
+        "00e55c113558b626",
+        "d7574718b64878e4",
+        "cc33560c9f3e9e55",
+        "dd62f2a9b7878352",
+        "ffa8a37d180c60bb",
+        "8859f8ab344d4f31",
+        "0aed69fb7fb65dbd",
+        "4f012f477cadcea9",
+        "cff317c5386f7b33",
+        "3b414cfd84b3491d",
+        "0130fe33b11c4037",
+        "0b42bc5f7084f306"
+      ],
+      "date": 1679605982486
+    },
+    {
+      "id": "4f012f477cadcea9",
+      "type": "move",
+      "order": [
+        "ef44266ef8110a38",
+        "6b71e3ff1d979a62",
+        "22acf4f9975a39ca",
+        "32b09dca4f8697cf",
+        "10893239e255c334",
+        "e9e19641417d6dd8",
+        "5195bfa67c3156d2",
+        "ddedbbab48a1c800",
+        "6e7adca8a4947ee9",
+        "c8963fb39e7da82f",
+        "433e0069aa2ef6ee",
+        "00e55c113558b626",
+        "d7574718b64878e4",
+        "cc33560c9f3e9e55",
+        "dd62f2a9b7878352",
+        "ffa8a37d180c60bb",
+        "8859f8ab344d4f31",
+        "4f012f477cadcea9",
+        "0aed69fb7fb65dbd",
+        "cff317c5386f7b33",
+        "3b414cfd84b3491d",
+        "0130fe33b11c4037",
+        "0b42bc5f7084f306"
+      ],
+      "date": 1679605987431
+    },
+    {
+      "type": "edit",
+      "id": "0aed69fb7fb65dbd",
+      "item": {
+        "type": "paragraph",
+        "id": "0aed69fb7fb65dbd",
+        "text": "The show function calls the handleInterrupt function with different interrupt numbers to demonstrate how the function works. The outputs of these function calls are displayed in an output frame using the $compile function from the [[@thi.ng/rdom]] library.\n\n"
+      },
+      "date": 1679606014699
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2e1e4a25e40d4f92"
+      },
+      "id": "2e1e4a25e40d4f92",
+      "type": "add",
+      "after": "0b42bc5f7084f306",
+      "date": 1679606054122
+    },
+    {
+      "id": "2e1e4a25e40d4f92",
+      "type": "move",
+      "order": [
+        "ef44266ef8110a38",
+        "6b71e3ff1d979a62",
+        "22acf4f9975a39ca",
+        "32b09dca4f8697cf",
+        "10893239e255c334",
+        "e9e19641417d6dd8",
+        "5195bfa67c3156d2",
+        "ddedbbab48a1c800",
+        "6e7adca8a4947ee9",
+        "c8963fb39e7da82f",
+        "433e0069aa2ef6ee",
+        "00e55c113558b626",
+        "d7574718b64878e4",
+        "cc33560c9f3e9e55",
+        "dd62f2a9b7878352",
+        "ffa8a37d180c60bb",
+        "8859f8ab344d4f31",
+        "4f012f477cadcea9",
+        "0aed69fb7fb65dbd",
+        "cff317c5386f7b33",
+        "3b414cfd84b3491d",
+        "0130fe33b11c4037",
+        "2e1e4a25e40d4f92",
+        "0b42bc5f7084f306"
+      ],
+      "date": 1679606056958
+    },
+    {
+      "type": "edit",
+      "id": "2e1e4a25e40d4f92",
+      "item": {
+        "type": "pagefold",
+        "id": "2e1e4a25e40d4f92",
+        "text": "~"
+      },
+      "date": 1679606059972
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1679606089062
+    },
+    {
+      "type": "edit",
+      "id": "ddedbbab48a1c800",
+      "item": {
+        "type": "frame",
+        "id": "ddedbbab48a1c800",
+        "text": "//code.dreyeck.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 150"
+      },
+      "date": 1679606099701
+    },
+    {
+      "type": "edit",
+      "id": "32b09dca4f8697cf",
+      "item": {
+        "type": "paragraph",
+        "id": "32b09dca4f8697cf",
+        "text": "The code defines an array called ivt, which represents the Interrupt Vector Table. This table contains entries that map interrupt numbers to corresponding [[Task]] functions. The handleInterrupt function takes an interrupt number as input, looks up the corresponding task function in the ivt array, and calls the function if it exists. If no task is assigned to the interrupt, the function outputs a message indicating that no task is assigned.\n\n"
+      },
+      "date": 1679606212330
+    },
+    {
+      "type": "edit",
+      "id": "32b09dca4f8697cf",
+      "item": {
+        "type": "paragraph",
+        "id": "32b09dca4f8697cf",
+        "text": "The code defines an array called ivt, which represents the [[Interrupt Vector Table]]. This table contains entries that map interrupt numbers to corresponding [[Task]] functions. The handleInterrupt function takes an interrupt number as input, looks up the corresponding task function in the ivt array, and calls the function if it exists. If no task is assigned to the interrupt, the function outputs a message indicating that no task is assigned.\n\n"
+      },
+      "date": 1679608512574
+    },
+    {
+      "type": "edit",
+      "id": "0aed69fb7fb65dbd",
+      "item": {
+        "type": "paragraph",
+        "id": "0aed69fb7fb65dbd",
+        "text": "The show function calls the handleInterrupt function with different interrupt numbers to demonstrate how the function works. The outputs of these function calls are displayed in the output frame above using the $compile function from the [[@thi.ng/rdom]] library.\n\n"
+      },
+      "date": 1679634383187
+    },
+    {
+      "type": "fork",
+      "date": 1679841383029
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2422523ae085e73e"
+      },
+      "id": "2422523ae085e73e",
+      "type": "add",
+      "after": "0b42bc5f7084f306",
+      "date": 1679841774114
+    },
+    {
+      "id": "2422523ae085e73e",
+      "type": "move",
+      "order": [
+        "ef44266ef8110a38",
+        "6b71e3ff1d979a62",
+        "22acf4f9975a39ca",
+        "32b09dca4f8697cf",
+        "10893239e255c334",
+        "e9e19641417d6dd8",
+        "5195bfa67c3156d2",
+        "ddedbbab48a1c800",
+        "6e7adca8a4947ee9",
+        "c8963fb39e7da82f",
+        "433e0069aa2ef6ee",
+        "00e55c113558b626",
+        "d7574718b64878e4",
+        "cc33560c9f3e9e55",
+        "2422523ae085e73e",
+        "dd62f2a9b7878352",
+        "ffa8a37d180c60bb",
+        "8859f8ab344d4f31",
+        "4f012f477cadcea9",
+        "0aed69fb7fb65dbd",
+        "cff317c5386f7b33",
+        "3b414cfd84b3491d",
+        "0130fe33b11c4037",
+        "2e1e4a25e40d4f92",
+        "0b42bc5f7084f306"
+      ],
+      "date": 1679841779179
+    },
+    {
+      "type": "edit",
+      "id": "2422523ae085e73e",
+      "item": {
+        "type": "code",
+        "id": "2422523ae085e73e",
+        "text": "   // http://code.fed.wiki/frame-integration-promises.html\n   function open(page, keepLineup=false, forks=[]) {\n      const asCopy = obj => JSON.parse(JSON.stringify(obj))\n      let date = Date.now()\n      for (let item of page.story) item.id ||= (Math.random()*10**20).toFixed(0)\n      page.journal ||= [{type:'create', date, item:asCopy(page)}, ...forks.map(site => ({type:'fork',date,site}))]\n      let message = {action: \"showResult\", page, keepLineup}\n      window.parent.postMessage(message, \"*\")\n    }"
+      },
+      "date": 1679841796956
+    },
+    {
+      "type": "edit",
+      "id": "ffa8a37d180c60bb",
+      "item": {
+        "type": "code",
+        "id": "ffa8a37d180c60bb",
+        "text": "// Add entries to the interrupt vector table\naddEntry(0, task1);\naddEntry(1, task2);\naddEntry(2, task3);\naddEntry(3, open);\n"
+      },
+      "date": 1679841811340
+    },
+    {
+      "type": "add",
+      "id": "b62288c52aeb6121",
+      "item": {
+        "type": "paragraph",
+        "id": "b62288c52aeb6121",
+        "text": "//TODO Create a Ghost Page"
+      },
+      "after": "cc33560c9f3e9e55",
+      "date": 1679841977688
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0b2fedbb4590b796"
+      },
+      "id": "0b2fedbb4590b796",
+      "type": "add",
+      "after": "0b42bc5f7084f306",
+      "date": 1679842264250
+    },
+    {
+      "id": "0b2fedbb4590b796",
+      "type": "move",
+      "order": [
+        "ef44266ef8110a38",
+        "6b71e3ff1d979a62",
+        "22acf4f9975a39ca",
+        "32b09dca4f8697cf",
+        "10893239e255c334",
+        "e9e19641417d6dd8",
+        "5195bfa67c3156d2",
+        "ddedbbab48a1c800",
+        "6e7adca8a4947ee9",
+        "c8963fb39e7da82f",
+        "433e0069aa2ef6ee",
+        "00e55c113558b626",
+        "d7574718b64878e4",
+        "cc33560c9f3e9e55",
+        "b62288c52aeb6121",
+        "0b2fedbb4590b796",
+        "2422523ae085e73e",
+        "dd62f2a9b7878352",
+        "ffa8a37d180c60bb",
+        "8859f8ab344d4f31",
+        "4f012f477cadcea9",
+        "0aed69fb7fb65dbd",
+        "cff317c5386f7b33",
+        "3b414cfd84b3491d",
+        "0130fe33b11c4037",
+        "2e1e4a25e40d4f92",
+        "0b42bc5f7084f306"
+      ],
+      "date": 1679842268906
+    },
+    {
+      "type": "edit",
+      "id": "0b2fedbb4590b796",
+      "item": {
+        "type": "code",
+        "id": "0b2fedbb4590b796",
+        "text": "   function doopen(event) {\n        const info = event.target.getAttribute('info')\n        const color = event.target.getAttribute('fill')\n        if(!info || !color) return\n        console.log({info,color})\n        const title = `${color?.toUpperCase()} Item Clicked`\n        const story = [\n            {type:'paragraph',text:`Click arrived at ${new Date().toLocaleTimeString()}`},\n            {type:'code',text:`pos: [${info}]`}\n        ]\n        open({title,story},event.shiftKey)\n   }"
+      },
+      "date": 1679842273077
+    },
+    {
+      "type": "edit",
+      "id": "ffa8a37d180c60bb",
+      "item": {
+        "type": "code",
+        "id": "ffa8a37d180c60bb",
+        "text": "// Add entries to the interrupt vector table\naddEntry(0, task1);\naddEntry(1, task2);\naddEntry(2, task3);\naddEntry(3, open);\naddEntry(4, doopen);\n"
+      },
+      "date": 1679842300595
+    },
+    {
+      "id": "2422523ae085e73e",
+      "type": "move",
+      "order": [
+        "ef44266ef8110a38",
+        "6b71e3ff1d979a62",
+        "22acf4f9975a39ca",
+        "32b09dca4f8697cf",
+        "10893239e255c334",
+        "e9e19641417d6dd8",
+        "5195bfa67c3156d2",
+        "ddedbbab48a1c800",
+        "6e7adca8a4947ee9",
+        "c8963fb39e7da82f",
+        "433e0069aa2ef6ee",
+        "00e55c113558b626",
+        "d7574718b64878e4",
+        "cc33560c9f3e9e55",
+        "b62288c52aeb6121",
+        "2422523ae085e73e",
+        "0b2fedbb4590b796",
+        "dd62f2a9b7878352",
+        "ffa8a37d180c60bb",
+        "8859f8ab344d4f31",
+        "4f012f477cadcea9",
+        "0aed69fb7fb65dbd",
+        "cff317c5386f7b33",
+        "3b414cfd84b3491d",
+        "0130fe33b11c4037",
+        "2e1e4a25e40d4f92",
+        "0b42bc5f7084f306"
+      ],
+      "date": 1679842598685
+    },
+    {
+      "type": "edit",
+      "id": "2422523ae085e73e",
+      "item": {
+        "type": "code",
+        "id": "2422523ae085e73e",
+        "text": "// http://code.fed.wiki/frame-integration-promises.html\nfunction open(page, keepLineup=false, forks=[]) {\n      const asCopy = obj => JSON.parse(JSON.stringify(obj))\n      let date = Date.now()\n      for (let item of page.story) item.id ||= (Math.random()*10**20).toFixed(0)\n      page.journal ||= [{type:'create', date, item:asCopy(page)}, ...forks.map(site => ({type:'fork',date,site}))]\n      let message = {action: \"showResult\", page, keepLineup}\n      window.parent.postMessage(message, \"*\")\n    }"
+      },
+      "date": 1679842614069
+    },
+    {
+      "type": "edit",
+      "id": "2422523ae085e73e",
+      "item": {
+        "type": "code",
+        "id": "2422523ae085e73e",
+        "text": "// http://code.fed.wiki/frame-integration-promises.html\nfunction open(page, keepLineup=false, forks=[]) {\n      const asCopy = obj => JSON.parse(JSON.stringify(obj))\n      let date = Date.now()\n      page.journal ||= [{type:'create', date, item:asCopy(page)}, ...forks.map(site => ({type:'fork',date,site}))]\n      let message = {action: \"showResult\", page, keepLineup}\n      window.parent.postMessage(message, \"*\")\n    }"
+      },
+      "date": 1679842639053
+    },
+    {
+      "type": "edit",
+      "id": "2422523ae085e73e",
+      "item": {
+        "type": "code",
+        "id": "2422523ae085e73e",
+        "text": "// http://code.fed.wiki/frame-integration-promises.html\nfunction open(page, keepLineup=false, forks=[]) {\n      const localPage = page;\n      const asCopy = obj => JSON.parse(JSON.stringify(obj))\n      let date = Date.now()\n      page.journal ||= [{type:'create', date, item:asCopy(page)}, ...forks.map(site => ({type:'fork',date,site}))]\n      let message = {action: \"showResult\", page, keepLineup}\n      window.parent.postMessage(message, \"*\")\n    }"
+      },
+      "date": 1679842748724
+    },
+    {
+      "type": "add",
+      "id": "9beb4319d000419b",
+      "item": {
+        "type": "paragraph",
+        "id": "9beb4319d000419b",
+        "text": "//FIXME"
+      },
+      "after": "b62288c52aeb6121",
+      "date": 1679842916672
+    },
+    {
+      "id": "9beb4319d000419b",
+      "type": "move",
+      "order": [
+        "ef44266ef8110a38",
+        "6b71e3ff1d979a62",
+        "22acf4f9975a39ca",
+        "32b09dca4f8697cf",
+        "10893239e255c334",
+        "e9e19641417d6dd8",
+        "5195bfa67c3156d2",
+        "ddedbbab48a1c800",
+        "6e7adca8a4947ee9",
+        "c8963fb39e7da82f",
+        "433e0069aa2ef6ee",
+        "00e55c113558b626",
+        "d7574718b64878e4",
+        "cc33560c9f3e9e55",
+        "b62288c52aeb6121",
+        "2422523ae085e73e",
+        "9beb4319d000419b",
+        "0b2fedbb4590b796",
+        "dd62f2a9b7878352",
+        "ffa8a37d180c60bb",
+        "8859f8ab344d4f31",
+        "4f012f477cadcea9",
+        "0aed69fb7fb65dbd",
+        "cff317c5386f7b33",
+        "3b414cfd84b3491d",
+        "0130fe33b11c4037",
+        "2e1e4a25e40d4f92",
+        "0b42bc5f7084f306"
+      ],
+      "date": 1679842918739
+    },
+    {
+      "type": "edit",
+      "id": "9beb4319d000419b",
+      "item": {
+        "type": "paragraph",
+        "id": "9beb4319d000419b",
+        "text": "//FIXME Uncaught TypeError: can't access property \"journal\", page is undefined"
+      },
+      "date": 1679842984557
+    },
+    {
+      "type": "edit",
+      "id": "2422523ae085e73e",
+      "item": {
+        "type": "code",
+        "id": "2422523ae085e73e",
+        "text": "// http://code.fed.wiki/frame-integration-promises.html\nfunction open(page, keepLineup=false, forks=[]) {\n      //FIXME Uncaught TypeError: …\n      const asCopy = obj => JSON.parse(JSON.stringify(obj))\n      let date = Date.now()\n      page.journal ||= [{type:'create', date, item:asCopy(page)}, ...forks.map(site => ({type:'fork',date,site}))]\n      let message = {action: \"showResult\", page, keepLineup}\n      window.parent.postMessage(message, \"*\")\n    }"
+      },
+      "date": 1679842989023
+    },
+    {
+      "type": "edit",
+      "id": "2422523ae085e73e",
+      "item": {
+        "type": "code",
+        "id": "2422523ae085e73e",
+        "text": "// http://code.fed.wiki/frame-integration-promises.html\nfunction open(page, keepLineup=false, forks=[]) {\n      //FIXME Uncaught TypeError: ...\n      const asCopy = obj => JSON.parse(JSON.stringify(obj))\n      let date = Date.now()\n      page.journal ||= [{type:'create', date, item:asCopy(page)}, ...forks.map(site => ({type:'fork',date,site}))]\n      let message = {action: \"showResult\", page, keepLineup}\n      window.parent.postMessage(message, \"*\")\n    }"
+      },
+      "date": 1679843012590
+    },
+    {
+      "type": "edit",
+      "id": "ffa8a37d180c60bb",
+      "item": {
+        "type": "code",
+        "id": "ffa8a37d180c60bb",
+        "text": "// Add entries to the interrupt vector table\naddEntry(0, task1);\naddEntry(1, task2);\naddEntry(2, task3);\naddEntry(3, open);\naddEntry(4, task4);\n"
+      },
+      "date": 1679843131241
+    },
+    {
+      "type": "edit",
+      "id": "ffa8a37d180c60bb",
+      "item": {
+        "type": "code",
+        "id": "ffa8a37d180c60bb",
+        "text": "// Add entries to the interrupt vector table\naddEntry(0, task1);\naddEntry(1, task2);\naddEntry(2, task3);\naddEntry(3, open);\n\n"
+      },
+      "date": 1679843184129
+    },
+    {
+      "type": "edit",
+      "id": "ffa8a37d180c60bb",
+      "item": {
+        "type": "code",
+        "id": "ffa8a37d180c60bb",
+        "text": "// Add entries to the interrupt vector table\naddEntry(0, task1);\naddEntry(1, task2);\naddEntry(2, task3);\naddEntry(3, doopen);\n\n"
+      },
+      "date": 1679843258801
+    },
+    {
+      "type": "edit",
+      "id": "0b2fedbb4590b796",
+      "item": {
+        "type": "code",
+        "id": "0b2fedbb4590b796",
+        "text": "function doopen() {\n        const title = `${color?.toUpperCase()} Item Clicked`\n        const story = [\n            {type:'paragraph',text:`Function doopen called at ${new Date().toLocaleTimeString()}`}\n        ]\n        open({title,story},event.shiftKey)\n   }"
+      },
+      "date": 1679843395086
+    },
+    {
+      "type": "edit",
+      "id": "0b2fedbb4590b796",
+      "item": {
+        "type": "code",
+        "id": "0b2fedbb4590b796",
+        "text": "function doopen() {\n        const title = `a Ghost Page`\n        const story = [\n            {type:'paragraph',text:`Function doopen called at ${new Date().toLocaleTimeString()}`}\n        ]\n        open({title,story},event.shiftKey)\n   }"
+      },
+      "date": 1679843414088
+    },
+    {
+      "type": "edit",
+      "id": "0b2fedbb4590b796",
+      "item": {
+        "type": "code",
+        "id": "0b2fedbb4590b796",
+        "text": "function ghost() {\n        const title = `a Ghost Page`\n        const story = [\n            {type:'paragraph',text:`Function doopen called at ${new Date().toLocaleTimeString()}`}\n        ]\n        open({title,story},event.shiftKey)\n   }"
+      },
+      "date": 1679843458702
+    },
+    {
+      "type": "edit",
+      "id": "ffa8a37d180c60bb",
+      "item": {
+        "type": "code",
+        "id": "ffa8a37d180c60bb",
+        "text": "// Add entries to the interrupt vector table\naddEntry(0, task1);\naddEntry(1, task2);\naddEntry(2, task3);\naddEntry(3, ghost);\n\n"
+      },
+      "date": 1679843461821
+    },
+    {
+      "type": "edit",
+      "id": "0b2fedbb4590b796",
+      "item": {
+        "type": "code",
+        "id": "0b2fedbb4590b796",
+        "text": "function ghost() {\n        const title = `a Ghost Page`\n        const story = [\n            {type:'paragraph',text:`Function ghost called at ${new Date().toLocaleTimeString()}`}\n        ]\n        open({title,story},event.shiftKey)\n   }"
+      },
+      "date": 1679843535889
+    },
+    {
+      "type": "remove",
+      "id": "9beb4319d000419b",
+      "date": 1679843538236
+    },
+    {
+      "type": "edit",
+      "id": "2422523ae085e73e",
+      "item": {
+        "type": "code",
+        "id": "2422523ae085e73e",
+        "text": "// http://code.fed.wiki/frame-integration-promises.html\nfunction open(page, keepLineup=false, forks=[]) {\n      const asCopy = obj => JSON.parse(JSON.stringify(obj))\n      let date = Date.now()\n      page.journal ||= [{type:'create', date, item:asCopy(page)}, ...forks.map(site => ({type:'fork',date,site}))]\n      let message = {action: \"showResult\", page, keepLineup}\n      window.parent.postMessage(message, \"*\")\n    }"
+      },
+      "date": 1679843543267
+    },
+    {
+      "type": "edit",
+      "id": "3b414cfd84b3491d",
+      "item": {
+        "type": "code",
+        "id": "3b414cfd84b3491d",
+        "text": "// Call the handleInterrupt function with different interrupt numbers\nhandleInterrupt(0); // Output: Task 1 executed.\nhandleInterrupt(1); // Output: Task 2 executed.\nhandleInterrupt(2); // Output: Task 3 executed.\nhandleInterrupt(3); // Output: a Ghost Page\nhandleInterrupt(4); // Output: No task assigned to interrupt 4.\n"
+      },
+      "date": 1679843732849
+    },
+    {
+      "type": "edit",
+      "id": "b62288c52aeb6121",
+      "item": {
+        "type": "paragraph",
+        "id": "b62288c52aeb6121",
+        "text": "//TODO [[Create a Ghost Page]]"
+      },
+      "date": 1679844576782
+    },
+    {
+      "type": "add",
+      "id": "b0cab9b25501a3ea",
+      "item": {
+        "type": "paragraph",
+        "id": "b0cab9b25501a3ea",
+        "text": "We add another task function that opens a [[Ghost Page]]. See also [[Create a Ghost Page]]. >> script ghost"
+      },
+      "after": "cc33560c9f3e9e55",
+      "date": 1679845553771
+    },
+    {
+      "type": "remove",
+      "id": "b62288c52aeb6121",
+      "date": 1679845557678
+    },
+    {
+      "type": "edit",
+      "id": "b0cab9b25501a3ea",
+      "item": {
+        "type": "paragraph",
+        "id": "b0cab9b25501a3ea",
+        "text": "We add another task function that opens a [[Ghost Page]]. See also [[Create a Ghost Page]]. >> script ghost"
+      },
+      "date": 1679845565963
+    },
+    {
+      "type": "edit",
+      "id": "b0cab9b25501a3ea",
+      "item": {
+        "type": "paragraph",
+        "id": "b0cab9b25501a3ea",
+        "text": "We add another task function that opens a [[Ghost Page]]. See also [[Create a Ghost Page]]. >> script ghost"
+      },
+      "date": 1679845597572
+    },
+    {
+      "type": "edit",
+      "id": "b0cab9b25501a3ea",
+      "item": {
+        "type": "paragraph",
+        "id": "b0cab9b25501a3ea",
+        "text": "We add another task function that opens a [[Ghost Page]]. See also [[Create a Ghost Page]]. >> script ghost"
+      },
+      "date": 1679845751679
+    },
+    {
+      "type": "fork",
+      "date": 1679845808293
+    },
+    {
+      "type": "edit",
+      "id": "0b2fedbb4590b796",
+      "item": {
+        "type": "code",
+        "id": "0b2fedbb4590b796",
+        "text": "function ghost() {\n        const title = `a Ghost Page`\n        const story = [\n            {type:'paragraph',text:`[[Ghost Page]] created by function ghost called at ${new Date().toLocaleTimeString()}`}\n        ]\n        open({title,story},event.shiftKey)\n   }"
+      },
+      "date": 1679852144386
+    },
+    {
+      "type": "edit",
+      "id": "0b2fedbb4590b796",
+      "item": {
+        "type": "code",
+        "id": "0b2fedbb4590b796",
+        "text": "function ghost() {\n        const title = `a Ghost Page`\n        const story = [\n            {type:'paragraph',text:`[[Ghost Page]] created at ${new Date().toLocaleTimeString()}`}\n        ]\n        open({title,story},event.shiftKey)\n   }"
+      },
+      "date": 1679852258203
+    },
+    {
+      "type": "fork",
+      "date": 1679852305531
+    },
+    {
+      "type": "edit",
+      "id": "e9e19641417d6dd8",
+      "item": {
+        "type": "code",
+        "id": "e9e19641417d6dd8",
+        "text": "// Define a function to perform table lookup and dispatch\nfunction handleInterrupt(interruptNumber, ...args) {\n  let taskFunction = ivt[interruptNumber];\n  if (taskFunction) {\n    taskFunction(...args); // pass the arguments using the spread syntax\n  } else {\n    console.log(`No task assigned to interrupt ${interruptNumber}.`);\n    $compile(\n      [\"pre\", {}, \"No task assigned to interrupt \", interruptNumber, \".\"]\n    ).mount(document.getElementById(\"output\"));\n  }\n}"
+      },
+      "date": 1679989098126
+    },
+    {
+      "type": "edit",
+      "id": "5195bfa67c3156d2",
+      "item": {
+        "type": "paragraph",
+        "id": "5195bfa67c3156d2",
+        "text": "⇒ [[Rest and Spread Operators]]"
+      },
+      "date": 1679989138146
+    },
+    {
+      "type": "add",
+      "id": "d417d590341da753",
+      "item": {
+        "type": "paragraph",
+        "id": "d417d590341da753",
+        "text": "Output frame: [⇒ [[Static Import Snippet]], importjs.html]"
+      },
+      "after": "5195bfa67c3156d2",
+      "date": 1679989138846
+    },
+    {
+      "type": "fork",
+      "site": "code.dreyeck.ch",
+      "date": 1679990427802
+    },
+    {
+      "type": "edit",
+      "id": "ddedbbab48a1c800",
+      "item": {
+        "type": "frame",
+        "id": "ddedbbab48a1c800",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/js-snippet-template/importjs.html\nHEIGHT 150"
+      },
+      "date": 1679990442275
+    },
+    {
+      "type": "edit",
+      "id": "6b71e3ff1d979a62",
+      "item": {
+        "type": "paragraph",
+        "id": "6b71e3ff1d979a62",
+        "text": "Context: ⇒ [[Task Location]] ⇒ [[Interrupt Vector Table]] (IVT) ⇒ [[Dispatch Table]] "
+      },
+      "date": 1680003997557
+    },
+    {
+      "type": "edit",
+      "id": "6b71e3ff1d979a62",
+      "item": {
+        "type": "paragraph",
+        "id": "6b71e3ff1d979a62",
+        "text": "Context: ⇒ [[Task Location]] ⇒ [[Interrupt Vector Table]] (IVT) ⇒ [[Dispatch Table]] ⇒ [[Memoization]]: The basic idea is just to keep a table of previously computed input/result pairs."
+      },
+      "date": 1680004002533
+    }
+  ]
+}
