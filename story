@@ -10,62 +10,25 @@
       "text": "There is no [[Distinction]] between [[Story]] and [[Life]]."
     },
     {
-      "type": "paragraph",
-      "id": "9ca2d627e704e7fc",
-      "text": "Into this space we are walking, listening, and waiting for the story to emerge. A story that illuminates new meaning for us and for others. "
-    },
-    {
-      "type": "paragraph",
-      "id": "944447e0d9cefd90",
-      "text": "In these pages, we strive to be [[Making Sense]] drawing on experiences of writing a wiki, explored in [[On Writing]]."
-    },
-    {
-      "type": "paragraph",
-      "id": "a91f3fca49423c68",
-      "text": "We are writing three stories which will become woven together as we read each other's words. Surrounding these braided stories, a garden will emerge that hold greater meaning for readers who are curious – a place for them to wonder and find new patterns of understanding."
-    },
-    {
-      "type": "pagefold",
-      "id": "a7dc00ef5e652d6d",
-      "text": "Thompson"
-    },
-    {
-      "type": "paragraph",
-      "id": "90e8e96083111cd4",
-      "text": "[[Thompson's Story]]"
-    },
-    {
-      "type": "pagefold",
-      "id": "3b9c9db7efaec3ce",
-      "text": "David\n"
-    },
-    {
-      "type": "paragraph",
-      "id": "c3adcf74d22aa79e",
-      "text": "[[David's Final]]"
-    },
-    {
-      "type": "pagefold",
-      "id": "92d6b8647c453b93",
-      "text": "Jess"
+      "type": "reference",
+      "id": "c29f77bd472dedd2",
+      "site": "thompson.reimage.fed.wiki",
+      "slug": "story",
+      "title": "Story",
+      "text": "Into this space we are walking, listening, and waiting for the story to emerge. A story that illuminates new meaning for us and for others."
     },
     {
       "type": "reference",
-      "id": "71a4cc4237b5fc90",
-      "site": "jess.reimage.fed.wiki",
-      "slug": "jesss-story",
-      "title": "Jess's Story",
-      "text": "Here is Jess's unfolding story:"
+      "id": "5159f0dfaa6770ad",
+      "site": "marc.tries.fed.wiki",
+      "slug": "story",
+      "title": "Story",
+      "text": "Our understandings, misunderstandings and lack of understandings."
     },
     {
-      "type": "pagefold",
-      "id": "f876998f71273a09",
-      "text": " "
-    },
-    {
-      "type": "html",
-      "id": "f80adaee5751ad1e",
-      "text": "<form \n  action=\"http://new_page/\"\n  style=\"background-color:#eee; padding:15px;\">\nNew Page<br><br>\n<input\n  name=title\n  size=50\n  placeholder=\"New Page Title\">\n<input\n  type=submit\n  value=create>\n</center>\n</form>"
+      "type": "paragraph",
+      "id": "032a1b35e94407d5",
+      "text": "⇒ [[Storycraft]]: Stories are about [[Choice]]s and choosing.\n"
     }
   ],
   "journal": [
@@ -3251,6 +3214,147 @@
         "text": "There is no [[Distinction]] between [[Story]] and [[Life]]."
       },
       "date": 1670606601839
+    },
+    {
+      "type": "remove",
+      "id": "9ca2d627e704e7fc",
+      "date": 1681484495255
+    },
+    {
+      "type": "remove",
+      "id": "944447e0d9cefd90",
+      "date": 1681484496297
+    },
+    {
+      "type": "remove",
+      "id": "a91f3fca49423c68",
+      "date": 1681484497995
+    },
+    {
+      "type": "remove",
+      "id": "a7dc00ef5e652d6d",
+      "date": 1681484500726
+    },
+    {
+      "type": "remove",
+      "id": "90e8e96083111cd4",
+      "date": 1681484502507
+    },
+    {
+      "type": "remove",
+      "id": "3b9c9db7efaec3ce",
+      "date": 1681484504261
+    },
+    {
+      "type": "remove",
+      "id": "c3adcf74d22aa79e",
+      "date": 1681484506347
+    },
+    {
+      "type": "remove",
+      "id": "92d6b8647c453b93",
+      "date": 1681484508223
+    },
+    {
+      "type": "remove",
+      "id": "71a4cc4237b5fc90",
+      "date": 1681484509807
+    },
+    {
+      "type": "remove",
+      "id": "f876998f71273a09",
+      "date": 1681484514300
+    },
+    {
+      "type": "remove",
+      "id": "f80adaee5751ad1e",
+      "date": 1681484518257
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c29f77bd472dedd2"
+      },
+      "id": "c29f77bd472dedd2",
+      "type": "add",
+      "after": "638601223433c1df",
+      "date": 1681484519755
+    },
+    {
+      "type": "edit",
+      "id": "c29f77bd472dedd2",
+      "item": {
+        "type": "reference",
+        "id": "c29f77bd472dedd2",
+        "site": "thompson.reimage.fed.wiki",
+        "slug": "story",
+        "title": "Story",
+        "text": "Into this space we are walking, listening, and waiting for the story to emerge. A story that illuminates new meaning for us and for others."
+      },
+      "date": 1681484523276
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5159f0dfaa6770ad"
+      },
+      "id": "5159f0dfaa6770ad",
+      "type": "add",
+      "after": "c29f77bd472dedd2",
+      "date": 1681484558315
+    },
+    {
+      "type": "edit",
+      "id": "5159f0dfaa6770ad",
+      "item": {
+        "type": "reference",
+        "id": "5159f0dfaa6770ad",
+        "site": "marc.tries.fed.wiki",
+        "slug": "story",
+        "title": "Story",
+        "text": "Our understandings, misunderstandings and lack of understandings."
+      },
+      "date": 1681484561646
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "032a1b35e94407d5"
+      },
+      "id": "032a1b35e94407d5",
+      "type": "add",
+      "after": "5159f0dfaa6770ad",
+      "date": 1681484571121
+    },
+    {
+      "type": "edit",
+      "id": "032a1b35e94407d5",
+      "item": {
+        "type": "paragraph",
+        "id": "032a1b35e94407d5",
+        "text": "[[Storycraft]]"
+      },
+      "date": 1681484574489
+    },
+    {
+      "type": "edit",
+      "id": "032a1b35e94407d5",
+      "item": {
+        "type": "paragraph",
+        "id": "032a1b35e94407d5",
+        "text": "⇒ [[Storycraft]]"
+      },
+      "date": 1681484592520
+    },
+    {
+      "type": "edit",
+      "id": "032a1b35e94407d5",
+      "item": {
+        "type": "paragraph",
+        "id": "032a1b35e94407d5",
+        "text": "⇒ [[Storycraft]]: Stories are about [[Choice]]s and choosing.\n"
+      },
+      "date": 1681484616282
     }
   ]
 }
