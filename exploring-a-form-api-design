@@ -1,0 +1,1170 @@
+{
+  "title": "Exploring a Form API Design",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "8aaed66c4247dda4",
+      "text": "We dive into some ideas for a new Form design, pulling in a lot of our favorite [[Elm]] techniques to make it safe and intuitive. [https://elm-radio.com/episode/exploring-form-api/ podcast]"
+    },
+    {
+      "type": "audio",
+      "id": "5af7bff573f01719",
+      "text": "https://cdn.simplecast.com/audio/6a206baa-9c8e-4c25-9037-2b674204ba84/episodes/43ca9779-ac0a-435b-bcae-f6e2b28e2cce/audio/faad690d-746b-4be3-850a-c822809081db/default_tc.mp3\n[[Elm Radio]], Episode#61: Exploring a New Form API Design"
+    },
+    {
+      "type": "paragraph",
+      "id": "906edb4d5e5f1198",
+      "text": "[00:00:57]\n[…] in a way that we can parse, don't validate."
+    },
+    {
+      "type": "paragraph",
+      "id": "1a92b50ee0df8ae9",
+      "text": "[00:02:22]\nDillon, what is a [[Form]]?"
+    },
+    {
+      "type": "paragraph",
+      "id": "1c6188e105d5ee30",
+      "text": "[00:02:26]\nWell, I mean, I think, again, it is sort of these two different concerns.\n[00:02:32]\nHow do you present something to the user that they can input data into and how do you take\n[00:02:38]\nthat data and turn it into structured data that might have errors, also known as parsing.\n[00:02:45]\nSometimes we call that...\n[00:02:46]\nDecoding, data dating, parsing."
+    },
+    {
+      "type": "paragraph",
+      "id": "e1056851037aaccd",
+      "text": "[Note from [[Ralf Barkow]]:  A [[Wiki Page]] is a form or a [[Container]].]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3fb7cef4a5343d90",
+      "text": "[00:02:50]\nAnd, you know, ideally, I think that parse don't validate is really key in my mind to\n[00:02:56]\nan ideal form API because, sure, you can sort of treat everything as strings or low level\n[00:03:03]\ndata and leave it at that and just tack on errors."
+    },
+    {
+      "type": "paragraph",
+      "id": "5f82e9732460d434",
+      "text": "[00:03:07]\nAnd that simplifies a lot of things, but it doesn't feel right.\n[00:03:14]\nIt feels like we should be able to parse things into nicely structured data.\n[00:03:19]\nAt the core, I think it's that and that data, then the purpose of it is usually to send\n[00:03:25]\nit to a server.\n[00:03:27]\nNot always."
+    },
+    {
+      "type": "paragraph",
+      "id": "066ea159f681cd89",
+      "text": "[00:03:29]\nYou sort of front end only forms where we're not really persisting it to a back end or\n[00:03:34]\ninteracting with some external service.\n[00:03:37]\nBut usually that's what it's for."
+    },
+    {
+      "type": "paragraph",
+      "id": "874cb25646113416",
+      "text": "[00:03:40]\nSo a form is a series of inputs that you can turn into either a list of errors because\n[00:03:47]\nthe form is not complete or has problems or to something, let's say, final that you can\n[00:03:54]\nsubmit to a service, a server, another function, something like that."
+    },
+    {
+      "type": "paragraph",
+      "id": "14192c3ac4d72fad",
+      "text": "[00:04:00]\nJust a series of inputs that you want to handle in a nice way."
+    },
+    {
+      "type": "paragraph",
+      "id": "0e939799ac5bec1a",
+      "text": "[00:04:15]\nYou want to give really nice user feedback and you want that feedback to be meaningful,\n[00:04:22]\nprecise and in sync with what your actual back end expects."
+    },
+    {
+      "type": "paragraph",
+      "id": "1f6295210355f92d",
+      "text": "[00:04:43]\nWell, wouldn't it be handy if we could run the same code on both sides and have that\n[00:04:48]\nbe Elm code that so we know that they're in sync.\n[00:04:52]\nAnd yes, of course, I'm talking about the new Elm pages release, which we'll definitely\n[00:04:57]\nbe talking about at some point."
+    },
+    {
+      "type": "paragraph",
+      "id": "d6132b16a475b601",
+      "text": "[00:05:19]\nI've been thinking about forms a lot because it's pretty core to the goals I have for Elm\n[00:05:26]\npages v3, especially being able to take input, user input and turn it into trusted validated\n[00:05:37]\ndata."
+    },
+    {
+      "type": "paragraph",
+      "id": "f35397c5ebc5fbfa",
+      "text": "[00:05:38]\nAnd you want that feedback.\n[00:05:40]\nYou want to share that feedback about what makes it invalid to the user.\n[00:05:44]\nAnd you want to be able to use that same logic to get it into a trusted form, you know, trusted\n[00:05:51]\nstructured data that you can use to do things with, you know, with those assumptions that\n[00:05:56]\nyou made with your parsing logic."
+    },
+    {
+      "type": "paragraph",
+      "id": "3ee6422921d71937",
+      "text": "[00:05:58]\nSo if you if you say something is a valid username, then you need to be able to trust\n[00:06:03]\nthat."
+    },
+    {
+      "type": "paragraph",
+      "id": "c3f172d8cd50b95c",
+      "text": "[00:06:04]\nBefore we dive into that, I want to know whether you think what a form API is for because when\n[00:06:12]\nI was working with React back in the day, it's not like I did it for a long time.\n[00:06:18]\nBut when people said, hey, I'm looking for a form package, it felt more like people were\n[00:06:24]\nlooking for how to create form UIs.\n[00:06:30]\nLike I want to say here is an input and it expects a number.\n[00:06:36]\nAnd based on this condition, it shows up or doesn't show up.\n[00:06:40]\nAnd it will look like this."
+    },
+    {
+      "type": "paragraph",
+      "id": "089b86bf5c4e5965",
+      "text": "[00:06:41]\nAnd I feel like the packages that you see in the Elm community, they don't have that\n[00:06:47]\nUI component.\n[00:06:48]\nThey don't have a visual.\n[00:06:50]\nThey only have that logic about validating, parsing, showing errors, but they don't have\n[00:06:56]\nthat particular point of outputting or rendering a UI."
+    },
+    {
+      "type": "paragraph",
+      "id": "29cf176ff0a206f7",
+      "text": "[00:07:02]\nWhen you say rendering a UI, do you mean like rendering a field that's like a password input\n[00:07:08]\ntype, so it masks the characters versus a text area?\n[00:07:12]\nYeah, exactly.\n[00:07:13]\nAnd with a specific UI, it looks good and you can just put it in your project and use\n[00:07:20]\nit and you will be happy."
+    },
+    {
+      "type": "paragraph",
+      "id": "18eb9db6b427520e",
+      "text": "[00:07:27]\nSo I think first of all, starting with what would vanilla form handling look like in Elm\n[00:07:34]\nis a very good place to start.\n[00:07:35]\nI like that a lot."
+    },
+    {
+      "type": "paragraph",
+      "id": "91c3ff7d127923b8",
+      "text": "[00:07:37]\nFor the problem of like presenting the form versus kind of parsing the input, that's a\n[00:07:44]\ngreat distinction.\n[00:07:46]\nThere definitely are helpers in some of the common packages in the Elm ecosystem that\n[00:07:51]\nhelp with this.\n[00:07:52]\nThere are a few considerations here."
+    },
+    {
+      "type": "paragraph",
+      "id": "b47fffca47cc89df",
+      "text": "[00:07:55]\nSo the different approaches you could take, you could completely leave it up to the user\n[00:08:00]\nand say, all I do is parse data.\n[00:08:03]\nI don't have any concern about how you present it.\n[00:08:07]\nThat's up to the user.\n[00:08:09]\nSo there are different approaches you could take this."
+    },
+    {
+      "type": "paragraph",
+      "id": "7a9f2dbb2303cc10",
+      "text": "[00:08:13]\nYou could leave it completely up to the user to deal with presenting the forms.\n[00:08:19]\nAnd all you do is you parse the data from those forms.\n[00:08:23]\nYou could sort of provide some helpers for presenting those forms.\n[00:08:27]\nThat's kind of the approach that one of the more popular packages out there, Itake Emilian,\n[00:08:36]\nI think is his name.\n[00:08:37]\nI don't know how to pronounce that properly."
+    },
+    {
+      "type": "paragraph",
+      "id": "59d78a286be1e3d3",
+      "text": "[00:08:39]\nBut this package Elm form is like a sort of decoder style API for parsing form input.\n[00:08:48]\nAnd it provides a few helpers for displaying fields.\n[00:08:53]\nLike nice looking fields, you mean?\n[00:08:55]\nIt doesn't have any opinions on how they look.\n[00:08:59]\nAnd I kind of think that that makes sense because at the core, you have essentially\n[00:09:06]\nthree different elements, maybe four."
+    },
+    {
+      "type": "paragraph",
+      "id": "4021f902c15f2291",
+      "text": "[00:09:11]\nYou have inputs.\n[00:09:13]\nThat's kind of the broadest one because a radio button is a type of input.\n[00:09:18]\nText input is an input.\n[00:09:19]\nPassword input is an input.\n[00:09:20]\nA data input is an input.\n[00:09:22]\nYou have buttons.\n[00:09:23]\nTexts can be used to submit forms.\n[00:09:26]\nActually you can create that using an input element.\n[00:09:30]\nSo that's sort of just a special case."
+    },
+    {
+      "type": "paragraph",
+      "id": "70d78c044bbd42af",
+      "text": "[00:09:34]\nAnd I mean, depending on how you're building your forms, if you're not necessarily concerned\n[00:09:39]\nabout building it as a semantic HTML form, where it's actually like a valid form with\n[00:09:45]\na button that would actually do something without JavaScript, then you could say like,\n[00:09:50]\nyou know, that's not even a concern of the package."
+    },
+    {
+      "type": "paragraph",
+      "id": "4e26c0434425b5f3",
+      "text": "[00:09:54]\nHere's a message you can attach to it to submit or a function you could use to validate or\n[00:09:59]\nwhatever and wire that up to whatever element you want.\n[00:10:02]\nI don't care.\n[00:10:03]\nI don't have an opinion on how you render that."
+    },
+    {
+      "type": "paragraph",
+      "id": "76511b13b4fadb2f",
+      "text": "[00:10:06]\nAnd then you've got a select element which can have dropdowns and you've got a text area.\n[00:10:12]\nSo there aren't that many."
+    },
+    {
+      "type": "paragraph",
+      "id": "042bc15b0c77e220",
+      "text": "[00:10:17]\nIt's just like really it seems like it should be a different input type.\n[00:10:21]\nThere's probably some historical reason for why it's not.\n[00:10:24]\nYou mean it should be the same or it should be a different one?\n[00:10:27]\nBecause there are different ones.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "dd97c082fb4fc382",
+      "text": "[00:10:29]\nI mean it should be like, why not have it be an input element with type equals text area or something like that."
+    },
+    {
+      "type": "paragraph",
+      "id": "cdbd5fa5e54a4119",
+      "text": "[Note: Compare this idea to our JSON, where the [[Story]] contains input elements with type equals paragraph or audio etc. ; RB]"
+    },
+    {
+      "type": "paragraph",
+      "id": "bb14ce6d7365558b",
+      "text": "[00:10:39]\nLike it's just a, at the end of the day, it's functionally equivalent to input type equals\n[00:10:44]\ntext but it's presented differently but that's the same for input type equals tel for telephone\n[00:10:50]\nnumber or input type equals email.\n[00:10:52]\nIt's like functionally the same as input type equals text.\n[00:10:56]\nYou know email is maybe going to run a client side validation automatically unless you have\n[00:11:03]\na no validate attribute which usually is actually what you want to do because you want to present\n[00:11:08]\nyour own error messages however you want to present them and have more fine grained control\n[00:11:13]\nover what error messages to present and how and when to present them."
+    },
+    {
+      "type": "paragraph",
+      "id": "c926f80d016f37c6",
+      "text": "[00:11:18]\nSo at the end of the day, my point is that the concern about how to present it nicely\n[00:11:25]\nI personally think is a separate concern from sort of presenting the raw input fields and parsing that data."
+    },
+    {
+      "type": "paragraph",
+      "id": "406e962d4384471e",
+      "text": "[00:11:35]\nThose two things I think should be a single concern of how you present the low level fields\n[00:11:42]\nand how do you parse the data.\n[00:11:44]\nAnd if those two things know about each other there are certain nice things you could do\n[00:11:48]\nbecause a date input has certain implications for what type it will parse into."
+    },
+    {
+      "type": "paragraph",
+      "id": "9abd712921d4e96e",
+      "text": "[00:11:54]\nPresenting it in terms of nice styles and that sort of thing.\n[00:11:58]\nMy thought on that is that that should be a separate concern.\n[00:12:02]\nNot that you couldn't have nice abstractions to help with that but I think that you can\n[00:12:08]\nhandle that pretty well by just saying, hey, I know how to render these fields that you\n[00:12:13]\nhave and hopefully the form API you have knows whether it's a date field or a text field\n[00:12:20]\nor a password field and it knows how to put the right attributes for that.\n[00:12:25]\nBut then it should allow you to put other HTML attributes to style it.\n[00:12:30]\nThat's how I think of it."
+    },
+    {
+      "type": "paragraph",
+      "id": "066fa49016ef516e",
+      "text": "[00:12:32]\nI feel like it could be useful to have the form API provide those helpers but at some\n[00:12:39]\npoint it's going to conflict with what your UI designer will want or what you will want\n[00:12:46]\nthe application to look like"
+    },
+    {
+      "type": "paragraph",
+      "id": "e938b46db279e005",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "775f8c221f474228",
+      "text": "[00:13:04]\nI think I mentioned this before but I feel like that's also the same reason why we don't\n[00:13:08]\nhave a lot of UI packages with nice inputs, with nice buttons, with all those niceties.\n[00:13:15]\nExcept the ones that are like this is a standard material UI from Google.\n[00:13:21]\nThere's a package for that.\n[00:13:23]\nAnd that makes sense because if your company says or your team says we're going to build\n[00:13:28]\nit with this material UI style then this makes a lot of sense.\n[00:13:32]\nIt's going to work for you in the long run or in some version of the long run."
+    },
+    {
+      "type": "paragraph",
+      "id": "f081e61958bb622c",
+      "text": "[00:13:38]\nBut otherwise it's unlikely that it's going to work out.\n[00:13:43]\nSo I do feel like they should be separate.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "990db824dc694cce",
+      "text": "[00:13:46]\nBecause you can get backed into a corner where you have a nice getting started experience,\n[00:13:53]\nthings look really good and you're like wow this is simple.\n[00:13:56] [00:13:56]\nThere are so few decisions I need to make.\n[00:13:58]\nIt looks nice.\n[00:14:00]\nIt gives me what I need.\n[00:14:02]\nAnd then you get stuck.\n[00:14:04]\nAnd that's no fun.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "06510b611e364c45",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "f8910bbc4b120a06",
+      "text": "[00:14:27]\nSo I feel pretty strongly personally that the way that the view is presented should\n[00:14:33]\nbe extremely unopinionated and flexible except for the basic low level fields.\n[00:14:43]\nThat should be opinionated.\n[00:14:45]\nThat should be like hey if you're building like if you say here's a password input field\n[00:14:51]\nthat our API helps you do that.\n[00:14:53]\nIf you say here's a date field our API helps you do that and it helps you parse that because\n[00:14:59]\nit knows things about the expected format that will come from the date pickers that\n[00:15:07]\nare going to be presented to users in their browser."
+    },
+    {
+      "type": "paragraph",
+      "id": "97038de31e982994",
+      "text": "[00:15:10]\nSo I feel like we agree that presenting a nice UI is not part of what a form API should\n[00:15:16]\ndo.\n[00:15:17]\nBut then what is remaining is our potentially three things in my opinion.\n[00:15:23]\nTwo of those I totally agree with the third one I'm still not sure."
+    },
+    {
+      "type": "paragraph",
+      "id": "37e4e9662b546aef",
+      "text": "[…]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Exploring a Form API Design",
+        "story": []
+      },
+      "date": 1681988177021
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1c8926778fbe54ac"
+      },
+      "id": "1c8926778fbe54ac",
+      "type": "add",
+      "date": 1681988178569
+    },
+    {
+      "type": "edit",
+      "id": "1c8926778fbe54ac",
+      "item": {
+        "type": "paragraph",
+        "id": "1c8926778fbe54ac",
+        "text": "[[Exploring a New Form API Design]]"
+      },
+      "date": 1681988181579
+    },
+    {
+      "type": "edit",
+      "id": "1c8926778fbe54ac",
+      "item": {
+        "type": "paragraph",
+        "id": "1c8926778fbe54ac",
+        "text": "Exploring a New Form API Design"
+      },
+      "date": 1681988251039
+    },
+    {
+      "type": "edit",
+      "id": "1c8926778fbe54ac",
+      "item": {
+        "type": "paragraph",
+        "id": "1c8926778fbe54ac",
+        "text": "Exploring a New Form API Design [https://elm-radio.com/episode/exploring-form-api/ podcast]"
+      },
+      "date": 1681988273954
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8aaed66c4247dda4"
+      },
+      "id": "8aaed66c4247dda4",
+      "type": "add",
+      "after": "1c8926778fbe54ac",
+      "date": 1681988284355
+    },
+    {
+      "type": "edit",
+      "id": "8aaed66c4247dda4",
+      "item": {
+        "type": "paragraph",
+        "id": "8aaed66c4247dda4",
+        "text": "We dive into some ideas for a new Form design, pulling in a lot of our favorite Elm techniques to make it safe and intuitive."
+      },
+      "date": 1681988286163
+    },
+    {
+      "id": "8aaed66c4247dda4",
+      "type": "move",
+      "order": [
+        "8aaed66c4247dda4",
+        "1c8926778fbe54ac"
+      ],
+      "date": 1681988290923
+    },
+    {
+      "type": "remove",
+      "id": "1c8926778fbe54ac",
+      "date": 1681988299492
+    },
+    {
+      "type": "edit",
+      "id": "8aaed66c4247dda4",
+      "item": {
+        "type": "paragraph",
+        "id": "8aaed66c4247dda4",
+        "text": "We dive into some ideas for a new Form design, pulling in a lot of our favorite Elm techniques to make it safe and intuitive. [https://elm-radio.com/episode/exploring-form-api/ podcast]"
+      },
+      "date": 1681988301521
+    },
+    {
+      "type": "edit",
+      "id": "8aaed66c4247dda4",
+      "item": {
+        "type": "paragraph",
+        "id": "8aaed66c4247dda4",
+        "text": "We dive into some ideas for a new Form design, pulling in a lot of our favorite [[Elm]] techniques to make it safe and intuitive. [https://elm-radio.com/episode/exploring-form-api/ podcast]"
+      },
+      "date": 1681988322726
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "906edb4d5e5f1198"
+      },
+      "id": "906edb4d5e5f1198",
+      "type": "add",
+      "after": "8aaed66c4247dda4",
+      "date": 1681988431676
+    },
+    {
+      "type": "edit",
+      "id": "906edb4d5e5f1198",
+      "item": {
+        "type": "paragraph",
+        "id": "906edb4d5e5f1198",
+        "text": "https://elm-radio.com/episode/exploring-form-api/#00-01-01"
+      },
+      "date": 1681988434117
+    },
+    {
+      "type": "edit",
+      "id": "906edb4d5e5f1198",
+      "item": {
+        "type": "paragraph",
+        "id": "906edb4d5e5f1198",
+        "text": "[00:00:57]\nin a way that we can parse, don't validate."
+      },
+      "date": 1681988453213
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5af7bff573f01719"
+      },
+      "id": "5af7bff573f01719",
+      "type": "add",
+      "after": "906edb4d5e5f1198",
+      "date": 1681988607221
+    },
+    {
+      "type": "edit",
+      "id": "5af7bff573f01719",
+      "item": {
+        "type": "audio",
+        "id": "5af7bff573f01719",
+        "text": "https://cdn.simplecast.com/audio/6a206baa-9c8e-4c25-9037-2b674204ba84/episodes/43ca9779-ac0a-435b-bcae-f6e2b28e2cce/audio/faad690d-746b-4be3-850a-c822809081db/default_tc.mp3"
+      },
+      "date": 1681988610008
+    },
+    {
+      "type": "edit",
+      "id": "5af7bff573f01719",
+      "item": {
+        "type": "audio",
+        "id": "5af7bff573f01719",
+        "text": "https://cdn.simplecast.com/audio/6a206baa-9c8e-4c25-9037-2b674204ba84/episodes/43ca9779-ac0a-435b-bcae-f6e2b28e2cce/audio/faad690d-746b-4be3-850a-c822809081db/default_tc.mp3\nExploring a New Form API Design"
+      },
+      "date": 1681988651718
+    },
+    {
+      "type": "edit",
+      "id": "5af7bff573f01719",
+      "item": {
+        "type": "audio",
+        "id": "5af7bff573f01719",
+        "text": "https://cdn.simplecast.com/audio/6a206baa-9c8e-4c25-9037-2b674204ba84/episodes/43ca9779-ac0a-435b-bcae-f6e2b28e2cce/audio/faad690d-746b-4be3-850a-c822809081db/default_tc.mp3\nEpisode#61: Exploring a New Form API Design"
+      },
+      "date": 1681988666749
+    },
+    {
+      "type": "edit",
+      "id": "5af7bff573f01719",
+      "item": {
+        "type": "audio",
+        "id": "5af7bff573f01719",
+        "text": "https://cdn.simplecast.com/audio/6a206baa-9c8e-4c25-9037-2b674204ba84/episodes/43ca9779-ac0a-435b-bcae-f6e2b28e2cce/audio/faad690d-746b-4be3-850a-c822809081db/default_tc.mp3\n[[Elm Radio]], Episode#61: Exploring a New Form API Design"
+      },
+      "date": 1681988683247
+    },
+    {
+      "id": "906edb4d5e5f1198",
+      "type": "move",
+      "order": [
+        "8aaed66c4247dda4",
+        "5af7bff573f01719",
+        "906edb4d5e5f1198"
+      ],
+      "date": 1681988688623
+    },
+    {
+      "type": "edit",
+      "id": "906edb4d5e5f1198",
+      "item": {
+        "type": "paragraph",
+        "id": "906edb4d5e5f1198",
+        "text": "[00:00:57]\n[…] in a way that we can parse, don't validate."
+      },
+      "date": 1681988734008
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1a92b50ee0df8ae9"
+      },
+      "id": "1a92b50ee0df8ae9",
+      "type": "add",
+      "after": "906edb4d5e5f1198",
+      "date": 1681988823309
+    },
+    {
+      "type": "edit",
+      "id": "1a92b50ee0df8ae9",
+      "item": {
+        "type": "paragraph",
+        "id": "1a92b50ee0df8ae9",
+        "text": "[00:02:22]\nDillon, what is a form?"
+      },
+      "date": 1681988826757
+    },
+    {
+      "type": "add",
+      "id": "e938b46db279e005",
+      "item": {
+        "type": "paragraph",
+        "id": "e938b46db279e005",
+        "text": "[…]"
+      },
+      "after": "1a92b50ee0df8ae9",
+      "date": 1681988835663
+    },
+    {
+      "type": "edit",
+      "id": "1a92b50ee0df8ae9",
+      "item": {
+        "type": "paragraph",
+        "id": "1a92b50ee0df8ae9",
+        "text": "[00:02:22]\nDillon, what is a [[Form]]?"
+      },
+      "date": 1681989353062
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1c6188e105d5ee30"
+      },
+      "id": "1c6188e105d5ee30",
+      "type": "add",
+      "after": "e938b46db279e005",
+      "date": 1681989444874
+    },
+    {
+      "id": "1c6188e105d5ee30",
+      "type": "move",
+      "order": [
+        "8aaed66c4247dda4",
+        "5af7bff573f01719",
+        "906edb4d5e5f1198",
+        "1a92b50ee0df8ae9",
+        "1c6188e105d5ee30",
+        "e938b46db279e005"
+      ],
+      "date": 1681989446372
+    },
+    {
+      "type": "edit",
+      "id": "1c6188e105d5ee30",
+      "item": {
+        "type": "paragraph",
+        "id": "1c6188e105d5ee30",
+        "text": "[00:02:26]\nWell, I mean, I think, again, it is sort of these two different concerns.\n[00:02:32]\nHow do you present something to the user that they can input data into and how do you take\n[00:02:38]\nthat data and turn it into structured data that might have errors, also known as parsing.\n[00:02:45]\nSometimes we call that...\n[00:02:46]\nDecoding, data dating, parsing."
+      },
+      "date": 1681989447637
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e1056851037aaccd"
+      },
+      "id": "e1056851037aaccd",
+      "type": "add",
+      "after": "e938b46db279e005",
+      "date": 1681989481217
+    },
+    {
+      "id": "e1056851037aaccd",
+      "type": "move",
+      "order": [
+        "8aaed66c4247dda4",
+        "5af7bff573f01719",
+        "906edb4d5e5f1198",
+        "1a92b50ee0df8ae9",
+        "1c6188e105d5ee30",
+        "e1056851037aaccd",
+        "e938b46db279e005"
+      ],
+      "date": 1681989483793
+    },
+    {
+      "type": "edit",
+      "id": "e1056851037aaccd",
+      "item": {
+        "type": "paragraph",
+        "id": "e1056851037aaccd",
+        "text": "[Note from [[Ralf Barkow]]: A wiki page is a form.]"
+      },
+      "date": 1681989539043
+    },
+    {
+      "type": "edit",
+      "id": "e1056851037aaccd",
+      "item": {
+        "type": "paragraph",
+        "id": "e1056851037aaccd",
+        "text": "[Note from [[Ralf Barkow]]:  A wiki page is a form or a [[Container]].]"
+      },
+      "date": 1681989597828
+    },
+    {
+      "type": "edit",
+      "id": "e1056851037aaccd",
+      "item": {
+        "type": "paragraph",
+        "id": "e1056851037aaccd",
+        "text": "[Note from [[Ralf Barkow]]:  A [[Wiki Page]] is a form or a [[Container]].]"
+      },
+      "date": 1681989612768
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3fb7cef4a5343d90"
+      },
+      "id": "3fb7cef4a5343d90",
+      "type": "add",
+      "after": "e938b46db279e005",
+      "date": 1681989667130
+    },
+    {
+      "id": "3fb7cef4a5343d90",
+      "type": "move",
+      "order": [
+        "8aaed66c4247dda4",
+        "5af7bff573f01719",
+        "906edb4d5e5f1198",
+        "1a92b50ee0df8ae9",
+        "1c6188e105d5ee30",
+        "e1056851037aaccd",
+        "3fb7cef4a5343d90",
+        "e938b46db279e005"
+      ],
+      "date": 1681989669022
+    },
+    {
+      "type": "edit",
+      "id": "3fb7cef4a5343d90",
+      "item": {
+        "type": "paragraph",
+        "id": "3fb7cef4a5343d90",
+        "text": "[00:02:50]\nAnd, you know, ideally, I think that parse don't validate is really key in my mind to\n[00:02:56]\nan ideal form API because, sure, you can sort of treat everything as strings or low level\n[00:03:03]\ndata and leave it at that and just tack on errors."
+      },
+      "date": 1681989670475
+    },
+    {
+      "type": "add",
+      "id": "5f82e9732460d434",
+      "item": {
+        "type": "paragraph",
+        "id": "5f82e9732460d434",
+        "text": "[00:03:07]\nAnd that simplifies a lot of things, but it doesn't feel right.\n[00:03:14]\nIt feels like we should be able to parse things into nicely structured data.\n[00:03:19]\nAt the core, I think it's that and that data, then the purpose of it is usually to send\n[00:03:25]\nit to a server.\n[00:03:27]\nNot always."
+      },
+      "after": "3fb7cef4a5343d90",
+      "date": 1681989691510
+    },
+    {
+      "type": "add",
+      "id": "066ea159f681cd89",
+      "item": {
+        "type": "paragraph",
+        "id": "066ea159f681cd89",
+        "text": "[00:03:29]\nYou sort of front end only forms where we're not really persisting it to a back end or\n[00:03:34]\ninteracting with some external service.\n[00:03:37]\nBut usually that's what it's for."
+      },
+      "after": "5f82e9732460d434",
+      "date": 1681989711799
+    },
+    {
+      "type": "add",
+      "id": "874cb25646113416",
+      "item": {
+        "type": "paragraph",
+        "id": "874cb25646113416",
+        "text": "[00:03:40]\nSo a form is a series of inputs that you can turn into either a list of errors because\n[00:03:47]\nthe form is not complete or has problems or to something, let's say, final that you can\n[00:03:54]\nsubmit to a service, a server, another function, something like that."
+      },
+      "after": "066ea159f681cd89",
+      "date": 1681989756624
+    },
+    {
+      "type": "add",
+      "id": "14192c3ac4d72fad",
+      "item": {
+        "type": "paragraph",
+        "id": "14192c3ac4d72fad",
+        "text": "[00:04:00]\nJust a series of inputs that you want to handle in a nice way."
+      },
+      "after": "874cb25646113416",
+      "date": 1681989766650
+    },
+    {
+      "type": "add",
+      "id": "0e939799ac5bec1a",
+      "item": {
+        "type": "paragraph",
+        "id": "0e939799ac5bec1a",
+        "text": "[00:04:15]\nYou want to give really nice user feedback and you want that feedback to be meaningful,\n[00:04:22]\nprecise and in sync with what your actual back end expects."
+      },
+      "after": "14192c3ac4d72fad",
+      "date": 1681989784227
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1f6295210355f92d"
+      },
+      "id": "1f6295210355f92d",
+      "type": "add",
+      "after": "e938b46db279e005",
+      "date": 1681989986660
+    },
+    {
+      "id": "1f6295210355f92d",
+      "type": "move",
+      "order": [
+        "8aaed66c4247dda4",
+        "5af7bff573f01719",
+        "906edb4d5e5f1198",
+        "1a92b50ee0df8ae9",
+        "1c6188e105d5ee30",
+        "e1056851037aaccd",
+        "3fb7cef4a5343d90",
+        "5f82e9732460d434",
+        "066ea159f681cd89",
+        "874cb25646113416",
+        "14192c3ac4d72fad",
+        "0e939799ac5bec1a",
+        "1f6295210355f92d",
+        "e938b46db279e005"
+      ],
+      "date": 1681989988630
+    },
+    {
+      "type": "edit",
+      "id": "1f6295210355f92d",
+      "item": {
+        "type": "paragraph",
+        "id": "1f6295210355f92d",
+        "text": "[00:04:43]\nWell, wouldn't it be handy if we could run the same code on both sides and have that\n[00:04:48]\nbe Elm code that so we know that they're in sync.\n[00:04:52]\nAnd yes, of course, I'm talking about the new Elm pages release, which we'll definitely\n[00:04:57]\nbe talking about at some point."
+      },
+      "date": 1681989990249
+    },
+    {
+      "type": "add",
+      "id": "d6132b16a475b601",
+      "item": {
+        "type": "paragraph",
+        "id": "d6132b16a475b601",
+        "text": "[00:05:19]\nI've been thinking about forms a lot because it's pretty core to the goals I have for Elm\n[00:05:26]\npages v3, especially being able to take input, user input and turn it into trusted validated\n[00:05:37]\ndata."
+      },
+      "after": "1f6295210355f92d",
+      "date": 1681990043052
+    },
+    {
+      "type": "add",
+      "id": "f35397c5ebc5fbfa",
+      "item": {
+        "type": "paragraph",
+        "id": "f35397c5ebc5fbfa",
+        "text": "[00:05:38]\nAnd you want that feedback.\n[00:05:40]\nYou want to share that feedback about what makes it invalid to the user.\n[00:05:44]\nAnd you want to be able to use that same logic to get it into a trusted form, you know, trusted\n[00:05:51]\nstructured data that you can use to do things with, you know, with those assumptions that\n[00:05:56]\nyou made with your parsing logic."
+      },
+      "after": "d6132b16a475b601",
+      "date": 1681990071895
+    },
+    {
+      "type": "add",
+      "id": "3ee6422921d71937",
+      "item": {
+        "type": "paragraph",
+        "id": "3ee6422921d71937",
+        "text": "[00:05:58]\nSo if you if you say something is a valid username, then you need to be able to trust\n[00:06:03]\nthat."
+      },
+      "after": "f35397c5ebc5fbfa",
+      "date": 1681990085814
+    },
+    {
+      "type": "add",
+      "id": "c3f172d8cd50b95c",
+      "item": {
+        "type": "paragraph",
+        "id": "c3f172d8cd50b95c",
+        "text": "[00:06:04]\nBefore we dive into that, I want to know whether you think what a form API is for because when\n[00:06:12]\nI was working with React back in the day, it's not like I did it for a long time.\n[00:06:18]\nBut when people said, hey, I'm looking for a form package, it felt more like people were\n[00:06:24]\nlooking for how to create form UIs.\n[00:06:30]\nLike I want to say here is an input and it expects a number.\n[00:06:36]\nAnd based on this condition, it shows up or doesn't show up.\n[00:06:40]\nAnd it will look like this."
+      },
+      "after": "3ee6422921d71937",
+      "date": 1681990117346
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "089b86bf5c4e5965"
+      },
+      "id": "089b86bf5c4e5965",
+      "type": "add",
+      "after": "e938b46db279e005",
+      "date": 1681990137826
+    },
+    {
+      "id": "089b86bf5c4e5965",
+      "type": "move",
+      "order": [
+        "8aaed66c4247dda4",
+        "5af7bff573f01719",
+        "906edb4d5e5f1198",
+        "1a92b50ee0df8ae9",
+        "1c6188e105d5ee30",
+        "e1056851037aaccd",
+        "3fb7cef4a5343d90",
+        "5f82e9732460d434",
+        "066ea159f681cd89",
+        "874cb25646113416",
+        "14192c3ac4d72fad",
+        "0e939799ac5bec1a",
+        "1f6295210355f92d",
+        "d6132b16a475b601",
+        "f35397c5ebc5fbfa",
+        "3ee6422921d71937",
+        "c3f172d8cd50b95c",
+        "089b86bf5c4e5965",
+        "e938b46db279e005"
+      ],
+      "date": 1681990139299
+    },
+    {
+      "type": "edit",
+      "id": "089b86bf5c4e5965",
+      "item": {
+        "type": "paragraph",
+        "id": "089b86bf5c4e5965",
+        "text": "[00:06:41]\nAnd I feel like the packages that you see in the Elm community, they don't have that\n[00:06:47]\nUI component.\n[00:06:48]\nThey don't have a visual.\n[00:06:50]\nThey only have that logic about validating, parsing, showing errors, but they don't have\n[00:06:56]\nthat particular point of outputting or rendering a UI."
+      },
+      "date": 1681990140313
+    },
+    {
+      "type": "add",
+      "id": "29cf176ff0a206f7",
+      "item": {
+        "type": "paragraph",
+        "id": "29cf176ff0a206f7",
+        "text": "[00:07:02]\nWhen you say rendering a UI, do you mean like rendering a field that's like a password input\n[00:07:08]\ntype, so it masks the characters versus a text area?\n[00:07:12]\nYeah, exactly.\n[00:07:13]\nAnd with a specific UI, it looks good and you can just put it in your project and use\n[00:07:20]\nit and you will be happy."
+      },
+      "after": "089b86bf5c4e5965",
+      "date": 1681990163829
+    },
+    {
+      "type": "add",
+      "id": "18eb9db6b427520e",
+      "item": {
+        "type": "paragraph",
+        "id": "18eb9db6b427520e",
+        "text": "[00:07:27]\nSo I think first of all, starting with what would vanilla form handling look like in Elm\n[00:07:34]\nis a very good place to start.\n[00:07:35]\nI like that a lot."
+      },
+      "after": "29cf176ff0a206f7",
+      "date": 1681990183770
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "91c3ff7d127923b8"
+      },
+      "id": "91c3ff7d127923b8",
+      "type": "add",
+      "after": "e938b46db279e005",
+      "date": 1681990209195
+    },
+    {
+      "id": "91c3ff7d127923b8",
+      "type": "move",
+      "order": [
+        "8aaed66c4247dda4",
+        "5af7bff573f01719",
+        "906edb4d5e5f1198",
+        "1a92b50ee0df8ae9",
+        "1c6188e105d5ee30",
+        "e1056851037aaccd",
+        "3fb7cef4a5343d90",
+        "5f82e9732460d434",
+        "066ea159f681cd89",
+        "874cb25646113416",
+        "14192c3ac4d72fad",
+        "0e939799ac5bec1a",
+        "1f6295210355f92d",
+        "d6132b16a475b601",
+        "f35397c5ebc5fbfa",
+        "3ee6422921d71937",
+        "c3f172d8cd50b95c",
+        "089b86bf5c4e5965",
+        "29cf176ff0a206f7",
+        "18eb9db6b427520e",
+        "91c3ff7d127923b8",
+        "e938b46db279e005"
+      ],
+      "date": 1681990210759
+    },
+    {
+      "type": "edit",
+      "id": "91c3ff7d127923b8",
+      "item": {
+        "type": "paragraph",
+        "id": "91c3ff7d127923b8",
+        "text": "[00:07:37]\nFor the problem of like presenting the form versus kind of parsing the input, that's a\n[00:07:44]\ngreat distinction.\n[00:07:46]\nThere definitely are helpers in some of the common packages in the Elm ecosystem that\n[00:07:51]\nhelp with this.\n[00:07:52]\nThere are a few considerations here."
+      },
+      "date": 1681990211940
+    },
+    {
+      "type": "add",
+      "id": "b47fffca47cc89df",
+      "item": {
+        "type": "paragraph",
+        "id": "b47fffca47cc89df",
+        "text": "[00:07:55]\nSo the different approaches you could take, you could completely leave it up to the user\n[00:08:00]\nand say, all I do is parse data.\n[00:08:03]\nI don't have any concern about how you present it.\n[00:08:07]\nThat's up to the user.\n[00:08:09]\nSo there are different approaches you could take this."
+      },
+      "after": "91c3ff7d127923b8",
+      "date": 1681990231813
+    },
+    {
+      "type": "add",
+      "id": "7a9f2dbb2303cc10",
+      "item": {
+        "type": "paragraph",
+        "id": "7a9f2dbb2303cc10",
+        "text": "[00:08:13]\nYou could leave it completely up to the user to deal with presenting the forms.\n[00:08:19]\nAnd all you do is you parse the data from those forms.\n[00:08:23]\nYou could sort of provide some helpers for presenting those forms.\n[00:08:27]\nThat's kind of the approach that one of the more popular packages out there, Itake Emilian,\n[00:08:36]\nI think is his name.\n[00:08:37]\nI don't know how to pronounce that properly."
+      },
+      "after": "b47fffca47cc89df",
+      "date": 1681990292112
+    },
+    {
+      "type": "add",
+      "id": "59d78a286be1e3d3",
+      "item": {
+        "type": "paragraph",
+        "id": "59d78a286be1e3d3",
+        "text": "[00:08:39]\nBut this package Elm form is like a sort of decoder style API for parsing form input.\n[00:08:48]\nAnd it provides a few helpers for displaying fields.\n[00:08:53]\nLike nice looking fields, you mean?\n[00:08:55]\nIt doesn't have any opinions on how they look.\n[00:08:59]\nAnd I kind of think that that makes sense because at the core, you have essentially\n[00:09:06]\nthree different elements, maybe four."
+      },
+      "after": "7a9f2dbb2303cc10",
+      "date": 1681990360757
+    },
+    {
+      "type": "add",
+      "id": "4021f902c15f2291",
+      "item": {
+        "type": "paragraph",
+        "id": "4021f902c15f2291",
+        "text": "[00:09:11]\nYou have inputs.\n[00:09:13]\nThat's kind of the broadest one because a radio button is a type of input.\n[00:09:18]\nText input is an input.\n[00:09:19]\nPassword input is an input.\n[00:09:20]\nA data input is an input.\n[00:09:22]\nYou have buttons.\n[00:09:23]\nTexts can be used to submit forms.\n[00:09:26]\nActually you can create that using an input element.\n[00:09:30]\nSo that's sort of just a special case."
+      },
+      "after": "59d78a286be1e3d3",
+      "date": 1681990386183
+    },
+    {
+      "type": "add",
+      "id": "70d78c044bbd42af",
+      "item": {
+        "type": "paragraph",
+        "id": "70d78c044bbd42af",
+        "text": "[00:09:34]\nAnd I mean, depending on how you're building your forms, if you're not necessarily concerned\n[00:09:39]\nabout building it as a semantic HTML form, where it's actually like a valid form with\n[00:09:45]\na button that would actually do something without JavaScript, then you could say like,\n[00:09:50]\nyou know, that's not even a concern of the package."
+      },
+      "after": "4021f902c15f2291",
+      "date": 1681990461726
+    },
+    {
+      "type": "add",
+      "id": "4e26c0434425b5f3",
+      "item": {
+        "type": "paragraph",
+        "id": "4e26c0434425b5f3",
+        "text": "[00:09:54]\nHere's a message you can attach to it to submit or a function you could use to validate or\n[00:09:59]\nwhatever and wire that up to whatever element you want.\n[00:10:02]\nI don't care.\n[00:10:03]\nI don't have an opinion on how you render that."
+      },
+      "after": "70d78c044bbd42af",
+      "date": 1681990478240
+    },
+    {
+      "type": "add",
+      "id": "76511b13b4fadb2f",
+      "item": {
+        "type": "paragraph",
+        "id": "76511b13b4fadb2f",
+        "text": "[00:10:06]\nAnd then you've got a select element which can have dropdowns and you've got a text area.\n[00:10:12]\nSo there aren't that many."
+      },
+      "after": "4e26c0434425b5f3",
+      "date": 1681990493435
+    },
+    {
+      "type": "add",
+      "id": "042bc15b0c77e220",
+      "item": {
+        "type": "paragraph",
+        "id": "042bc15b0c77e220",
+        "text": "[00:10:17]\nIt's just like really it seems like it should be a different input type.\n[00:10:21]\nThere's probably some historical reason for why it's not.\n[00:10:24]\nYou mean it should be the same or it should be a different one?\n[00:10:27]\nBecause there are different ones.\n[00:10:29]\nI mean it should be like, why not have it be an input element with type equals text\n[00:10:37]\narea or something like that."
+      },
+      "after": "76511b13b4fadb2f",
+      "date": 1681990528413
+    },
+    {
+      "type": "edit",
+      "id": "042bc15b0c77e220",
+      "item": {
+        "type": "paragraph",
+        "id": "042bc15b0c77e220",
+        "text": "[00:10:17]\nIt's just like really it seems like it should be a different input type.\n[00:10:21]\nThere's probably some historical reason for why it's not.\n[00:10:24]\nYou mean it should be the same or it should be a different one?\n[00:10:27]\nBecause there are different ones.\n"
+      },
+      "date": 1681990613530
+    },
+    {
+      "type": "add",
+      "id": "dd97c082fb4fc382",
+      "item": {
+        "type": "paragraph",
+        "id": "dd97c082fb4fc382",
+        "text": "[00:10:29]\nI mean it should be like, why not have it be an input element with type equals text area or something like that."
+      },
+      "after": "042bc15b0c77e220",
+      "date": 1681990614096
+    },
+    {
+      "type": "add",
+      "id": "cdbd5fa5e54a4119",
+      "item": {
+        "type": "paragraph",
+        "id": "cdbd5fa5e54a4119",
+        "text": "[Note: Compare this idea to our JSON, where Story contains ]"
+      },
+      "after": "dd97c082fb4fc382",
+      "date": 1681990683247
+    },
+    {
+      "type": "edit",
+      "id": "cdbd5fa5e54a4119",
+      "item": {
+        "type": "paragraph",
+        "id": "cdbd5fa5e54a4119",
+        "text": "[Note: Compare this idea to our JSON, where Story contains input elements with type equals parar"
+      },
+      "date": 1681990718310
+    },
+    {
+      "type": "edit",
+      "id": "cdbd5fa5e54a4119",
+      "item": {
+        "type": "paragraph",
+        "id": "cdbd5fa5e54a4119",
+        "text": "[Note: Compare this idea to our JSON, where Story contains input elements with type equals paragraph …  ; RB]"
+      },
+      "date": 1681990736893
+    },
+    {
+      "type": "edit",
+      "id": "cdbd5fa5e54a4119",
+      "item": {
+        "type": "paragraph",
+        "id": "cdbd5fa5e54a4119",
+        "text": "[Note: Compare this idea to our JSON, where Story contains input elements with type equals paragraph or audio etc. ; RB]"
+      },
+      "date": 1681990767020
+    },
+    {
+      "type": "edit",
+      "id": "cdbd5fa5e54a4119",
+      "item": {
+        "type": "paragraph",
+        "id": "cdbd5fa5e54a4119",
+        "text": "[Note: Compare this idea to our JSON, where the [[Story]] contains input elements with type equals paragraph or audio etc. ; RB]"
+      },
+      "date": 1681990786719
+    },
+    {
+      "type": "add",
+      "id": "bb14ce6d7365558b",
+      "item": {
+        "type": "paragraph",
+        "id": "bb14ce6d7365558b",
+        "text": "[00:10:39]\nLike it's just a, at the end of the day, it's functionally equivalent to input type equals\n[00:10:44]\ntext but it's presented differently but that's the same for input type equals tel for telephone\n[00:10:50]\nnumber or input type equals email.\n[00:10:52]\nIt's like functionally the same as input type equals text.\n[00:10:56]\nYou know email is maybe going to run a client side validation automatically unless you have\n[00:11:03]\na no validate attribute which usually is actually what you want to do because you want to present\n[00:11:08]\nyour own error messages however you want to present them and have more fine grained control\n[00:11:13]\nover what error messages to present and how and when to present them."
+      },
+      "after": "cdbd5fa5e54a4119",
+      "date": 1681990859899
+    },
+    {
+      "type": "add",
+      "id": "c926f80d016f37c6",
+      "item": {
+        "type": "paragraph",
+        "id": "c926f80d016f37c6",
+        "text": "[00:11:18]\nSo at the end of the day, my point is that the concern about how to present it nicely\n[00:11:25]\nI personally think is a separate concern from sort of presenting the raw input fields and\n[00:11:34]\nparsing that data."
+      },
+      "after": "bb14ce6d7365558b",
+      "date": 1681990892217
+    },
+    {
+      "type": "add",
+      "id": "406e962d4384471e",
+      "item": {
+        "type": "paragraph",
+        "id": "406e962d4384471e",
+        "text": "[00:11:35]\nThose two things I think should be a single concern of how you present the low level fields\n[00:11:42]\nand how do you parse the data.\n[00:11:44]\nAnd if those two things know about each other there are certain nice things you could do\n[00:11:48]\nbecause a date input has certain implications for what type it will parse into."
+      },
+      "after": "c926f80d016f37c6",
+      "date": 1681990948231
+    },
+    {
+      "type": "add",
+      "id": "9abd712921d4e96e",
+      "item": {
+        "type": "paragraph",
+        "id": "9abd712921d4e96e",
+        "text": "[00:11:54]\nPresenting it in terms of nice styles and that sort of thing.\n[00:11:58]\nMy thought on that is that that should be a separate concern.\n[00:12:02]\nNot that you couldn't have nice abstractions to help with that but I think that you can\n[00:12:08]\nhandle that pretty well by just saying, hey, I know how to render these fields that you\n[00:12:13]\nhave and hopefully the form API you have knows whether it's a date field or a text field\n[00:12:20]\nor a password field and it knows how to put the right attributes for that.\n[00:12:25]\nBut then it should allow you to put other HTML attributes to style it.\n[00:12:30]\nThat's how I think of it."
+      },
+      "after": "406e962d4384471e",
+      "date": 1681990963428
+    },
+    {
+      "type": "edit",
+      "id": "c926f80d016f37c6",
+      "item": {
+        "type": "paragraph",
+        "id": "c926f80d016f37c6",
+        "text": "[00:11:18]\nSo at the end of the day, my point is that the concern about how to present it nicely\n[00:11:25]\nI personally think is a separate concern from sort of presenting the raw input fields and parsing that data."
+      },
+      "date": 1681990984827
+    },
+    {
+      "type": "add",
+      "id": "066fa49016ef516e",
+      "item": {
+        "type": "paragraph",
+        "id": "066fa49016ef516e",
+        "text": "[00:12:32]\nI feel like it could be useful to have the form API provide those helpers but at some\n[00:12:39]\npoint it's going to conflict with what your UI designer will want or what you will want\n[00:12:46]\nthe application to look like"
+      },
+      "after": "9abd712921d4e96e",
+      "date": 1681991095111
+    },
+    {
+      "type": "add",
+      "id": "775f8c221f474228",
+      "item": {
+        "type": "paragraph",
+        "id": "775f8c221f474228",
+        "text": "[00:13:04]\nI think I mentioned this before but I feel like that's also the same reason why we don't\n[00:13:08]\nhave a lot of UI packages with nice inputs, with nice buttons, with all those niceties.\n[00:13:15]\nExcept the ones that are like this is a standard material UI from Google.\n[00:13:21]\nThere's a package for that.\n[00:13:23]\nAnd that makes sense because if your company says or your team says we're going to build\n[00:13:28]\nit with this material UI style then this makes a lot of sense.\n[00:13:32]\nIt's going to work for you in the long run or in some version of the long run."
+      },
+      "after": "e938b46db279e005",
+      "date": 1681991159458
+    },
+    {
+      "type": "add",
+      "id": "06510b611e364c45",
+      "item": {
+        "type": "paragraph",
+        "id": "06510b611e364c45",
+        "text": "[…]"
+      },
+      "after": "775f8c221f474228",
+      "date": 1681991161338
+    },
+    {
+      "type": "add",
+      "id": "f081e61958bb622c",
+      "item": {
+        "type": "paragraph",
+        "id": "f081e61958bb622c",
+        "text": "[00:13:38]\nBut otherwise it's unlikely that it's going to work out.\n[00:13:43]\nSo I do feel like they should be separate.\n[00:13:46]\nBecause you can get backed into a corner where you have a nice getting started experience,\n[00:13:53]\nthings look really good and you're like wow this is simple.\n[00:13:56]\n"
+      },
+      "after": "775f8c221f474228",
+      "date": 1681991214385
+    },
+    {
+      "type": "edit",
+      "id": "f081e61958bb622c",
+      "item": {
+        "type": "paragraph",
+        "id": "f081e61958bb622c",
+        "text": "[00:13:38]\nBut otherwise it's unlikely that it's going to work out.\n[00:13:43]\nSo I do feel like they should be separate.\n"
+      },
+      "date": 1681991248796
+    },
+    {
+      "type": "add",
+      "id": "990db824dc694cce",
+      "item": {
+        "type": "paragraph",
+        "id": "990db824dc694cce",
+        "text": "[00:13:46]\nBecause you can get backed into a corner where you have a nice getting started experience,\n[00:13:53]\nthings look really good and you're like wow this is simple.\n[00:13:56]\n"
+      },
+      "after": "f081e61958bb622c",
+      "date": 1681991250007
+    },
+    {
+      "type": "edit",
+      "id": "990db824dc694cce",
+      "item": {
+        "type": "paragraph",
+        "id": "990db824dc694cce",
+        "text": "[00:13:46]\nBecause you can get backed into a corner where you have a nice getting started experience,\n[00:13:53]\nthings look really good and you're like wow this is simple.\n[00:13:56] [00:13:56]\nThere are so few decisions I need to make.\n[00:13:58]\nIt looks nice.\n[00:14:00]\nIt gives me what I need.\n[00:14:02]\nAnd then you get stuck.\n[00:14:04]\nAnd that's no fun.\n"
+      },
+      "date": 1681991276947
+    },
+    {
+      "type": "add",
+      "id": "f8910bbc4b120a06",
+      "item": {
+        "type": "paragraph",
+        "id": "f8910bbc4b120a06",
+        "text": "[00:14:27]\nSo I feel pretty strongly personally that the way that the view is presented should\n[00:14:33]\nbe extremely unopinionated and flexible except for the basic low level fields.\n[00:14:43]\nThat should be opinionated.\n[00:14:45]\nThat should be like hey if you're building like if you say here's a password input field\n[00:14:51]\nthat our API helps you do that.\n[00:14:53]\nIf you say here's a date field our API helps you do that and it helps you parse that because\n[00:14:59]\nit knows things about the expected format that will come from the date pickers that\n[00:15:07]\nare going to be presented to users in their browser."
+      },
+      "after": "06510b611e364c45",
+      "date": 1681991333407
+    },
+    {
+      "type": "add",
+      "id": "37e4e9662b546aef",
+      "item": {
+        "type": "paragraph",
+        "id": "37e4e9662b546aef",
+        "text": "[…]"
+      },
+      "after": "f8910bbc4b120a06",
+      "date": 1681991334869
+    },
+    {
+      "type": "add",
+      "id": "97038de31e982994",
+      "item": {
+        "type": "paragraph",
+        "id": "97038de31e982994",
+        "text": "[00:15:10]\nSo I feel like we agree that presenting a nice UI is not part of what a form API should\n[00:15:16]\ndo.\n[00:15:17]\nBut then what is remaining is our potentially three things in my opinion.\n[00:15:23]\nTwo of those I totally agree with the third one I'm still not sure."
+      },
+      "after": "f8910bbc4b120a06",
+      "date": 1681991397902
+    }
+  ]
+}
