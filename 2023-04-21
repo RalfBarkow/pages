@@ -1,0 +1,950 @@
+{
+  "title": "2023-04-21",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "3b6e2be8154a6908",
+      "text": "⇒ [[Scaling Elm Apps]] & \"Web Apps without Web Servers\" by [[Richard Feldman]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "c79e6f02a043c553",
+      "text": "Remove plugin deprecated code for Intellij IDEA 2022.3.2\n#792 [https://github.com/klazuka/intellij-elm/pull/792 github]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6219958165afb337",
+      "text": "IntelliJ IDEA CE 2021.2.2 [https://download.jetbrains.com/idea/ideaIC-2021.2.2.dmg dmg] and Elm plugin v4.4.1 (2021-09-20) [https://plugins.jetbrains.com/plugin/10268-elm page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "a4240cb97b50e249",
+      "text": "⇒ [[elm-pages]] ⇒ [[What is elm-pages?]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "81990157819e73e8",
+      "text": "Introducing elm-pages 2.0 [https://elm-pages.com/blog/introducing-v2 post]"
+    },
+    {
+      "type": "markdown",
+      "id": "3ac203400c142e91",
+      "text": "* Doubling down on DataSources"
+    },
+    {
+      "type": "paragraph",
+      "id": "5147945ff7670a4b",
+      "text": "One of the most important features missing before v2 was the ability to use external data to specify pre-rendered pages. In v1, adding new files to the content/folder (usually Markdown files) was the only way to create a new page. This limitation meant that you could not, for example, use a CMS (Content Management System) to host your blog posts or other pages in an external system and then use that external data to create a page for each entry."
+    },
+    {
+      "type": "paragraph",
+      "id": "bef2680658951f67",
+      "text": "Note: Replace \"use a CMS\" with \"use Federated Wiki\" as an external system/DataSource?!! ⇒ [[Elm-Form Demo]] & Custom Home Page"
+    },
+    {
+      "type": "paragraph",
+      "id": "40765e674785244b",
+      "text": "To create a blog post, we could run"
+    },
+    {
+      "type": "paragraph",
+      "id": "46479ba73abc7c7f",
+      "text": "elm-pages add Blog.Slug_"
+    },
+    {
+      "type": "paragraph",
+      "id": "eb9f6e9c5596a3ec",
+      "text": "⇒ [[Slug]] ⇒ [[Where Pages Live]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "25f4cd5eb090a83d",
+      "text": "If we wanted to migrate our blog posts over to an external CMS and fetch the blog posts with HTTP, then we would just swap out that DataSource for different one:\n\n"
+    },
+    {
+      "type": "code",
+      "id": "15d8349925920e68",
+      "text": "import OptimizedDecoder as Decode\nimport DataSource.Http\nimport Pages.Secrets\n\n\ntype alias RouteParams =\n    { slug : String }\n\n\nroutes : DataSource (List RouteParams)\nroutes =\n    DataSource.Http.get\n        (Pages.Secrets.succeed (\"https://api.my-cms.com/all-blog-posts\"))\n        (Decode.list (blogPostDecoder |> Decode.map .slug |> Decode.map RouteParams))\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "283eed05b496c784",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "b22ce587ae34a5ce",
+      "text": "DataSource.Port lets you decode JSON data that you call from custom NodeJS functions. As with any DataSource, you get this data in the build step and then it gets built in to your site, so these NodeJS functions, HTTP requests, file reads, etc. are not happening when a user opens a page in your live site that you built with elm-pages build."
+    },
+    {
+      "type": "paragraph",
+      "id": "fa6a08aa1059c29b",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "5fbad4272998f0c6",
+      "text": "elm-pages 2.0 uses a pull-based approach. You can define a Page Module and just use it to render an Elm view (or a mini Elm app with its own Msg and update). Or you can pull in metadata from all blog posts if that's what you need. It's up to you. The core building blocks let you pull in data, and it's up to you to define where to get the data from and what to do with it."
+    },
+    {
+      "type": "paragraph",
+      "id": "fa9ec28c43f5b491",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3dbfa919ac3cdedf",
+      "text": "v2 has removed Webpack, as well as many other NPM dependencies. The dev server is completely custom tailored to compile your elm-pages app, give you Elm compiler error overlays in the dev server, as well as DataSource error overlays. And it even does hot module replacement for the DataSources your page depends on. For example, if you have a DataSource to list out every blog post marked with a particular tag in the frontmatter, if you save a markdown file and add or remove a tag, it will be instantly reflected when you are viewing the page in the dev server."
+    },
+    {
+      "type": "paragraph",
+      "id": "7b841fa65e937fda",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "1ed4ccb7a48d1617",
+      "text": "One of the core changes under the hood in v2 is that everything is built one page at a time. That's central to how the dev server performance was optimized to quickly render and hot reload pages and their data.\n\nThis new architecture under the hood is also what powers some experimental functionality that will be the focus of the next elm-pages milestone: serverless rendering. Serverless functions let you run JavaScript code with minimal infrastructure setup, and respond to an HTTP request. This is essentially exactly what the dev server is doing, so it's not a big leap from that to rendering pages at request-time instead of pre-rendering them at build-time."
+    },
+    {
+      "type": "paragraph",
+      "id": "6f3b6c05de0953a0",
+      "text": "Pre-rendering pages is still ideal in cases where you have the data you need ahead of time, but in some cases you may want to pull in data on-demand, or even use request headers when serving up the page. For example, you could use an authentication header to verify that a user is logged in, and do a redirect or serve up the user's page depending on the auth check. One of the challenges with traditional Jamstack sites is content that is user-specific, and this functionality can open up some use cases in this area."
+    },
+    {
+      "type": "video",
+      "id": "d0079d3611384278",
+      "text": "YOUTUBE 8zM0pF-Qjcg\n[[Dillon Kearns]] - Declarative Server State "
+    },
+    {
+      "type": "paragraph",
+      "id": "d94777a67eadffa7",
+      "text": "[https://youtu.be/8zM0pF-Qjcg?t=1095 18:15]\ninstead of just asking the server for data we want to tell the server to do things\n18:20\nright actions well how do you do that on the web? This is something that the remix js team [https://remix.run/ site] has really been popularizing these days is using some of these core web concepts that have been around for many many years. How do you tell the uh a server to do something?\n18:39\nwell uh forms that's what forms have been traditionally and they're kind of making a comeback and so elm-pages 3.0 uses forms to do\n18:47\nthat so let's uh let's do that so let's let's find our to-do here"
+    },
+    {
+      "type": "paragraph",
+      "id": "3c047bcff314eb76",
+      "text": "⇒ [[Forms]] ⇒ [[Form]] ⇒ [[Elm-Form Demo]] ⇒ [[Exploring a Form API Design]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "53923963131df3b5",
+      "text": "https://youtu.be/8zM0pF-Qjcg?t=1288"
+    },
+    {
+      "type": "paragraph",
+      "id": "13b85793dfb7fed5",
+      "text": "Roadmap [https://github.com/dillonkearns/elm-pages/projects/2 github], [https://github.com/dillonkearns/elm-pages/projects?type=classic projects]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "2023-04-21",
+        "story": []
+      },
+      "date": 1682035211467
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3b6e2be8154a6908"
+      },
+      "id": "3b6e2be8154a6908",
+      "type": "add",
+      "date": 1682035213328
+    },
+    {
+      "type": "edit",
+      "id": "3b6e2be8154a6908",
+      "item": {
+        "type": "paragraph",
+        "id": "3b6e2be8154a6908",
+        "text": "⇒ [[Scaling Elm Apps]]"
+      },
+      "date": 1682035226831
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c79e6f02a043c553"
+      },
+      "id": "c79e6f02a043c553",
+      "type": "add",
+      "after": "3b6e2be8154a6908",
+      "date": 1682035325886
+    },
+    {
+      "type": "edit",
+      "id": "c79e6f02a043c553",
+      "item": {
+        "type": "paragraph",
+        "id": "c79e6f02a043c553",
+        "text": "Remove plugin deprecated code for Intellij IDEA 2022.3.2\n#792"
+      },
+      "date": 1682035328640
+    },
+    {
+      "type": "edit",
+      "id": "c79e6f02a043c553",
+      "item": {
+        "type": "paragraph",
+        "id": "c79e6f02a043c553",
+        "text": "Remove plugin deprecated code for Intellij IDEA 2022.3.2\n#792 [https://github.com/klazuka/intellij-elm/pull/792 github]"
+      },
+      "date": 1682035338303
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6219958165afb337"
+      },
+      "id": "6219958165afb337",
+      "type": "add",
+      "after": "c79e6f02a043c553",
+      "date": 1682036924192
+    },
+    {
+      "type": "edit",
+      "id": "6219958165afb337",
+      "item": {
+        "type": "paragraph",
+        "id": "6219958165afb337",
+        "text": "IntelliJ IDEA CE 2021.2.2"
+      },
+      "date": 1682036926397
+    },
+    {
+      "type": "edit",
+      "id": "6219958165afb337",
+      "item": {
+        "type": "paragraph",
+        "id": "6219958165afb337",
+        "text": "IntelliJ IDEA CE 2021.2.2 and Elm plugin"
+      },
+      "date": 1682036953091
+    },
+    {
+      "type": "edit",
+      "id": "6219958165afb337",
+      "item": {
+        "type": "paragraph",
+        "id": "6219958165afb337",
+        "text": "IntelliJ IDEA CE 2021.2.2 and Elm plugin v4.4.1 (2021-09-20)"
+      },
+      "date": 1682036964585
+    },
+    {
+      "type": "edit",
+      "id": "6219958165afb337",
+      "item": {
+        "type": "paragraph",
+        "id": "6219958165afb337",
+        "text": "IntelliJ IDEA CE 2021.2.2 and Elm plugin v4.4.1 (2021-09-20) [https://plugins.jetbrains.com/plugin/10268-elm page]"
+      },
+      "date": 1682036974968
+    },
+    {
+      "type": "edit",
+      "id": "6219958165afb337",
+      "item": {
+        "type": "paragraph",
+        "id": "6219958165afb337",
+        "text": "IntelliJ IDEA CE 2021.2.2 [https://download.jetbrains.com/idea/ideaIC-2021.2.2.dmg dmg] and Elm plugin v4.4.1 (2021-09-20) [https://plugins.jetbrains.com/plugin/10268-elm page]"
+      },
+      "date": 1682036989666
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a4240cb97b50e249"
+      },
+      "id": "a4240cb97b50e249",
+      "type": "add",
+      "after": "6219958165afb337",
+      "date": 1682037050300
+    },
+    {
+      "type": "edit",
+      "id": "a4240cb97b50e249",
+      "item": {
+        "type": "paragraph",
+        "id": "a4240cb97b50e249",
+        "text": "⇒ [[elm-pages]]"
+      },
+      "date": 1682037068223
+    },
+    {
+      "type": "edit",
+      "id": "a4240cb97b50e249",
+      "item": {
+        "type": "paragraph",
+        "id": "a4240cb97b50e249",
+        "text": "⇒ [[elm-pages]] ⇒ [[What is elm-pages?]]"
+      },
+      "date": 1682037085573
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "81990157819e73e8"
+      },
+      "id": "81990157819e73e8",
+      "type": "add",
+      "after": "a4240cb97b50e249",
+      "date": 1682037150873
+    },
+    {
+      "type": "edit",
+      "id": "81990157819e73e8",
+      "item": {
+        "type": "paragraph",
+        "id": "81990157819e73e8",
+        "text": "Introducing elm-pages 2.0"
+      },
+      "date": 1682037154103
+    },
+    {
+      "type": "edit",
+      "id": "81990157819e73e8",
+      "item": {
+        "type": "paragraph",
+        "id": "81990157819e73e8",
+        "text": "Introducing elm-pages 2.0 [https://elm-pages.com/blog/introducing-v2 post]"
+      },
+      "date": 1682037161449
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "af18d6497239fadd"
+      },
+      "id": "af18d6497239fadd",
+      "type": "add",
+      "after": "81990157819e73e8",
+      "date": 1682037348051
+    },
+    {
+      "type": "edit",
+      "id": "af18d6497239fadd",
+      "item": {
+        "type": "video",
+        "id": "af18d6497239fadd",
+        "text": "\"Web Apps without Web Servers\" by Richard Feldman"
+      },
+      "date": 1682037354023
+    },
+    {
+      "type": "edit",
+      "id": "af18d6497239fadd",
+      "item": {
+        "type": "video",
+        "id": "af18d6497239fadd",
+        "text": "YOUTUBE WqV5kqaFRDU\n\"Web Apps without Web Servers\" by Richard Feldman"
+      },
+      "date": 1682037379267
+    },
+    {
+      "id": "af18d6497239fadd",
+      "type": "remove",
+      "removedTo": {
+        "page": "Scaling Elm Apps"
+      },
+      "date": 1682037538513
+    },
+    {
+      "type": "edit",
+      "id": "3b6e2be8154a6908",
+      "item": {
+        "type": "paragraph",
+        "id": "3b6e2be8154a6908",
+        "text": "⇒ [[Scaling Elm Apps]] & \"Web Apps without Web Servers\" by Richard Feldman"
+      },
+      "date": 1682037769300
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3ac203400c142e91"
+      },
+      "id": "3ac203400c142e91",
+      "type": "add",
+      "after": "81990157819e73e8",
+      "date": 1682037809121
+    },
+    {
+      "type": "edit",
+      "id": "3ac203400c142e91",
+      "item": {
+        "type": "markdown",
+        "id": "3ac203400c142e91",
+        "text": "* Doubling down on DataSources"
+      },
+      "date": 1682037812567
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5147945ff7670a4b"
+      },
+      "id": "5147945ff7670a4b",
+      "type": "add",
+      "after": "3ac203400c142e91",
+      "date": 1682037861768
+    },
+    {
+      "type": "edit",
+      "id": "5147945ff7670a4b",
+      "item": {
+        "type": "paragraph",
+        "id": "5147945ff7670a4b",
+        "text": "One of the most important features missing before v2 was the ability to use external data to specify pre-rendered pages. In v1, adding new files to the content/folder (usually Markdown files) was the only way to create a new page. This limitation meant that you could not, for example, use a CMS (Content Management System) to host your blog posts or other pages in an external system and then use that external data to create a page for each entry."
+      },
+      "date": 1682037863520
+    },
+    {
+      "type": "add",
+      "id": "bef2680658951f67",
+      "item": {
+        "type": "paragraph",
+        "id": "bef2680658951f67",
+        "text": "Note: Replace \"use a CMS\" with \"use Federated Wiki\"?!"
+      },
+      "after": "5147945ff7670a4b",
+      "date": 1682037917779
+    },
+    {
+      "type": "edit",
+      "id": "bef2680658951f67",
+      "item": {
+        "type": "paragraph",
+        "id": "bef2680658951f67",
+        "text": "Note: Replace \"use a CMS\" with \"use Federated Wiki\" as an external system?!"
+      },
+      "date": 1682038198182
+    },
+    {
+      "type": "edit",
+      "id": "bef2680658951f67",
+      "item": {
+        "type": "paragraph",
+        "id": "bef2680658951f67",
+        "text": "Note: Replace \"use a CMS\" with \"use Federated Wiki\" as an external system?!! ⇒ [[Elm-Form Demo]]"
+      },
+      "date": 1682038227166
+    },
+    {
+      "type": "edit",
+      "id": "bef2680658951f67",
+      "item": {
+        "type": "paragraph",
+        "id": "bef2680658951f67",
+        "text": "Note: Replace \"use a CMS\" with \"use Federated Wiki\" as an external system?!! ⇒ [[Elm-Form Demo]] & Custom Home Page"
+      },
+      "date": 1682038283457
+    },
+    {
+      "type": "edit",
+      "id": "3b6e2be8154a6908",
+      "item": {
+        "type": "paragraph",
+        "id": "3b6e2be8154a6908",
+        "text": "⇒ [[Scaling Elm Apps]] & \"Web Apps without Web Servers\" by [[Richard Feldman]]"
+      },
+      "date": 1682038317059
+    },
+    {
+      "type": "edit",
+      "id": "bef2680658951f67",
+      "item": {
+        "type": "paragraph",
+        "id": "bef2680658951f67",
+        "text": "Note: Replace \"use a CMS\" with \"use Federated Wiki\" as an external system/DataSource?!! ⇒ [[Elm-Form Demo]] & Custom Home Page"
+      },
+      "date": 1682038346035
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "40765e674785244b"
+      },
+      "id": "40765e674785244b",
+      "type": "add",
+      "after": "bef2680658951f67",
+      "date": 1682038438612
+    },
+    {
+      "type": "edit",
+      "id": "40765e674785244b",
+      "item": {
+        "type": "paragraph",
+        "id": "40765e674785244b",
+        "text": "To create a blog post, we could run"
+      },
+      "date": 1682038441048
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "46479ba73abc7c7f"
+      },
+      "id": "46479ba73abc7c7f",
+      "type": "add",
+      "after": "40765e674785244b",
+      "date": 1682038447673
+    },
+    {
+      "type": "edit",
+      "id": "46479ba73abc7c7f",
+      "item": {
+        "type": "paragraph",
+        "id": "46479ba73abc7c7f",
+        "text": "elm-pages add Blog.Slug_"
+      },
+      "date": 1682038449910
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "eb9f6e9c5596a3ec"
+      },
+      "id": "eb9f6e9c5596a3ec",
+      "type": "add",
+      "after": "46479ba73abc7c7f",
+      "date": 1682038452037
+    },
+    {
+      "type": "edit",
+      "id": "eb9f6e9c5596a3ec",
+      "item": {
+        "type": "paragraph",
+        "id": "eb9f6e9c5596a3ec",
+        "text": "⇒ [[Slug]]"
+      },
+      "date": 1682038462800
+    },
+    {
+      "type": "edit",
+      "id": "eb9f6e9c5596a3ec",
+      "item": {
+        "type": "paragraph",
+        "id": "eb9f6e9c5596a3ec",
+        "text": "⇒ [[Slug]] ⇒ [[Where Pages Live]]"
+      },
+      "date": 1682038489212
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "25f4cd5eb090a83d"
+      },
+      "id": "25f4cd5eb090a83d",
+      "type": "add",
+      "after": "eb9f6e9c5596a3ec",
+      "date": 1682038576034
+    },
+    {
+      "type": "edit",
+      "id": "25f4cd5eb090a83d",
+      "item": {
+        "type": "paragraph",
+        "id": "25f4cd5eb090a83d",
+        "text": "If we wanted to migrate our blog posts over to an external CMS and fetch the blog posts with HTTP, then we would just swap out that DataSource for different one:\n\n"
+      },
+      "date": 1682038578686
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "15d8349925920e68"
+      },
+      "id": "15d8349925920e68",
+      "type": "add",
+      "after": "25f4cd5eb090a83d",
+      "date": 1682038588191
+    },
+    {
+      "type": "edit",
+      "id": "15d8349925920e68",
+      "item": {
+        "type": "code",
+        "id": "15d8349925920e68",
+        "text": "import OptimizedDecoder as Decode\nimport DataSource.Http\nimport Pages.Secrets\n\n\ntype alias RouteParams =\n    { slug : String }\n\n\nroutes : DataSource (List RouteParams)\nroutes =\n    DataSource.Http.get\n        (Pages.Secrets.succeed (\"https://api.my-cms.com/all-blog-posts\"))\n        (Decode.list (blogPostDecoder |> Decode.map .slug |> Decode.map RouteParams))\n"
+      },
+      "date": 1682038589997
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "283eed05b496c784"
+      },
+      "id": "283eed05b496c784",
+      "type": "add",
+      "after": "15d8349925920e68",
+      "date": 1682038675949
+    },
+    {
+      "type": "edit",
+      "id": "283eed05b496c784",
+      "item": {
+        "type": "paragraph",
+        "id": "283eed05b496c784",
+        "text": "[…]"
+      },
+      "date": 1682038678682
+    },
+    {
+      "type": "add",
+      "id": "b22ce587ae34a5ce",
+      "item": {
+        "type": "paragraph",
+        "id": "b22ce587ae34a5ce",
+        "text": "DataSource.Port lets you decode JSON data that you call from custom NodeJS functions. As with any DataSource, you get this data in the build step and then it gets built in to your site, so these NodeJS functions, HTTP requests, file reads, etc. are not happening when a user opens a page in your live site that you built with elm-pages build."
+      },
+      "after": "283eed05b496c784",
+      "date": 1682038679308
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fa6a08aa1059c29b"
+      },
+      "id": "fa6a08aa1059c29b",
+      "type": "add",
+      "after": "b22ce587ae34a5ce",
+      "date": 1682038783897
+    },
+    {
+      "type": "edit",
+      "id": "fa6a08aa1059c29b",
+      "item": {
+        "type": "paragraph",
+        "id": "fa6a08aa1059c29b",
+        "text": "[…]"
+      },
+      "date": 1682038786655
+    },
+    {
+      "type": "add",
+      "id": "5fbad4272998f0c6",
+      "item": {
+        "type": "paragraph",
+        "id": "5fbad4272998f0c6",
+        "text": "elm-pages 2.0 uses a pull-based approach. You can define a Page Module and just use it to render an Elm view (or a mini Elm app with its own Msg and update). Or you can pull in metadata from all blog posts if that's what you need. It's up to you. The core building blocks let you pull in data, and it's up to you to define where to get the data from and what to do with it."
+      },
+      "after": "fa6a08aa1059c29b",
+      "date": 1682038787708
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fa9ec28c43f5b491"
+      },
+      "id": "fa9ec28c43f5b491",
+      "type": "add",
+      "after": "5fbad4272998f0c6",
+      "date": 1682038842057
+    },
+    {
+      "type": "edit",
+      "id": "fa9ec28c43f5b491",
+      "item": {
+        "type": "paragraph",
+        "id": "fa9ec28c43f5b491",
+        "text": "[…]"
+      },
+      "date": 1682038844821
+    },
+    {
+      "type": "add",
+      "id": "3dbfa919ac3cdedf",
+      "item": {
+        "type": "paragraph",
+        "id": "3dbfa919ac3cdedf",
+        "text": "v2 has removed Webpack, as well as many other NPM dependencies. The dev server is completely custom tailored to compile your elm-pages app, give you Elm compiler error overlays in the dev server, as well as DataSource error overlays. And it even does hot module replacement for the DataSources your page depends on. For example, if you have a DataSource to list out every blog post marked with a particular tag in the frontmatter, if you save a markdown file and add or remove a tag, it will be instantly reflected when you are viewing the page in the dev server."
+      },
+      "after": "fa9ec28c43f5b491",
+      "date": 1682038845262
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7b841fa65e937fda"
+      },
+      "id": "7b841fa65e937fda",
+      "type": "add",
+      "after": "3dbfa919ac3cdedf",
+      "date": 1682038879962
+    },
+    {
+      "type": "edit",
+      "id": "7b841fa65e937fda",
+      "item": {
+        "type": "paragraph",
+        "id": "7b841fa65e937fda",
+        "text": "[…]"
+      },
+      "date": 1682038883935
+    },
+    {
+      "type": "add",
+      "id": "1ed4ccb7a48d1617",
+      "item": {
+        "type": "paragraph",
+        "id": "1ed4ccb7a48d1617",
+        "text": "One of the core changes under the hood in v2 is that everything is built one page at a time. That's central to how the dev server performance was optimized to quickly render and hot reload pages and their data.\n\nThis new architecture under the hood is also what powers some experimental functionality that will be the focus of the next elm-pages milestone: serverless rendering. Serverless functions let you run JavaScript code with minimal infrastructure setup, and respond to an HTTP request. This is essentially exactly what the dev server is doing, so it's not a big leap from that to rendering pages at request-time instead of pre-rendering them at build-time."
+      },
+      "after": "7b841fa65e937fda",
+      "date": 1682038884544
+    },
+    {
+      "id": "d0079d3611384278",
+      "type": "add",
+      "item": {
+        "type": "video",
+        "id": "d0079d3611384278",
+        "text": "YOUTUBE 8zM0pF-Qjcg\n[[Dillon Kearns]] - Declarative Server State "
+      },
+      "after": "1ed4ccb7a48d1617",
+      "attribution": {
+        "page": "What is elm-pages?"
+      },
+      "date": 1682038906059
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6f3b6c05de0953a0"
+      },
+      "id": "6f3b6c05de0953a0",
+      "type": "add",
+      "after": "d0079d3611384278",
+      "date": 1682039228751
+    },
+    {
+      "id": "6f3b6c05de0953a0",
+      "type": "move",
+      "order": [
+        "3b6e2be8154a6908",
+        "c79e6f02a043c553",
+        "6219958165afb337",
+        "a4240cb97b50e249",
+        "81990157819e73e8",
+        "3ac203400c142e91",
+        "5147945ff7670a4b",
+        "bef2680658951f67",
+        "40765e674785244b",
+        "46479ba73abc7c7f",
+        "eb9f6e9c5596a3ec",
+        "25f4cd5eb090a83d",
+        "15d8349925920e68",
+        "283eed05b496c784",
+        "b22ce587ae34a5ce",
+        "fa6a08aa1059c29b",
+        "5fbad4272998f0c6",
+        "fa9ec28c43f5b491",
+        "3dbfa919ac3cdedf",
+        "7b841fa65e937fda",
+        "1ed4ccb7a48d1617",
+        "6f3b6c05de0953a0",
+        "d0079d3611384278"
+      ],
+      "date": 1682039230538
+    },
+    {
+      "type": "edit",
+      "id": "6f3b6c05de0953a0",
+      "item": {
+        "type": "paragraph",
+        "id": "6f3b6c05de0953a0",
+        "text": "Pre-rendering pages is still ideal in cases where you have the data you need ahead of time, but in some cases you may want to pull in data on-demand, or even use request headers when serving up the page. For example, you could use an authentication header to verify that a user is logged in, and do a redirect or serve up the user's page depending on the auth check. One of the challenges with traditional Jamstack sites is content that is user-specific, and this functionality can open up some use cases in this area."
+      },
+      "date": 1682039232069
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d94777a67eadffa7"
+      },
+      "id": "d94777a67eadffa7",
+      "type": "add",
+      "after": "d0079d3611384278",
+      "date": 1682040171068
+    },
+    {
+      "type": "edit",
+      "id": "d94777a67eadffa7",
+      "item": {
+        "type": "paragraph",
+        "id": "d94777a67eadffa7",
+        "text": "\n18:15\ninstead of just asking the server for data we want to tell the server to do things\n18:20\nright actions well how do you do that on the web this is something that the remix remix\n18:26\njs team has really been popularizing these days is using some of these core web concepts that have been around\n18:33\nfor for many many years how do you tell the uh a server to do something\n18:39\nwell uh forums that's what forms have been traditionally and they're kind of making a comeback and so on pages 3.0 uses forms to do\n18:47\nthat so let's uh let's do that so let's let's find our to-do here"
+      },
+      "date": 1682040172902
+    },
+    {
+      "type": "edit",
+      "id": "d94777a67eadffa7",
+      "item": {
+        "type": "paragraph",
+        "id": "d94777a67eadffa7",
+        "text": "18:15\ninstead of just asking the server for data we want to tell the server to do things\n18:20\nright actions well how do you do that on the web this is something that the remix remix\n18:26\njs team has really been popularizing these days is using some of these core web concepts that have been around\n18:33\nfor for many many years how do you tell the uh a server to do something\n18:39\nwell uh forms that's what forms have been traditionally and they're kind of making a comeback and so on pages 3.0 uses forms to do\n18:47\nthat so let's uh let's do that so let's let's find our to-do here"
+      },
+      "date": 1682040198292
+    },
+    {
+      "id": "3c047bcff314eb76",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "3c047bcff314eb76",
+        "text": "[[Elm-Form Demo]] – Exploring a New Form API Design"
+      },
+      "after": "d94777a67eadffa7",
+      "attribution": {
+        "page": "Dojo Exercises"
+      },
+      "date": 1682040219567
+    },
+    {
+      "type": "edit",
+      "id": "3c047bcff314eb76",
+      "item": {
+        "type": "paragraph",
+        "id": "3c047bcff314eb76",
+        "text": "[[Elm-Form Demo]] ⇒ [[Exploring a Form API Design]]"
+      },
+      "date": 1682040251346
+    },
+    {
+      "type": "edit",
+      "id": "3c047bcff314eb76",
+      "item": {
+        "type": "paragraph",
+        "id": "3c047bcff314eb76",
+        "text": "⇒ [[Forms]] ⇒ [[Elm-Form Demo]] ⇒ [[Exploring a Form API Design]]"
+      },
+      "date": 1682040274440
+    },
+    {
+      "type": "edit",
+      "id": "3c047bcff314eb76",
+      "item": {
+        "type": "paragraph",
+        "id": "3c047bcff314eb76",
+        "text": "⇒ [[Forms]] ⇒ [[Form]] ⇒ [[Elm-Form Demo]] ⇒ [[Exploring a Form API Design]]"
+      },
+      "date": 1682040314373
+    },
+    {
+      "type": "edit",
+      "id": "d94777a67eadffa7",
+      "item": {
+        "type": "paragraph",
+        "id": "d94777a67eadffa7",
+        "text": "[https://youtu.be/8zM0pF-Qjcg?t=1095 18:15]\ninstead of just asking the server for data we want to tell the server to do things\n18:20\nright actions well how do you do that on the web this is something that the remix remix\n18:26\njs team has really been popularizing these days is using some of these core web concepts that have been around\n18:33\nfor for many many years how do you tell the uh a server to do something\n18:39\nwell uh forms that's what forms have been traditionally and they're kind of making a comeback and so on pages 3.0 uses forms to do\n18:47\nthat so let's uh let's do that so let's let's find our to-do here"
+      },
+      "date": 1682040354000
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "53923963131df3b5"
+      },
+      "id": "53923963131df3b5",
+      "type": "add",
+      "after": "3c047bcff314eb76",
+      "date": 1682040591171
+    },
+    {
+      "type": "edit",
+      "id": "53923963131df3b5",
+      "item": {
+        "type": "paragraph",
+        "id": "53923963131df3b5",
+        "text": "https://youtu.be/8zM0pF-Qjcg?t=1288"
+      },
+      "date": 1682040593721
+    },
+    {
+      "type": "edit",
+      "id": "d94777a67eadffa7",
+      "item": {
+        "type": "paragraph",
+        "id": "d94777a67eadffa7",
+        "text": "[https://youtu.be/8zM0pF-Qjcg?t=1095 18:15]\ninstead of just asking the server for data we want to tell the server to do things\n18:20\nright actions well how do you do that on the web? This is something that the remix remix\n18:26\njs team has really been popularizing these days is using some of these core web concepts that have been around\n18:33\nfor for many many years how do you tell the uh a server to do something\n18:39\nwell uh forms that's what forms have been traditionally and they're kind of making a comeback and so on pages 3.0 uses forms to do\n18:47\nthat so let's uh let's do that so let's let's find our to-do here"
+      },
+      "date": 1682040621302
+    },
+    {
+      "type": "edit",
+      "id": "d94777a67eadffa7",
+      "item": {
+        "type": "paragraph",
+        "id": "d94777a67eadffa7",
+        "text": "[https://youtu.be/8zM0pF-Qjcg?t=1095 18:15]\ninstead of just asking the server for data we want to tell the server to do things\n18:20\nright actions well how do you do that on the web? This is something that the remix js team has really been popularizing these days is using some of these core web concepts that have been around\n18:33\nfor for many many years how do you tell the uh a server to do something\n18:39\nwell uh forms that's what forms have been traditionally and they're kind of making a comeback and so on pages 3.0 uses forms to do\n18:47\nthat so let's uh let's do that so let's let's find our to-do here"
+      },
+      "date": 1682040648651
+    },
+    {
+      "type": "edit",
+      "id": "d94777a67eadffa7",
+      "item": {
+        "type": "paragraph",
+        "id": "d94777a67eadffa7",
+        "text": "[https://youtu.be/8zM0pF-Qjcg?t=1095 18:15]\ninstead of just asking the server for data we want to tell the server to do things\n18:20\nright actions well how do you do that on the web? This is something that the remix js team [https://remix.run/ site] has really been popularizing these days is using some of these core web concepts that have been around for many many years how do you tell the uh a server to do something\n18:39\nwell uh forms that's what forms have been traditionally and they're kind of making a comeback and so on pages 3.0 uses forms to do\n18:47\nthat so let's uh let's do that so let's let's find our to-do here"
+      },
+      "date": 1682040743382
+    },
+    {
+      "type": "edit",
+      "id": "d94777a67eadffa7",
+      "item": {
+        "type": "paragraph",
+        "id": "d94777a67eadffa7",
+        "text": "[https://youtu.be/8zM0pF-Qjcg?t=1095 18:15]\ninstead of just asking the server for data we want to tell the server to do things\n18:20\nright actions well how do you do that on the web? This is something that the remix js team [https://remix.run/ site] has really been popularizing these days is using some of these core web concepts that have been around for many many years. How do you tell the uh a server to do something?\n18:39\nwell uh forms that's what forms have been traditionally and they're kind of making a comeback and so on pages 3.0 uses forms to do\n18:47\nthat so let's uh let's do that so let's let's find our to-do here"
+      },
+      "date": 1682040770130
+    },
+    {
+      "type": "edit",
+      "id": "d94777a67eadffa7",
+      "item": {
+        "type": "paragraph",
+        "id": "d94777a67eadffa7",
+        "text": "[https://youtu.be/8zM0pF-Qjcg?t=1095 18:15]\ninstead of just asking the server for data we want to tell the server to do things\n18:20\nright actions well how do you do that on the web? This is something that the remix js team [https://remix.run/ site] has really been popularizing these days is using some of these core web concepts that have been around for many many years. How do you tell the uh a server to do something?\n18:39\nwell uh forms that's what forms have been traditionally and they're kind of making a comeback and so elm-pages 3.0 uses forms to do\n18:47\nthat so let's uh let's do that so let's let's find our to-do here"
+      },
+      "date": 1682040785075
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "13b85793dfb7fed5"
+      },
+      "id": "13b85793dfb7fed5",
+      "type": "add",
+      "after": "53923963131df3b5",
+      "date": 1682041196111
+    },
+    {
+      "type": "edit",
+      "id": "13b85793dfb7fed5",
+      "item": {
+        "type": "paragraph",
+        "id": "13b85793dfb7fed5",
+        "text": "[https://github.com/dillonkearns/elm-pages/projects?type=classic projects]"
+      },
+      "date": 1682041214359
+    },
+    {
+      "type": "edit",
+      "id": "13b85793dfb7fed5",
+      "item": {
+        "type": "paragraph",
+        "id": "13b85793dfb7fed5",
+        "text": "Roadmap [https://github.com/dillonkearns/elm-pages/projects/2 github], [https://github.com/dillonkearns/elm-pages/projects?type=classic projects]"
+      },
+      "date": 1682041341091
+    }
+  ]
+}
