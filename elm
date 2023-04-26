@@ -2,12 +2,77 @@
   "title": "Elm",
   "story": [
     {
+      "type": "paragraph",
+      "id": "8e5b94a4c40c8069",
+      "text": "is a pure functional programming language created in 2012 by [[Evan Czaplicki]]. Elm compiles to JavaScript and is excellent for websites and web apps. It has a strong emphasis on simplicity and quality tooling. This language has many interesting properties, some of which we’ll have a brief look at. [https://nais.io/blog/posts/elm/ post]"
+    },
+    {
+      "type": "paragraph",
+      "id": "25030fbf77181bd0",
+      "text": "Type system"
+    },
+    {
+      "type": "paragraph",
+      "id": "da12ff97ea7b7a54",
+      "text": "Pure functional"
+    },
+    {
+      "type": "paragraph",
+      "id": "2cd925946114a35a",
+      "text": "Compiler driven development"
+    },
+    {
+      "type": "paragraph",
+      "id": "0393585b69d91ba6",
+      "text": "Introducing Elm to the team"
+    },
+    {
+      "type": "paragraph",
+      "id": "590fb01e01cb2b56",
+      "text": "If Elm is so good, why isn’t it more popular?"
+    },
+    {
+      "type": "paragraph",
+      "id": "8cad6f8853f6c775",
+      "text": "Small community and lack of Elm jobs"
+    },
+    {
+      "type": "paragraph",
+      "id": "1d32b0c2618c732a",
+      "text": "Accessibility and re-use"
+    },
+    {
+      "type": "paragraph",
+      "id": "01dc3d6b10296d8c",
+      "text": "Making a team decision"
+    },
+    {
+      "type": "paragraph",
+      "id": "971ffcc37e3dc59f",
+      "text": "Implementation"
+    },
+    {
+      "type": "paragraph",
+      "id": "9ad97ad50592477d",
+      "text": "[[GraphQL]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "f6b45b7471b3f76f",
+      "text": "Deployment"
+    },
+    {
+      "type": "pagefold",
+      "id": "c8ba2956f99acdf6",
+      "text": "~"
+    },
+    {
       "type": "reference",
       "id": "a50c3a6ddbe60881",
       "site": "wiki.ralfbarkow.ch",
       "slug": "user-focused-design-in-elm",
       "title": "User Focused Design in Elm",
-      "text": "Elm’s stated goal of maintainability, of restoring a level of sanity to the programmer in his art, is reminiscent of the work of [[Yukihiro Matsumoto]], who, with Ruby, sought to give developers [[joy]]."
+      "text": "Elm’s stated goal of maintainability, of restoring a level of sanity to the programmer in his art, is reminiscent of the work of [[Yukihiro Matsumoto]], who, with Ruby, sought to give developers [[Joy]]."
     },
     {
       "type": "reference",
@@ -128,6 +193,225 @@
         "text": "elm-pages is a framework for building an Elm single-page app with pre-rendered HTML pages. [https://elm-pages.com/docs docs]"
       },
       "date": 1671009841266
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8e5b94a4c40c8069"
+      },
+      "id": "8e5b94a4c40c8069",
+      "type": "add",
+      "after": "ffbac7981a937118",
+      "date": 1682338700695
+    },
+    {
+      "id": "8e5b94a4c40c8069",
+      "type": "move",
+      "order": [
+        "8e5b94a4c40c8069",
+        "a50c3a6ddbe60881",
+        "9637080a334330f6",
+        "ffbac7981a937118"
+      ],
+      "date": 1682338703392
+    },
+    {
+      "type": "edit",
+      "id": "8e5b94a4c40c8069",
+      "item": {
+        "type": "paragraph",
+        "id": "8e5b94a4c40c8069",
+        "text": "is a pure functional programming language created in 2012 by Evan Czaplicki. Elm compiles to JavaScript and is excellent for websites and web apps. It has a strong emphasis on simplicity and quality tooling. This language has many interesting properties, some of which we’ll have a brief look at."
+      },
+      "date": 1682338705924
+    },
+    {
+      "type": "edit",
+      "id": "8e5b94a4c40c8069",
+      "item": {
+        "type": "paragraph",
+        "id": "8e5b94a4c40c8069",
+        "text": "is a pure functional programming language created in 2012 by Evan Czaplicki. Elm compiles to JavaScript and is excellent for websites and web apps. It has a strong emphasis on simplicity and quality tooling. This language has many interesting properties, some of which we’ll have a brief look at. [https://nais.io/blog/posts/elm/ post]"
+      },
+      "date": 1682338735047
+    },
+    {
+      "type": "edit",
+      "id": "8e5b94a4c40c8069",
+      "item": {
+        "type": "paragraph",
+        "id": "8e5b94a4c40c8069",
+        "text": "is a pure functional programming language created in 2012 by [[Evan Czaplicki]]. Elm compiles to JavaScript and is excellent for websites and web apps. It has a strong emphasis on simplicity and quality tooling. This language has many interesting properties, some of which we’ll have a brief look at. [https://nais.io/blog/posts/elm/ post]"
+      },
+      "date": 1682338744240
+    },
+    {
+      "type": "edit",
+      "id": "a50c3a6ddbe60881",
+      "item": {
+        "type": "reference",
+        "id": "a50c3a6ddbe60881",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "user-focused-design-in-elm",
+        "title": "User Focused Design in Elm",
+        "text": "Elm’s stated goal of maintainability, of restoring a level of sanity to the programmer in his art, is reminiscent of the work of [[Yukihiro Matsumoto]], who, with Ruby, sought to give developers [[Joy]]."
+      },
+      "date": 1682345969711
+    },
+    {
+      "type": "add",
+      "id": "25030fbf77181bd0",
+      "item": {
+        "type": "paragraph",
+        "id": "25030fbf77181bd0",
+        "text": "Type system"
+      },
+      "after": "8e5b94a4c40c8069",
+      "date": 1682345980855
+    },
+    {
+      "type": "add",
+      "id": "da12ff97ea7b7a54",
+      "item": {
+        "type": "paragraph",
+        "id": "da12ff97ea7b7a54",
+        "text": "Pure functional"
+      },
+      "after": "25030fbf77181bd0",
+      "date": 1682346002377
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c8ba2956f99acdf6"
+      },
+      "id": "c8ba2956f99acdf6",
+      "type": "add",
+      "after": "ffbac7981a937118",
+      "date": 1682346005797
+    },
+    {
+      "id": "c8ba2956f99acdf6",
+      "type": "move",
+      "order": [
+        "8e5b94a4c40c8069",
+        "25030fbf77181bd0",
+        "da12ff97ea7b7a54",
+        "c8ba2956f99acdf6",
+        "a50c3a6ddbe60881",
+        "9637080a334330f6",
+        "ffbac7981a937118"
+      ],
+      "date": 1682346009319
+    },
+    {
+      "type": "edit",
+      "id": "c8ba2956f99acdf6",
+      "item": {
+        "type": "pagefold",
+        "id": "c8ba2956f99acdf6",
+        "text": "~"
+      },
+      "date": 1682346012230
+    },
+    {
+      "type": "add",
+      "id": "2cd925946114a35a",
+      "item": {
+        "type": "paragraph",
+        "id": "2cd925946114a35a",
+        "text": "Compiler driven development"
+      },
+      "after": "da12ff97ea7b7a54",
+      "date": 1682346024448
+    },
+    {
+      "type": "add",
+      "id": "0393585b69d91ba6",
+      "item": {
+        "type": "paragraph",
+        "id": "0393585b69d91ba6",
+        "text": "Introducing Elm to the team"
+      },
+      "after": "2cd925946114a35a",
+      "date": 1682346051560
+    },
+    {
+      "type": "add",
+      "id": "590fb01e01cb2b56",
+      "item": {
+        "type": "paragraph",
+        "id": "590fb01e01cb2b56",
+        "text": "If Elm is so good, why isn’t it more popular?"
+      },
+      "after": "0393585b69d91ba6",
+      "date": 1682346090707
+    },
+    {
+      "type": "add",
+      "id": "8cad6f8853f6c775",
+      "item": {
+        "type": "paragraph",
+        "id": "8cad6f8853f6c775",
+        "text": "Small community and lack of Elm jobs"
+      },
+      "after": "590fb01e01cb2b56",
+      "date": 1682346143784
+    },
+    {
+      "type": "add",
+      "id": "1d32b0c2618c732a",
+      "item": {
+        "type": "paragraph",
+        "id": "1d32b0c2618c732a",
+        "text": "Accessibility and re-use"
+      },
+      "after": "8cad6f8853f6c775",
+      "date": 1682346207880
+    },
+    {
+      "type": "add",
+      "id": "01dc3d6b10296d8c",
+      "item": {
+        "type": "paragraph",
+        "id": "01dc3d6b10296d8c",
+        "text": "Making a team decision"
+      },
+      "after": "1d32b0c2618c732a",
+      "date": 1682346259018
+    },
+    {
+      "type": "add",
+      "id": "971ffcc37e3dc59f",
+      "item": {
+        "type": "paragraph",
+        "id": "971ffcc37e3dc59f",
+        "text": "Implementation"
+      },
+      "after": "01dc3d6b10296d8c",
+      "date": 1682346305498
+    },
+    {
+      "type": "add",
+      "id": "9ad97ad50592477d",
+      "item": {
+        "type": "paragraph",
+        "id": "9ad97ad50592477d",
+        "text": "[[GraphQL]]"
+      },
+      "after": "971ffcc37e3dc59f",
+      "date": 1682346338253
+    },
+    {
+      "type": "add",
+      "id": "f6b45b7471b3f76f",
+      "item": {
+        "type": "paragraph",
+        "id": "f6b45b7471b3f76f",
+        "text": "Deployment"
+      },
+      "after": "9ad97ad50592477d",
+      "date": 1682346444142
     }
   ]
 }
