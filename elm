@@ -33,6 +33,11 @@
     },
     {
       "type": "paragraph",
+      "id": "9ad97ad50592477d",
+      "text": "[[GraphQL]]"
+    },
+    {
+      "type": "paragraph",
       "id": "8cad6f8853f6c775",
       "text": "Small community and lack of Elm jobs"
     },
@@ -50,11 +55,6 @@
       "type": "paragraph",
       "id": "971ffcc37e3dc59f",
       "text": "Implementation"
-    },
-    {
-      "type": "paragraph",
-      "id": "9ad97ad50592477d",
-      "text": "[[GraphQL]]"
     },
     {
       "type": "paragraph",
@@ -81,6 +81,14 @@
       "slug": "the-elm-architecture",
       "title": "The Elm Architecture",
       "text": "The Elm Architecture is a simple pattern for architecting webapps. The core idea is that your code is built around a Model of your application state, a way to update your model, and a way to view your model. [https://github.com/evancz/elm-architecture-tutorial/#the-elm-architecture github]"
+    },
+    {
+      "type": "reference",
+      "id": "ec0ce795f4bfaa36",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "elm-and-vite",
+      "title": "Elm and Vite",
+      "text": "[[Lindsay Wardell]] joins the Elm Radio Hosts [[Dillon Kearns]] and [[Jeroen Engels]] to talk about [[Vite]] and how to set it up for your [[Elm]] project. [https://elm-radio.com/episode/vite/ page]"
     },
     {
       "type": "reference",
@@ -412,6 +420,76 @@
       },
       "after": "9ad97ad50592477d",
       "date": 1682346444142
+    },
+    {
+      "id": "9ad97ad50592477d",
+      "type": "move",
+      "order": [
+        "8e5b94a4c40c8069",
+        "25030fbf77181bd0",
+        "da12ff97ea7b7a54",
+        "2cd925946114a35a",
+        "0393585b69d91ba6",
+        "590fb01e01cb2b56",
+        "9ad97ad50592477d",
+        "8cad6f8853f6c775",
+        "1d32b0c2618c732a",
+        "01dc3d6b10296d8c",
+        "971ffcc37e3dc59f",
+        "f6b45b7471b3f76f",
+        "c8ba2956f99acdf6",
+        "a50c3a6ddbe60881",
+        "9637080a334330f6",
+        "ffbac7981a937118"
+      ],
+      "date": 1684410591056
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ec0ce795f4bfaa36"
+      },
+      "id": "ec0ce795f4bfaa36",
+      "type": "add",
+      "after": "ffbac7981a937118",
+      "date": 1684590788183
+    },
+    {
+      "type": "edit",
+      "id": "ec0ce795f4bfaa36",
+      "item": {
+        "type": "reference",
+        "id": "ec0ce795f4bfaa36",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "elm-and-vite",
+        "title": "Elm and Vite",
+        "text": "[[Lindsay Wardell]] joins the Elm Radio Hosts [[Dillon Kearns]] and [[Jeroen Engels]] to talk about [[Vite]] and how to set it up for your [[Elm]] project. [https://elm-radio.com/episode/vite/ page]"
+      },
+      "date": 1684590791389
+    },
+    {
+      "id": "ec0ce795f4bfaa36",
+      "type": "move",
+      "order": [
+        "8e5b94a4c40c8069",
+        "25030fbf77181bd0",
+        "da12ff97ea7b7a54",
+        "2cd925946114a35a",
+        "0393585b69d91ba6",
+        "590fb01e01cb2b56",
+        "9ad97ad50592477d",
+        "8cad6f8853f6c775",
+        "1d32b0c2618c732a",
+        "01dc3d6b10296d8c",
+        "971ffcc37e3dc59f",
+        "f6b45b7471b3f76f",
+        "c8ba2956f99acdf6",
+        "a50c3a6ddbe60881",
+        "9637080a334330f6",
+        "ec0ce795f4bfaa36",
+        "ffbac7981a937118"
+      ],
+      "date": 1684590809418
     }
   ]
 }
