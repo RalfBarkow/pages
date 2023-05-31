@@ -4,7 +4,7 @@
     {
       "type": "paragraph",
       "id": "c0fc5dfa9719f0b8",
-      "text": "There is a whole section in [[The Official Guide]] about [[Decoder]]s, so check it out for a more comprehensive introduction! [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]"
+      "text": "There is a whole section in [[The Official Guide]] about [[Decoder]]s. [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]"
     },
     {
       "type": "paragraph",
@@ -14,60 +14,251 @@
     {
       "type": "paragraph",
       "id": "bfeaa7d33f192ace",
-      "text": "Our next example shows how to fetch some JSON data."
+      "text": "Our next example shows how to fetch some JSON data. [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e02b0e71cb9bec74",
+      "text": "We modify the example to get a [[Wiki Page JSON]] instead of a random quote. [https://github.com/RalfBarkow/vite-elm-dojo/commit/c1588c8f7342bfe07d2b864a92f4177adc83bfe2 commit]"
+    },
+    {
+      "type": "paragraph",
+      "id": "30f472df4373c18c",
+      "text": "We see \"I could not load the Wiki Page JSON for some reason.\" and consult the [[Elm Debugger]]:"
+    },
+    {
+      "type": "image",
+      "id": "1b67b231aa8dca1a",
+      "text": "Elm Debugger",
+      "size": "wide",
+      "width": 419,
+      "height": 254,
+      "url": "/assets/plugins/image/e990b33d101d69397bcd7e5fa81e1d3d.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "0e715179f105e597",
+      "text": "Our program – more precisely our [[Model]] – is in one of the following states:"
+    },
+    {
+      "type": "code",
+      "id": "bd6e695ba0d7f263",
+      "text": "type Model\n  = Failure\n  | Loading\n  | Success Page"
+    },
+    {
+      "type": "paragraph",
+      "id": "1c3724d3de000f5b",
+      "text": "In the [[Elm Debugger]] we see that the current state is Failure. And the current message is"
+    },
+    {
+      "type": "code",
+      "id": "a1d5cbc4680b244c",
+      "text": "GotPage Err …\n0 = BadBody \"Problem...`story`\"\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "258facc6b1726c62",
+      "text": "We see that our problem is related to the story, i.e. the value at json.story."
+    },
+    {
+      "type": "reference",
+      "id": "de87d4ede96f4cd4",
+      "site": "video.fed.wiki.org",
+      "slug": "01-story-and-journal",
+      "title": "01 Story and Journal",
+      "text": "We introduce the parts of a Federated Wiki page. The \"story\" is a collection of paragraphs and paragraph like items. The \"journal\" collects story edits. Should you take my page and edit it as yours, I can see what you've done and may decide to take your edits as my own."
+    },
+    {
+      "type": "paragraph",
+      "id": "98959dbeefcb584b",
+      "text": "Our page decoder looks like this:"
+    },
+    {
+      "type": "code",
+      "id": "6075468194398c14",
+      "text": "pageDecoder : Decoder Page\npageDecoder =\n  map3 Page\n    (field \"title\" string)\n    (field \"story\" storyDecoder)\n    (field \"journal\" journalDecoder)"
+    },
+    {
+      "type": "paragraph",
+      "id": "f43da6200453844f",
+      "text": "The story decoder is still incomplete:"
+    },
+    {
+      "type": "code",
+      "id": "2985a8ccfe3fc4ac",
+      "text": "storyDecoder : Decoder String\nstoryDecoder =\n  field \"story\" string |> Debug.log \"Decoding story:\"\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "f07fe55815d6d2e4",
+      "text": "We added some debug code to log the JSON content to the console in case of a BadBody error."
+    },
+    {
+      "type": "code",
+      "id": "8cd29697bb76c6cf",
+      "text": "  […]\n\nHttp.BadBody body ->\n                  let\n                    _ = Debug.log \"GotPage JSON:\" body -- Log the JSON content in case of Failure\n                  in\n                  \"Bad Body: \" ++ body\n\n  […]"
+    },
+    {
+      "type": "image",
+      "id": "d2a12b0000f83dca",
+      "text": "Elm Debugger and Console Log",
+      "size": "wide",
+      "width": 419,
+      "height": 250,
+      "url": "/assets/plugins/image/a0bfb9e04de60098b8220176517e9d2c.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "7a9b3f39f356c467",
+      "text": "In the console log we see the \"Problem with the value at json.story\" message:"
+    },
+    {
+      "type": "code",
+      "id": "781cc7848f91546f",
+      "text": "Object { \"GotPage JSON\": \"Problem with the value at json.story:\\n\\n    [\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"c0fc5dfa9719f0b8\\\",\\n            \\\"text\\\": \\\"There is a whole section in [[The Official Guide]] about [[Decoder]]s. [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"322b1d9c81270cc8\\\",\\n            \\\"text\\\": \\\"We just saw an example that uses [[HTTP]] to get the content of a book. [https://guide.elm-lang.org/effects/http.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/937e8e1d268c07cd050b13c080b4e62138da9ce5 commit]\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"bfeaa7d33f192ace\\\",\\n            \\\"text\\\": \\\"Our next example shows how to fetch some JSON data. [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]\\\"\\n        },\\n        \n\n  […]      \n\n{\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"ec74725a8c564752\\\",\\n            \\\"text\\\": \\\"How can I export console log […]? [https://stackoverflow.com/questions/64131010/how-can-i-export-console-log-win-elm stackoverflow]\\\"\\n        }\\n    ]\\n\\nExpecting an OBJECT with a field named `story`\" }\nelm-console-debug.js:2:104200\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "1bc7b42df347b9d5",
+      "text": "At the end, we are given an expectation: \"Expecting an OBJECT with a field named `story`\"."
+    },
+    {
+      "type": "pagefold",
+      "id": "2b55698007558763",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "38bbcf6223cf0053",
+      "text": "JSON decoding: BadBody error [https://discourse.elm-lang.org/t/json-decoding-badbody-error/6186 discourse], [https://ellie-app.com/9MqcYmv6JPga1 ellie]"
+    },
+    {
+      "type": "paragraph",
+      "id": "fdd8791fe8a52506",
+      "text": "HTTP POST RPC [https://dashboard.lamdera.app/docs/http-post-rpc page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "ec74725a8c564752",
+      "text": "How can I export console log […]? [https://stackoverflow.com/questions/64131010/how-can-i-export-console-log-win-elm stackoverflow]"
     }
   ],
   "journal": [
     {
       "type": "edit",
-      "id": "c0fc5dfa9719f0b8",
+      "id": "1c3724d3de000f5b",
       "item": {
         "type": "paragraph",
-        "id": "c0fc5dfa9719f0b8",
-        "text": "There is a whole section in [[The Official Guide]] about [[Decoder]]s, so check it out for a more comprehensive introduction! [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]"
+        "id": "1c3724d3de000f5b",
+        "text": "In the [[Elm Debugger]] we see that the current state is Failure. And the current message is"
       },
-      "date": 1685542658257
+      "date": 1685544056658
     },
     {
       "type": "edit",
-      "id": "322b1d9c81270cc8",
+      "id": "1c3724d3de000f5b",
       "item": {
         "type": "paragraph",
-        "id": "322b1d9c81270cc8",
-        "text": "We just saw an example that uses [[HTTP]] to get the content of a book. [https://guide.elm-lang.org/effects/http.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/937e8e1d268c07cd050b13c080b4e62138da9ce5 commit]"
+        "id": "1c3724d3de000f5b",
+        "text": "In the [[Elm Debugger]] we see that the current state is Failure. And the current message is"
       },
-      "date": 1685542522566
+      "date": 1685544018145
     },
     {
-      "type": "edit",
-      "id": "322b1d9c81270cc8",
       "item": {
         "type": "paragraph",
-        "id": "322b1d9c81270cc8",
-        "text": "We just saw an example that uses [[HTTP]] to get the content of a book. [https://guide.elm-lang.org/effects/http.html page]"
+        "id": "1c3724d3de000f5b",
+        "text": "In the [[Elm Debugger]] we see that the current state is Failure. And the current message is"
       },
-      "date": 1685542228183
-    },
-    {
-      "type": "edit",
-      "id": "322b1d9c81270cc8",
-      "item": {
-        "type": "paragraph",
-        "id": "322b1d9c81270cc8",
-        "text": "We just saw an example that uses [[HTTP]] to get the content of a book."
-      },
-      "date": 1685542219686
-    },
-    {
+      "id": "1c3724d3de000f5b",
       "type": "add",
-      "id": "322b1d9c81270cc8",
+      "after": "bd6e695ba0d7f263",
+      "date": 1685544016639
+    },
+    {
+      "type": "edit",
+      "id": "0e715179f105e597",
       "item": {
         "type": "paragraph",
-        "id": "322b1d9c81270cc8",
-        "text": "We just saw an example that uses HTTP to get the content of a book."
+        "id": "0e715179f105e597",
+        "text": "Our program – more precisely our [[Model]] – is in one of the following states:"
       },
-      "after": "c0fc5dfa9719f0b8",
-      "date": 1685542172176
+      "date": 1685543979678
+    },
+    {
+      "id": "0e715179f105e597",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263"
+      ],
+      "date": 1685543978290
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "0e715179f105e597",
+        "text": "Our program – more precisely our [[Model]] – is in one of the following states:"
+      },
+      "id": "0e715179f105e597",
+      "type": "add",
+      "after": "bd6e695ba0d7f263",
+      "date": 1685543976513
+    },
+    {
+      "type": "edit",
+      "id": "bd6e695ba0d7f263",
+      "item": {
+        "type": "code",
+        "id": "bd6e695ba0d7f263",
+        "text": "type Model\n  = Failure\n  | Loading\n  | Success Page"
+      },
+      "date": 1685543929558
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "bd6e695ba0d7f263",
+        "text": "type Model\n  = Failure\n  | Loading\n  | Success Page"
+      },
+      "id": "bd6e695ba0d7f263",
+      "type": "add",
+      "after": "1b67b231aa8dca1a",
+      "date": 1685543926944
+    },
+    {
+      "type": "edit",
+      "id": "1b67b231aa8dca1a",
+      "item": {
+        "type": "image",
+        "id": "1b67b231aa8dca1a",
+        "text": "Elm Debugger",
+        "size": "wide",
+        "width": 419,
+        "height": 254,
+        "url": "/assets/plugins/image/e990b33d101d69397bcd7e5fa81e1d3d.jpg"
+      },
+      "date": 1685543822915
+    },
+    {
+      "item": {
+        "type": "image",
+        "id": "1b67b231aa8dca1a",
+        "text": "Elm Debugger",
+        "size": "wide",
+        "width": 419,
+        "height": 254,
+        "url": "/assets/plugins/image/e990b33d101d69397bcd7e5fa81e1d3d.jpg"
+      },
+      "id": "1b67b231aa8dca1a",
+      "type": "add",
+      "after": "e02b0e71cb9bec74",
+      "date": 1685543781856
     },
     {
       "type": "edit",
@@ -75,9 +266,113 @@
       "item": {
         "type": "paragraph",
         "id": "c0fc5dfa9719f0b8",
-        "text": "There is a whole section in [[The Official Guide]] about decoders, so check it out for a more comprehensive introduction! [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]"
+        "text": "There is a whole section in [[The Official Guide]] about [[Decoder]]s. [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]"
       },
-      "date": 1685542148847
+      "date": 1685543632734
+    },
+    {
+      "type": "edit",
+      "id": "e02b0e71cb9bec74",
+      "item": {
+        "type": "paragraph",
+        "id": "e02b0e71cb9bec74",
+        "text": "We modify this example to get a [[Wiki Page JSON]] instead of a random quote. [https://github.com/RalfBarkow/vite-elm-dojo/commit/c1588c8f7342bfe07d2b864a92f4177adc83bfe2 commit]"
+      },
+      "date": 1685543573194
+    },
+    {
+      "type": "edit",
+      "id": "bfeaa7d33f192ace",
+      "item": {
+        "type": "paragraph",
+        "id": "bfeaa7d33f192ace",
+        "text": "Our next example shows how to fetch some JSON data. [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]"
+      },
+      "date": 1685543164085
+    },
+    {
+      "type": "edit",
+      "id": "e02b0e71cb9bec74",
+      "item": {
+        "type": "paragraph",
+        "id": "e02b0e71cb9bec74",
+        "text": "We modify this example to get a [[Wiki Page JSON]] instead of a random quote."
+      },
+      "date": 1685543105387
+    },
+    {
+      "id": "e02b0e71cb9bec74",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "e02b0e71cb9bec74",
+        "text": "We now modify this example to get a [[Wiki Page JSON]] instead of a random quote."
+      },
+      "after": "bfeaa7d33f192ace",
+      "attribution": {
+        "page": "2023-05-31"
+      },
+      "date": 1685543099064
+    },
+    {
+      "type": "fork",
+      "date": 1685542738522
+    },
+    {
+      "type": "edit",
+      "id": "bfeaa7d33f192ace",
+      "item": {
+        "type": "paragraph",
+        "id": "bfeaa7d33f192ace",
+        "text": "Our next example shows how to fetch some JSON data."
+      },
+      "date": 1685542725360,
+      "error": {
+        "type": "error",
+        "msg": ""
+      }
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "bfeaa7d33f192ace",
+        "text": "Our next example shows how to fetch some JSON data."
+      },
+      "id": "bfeaa7d33f192ace",
+      "type": "add",
+      "after": "322b1d9c81270cc8",
+      "date": 1685542714211
+    },
+    {
+      "type": "create",
+      "item": {
+        "title": "Elm and JSON",
+        "story": []
+      },
+      "date": 1685542100758
+    },
+    {
+      "id": "c0fc5dfa9719f0b8",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "c0fc5dfa9719f0b8",
+        "text": "⇒ [[Elm]] ⇒ [[Elm and JSON]]: Json.Decode Documentation [https://package.elm-lang.org/packages/elm/json/latest/Json-Decode page]: There is a whole section in guide.elm-lang.org about decoders, so check it out for a more comprehensive introduction! [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]"
+      },
+      "attribution": {
+        "page": "2023-05-31"
+      },
+      "date": 1685542110197
+    },
+    {
+      "type": "edit",
+      "id": "c0fc5dfa9719f0b8",
+      "item": {
+        "type": "paragraph",
+        "id": "c0fc5dfa9719f0b8",
+        "text": " There is a whole section in guide.elm-lang.org about decoders, so check it out for a more comprehensive introduction! [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]"
+      },
+      "date": 1685542116805
     },
     {
       "type": "edit",
@@ -95,59 +390,1158 @@
       "item": {
         "type": "paragraph",
         "id": "c0fc5dfa9719f0b8",
-        "text": " There is a whole section in guide.elm-lang.org about decoders, so check it out for a more comprehensive introduction! [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]"
+        "text": "There is a whole section in [[The Official Guide]] about decoders, so check it out for a more comprehensive introduction! [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]"
       },
-      "date": 1685542116805
+      "date": 1685542148847
     },
     {
-      "id": "c0fc5dfa9719f0b8",
       "type": "add",
+      "id": "322b1d9c81270cc8",
       "item": {
         "type": "paragraph",
-        "id": "c0fc5dfa9719f0b8",
-        "text": "⇒ [[Elm]] ⇒ [[Elm and JSON]]: Json.Decode Documentation [https://package.elm-lang.org/packages/elm/json/latest/Json-Decode page]: There is a whole section in guide.elm-lang.org about decoders, so check it out for a more comprehensive introduction! [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]"
+        "id": "322b1d9c81270cc8",
+        "text": "We just saw an example that uses HTTP to get the content of a book."
       },
-      "attribution": {
-        "page": "2023-05-31"
-      },
-      "date": 1685542110197
-    },
-    {
-      "type": "create",
-      "item": {
-        "title": "Elm and JSON",
-        "story": []
-      },
-      "date": 1685542100758
-    },
-    {
-      "item": {
-        "type": "paragraph",
-        "id": "bfeaa7d33f192ace",
-        "text": "Our next example shows how to fetch some JSON data."
-      },
-      "id": "bfeaa7d33f192ace",
-      "type": "add",
-      "after": "322b1d9c81270cc8",
-      "date": 1685542714211
+      "after": "c0fc5dfa9719f0b8",
+      "date": 1685542172176
     },
     {
       "type": "edit",
-      "id": "bfeaa7d33f192ace",
+      "id": "322b1d9c81270cc8",
       "item": {
         "type": "paragraph",
-        "id": "bfeaa7d33f192ace",
-        "text": "Our next example shows how to fetch some JSON data."
+        "id": "322b1d9c81270cc8",
+        "text": "We just saw an example that uses [[HTTP]] to get the content of a book."
       },
-      "date": 1685542725360,
+      "date": 1685542219686
+    },
+    {
+      "type": "edit",
+      "id": "322b1d9c81270cc8",
+      "item": {
+        "type": "paragraph",
+        "id": "322b1d9c81270cc8",
+        "text": "We just saw an example that uses [[HTTP]] to get the content of a book. [https://guide.elm-lang.org/effects/http.html page]"
+      },
+      "date": 1685542228183
+    },
+    {
+      "type": "edit",
+      "id": "322b1d9c81270cc8",
+      "item": {
+        "type": "paragraph",
+        "id": "322b1d9c81270cc8",
+        "text": "We just saw an example that uses [[HTTP]] to get the content of a book. [https://guide.elm-lang.org/effects/http.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/937e8e1d268c07cd050b13c080b4e62138da9ce5 commit]"
+      },
+      "date": 1685542522566
+    },
+    {
+      "type": "edit",
+      "id": "c0fc5dfa9719f0b8",
+      "item": {
+        "type": "paragraph",
+        "id": "c0fc5dfa9719f0b8",
+        "text": "There is a whole section in [[The Official Guide]] about [[Decoder]]s, so check it out for a more comprehensive introduction! [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]"
+      },
+      "date": 1685542658257
+    },
+    {
+      "type": "edit",
+      "id": "1c3724d3de000f5b",
+      "item": {
+        "type": "paragraph",
+        "id": "1c3724d3de000f5b",
+        "text": "In the [[Elm Debugger]] we see that the current state is Failure. And the current message is"
+      },
+      "date": 1685544076106
+    },
+    {
+      "type": "edit",
+      "id": "1c3724d3de000f5b",
+      "item": {
+        "type": "paragraph",
+        "id": "1c3724d3de000f5b",
+        "text": "In the [[Elm Debugger]] we see that the current state is Failure. And the current message is"
+      },
+      "date": 1685544114369
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "a1d5cbc4680b244c",
+        "text": "GotPage Err …\n0 = BadBody \"Problem...`story`\"\n"
+      },
+      "id": "a1d5cbc4680b244c",
+      "type": "add",
+      "after": "1c3724d3de000f5b",
+      "date": 1685544129562
+    },
+    {
+      "type": "edit",
+      "id": "a1d5cbc4680b244c",
+      "item": {
+        "type": "code",
+        "id": "a1d5cbc4680b244c",
+        "text": "GotPage Err …\n0 = BadBody \"Problem...`story`\"\n"
+      },
+      "date": 1685544132381
+    },
+    {
+      "item": {
+        "type": "pagefold",
+        "id": "2b55698007558763",
+        "text": "~"
+      },
+      "id": "2b55698007558763",
+      "type": "add",
+      "after": "a1d5cbc4680b244c",
+      "date": 1685544392319
+    },
+    {
+      "type": "edit",
+      "id": "2b55698007558763",
+      "item": {
+        "type": "pagefold",
+        "id": "2b55698007558763",
+        "text": "~"
+      },
+      "date": 1685544395689
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "38bbcf6223cf0053",
+        "text": "JSON decoding: BadBody error [https://discourse.elm-lang.org/t/json-decoding-badbody-error/6186 discourse], [https://ellie-app.com/9MqcYmv6JPga1 ellie]"
+      },
+      "id": "38bbcf6223cf0053",
+      "type": "add",
+      "after": "2b55698007558763",
+      "date": 1685544397190
+    },
+    {
+      "type": "edit",
+      "id": "38bbcf6223cf0053",
+      "item": {
+        "type": "paragraph",
+        "id": "38bbcf6223cf0053",
+        "text": "JSON decoding: BadBody error [https://discourse.elm-lang.org/t/json-decoding-badbody-error/6186 discourse], [https://ellie-app.com/9MqcYmv6JPga1 ellie]"
+      },
+      "date": 1685544399816
+    },
+    {
+      "type": "edit",
+      "id": "38bbcf6223cf0053",
+      "item": {
+        "type": "paragraph",
+        "id": "38bbcf6223cf0053",
+        "text": "JSON decoding: BadBody error [https://discourse.elm-lang.org/t/json-decoding-badbody-error/6186 discourse], [https://ellie-app.com/9MqcYmv6JPga1 ellie]"
+      },
+      "date": 1685544425636
+    },
+    {
+      "type": "edit",
+      "id": "38bbcf6223cf0053",
+      "item": {
+        "type": "paragraph",
+        "id": "38bbcf6223cf0053",
+        "text": "JSON decoding: BadBody error [https://discourse.elm-lang.org/t/json-decoding-badbody-error/6186 discourse], [https://ellie-app.com/9MqcYmv6JPga1 ellie]"
+      },
+      "date": 1685544444939
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "fdd8791fe8a52506",
+        "text": "HTTP POST RPC [https://dashboard.lamdera.app/docs/http-post-rpc page]"
+      },
+      "id": "fdd8791fe8a52506",
+      "type": "add",
+      "after": "38bbcf6223cf0053",
+      "date": 1685544763516
+    },
+    {
+      "type": "edit",
+      "id": "fdd8791fe8a52506",
+      "item": {
+        "type": "paragraph",
+        "id": "fdd8791fe8a52506",
+        "text": "HTTP POST RPC [https://dashboard.lamdera.app/docs/http-post-rpc page]"
+      },
+      "date": 1685544768149
+    },
+    {
+      "type": "edit",
+      "id": "fdd8791fe8a52506",
+      "item": {
+        "type": "paragraph",
+        "id": "fdd8791fe8a52506",
+        "text": "HTTP POST RPC [https://dashboard.lamdera.app/docs/http-post-rpc page]"
+      },
+      "date": 1685544778884
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "258facc6b1726c62",
+        "text": "We see that our problem is related to the story."
+      },
+      "id": "258facc6b1726c62",
+      "type": "add",
+      "after": "fdd8791fe8a52506",
+      "date": 1685545156413
+    },
+    {
+      "id": "258facc6b1726c62",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506"
+      ],
+      "date": 1685545158337
+    },
+    {
+      "type": "edit",
+      "id": "258facc6b1726c62",
+      "item": {
+        "type": "paragraph",
+        "id": "258facc6b1726c62",
+        "text": "We see that our problem is related to the story."
+      },
+      "date": 1685545160155
+    },
+    {
+      "item": {
+        "type": "reference",
+        "id": "de87d4ede96f4cd4",
+        "site": "video.fed.wiki.org",
+        "slug": "01-story-and-journal",
+        "title": "01 Story and Journal",
+        "text": "We introduce the parts of a Federated Wiki page. The \"story\" is a collection of paragraphs and paragraph like items. The \"journal\" collects story edits. Should you take my page and edit it as yours, I can see what you've done and may decide to take your edits as my own."
+      },
+      "id": "de87d4ede96f4cd4",
+      "type": "add",
+      "after": "fdd8791fe8a52506",
+      "date": 1685545722949
+    },
+    {
+      "id": "de87d4ede96f4cd4",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506"
+      ],
+      "date": 1685545725570
+    },
+    {
+      "type": "edit",
+      "id": "de87d4ede96f4cd4",
+      "item": {
+        "type": "reference",
+        "id": "de87d4ede96f4cd4",
+        "site": "video.fed.wiki.org",
+        "slug": "01-story-and-journal",
+        "title": "01 Story and Journal",
+        "text": "We introduce the parts of a Federated Wiki page. The \"story\" is a collection of paragraphs and paragraph like items. The \"journal\" collects story edits. Should you take my page and edit it as yours, I can see what you've done and may decide to take your edits as my own."
+      },
+      "date": 1685545727596
+    },
+    {
+      "type": "edit",
+      "id": "0e715179f105e597",
+      "item": {
+        "type": "paragraph",
+        "id": "0e715179f105e597",
+        "text": "Our program – more precisely our [[Model]] – is in one of the following states:"
+      },
+      "date": 1685545893248
+    },
+    {
+      "type": "edit",
+      "id": "de87d4ede96f4cd4",
+      "item": {
+        "type": "reference",
+        "id": "de87d4ede96f4cd4",
+        "site": "video.fed.wiki.org",
+        "slug": "01-story-and-journal",
+        "title": "01 Story and Journal",
+        "text": "We introduce the parts of a Federated Wiki page. The \"story\" is a collection of paragraphs and paragraph like items. The \"journal\" collects story edits. Should you take my page and edit it as yours, I can see what you've done and may decide to take your edits as my own."
+      },
+      "date": 1685546007005
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "6075468194398c14",
+        "text": "pageDecoder : Decoder Page\npageDecoder =\n  map3 Page\n    (field \"title\" string)\n    (field \"story\" storyDecoder)\n    (field \"journal\" journalDecoder)"
+      },
+      "id": "6075468194398c14",
+      "type": "add",
+      "after": "fdd8791fe8a52506",
+      "date": 1685546099649
+    },
+    {
+      "id": "6075468194398c14",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "6075468194398c14",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506"
+      ],
+      "date": 1685546102600
+    },
+    {
+      "type": "edit",
+      "id": "6075468194398c14",
+      "item": {
+        "type": "code",
+        "id": "6075468194398c14",
+        "text": "pageDecoder : Decoder Page\npageDecoder =\n  map3 Page\n    (field \"title\" string)\n    (field \"story\" storyDecoder)\n    (field \"journal\" journalDecoder)"
+      },
+      "date": 1685546104667
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "98959dbeefcb584b",
+        "text": "Our page decoder looks like this:"
+      },
+      "id": "98959dbeefcb584b",
+      "type": "add",
+      "after": "fdd8791fe8a52506",
+      "date": 1685546112016
+    },
+    {
+      "id": "98959dbeefcb584b",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506"
+      ],
+      "date": 1685546113772
+    },
+    {
+      "type": "edit",
+      "id": "98959dbeefcb584b",
+      "item": {
+        "type": "paragraph",
+        "id": "98959dbeefcb584b",
+        "text": "Our page decoder looks like this:"
+      },
+      "date": 1685546120961
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "f43da6200453844f",
+        "text": "The story decoder is incomplete:"
+      },
+      "id": "f43da6200453844f",
+      "type": "add",
+      "after": "fdd8791fe8a52506",
+      "date": 1685546157936
+    },
+    {
+      "id": "f43da6200453844f",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506"
+      ],
+      "date": 1685546159515
+    },
+    {
+      "type": "edit",
+      "id": "f43da6200453844f",
+      "item": {
+        "type": "paragraph",
+        "id": "f43da6200453844f",
+        "text": "The story decoder is incomplete:"
+      },
+      "date": 1685546170919
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "5a9a3d439e270d88",
+        "text": "storyDecoder : Decoder String\nstoryDecoder =\n  field \"story\" string |> Debug.log \"Decoding story:\"\n"
+      },
+      "id": "5a9a3d439e270d88",
+      "type": "add",
+      "after": "fdd8791fe8a52506",
+      "date": 1685546173541
+    },
+    {
+      "id": "5a9a3d439e270d88",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "214d7718e17ac846",
+        "5a9a3d439e270d88",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506"
+      ],
+      "date": 1685546175344,
       "error": {
         "type": "error",
-        "msg": ""
+        "msg": "Internal Server Error",
+        "response": "Server Ignoring move. Try reload."
       }
     },
     {
+      "type": "edit",
+      "id": "5a9a3d439e270d88",
+      "item": {
+        "type": "code",
+        "id": "5a9a3d439e270d88",
+        "text": "storyDecoder : Decoder String\nstoryDecoder =\n  field \"story\" string |> Debug.log \"Decoding story:\"\n"
+      },
+      "date": 1685546176966
+    },
+    {
       "type": "fork",
-      "date": 1685542738522
+      "date": 1685546179376
+    },
+    {
+      "type": "edit",
+      "id": "f43da6200453844f",
+      "item": {
+        "type": "paragraph",
+        "id": "f43da6200453844f",
+        "text": "The story decoder is still incomplete:"
+      },
+      "date": 1685546212657
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2985a8ccfe3fc4ac"
+      },
+      "id": "2985a8ccfe3fc4ac",
+      "type": "add",
+      "after": "fdd8791fe8a52506",
+      "date": 1685546214691
+    },
+    {
+      "id": "2985a8ccfe3fc4ac",
+      "type": "move",
+      "order": [
+        "5a9a3d439e270d88",
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "2985a8ccfe3fc4ac",
+        "fdd8791fe8a52506"
+      ],
+      "date": 1685546216459
+    },
+    {
+      "type": "edit",
+      "id": "2985a8ccfe3fc4ac",
+      "item": {
+        "type": "code",
+        "id": "2985a8ccfe3fc4ac",
+        "text": "storyDecoder : Decoder String\nstoryDecoder =\n  field \"story\" string |> Debug.log \"Decoding story:\"\n"
+      },
+      "date": 1685546222117
+    },
+    {
+      "id": "2985a8ccfe3fc4ac",
+      "type": "move",
+      "order": [
+        "5a9a3d439e270d88",
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506"
+      ],
+      "date": 1685546223860
+    },
+    {
+      "type": "add",
+      "id": "f07fe55815d6d2e4",
+      "item": {
+        "type": "paragraph",
+        "id": "f07fe55815d6d2e4",
+        "text": "We added a debug code to log the JSON content in case of an error."
+      },
+      "after": "f43da6200453844f",
+      "date": 1685546410811
+    },
+    {
+      "id": "f07fe55815d6d2e4",
+      "type": "move",
+      "order": [
+        "5a9a3d439e270d88",
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506"
+      ],
+      "date": 1685546413214
+    },
+    {
+      "type": "edit",
+      "id": "f07fe55815d6d2e4",
+      "item": {
+        "type": "paragraph",
+        "id": "f07fe55815d6d2e4",
+        "text": "We added some debug code to log the JSON content in case of an error."
+      },
+      "date": 1685546425033
+    },
+    {
+      "type": "edit",
+      "id": "f07fe55815d6d2e4",
+      "item": {
+        "type": "paragraph",
+        "id": "f07fe55815d6d2e4",
+        "text": "We added some debug code to log the JSON content to the console in case of an error."
+      },
+      "date": 1685546443420
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8cd29697bb76c6cf"
+      },
+      "id": "8cd29697bb76c6cf",
+      "type": "add",
+      "after": "fdd8791fe8a52506",
+      "date": 1685546458155
+    },
+    {
+      "type": "edit",
+      "id": "8cd29697bb76c6cf",
+      "item": {
+        "type": "code",
+        "id": "8cd29697bb76c6cf",
+        "text": "Http.BadBody body ->\n                  let\n                    _ = Debug.log \"GotPage JSON:\" body -- Log the JSON content in case of Failure\n                  in\n                  \"Bad Body: \" ++ body"
+      },
+      "date": 1685546459968
+    },
+    {
+      "id": "8cd29697bb76c6cf",
+      "type": "move",
+      "order": [
+        "5a9a3d439e270d88",
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506"
+      ],
+      "date": 1685546462107
+    },
+    {
+      "type": "edit",
+      "id": "f07fe55815d6d2e4",
+      "item": {
+        "type": "paragraph",
+        "id": "f07fe55815d6d2e4",
+        "text": "We added some debug code to log the JSON content to the console in case of a BadBody error."
+      },
+      "date": 1685546504554
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d2a12b0000f83dca"
+      },
+      "id": "d2a12b0000f83dca",
+      "type": "add",
+      "after": "fdd8791fe8a52506",
+      "date": 1685546521493
+    },
+    {
+      "id": "d2a12b0000f83dca",
+      "type": "move",
+      "order": [
+        "5a9a3d439e270d88",
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506"
+      ],
+      "date": 1685546523953
+    },
+    {
+      "type": "edit",
+      "id": "d2a12b0000f83dca",
+      "item": {
+        "type": "image",
+        "id": "d2a12b0000f83dca",
+        "text": "Elm Debugger and Console log",
+        "size": "wide",
+        "width": 419,
+        "height": 250,
+        "url": "/assets/plugins/image/a0bfb9e04de60098b8220176517e9d2c.jpg"
+      },
+      "date": 1685546545880
+    },
+    {
+      "type": "add",
+      "id": "ec74725a8c564752",
+      "item": {
+        "type": "paragraph",
+        "id": "ec74725a8c564752",
+        "text": "How can I export console log […]?"
+      },
+      "after": "fdd8791fe8a52506",
+      "date": 1685546650010
+    },
+    {
+      "type": "edit",
+      "id": "ec74725a8c564752",
+      "item": {
+        "type": "paragraph",
+        "id": "ec74725a8c564752",
+        "text": "How can I export console log […]? [https://stackoverflow.com/questions/64131010/how-can-i-export-console-log-win-elm stackoverflow]"
+      },
+      "date": 1685546665793
+    },
+    {
+      "type": "edit",
+      "id": "d2a12b0000f83dca",
+      "item": {
+        "type": "image",
+        "id": "d2a12b0000f83dca",
+        "text": "Elm Debugger and Console Log",
+        "size": "wide",
+        "width": 419,
+        "height": 250,
+        "url": "/assets/plugins/image/a0bfb9e04de60098b8220176517e9d2c.jpg"
+      },
+      "date": 1685546690603
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "781cc7848f91546f"
+      },
+      "id": "781cc7848f91546f",
+      "type": "add",
+      "after": "ec74725a8c564752",
+      "date": 1685546723281
+    },
+    {
+      "id": "781cc7848f91546f",
+      "type": "move",
+      "order": [
+        "5a9a3d439e270d88",
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "781cc7848f91546f",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685546725486
+    },
+    {
+      "type": "edit",
+      "id": "781cc7848f91546f",
+      "item": {
+        "type": "code",
+        "id": "781cc7848f91546f",
+        "text": "Object { \"GotPage JSON\": 'Problem with the value at json.story:\\n\\n    [\\n        {\\n            \"type\": \"paragraph\",\\n            \"id\": \"9d8f6475636b7473\",\\n            \"text\": \"From an information theory perspective, an arbitrary selected pattern can have unbounded amounts of complexity. [https://btm.qva.mybluehost.me/building-arbitrary-life-patterns-in-15-gliders/ post], [https://assemblag.es/@ideoforms/109377632328641624 post]\"\\n        },\\n        {\\n            \"type\": \"paragraph\",\\n            \"id\": \"255c4baae5d842f5\",\\n            \"text\": \"Universal [[Constructor]] ⇒ [[Constructor Theory]]\"\\n        },\\n        {\\n            \"type\": \"reference\",\\n            \"id\": \"7b3e927514e76d31\",\\n            \"site\": \"wiki.ralfbarkow.ch\",\\n            \"slug\": \"constructor-theory\",\\n            \"title\": \"Constructor Theory\",\\n            \"text\": \"seeks to express all fundamental scientific theories in terms of a dichotomy between [[possible]] and [[impossible]] physical transformations – those that can be caused to happen and those th…' }\n​\n\"GotPage JSON\": 'Problem with the value at json.story:\\n\\n    [\\n        {\\n            \"type\": \"paragraph\",\\n            \"id\": \"9d8f6475636b7473\",\\n            \"text\": \"From an information theory perspective, an arbitrary selected pattern can have unbounded amounts of complexity. [https://btm.qva.mybluehost.me/building-arbitrary-life-patterns-in-15-gliders/ post], [https://assemblag.es/@ideoforms/109377632328641624 post]\"\\n        },\\n        {\\n            \"type\": \"paragraph\",\\n            \"id\": \"255c4baae5d842f5\",\\n            \"text\": \"Universal [[Constructor]] ⇒ [[Constructor Theory]]\"\\n        },\\n        {\\n            \"type\": \"reference\",\\n            \"id\": \"7b3e927514e76d31\",\\n            \"site\": \"wiki.ralfbarkow.ch\",\\n            \"slug\": \"constructor-theory\",\\n            \"title\": \"Constructor Theory\",\\n            \"text\": \"seeks to express all fundamental scientific theories in terms of a dichotomy between [[possible]] and [[impossible]] physical transformations – those that can be caused to happen and those th…'\n​\n<prototype>: Object { … }\nelm-console-debug.js:2:104200\n"
+      },
+      "date": 1685546726953
+    },
+    {
+      "type": "edit",
+      "id": "781cc7848f91546f",
+      "item": {
+        "type": "code",
+        "id": "781cc7848f91546f",
+        "text": "Object { \"GotPage JSON\": 'Problem with the value at json.story:\\n\\n    [\\n        {\\n            \"type\": \"paragraph\",\\n            \"id\": \"9d8f6475636b7473\",\\n            \"text\": \"From an information theory perspective, an arbitrary selected pattern can have unbounded amounts of complexity. [https://btm.qva.mybluehost.me/building-arbitrary-life-patterns-in-15-gliders/ post], [https://assemblag.es/@ideoforms/109377632328641624 post]\"\\n        },\\n        {\\n            \"type\": \"paragraph\",\\n            \"id\": \"255c4baae5d842f5\",\\n            \"text\": \"Universal [[Constructor]] ⇒ [[Constructor Theory]]\"\\n        },\\n        {\\n            \"type\": \"reference\",\\n            \"id\": \"7b3e927514e76d31\",\\n            \"site\": \"wiki.ralfbarkow.ch\",\\n            \"slug\": \"constructor-theory\",\\n            \"title\": \"Constructor Theory\",\\n            \"text\": \"seeks to express all fundamental scientific theories in terms of a dichotomy between [[possible]] and [[impossible]] physical transformations – those that can be caused to happen and those th…' }\nelm-console-debug.js:2:104200\n"
+      },
+      "date": 1685546739724
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7a9b3f39f356c467"
+      },
+      "id": "7a9b3f39f356c467",
+      "type": "add",
+      "after": "ec74725a8c564752",
+      "date": 1685546852426
+    },
+    {
+      "id": "7a9b3f39f356c467",
+      "type": "move",
+      "order": [
+        "5a9a3d439e270d88",
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685546858584
+    },
+    {
+      "type": "edit",
+      "id": "7a9b3f39f356c467",
+      "item": {
+        "type": "paragraph",
+        "id": "7a9b3f39f356c467",
+        "text": "In the console log we see the following message:"
+      },
+      "date": 1685546870045
+    },
+    {
+      "type": "edit",
+      "id": "258facc6b1726c62",
+      "item": {
+        "type": "paragraph",
+        "id": "258facc6b1726c62",
+        "text": "We see that our problem is related to the story (\" Problem with the value at json.story: …\")."
+      },
+      "date": 1685546976664
+    },
+    {
+      "type": "edit",
+      "id": "258facc6b1726c62",
+      "item": {
+        "type": "paragraph",
+        "id": "258facc6b1726c62",
+        "text": "We see that our problem is related to the story (\"Problem with the value at json.story: …\")."
+      },
+      "date": 1685546990798
+    },
+    {
+      "type": "edit",
+      "id": "258facc6b1726c62",
+      "item": {
+        "type": "paragraph",
+        "id": "258facc6b1726c62",
+        "text": "We see that our problem is related to the story, i.e. the value at json.story."
+      },
+      "date": 1685547045616
+    },
+    {
+      "type": "remove",
+      "id": "5a9a3d439e270d88",
+      "date": 1685547156392
+    },
+    {
+      "type": "edit",
+      "id": "e02b0e71cb9bec74",
+      "item": {
+        "type": "paragraph",
+        "id": "e02b0e71cb9bec74",
+        "text": "We modify the example to get a [[Wiki Page JSON]] instead of a random quote. [https://github.com/RalfBarkow/vite-elm-dojo/commit/c1588c8f7342bfe07d2b864a92f4177adc83bfe2 commit]"
+      },
+      "date": 1685547190588
+    },
+    {
+      "type": "add",
+      "id": "30f472df4373c18c",
+      "item": {
+        "type": "paragraph",
+        "id": "30f472df4373c18c",
+        "text": "We see \"I could not load the Wiki Page JSON for some reason\""
+      },
+      "after": "e02b0e71cb9bec74",
+      "date": 1685547255593
+    },
+    {
+      "type": "edit",
+      "id": "30f472df4373c18c",
+      "item": {
+        "type": "paragraph",
+        "id": "30f472df4373c18c",
+        "text": "We see \"I could not load the Wiki Page JSON for some reason.\""
+      },
+      "date": 1685547266821
+    },
+    {
+      "type": "edit",
+      "id": "30f472df4373c18c",
+      "item": {
+        "type": "paragraph",
+        "id": "30f472df4373c18c",
+        "text": "We see \"I could not load the Wiki Page JSON for some reason.\" and consult the [[Elm Debugger]]:"
+      },
+      "date": 1685547296166
+    },
+    {
+      "type": "edit",
+      "id": "781cc7848f91546f",
+      "item": {
+        "type": "code",
+        "id": "781cc7848f91546f",
+        "text": "Object { \"GotPage JSON\": \"Problem with the value at json.story:\\n\\n    [\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"c0fc5dfa9719f0b8\\\",\\n            \\\"text\\\": \\\"There is a whole section in [[The Official Guide]] about [[Decoder]]s. [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"322b1d9c81270cc8\\\",\\n            \\\"text\\\": \\\"We just saw an example that uses [[HTTP]] to get the content of a book. [https://guide.elm-lang.org/effects/http.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/937e8e1d268c07cd050b13c080b4e62138da9ce5 commit]\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"bfeaa7d33f192ace\\\",\\n            \\\"text\\\": \\\"Our next example shows how to fetch some JSON data. [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"e02b0e71cb9bec74\\\",\\n            \\\"text\\\": \\\"We modify the example to get a [[Wiki Page JSON]] instead of a random quote. [https://github.com/RalfBarkow/vite-elm-dojo/commit/c1588c8f7342bfe07d2b864a92f4177adc83bfe2 commit]\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"30f472df4373c18c\\\",\\n            \\\"text\\\": \\\"We see \\\\\\\"I could not load the Wiki Page JSON for some reason.\\\\\\\" and consult the [[Elm Debugger]]:\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"image\\\",\\n            \\\"id\\\": \\\"1b67b231aa8dca1a\\\",\\n            \\\"text\\\": \\\"Elm Debugger\\\",\\n            \\\"size\\\": \\\"wide\\\",\\n            \\\"width\\\": 419,\\n            \\\"height\\\": 254,\\n            \\\"url\\\": \\\"/assets/plugins/image/e990b33d101d69397bcd7e5fa81e1d3d.jpg\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"0e715179f105e597\\\",\\n            \\\"text\\\": \\\"Our program – more precisely our [[Model]] – is in one of the following states:\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"code\\\",\\n            \\\"id\\\": \\\"bd6e695ba0d7f263\\\",\\n            \\\"text\\\": \\\"type Model\\\\n  = Failure\\\\n  | Loading\\\\n  | Success Page\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"1c3724d3de000f5b\\\",\\n            \\\"text\\\": \\\"In the [[Elm Debugger]] we see that the current state is Failure. And the current message is\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"code\\\",\\n            \\\"id\\\": \\\"a1d5cbc4680b244c\\\",\\n            \\\"text\\\": \\\"GotPage Err …\\\\n0 = BadBody \\\\\\\"Problem...`story`\\\\\\\"\\\\n\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"258facc6b1726c62\\\",\\n            \\\"text\\\": \\\"We see that our problem is related to the story, i.e. the value at json.story.\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"reference\\\",\\n            \\\"id\\\": \\\"de87d4ede96f4cd4\\\",\\n            \\\"site\\\": \\\"video.fed.wiki.org\\\",\\n            \\\"slug\\\": \\\"01-story-and-journal\\\",\\n            \\\"title\\\": \\\"01 Story and Journal\\\",\\n            \\\"text\\\": \\\"We introduce the parts of a Federated Wiki page. The \\\\\\\"story\\\\\\\" is a collection of paragraphs and paragraph like items. The \\\\\\\"journal\\\\\\\" collects story edits. Should you take my page and edit it as yours, I can see what you've done and may decide to take your edits as my own.\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"98959dbeefcb584b\\\",\\n            \\\"text\\\": \\\"Our page decoder looks like this:\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"code\\\",\\n            \\\"id\\\": \\\"6075468194398c14\\\",\\n            \\\"text\\\": \\\"pageDecoder : Decoder Page\\\\npageDecoder =\\\\n  map3 Page\\\\n    (field \\\\\\\"title\\\\\\\" string)\\\\n    (field \\\\\\\"story\\\\\\\" storyDecoder)\\\\n    (field \\\\\\\"journal\\\\\\\" journalDecoder)\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"f43da6200453844f\\\",\\n            \\\"text\\\": \\\"The story decoder is still incomplete:\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"code\\\",\\n            \\\"id\\\": \\\"2985a8ccfe3fc4ac\\\",\\n            \\\"text\\\": \\\"storyDecoder : Decoder String\\\\nstoryDecoder =\\\\n  field \\\\\\\"story\\\\\\\" string |> Debug.log \\\\\\\"Decoding story:\\\\\\\"\\\\n\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"f07fe55815d6d2e4\\\",\\n            \\\"text\\\": \\\"We added some debug code to log the JSON content to the console in case of a BadBody error.\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"code\\\",\\n            \\\"id\\\": \\\"8cd29697bb76c6cf\\\",\\n            \\\"text\\\": \\\"Http.BadBody body ->\\\\n                  let\\\\n                    _ = Debug.log \\\\\\\"GotPage JSON:\\\\\\\" body -- Log the JSON content in case of Failure\\\\n                  in\\\\n                  \\\\\\\"Bad Body: \\\\\\\" ++ body\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"image\\\",\\n            \\\"id\\\": \\\"d2a12b0000f83dca\\\",\\n            \\\"text\\\": \\\"Elm Debugger and Console Log\\\",\\n            \\\"size\\\": \\\"wide\\\",\\n            \\\"width\\\": 419,\\n            \\\"height\\\": 250,\\n            \\\"url\\\": \\\"/assets/plugins/image/a0bfb9e04de60098b8220176517e9d2c.jpg\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"7a9b3f39f356c467\\\",\\n            \\\"text\\\": \\\"In the console log we see the following message:\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"code\\\",\\n            \\\"id\\\": \\\"781cc7848f91546f\\\",\\n            \\\"text\\\": \\\"Object { \\\\\\\"GotPage JSON\\\\\\\": 'Problem with the value at json.story:\\\\\\\\n\\\\\\\\n    [\\\\\\\\n        {\\\\\\\\n            \\\\\\\"type\\\\\\\": \\\\\\\"paragraph\\\\\\\",\\\\\\\\n            \\\\\\\"id\\\\\\\": \\\\\\\"9d8f6475636b7473\\\\\\\",\\\\\\\\n            \\\\\\\"text\\\\\\\": \\\\\\\"From an information theory perspective, an arbitrary selected pattern can have unbounded amounts of complexity. [https://btm.qva.mybluehost.me/building-arbitrary-life-patterns-in-15-gliders/ post], [https://assemblag.es/@ideoforms/109377632328641624 post]\\\\\\\"\\\\\\\\n        },\\\\\\\\n        {\\\\\\\\n            \\\\\\\"type\\\\\\\": \\\\\\\"paragraph\\\\\\\",\\\\\\\\n            \\\\\\\"id\\\\\\\": \\\\\\\"255c4baae5d842f5\\\\\\\",\\\\\\\\n            \\\\\\\"text\\\\\\\": \\\\\\\"Universal [[Constructor]] ⇒ [[Constructor Theory]]\\\\\\\"\\\\\\\\n        },\\\\\\\\n        {\\\\\\\\n            \\\\\\\"type\\\\\\\": \\\\\\\"reference\\\\\\\",\\\\\\\\n            \\\\\\\"id\\\\\\\": \\\\\\\"7b3e927514e76d31\\\\\\\",\\\\\\\\n            \\\\\\\"site\\\\\\\": \\\\\\\"wiki.ralfbarkow.ch\\\\\\\",\\\\\\\\n            \\\\\\\"slug\\\\\\\": \\\\\\\"constructor-theory\\\\\\\",\\\\\\\\n            \\\\\\\"title\\\\\\\": \\\\\\\"Constructor Theory\\\\\\\",\\\\\\\\n            \\\\\\\"text\\\\\\\": \\\\\\\"seeks to express all fundamental scientific theories in terms of a dichotomy between [[possible]] and [[impossible]] physical transformations – those that can be caused to happen and those th…' }\\\\nelm-console-debug.js:2:104200\\\\n\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"pagefold\\\",\\n            \\\"id\\\": \\\"2b55698007558763\\\",\\n            \\\"text\\\": \\\"~\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"38bbcf6223cf0053\\\",\\n            \\\"text\\\": \\\"JSON decoding: BadBody error [https://discourse.elm-lang.org/t/json-decoding-badbody-error/6186 discourse], [https://ellie-app.com/9MqcYmv6JPga1 ellie]\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"fdd8791fe8a52506\\\",\\n            \\\"text\\\": \\\"HTTP POST RPC [https://dashboard.lamdera.app/docs/http-post-rpc page]\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"ec74725a8c564752\\\",\\n            \\\"text\\\": \\\"How can I export console log […]? [https://stackoverflow.com/questions/64131010/how-can-i-export-console-log-win-elm stackoverflow]\\\"\\n        }\\n    ]\\n\\nExpecting an OBJECT with a field named `story`\" }\nelm-console-debug.js:2:104200\n"
+      },
+      "date": 1685547475929
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1bc7b42df347b9d5"
+      },
+      "id": "1bc7b42df347b9d5",
+      "type": "add",
+      "after": "ec74725a8c564752",
+      "date": 1685547550186
+    },
+    {
+      "id": "1bc7b42df347b9d5",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685547554419
+    },
+    {
+      "type": "edit",
+      "id": "1bc7b42df347b9d5",
+      "item": {
+        "type": "paragraph",
+        "id": "1bc7b42df347b9d5",
+        "text": "Expecting an OBJECT with a field named `story"
+      },
+      "date": 1685547556030
+    },
+    {
+      "type": "edit",
+      "id": "1bc7b42df347b9d5",
+      "item": {
+        "type": "paragraph",
+        "id": "1bc7b42df347b9d5",
+        "text": "Expecting an OBJECT with a field named `story`"
+      },
+      "date": 1685547568099
+    },
+    {
+      "type": "edit",
+      "id": "1bc7b42df347b9d5",
+      "item": {
+        "type": "paragraph",
+        "id": "1bc7b42df347b9d5",
+        "text": "So we are told an expectation:"
+      },
+      "date": 1685547621534
+    },
+    {
+      "type": "add",
+      "id": "ead7efea76138973",
+      "item": {
+        "type": "paragraph",
+        "id": "ead7efea76138973",
+        "text": "Expecting an OBJECT with a field named `story`"
+      },
+      "after": "1bc7b42df347b9d5",
+      "date": 1685547621867
+    },
+    {
+      "type": "edit",
+      "id": "781cc7848f91546f",
+      "item": {
+        "type": "code",
+        "id": "781cc7848f91546f",
+        "text": "Object { \"GotPage JSON\": \"Problem with the value at json.story:\\n\\n    [\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"c0fc5dfa9719f0b8\\\",\\n            \\\"text\\\": \\\"There is a whole section in [[The Official Guide]] about [[Decoder]]s. [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"322b1d9c81270cc8\\\",\\n            \\\"text\\\": \\\"We just saw an example that uses [[HTTP]] to get the content of a book. … },\\n […] {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"ec74725a8c564752\\\",\\n            \\\"text\\\": \\\"How can I export console log […]? [https://stackoverflow.com/questions/64131010/how-can-i-export-console-log-win-elm stackoverflow]\\\"\\n        }\\n    ]\\n\\nExpecting an OBJECT with a field named `story`\" }\nelm-console-debug.js:2:104200\n"
+      },
+      "date": 1685547803973
+    },
+    {
+      "type": "edit",
+      "id": "781cc7848f91546f",
+      "item": {
+        "type": "code",
+        "id": "781cc7848f91546f",
+        "text": "Object { \"GotPage JSON\": \"Problem with the value at json.story:\\n\\n    [\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"c0fc5dfa9719f0b8\\\",\\n            \\\"text\\\": \\\"There is a whole section in [[The Official Guide]] about [[Decoder]]s. [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"322b1d9c81270cc8\\\",\\n            \\\"text\\\": \\\"We just saw an example that uses [[HTTP]] to get the content of a book. … },\\n \n\n  […] \n\n{\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"ec74725a8c564752\\\",\\n            \\\"text\\\": \\\"How can I export console log […]? [https://stackoverflow.com/questions/64131010/how-can-i-export-console-log-win-elm stackoverflow]\\\"\\n        }\\n    ]\\n\\nExpecting an OBJECT with a field named `story`\" }\nelm-console-debug.js:2:104200\n"
+      },
+      "date": 1685547846060
+    },
+    {
+      "type": "edit",
+      "id": "781cc7848f91546f",
+      "item": {
+        "type": "code",
+        "id": "781cc7848f91546f",
+        "text": "Object { \"GotPage JSON\": \"Problem with the value at json.story:\\n\\n    [\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"c0fc5dfa9719f0b8\\\",\\n            \\\"text\\\": \\\"There is a whole section in [[The Official Guide]] about [[Decoder]]s. [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"322b1d9c81270cc8\\\",\\n            \\\"text\\\": \\\"We just saw an example that uses [[HTTP]] to get the content of a book. […]},\\n \n\n  […] \n\n{\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"ec74725a8c564752\\\",\\n            \\\"text\\\": \\\"How can I export console log […]? [https://stackoverflow.com/questions/64131010/how-can-i-export-console-log-win-elm stackoverflow]\\\"\\n        }\\n    ]\\n\\nExpecting an OBJECT with a field named `story`\" }\nelm-console-debug.js:2:104200\n"
+      },
+      "date": 1685547884938
+    },
+    {
+      "type": "edit",
+      "id": "8cd29697bb76c6cf",
+      "item": {
+        "type": "code",
+        "id": "8cd29697bb76c6cf",
+        "text": "  […]\n\nHttp.BadBody body ->\n                  let\n                    _ = Debug.log \"GotPage JSON:\" body -- Log the JSON content in case of Failure\n                  in\n                  \"Bad Body: \" ++ body\n\n  […]"
+      },
+      "date": 1685547975681
+    },
+    {
+      "type": "edit",
+      "id": "7a9b3f39f356c467",
+      "item": {
+        "type": "paragraph",
+        "id": "7a9b3f39f356c467",
+        "text": "In the console log we see the \"Problem with the value at json.story\" message:"
+      },
+      "date": 1685548017523
+    },
+    {
+      "type": "edit",
+      "id": "1bc7b42df347b9d5",
+      "item": {
+        "type": "paragraph",
+        "id": "1bc7b42df347b9d5",
+        "text": "At the end, we are given an expectation:"
+      },
+      "date": 1685548060473
+    },
+    {
+      "type": "edit",
+      "id": "ead7efea76138973",
+      "item": {
+        "type": "paragraph",
+        "id": "ead7efea76138973",
+        "text": "\"Expecting an OBJECT with a field named `story`\""
+      },
+      "date": 1685548071506
+    },
+    {
+      "type": "remove",
+      "id": "ead7efea76138973",
+      "date": 1685548074985
+    },
+    {
+      "type": "edit",
+      "id": "1bc7b42df347b9d5",
+      "item": {
+        "type": "paragraph",
+        "id": "1bc7b42df347b9d5",
+        "text": "At the end, we are given an expectation: \"Expecting an OBJECT with a field named `story`\"."
+      },
+      "date": 1685548078683
+    },
+    {
+      "type": "edit",
+      "id": "781cc7848f91546f",
+      "item": {
+        "type": "code",
+        "id": "781cc7848f91546f",
+        "text": "Object { \"GotPage JSON\": \"Problem with the value at json.story:\\n\\n    [\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"c0fc5dfa9719f0b8\\\",\\n            \\\"text\\\": \\\"There is a whole section in [[The Official Guide]] about [[Decoder]]s. [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"322b1d9c81270cc8\\\",\\n            \\\"text\\\": \\\"We just saw an example that uses [[HTTP]] to get the content of a book. [https://guide.elm-lang.org/effects/http.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/937e8e1d268c07cd050b13c080b4e62138da9ce5 commit]\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"bfeaa7d33f192ace\\\",\\n            \\\"text\\\": \\\"Our next example shows how to fetch some JSON data. [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]\\\"\\n        },\\n        \n\n  […]      \n\n{\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"ec74725a8c564752\\\",\\n            \\\"text\\\": \\\"How can I export console log […]? [https://stackoverflow.com/questions/64131010/how-can-i-export-console-log-win-elm stackoverflow]\\\"\\n        }\\n    ]\\n\\nExpecting an OBJECT with a field named `story`\" }\nelm-console-debug.js:2:104200\n"
+      },
+      "date": 1685548370228
     }
   ]
 }
