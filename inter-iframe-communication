@@ -1,0 +1,844 @@
+{
+  "title": "Inter-iFrame Communication",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "43f1fc50962087d5",
+      "text": "[[Elm]] provides mechanisms for inter-iframe communication using ports and subscriptions."
+    },
+    {
+      "type": "paragraph",
+      "id": "aaab028c58c82bb4",
+      "text": "Here's a high-level overview of how we can achieve this:"
+    },
+    {
+      "type": "paragraph",
+      "id": "8ba923c9f5cc9028",
+      "text": "1. In the parent document that contains the iframes (iframe1Src, iframe2Src, and iframe3Src), include the Elm application as the source for iframe3Src. [https://github.com/RalfBarkow/vite-elm-dojo/commit/8ba5383e064758286e032e93572d9683ca2e4637 commit]"
+    },
+    {
+      "type": "paragraph",
+      "id": "2444525589b60594",
+      "text": "2. Inside the Elm application, define ports to establish communication channels with the parent document and the other iframes."
+    },
+    {
+      "type": "paragraph",
+      "id": "3e4b70bd67cf6106",
+      "text": "3. In iframe3Src, subscribe to messages from iframe1Src and iframe2Src using Elm's subscriptions mechanism."
+    },
+    {
+      "type": "paragraph",
+      "id": "db5113b7cfc5417f",
+      "text": "4. When iframe3Src needs to send a message to iframe1Src or iframe2Src, it can use outgoing ports to send the message to the parent document."
+    },
+    {
+      "type": "paragraph",
+      "id": "1c92222132e0ecb8",
+      "text": "5. In the parent document, capture the messages sent from iframe3Src and relay them to the corresponding iframes (iframe1Src and iframe2Src) using postMessage."
+    },
+    {
+      "type": "paragraph",
+      "id": "adf0205dc3f51b15",
+      "text": "6. Similarly, messages received from iframe1Src and iframe2Src in the parent document can be forwarded to iframe3Src using postMessage."
+    },
+    {
+      "type": "paragraph",
+      "id": "76c4f2169d01b56c",
+      "text": "7. Inside the Elm application (iframe3Src), subscribe to incoming messages from the parent document and process them accordingly."
+    },
+    {
+      "type": "paragraph",
+      "id": "9e2a10474832f1be",
+      "text": "This way, you can establish bidirectional communication between iframe3Src and the other iframes (iframe1Src and iframe2Src) through the parent document. The parent document acts as a mediator for [[Message Passing]]."
+    },
+    {
+      "type": "paragraph",
+      "id": "93a3df0281770a02",
+      "text": "Remember to handle security considerations, such as verifying the origin of the messages to prevent unauthorized access and ensuring proper message validation to avoid potential security vulnerabilities."
+    },
+    {
+      "type": "pagefold",
+      "id": "6b7f17c539d6edf6",
+      "text": "Parent Document"
+    },
+    {
+      "type": "code",
+      "id": "02789f2181bbf61d",
+      "text": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>Parent Document</title>\n    <!-- Include Elm-generated JavaScript bundle -->\n    <script src=\"elm-app.js\" defer></script>\n  </head>\n  <body>\n    <!-- Elm application will be rendered here -->\n    <div id=\"elm-app\"></div>\n  </body>\n</html>\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "a307eb963f2bb4db",
+      "text": "In this example, the Elm-generated JavaScript bundle is included with the <script> tag pointing to the elm-app.js file. The <div> element with the id elm-app is where the Elm application will be rendered."
+    },
+    {
+      "type": "paragraph",
+      "id": "b1ae061016bf9f6f",
+      "text": "Our Elm code (Main.elm) represents the Elm application that will be loaded and rendered within the parent document. It contains the view function, which defines the structure and content of the Elm application's UI. The Elm application will be embedded within the <iframe> elements specified in the view function."
+    },
+    {
+      "type": "markdown",
+      "id": "8b07359850c64695",
+      "text": "# View Function"
+    },
+    {
+      "type": "code",
+      "id": "f278b5b5b06d7842",
+      "text": "view : Model -> Html Msg\nview model =\n    div []\n        [ iframe [ src model.iframe1Src ] []\n        , iframe [ src model.iframe2Src ] []\n        , iframe [ src model.iframe3Src ] []\n        , div []\n            [ button [ onClick (ChangeIframe1Src \"http://hive.dreyeck.ch/view/create-new-page-test\") ] [ text \"Change iframe 1 src\" ]\n            , button [ onClick (ChangeIframe2Src \"http://hive.dreyeck.ch/create-new-page-test.json\") ] [ text \"Change iframe 2 src\" ]\n            , button [ onClick (ChangeIframe3Src \"http://hive.dreyeck.ch/\") ] [ text \"Change iframe 3 src\" ]\n            ]\n        ]\n"
+    },
+    {
+      "type": "markdown",
+      "id": "8d31360ad3ba84a1",
+      "text": "# Parent Document"
+    },
+    {
+      "type": "paragraph",
+      "id": "929af006446c52f3",
+      "text": "So, in this context, the \"parent document\" refers to the HTML page that includes the Elm application's JavaScript bundle and serves as the container for rendering the Elm application."
+    },
+    {
+      "type": "reference",
+      "id": "5feb48c72d1932bd",
+      "site": "ward.asia.wiki.org",
+      "slug": "safe-and-familiar-welcome",
+      "title": "Safe and Familiar Welcome",
+      "text": "We could provide an \"index.html\" style template in the server that would present a more familiar welcome page before easing visitors into the new world of federated wiki."
+    },
+    {
+      "type": "paragraph",
+      "id": "b48bc459e4722253",
+      "text": "We intend to integrate an Elm application within a federated wiki page to enhance its functionality."
+    },
+    {
+      "type": "paragraph",
+      "id": "58ecc7c78eb1e0e6",
+      "text": "By creating an HTML template in the server that presents a welcome page, we can seamlessly incorporate the Elm application into the federated wiki environment. This welcome page can provide a familiar interface to visitors before introducing them to the features and content of the federated wiki."
+    },
+    {
+      "type": "paragraph",
+      "id": "093c5e7954d6369f",
+      "text": "The federated wiki platform offers various options for customizing the look and feel of the welcome page, such as project-look or blog-look templates. These templates can be updated regularly to match evolving contemporary styles, allowing site owners to align their domains with modern design aesthetics."
+    },
+    {
+      "type": "paragraph",
+      "id": "cd038550f7a97355",
+      "text": "One open question is how to transition gracefully between the federated wiki mode and the Elm application mode. This transition can be an opportunity to provide delightful user experiences or potentially confuse users. Finding a balance and ensuring a seamless flow between the different modes is important."
+    },
+    {
+      "type": "paragraph",
+      "id": "c78c4ec063fc88fb",
+      "text": "Regarding the revisions and content forking, the Assets plugin in federated wiki provides a mechanism for storing alternative implementations of the site landing page. By reserving the \"home\" subdirectory, site owners can customize the welcome page using HTML and CSS without requiring privileged access to the server or coordination with other users."
+    },
+    {
+      "type": "paragraph",
+      "id": "bedd5cddcd56a050",
+      "text": "However, it's worth noting that integrating the Elm application and federated wiki requires technical implementation and customization. It may involve creating custom plugins, integrating with federated wiki's APIs, and handling the communication and data flow between the two systems."
+    },
+    {
+      "type": "pagefold",
+      "id": "fe43050e6738d0c4",
+      "text": "~"
+    },
+    {
+      "type": "reference",
+      "id": "64830e77ec53280e",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "meta-shell",
+      "title": "Meta Shell",
+      "text": "⇒ [[Secure, Sandboxed iFrames]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Inter-iFrame Communication",
+        "story": []
+      },
+      "date": 1685799985488
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "43f1fc50962087d5"
+      },
+      "id": "43f1fc50962087d5",
+      "type": "add",
+      "date": 1685800005780
+    },
+    {
+      "type": "edit",
+      "id": "43f1fc50962087d5",
+      "item": {
+        "type": "paragraph",
+        "id": "43f1fc50962087d5",
+        "text": "[[Elm]] provides mechanisms for inter-iframe communication using ports and subscriptions."
+      },
+      "date": 1685800011304
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "aaab028c58c82bb4"
+      },
+      "id": "aaab028c58c82bb4",
+      "type": "add",
+      "after": "43f1fc50962087d5",
+      "date": 1685800022793
+    },
+    {
+      "type": "edit",
+      "id": "aaab028c58c82bb4",
+      "item": {
+        "type": "paragraph",
+        "id": "aaab028c58c82bb4",
+        "text": "Here's a high-level overview of how you can achieve this:"
+      },
+      "date": 1685800023996
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8ba923c9f5cc9028"
+      },
+      "id": "8ba923c9f5cc9028",
+      "type": "add",
+      "after": "aaab028c58c82bb4",
+      "date": 1685800032638
+    },
+    {
+      "type": "edit",
+      "id": "8ba923c9f5cc9028",
+      "item": {
+        "type": "paragraph",
+        "id": "8ba923c9f5cc9028",
+        "text": "1. (iframe1Src, iframe2Src, and iframe3Src), include the Elm application as the source for iframe3Src."
+      },
+      "date": 1685800036014
+    },
+    {
+      "type": "edit",
+      "id": "8ba923c9f5cc9028",
+      "item": {
+        "type": "paragraph",
+        "id": "8ba923c9f5cc9028",
+        "text": "1. In the parent document that contains the iframes (iframe1Src, iframe2Src, and iframe3Src), include the Elm application as the source for iframe3Src."
+      },
+      "date": 1685800049651
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2444525589b60594"
+      },
+      "id": "2444525589b60594",
+      "type": "add",
+      "after": "8ba923c9f5cc9028",
+      "date": 1685800104062
+    },
+    {
+      "type": "edit",
+      "id": "2444525589b60594",
+      "item": {
+        "type": "paragraph",
+        "id": "2444525589b60594",
+        "text": "2. Inside the Elm application, define ports to establish communication channels with the parent document and the other iframes."
+      },
+      "date": 1685800106863
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3e4b70bd67cf6106"
+      },
+      "id": "3e4b70bd67cf6106",
+      "type": "add",
+      "after": "2444525589b60594",
+      "date": 1685800126670
+    },
+    {
+      "type": "edit",
+      "id": "3e4b70bd67cf6106",
+      "item": {
+        "type": "paragraph",
+        "id": "3e4b70bd67cf6106",
+        "text": "3. In iframe3Src, subscribe to messages from iframe1Src and iframe2Src using Elm's subscriptions mechanism.\nWhen iframe3Src needs to send a message to "
+      },
+      "date": 1685800129577
+    },
+    {
+      "type": "edit",
+      "id": "3e4b70bd67cf6106",
+      "item": {
+        "type": "paragraph",
+        "id": "3e4b70bd67cf6106",
+        "text": "3. In iframe3Src, subscribe to messages from iframe1Src and iframe2Src using Elm's subscriptions mechanism."
+      },
+      "date": 1685800141083
+    },
+    {
+      "type": "add",
+      "id": "db5113b7cfc5417f",
+      "item": {
+        "type": "paragraph",
+        "id": "db5113b7cfc5417f",
+        "text": "4. When iframe3Src needs to send a message to "
+      },
+      "after": "3e4b70bd67cf6106",
+      "date": 1685800142644
+    },
+    {
+      "type": "edit",
+      "id": "db5113b7cfc5417f",
+      "item": {
+        "type": "paragraph",
+        "id": "db5113b7cfc5417f",
+        "text": "4. When iframe3Src needs to send a message to iframe1Src or iframe2Src, it can use outgoing ports to send the message to the parent document."
+      },
+      "date": 1685800152496
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1c92222132e0ecb8"
+      },
+      "id": "1c92222132e0ecb8",
+      "type": "add",
+      "after": "db5113b7cfc5417f",
+      "date": 1685800168573
+    },
+    {
+      "type": "edit",
+      "id": "1c92222132e0ecb8",
+      "item": {
+        "type": "paragraph",
+        "id": "1c92222132e0ecb8",
+        "text": "5. In the parent document, capture the messages sent from iframe3Src and relay them to the corresponding iframes (iframe1Src and iframe2Src) using postMessage."
+      },
+      "date": 1685800170911
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "adf0205dc3f51b15"
+      },
+      "id": "adf0205dc3f51b15",
+      "type": "add",
+      "after": "1c92222132e0ecb8",
+      "date": 1685800180049
+    },
+    {
+      "type": "edit",
+      "id": "adf0205dc3f51b15",
+      "item": {
+        "type": "paragraph",
+        "id": "adf0205dc3f51b15",
+        "text": "6. Similarly, messages received from iframe1Src and iframe2Src in the parent document can be forwarded to iframe3Src using postMessage."
+      },
+      "date": 1685800182047
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "76c4f2169d01b56c"
+      },
+      "id": "76c4f2169d01b56c",
+      "type": "add",
+      "after": "adf0205dc3f51b15",
+      "date": 1685800191973
+    },
+    {
+      "type": "edit",
+      "id": "76c4f2169d01b56c",
+      "item": {
+        "type": "paragraph",
+        "id": "76c4f2169d01b56c",
+        "text": "7. Inside the Elm application (iframe3Src), subscribe to incoming messages from the parent document and process them accordingly."
+      },
+      "date": 1685800194698
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9e2a10474832f1be"
+      },
+      "id": "9e2a10474832f1be",
+      "type": "add",
+      "after": "76c4f2169d01b56c",
+      "date": 1685800202209
+    },
+    {
+      "type": "edit",
+      "id": "9e2a10474832f1be",
+      "item": {
+        "type": "paragraph",
+        "id": "9e2a10474832f1be",
+        "text": "This way, you can establish bidirectional communication between iframe3Src and the other iframes (iframe1Src and iframe2Src) through the parent document. The parent document acts as a mediator for message passing."
+      },
+      "date": 1685800203389
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "93a3df0281770a02"
+      },
+      "id": "93a3df0281770a02",
+      "type": "add",
+      "after": "9e2a10474832f1be",
+      "date": 1685800216585
+    },
+    {
+      "type": "edit",
+      "id": "93a3df0281770a02",
+      "item": {
+        "type": "paragraph",
+        "id": "93a3df0281770a02",
+        "text": "Remember to handle security considerations, such as verifying the origin of the messages to prevent unauthorized access and ensuring proper message validation to avoid potential security vulnerabilities."
+      },
+      "date": 1685800217888
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "02789f2181bbf61d"
+      },
+      "id": "02789f2181bbf61d",
+      "type": "add",
+      "after": "93a3df0281770a02",
+      "date": 1685800283107
+    },
+    {
+      "type": "edit",
+      "id": "02789f2181bbf61d",
+      "item": {
+        "type": "code",
+        "id": "02789f2181bbf61d",
+        "text": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>Parent Document</title>\n    <!-- Include Elm-generated JavaScript bundle -->\n    <script src=\"elm-app.js\" defer></script>\n  </head>\n  <body>\n    <!-- Elm application will be rendered here -->\n    <div id=\"elm-app\"></div>\n  </body>\n</html>\n"
+      },
+      "date": 1685800286714
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a307eb963f2bb4db"
+      },
+      "id": "a307eb963f2bb4db",
+      "type": "add",
+      "after": "02789f2181bbf61d",
+      "date": 1685800323099
+    },
+    {
+      "type": "edit",
+      "id": "a307eb963f2bb4db",
+      "item": {
+        "type": "paragraph",
+        "id": "a307eb963f2bb4db",
+        "text": "In this example, the Elm-generated JavaScript bundle is included with the <script> tag pointing to the elm-app.js file. The <div> element with the id elm-app is where the Elm application will be rendered."
+      },
+      "date": 1685800324371
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6b7f17c539d6edf6"
+      },
+      "id": "6b7f17c539d6edf6",
+      "type": "add",
+      "after": "a307eb963f2bb4db",
+      "date": 1685800336809
+    },
+    {
+      "type": "edit",
+      "id": "6b7f17c539d6edf6",
+      "item": {
+        "type": "pagefold",
+        "id": "6b7f17c539d6edf6",
+        "text": "Parent Document"
+      },
+      "date": 1685800339666
+    },
+    {
+      "id": "6b7f17c539d6edf6",
+      "type": "move",
+      "order": [
+        "43f1fc50962087d5",
+        "aaab028c58c82bb4",
+        "8ba923c9f5cc9028",
+        "2444525589b60594",
+        "3e4b70bd67cf6106",
+        "db5113b7cfc5417f",
+        "1c92222132e0ecb8",
+        "adf0205dc3f51b15",
+        "76c4f2169d01b56c",
+        "9e2a10474832f1be",
+        "93a3df0281770a02",
+        "6b7f17c539d6edf6",
+        "02789f2181bbf61d",
+        "a307eb963f2bb4db"
+      ],
+      "date": 1685800342030
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b1ae061016bf9f6f"
+      },
+      "id": "b1ae061016bf9f6f",
+      "type": "add",
+      "after": "a307eb963f2bb4db",
+      "date": 1685800359935
+    },
+    {
+      "type": "edit",
+      "id": "b1ae061016bf9f6f",
+      "item": {
+        "type": "paragraph",
+        "id": "b1ae061016bf9f6f",
+        "text": "Our Elm code (Main.elm) represents the Elm application that will be loaded and rendered within the parent document. It contains the view function, which defines the structure and content of the Elm application's UI. The Elm application will be embedded within the <iframe> elements specified in the view function."
+      },
+      "date": 1685800376516
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8d31360ad3ba84a1"
+      },
+      "id": "8d31360ad3ba84a1",
+      "type": "add",
+      "after": "b1ae061016bf9f6f",
+      "date": 1685800404907
+    },
+    {
+      "type": "edit",
+      "id": "8d31360ad3ba84a1",
+      "item": {
+        "type": "paragraph",
+        "id": "8d31360ad3ba84a1",
+        "text": "So, in this context, the \"parent document\" refers to the HTML page that includes the Elm application's JavaScript bundle and serves as the container for rendering the Elm application."
+      },
+      "date": 1685800406084
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f278b5b5b06d7842"
+      },
+      "id": "f278b5b5b06d7842",
+      "type": "add",
+      "after": "8d31360ad3ba84a1",
+      "date": 1685800432269
+    },
+    {
+      "id": "f278b5b5b06d7842",
+      "type": "move",
+      "order": [
+        "43f1fc50962087d5",
+        "aaab028c58c82bb4",
+        "8ba923c9f5cc9028",
+        "2444525589b60594",
+        "3e4b70bd67cf6106",
+        "db5113b7cfc5417f",
+        "1c92222132e0ecb8",
+        "adf0205dc3f51b15",
+        "76c4f2169d01b56c",
+        "9e2a10474832f1be",
+        "93a3df0281770a02",
+        "6b7f17c539d6edf6",
+        "02789f2181bbf61d",
+        "a307eb963f2bb4db",
+        "b1ae061016bf9f6f",
+        "f278b5b5b06d7842",
+        "8d31360ad3ba84a1"
+      ],
+      "date": 1685800433950
+    },
+    {
+      "type": "edit",
+      "id": "f278b5b5b06d7842",
+      "item": {
+        "type": "code",
+        "id": "f278b5b5b06d7842",
+        "text": "view : Model -> Html Msg\nview model =\n    div []\n        [ iframe [ src model.iframe1Src ] []\n        , iframe [ src model.iframe2Src ] []\n        , iframe [ src model.iframe3Src ] []\n        , div []\n            [ button [ onClick (ChangeIframe1Src \"http://hive.dreyeck.ch/view/create-new-page-test\") ] [ text \"Change iframe 1 src\" ]\n            , button [ onClick (ChangeIframe2Src \"http://hive.dreyeck.ch/create-new-page-test.json\") ] [ text \"Change iframe 2 src\" ]\n            , button [ onClick (ChangeIframe3Src \"http://hive.dreyeck.ch/\") ] [ text \"Change iframe 3 src\" ]\n            ]\n        ]\n"
+      },
+      "date": 1685800436183
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5feb48c72d1932bd"
+      },
+      "id": "5feb48c72d1932bd",
+      "type": "add",
+      "after": "8d31360ad3ba84a1",
+      "date": 1685801055812
+    },
+    {
+      "type": "edit",
+      "id": "5feb48c72d1932bd",
+      "item": {
+        "type": "reference",
+        "id": "5feb48c72d1932bd",
+        "site": "ward.asia.wiki.org",
+        "slug": "safe-and-familiar-welcome",
+        "title": "Safe and Familiar Welcome",
+        "text": "We could provide an \"index.html\" style template in the server that would present a more familiar welcome page before easing visitors into the new world of federated wiki."
+      },
+      "date": 1685801059382
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b48bc459e4722253"
+      },
+      "id": "b48bc459e4722253",
+      "type": "add",
+      "after": "5feb48c72d1932bd",
+      "date": 1685801070096
+    },
+    {
+      "type": "edit",
+      "id": "b48bc459e4722253",
+      "item": {
+        "type": "paragraph",
+        "id": "b48bc459e4722253",
+        "text": "We intend to integrate an Elm application within a federated wiki page to enhance its functionality."
+      },
+      "date": 1685801102502
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "58ecc7c78eb1e0e6"
+      },
+      "id": "58ecc7c78eb1e0e6",
+      "type": "add",
+      "after": "b48bc459e4722253",
+      "date": 1685801126059
+    },
+    {
+      "type": "edit",
+      "id": "58ecc7c78eb1e0e6",
+      "item": {
+        "type": "paragraph",
+        "id": "58ecc7c78eb1e0e6",
+        "text": "By creating an HTML template in the server that presents a welcome page, you can seamlessly incorporate the Elm application into the federated wiki environment. This welcome page can provide a familiar interface to visitors before introducing them to the features and content of the federated wiki."
+      },
+      "date": 1685801127346
+    },
+    {
+      "type": "edit",
+      "id": "58ecc7c78eb1e0e6",
+      "item": {
+        "type": "paragraph",
+        "id": "58ecc7c78eb1e0e6",
+        "text": "By creating an HTML template in the server that presents a welcome page, we can seamlessly incorporate the Elm application into the federated wiki environment. This welcome page can provide a familiar interface to visitors before introducing them to the features and content of the federated wiki."
+      },
+      "date": 1685801141548
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "093c5e7954d6369f"
+      },
+      "id": "093c5e7954d6369f",
+      "type": "add",
+      "after": "58ecc7c78eb1e0e6",
+      "date": 1685801163419
+    },
+    {
+      "type": "edit",
+      "id": "093c5e7954d6369f",
+      "item": {
+        "type": "paragraph",
+        "id": "093c5e7954d6369f",
+        "text": "The federated wiki platform offers various options for customizing the look and feel of the welcome page, such as project-look or blog-look templates. These templates can be updated regularly to match evolving contemporary styles, allowing site owners to align their domains with modern design aesthetics."
+      },
+      "date": 1685801164679
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "cd038550f7a97355"
+      },
+      "id": "cd038550f7a97355",
+      "type": "add",
+      "after": "093c5e7954d6369f",
+      "date": 1685801181616
+    },
+    {
+      "type": "edit",
+      "id": "cd038550f7a97355",
+      "item": {
+        "type": "paragraph",
+        "id": "cd038550f7a97355",
+        "text": "One open question is how to transition gracefully between the federated wiki mode and the Elm application mode. This transition can be an opportunity to provide delightful user experiences or potentially confuse users. Finding a balance and ensuring a seamless flow between the different modes is important."
+      },
+      "date": 1685801183011
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c78c4ec063fc88fb"
+      },
+      "id": "c78c4ec063fc88fb",
+      "type": "add",
+      "after": "cd038550f7a97355",
+      "date": 1685801198641
+    },
+    {
+      "type": "edit",
+      "id": "c78c4ec063fc88fb",
+      "item": {
+        "type": "paragraph",
+        "id": "c78c4ec063fc88fb",
+        "text": "Regarding the revisions and content forking, the Assets plugin in federated wiki provides a mechanism for storing alternative implementations of the site landing page. By reserving the \"home\" subdirectory, site owners can customize the welcome page using HTML and CSS without requiring privileged access to the server or coordination with other users."
+      },
+      "date": 1685801200002
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bedd5cddcd56a050"
+      },
+      "id": "bedd5cddcd56a050",
+      "type": "add",
+      "after": "c78c4ec063fc88fb",
+      "date": 1685801221839
+    },
+    {
+      "type": "edit",
+      "id": "bedd5cddcd56a050",
+      "item": {
+        "type": "paragraph",
+        "id": "bedd5cddcd56a050",
+        "text": "However, it's worth noting that integrating the Elm application and federated wiki requires technical implementation and customization. It may involve creating custom plugins, integrating with federated wiki's APIs, and handling the communication and data flow between the two systems."
+      },
+      "date": 1685801223303
+    },
+    {
+      "type": "edit",
+      "id": "aaab028c58c82bb4",
+      "item": {
+        "type": "paragraph",
+        "id": "aaab028c58c82bb4",
+        "text": "Here's a high-level overview of how we can achieve this:"
+      },
+      "date": 1685801252787
+    },
+    {
+      "type": "edit",
+      "id": "8ba923c9f5cc9028",
+      "item": {
+        "type": "paragraph",
+        "id": "8ba923c9f5cc9028",
+        "text": "1. In the parent document that contains the iframes (iframe1Src, iframe2Src, and iframe3Src), include the Elm application as the source for iframe3Src. [https://github.com/RalfBarkow/vite-elm-dojo/commit/8ba5383e064758286e032e93572d9683ca2e4637 commit]"
+      },
+      "date": 1685801391362
+    },
+    {
+      "type": "edit",
+      "id": "9e2a10474832f1be",
+      "item": {
+        "type": "paragraph",
+        "id": "9e2a10474832f1be",
+        "text": "This way, you can establish bidirectional communication between iframe3Src and the other iframes (iframe1Src and iframe2Src) through the parent document. The parent document acts as a mediator for [[Message Passing]]."
+      },
+      "date": 1685801514526
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fe43050e6738d0c4"
+      },
+      "id": "fe43050e6738d0c4",
+      "type": "add",
+      "after": "bedd5cddcd56a050",
+      "date": 1685801679567
+    },
+    {
+      "type": "edit",
+      "id": "fe43050e6738d0c4",
+      "item": {
+        "type": "pagefold",
+        "id": "fe43050e6738d0c4",
+        "text": "~"
+      },
+      "date": 1685801683067
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "64830e77ec53280e"
+      },
+      "id": "64830e77ec53280e",
+      "type": "add",
+      "after": "fe43050e6738d0c4",
+      "date": 1685801684403
+    },
+    {
+      "type": "edit",
+      "id": "64830e77ec53280e",
+      "item": {
+        "type": "reference",
+        "id": "64830e77ec53280e",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "meta-shell",
+        "title": "Meta Shell",
+        "text": "⇒ [[Secure, Sandboxed iFrames]]"
+      },
+      "date": 1685801686537
+    },
+    {
+      "type": "add",
+      "id": "8b07359850c64695",
+      "item": {
+        "type": "paragraph",
+        "id": "8b07359850c64695",
+        "text": "# View Function"
+      },
+      "after": "b1ae061016bf9f6f",
+      "date": 1685801800233
+    },
+    {
+      "type": "edit",
+      "id": "8b07359850c64695",
+      "item": {
+        "type": "markdown",
+        "id": "8b07359850c64695",
+        "text": "# View Function"
+      },
+      "date": 1685801801737
+    },
+    {
+      "type": "edit",
+      "id": "8d31360ad3ba84a1",
+      "item": {
+        "type": "paragraph",
+        "id": "8d31360ad3ba84a1",
+        "text": "# Parent Document"
+      },
+      "date": 1685801827622
+    },
+    {
+      "type": "add",
+      "id": "929af006446c52f3",
+      "item": {
+        "type": "paragraph",
+        "id": "929af006446c52f3",
+        "text": "So, in this context, the \"parent document\" refers to the HTML page that includes the Elm application's JavaScript bundle and serves as the container for rendering the Elm application."
+      },
+      "after": "8d31360ad3ba84a1",
+      "date": 1685801827913
+    },
+    {
+      "type": "edit",
+      "id": "8d31360ad3ba84a1",
+      "item": {
+        "type": "markdown",
+        "id": "8d31360ad3ba84a1",
+        "text": "# Parent Document"
+      },
+      "date": 1685801829293
+    }
+  ]
+}

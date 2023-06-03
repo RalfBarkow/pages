@@ -19,12 +19,51 @@
     {
       "type": "paragraph",
       "id": "e02b0e71cb9bec74",
-      "text": "We modify the example to get a [[Wiki Page JSON]] instead of a random quote. [https://github.com/RalfBarkow/vite-elm-dojo/commit/c1588c8f7342bfe07d2b864a92f4177adc83bfe2 commit]"
+      "text": "We modify the example to get a simple [[Elm]] application that fetches JSON data from a specific URL – a [[Wiki Page JSON]] instead of a random quote – and displays it on a webpage. [https://github.com/RalfBarkow/vite-elm-dojo/commit/c1588c8f7342bfe07d2b864a92f4177adc83bfe2 commit]"
     },
     {
       "type": "paragraph",
       "id": "30f472df4373c18c",
-      "text": "We see \"I could not load the Wiki Page JSON for some reason.\" and consult the [[Elm Debugger]]:"
+      "text": "We see \"I could not load the Wiki Page JSON for some reason.\" and consult the [[Elm Debugger]]."
+    },
+    {
+      "type": "image",
+      "id": "d2a12b0000f83dca",
+      "text": "Wiki Page JSON View, Elm Debugger and Console Log",
+      "size": "wide",
+      "width": 419,
+      "height": 250,
+      "url": "/assets/plugins/image/a0bfb9e04de60098b8220176517e9d2c.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "0e715179f105e597",
+      "text": "The Model type represents the different states of the application. "
+    },
+    {
+      "type": "code",
+      "id": "bd6e695ba0d7f263",
+      "text": "type Model\n    = Loading\n    | Success Wiki.Page\n    | Failure String"
+    },
+    {
+      "type": "paragraph",
+      "id": "8766458db1e786d8",
+      "text": "It can be Loading if the data is retrieved, Success if the data, i.e. a [[Page]] was successfully retrieved, or Failure if the data retrieval fails."
+    },
+    {
+      "type": "paragraph",
+      "id": "aa3e41078537d359",
+      "text": "The Page type represents the structure of the retrieved JSON data. "
+    },
+    {
+      "type": "code",
+      "id": "beb7be493b27a847",
+      "text": "type alias Page =\n    { title : String\n    , story : List Story\n    , journal : List Journal\n    }"
+    },
+    {
+      "type": "paragraph",
+      "id": "91efd4b30f1fe597",
+      "text": "It contains a title field of type String, a story field containing a list of Story objects, and a journal field containing a list of Journal objects"
     },
     {
       "type": "image",
@@ -34,16 +73,6 @@
       "width": 419,
       "height": 254,
       "url": "/assets/plugins/image/e990b33d101d69397bcd7e5fa81e1d3d.jpg"
-    },
-    {
-      "type": "paragraph",
-      "id": "0e715179f105e597",
-      "text": "Our program – more precisely our [[Model]] – is in one of the following states:"
-    },
-    {
-      "type": "code",
-      "id": "bd6e695ba0d7f263",
-      "text": "type Model\n  = Failure\n  | Loading\n  | Success Page"
     },
     {
       "type": "paragraph",
@@ -71,12 +100,22 @@
     {
       "type": "paragraph",
       "id": "98959dbeefcb584b",
-      "text": "Our page decoder looks like this:"
+      "text": "The code includes various JSON decoders using the Json.Decode module. These decoders are used to decode the JSON response into Elm types. "
+    },
+    {
+      "type": "paragraph",
+      "id": "0ced0100b0b3cd94",
+      "text": "Our page decoder initially looks like this:"
     },
     {
       "type": "code",
       "id": "6075468194398c14",
-      "text": "pageDecoder : Decoder Page\npageDecoder =\n  map3 Page\n    (field \"title\" string)\n    (field \"story\" storyDecoder)\n    (field \"journal\" journalDecoder)"
+      "text": "decodePage : Decoder Page\ndecodePage =\n    map3 Page\n        (field \"title\" string)\n        (field \"story\" (list decodeStory))\n        (field \"journal\" (list decodeStoryEdit))"
+    },
+    {
+      "type": "paragraph",
+      "id": "b4e3a98f693466e6",
+      "text": "decodePage decodes the JSON response into a Page object."
     },
     {
       "type": "paragraph",
@@ -86,31 +125,57 @@
     {
       "type": "code",
       "id": "2985a8ccfe3fc4ac",
-      "text": "storyDecoder : Decoder String\nstoryDecoder =\n  field \"story\" string |> Debug.log \"Decoding story:\"\n"
+      "text": "decodeStory : Decoder Story\ndecodeStory =\n    map3 Story\n        (field \"type\" string)\n        (field \"id\" string)\n        (field \"text\" string)"
+    },
+    {
+      "type": "paragraph",
+      "id": "5e4ec35e995a34c8",
+      "text": "decodeStory decodes a story object."
+    },
+    {
+      "type": "code",
+      "id": "322f037267a41acc",
+      "text": "decodeStoryEdit : Decoder Journal\ndecodeStoryEdit =\n    map4 Journal\n        (field \"type\" string)\n        (field \"id\" string)\n        (field \"item\" decodeJournalItem)\n        (field \"date\" int)\n\n\ndecodeJournalItem : Decoder Item\ndecodeJournalItem =\n    map3 Item\n        (field \"type\" string)\n        (field \"id\" string)\n        (field \"text\" string)"
+    },
+    {
+      "type": "paragraph",
+      "id": "8a640fbd24095cca",
+      "text": "decodeStoryEdit decodes a journal object, and decodeJournalItem decodes a (story) item object within a journal."
     },
     {
       "type": "paragraph",
       "id": "f07fe55815d6d2e4",
-      "text": "We added some debug code to log the JSON content to the console in case of a BadBody error."
+      "text": "Regarding the GotPage Err message, we added some debug code to log the JSON content to the console in case of a BadBody error. [⇒ [[Decoding JSON HTTP Responses]], The BadBody Error]"
+    },
+    {
+      "type": "paragraph",
+      "id": "b8430225940b3f63",
+      "text": "The Http.BadBody case is used to handle the scenario where the HTTP request returns a response with a bad or unexpected body content. This case is triggered when the HTTP response body cannot be successfully decoded according to the expected JSON structure."
+    },
+    {
+      "type": "paragraph",
+      "id": "3d2bd88425bc6a13",
+      "text": "Here's how the Http.BadBody case is handled in the code:"
     },
     {
       "type": "code",
       "id": "8cd29697bb76c6cf",
-      "text": "  […]\n\nHttp.BadBody body ->\n                  let\n                    _ = Debug.log \"GotPage JSON:\" body -- Log the JSON content in case of Failure\n                  in\n                  \"Bad Body: \" ++ body\n\n  […]"
-    },
-    {
-      "type": "image",
-      "id": "d2a12b0000f83dca",
-      "text": "Elm Debugger and Console Log",
-      "size": "wide",
-      "width": 419,
-      "height": 250,
-      "url": "/assets/plugins/image/a0bfb9e04de60098b8220176517e9d2c.jpg"
+      "text": "Http.BadBody body ->\n    let\n        _ =\n            Debug.log \"GotPage JSON:\" body\n    in\n    \"Bad Body: \" ++ body\n"
     },
     {
       "type": "paragraph",
       "id": "7a9b3f39f356c467",
-      "text": "In the console log we see the \"Problem with the value at json.story\" message:"
+      "text": "In this case, the body parameter represents the content of the response body. To assist with debugging, the Debug.log function is used to log the content of the response body, printing it to the browser's developer console. This helps in inspecting the received JSON content for troubleshooting purposes.\n\nAfter logging the body content, the code returns a descriptive error message with the body content. This error message will be displayed in the UI when the Failure state is reached.\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "7ce7cc63230c5197",
+      "text": "Note that when handling the Http.BadBody case in this way, it is assumed that the response body is a valid JSON structure, and if it is not, it is considered a \"bad body\". "
+    },
+    {
+      "type": "paragraph",
+      "id": "8730ade22d94f572",
+      "text": "In the console log we saw the message \"Problem with the value in json.story\":"
     },
     {
       "type": "code",
@@ -120,7 +185,7 @@
     {
       "type": "paragraph",
       "id": "1bc7b42df347b9d5",
-      "text": "At the end, we are given an expectation: \"Expecting an OBJECT with a field named `story`\"."
+      "text": "At the end we get an expectation: \"Expecting an OBJECT with a field named `story`\"."
     },
     {
       "type": "pagefold",
@@ -141,6 +206,46 @@
       "type": "paragraph",
       "id": "ec74725a8c564752",
       "text": "How can I export console log […]? [https://stackoverflow.com/questions/64131010/how-can-i-export-console-log-win-elm stackoverflow]"
+    },
+    {
+      "type": "paragraph",
+      "id": "495a91cc03e19115",
+      "text": "Is it possible to conditionally decode certain fields using elm-decode-pipeline [https://stackoverflow.com/questions/41465430/is-it-possible-to-conditionally-decode-certain-fields-using-elm-decode-pipeline stackoverflow]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d9daea0c32320b70",
+      "text": "Conditional JSON decoder with optional fields [https://discourse.elm-lang.org/t/conditional-json-decoder-with-optional-fields/7938/1 discourse], [https://ellie-app.com/fWqhXzzjgCta1 ellie]"
+    },
+    {
+      "type": "paragraph",
+      "id": "c91f0eb6065e8014",
+      "text": "Based on the provided JSON structure for the \"journal\" part of a wiki page, here's how the conditional Elm JSON decoders could look like:"
+    },
+    {
+      "type": "code",
+      "id": "359c54e6cbafb4e0",
+      "text": "import Json.Decode exposing (Decoder, at, string, field, maybe, int, oneOf, succeed)\n\n\ntype alias JournalEntry =\n    { entryType : EntryType\n    , id : String\n    , item : Item\n    , date : Int\n    }\n\n\ntype EntryType\n    = Edit\n    | Add\n    | Move\n\n\ntype alias Item =\n    { itemType : String\n    , id : String\n    , text : String\n    }\n\n\ndecodeJournalEntry : Decoder JournalEntry\ndecodeJournalEntry =\n    let\n        decodeEdit =\n            succeed Edit\n\n        decodeAdd =\n            succeed Add\n\n        decodeMove =\n            succeed Move\n\n        decodeItem =\n            field \"item\" <| Item\n                <$> field \"type\" string\n                <*> field \"id\" string\n                <*> field \"text\" string\n    in\n    field \"type\" string\n        |> andThen decodeEntryType\n        |> andMap2 (field \"id\" string) decodeItem\n        |> andMap2 (field \"date\" int) decodeEntryTypeDetails\n\n\ndecodeEntryType : String -> Decoder EntryType\ndecodeEntryType entryType =\n    case entryType of\n        \"edit\" ->\n            succeed Edit\n\n        \"add\" ->\n            succeed Add\n\n        \"move\" ->\n            succeed Move\n\n        _ ->\n            fail (\"unknown entry type: \" ++ entryType)\n\n\ndecodeEntryTypeDetails : EntryType -> Item -> Int -> Decoder JournalEntry\ndecodeEntryTypeDetails entryType item date =\n    case entryType of\n        Edit ->\n            succeed (JournalEntry Edit item date)\n\n        Add ->\n            andThen (field \"after\" (maybe string)) decodeAddDetails\n                |> map (\\after -> JournalEntry Add { item | after = after } date)\n\n        Move ->\n            field \"order\" (list string)\n                |> map (\\order -> JournalEntry Move { item | order = order } date)\n\n\ndecodeAddDetails : Maybe String -> Decoder (Maybe String)\ndecodeAddDetails maybeAfter =\n    case maybeAfter of\n        Just after ->\n            succeed (Just after)\n\n        Nothing ->\n            succeed Nothing\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "5364f8b30d4accba",
+      "text": "In this example, we define the types JournalEntry, EntryType, and Item to represent the structure of the JSON data. The JournalEntry type has fields for entryType, id, item, and date. The EntryType type represents first only some of the possible entry types: Edit, Add, and Move. The Item type represents the structure of the item field."
+    },
+    {
+      "type": "paragraph",
+      "id": "16628eac656a16a8",
+      "text": "The decodeJournalEntry function is the main decoder for the journal entries. It uses andThen and andMap2 to conditionally decode the entry type and the item details based on the entry type value. The decodeEntryType function decodes the entry type string and returns the appropriate EntryType variant. The decodeEntryTypeDetails function takes the entry type, item, and date and further decodes the entry details based on the entry type. It returns a decoder for the JournalEntry."
+    },
+    {
+      "type": "paragraph",
+      "id": "7f8f2bb200b9fe10",
+      "text": "The decodeAddDetails function is used within decodeEntryTypeDetails to handle the optional \"after\" field in the Add entry type."
+    },
+    {
+      "type": "paragraph",
+      "id": "59107f515379fde7",
+      "text": "Note: The code assumes that you have defined the necessary types (Edit, Add, Move, Item, etc.) in your Elm module.\n\n"
     }
   ],
   "journal": [
@@ -1542,6 +1647,2348 @@
         "text": "Object { \"GotPage JSON\": \"Problem with the value at json.story:\\n\\n    [\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"c0fc5dfa9719f0b8\\\",\\n            \\\"text\\\": \\\"There is a whole section in [[The Official Guide]] about [[Decoder]]s. [https://guide.elm-lang.org/effects/json.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"322b1d9c81270cc8\\\",\\n            \\\"text\\\": \\\"We just saw an example that uses [[HTTP]] to get the content of a book. [https://guide.elm-lang.org/effects/http.html page], [https://github.com/RalfBarkow/vite-elm-dojo/commit/937e8e1d268c07cd050b13c080b4e62138da9ce5 commit]\\\"\\n        },\\n        {\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"bfeaa7d33f192ace\\\",\\n            \\\"text\\\": \\\"Our next example shows how to fetch some JSON data. [https://github.com/RalfBarkow/vite-elm-dojo/commit/1f56043a46aedec6ac099250a1bf72be17d7d5c1 commit]\\\"\\n        },\\n        \n\n  […]      \n\n{\\n            \\\"type\\\": \\\"paragraph\\\",\\n            \\\"id\\\": \\\"ec74725a8c564752\\\",\\n            \\\"text\\\": \\\"How can I export console log […]? [https://stackoverflow.com/questions/64131010/how-can-i-export-console-log-win-elm stackoverflow]\\\"\\n        }\\n    ]\\n\\nExpecting an OBJECT with a field named `story`\" }\nelm-console-debug.js:2:104200\n"
       },
       "date": 1685548370228
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7f7ee9b6188bc97f"
+      },
+      "id": "7f7ee9b6188bc97f",
+      "type": "add",
+      "after": "ec74725a8c564752",
+      "date": 1685549420414
+    },
+    {
+      "id": "7f7ee9b6188bc97f",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "7f7ee9b6188bc97f",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685549434198
+    },
+    {
+      "type": "edit",
+      "id": "7f7ee9b6188bc97f",
+      "item": {
+        "type": "markdown",
+        "id": "7f7ee9b6188bc97f",
+        "text": " The Model type represents the different states of the application. It can be either Failure (indicating an error occurred), Loading (indicating the data is being fetched), or Success (indicating the data was successfully fetched). The Page type alias represents the structure of the JSON data."
+      },
+      "date": 1685549437775
+    },
+    {
+      "type": "edit",
+      "id": "7f7ee9b6188bc97f",
+      "item": {
+        "type": "markdown",
+        "id": "7f7ee9b6188bc97f",
+        "text": "The Model type represents the different states of the application. It can be either Failure (indicating an error occurred), Loading (indicating the data is being fetched), or Success (indicating the data was successfully fetched). The Page type alias represents the structure of the JSON data."
+      },
+      "date": 1685549446444
+    },
+    {
+      "type": "edit",
+      "id": "0e715179f105e597",
+      "item": {
+        "type": "paragraph",
+        "id": "0e715179f105e597",
+        "text": " The Model type represents the different states of the application. It can be either Failure (indicating an error occurred), Loading (indicating the data is being fetched), or Success (indicating the data was successfully fetched). The Page type alias represents the structure of the JSON data."
+      },
+      "date": 1685549452273
+    },
+    {
+      "type": "remove",
+      "id": "7f7ee9b6188bc97f",
+      "date": 1685549453959
+    },
+    {
+      "type": "edit",
+      "id": "0e715179f105e597",
+      "item": {
+        "type": "paragraph",
+        "id": "0e715179f105e597",
+        "text": "The Model type represents the different states of the application. It can be either Failure (indicating an error occurred), Loading (indicating the data is being fetched), or Success (indicating the data was successfully fetched). The Page type alias represents the structure of the JSON data."
+      },
+      "date": 1685549458656
+    },
+    {
+      "type": "edit",
+      "id": "0e715179f105e597",
+      "item": {
+        "type": "paragraph",
+        "id": "0e715179f105e597",
+        "text": "The Model type represents the different states of the application. It can be either Failure (indicating an error occurred), Loading (indicating the data is being fetched), or Success (indicating the data was successfully fetched). "
+      },
+      "date": 1685549480860
+    },
+    {
+      "type": "add",
+      "id": "aa3e41078537d359",
+      "item": {
+        "type": "paragraph",
+        "id": "aa3e41078537d359",
+        "text": "The Page type alias represents the structure of the JSON data."
+      },
+      "after": "0e715179f105e597",
+      "date": 1685549481964
+    },
+    {
+      "id": "bd6e695ba0d7f263",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685549488780
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "beb7be493b27a847"
+      },
+      "id": "beb7be493b27a847",
+      "type": "add",
+      "after": "ec74725a8c564752",
+      "date": 1685549506109
+    },
+    {
+      "id": "beb7be493b27a847",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685549521246
+    },
+    {
+      "type": "edit",
+      "id": "beb7be493b27a847",
+      "item": {
+        "type": "code",
+        "id": "beb7be493b27a847",
+        "text": "type alias Page =\n  { title : String\n  , story : String\n  , journal : String\n  }"
+      },
+      "date": 1685549522785
+    },
+    {
+      "type": "add",
+      "id": "78ed4be415c2ac1e",
+      "item": {
+        "type": "paragraph",
+        "id": "78ed4be415c2ac1e",
+        "text": "As a next step, we could change the type of story from String to Story"
+      },
+      "after": "1bc7b42df347b9d5",
+      "date": 1685549620180
+    },
+    {
+      "type": "edit",
+      "id": "78ed4be415c2ac1e",
+      "item": {
+        "type": "paragraph",
+        "id": "78ed4be415c2ac1e",
+        "text": "As a next step we could change the type of the story from String to Story."
+      },
+      "date": 1685549637765
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "180d020bf9223019"
+      },
+      "id": "180d020bf9223019",
+      "type": "add",
+      "after": "ec74725a8c564752",
+      "date": 1685549667767
+    },
+    {
+      "id": "180d020bf9223019",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685549674941
+    },
+    {
+      "type": "edit",
+      "id": "180d020bf9223019",
+      "item": {
+        "type": "code",
+        "id": "180d020bf9223019",
+        "text": "type alias Page =\n  { title : String\n  , story : Story\n  , journal : String\n  }"
+      },
+      "date": 1685549682399
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "221bdd503ed0e750"
+      },
+      "id": "221bdd503ed0e750",
+      "type": "add",
+      "after": "ec74725a8c564752",
+      "date": 1685549758275
+    },
+    {
+      "id": "221bdd503ed0e750",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685549765012
+    },
+    {
+      "type": "edit",
+      "id": "221bdd503ed0e750",
+      "item": {
+        "type": "code",
+        "id": "221bdd503ed0e750",
+        "text": "type alias Story =\n  { type : String\n  , id : String\n  , text : String\n  }"
+      },
+      "date": 1685549767192
+    },
+    {
+      "type": "edit",
+      "id": "221bdd503ed0e750",
+      "item": {
+        "type": "code",
+        "id": "221bdd503ed0e750",
+        "text": "type alias Story =\n  { storyType : String\n  , storyId : String\n  , storyText : String\n  }"
+      },
+      "date": 1685549859707
+    },
+    {
+      "type": "edit",
+      "id": "221bdd503ed0e750",
+      "item": {
+        "type": "code",
+        "id": "221bdd503ed0e750",
+        "text": "type alias Story =\n  { type : String\n  , id : String\n  , text : String\n  }"
+      },
+      "date": 1685549933903
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dd0547de08c01eef"
+      },
+      "id": "dd0547de08c01eef",
+      "type": "add",
+      "after": "ec74725a8c564752",
+      "date": 1685549954011
+    },
+    {
+      "id": "dd0547de08c01eef",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685549956276
+    },
+    {
+      "type": "edit",
+      "id": "dd0547de08c01eef",
+      "item": {
+        "type": "paragraph",
+        "id": "dd0547de08c01eef",
+        "text": "Gives us"
+      },
+      "date": 1685549962194
+    },
+    {
+      "type": "edit",
+      "id": "dd0547de08c01eef",
+      "item": {
+        "type": "paragraph",
+        "id": "dd0547de08c01eef",
+        "text": "Gives us a"
+      },
+      "date": 1685549965806
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9eb29a404cfed936"
+      },
+      "id": "9eb29a404cfed936",
+      "type": "add",
+      "after": "ec74725a8c564752",
+      "date": 1685549968658
+    },
+    {
+      "id": "9eb29a404cfed936",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "9eb29a404cfed936",
+        "dd0547de08c01eef",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685549979766
+    },
+    {
+      "id": "dd0547de08c01eef",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685549981024
+    },
+    {
+      "type": "edit",
+      "id": "9eb29a404cfed936",
+      "item": {
+        "type": "code",
+        "id": "9eb29a404cfed936",
+        "text": "Compilation failed\nCompiling ...-- RESERVED WORD -------------------------------------------------- src/Main.elm\n\nI just started parsing a record type, but I got stuck on this field name:\n\n41|   { type : String\n        ^^^^\nIt looks like you are trying to use `type` as a field name, but that is a\nreserved word. Try using a different name!\n\n\nDetected problems in 1 module."
+      },
+      "date": 1685549982413
+    },
+    {
+      "type": "edit",
+      "id": "dd0547de08c01eef",
+      "item": {
+        "type": "paragraph",
+        "id": "dd0547de08c01eef",
+        "text": "Gives us a compilation error:"
+      },
+      "date": 1685549991298
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b8d89b599fec9139"
+      },
+      "id": "b8d89b599fec9139",
+      "type": "add",
+      "after": "ec74725a8c564752",
+      "date": 1685550016901
+    },
+    {
+      "type": "edit",
+      "id": "b8d89b599fec9139",
+      "item": {
+        "type": "code",
+        "id": "b8d89b599fec9139",
+        "text": " type : String"
+      },
+      "date": 1685550027774
+    },
+    {
+      "type": "edit",
+      "id": "b8d89b599fec9139",
+      "item": {
+        "type": "code",
+        "id": "b8d89b599fec9139",
+        "text": "type alias Story =\n  { typeOfStory : String\n  , id : String\n  , text : String\n  }"
+      },
+      "date": 1685550107437
+    },
+    {
+      "id": "b8d89b599fec9139",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "b8d89b599fec9139",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685550110727
+    },
+    {
+      "type": "add",
+      "id": "ecdee2948ac9b113",
+      "item": {
+        "type": "paragraph",
+        "id": "ecdee2948ac9b113",
+        "text": "How about:"
+      },
+      "after": "dd0547de08c01eef",
+      "date": 1685550120810
+    },
+    {
+      "id": "ecdee2948ac9b113",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685550122999
+    },
+    {
+      "type": "edit",
+      "id": "ecdee2948ac9b113",
+      "item": {
+        "type": "paragraph",
+        "id": "ecdee2948ac9b113",
+        "text": "How about this:"
+      },
+      "date": 1685550136484
+    },
+    {
+      "type": "fork",
+      "date": 1685550165228
+    },
+    {
+      "type": "add",
+      "id": "00941a620aa36f1d",
+      "item": {
+        "type": "paragraph",
+        "id": "00941a620aa36f1d",
+        "text": "Gives us a compilation error:"
+      },
+      "after": "ecdee2948ac9b113",
+      "date": 1685550249073
+    },
+    {
+      "id": "00941a620aa36f1d",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685550251082
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7837c987aeca6001"
+      },
+      "id": "7837c987aeca6001",
+      "type": "add",
+      "after": "ec74725a8c564752",
+      "date": 1685550253366
+    },
+    {
+      "id": "7837c987aeca6001",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "7837c987aeca6001",
+        "00941a620aa36f1d",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685550259328
+    },
+    {
+      "id": "00941a620aa36f1d",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "7837c987aeca6001",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685550261790
+    },
+    {
+      "type": "edit",
+      "id": "7837c987aeca6001",
+      "item": {
+        "type": "code",
+        "id": "7837c987aeca6001",
+        "text": "Gives us a compilation error:"
+      },
+      "date": 1685550263079
+    },
+    {
+      "type": "edit",
+      "id": "7837c987aeca6001",
+      "item": {
+        "type": "code",
+        "id": "7837c987aeca6001",
+        "text": "Compilation failed\nCompiling ...-- TYPE MISMATCH -------------------------------------------------- src/Main.elm\n\nThe 3rd argument to `map3` is not what I expect:\n\n150|   map3 Page\n151|     (field \"title\" string)\n152|>    (field \"story\" storyDecoder)\n153|     (field \"journal\" journalDecoder)\n\nThis `field` call produces:\n\n    Decoder String\n\nBut `map3` needs the 3rd argument to be:\n\n    Decoder Story\n\nHint: I always figure out the argument types from left to right. If an argument\nis acceptable, I assume it is “correct” and move on. So the problem may actually\nbe in one of the previous arguments!\n\n\nDetected problems in 1 module."
+      },
+      "date": 1685550273210
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c59a40c65cf3a1e2"
+      },
+      "id": "c59a40c65cf3a1e2",
+      "type": "add",
+      "after": "ec74725a8c564752",
+      "date": 1685551140766
+    },
+    {
+      "id": "c59a40c65cf3a1e2",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "7837c987aeca6001",
+        "c59a40c65cf3a1e2",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685551144794
+    },
+    {
+      "type": "edit",
+      "id": "c59a40c65cf3a1e2",
+      "item": {
+        "type": "paragraph",
+        "id": "c59a40c65cf3a1e2",
+        "text": "https://noredink.github.io/json-to-elm/"
+      },
+      "date": 1685551147922
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9aa5d4a9bc851d1b"
+      },
+      "id": "9aa5d4a9bc851d1b",
+      "type": "add",
+      "after": "ec74725a8c564752",
+      "date": 1685551159719
+    },
+    {
+      "id": "9aa5d4a9bc851d1b",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "7837c987aeca6001",
+        "c59a40c65cf3a1e2",
+        "9aa5d4a9bc851d1b",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685551163693
+    },
+    {
+      "type": "edit",
+      "id": "9aa5d4a9bc851d1b",
+      "item": {
+        "type": "code",
+        "id": "9aa5d4a9bc851d1b",
+        "text": "import Json.Encode\nimport Json.Decode exposing ((:=))\n-- elm-package install --yes circuithub/elm-json-extra\nimport Json.Decode.Extra exposing ((|:))\n\ntype alias Page =\n    { title : String\n    , story : List ComplexType\n    , journal : List ComplexType\n    }\n\ndecodePage : Json.Decode.Decoder Page\ndecodePage =\n    Json.Decode.succeed Page\n        |: (\"title\" := Json.Decode.string)\n        |: (\"story\" := Json.Decode.list decodeComplexType)\n        |: (\"journal\" := Json.Decode.list decodeComplexType)\n\nencodePage : Page -> Json.Encode.Value\nencodePage record =\n    Json.Encode.object\n        [ (\"title\",  Json.Encode.string <| record.title)\n        , (\"story\",  Json.Encode.list <| List.map encodeComplexType <| record.story)\n        , (\"journal\",  Json.Encode.list <| List.map encodeComplexType <| record.journal)\n        ]"
+      },
+      "date": 1685551166721
+    },
+    {
+      "type": "add",
+      "id": "a051e625ee9dd51b",
+      "item": {
+        "type": "paragraph",
+        "id": "a051e625ee9dd51b",
+        "text": "NOTE — this package is not compatible with Elm 0.19.1"
+      },
+      "after": "c59a40c65cf3a1e2",
+      "date": 1685551252520
+    },
+    {
+      "id": "a051e625ee9dd51b",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "d2a12b0000f83dca",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "7837c987aeca6001",
+        "c59a40c65cf3a1e2",
+        "9aa5d4a9bc851d1b",
+        "a051e625ee9dd51b",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752"
+      ],
+      "date": 1685551255616
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "495a91cc03e19115"
+      },
+      "id": "495a91cc03e19115",
+      "type": "add",
+      "after": "ec74725a8c564752",
+      "date": 1685569342796
+    },
+    {
+      "type": "edit",
+      "id": "495a91cc03e19115",
+      "item": {
+        "type": "paragraph",
+        "id": "495a91cc03e19115",
+        "text": "Is it possible to conditionally decode certain fields using elm-decode-pipeline"
+      },
+      "date": 1685569348159
+    },
+    {
+      "type": "edit",
+      "id": "495a91cc03e19115",
+      "item": {
+        "type": "paragraph",
+        "id": "495a91cc03e19115",
+        "text": "Is it possible to conditionally decode certain fields using elm-decode-pipeline [https://stackoverflow.com/questions/41465430/is-it-possible-to-conditionally-decode-certain-fields-using-elm-decode-pipeline stackoverflow]"
+      },
+      "date": 1685569363631
+    },
+    {
+      "type": "add",
+      "id": "d9daea0c32320b70",
+      "item": {
+        "type": "paragraph",
+        "id": "d9daea0c32320b70",
+        "text": "Conditional JSON decoder with optional fields"
+      },
+      "after": "495a91cc03e19115",
+      "date": 1685569424657
+    },
+    {
+      "type": "edit",
+      "id": "d9daea0c32320b70",
+      "item": {
+        "type": "paragraph",
+        "id": "d9daea0c32320b70",
+        "text": "Conditional JSON decoder with optional fields [https://discourse.elm-lang.org/t/conditional-json-decoder-with-optional-fields/7938/1 discourse]"
+      },
+      "date": 1685569440085
+    },
+    {
+      "type": "edit",
+      "id": "d9daea0c32320b70",
+      "item": {
+        "type": "paragraph",
+        "id": "d9daea0c32320b70",
+        "text": "Conditional JSON decoder with optional fields [https://discourse.elm-lang.org/t/conditional-json-decoder-with-optional-fields/7938/1 discourse], [https://ellie-app.com/fWqhXzzjgCta1 ellie]"
+      },
+      "date": 1685569576861
+    },
+    {
+      "id": "d2a12b0000f83dca",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "d2a12b0000f83dca",
+        "1b67b231aa8dca1a",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "7837c987aeca6001",
+        "c59a40c65cf3a1e2",
+        "9aa5d4a9bc851d1b",
+        "a051e625ee9dd51b",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752",
+        "495a91cc03e19115",
+        "d9daea0c32320b70"
+      ],
+      "date": 1685605342428
+    },
+    {
+      "type": "edit",
+      "id": "d2a12b0000f83dca",
+      "item": {
+        "type": "image",
+        "id": "d2a12b0000f83dca",
+        "text": "Wiki Page JSON View, Elm Debugger and Console Log",
+        "size": "wide",
+        "width": 419,
+        "height": 250,
+        "url": "/assets/plugins/image/a0bfb9e04de60098b8220176517e9d2c.jpg"
+      },
+      "date": 1685605366176
+    },
+    {
+      "id": "0e715179f105e597",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "d2a12b0000f83dca",
+        "0e715179f105e597",
+        "1b67b231aa8dca1a",
+        "bd6e695ba0d7f263",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "7837c987aeca6001",
+        "c59a40c65cf3a1e2",
+        "9aa5d4a9bc851d1b",
+        "a051e625ee9dd51b",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752",
+        "495a91cc03e19115",
+        "d9daea0c32320b70"
+      ],
+      "date": 1685605419348
+    },
+    {
+      "id": "bd6e695ba0d7f263",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "d2a12b0000f83dca",
+        "bd6e695ba0d7f263",
+        "0e715179f105e597",
+        "1b67b231aa8dca1a",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "7837c987aeca6001",
+        "c59a40c65cf3a1e2",
+        "9aa5d4a9bc851d1b",
+        "a051e625ee9dd51b",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752",
+        "495a91cc03e19115",
+        "d9daea0c32320b70"
+      ],
+      "date": 1685605428961
+    },
+    {
+      "id": "0e715179f105e597",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "d2a12b0000f83dca",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "1b67b231aa8dca1a",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "7837c987aeca6001",
+        "c59a40c65cf3a1e2",
+        "9aa5d4a9bc851d1b",
+        "a051e625ee9dd51b",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752",
+        "495a91cc03e19115",
+        "d9daea0c32320b70"
+      ],
+      "date": 1685605434287
+    },
+    {
+      "type": "edit",
+      "id": "0e715179f105e597",
+      "item": {
+        "type": "paragraph",
+        "id": "0e715179f105e597",
+        "text": "The Model type represents the different states of the application. "
+      },
+      "date": 1685605436746
+    },
+    {
+      "type": "add",
+      "id": "8766458db1e786d8",
+      "item": {
+        "type": "paragraph",
+        "id": "8766458db1e786d8",
+        "text": "It can be either Failure (indicating an error occurred), Loading (indicating the data is being fetched), or Success (indicating the data was successfully fetched). "
+      },
+      "after": "0e715179f105e597",
+      "date": 1685605437929
+    },
+    {
+      "id": "bd6e695ba0d7f263",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "d2a12b0000f83dca",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "8766458db1e786d8",
+        "1b67b231aa8dca1a",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "7837c987aeca6001",
+        "c59a40c65cf3a1e2",
+        "9aa5d4a9bc851d1b",
+        "a051e625ee9dd51b",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752",
+        "495a91cc03e19115",
+        "d9daea0c32320b70"
+      ],
+      "date": 1685605439612
+    },
+    {
+      "type": "edit",
+      "id": "30f472df4373c18c",
+      "item": {
+        "type": "paragraph",
+        "id": "30f472df4373c18c",
+        "text": "We see \"I could not load the Wiki Page JSON for some reason.\" and consult the [[Elm Debugger]]."
+      },
+      "date": 1685605452716
+    },
+    {
+      "type": "edit",
+      "id": "8766458db1e786d8",
+      "item": {
+        "type": "paragraph",
+        "id": "8766458db1e786d8",
+        "text": "It can be either Failure (indicating an error occurred), Loading (indicating the data – a Page – is being fetched), or Success (indicating the data was successfully fetched). "
+      },
+      "date": 1685605515062
+    },
+    {
+      "type": "edit",
+      "id": "8766458db1e786d8",
+      "item": {
+        "type": "paragraph",
+        "id": "8766458db1e786d8",
+        "text": "It can be either Failure (indicating an error occurred), Loading (indicating the data is being fetched), or Success (indicating the data – a Page – was successfully fetched). "
+      },
+      "date": 1685605533160
+    },
+    {
+      "id": "1b67b231aa8dca1a",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "d2a12b0000f83dca",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "8766458db1e786d8",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1c3724d3de000f5b",
+        "1b67b231aa8dca1a",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "7837c987aeca6001",
+        "c59a40c65cf3a1e2",
+        "9aa5d4a9bc851d1b",
+        "a051e625ee9dd51b",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752",
+        "495a91cc03e19115",
+        "d9daea0c32320b70"
+      ],
+      "date": 1685605570857
+    },
+    {
+      "id": "1b67b231aa8dca1a",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "d2a12b0000f83dca",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "8766458db1e786d8",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "1b67b231aa8dca1a",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "7837c987aeca6001",
+        "c59a40c65cf3a1e2",
+        "9aa5d4a9bc851d1b",
+        "a051e625ee9dd51b",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752",
+        "495a91cc03e19115",
+        "d9daea0c32320b70"
+      ],
+      "date": 1685605584930
+    },
+    {
+      "type": "edit",
+      "id": "6075468194398c14",
+      "item": {
+        "type": "code",
+        "id": "6075468194398c14",
+        "text": "decodePage : Decoder Page\ndecodePage =\n    map3 Page\n        (field \"title\" string)\n        (field \"story\" (list decodeStory))\n        (field \"journal\" (list decodeJournal))"
+      },
+      "date": 1685605647884
+    },
+    {
+      "type": "edit",
+      "id": "8766458db1e786d8",
+      "item": {
+        "type": "paragraph",
+        "id": "8766458db1e786d8",
+        "text": "It can be Failure when the data retrieval fails, Loading when the data is being fetched, or Success when the data – a Page – is successfully retrieved."
+      },
+      "date": 1685605737008
+    },
+    {
+      "type": "edit",
+      "id": "8766458db1e786d8",
+      "item": {
+        "type": "paragraph",
+        "id": "8766458db1e786d8",
+        "text": "It can be Failure if the data retrieval fails, Loading if the data is retrieved, or Success if the data, i.e. a Page was successfully retrieved."
+      },
+      "date": 1685605815377
+    },
+    {
+      "type": "edit",
+      "id": "aa3e41078537d359",
+      "item": {
+        "type": "paragraph",
+        "id": "aa3e41078537d359",
+        "text": "The Page type represents the structure of the retrieved JSON data. "
+      },
+      "date": 1685605875685
+    },
+    {
+      "type": "add",
+      "id": "91efd4b30f1fe597",
+      "item": {
+        "type": "paragraph",
+        "id": "91efd4b30f1fe597",
+        "text": "It contains a title field of type String, a story field containing a list of Story objects, and a journal field containing a list of Journal objects"
+      },
+      "after": "aa3e41078537d359",
+      "date": 1685605876699
+    },
+    {
+      "id": "beb7be493b27a847",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "d2a12b0000f83dca",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "8766458db1e786d8",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "91efd4b30f1fe597",
+        "1b67b231aa8dca1a",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "6075468194398c14",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "7837c987aeca6001",
+        "c59a40c65cf3a1e2",
+        "9aa5d4a9bc851d1b",
+        "a051e625ee9dd51b",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752",
+        "495a91cc03e19115",
+        "d9daea0c32320b70"
+      ],
+      "date": 1685605878326
+    },
+    {
+      "type": "edit",
+      "id": "beb7be493b27a847",
+      "item": {
+        "type": "code",
+        "id": "beb7be493b27a847",
+        "text": "type alias Page =\n    { title : String\n    , story : List Story\n    , journal : List Journal\n    }"
+      },
+      "date": 1685605907091
+    },
+    {
+      "type": "edit",
+      "id": "e02b0e71cb9bec74",
+      "item": {
+        "type": "paragraph",
+        "id": "e02b0e71cb9bec74",
+        "text": "We modify the example to get a simple Elm application that fetches JSON data from a specific URL – a [[Wiki Page JSON]] instead of a random quote – and displays it on a webpage. [https://github.com/RalfBarkow/vite-elm-dojo/commit/c1588c8f7342bfe07d2b864a92f4177adc83bfe2 commit]"
+      },
+      "date": 1685606005601
+    },
+    {
+      "type": "edit",
+      "id": "258facc6b1726c62",
+      "item": {
+        "type": "paragraph",
+        "id": "258facc6b1726c62",
+        "text": "We see that our problem was related to the story, i.e. the value at json.story."
+      },
+      "date": 1685606099497
+    },
+    {
+      "type": "edit",
+      "id": "2985a8ccfe3fc4ac",
+      "item": {
+        "type": "code",
+        "id": "2985a8ccfe3fc4ac",
+        "text": "decodeStory =\n    map3 Story\n        (field \"type\" string)\n        (field \"id\" string)\n        (field \"text\" string)"
+      },
+      "date": 1685606155148
+    },
+    {
+      "type": "edit",
+      "id": "2985a8ccfe3fc4ac",
+      "item": {
+        "type": "code",
+        "id": "2985a8ccfe3fc4ac",
+        "text": "decodeStory : Decoder Story\ndecodeStory =\n    map3 Story\n        (field \"type\" string)\n        (field \"id\" string)\n        (field \"text\" string)"
+      },
+      "date": 1685606163529
+    },
+    {
+      "type": "edit",
+      "id": "258facc6b1726c62",
+      "item": {
+        "type": "paragraph",
+        "id": "258facc6b1726c62",
+        "text": "We see that our problem is related to the story, i.e. the value at json.story."
+      },
+      "date": 1685606325986
+    },
+    {
+      "type": "edit",
+      "id": "98959dbeefcb584b",
+      "item": {
+        "type": "paragraph",
+        "id": "98959dbeefcb584b",
+        "text": "The code includes various JSON decoders using the Json.Decode module. These decoders are used to decode the JSON response into Elm types. decodePage decodes the JSON response into a Page object, decodeStory decodes a story object, decodeJournal decodes a journal object, and decodeJournalItem decodes an item object within a journal."
+      },
+      "date": 1685606456319
+    },
+    {
+      "type": "add",
+      "id": "0ced0100b0b3cd94",
+      "item": {
+        "type": "paragraph",
+        "id": "0ced0100b0b3cd94",
+        "text": "Our page decoder looks like this:"
+      },
+      "after": "98959dbeefcb584b",
+      "date": 1685606456961
+    },
+    {
+      "type": "edit",
+      "id": "98959dbeefcb584b",
+      "item": {
+        "type": "paragraph",
+        "id": "98959dbeefcb584b",
+        "text": "The code includes various JSON decoders using the Json.Decode module. These decoders are used to decode the JSON response into Elm types. "
+      },
+      "date": 1685606485968
+    },
+    {
+      "type": "add",
+      "id": "b4e3a98f693466e6",
+      "item": {
+        "type": "paragraph",
+        "id": "b4e3a98f693466e6",
+        "text": "decodePage decodes the JSON response into a Page object, decodeStory decodes a story object, decodeJournal decodes a journal object, and decodeJournalItem decodes an item object within a journal."
+      },
+      "after": "98959dbeefcb584b",
+      "date": 1685606488521
+    },
+    {
+      "id": "b4e3a98f693466e6",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "d2a12b0000f83dca",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "8766458db1e786d8",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "91efd4b30f1fe597",
+        "1b67b231aa8dca1a",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "0ced0100b0b3cd94",
+        "6075468194398c14",
+        "b4e3a98f693466e6",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "7837c987aeca6001",
+        "c59a40c65cf3a1e2",
+        "9aa5d4a9bc851d1b",
+        "a051e625ee9dd51b",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752",
+        "495a91cc03e19115",
+        "d9daea0c32320b70"
+      ],
+      "date": 1685606490819
+    },
+    {
+      "type": "edit",
+      "id": "b4e3a98f693466e6",
+      "item": {
+        "type": "paragraph",
+        "id": "b4e3a98f693466e6",
+        "text": "decodePage decodes the JSON response into a Page object."
+      },
+      "date": 1685606500605
+    },
+    {
+      "type": "add",
+      "id": "5e4ec35e995a34c8",
+      "item": {
+        "type": "paragraph",
+        "id": "5e4ec35e995a34c8",
+        "text": "decodeStory decodes a story object, decodeJournal decodes a journal object, and decodeJournalItem decodes an item object within a journal."
+      },
+      "after": "b4e3a98f693466e6",
+      "date": 1685606503156
+    },
+    {
+      "id": "5e4ec35e995a34c8",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "d2a12b0000f83dca",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "8766458db1e786d8",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "91efd4b30f1fe597",
+        "1b67b231aa8dca1a",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "0ced0100b0b3cd94",
+        "6075468194398c14",
+        "b4e3a98f693466e6",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "5e4ec35e995a34c8",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "7837c987aeca6001",
+        "c59a40c65cf3a1e2",
+        "9aa5d4a9bc851d1b",
+        "a051e625ee9dd51b",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752",
+        "495a91cc03e19115",
+        "d9daea0c32320b70"
+      ],
+      "date": 1685606507215
+    },
+    {
+      "type": "edit",
+      "id": "5e4ec35e995a34c8",
+      "item": {
+        "type": "paragraph",
+        "id": "5e4ec35e995a34c8",
+        "text": "decodeStory decodes a story object."
+      },
+      "date": 1685606543978
+    },
+    {
+      "type": "add",
+      "id": "8a640fbd24095cca",
+      "item": {
+        "type": "paragraph",
+        "id": "8a640fbd24095cca",
+        "text": "decodeJournal decodes a journal object, and decodeJournalItem decodes an item object within a journal."
+      },
+      "after": "5e4ec35e995a34c8",
+      "date": 1685606556595
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "322f037267a41acc"
+      },
+      "id": "322f037267a41acc",
+      "type": "add",
+      "after": "d9daea0c32320b70",
+      "date": 1685606585632
+    },
+    {
+      "id": "322f037267a41acc",
+      "type": "move",
+      "order": [
+        "c0fc5dfa9719f0b8",
+        "322b1d9c81270cc8",
+        "bfeaa7d33f192ace",
+        "e02b0e71cb9bec74",
+        "30f472df4373c18c",
+        "d2a12b0000f83dca",
+        "0e715179f105e597",
+        "bd6e695ba0d7f263",
+        "8766458db1e786d8",
+        "aa3e41078537d359",
+        "beb7be493b27a847",
+        "91efd4b30f1fe597",
+        "1b67b231aa8dca1a",
+        "1c3724d3de000f5b",
+        "a1d5cbc4680b244c",
+        "258facc6b1726c62",
+        "de87d4ede96f4cd4",
+        "98959dbeefcb584b",
+        "0ced0100b0b3cd94",
+        "6075468194398c14",
+        "b4e3a98f693466e6",
+        "f43da6200453844f",
+        "2985a8ccfe3fc4ac",
+        "5e4ec35e995a34c8",
+        "322f037267a41acc",
+        "8a640fbd24095cca",
+        "f07fe55815d6d2e4",
+        "8cd29697bb76c6cf",
+        "7a9b3f39f356c467",
+        "781cc7848f91546f",
+        "1bc7b42df347b9d5",
+        "78ed4be415c2ac1e",
+        "180d020bf9223019",
+        "221bdd503ed0e750",
+        "dd0547de08c01eef",
+        "9eb29a404cfed936",
+        "ecdee2948ac9b113",
+        "b8d89b599fec9139",
+        "00941a620aa36f1d",
+        "7837c987aeca6001",
+        "c59a40c65cf3a1e2",
+        "9aa5d4a9bc851d1b",
+        "a051e625ee9dd51b",
+        "2b55698007558763",
+        "38bbcf6223cf0053",
+        "fdd8791fe8a52506",
+        "ec74725a8c564752",
+        "495a91cc03e19115",
+        "d9daea0c32320b70"
+      ],
+      "date": 1685606609575
+    },
+    {
+      "type": "edit",
+      "id": "322f037267a41acc",
+      "item": {
+        "type": "code",
+        "id": "322f037267a41acc",
+        "text": "decodeJournal : Decoder Journal\ndecodeJournal =\n    map4 Journal\n        (field \"type\" string)\n        (field \"id\" string)\n        (field \"item\" decodeJournalItem)\n        (field \"date\" int)\n\n\ndecodeJournalItem : Decoder Item\ndecodeJournalItem =\n    map3 Item\n        (field \"type\" string)\n        (field \"id\" string)\n        (field \"text\" string)"
+      },
+      "date": 1685606611925
+    },
+    {
+      "type": "edit",
+      "id": "f07fe55815d6d2e4",
+      "item": {
+        "type": "paragraph",
+        "id": "f07fe55815d6d2e4",
+        "text": "Regarding the GotPage Err message, we added some debug code to log the JSON content to the console in case of a BadBody error."
+      },
+      "date": 1685606715682
+    },
+    {
+      "type": "add",
+      "id": "b8430225940b3f63",
+      "item": {
+        "type": "paragraph",
+        "id": "b8430225940b3f63",
+        "text": "The Http.BadBody case is used to handle the scenario where the HTTP request returns a response with a bad or unexpected body content. This case is triggered when the HTTP response body cannot be successfully decoded according to the expected JSON structure."
+      },
+      "after": "f07fe55815d6d2e4",
+      "date": 1685606850268
+    },
+    {
+      "type": "add",
+      "id": "3d2bd88425bc6a13",
+      "item": {
+        "type": "paragraph",
+        "id": "3d2bd88425bc6a13",
+        "text": "Here's how the Http.BadBody case is handled in the code:"
+      },
+      "after": "b8430225940b3f63",
+      "date": 1685606887796
+    },
+    {
+      "type": "edit",
+      "id": "8cd29697bb76c6cf",
+      "item": {
+        "type": "code",
+        "id": "8cd29697bb76c6cf",
+        "text": "Http.BadBody body ->\n    let\n        _ =\n            Debug.log \"GotPage JSON:\" body\n    in\n    \"Bad Body: \" ++ body\n"
+      },
+      "date": 1685606895794
+    },
+    {
+      "type": "edit",
+      "id": "7a9b3f39f356c467",
+      "item": {
+        "type": "paragraph",
+        "id": "7a9b3f39f356c467",
+        "text": "In this case, the body parameter represents the content of the response body. To assist with debugging, the Debug.log function is used to log the content of the response body, printing it to the browser's developer console. This helps in inspecting the received JSON content for troubleshooting purposes.\n\nAfter logging the body content, the code returns a descriptive error message by concatenating the string \"Bad Body: \" with the body content. This error message will be displayed in the UI when the Failure state is reached.\n\nIt's important to note that handling the Http.BadBody case in this manner assumes that the response body should be a valid JSON structure, and if it's not, it's considered a \"bad body.\" "
+      },
+      "date": 1685606970320
+    },
+    {
+      "type": "add",
+      "id": "8730ade22d94f572",
+      "item": {
+        "type": "paragraph",
+        "id": "8730ade22d94f572",
+        "text": "In the console log we see the \"Problem with the value at json.story\" message:"
+      },
+      "after": "7a9b3f39f356c467",
+      "date": 1685606970824
+    },
+    {
+      "type": "edit",
+      "id": "7a9b3f39f356c467",
+      "item": {
+        "type": "paragraph",
+        "id": "7a9b3f39f356c467",
+        "text": "In this case, the body parameter represents the content of the response body. To assist with debugging, the Debug.log function is used to log the content of the response body, printing it to the browser's developer console. This helps in inspecting the received JSON content for troubleshooting purposes.\n\nAfter logging the body content, the code returns a descriptive error message with the body content. This error message will be displayed in the UI when the Failure state is reached.\n\nIt's important to note that handling the Http.BadBody case in this manner assumes that the response body should be a valid JSON structure, and if it's not, it's considered a \"bad body.\" "
+      },
+      "date": 1685607084557
+    },
+    {
+      "type": "edit",
+      "id": "7a9b3f39f356c467",
+      "item": {
+        "type": "paragraph",
+        "id": "7a9b3f39f356c467",
+        "text": "In this case, the body parameter represents the content of the response body. To assist with debugging, the Debug.log function is used to log the content of the response body, printing it to the browser's developer console. This helps in inspecting the received JSON content for troubleshooting purposes.\n\nAfter logging the body content, the code returns a descriptive error message with the body content. This error message will be displayed in the UI when the Failure state is reached.\n\n"
+      },
+      "date": 1685607149903
+    },
+    {
+      "type": "add",
+      "id": "7ce7cc63230c5197",
+      "item": {
+        "type": "paragraph",
+        "id": "7ce7cc63230c5197",
+        "text": "It's important to note that handling the Http.BadBody case in this manner assumes that the response body should be a valid JSON structure, and if it's not, it's considered a \"bad body.\" "
+      },
+      "after": "7a9b3f39f356c467",
+      "date": 1685607151901
+    },
+    {
+      "type": "edit",
+      "id": "7ce7cc63230c5197",
+      "item": {
+        "type": "paragraph",
+        "id": "7ce7cc63230c5197",
+        "text": "Note that when handling the Http.BadBody case in this way, it is assumed that the response body is a valid JSON structure, and if it is not, it is considered a \"bad body\". "
+      },
+      "date": 1685607184830
+    },
+    {
+      "type": "remove",
+      "id": "a051e625ee9dd51b",
+      "date": 1685607237837
+    },
+    {
+      "type": "remove",
+      "id": "9aa5d4a9bc851d1b",
+      "date": 1685607239269
+    },
+    {
+      "type": "remove",
+      "id": "7837c987aeca6001",
+      "date": 1685607241487
+    },
+    {
+      "type": "remove",
+      "id": "00941a620aa36f1d",
+      "date": 1685607245230
+    },
+    {
+      "type": "remove",
+      "id": "c59a40c65cf3a1e2",
+      "date": 1685607246576
+    },
+    {
+      "type": "remove",
+      "id": "b8d89b599fec9139",
+      "date": 1685607248019
+    },
+    {
+      "type": "remove",
+      "id": "ecdee2948ac9b113",
+      "date": 1685607253871
+    },
+    {
+      "type": "remove",
+      "id": "9eb29a404cfed936",
+      "date": 1685607256613
+    },
+    {
+      "type": "remove",
+      "id": "dd0547de08c01eef",
+      "date": 1685607280056
+    },
+    {
+      "type": "remove",
+      "id": "221bdd503ed0e750",
+      "date": 1685607281897
+    },
+    {
+      "type": "remove",
+      "id": "180d020bf9223019",
+      "date": 1685607284003
+    },
+    {
+      "type": "remove",
+      "id": "78ed4be415c2ac1e",
+      "date": 1685607286136
+    },
+    {
+      "type": "edit",
+      "id": "8730ade22d94f572",
+      "item": {
+        "type": "paragraph",
+        "id": "8730ade22d94f572",
+        "text": "In the console log we saw the message \"Problem with the value in json.story\":"
+      },
+      "date": 1685607349199
+    },
+    {
+      "type": "edit",
+      "id": "1bc7b42df347b9d5",
+      "item": {
+        "type": "paragraph",
+        "id": "1bc7b42df347b9d5",
+        "text": "At the end we get an expectation: \"Expecting an OBJECT with a field named `story`\"."
+      },
+      "date": 1685607376560
+    },
+    {
+      "type": "edit",
+      "id": "e02b0e71cb9bec74",
+      "item": {
+        "type": "paragraph",
+        "id": "e02b0e71cb9bec74",
+        "text": "We modify the example to get a simple [[Elm]] application that fetches JSON data from a specific URL – a [[Wiki Page JSON]] instead of a random quote – and displays it on a webpage. [https://github.com/RalfBarkow/vite-elm-dojo/commit/c1588c8f7342bfe07d2b864a92f4177adc83bfe2 commit]"
+      },
+      "date": 1685607427040
+    },
+    {
+      "type": "edit",
+      "id": "f07fe55815d6d2e4",
+      "item": {
+        "type": "paragraph",
+        "id": "f07fe55815d6d2e4",
+        "text": "Regarding the GotPage Err message, we added some debug code to log the JSON content to the console in case of a BadBody error. [⇒ [[Decoding JSON HTTP Responses]]]"
+      },
+      "date": 1685609924996
+    },
+    {
+      "type": "edit",
+      "id": "f07fe55815d6d2e4",
+      "item": {
+        "type": "paragraph",
+        "id": "f07fe55815d6d2e4",
+        "text": "Regarding the GotPage Err message, we added some debug code to log the JSON content to the console in case of a BadBody error. [⇒ [[Decoding JSON HTTP Responses]], The BadBody Error]"
+      },
+      "date": 1685609942713
+    },
+    {
+      "type": "edit",
+      "id": "bd6e695ba0d7f263",
+      "item": {
+        "type": "code",
+        "id": "bd6e695ba0d7f263",
+        "text": "type Model\n    = Loading\n    | Success Page\n    | Failure String\n"
+      },
+      "date": 1685612629591
+    },
+    {
+      "type": "edit",
+      "id": "8766458db1e786d8",
+      "item": {
+        "type": "paragraph",
+        "id": "8766458db1e786d8",
+        "text": "It can be Loading if the data is retrieved, Success if the data, i.e. a Page was successfully retrieved, or Failure if the data retrieval fails."
+      },
+      "date": 1685612682337
+    },
+    {
+      "type": "edit",
+      "id": "6075468194398c14",
+      "item": {
+        "type": "code",
+        "id": "6075468194398c14",
+        "text": "decodePage : Decoder Page\ndecodePage =\n    map3 Page\n        (field \"title\" string)\n        (field \"story\" (list decodeStory))\n        (field \"journal\" (list decodeStoryEdit))"
+      },
+      "date": 1685613223828
+    },
+    {
+      "type": "edit",
+      "id": "322f037267a41acc",
+      "item": {
+        "type": "code",
+        "id": "322f037267a41acc",
+        "text": "decodeStoryEdit : Decoder Journal\ndecodeStoryEdit =\n    map4 Journal\n        (field \"type\" string)\n        (field \"id\" string)\n        (field \"item\" decodeJournalItem)\n        (field \"date\" int)\n\n\ndecodeJournalItem : Decoder Item\ndecodeJournalItem =\n    map3 Item\n        (field \"type\" string)\n        (field \"id\" string)\n        (field \"text\" string)"
+      },
+      "date": 1685613462203
+    },
+    {
+      "type": "edit",
+      "id": "8a640fbd24095cca",
+      "item": {
+        "type": "paragraph",
+        "id": "8a640fbd24095cca",
+        "text": "decodeStoryEdit decodes a journal object, and decodeJournalItem decodes an item object within a journal."
+      },
+      "date": 1685613478732
+    },
+    {
+      "type": "edit",
+      "id": "8a640fbd24095cca",
+      "item": {
+        "type": "paragraph",
+        "id": "8a640fbd24095cca",
+        "text": "decodeStoryEdit decodes a journal object, and decodeJournalItem decodes an (story) item object within a journal."
+      },
+      "date": 1685613521916
+    },
+    {
+      "type": "edit",
+      "id": "8a640fbd24095cca",
+      "item": {
+        "type": "paragraph",
+        "id": "8a640fbd24095cca",
+        "text": "decodeStoryEdit decodes a journal object, and decodeJournalItem decodes a (story) item object within a journal."
+      },
+      "date": 1685613538793
+    },
+    {
+      "type": "edit",
+      "id": "bd6e695ba0d7f263",
+      "item": {
+        "type": "code",
+        "id": "bd6e695ba0d7f263",
+        "text": "type Model\n    = Loading\n    | Success Wiki.Page\n    | Failure String"
+      },
+      "date": 1685695860093
+    },
+    {
+      "type": "edit",
+      "id": "8766458db1e786d8",
+      "item": {
+        "type": "paragraph",
+        "id": "8766458db1e786d8",
+        "text": "It can be Loading if the data is retrieved, Success if the data, i.e. a [[Page]] was successfully retrieved, or Failure if the data retrieval fails."
+      },
+      "date": 1685695892430
+    },
+    {
+      "type": "edit",
+      "id": "0ced0100b0b3cd94",
+      "item": {
+        "type": "paragraph",
+        "id": "0ced0100b0b3cd94",
+        "text": "Our page decoder initially looks like this:"
+      },
+      "date": 1685696843512
+    },
+    {
+      "type": "add",
+      "id": "c91f0eb6065e8014",
+      "item": {
+        "type": "paragraph",
+        "id": "c91f0eb6065e8014",
+        "text": "Based on the provided JSON structure for the \"journal\" part of a wiki page, here's how the conditional Elm JSON decoders could look like:"
+      },
+      "after": "d9daea0c32320b70",
+      "date": 1685714209036
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "359c54e6cbafb4e0"
+      },
+      "id": "359c54e6cbafb4e0",
+      "type": "add",
+      "after": "c91f0eb6065e8014",
+      "date": 1685714224551
+    },
+    {
+      "type": "edit",
+      "id": "359c54e6cbafb4e0",
+      "item": {
+        "type": "code",
+        "id": "359c54e6cbafb4e0",
+        "text": "import Json.Decode exposing (Decoder, at, string, field, maybe, int, oneOf, succeed)\n\n\ntype alias JournalEntry =\n    { entryType : EntryType\n    , id : String\n    , item : Item\n    , date : Int\n    }\n\n\ntype EntryType\n    = Edit\n    | Add\n    | Move\n\n\ntype alias Item =\n    { itemType : String\n    , id : String\n    , text : String\n    }\n\n\ndecodeJournalEntry : Decoder JournalEntry\ndecodeJournalEntry =\n    let\n        decodeEdit =\n            succeed Edit\n\n        decodeAdd =\n            succeed Add\n\n        decodeMove =\n            succeed Move\n\n        decodeItem =\n            field \"item\" <| Item\n                <$> field \"type\" string\n                <*> field \"id\" string\n                <*> field \"text\" string\n    in\n    field \"type\" string\n        |> andThen decodeEntryType\n        |> andMap2 (field \"id\" string) decodeItem\n        |> andMap2 (field \"date\" int) decodeEntryTypeDetails\n\n\ndecodeEntryType : String -> Decoder EntryType\ndecodeEntryType entryType =\n    case entryType of\n        \"edit\" ->\n            succeed Edit\n\n        \"add\" ->\n            succeed Add\n\n        \"move\" ->\n            succeed Move\n\n        _ ->\n            fail (\"unknown entry type: \" ++ entryType)\n\n\ndecodeEntryTypeDetails : EntryType -> Item -> Int -> Decoder JournalEntry\ndecodeEntryTypeDetails entryType item date =\n    case entryType of\n        Edit ->\n            succeed (JournalEntry Edit item date)\n\n        Add ->\n            andThen (field \"after\" (maybe string)) decodeAddDetails\n                |> map (\\after -> JournalEntry Add { item | after = after } date)\n\n        Move ->\n            field \"order\" (list string)\n                |> map (\\order -> JournalEntry Move { item | order = order } date)\n\n\ndecodeAddDetails : Maybe String -> Decoder (Maybe String)\ndecodeAddDetails maybeAfter =\n    case maybeAfter of\n        Just after ->\n            succeed (Just after)\n\n        Nothing ->\n            succeed Nothing\n"
+      },
+      "date": 1685714228194
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5364f8b30d4accba"
+      },
+      "id": "5364f8b30d4accba",
+      "type": "add",
+      "after": "359c54e6cbafb4e0",
+      "date": 1685714300093
+    },
+    {
+      "type": "edit",
+      "id": "5364f8b30d4accba",
+      "item": {
+        "type": "paragraph",
+        "id": "5364f8b30d4accba",
+        "text": "In this example, we define the types JournalEntry, EntryType, and Item to represent the structure of the JSON data. The JournalEntry type has fields for entryType, id, item, and date. The EntryType type represents the possible entry types: Edit, Add, and Move. The Item type represents the structure of the item field."
+      },
+      "date": 1685714303125
+    },
+    {
+      "type": "add",
+      "id": "16628eac656a16a8",
+      "item": {
+        "type": "paragraph",
+        "id": "16628eac656a16a8",
+        "text": "The decodeJournalEntry function is the main decoder for the journal entries. It uses andThen and andMap2 to conditionally decode the entry type and the item details based on the entry type value. The decodeEntryType function decodes the entry type string and returns the appropriate EntryType variant. The decodeEntryTypeDetails function takes the entry type, item, and date and further decodes the entry details based on the entry type. It returns a decoder for the JournalEntry."
+      },
+      "after": "5364f8b30d4accba",
+      "date": 1685714367497
+    },
+    {
+      "type": "add",
+      "id": "7f8f2bb200b9fe10",
+      "item": {
+        "type": "paragraph",
+        "id": "7f8f2bb200b9fe10",
+        "text": "The decodeAddDetails function is used within decodeEntryTypeDetails to handle the optional \"after\" field in the Add entry type."
+      },
+      "after": "16628eac656a16a8",
+      "date": 1685714409326
+    },
+    {
+      "type": "add",
+      "id": "59107f515379fde7",
+      "item": {
+        "type": "paragraph",
+        "id": "59107f515379fde7",
+        "text": "Note: The code assumes that you have defined the necessary types (Edit, Add, Move, Item, etc.) in your Elm module.\n\n"
+      },
+      "after": "7f8f2bb200b9fe10",
+      "date": 1685714421385
+    },
+    {
+      "type": "edit",
+      "id": "5364f8b30d4accba",
+      "item": {
+        "type": "paragraph",
+        "id": "5364f8b30d4accba",
+        "text": "In this example, we define the types JournalEntry, EntryType, and Item to represent the structure of the JSON data. The JournalEntry type has fields for entryType, id, item, and date. The EntryType type represents first only some of the possible entry types: Edit, Add, and Move. The Item type represents the structure of the item field."
+      },
+      "date": 1685765669315
     }
   ]
 }
