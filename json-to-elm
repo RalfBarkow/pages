@@ -1,0 +1,766 @@
+{
+  "title": "json-to-elm",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "4de2a82b9a710fbd",
+      "text": "The \"How I implemented json-to-elm\" [https://medium.com/@eeue56/how-i-implemented-json-to-elm-b61081587c3a post] is about the author's experience in implementing a tool that generates valid [[Elm]] code from different forms of input. The tool aims to reduce the time spent by developers on writing decoders in Elm. [https://noredink.github.io/json-to-elm/ site] "
+    },
+    {
+      "type": "paragraph",
+      "id": "03add2f370473d70",
+      "text": "The author discusses the history of JSON decoders in Elm and the limitations of the existing approach. They then describe the five different implementations of json-to-elm, starting with a Python implementation and progressing to JavaScript and finally Elm."
+    },
+    {
+      "type": "paragraph",
+      "id": "60a89865eaa74d4d",
+      "text": "In the first implementation, the author wrote a Python code that takes a JSON blob as input and generates the type alias, decoder, and encoder for that JSON blob. They explain how they translated the logic of JSON decoders from Elm to Python."
+    },
+    {
+      "type": "paragraph",
+      "id": "f5b2a1685aaf1c67",
+      "text": "The second implementation involved rewriting the Python code in JavaScript to make it more accessible to Elm users, as many of them come from JavaScript backgrounds.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "30a1c43d2e6457cd",
+      "text": "The third implementation was done in Elm and focused on creating a visual text input that takes JSON as input and generates Elm code as output. The author explains the challenges faced during this implementation and the need for refactoring the code to improve its readability and maintainability."
+    },
+    {
+      "type": "paragraph",
+      "id": "92c33eff268050cd",
+      "text": "[…] Instead of doing a simple first pass, we would try and keep the context for each field we collected. We would first collect all the fields and their types. We’d then filter for type alises, running the whole process on each child type alias. Finally, we’d put them all together into the type-alias that would be returned. The code looked something like this:"
+    },
+    {
+      "type": "code",
+      "id": "58c7d6e9d87962e3",
+      "text": "createTypeAlias : Json.Value -> String -> String -> TypeAlias\ncreateTypeAlias stuff aliasName base =\n    let\n        fields =\n            generateFields stuff base\n                |> List.map (\\( _, key, name, _ ) -> ( key, name ))\n                |> Dict.fromList\n    in\n    { name = aliasName\n    , fields = fields\n    , base = base\n    }\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "5ab03369c34811bc",
+      "text": "The fourth implementation involved further refactoring and improvements, including the use of an [[Abstract Syntax Tree]] ([[AST]]) to represent the code and the introduction of union types to represent all the possible JSON values. This allowed for better separation of logic and easier implementation of new features.\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "6e4f189566c4da1c",
+      "text": "The fifth implementation added support for decoder/encoder input and introduced the ability to convert old-style decoders to the new pipeline decoders (noredink/elm-decode-pipeline). The author also added user-facing options and the ability to generate English descriptions of type aliases and decoders.\n\n"
+    },
+    {
+      "type": "pagefold",
+      "id": "aac5a425234316ca",
+      "text": "AST"
+    },
+    {
+      "type": "paragraph",
+      "id": "07d93a4666990aac",
+      "text": "In the context of the fourth implementation Noah  realised that actually, an [[AST]] might make more sense. "
+    },
+    {
+      "type": "paragraph",
+      "id": "e4707b73655f7d19",
+      "text": "One of the first changes they made in the fifth implementation was to use a union type to represent all the possible JSON values, instead of just getting it back as a string. This would allow him to really think about the values he was representing, at a type level instead of strings. "
+    },
+    {
+      "type": "markdown",
+      "id": "300db4904a7b15ae",
+      "text": "> I’d also be able to represent some of the recursive values in a more logical setting, using two new constructors — ResolvedType, to represent the aliases already parsed, and ComplexType, to represent a type that hadn’t been parsed yet."
+    },
+    {
+      "type": "paragraph",
+      "id": "c13357d659b93540",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "03dd31348bf522e9",
+      "text": "The next thing Noah thought about was generating the Javascript required to parse the JSON at runtime. This would effectively be the first case of an Elm compiler written in Elm, as it allowed you to take in an Elm decoder, and verify it against some JSON input. You can check out the commit [https://github.com/eeue56/json-to-elm/commit/64b7cf34433cb6817bfd1ca3c996cb457624d0b9 here], but he  dropped support for it when the Native module syntax changed. Still a neat little sidenote!"
+    },
+    {
+      "type": "paragraph",
+      "id": "998797dcd495addd",
+      "text": "During this time, they also developed elm-decode-pipeline as a more idiomatic alternative to the infix operators of Json.Decode.Extra. This gave them the idea that they could use the AST that Noah had written for json-to-elm to convert the old decoders to the new pipeline decoders."
+    },
+    {
+      "type": "paragraph",
+      "id": "ffa40943f98c8b52",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "69e748ce710f6aa1",
+      "text": "Once a decoder was discovered, it would be parsed and converted into a type alias, which would then be used to build up the AST. Once we had the AST, we could generate the decoders just as we were before. This meant could read in old-style decoders, but generate new style decoders."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "json-to-elm",
+        "story": []
+      },
+      "date": 1685944772788
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f65e737bb08cb4b6"
+      },
+      "id": "f65e737bb08cb4b6",
+      "type": "add",
+      "date": 1685944774339
+    },
+    {
+      "type": "edit",
+      "id": "f65e737bb08cb4b6",
+      "item": {
+        "type": "paragraph",
+        "id": "f65e737bb08cb4b6",
+        "text": "is a tool that can take many forms of input and generate valid Elm code. The tool is designed to reduce the amount of time developers spend writing decoders in Elm. We’ll discuss the reasoning behind creation and the 5 different implementation passes that took it to where it is today."
+      },
+      "date": 1685944777372
+    },
+    {
+      "type": "edit",
+      "id": "f65e737bb08cb4b6",
+      "item": {
+        "type": "paragraph",
+        "id": "f65e737bb08cb4b6",
+        "text": "is a tool that can take many forms of input and generate valid Elm code. The tool is designed to reduce the amount of time developers spend writing decoders in Elm. We’ll discuss the reasoning behind creation and the 5 different implementation passes that took it to where it is today. [https://medium.com/@eeue56/how-i-implemented-json-to-elm-b61081587c3a post]"
+      },
+      "date": 1685944783357
+    },
+    {
+      "type": "edit",
+      "id": "f65e737bb08cb4b6",
+      "item": {
+        "type": "paragraph",
+        "id": "f65e737bb08cb4b6",
+        "text": "is a tool that can take many forms of input and generate valid Elm code. The tool was designed to reduce the time developers spend writing decoders in Elm. We discuss the reasons for its creation and the 5 different implementation passes that have made it what it is today. [https://medium.com/@eeue56/how-i-implemented-json-to-elm-b61081587c3a post]"
+      },
+      "date": 1685944837274
+    },
+    {
+      "type": "edit",
+      "id": "f65e737bb08cb4b6",
+      "item": {
+        "type": "paragraph",
+        "id": "f65e737bb08cb4b6",
+        "text": "is a tool that can take many forms of input and generate valid Elm code. The tool was designed to reduce the time developers spend writing decoders in Elm. We discuss the reasons for its creation and the 5 different implementation passes that have made it what it is today. [https://medium.com/@eeue56/how-i-implemented-json-to-elm-b61081587c3a post], [https://noredink.github.io/json-to-elm/ site]"
+      },
+      "date": 1685944871817
+    },
+    {
+      "id": "daac2495263674ce",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "daac2495263674ce",
+        "text": ">  I realised that actually, an [[AST]] might make more sense. And so, it was time for another rewrite!"
+      },
+      "after": "f65e737bb08cb4b6",
+      "attribution": {
+        "page": "2023-06-04"
+      },
+      "date": 1685944946304
+    },
+    {
+      "id": "e4707b73655f7d19",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "e4707b73655f7d19",
+        "text": "One of the first changes Noah made was to use a union type to represent all the possible JSON values, instead of just getting it back as a string. This would allow him to really think about the values he was representing, at a type level instead of strings. "
+      },
+      "after": "daac2495263674ce",
+      "attribution": {
+        "page": "2023-06-04"
+      },
+      "date": 1685944950022
+    },
+    {
+      "id": "300db4904a7b15ae",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "300db4904a7b15ae",
+        "text": "> I’d also be able to represent some of the recursive values in a more logical setting, using two new constructors — ResolvedType, to represent the aliases already parsed, and ComplexType, to represent a type that hadn’t been parsed yet."
+      },
+      "after": "e4707b73655f7d19",
+      "attribution": {
+        "page": "2023-06-04"
+      },
+      "date": 1685944954146
+    },
+    {
+      "id": "4de2a82b9a710fbd",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "4de2a82b9a710fbd",
+        "text": "noredink/elm-decode-pipeline"
+      },
+      "after": "f65e737bb08cb4b6",
+      "attribution": {
+        "page": "2023-06-04"
+      },
+      "date": 1685944967255
+    },
+    {
+      "id": "c13357d659b93540",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "c13357d659b93540",
+        "text": "The next thing Noah thought about was generating the Javascript required to parse the JSON at runtime. This would effectively be the first case of an Elm compiler written in Elm, as it allowed you to take in an Elm decoder, and verify it against some JSON input. You can check out the commit [https://github.com/eeue56/json-to-elm/commit/64b7cf34433cb6817bfd1ca3c996cb457624d0b9 here], but he  dropped support for it when the Native module syntax changed. Still a neat little sidenote!"
+      },
+      "after": "300db4904a7b15ae",
+      "attribution": {
+        "page": "2023-06-04"
+      },
+      "date": 1685944973106
+    },
+    {
+      "type": "remove",
+      "id": "daac2495263674ce",
+      "date": 1685945000867
+    },
+    {
+      "type": "add",
+      "id": "5851e566776c615d",
+      "item": {
+        "type": "paragraph",
+        "id": "5851e566776c615d",
+        "text": "Noah realised that actually, an [[AST]] might make more sense. And so, it was time for another rewrite!"
+      },
+      "after": "4de2a82b9a710fbd",
+      "date": 1685945007079
+    },
+    {
+      "type": "edit",
+      "id": "4de2a82b9a710fbd",
+      "item": {
+        "type": "paragraph",
+        "id": "4de2a82b9a710fbd",
+        "text": "The article is about the author's experience in implementing json-to-elm, a tool that generates valid Elm code from different forms of input. The tool aims to reduce the time spent by developers on writing decoders in Elm. The author discusses the history of JSON decoders in Elm and the limitations of the existing approach. They then describe the five different implementations of json-to-elm, starting with a Python implementation and progressing to JavaScript and finally Elm."
+      },
+      "date": 1685945125804
+    },
+    {
+      "type": "add",
+      "id": "3fbc953a499634c3",
+      "item": {
+        "type": "paragraph",
+        "id": "3fbc953a499634c3",
+        "text": "noredink/elm-decode-pipeline"
+      },
+      "after": "4de2a82b9a710fbd",
+      "date": 1685945156034
+    },
+    {
+      "type": "edit",
+      "id": "f65e737bb08cb4b6",
+      "item": {
+        "type": "paragraph",
+        "id": "f65e737bb08cb4b6",
+        "text": "is a tool that can take many forms of input and generate valid Elm code. The tool was designed to reduce the time developers spend writing decoders in Elm. We discuss the reasons for its creation and the 5 different implementation passes that have made it what it is today., [https://noredink.github.io/json-to-elm/ site]"
+      },
+      "date": 1685945171933
+    },
+    {
+      "type": "edit",
+      "id": "4de2a82b9a710fbd",
+      "item": {
+        "type": "paragraph",
+        "id": "4de2a82b9a710fbd",
+        "text": "The [https://medium.com/@eeue56/how-i-implemented-json-to-elm-b61081587c3a article] is about the author's experience in implementing json-to-elm, a tool that generates valid Elm code from different forms of input. The tool aims to reduce the time spent by developers on writing decoders in Elm. The author discusses the history of JSON decoders in Elm and the limitations of the existing approach. They then describe the five different implementations of json-to-elm, starting with a Python implementation and progressing to JavaScript and finally Elm."
+      },
+      "date": 1685945185411
+    },
+    {
+      "type": "edit",
+      "id": "4de2a82b9a710fbd",
+      "item": {
+        "type": "paragraph",
+        "id": "4de2a82b9a710fbd",
+        "text": "The [https://medium.com/@eeue56/how-i-implemented-json-to-elm-b61081587c3a article] is about the author's experience in implementing json-to-elm, a tool that generates valid [[Elm]] code from different forms of input. The tool aims to reduce the time spent by developers on writing decoders in Elm. The author discusses the history of JSON decoders in Elm and the limitations of the existing approach. They then describe the five different implementations of json-to-elm, starting with a Python implementation and progressing to JavaScript and finally Elm."
+      },
+      "date": 1685945205633
+    },
+    {
+      "type": "edit",
+      "id": "f65e737bb08cb4b6",
+      "item": {
+        "type": "paragraph",
+        "id": "f65e737bb08cb4b6",
+        "text": "is a tool that can take many forms of input and generate valid Elm code. The tool was designed to reduce the time developers spend writing decoders in Elm. We discuss the reasons for its creation and the 5 different implementation passes that have made it what it is today., "
+      },
+      "date": 1685945251513
+    },
+    {
+      "type": "edit",
+      "id": "4de2a82b9a710fbd",
+      "item": {
+        "type": "paragraph",
+        "id": "4de2a82b9a710fbd",
+        "text": "The [https://medium.com/@eeue56/how-i-implemented-json-to-elm-b61081587c3a article] is about the author's experience in implementing json-to-elm, a tool that generates valid [[Elm]] code from different forms of input. The tool aims to reduce the time spent by developers on writing decoders in Elm. [https://noredink.github.io/json-to-elm/ site] The author discusses the history of JSON decoders in Elm and the limitations of the existing approach. They then describe the five different implementations of json-to-elm, starting with a Python implementation and progressing to JavaScript and finally Elm."
+      },
+      "date": 1685945256242
+    },
+    {
+      "type": "remove",
+      "id": "f65e737bb08cb4b6",
+      "date": 1685945259007
+    },
+    {
+      "type": "edit",
+      "id": "4de2a82b9a710fbd",
+      "item": {
+        "type": "paragraph",
+        "id": "4de2a82b9a710fbd",
+        "text": "The [https://medium.com/@eeue56/how-i-implemented-json-to-elm-b61081587c3a article] is about the author's experience in implementing json-to-elm, a tool that generates valid [[Elm]] code from different forms of input. The tool aims to reduce the time spent by developers on writing decoders in Elm. [https://noredink.github.io/json-to-elm/ site] The author discusses the history of JSON decoders in Elm and the limitations of the existing approach. They then describe the five different implementations of json-to-elm, starting with "
+      },
+      "date": 1685945293530
+    },
+    {
+      "type": "add",
+      "id": "f5dd0860ed5c4f04",
+      "item": {
+        "type": "paragraph",
+        "id": "f5dd0860ed5c4f04",
+        "text": "a Python implementation and progressing to JavaScript and finally Elm."
+      },
+      "after": "4de2a82b9a710fbd",
+      "date": 1685945293894
+    },
+    {
+      "type": "remove",
+      "id": "f5dd0860ed5c4f04",
+      "date": 1685945300122
+    },
+    {
+      "type": "edit",
+      "id": "4de2a82b9a710fbd",
+      "item": {
+        "type": "paragraph",
+        "id": "4de2a82b9a710fbd",
+        "text": "The [https://medium.com/@eeue56/how-i-implemented-json-to-elm-b61081587c3a article] is about the author's experience in implementing json-to-elm, a tool that generates valid [[Elm]] code from different forms of input. The tool aims to reduce the time spent by developers on writing decoders in Elm. [https://noredink.github.io/json-to-elm/ site] "
+      },
+      "date": 1685945303922
+    },
+    {
+      "type": "add",
+      "id": "03add2f370473d70",
+      "item": {
+        "type": "paragraph",
+        "id": "03add2f370473d70",
+        "text": "The author discusses the history of JSON decoders in Elm and the limitations of the existing approach. They then describe the five different implementations of json-to-elm, starting with a Python implementation and progressing to JavaScript and finally Elm."
+      },
+      "after": "4de2a82b9a710fbd",
+      "date": 1685945304350
+    },
+    {
+      "id": "3fbc953a499634c3",
+      "type": "move",
+      "order": [
+        "4de2a82b9a710fbd",
+        "3fbc953a499634c3",
+        "03add2f370473d70",
+        "5851e566776c615d",
+        "e4707b73655f7d19",
+        "300db4904a7b15ae",
+        "c13357d659b93540"
+      ],
+      "date": 1685945328917
+    },
+    {
+      "type": "add",
+      "id": "60a89865eaa74d4d",
+      "item": {
+        "type": "paragraph",
+        "id": "60a89865eaa74d4d",
+        "text": "In the first implementation, the author wrote a Python code that takes a JSON blob as input and generates the type alias, decoder, and encoder for that JSON blob. They explain how they translated the logic of JSON decoders from Elm to Python.\n\n"
+      },
+      "after": "03add2f370473d70",
+      "date": 1685945336250
+    },
+    {
+      "type": "edit",
+      "id": "60a89865eaa74d4d",
+      "item": {
+        "type": "paragraph",
+        "id": "60a89865eaa74d4d",
+        "text": "In the first implementation, the author wrote a Python code that takes a JSON blob as input and generates the type alias, decoder, and encoder for that JSON blob. They explain how they translated the logic of JSON decoders from Elm to Python."
+      },
+      "date": 1685945356442
+    },
+    {
+      "type": "add",
+      "id": "f5b2a1685aaf1c67",
+      "item": {
+        "type": "paragraph",
+        "id": "f5b2a1685aaf1c67",
+        "text": "The second implementation involved rewriting the Python code in JavaScript to make it more accessible to Elm users, as many of them come from JavaScript backgrounds.\n"
+      },
+      "after": "60a89865eaa74d4d",
+      "date": 1685945357106
+    },
+    {
+      "type": "add",
+      "id": "30a1c43d2e6457cd",
+      "item": {
+        "type": "paragraph",
+        "id": "30a1c43d2e6457cd",
+        "text": "The third implementation was done in Elm and focused on creating a visual text input that takes JSON as input and generates Elm code as output. The author explains the challenges faced during this implementation and the need for refactoring the code to improve its readability and maintainability."
+      },
+      "after": "f5b2a1685aaf1c67",
+      "date": 1685945372519
+    },
+    {
+      "type": "add",
+      "id": "5ab03369c34811bc",
+      "item": {
+        "type": "paragraph",
+        "id": "5ab03369c34811bc",
+        "text": "The fourth implementation involved further refactoring and improvements, including the use of an abstract syntax tree (AST) to represent the code and the introduction of union types to represent JSON values. This allowed for better separation of logic and easier implementation of new features.\n\n"
+      },
+      "after": "30a1c43d2e6457cd",
+      "date": 1685945390291
+    },
+    {
+      "type": "add",
+      "id": "6e4f189566c4da1c",
+      "item": {
+        "type": "paragraph",
+        "id": "6e4f189566c4da1c",
+        "text": "The fifth implementation added support for decoder/encoder input and introduced the ability to convert old-style decoders to the new pipeline decoders. The author also added user-facing options and the ability to generate English descriptions of type aliases and decoders.\n\n"
+      },
+      "after": "5ab03369c34811bc",
+      "date": 1685945405560
+    },
+    {
+      "id": "3fbc953a499634c3",
+      "type": "move",
+      "order": [
+        "4de2a82b9a710fbd",
+        "03add2f370473d70",
+        "60a89865eaa74d4d",
+        "f5b2a1685aaf1c67",
+        "30a1c43d2e6457cd",
+        "5ab03369c34811bc",
+        "6e4f189566c4da1c",
+        "3fbc953a499634c3",
+        "5851e566776c615d",
+        "e4707b73655f7d19",
+        "300db4904a7b15ae",
+        "c13357d659b93540"
+      ],
+      "date": 1685945415411
+    },
+    {
+      "type": "add",
+      "id": "07d93a4666990aac",
+      "item": {
+        "type": "paragraph",
+        "id": "07d93a4666990aac",
+        "text": "The article concludes by highlighting the benefits of json-to-elm in reducing code duplication and cognitive load for developers, and the author's enjoyment in working on the project."
+      },
+      "after": "3fbc953a499634c3",
+      "date": 1685945435189
+    },
+    {
+      "id": "5851e566776c615d",
+      "type": "remove",
+      "removedTo": {
+        "page": "2023-06-04"
+      },
+      "date": 1685945449820
+    },
+    {
+      "type": "edit",
+      "id": "4de2a82b9a710fbd",
+      "item": {
+        "type": "paragraph",
+        "id": "4de2a82b9a710fbd",
+        "text": "The \"How I implemented json-to-elm\" [https://medium.com/@eeue56/how-i-implemented-json-to-elm-b61081587c3a post] is about the author's experience in implementing json-to-elm, a tool that generates valid [[Elm]] code from different forms of input. The tool aims to reduce the time spent by developers on writing decoders in Elm. [https://noredink.github.io/json-to-elm/ site] "
+      },
+      "date": 1685945659469
+    },
+    {
+      "type": "edit",
+      "id": "4de2a82b9a710fbd",
+      "item": {
+        "type": "paragraph",
+        "id": "4de2a82b9a710fbd",
+        "text": "The \"How I implemented json-to-elm\" [https://medium.com/@eeue56/how-i-implemented-json-to-elm-b61081587c3a post] is about the author's experience in implementing a tool that generates valid [[Elm]] code from different forms of input. The tool aims to reduce the time spent by developers on writing decoders in Elm. [https://noredink.github.io/json-to-elm/ site] "
+      },
+      "date": 1685945683299
+    },
+    {
+      "type": "remove",
+      "id": "3fbc953a499634c3",
+      "date": 1685947132486
+    },
+    {
+      "type": "edit",
+      "id": "6e4f189566c4da1c",
+      "item": {
+        "type": "paragraph",
+        "id": "6e4f189566c4da1c",
+        "text": "The fifth implementation added support for decoder/encoder input and introduced the ability to convert old-style decoders to the new pipeline decoders (noredink/elm-decode-pipeline). The author also added user-facing options and the ability to generate English descriptions of type aliases and decoders.\n\n"
+      },
+      "date": 1685947137972
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "aac5a425234316ca"
+      },
+      "id": "aac5a425234316ca",
+      "type": "add",
+      "after": "c13357d659b93540",
+      "date": 1685947245929
+    },
+    {
+      "id": "aac5a425234316ca",
+      "type": "move",
+      "order": [
+        "4de2a82b9a710fbd",
+        "03add2f370473d70",
+        "60a89865eaa74d4d",
+        "f5b2a1685aaf1c67",
+        "30a1c43d2e6457cd",
+        "5ab03369c34811bc",
+        "aac5a425234316ca",
+        "6e4f189566c4da1c",
+        "07d93a4666990aac",
+        "e4707b73655f7d19",
+        "300db4904a7b15ae",
+        "c13357d659b93540"
+      ],
+      "date": 1685947255380
+    },
+    {
+      "id": "6e4f189566c4da1c",
+      "type": "move",
+      "order": [
+        "4de2a82b9a710fbd",
+        "03add2f370473d70",
+        "60a89865eaa74d4d",
+        "f5b2a1685aaf1c67",
+        "30a1c43d2e6457cd",
+        "5ab03369c34811bc",
+        "6e4f189566c4da1c",
+        "aac5a425234316ca",
+        "07d93a4666990aac",
+        "e4707b73655f7d19",
+        "300db4904a7b15ae",
+        "c13357d659b93540"
+      ],
+      "date": 1685947260162
+    },
+    {
+      "type": "edit",
+      "id": "aac5a425234316ca",
+      "item": {
+        "type": "pagefold",
+        "id": "aac5a425234316ca",
+        "text": "AST"
+      },
+      "date": 1685947263845
+    },
+    {
+      "type": "edit",
+      "id": "07d93a4666990aac",
+      "item": {
+        "type": "paragraph",
+        "id": "07d93a4666990aac",
+        "text": "In the context of the fourth implementation"
+      },
+      "date": 1685947299540
+    },
+    {
+      "type": "edit",
+      "id": "07d93a4666990aac",
+      "item": {
+        "type": "paragraph",
+        "id": "07d93a4666990aac",
+        "text": "In the context of the fourth implementation Noah  realised that actually, an AST might make more sense. "
+      },
+      "date": 1685947341760
+    },
+    {
+      "type": "edit",
+      "id": "e4707b73655f7d19",
+      "item": {
+        "type": "paragraph",
+        "id": "e4707b73655f7d19",
+        "text": "One of the first changes Noah made in the fifth implementation was to use a union type to represent all the possible JSON values, instead of just getting it back as a string. This would allow him to really think about the values he was representing, at a type level instead of strings. "
+      },
+      "date": 1685947391591
+    },
+    {
+      "type": "edit",
+      "id": "07d93a4666990aac",
+      "item": {
+        "type": "paragraph",
+        "id": "07d93a4666990aac",
+        "text": "In the context of the fourth implementation Noah  realised that actually, an [[AST]] might make more sense. "
+      },
+      "date": 1685947427214
+    },
+    {
+      "type": "edit",
+      "id": "c13357d659b93540",
+      "item": {
+        "type": "paragraph",
+        "id": "c13357d659b93540",
+        "text": "[…]"
+      },
+      "date": 1685947628690
+    },
+    {
+      "type": "add",
+      "id": "03dd31348bf522e9",
+      "item": {
+        "type": "paragraph",
+        "id": "03dd31348bf522e9",
+        "text": "The next thing Noah thought about was generating the Javascript required to parse the JSON at runtime. This would effectively be the first case of an Elm compiler written in Elm, as it allowed you to take in an Elm decoder, and verify it against some JSON input. You can check out the commit [https://github.com/eeue56/json-to-elm/commit/64b7cf34433cb6817bfd1ca3c996cb457624d0b9 here], but he  dropped support for it when the Native module syntax changed. Still a neat little sidenote!"
+      },
+      "after": "c13357d659b93540",
+      "date": 1685947629111
+    },
+    {
+      "type": "add",
+      "id": "998797dcd495addd",
+      "item": {
+        "type": "paragraph",
+        "id": "998797dcd495addd",
+        "text": "During this time, they also created elm-decode-pipeline as a more idiomatic alternative to Json.Decode.Extra’s infix operators. This gave them the idea that they could use the AST Noah had written for json-to-elm in order to convert thei old decoders to the new pipeline decoders."
+      },
+      "after": "03dd31348bf522e9",
+      "date": 1685947718834
+    },
+    {
+      "type": "edit",
+      "id": "998797dcd495addd",
+      "item": {
+        "type": "paragraph",
+        "id": "998797dcd495addd",
+        "text": "During this time, they also developed elm-decode-pipeline as a more idiomatic alternative to the infix operators of Json.Decode.Extra. This gave them the idea that they could use the AST that Noah had written for json-to-elm to convert the old decoders to the new pipeline decoders."
+      },
+      "date": 1685947749237
+    },
+    {
+      "type": "add",
+      "id": "ffa40943f98c8b52",
+      "item": {
+        "type": "paragraph",
+        "id": "ffa40943f98c8b52",
+        "text": "[…]"
+      },
+      "after": "998797dcd495addd",
+      "date": 1685947802141
+    },
+    {
+      "type": "add",
+      "id": "69e748ce710f6aa1",
+      "item": {
+        "type": "paragraph",
+        "id": "69e748ce710f6aa1",
+        "text": "Once a decoder was discovered, it would be parsed and converted into a type alias, which would then be used to build up the AST. Once we had the AST, we could generate the decoders just as we were before. This meant could read in old-style decoders, but generate new style decoders."
+      },
+      "after": "ffa40943f98c8b52",
+      "date": 1685947802707
+    },
+    {
+      "id": "58c7d6e9d87962e3",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "58c7d6e9d87962e3",
+        "text": "createTypeAlias : Json.Value -> String -> String -> TypeAlias\ncreateTypeAlias stuff aliasName base =\n    let\n        fields =\n            generateFields stuff base\n                |> List.map (\\( _, key, name, _ ) -> ( key, name ))\n                |> Dict.fromList\n    in\n    { name = aliasName\n    , fields = fields\n    , base = base\n    }\n"
+      },
+      "after": "f5b2a1685aaf1c67",
+      "attribution": {
+        "page": "2023-06-05"
+      },
+      "date": 1685965372502
+    },
+    {
+      "id": "30a1c43d2e6457cd",
+      "type": "move",
+      "order": [
+        "4de2a82b9a710fbd",
+        "03add2f370473d70",
+        "60a89865eaa74d4d",
+        "f5b2a1685aaf1c67",
+        "30a1c43d2e6457cd",
+        "58c7d6e9d87962e3",
+        "5ab03369c34811bc",
+        "6e4f189566c4da1c",
+        "aac5a425234316ca",
+        "07d93a4666990aac",
+        "e4707b73655f7d19",
+        "300db4904a7b15ae",
+        "c13357d659b93540",
+        "03dd31348bf522e9",
+        "998797dcd495addd",
+        "ffa40943f98c8b52",
+        "69e748ce710f6aa1"
+      ],
+      "date": 1685965374616
+    },
+    {
+      "type": "add",
+      "id": "92c33eff268050cd",
+      "item": {
+        "type": "paragraph",
+        "id": "92c33eff268050cd",
+        "text": "[…] Instead of doing a simple first pass, we would try and keep the context for each field we collected. We would first collect all the fields and their types. We’d then filter for type alises, running the whole process on each child type alias. Finally, we’d put them all together into the type-alias that would be returned. The code looked something like this:"
+      },
+      "after": "30a1c43d2e6457cd",
+      "date": 1685965537153
+    },
+    {
+      "type": "edit",
+      "id": "5ab03369c34811bc",
+      "item": {
+        "type": "paragraph",
+        "id": "5ab03369c34811bc",
+        "text": "The fourth implementation involved further refactoring and improvements, including the use of an [[abstract syntax tree]] (AST) to represent the code and the introduction of union types to represent JSON values. This allowed for better separation of logic and easier implementation of new features.\n\n"
+      },
+      "date": 1685965660363
+    },
+    {
+      "type": "edit",
+      "id": "5ab03369c34811bc",
+      "item": {
+        "type": "paragraph",
+        "id": "5ab03369c34811bc",
+        "text": "The fourth implementation involved further refactoring and improvements, including the use of an [[Abstract Syntax Tree]] ([[AST]]) to represent the code and the introduction of union types to represent JSON values. This allowed for better separation of logic and easier implementation of new features.\n\n"
+      },
+      "date": 1685965760347
+    },
+    {
+      "type": "edit",
+      "id": "5ab03369c34811bc",
+      "item": {
+        "type": "paragraph",
+        "id": "5ab03369c34811bc",
+        "text": "The fourth implementation involved further refactoring and improvements, including the use of an [[Abstract Syntax Tree]] ([[AST]]) to represent the code and the introduction of union types to represent all the possible JSON values. This allowed for better separation of logic and easier implementation of new features.\n\n"
+      },
+      "date": 1685965800484
+    },
+    {
+      "type": "edit",
+      "id": "e4707b73655f7d19",
+      "item": {
+        "type": "paragraph",
+        "id": "e4707b73655f7d19",
+        "text": "One of the first changes they made in the fifth implementation was to use a union type to represent all the possible JSON values, instead of just getting it back as a string. This would allow him to really think about the values he was representing, at a type level instead of strings. "
+      },
+      "date": 1685967740117
+    }
+  ]
+}
