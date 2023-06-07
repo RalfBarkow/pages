@@ -1,0 +1,1658 @@
+{
+  "title": "WikiSpec Journal",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "1dbb60315889e20a",
+      "text": "refactor: [[Journal]] type alias to an empty record,\n\nrefactor: test: RED Decode JSON into Page\n\nThis [https://github.com/RalfBarkow/vite-elm-dojo/commit/5fe85629abb1cc74450f3303f9a9a470e31e8c2b commit] refactors the Journal type alias in the Wiki module. It changes the previous definition of { storyEdits : [[List]] StoryEdit } to an empty record {}.\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "b069e9231c3d59f7",
+      "text": "test case output: [⇒ [[Create New Page Test]] > JSON]\n\nOk { journal = [{}], story = [{ id = \"a753f30993d4523a\", text = \"We could not find this page.\", title = \"Create New Page Test\", type_ = \"future\" }], title = \"Create New Page Test\" }"
+    },
+    {
+      "type": "code",
+      "id": "d7207ed0b8a523c1",
+      "text": "{\n  \"title\": \"Create New Page Test\",\n  \"story\": [\n    {\n      \"id\": \"a753f30993d4523a\",\n      \"type\": \"future\",\n      \"text\": \"We could not find this page.\",\n      \"title\": \"Create New Page Test\"\n    }\n  ],\n  \"journal\": []\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "0857064b9bf6e357",
+      "text": "< JSON"
+    },
+    {
+      "type": "paragraph",
+      "id": "2b05187232405950",
+      "text": "The difference you're observing is related to how Elm represents empty records ({}) and empty lists ([]) in its output. (chat.openai)"
+    },
+    {
+      "type": "paragraph",
+      "id": "a45d193afaca11fd",
+      "text": "In Elm, an empty record {} is represented as a record with no fields. It's a way of indicating an empty [[structure]]. On the other hand, an empty list [] is represented as a list with no elements."
+    },
+    {
+      "type": "paragraph",
+      "id": "ec40d7b1de0e24f2",
+      "text": "When you see journal = [{}] in the test case output, it means that the journal field is an empty list, but the list contains one element, which is an empty record. This is just the way Elm represents empty lists containing empty records."
+    },
+    {
+      "type": "paragraph",
+      "id": "49c3d37601f15f85",
+      "text": "In your case, even though the rawData JSON specifies \"journal\": [], Elm decodes it as an empty list with one element, which is an empty record. This is a quirk of Elm's JSON decoding mechanism. It's important to note that although the representation might differ, both journal = [{}] and journal = [] effectively [[indicate]] an empty journal."
+    },
+    {
+      "type": "paragraph",
+      "id": "190db611d9c89728",
+      "text": "So, in terms of functionality, there is no difference between journal = [{}] and journal = [] in this context. It's simply a matter of how Elm presents the empty journal in its output. (chat.openai)"
+    },
+    {
+      "type": "pagefold",
+      "id": "3b50406bc98b0886",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "2a5143b241383532",
+      "text": "See also [[Elm and AI]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "9ada78c71b7a766d",
+      "text": "I would like to model the Journal as a stream of events. See [[Event Sourcing]], \"[[Write-Ahead-Log]]\" [https://martinfowler.com/articles/patterns-of-distributed-systems/wal.html page] and \"Lamdera Data Storage\" [https://realmario.notion.site/Lamdera-Data-Storage-faf9d90bc31e45cc9959caec5ced4ad2 page]."
+    },
+    {
+      "type": "reference",
+      "id": "2585e6a310490fcb",
+      "site": "wiki.dbbs.co",
+      "slug": "event-sourcing",
+      "title": "Event Sourcing",
+      "text": "Design a system by modeling objects as a stream of events.  Instead of saving the current state, save the events that lead up to the current state."
+    },
+    {
+      "type": "paragraph",
+      "id": "fccd6a492da9ad58",
+      "text": "[…] it seems like you want to model the Journal as a stream of events using the event sourcing pattern. Event sourcing involves saving the events that lead up to the current state of an object, rather than saving the current state itself. This approach allows you to recreate the object's state by replaying the events. (chat.openai)"
+    },
+    {
+      "type": "paragraph",
+      "id": "860d7b43c1609e56",
+      "text": "In the context of your Wiki application, you can apply event sourcing to the Journal, where each action or modification to a page is captured as an event. These events can be stored in a sequential order to represent the history of changes made to the page."
+    },
+    {
+      "type": "paragraph",
+      "id": "f3fce432e4a66552",
+      "text": "To implement this, you would need to define a set of event types that represent different actions or modifications to the page. For example, you might have events like \"PageCreated\", \"TextUpdated\", \"TitleUpdated\", etc."
+    },
+    {
+      "type": "paragraph",
+      "id": "83ed4a81aabbbce0",
+      "text": "Here's a rough example of how you can model the Journal as a stream of events in Elm:"
+    },
+    {
+      "type": "code",
+      "id": "cfab0e51092bbf2d",
+      "text": "module Wiki exposing (Journal, Page, Event, pageDecoder)\n\nimport Json.Decode as Decode\n\n\ntype alias Page =\n    { title : String\n    , story : List Story\n    , journal : Journal\n    }\n\n\ntype alias Story =\n    { id : String\n    , type_ : String\n    , text : String\n    , title : String\n    }\n\n\ntype alias Journal =\n    List Event\n\n\ntype Event\n    = PageCreated { id : String, title : String }\n    | TextUpdated { id : String, text : String }\n    | TitleUpdated { id : String, title : String }\n    -- Add more event types as needed\n\n\npageDecoder : Decode.Decoder Page\npageDecoder =\n    Decode.map3 Page\n        (Decode.field \"title\" Decode.string)\n        (Decode.field \"story\" (Decode.list storyDecoder))\n        (Decode.field \"journal\" (Decode.list eventDecoder))\n\n\neventDecoder : Decode.Decoder Event\neventDecoder =\n    Decode.oneOf\n        [ Decode.map2 PageCreated\n            (Decode.field \"id\" Decode.string)\n            (Decode.field \"title\" Decode.string)\n        , Decode.map2 TextUpdated\n            (Decode.field \"id\" Decode.string)\n            (Decode.field \"text\" Decode.string)\n        , Decode.map2 TitleUpdated\n            (Decode.field \"id\" Decode.string)\n            (Decode.field \"title\" Decode.string)\n        -- Add more event decoders for other event types\n        ]\n\n\nstoryDecoder : Decode.Decoder Story\nstoryDecoder =\n    Decode.map4 Story\n        (Decode.field \"id\" Decode.string)\n        (Decode.field \"type\" Decode.string)\n        (Decode.field \"text\" Decode.string)\n        (Decode.field \"title\" Decode.string)\n"
+    },
+    {
+      "type": "reference",
+      "id": "19205ffe61b5bce9",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "time-travel-project",
+      "title": "Time Travel Project",
+      "text": "Pattern: [[Time Travel]]. [https://github.com/RalfBarkow/time-travel-project github]"
+    },
+    {
+      "type": "pagefold",
+      "id": "af33aa210dfe0b72",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "2d3010a6ccaf92b0",
+      "text": "Elm does not support conditional type aliases directly. Type aliases in Elm are used to define simple named types that can be reused throughout the codebase. They provide a way to give a name to a type or a composition of types for better readability and maintainability. (chat.openai)"
+    },
+    {
+      "type": "paragraph",
+      "id": "82bbda23d7c0097b",
+      "text": "Conditional type aliases, also known as type-level conditionals, allow you to define different type aliases based on some condition or type constraint. While some programming languages, like TypeScript, support conditional types, Elm does not have built-in support for this feature."
+    },
+    {
+      "type": "paragraph",
+      "id": "9d65a2e0dafe6e25",
+      "text": "In Elm, if you need conditional behavior based on types, you typically handle it through union types, pattern matching, or polymorphic functions. These techniques allow you to express different behaviors based on the values and types you are working with."
+    },
+    {
+      "type": "paragraph",
+      "id": "e2ba990422080644",
+      "text": "If you have a specific use case or scenario where you believe conditional type aliases would be beneficial, please provide more details, and I'll be happy to help you find an Elm-friendly approach to achieve the desired outcome. (chat.openai)\n"
+    },
+    {
+      "type": "pagefold",
+      "id": "5a40346d17a3ea4a",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "88310b4b22e25b92",
+      "text": "And how to deal with different JSON structures?"
+    },
+    {
+      "type": "paragraph",
+      "id": "de11a7c1d9fed671",
+      "text": "In Elm, when dealing with different JSON structures, you typically define separate types for each structure and use decoding techniques to handle the variations. (chat.openai)"
+    },
+    {
+      "type": "paragraph",
+      "id": "284876386a942311",
+      "text": "Here's a general approach to handle different JSON structures in Elm:"
+    },
+    {
+      "type": "paragraph",
+      "id": "73890548cdd5685d",
+      "text": "1. Define a type for each JSON structure: Create a separate type for each expected JSON structure, representing the different fields and their types."
+    },
+    {
+      "type": "paragraph",
+      "id": "5fdb7485c7026bc7",
+      "text": "2. Use a decoder: Elm provides the Json.Decode module, which allows you to define decoders to parse JSON into Elm types. Use the decoder functions (string, int, bool, etc.) to specify how each JSON field should be decoded."
+    },
+    {
+      "type": "paragraph",
+      "id": "8199a1d23db2d2bb",
+      "text": "3. Handle variations: If you have different JSON structures, you can use conditional decoding techniques to handle the variations. This can be done using functions like andThen, oneOf, or map. You can use pattern matching to conditionally decode fields based on their presence or expected structure."
+    },
+    {
+      "type": "paragraph",
+      "id": "af66e06b1145a27c",
+      "text": "4. Use Decode.decodeValue: This function takes a decoder and a JSON value (e.g., a Json.Decode.Value obtained from Json.Decode.decodeString), and returns a result indicating success or failure."
+    },
+    {
+      "type": "paragraph",
+      "id": "de89785ef15e874e",
+      "text": "Here's a simple example to illustrate the approach:"
+    },
+    {
+      "type": "code",
+      "id": "e774564c0062ffc0",
+      "text": "import Json.Decode exposing (Decoder, field, string, int, andThen, oneOf, succeed, fail)\nimport Json.Decode.Extra exposing (optional)\n\ntype alias MyData =\n    { id : Int\n    , name : String\n    , age : Maybe Int\n    }\n\nmyDataDecoder : Decoder MyData\nmyDataDecoder =\n    field \"id\" int\n        |> andThen (\\id ->\n            field \"name\" string\n                |> andThen (\\name ->\n                    optional (field \"age\" int)\n                        |> andThen (\\age ->\n                            case age of\n                                Just a ->\n                                    succeed { id = id, name = name, age = Just a }\n\n                                Nothing ->\n                                    fail \"Age field is missing or invalid\"\n                        )\n                )\n        )\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "3ce24052fd94c237",
+      "text": "In the above example, the MyData type represents a JSON structure with fields id, name, and an optional age. The myDataDecoder function defines how the JSON should be decoded into the MyData type, handling the optional field using optional and andThen. (chat.openai)"
+    },
+    {
+      "type": "pagefold",
+      "id": "e0b4999c1425f223",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "e2da9212c5fb8d57",
+      "text": "Ok, my journal is one of such different JSON structures."
+    },
+    {
+      "type": "paragraph",
+      "id": "b0dfe375b16dbc94",
+      "text": "If your journal represents different JSON structures, you can handle the variations using conditional decoding techniques. Here's an example: (chat.openai)"
+    },
+    {
+      "type": "paragraph",
+      "id": "354226a5b8ca95aa",
+      "text": "1. Empty Journal:"
+    },
+    {
+      "type": "code",
+      "id": "7424f0aaecd64d60",
+      "text": "{\n  \"journal\": []\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "f0cc9784c0683ccd",
+      "text": "2. Non-empty Journal:"
+    },
+    {
+      "type": "code",
+      "id": "7fcb483c11a70de7",
+      "text": "{\n  \"journal\": [\n    {\n      \"event\": \"Create\",\n      \"item\": \"Edit Page Test\",\n      \"date\": 1685700575889\n    }\n  ]\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "23cce28c79384a7a",
+      "text": "To handle these variations, you can define a type Journal with different constructors based on the structure. Here's an example implementation:"
+    },
+    {
+      "type": "code",
+      "id": "6b24816dbeb8f8cb",
+      "text": "import Json.Decode as Decode exposing (Decoder, list, field, string, int, oneOf)\n\ntype Journal\n    = EmptyJournal\n    | NonEmptyJournal String\n\njournalDecoder : Decoder Journal\njournalDecoder =\n    field \"journal\" (list journalEntryDecoder)\n        |> Decode.andThen handleJournal\n\nhandleJournal : List JournalEntry -> Decoder Journal\nhandleJournal entries =\n    case entries of\n        [] ->\n            Decode.succeed EmptyJournal\n\n        _ ->\n            Decode.succeed (NonEmptyJournal \"Some data\")\n\njournalEntryDecoder : Decoder JournalEntry\njournalEntryDecoder =\n    Decode.map3 JournalEntry\n        (field \"event\" string)\n        (field \"item\" string)\n        (field \"date\" int)\n\ntype alias JournalEntry =\n    { event : String\n    , item : String\n    , date : Int\n    }\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "41ac27e2c330ba88",
+      "text": "In the above example, the Journal type represents the different variations of the journal. We have EmptyJournal and NonEmptyJournal constructors. The journalDecoder function decodes the \"journal\" field and uses andThen to handle the variations based on the presence or absence of entries."
+    },
+    {
+      "type": "paragraph",
+      "id": "48f82f3a8412e886",
+      "text": "The handleJournal function is called by andThen and takes the list of JournalEntry as an argument. Here, you can implement your logic to determine whether the journal is empty or non-empty."
+    },
+    {
+      "type": "paragraph",
+      "id": "d88a65214d7d480a",
+      "text": "Note that this is a simplified example, and you would need to adapt it based on your specific JSON structures and requirements. By using conditional decoding techniques and defining appropriate types and decoders, you can handle different JSON structures in your journal or any other data structure in Elm. (chat.openai)"
+    },
+    {
+      "type": "pagefold",
+      "id": "fd0f8c80e03cf7f6",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "b4a92dbc86f784d4",
+      "text": "refactor: Journal as type (was: type alias) [https://github.com/RalfBarkow/vite-elm-dojo/commit/e50c0f6144392ff7121994d21cc63c4393078c96 commit]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "WikiSpec Journal",
+        "story": []
+      },
+      "date": 1686086022691
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1dbb60315889e20a"
+      },
+      "id": "1dbb60315889e20a",
+      "type": "add",
+      "date": 1686086034124
+    },
+    {
+      "type": "edit",
+      "id": "1dbb60315889e20a",
+      "item": {
+        "type": "paragraph",
+        "id": "1dbb60315889e20a",
+        "text": "refactor: Journal type alias to an empty record,\n\nrefactor: test: RED Decode JSON into Page\n\nThis commit refactors the Journal type alias in the Wiki module. It changes the previous definition of { storyEdits : List StoryEdit } to an empty record {}.\n\ntest case output:\n\nOk { journal = [{}], story = [{ id = \"b8a8a898990b9b70\", text = \"We could not find this page.\", title = \"Create New Page Test\", type_ = \"future\" }], title = \"Create New Page Test\" }"
+      },
+      "date": 1686086042833
+    },
+    {
+      "type": "edit",
+      "id": "1dbb60315889e20a",
+      "item": {
+        "type": "paragraph",
+        "id": "1dbb60315889e20a",
+        "text": "refactor: Journal type alias to an empty record,\n\nrefactor: test: RED Decode JSON into Page\n\nThis [https://github.com/RalfBarkow/vite-elm-dojo/commit/5fe85629abb1cc74450f3303f9a9a470e31e8c2b commit] refactors the Journal type alias in the Wiki module. It changes the previous definition of { storyEdits : List StoryEdit } to an empty record {}.\n\ntest case output:\n\nOk { journal = [{}], story = [{ id = \"b8a8a898990b9b70\", text = \"We could not find this page.\", title = \"Create New Page Test\", type_ = \"future\" }], title = \"Create New Page Test\" }"
+      },
+      "date": 1686086081806
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0857064b9bf6e357"
+      },
+      "id": "0857064b9bf6e357",
+      "type": "add",
+      "after": "1dbb60315889e20a",
+      "date": 1686086138810
+    },
+    {
+      "type": "edit",
+      "id": "0857064b9bf6e357",
+      "item": {
+        "type": "paragraph",
+        "id": "0857064b9bf6e357",
+        "text": "The difference you're observing is related to how Elm represents empty records ({}) and empty lists ([]) in its output. (chat.openai)"
+      },
+      "date": 1686086149359
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a45d193afaca11fd"
+      },
+      "id": "a45d193afaca11fd",
+      "type": "add",
+      "after": "0857064b9bf6e357",
+      "date": 1686086159931
+    },
+    {
+      "type": "edit",
+      "id": "a45d193afaca11fd",
+      "item": {
+        "type": "paragraph",
+        "id": "a45d193afaca11fd",
+        "text": "In Elm, an empty record {} is represented as a record with no fields. It's a way of indicating an empty structure. On the other hand, an empty list [] is represented as a list with no elements."
+      },
+      "date": 1686086162342
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ec40d7b1de0e24f2"
+      },
+      "id": "ec40d7b1de0e24f2",
+      "type": "add",
+      "after": "a45d193afaca11fd",
+      "date": 1686086179884
+    },
+    {
+      "type": "edit",
+      "id": "ec40d7b1de0e24f2",
+      "item": {
+        "type": "paragraph",
+        "id": "ec40d7b1de0e24f2",
+        "text": "When you see journal = [{}] in the test case output, it means that the journal field is an empty list, but the list contains one element, which is an empty record. This is just the way Elm represents empty lists containing empty records."
+      },
+      "date": 1686086181355
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "49c3d37601f15f85"
+      },
+      "id": "49c3d37601f15f85",
+      "type": "add",
+      "after": "ec40d7b1de0e24f2",
+      "date": 1686086199921
+    },
+    {
+      "type": "edit",
+      "id": "49c3d37601f15f85",
+      "item": {
+        "type": "paragraph",
+        "id": "49c3d37601f15f85",
+        "text": "In your case, even though the rawData JSON specifies \"journal\": [], Elm decodes it as an empty list with one element, which is an empty record. This is a quirk of Elm's JSON decoding mechanism. It's important to note that although the representation might differ, both journal = [{}] and journal = [] effectively indicate an empty journal."
+      },
+      "date": 1686086201619
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "190db611d9c89728"
+      },
+      "id": "190db611d9c89728",
+      "type": "add",
+      "after": "49c3d37601f15f85",
+      "date": 1686086242106
+    },
+    {
+      "type": "edit",
+      "id": "190db611d9c89728",
+      "item": {
+        "type": "paragraph",
+        "id": "190db611d9c89728",
+        "text": "So, in terms of functionality, there is no difference between journal = [{}] and journal = [] in this context. It's simply a matter of how Elm presents the empty journal in its output. (chat.openai)"
+      },
+      "date": 1686086250063
+    },
+    {
+      "type": "edit",
+      "id": "1dbb60315889e20a",
+      "item": {
+        "type": "paragraph",
+        "id": "1dbb60315889e20a",
+        "text": "refactor: [[Journal]] type alias to an empty record,\n\nrefactor: test: RED Decode JSON into Page\n\nThis [https://github.com/RalfBarkow/vite-elm-dojo/commit/5fe85629abb1cc74450f3303f9a9a470e31e8c2b commit] refactors the Journal type alias in the Wiki module. It changes the previous definition of { storyEdits : List StoryEdit } to an empty record {}.\n\ntest case output:\n\nOk { journal = [{}], story = [{ id = \"b8a8a898990b9b70\", text = \"We could not find this page.\", title = \"Create New Page Test\", type_ = \"future\" }], title = \"Create New Page Test\" }"
+      },
+      "date": 1686086281565
+    },
+    {
+      "type": "edit",
+      "id": "1dbb60315889e20a",
+      "item": {
+        "type": "paragraph",
+        "id": "1dbb60315889e20a",
+        "text": "refactor: [[Journal]] type alias to an empty record,\n\nrefactor: test: RED Decode JSON into Page\n\nThis [https://github.com/RalfBarkow/vite-elm-dojo/commit/5fe85629abb1cc74450f3303f9a9a470e31e8c2b commit] refactors the Journal type alias in the Wiki module. It changes the previous definition of { storyEdits : List StoryEdit } to an empty record {}.\n\ntest case output: [⇒[[Create New Page Test]]]\n\nOk { journal = [{}], story = [{ id = \"b8a8a898990b9b70\", text = \"We could not find this page.\", title = \"Create New Page Test\", type_ = \"future\" }], title = \"Create New Page Test\" }"
+      },
+      "date": 1686086376622
+    },
+    {
+      "type": "edit",
+      "id": "1dbb60315889e20a",
+      "item": {
+        "type": "paragraph",
+        "id": "1dbb60315889e20a",
+        "text": "refactor: [[Journal]] type alias to an empty record,\n\nrefactor: test: RED Decode JSON into Page\n\nThis [https://github.com/RalfBarkow/vite-elm-dojo/commit/5fe85629abb1cc74450f3303f9a9a470e31e8c2b commit] refactors the Journal type alias in the Wiki module. It changes the previous definition of { storyEdits : List StoryEdit } to an empty record {}.\n\ntest case output: [⇒ [[Create New Page Test]]]\n\nOk { journal = [{}], story = [{ id = \"b8a8a898990b9b70\", text = \"We could not find this page.\", title = \"Create New Page Test\", type_ = \"future\" }], title = \"Create New Page Test\" }"
+      },
+      "date": 1686086380813
+    },
+    {
+      "type": "edit",
+      "id": "1dbb60315889e20a",
+      "item": {
+        "type": "paragraph",
+        "id": "1dbb60315889e20a",
+        "text": "refactor: [[Journal]] type alias to an empty record,\n\nrefactor: test: RED Decode JSON into Page\n\nThis [https://github.com/RalfBarkow/vite-elm-dojo/commit/5fe85629abb1cc74450f3303f9a9a470e31e8c2b commit] refactors the Journal type alias in the Wiki module. It changes the previous definition of { storyEdits : List StoryEdit } to an empty record {}.\n\ntest case output: [⇒ [[Create New Page Test]] > JSON]\n\nOk { journal = [{}], story = [{ id = \"b8a8a898990b9b70\", text = \"We could not find this page.\", title = \"Create New Page Test\", type_ = \"future\" }], title = \"Create New Page Test\" }"
+      },
+      "date": 1686086393609
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3b50406bc98b0886"
+      },
+      "id": "3b50406bc98b0886",
+      "type": "add",
+      "after": "190db611d9c89728",
+      "date": 1686086578063
+    },
+    {
+      "type": "edit",
+      "id": "3b50406bc98b0886",
+      "item": {
+        "type": "pagefold",
+        "id": "3b50406bc98b0886",
+        "text": "~"
+      },
+      "date": 1686086581052
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2a5143b241383532"
+      },
+      "id": "2a5143b241383532",
+      "type": "add",
+      "after": "3b50406bc98b0886",
+      "date": 1686086582424
+    },
+    {
+      "type": "edit",
+      "id": "2a5143b241383532",
+      "item": {
+        "type": "paragraph",
+        "id": "2a5143b241383532",
+        "text": "[[Elm and AI]]"
+      },
+      "date": 1686086589321
+    },
+    {
+      "type": "edit",
+      "id": "2a5143b241383532",
+      "item": {
+        "type": "paragraph",
+        "id": "2a5143b241383532",
+        "text": "See also [[Elm and AI]]"
+      },
+      "date": 1686086596209
+    },
+    {
+      "type": "edit",
+      "id": "a45d193afaca11fd",
+      "item": {
+        "type": "paragraph",
+        "id": "a45d193afaca11fd",
+        "text": "In Elm, an empty record {} is represented as a record with no fields. It's a way of indicating an empty [[structure]]. On the other hand, an empty list [] is represented as a list with no elements."
+      },
+      "date": 1686087719958
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2585e6a310490fcb"
+      },
+      "id": "2585e6a310490fcb",
+      "type": "add",
+      "after": "2a5143b241383532",
+      "date": 1686088102940
+    },
+    {
+      "type": "edit",
+      "id": "2585e6a310490fcb",
+      "item": {
+        "type": "reference",
+        "id": "2585e6a310490fcb",
+        "site": "wiki.dbbs.co",
+        "slug": "event-sourcing",
+        "title": "Event Sourcing",
+        "text": "Design a system by modeling objects as a stream of events.  Instead of saving the current state, save the events that lead up to the current state."
+      },
+      "date": 1686088105975
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "19205ffe61b5bce9"
+      },
+      "id": "19205ffe61b5bce9",
+      "type": "add",
+      "after": "2585e6a310490fcb",
+      "date": 1686088177402
+    },
+    {
+      "type": "edit",
+      "id": "19205ffe61b5bce9",
+      "item": {
+        "type": "reference",
+        "id": "19205ffe61b5bce9",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "time-travel-project",
+        "title": "Time Travel Project",
+        "text": "Pattern: [[Time Travel]]. [https://github.com/RalfBarkow/time-travel-project github]"
+      },
+      "date": 1686088179729
+    },
+    {
+      "type": "add",
+      "id": "9ada78c71b7a766d",
+      "item": {
+        "type": "paragraph",
+        "id": "9ada78c71b7a766d",
+        "text": "I would like to model the Journal as a stream of events. See"
+      },
+      "after": "2a5143b241383532",
+      "date": 1686088379514
+    },
+    {
+      "type": "edit",
+      "id": "9ada78c71b7a766d",
+      "item": {
+        "type": "paragraph",
+        "id": "9ada78c71b7a766d",
+        "text": "I would like to model the Journal as a stream of events. See [[Event Sourcing]]"
+      },
+      "date": 1686088391817
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fccd6a492da9ad58"
+      },
+      "id": "fccd6a492da9ad58",
+      "type": "add",
+      "after": "2585e6a310490fcb",
+      "date": 1686088415624
+    },
+    {
+      "type": "edit",
+      "id": "fccd6a492da9ad58",
+      "item": {
+        "type": "paragraph",
+        "id": "fccd6a492da9ad58",
+        "text": "[…]  it seems like you want to model the Journal as a stream of events using the event sourcing pattern. Event sourcing involves saving the events that lead up to the current state of an object, rather than saving the current state itself. This approach allows you to recreate the object's state by replaying the events."
+      },
+      "date": 1686088419846
+    },
+    {
+      "type": "edit",
+      "id": "fccd6a492da9ad58",
+      "item": {
+        "type": "paragraph",
+        "id": "fccd6a492da9ad58",
+        "text": "[…] it seems like you want to model the Journal as a stream of events using the event sourcing pattern. Event sourcing involves saving the events that lead up to the current state of an object, rather than saving the current state itself. This approach allows you to recreate the object's state by replaying the events."
+      },
+      "date": 1686088423893
+    },
+    {
+      "type": "edit",
+      "id": "fccd6a492da9ad58",
+      "item": {
+        "type": "paragraph",
+        "id": "fccd6a492da9ad58",
+        "text": "[…] it seems like you want to model the Journal as a stream of events using the event sourcing pattern. Event sourcing involves saving the events that lead up to the current state of an object, rather than saving the current state itself. This approach allows you to recreate the object's state by replaying the events. (chat.openai)"
+      },
+      "date": 1686088430126
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "860d7b43c1609e56"
+      },
+      "id": "860d7b43c1609e56",
+      "type": "add",
+      "after": "fccd6a492da9ad58",
+      "date": 1686088441545
+    },
+    {
+      "type": "edit",
+      "id": "860d7b43c1609e56",
+      "item": {
+        "type": "paragraph",
+        "id": "860d7b43c1609e56",
+        "text": "In the context of your Wiki application, you can apply event sourcing to the Journal, where each action or modification to a page is captured as an event. These events can be stored in a sequential order to represent the history of changes made to the page."
+      },
+      "date": 1686088444636
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f3fce432e4a66552"
+      },
+      "id": "f3fce432e4a66552",
+      "type": "add",
+      "after": "860d7b43c1609e56",
+      "date": 1686088458228
+    },
+    {
+      "type": "edit",
+      "id": "f3fce432e4a66552",
+      "item": {
+        "type": "paragraph",
+        "id": "f3fce432e4a66552",
+        "text": "To implement this, you would need to define a set of event types that represent different actions or modifications to the page. For example, you might have events like \"PageCreated\", \"TextUpdated\", \"TitleUpdated\", etc."
+      },
+      "date": 1686088460298
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "83ed4a81aabbbce0"
+      },
+      "id": "83ed4a81aabbbce0",
+      "type": "add",
+      "after": "f3fce432e4a66552",
+      "date": 1686088468306
+    },
+    {
+      "type": "edit",
+      "id": "83ed4a81aabbbce0",
+      "item": {
+        "type": "paragraph",
+        "id": "83ed4a81aabbbce0",
+        "text": "Here's a rough example of how you can model the Journal as a stream of events in Elm:"
+      },
+      "date": 1686088470969
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "cfab0e51092bbf2d"
+      },
+      "id": "cfab0e51092bbf2d",
+      "type": "add",
+      "after": "83ed4a81aabbbce0",
+      "date": 1686088476477
+    },
+    {
+      "type": "edit",
+      "id": "cfab0e51092bbf2d",
+      "item": {
+        "type": "code",
+        "id": "cfab0e51092bbf2d",
+        "text": "module Wiki exposing (Journal, Page, Event, pageDecoder)\n\nimport Json.Decode as Decode\n\n\ntype alias Page =\n    { title : String\n    , story : List Story\n    , journal : Journal\n    }\n\n\ntype alias Story =\n    { id : String\n    , type_ : String\n    , text : String\n    , title : String\n    }\n\n\ntype alias Journal =\n    List Event\n\n\ntype Event\n    = PageCreated { id : String, title : String }\n    | TextUpdated { id : String, text : String }\n    | TitleUpdated { id : String, title : String }\n    -- Add more event types as needed\n\n\npageDecoder : Decode.Decoder Page\npageDecoder =\n    Decode.map3 Page\n        (Decode.field \"title\" Decode.string)\n        (Decode.field \"story\" (Decode.list storyDecoder))\n        (Decode.field \"journal\" (Decode.list eventDecoder))\n\n\neventDecoder : Decode.Decoder Event\neventDecoder =\n    Decode.oneOf\n        [ Decode.map2 PageCreated\n            (Decode.field \"id\" Decode.string)\n            (Decode.field \"title\" Decode.string)\n        , Decode.map2 TextUpdated\n            (Decode.field \"id\" Decode.string)\n            (Decode.field \"text\" Decode.string)\n        , Decode.map2 TitleUpdated\n            (Decode.field \"id\" Decode.string)\n            (Decode.field \"title\" Decode.string)\n        -- Add more event decoders for other event types\n        ]\n\n\nstoryDecoder : Decode.Decoder Story\nstoryDecoder =\n    Decode.map4 Story\n        (Decode.field \"id\" Decode.string)\n        (Decode.field \"type\" Decode.string)\n        (Decode.field \"text\" Decode.string)\n        (Decode.field \"title\" Decode.string)\n"
+      },
+      "date": 1686088478882
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "af33aa210dfe0b72"
+      },
+      "id": "af33aa210dfe0b72",
+      "type": "add",
+      "after": "19205ffe61b5bce9",
+      "date": 1686098752664
+    },
+    {
+      "type": "edit",
+      "id": "af33aa210dfe0b72",
+      "item": {
+        "type": "pagefold",
+        "id": "af33aa210dfe0b72",
+        "text": "~"
+      },
+      "date": 1686098756033
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2d3010a6ccaf92b0"
+      },
+      "id": "2d3010a6ccaf92b0",
+      "type": "add",
+      "after": "af33aa210dfe0b72",
+      "date": 1686098761499
+    },
+    {
+      "type": "edit",
+      "id": "2d3010a6ccaf92b0",
+      "item": {
+        "type": "paragraph",
+        "id": "2d3010a6ccaf92b0",
+        "text": "Elm does not support conditional type aliases directly. Type aliases in Elm are used to define simple named types that can be reused throughout the codebase. They provide a way to give a name to a type or a composition of types for better readability and maintainability."
+      },
+      "date": 1686098776560
+    },
+    {
+      "type": "edit",
+      "id": "2d3010a6ccaf92b0",
+      "item": {
+        "type": "paragraph",
+        "id": "2d3010a6ccaf92b0",
+        "text": "Elm does not support conditional type aliases directly. Type aliases in Elm are used to define simple named types that can be reused throughout the codebase. They provide a way to give a name to a type or a composition of types for better readability and maintainability. (chat.openai)"
+      },
+      "date": 1686098823924
+    },
+    {
+      "type": "add",
+      "id": "82bbda23d7c0097b",
+      "item": {
+        "type": "paragraph",
+        "id": "82bbda23d7c0097b",
+        "text": "Conditional type aliases, also known as type-level conditionals, allow you to define different type aliases based on some condition or type constraint. While some programming languages, like TypeScript, support conditional types, Elm does not have built-in support for this feature."
+      },
+      "after": "2d3010a6ccaf92b0",
+      "date": 1686098824979
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9d65a2e0dafe6e25"
+      },
+      "id": "9d65a2e0dafe6e25",
+      "type": "add",
+      "after": "82bbda23d7c0097b",
+      "date": 1686098844905
+    },
+    {
+      "type": "edit",
+      "id": "9d65a2e0dafe6e25",
+      "item": {
+        "type": "paragraph",
+        "id": "9d65a2e0dafe6e25",
+        "text": "In Elm, if you need conditional behavior based on types, you typically handle it through union types, pattern matching, or polymorphic functions. These techniques allow you to express different behaviors based on the values and types you are working with.\n\n"
+      },
+      "date": 1686098846800
+    },
+    {
+      "type": "edit",
+      "id": "9d65a2e0dafe6e25",
+      "item": {
+        "type": "paragraph",
+        "id": "9d65a2e0dafe6e25",
+        "text": "In Elm, if you need conditional behavior based on types, you typically handle it through union types, pattern matching, or polymorphic functions. These techniques allow you to express different behaviors based on the values and types you are working with."
+      },
+      "date": 1686098870071
+    },
+    {
+      "type": "add",
+      "id": "e2ba990422080644",
+      "item": {
+        "type": "paragraph",
+        "id": "e2ba990422080644",
+        "text": "If you have a specific use case or scenario where you believe conditional type aliases would be beneficial, please provide more details, and I'll be happy to help you find an Elm-friendly approach to achieve the desired outcome. (chat.openai)\n"
+      },
+      "after": "9d65a2e0dafe6e25",
+      "date": 1686098880584
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5a40346d17a3ea4a"
+      },
+      "id": "5a40346d17a3ea4a",
+      "type": "add",
+      "after": "e2ba990422080644",
+      "date": 1686098883282
+    },
+    {
+      "type": "edit",
+      "id": "5a40346d17a3ea4a",
+      "item": {
+        "type": "pagefold",
+        "id": "5a40346d17a3ea4a",
+        "text": "~"
+      },
+      "date": 1686098887164
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "88310b4b22e25b92"
+      },
+      "id": "88310b4b22e25b92",
+      "type": "add",
+      "after": "5a40346d17a3ea4a",
+      "date": 1686098896533
+    },
+    {
+      "type": "edit",
+      "id": "88310b4b22e25b92",
+      "item": {
+        "type": "paragraph",
+        "id": "88310b4b22e25b92",
+        "text": "And how to deal with different JSON structures?"
+      },
+      "date": 1686098898239
+    },
+    {
+      "type": "add",
+      "id": "de11a7c1d9fed671",
+      "item": {
+        "type": "paragraph",
+        "id": "de11a7c1d9fed671",
+        "text": "In Elm, when dealing with different JSON structures, you typically define separate types for each structure and use decoding techniques to handle the variations. (chat.openai)"
+      },
+      "after": "88310b4b22e25b92",
+      "date": 1686098922642
+    },
+    {
+      "type": "add",
+      "id": "284876386a942311",
+      "item": {
+        "type": "paragraph",
+        "id": "284876386a942311",
+        "text": "Here's a general approach to handle different JSON structures in Elm:"
+      },
+      "after": "de11a7c1d9fed671",
+      "date": 1686098941014
+    },
+    {
+      "type": "add",
+      "id": "73890548cdd5685d",
+      "item": {
+        "type": "paragraph",
+        "id": "73890548cdd5685d",
+        "text": "1. Define a type for each JSON structure: Create a separate type for each expected JSON structure, representing the different fields and their types."
+      },
+      "after": "284876386a942311",
+      "date": 1686098950686
+    },
+    {
+      "type": "add",
+      "id": "5fdb7485c7026bc7",
+      "item": {
+        "type": "paragraph",
+        "id": "5fdb7485c7026bc7",
+        "text": "2. Use a decoder: Elm provides the Json.Decode module, which allows you to define decoders to parse JSON into Elm types. Use the decoder functions (string, int, bool, etc.) to specify how each JSON field should be decoded."
+      },
+      "after": "73890548cdd5685d",
+      "date": 1686098969962
+    },
+    {
+      "type": "add",
+      "id": "8199a1d23db2d2bb",
+      "item": {
+        "type": "paragraph",
+        "id": "8199a1d23db2d2bb",
+        "text": "3. Handle variations: If you have different JSON structures, you can use conditional decoding techniques to handle the variations. This can be done using functions like andThen, oneOf, or map. You can use pattern matching to conditionally decode fields based on their presence or expected structure."
+      },
+      "after": "5fdb7485c7026bc7",
+      "date": 1686098991837
+    },
+    {
+      "type": "add",
+      "id": "af66e06b1145a27c",
+      "item": {
+        "type": "paragraph",
+        "id": "af66e06b1145a27c",
+        "text": "4. Use Decode.decodeValue: This function takes a decoder and a JSON value (e.g., a Json.Decode.Value obtained from Json.Decode.decodeString), and returns a result indicating success or failure."
+      },
+      "after": "8199a1d23db2d2bb",
+      "date": 1686099017426
+    },
+    {
+      "type": "add",
+      "id": "de89785ef15e874e",
+      "item": {
+        "type": "paragraph",
+        "id": "de89785ef15e874e",
+        "text": "Here's a simple example to illustrate the approach:"
+      },
+      "after": "af66e06b1145a27c",
+      "date": 1686099033485
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e774564c0062ffc0"
+      },
+      "id": "e774564c0062ffc0",
+      "type": "add",
+      "after": "de89785ef15e874e",
+      "date": 1686099041225
+    },
+    {
+      "type": "edit",
+      "id": "e774564c0062ffc0",
+      "item": {
+        "type": "code",
+        "id": "e774564c0062ffc0",
+        "text": "import Json.Decode exposing (Decoder, field, string, int, andThen, oneOf, succeed, fail)\nimport Json.Decode.Extra exposing (optional)\n\ntype alias MyData =\n    { id : Int\n    , name : String\n    , age : Maybe Int\n    }\n\nmyDataDecoder : Decoder MyData\nmyDataDecoder =\n    field \"id\" int\n        |> andThen (\\id ->\n            field \"name\" string\n                |> andThen (\\name ->\n                    optional (field \"age\" int)\n                        |> andThen (\\age ->\n                            case age of\n                                Just a ->\n                                    succeed { id = id, name = name, age = Just a }\n\n                                Nothing ->\n                                    fail \"Age field is missing or invalid\"\n                        )\n                )\n        )\n"
+      },
+      "date": 1686099043252
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3ce24052fd94c237"
+      },
+      "id": "3ce24052fd94c237",
+      "type": "add",
+      "after": "e774564c0062ffc0",
+      "date": 1686099101812
+    },
+    {
+      "type": "edit",
+      "id": "3ce24052fd94c237",
+      "item": {
+        "type": "paragraph",
+        "id": "3ce24052fd94c237",
+        "text": "n the above example, the MyData type represents a JSON structure with fields id, name, and an optional age. The myDataDecoder function defines how the JSON should be decoded into the MyData type, handling the optional field using optional and andThen."
+      },
+      "date": 1686099104003
+    },
+    {
+      "type": "edit",
+      "id": "3ce24052fd94c237",
+      "item": {
+        "type": "paragraph",
+        "id": "3ce24052fd94c237",
+        "text": "In the above example, the MyData type represents a JSON structure with fields id, name, and an optional age. The myDataDecoder function defines how the JSON should be decoded into the MyData type, handling the optional field using optional and andThen."
+      },
+      "date": 1686099108827
+    },
+    {
+      "type": "edit",
+      "id": "3ce24052fd94c237",
+      "item": {
+        "type": "paragraph",
+        "id": "3ce24052fd94c237",
+        "text": "In the above example, the MyData type represents a JSON structure with fields id, name, and an optional age. The myDataDecoder function defines how the JSON should be decoded into the MyData type, handling the optional field using optional and andThen. (chat.openai)"
+      },
+      "date": 1686099135328
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e0b4999c1425f223"
+      },
+      "id": "e0b4999c1425f223",
+      "type": "add",
+      "after": "3ce24052fd94c237",
+      "date": 1686099143193
+    },
+    {
+      "type": "edit",
+      "id": "e0b4999c1425f223",
+      "item": {
+        "type": "pagefold",
+        "id": "e0b4999c1425f223",
+        "text": "~"
+      },
+      "date": 1686099146627
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e2da9212c5fb8d57"
+      },
+      "id": "e2da9212c5fb8d57",
+      "type": "add",
+      "after": "e0b4999c1425f223",
+      "date": 1686099148207
+    },
+    {
+      "type": "edit",
+      "id": "e2da9212c5fb8d57",
+      "item": {
+        "type": "paragraph",
+        "id": "e2da9212c5fb8d57",
+        "text": "Ok, my journal is one of such different JSON structures."
+      },
+      "date": 1686099149655
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b0dfe375b16dbc94"
+      },
+      "id": "b0dfe375b16dbc94",
+      "type": "add",
+      "after": "e2da9212c5fb8d57",
+      "date": 1686099194748
+    },
+    {
+      "type": "edit",
+      "id": "b0dfe375b16dbc94",
+      "item": {
+        "type": "paragraph",
+        "id": "b0dfe375b16dbc94",
+        "text": "If your journal represents different JSON structures, you can handle the variations using conditional decoding techniques. Here's an example: (chat.openai)"
+      },
+      "date": 1686099201497
+    },
+    {
+      "type": "add",
+      "id": "354226a5b8ca95aa",
+      "item": {
+        "type": "paragraph",
+        "id": "354226a5b8ca95aa",
+        "text": "1."
+      },
+      "after": "b0dfe375b16dbc94",
+      "date": 1686099230055
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7424f0aaecd64d60"
+      },
+      "id": "7424f0aaecd64d60",
+      "type": "add",
+      "after": "c6db84f7c4e55adb",
+      "date": 1686099232969
+    },
+    {
+      "type": "edit",
+      "id": "7424f0aaecd64d60",
+      "item": {
+        "type": "code",
+        "id": "7424f0aaecd64d60",
+        "text": "{\n  \"journal\": []\n}\n"
+      },
+      "date": 1686099235760
+    },
+    {
+      "type": "edit",
+      "id": "354226a5b8ca95aa",
+      "item": {
+        "type": "paragraph",
+        "id": "354226a5b8ca95aa",
+        "text": "1. Empty Journal:"
+      },
+      "date": 1686099243908
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f0cc9784c0683ccd"
+      },
+      "id": "f0cc9784c0683ccd",
+      "type": "add",
+      "after": "7424f0aaecd64d60",
+      "date": 1686099252273
+    },
+    {
+      "type": "edit",
+      "id": "f0cc9784c0683ccd",
+      "item": {
+        "type": "paragraph",
+        "id": "f0cc9784c0683ccd",
+        "text": "2. Non-empty Journal:"
+      },
+      "date": 1686099255925
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7fcb483c11a70de7"
+      },
+      "id": "7fcb483c11a70de7",
+      "type": "add",
+      "after": "f0cc9784c0683ccd",
+      "date": 1686099273365
+    },
+    {
+      "type": "edit",
+      "id": "7fcb483c11a70de7",
+      "item": {
+        "type": "code",
+        "id": "7fcb483c11a70de7",
+        "text": "{\n  \"journal\": [\n    {\n      \"event\": \"Create\",\n      \"item\": \"Edit Page Test\",\n      \"date\": 1685700575889\n    }\n  ]\n}\n"
+      },
+      "date": 1686099275630
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "23cce28c79384a7a"
+      },
+      "id": "23cce28c79384a7a",
+      "type": "add",
+      "after": "7fcb483c11a70de7",
+      "date": 1686099297220
+    },
+    {
+      "type": "edit",
+      "id": "23cce28c79384a7a",
+      "item": {
+        "type": "paragraph",
+        "id": "23cce28c79384a7a",
+        "text": "To handle these variations, you can define a type Journal with different constructors based on the structure. Here's an example implementation:"
+      },
+      "date": 1686099299424
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6b24816dbeb8f8cb"
+      },
+      "id": "6b24816dbeb8f8cb",
+      "type": "add",
+      "after": "23cce28c79384a7a",
+      "date": 1686099309605
+    },
+    {
+      "type": "edit",
+      "id": "6b24816dbeb8f8cb",
+      "item": {
+        "type": "code",
+        "id": "6b24816dbeb8f8cb",
+        "text": "import Json.Decode as Decode exposing (Decoder, list, field, string, int, oneOf)\n\ntype Journal\n    = EmptyJournal\n    | NonEmptyJournal String\n\njournalDecoder : Decoder Journal\njournalDecoder =\n    field \"journal\" (list journalEntryDecoder)\n        |> Decode.andThen handleJournal\n\nhandleJournal : List JournalEntry -> Decoder Journal\nhandleJournal entries =\n    case entries of\n        [] ->\n            Decode.succeed EmptyJournal\n\n        _ ->\n            Decode.succeed (NonEmptyJournal \"Some data\")\n\njournalEntryDecoder : Decoder JournalEntry\njournalEntryDecoder =\n    Decode.map3 JournalEntry\n        (field \"event\" string)\n        (field \"item\" string)\n        (field \"date\" int)\n\ntype alias JournalEntry =\n    { event : String\n    , item : String\n    , date : Int\n    }\n"
+      },
+      "date": 1686099312051
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "41ac27e2c330ba88"
+      },
+      "id": "41ac27e2c330ba88",
+      "type": "add",
+      "after": "6b24816dbeb8f8cb",
+      "date": 1686099364174
+    },
+    {
+      "type": "edit",
+      "id": "41ac27e2c330ba88",
+      "item": {
+        "type": "paragraph",
+        "id": "41ac27e2c330ba88",
+        "text": "n the above example, the Journal type represents the different variations of the journal. We have EmptyJournal and NonEmptyJournal constructors. The journalDecoder function decodes the \"journal\" field and uses andThen to handle the variations based on the presence or absence of entries."
+      },
+      "date": 1686099366211
+    },
+    {
+      "type": "edit",
+      "id": "41ac27e2c330ba88",
+      "item": {
+        "type": "paragraph",
+        "id": "41ac27e2c330ba88",
+        "text": "In the above example, the Journal type represents the different variations of the journal. We have EmptyJournal and NonEmptyJournal constructors. The journalDecoder function decodes the \"journal\" field and uses andThen to handle the variations based on the presence or absence of entries."
+      },
+      "date": 1686099370821
+    },
+    {
+      "type": "add",
+      "id": "48f82f3a8412e886",
+      "item": {
+        "type": "paragraph",
+        "id": "48f82f3a8412e886",
+        "text": "The handleJournal function is called by andThen and takes the list of JournalEntry as an argument. Here, you can implement your logic to determine whether the journal is empty or non-empty."
+      },
+      "after": "41ac27e2c330ba88",
+      "date": 1686099397786
+    },
+    {
+      "type": "add",
+      "id": "d88a65214d7d480a",
+      "item": {
+        "type": "paragraph",
+        "id": "d88a65214d7d480a",
+        "text": "Note that this is a simplified example, and you would need to adapt it based on your specific JSON structures and requirements. By using conditional decoding techniques and defining appropriate types and decoders, you can handle different JSON structures in your journal or any other data structure in Elm. (chat.openai)"
+      },
+      "after": "48f82f3a8412e886",
+      "date": 1686099412074
+    },
+    {
+      "type": "add",
+      "id": "b4a92dbc86f784d4",
+      "item": {
+        "type": "paragraph",
+        "id": "b4a92dbc86f784d4",
+        "text": "refactor: Journal as type (was: type alias) "
+      },
+      "after": "d88a65214d7d480a",
+      "date": 1686099464244
+    },
+    {
+      "type": "edit",
+      "id": "b4a92dbc86f784d4",
+      "item": {
+        "type": "paragraph",
+        "id": "b4a92dbc86f784d4",
+        "text": "refactor: Journal as type (was: type alias) [https://github.com/RalfBarkow/vite-elm-dojo/commit/e50c0f6144392ff7121994d21cc63c4393078c96 commit]"
+      },
+      "date": 1686099478196
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fd0f8c80e03cf7f6"
+      },
+      "id": "fd0f8c80e03cf7f6",
+      "type": "add",
+      "after": "b4a92dbc86f784d4",
+      "date": 1686099578262
+    },
+    {
+      "id": "fd0f8c80e03cf7f6",
+      "type": "move",
+      "order": [
+        "1dbb60315889e20a",
+        "0857064b9bf6e357",
+        "a45d193afaca11fd",
+        "ec40d7b1de0e24f2",
+        "49c3d37601f15f85",
+        "190db611d9c89728",
+        "3b50406bc98b0886",
+        "2a5143b241383532",
+        "9ada78c71b7a766d",
+        "2585e6a310490fcb",
+        "fccd6a492da9ad58",
+        "860d7b43c1609e56",
+        "f3fce432e4a66552",
+        "83ed4a81aabbbce0",
+        "cfab0e51092bbf2d",
+        "19205ffe61b5bce9",
+        "af33aa210dfe0b72",
+        "2d3010a6ccaf92b0",
+        "82bbda23d7c0097b",
+        "9d65a2e0dafe6e25",
+        "e2ba990422080644",
+        "5a40346d17a3ea4a",
+        "88310b4b22e25b92",
+        "de11a7c1d9fed671",
+        "284876386a942311",
+        "73890548cdd5685d",
+        "5fdb7485c7026bc7",
+        "8199a1d23db2d2bb",
+        "af66e06b1145a27c",
+        "de89785ef15e874e",
+        "e774564c0062ffc0",
+        "3ce24052fd94c237",
+        "e0b4999c1425f223",
+        "e2da9212c5fb8d57",
+        "b0dfe375b16dbc94",
+        "354226a5b8ca95aa",
+        "7424f0aaecd64d60",
+        "f0cc9784c0683ccd",
+        "7fcb483c11a70de7",
+        "23cce28c79384a7a",
+        "6b24816dbeb8f8cb",
+        "41ac27e2c330ba88",
+        "48f82f3a8412e886",
+        "d88a65214d7d480a",
+        "fd0f8c80e03cf7f6",
+        "b4a92dbc86f784d4"
+      ],
+      "date": 1686099580275
+    },
+    {
+      "type": "edit",
+      "id": "fd0f8c80e03cf7f6",
+      "item": {
+        "type": "pagefold",
+        "id": "fd0f8c80e03cf7f6",
+        "text": "~"
+      },
+      "date": 1686099583588
+    },
+    {
+      "type": "add",
+      "id": "79001f92e9692365",
+      "item": {
+        "type": "paragraph",
+        "id": "79001f92e9692365",
+        "text": "Cf. Write-Ahead Log"
+      },
+      "after": "fccd6a492da9ad58",
+      "date": 1686100651893
+    },
+    {
+      "type": "edit",
+      "id": "79001f92e9692365",
+      "item": {
+        "type": "paragraph",
+        "id": "79001f92e9692365",
+        "text": "Cf. Write-Ahead Log [https://martinfowler.com/articles/patterns-of-distributed-systems/wal.html page]"
+      },
+      "date": 1686100663220
+    },
+    {
+      "type": "edit",
+      "id": "79001f92e9692365",
+      "item": {
+        "type": "paragraph",
+        "id": "79001f92e9692365",
+        "text": "Cf. \"Write-Ahead Log\" [https://martinfowler.com/articles/patterns-of-distributed-systems/wal.html page] and \"Lamdera Data Storage\" "
+      },
+      "date": 1686100759141
+    },
+    {
+      "type": "edit",
+      "id": "79001f92e9692365",
+      "item": {
+        "type": "paragraph",
+        "id": "79001f92e9692365",
+        "text": "Cf. \"Write-Ahead Log\" [https://martinfowler.com/articles/patterns-of-distributed-systems/wal.html page] and \"Lamdera Data Storage\" [https://realmario.notion.site/Lamdera-Data-Storage-faf9d90bc31e45cc9959caec5ced4ad2 page]"
+      },
+      "date": 1686100791360
+    },
+    {
+      "id": "79001f92e9692365",
+      "type": "move",
+      "order": [
+        "1dbb60315889e20a",
+        "0857064b9bf6e357",
+        "a45d193afaca11fd",
+        "ec40d7b1de0e24f2",
+        "49c3d37601f15f85",
+        "190db611d9c89728",
+        "3b50406bc98b0886",
+        "2a5143b241383532",
+        "9ada78c71b7a766d",
+        "2585e6a310490fcb",
+        "79001f92e9692365",
+        "fccd6a492da9ad58",
+        "860d7b43c1609e56",
+        "f3fce432e4a66552",
+        "83ed4a81aabbbce0",
+        "cfab0e51092bbf2d",
+        "19205ffe61b5bce9",
+        "af33aa210dfe0b72",
+        "2d3010a6ccaf92b0",
+        "82bbda23d7c0097b",
+        "9d65a2e0dafe6e25",
+        "e2ba990422080644",
+        "5a40346d17a3ea4a",
+        "88310b4b22e25b92",
+        "de11a7c1d9fed671",
+        "284876386a942311",
+        "73890548cdd5685d",
+        "5fdb7485c7026bc7",
+        "8199a1d23db2d2bb",
+        "af66e06b1145a27c",
+        "de89785ef15e874e",
+        "e774564c0062ffc0",
+        "3ce24052fd94c237",
+        "e0b4999c1425f223",
+        "e2da9212c5fb8d57",
+        "b0dfe375b16dbc94",
+        "354226a5b8ca95aa",
+        "7424f0aaecd64d60",
+        "f0cc9784c0683ccd",
+        "7fcb483c11a70de7",
+        "23cce28c79384a7a",
+        "6b24816dbeb8f8cb",
+        "41ac27e2c330ba88",
+        "48f82f3a8412e886",
+        "d88a65214d7d480a",
+        "fd0f8c80e03cf7f6",
+        "b4a92dbc86f784d4"
+      ],
+      "date": 1686100801009
+    },
+    {
+      "id": "79001f92e9692365",
+      "type": "move",
+      "order": [
+        "1dbb60315889e20a",
+        "0857064b9bf6e357",
+        "a45d193afaca11fd",
+        "ec40d7b1de0e24f2",
+        "49c3d37601f15f85",
+        "190db611d9c89728",
+        "3b50406bc98b0886",
+        "2a5143b241383532",
+        "9ada78c71b7a766d",
+        "79001f92e9692365",
+        "2585e6a310490fcb",
+        "fccd6a492da9ad58",
+        "860d7b43c1609e56",
+        "f3fce432e4a66552",
+        "83ed4a81aabbbce0",
+        "cfab0e51092bbf2d",
+        "19205ffe61b5bce9",
+        "af33aa210dfe0b72",
+        "2d3010a6ccaf92b0",
+        "82bbda23d7c0097b",
+        "9d65a2e0dafe6e25",
+        "e2ba990422080644",
+        "5a40346d17a3ea4a",
+        "88310b4b22e25b92",
+        "de11a7c1d9fed671",
+        "284876386a942311",
+        "73890548cdd5685d",
+        "5fdb7485c7026bc7",
+        "8199a1d23db2d2bb",
+        "af66e06b1145a27c",
+        "de89785ef15e874e",
+        "e774564c0062ffc0",
+        "3ce24052fd94c237",
+        "e0b4999c1425f223",
+        "e2da9212c5fb8d57",
+        "b0dfe375b16dbc94",
+        "354226a5b8ca95aa",
+        "7424f0aaecd64d60",
+        "f0cc9784c0683ccd",
+        "7fcb483c11a70de7",
+        "23cce28c79384a7a",
+        "6b24816dbeb8f8cb",
+        "41ac27e2c330ba88",
+        "48f82f3a8412e886",
+        "d88a65214d7d480a",
+        "fd0f8c80e03cf7f6",
+        "b4a92dbc86f784d4"
+      ],
+      "date": 1686100806946
+    },
+    {
+      "type": "edit",
+      "id": "9ada78c71b7a766d",
+      "item": {
+        "type": "paragraph",
+        "id": "9ada78c71b7a766d",
+        "text": "I would like to model the Journal as a stream of events. See [[Event Sourcing]] and "
+      },
+      "date": 1686100836471
+    },
+    {
+      "type": "remove",
+      "id": "79001f92e9692365",
+      "date": 1686100840257
+    },
+    {
+      "type": "edit",
+      "id": "9ada78c71b7a766d",
+      "item": {
+        "type": "paragraph",
+        "id": "9ada78c71b7a766d",
+        "text": "I would like to model the Journal as a stream of events. See [[Event Sourcing]] and \"Write-Ahead Log\" [https://martinfowler.com/articles/patterns-of-distributed-systems/wal.html page] and \"Lamdera Data Storage\" [https://realmario.notion.site/Lamdera-Data-Storage-faf9d90bc31e45cc9959caec5ced4ad2 page]"
+      },
+      "date": 1686100841529
+    },
+    {
+      "type": "edit",
+      "id": "9ada78c71b7a766d",
+      "item": {
+        "type": "paragraph",
+        "id": "9ada78c71b7a766d",
+        "text": "I would like to model the Journal as a stream of events. See [[Event Sourcing]] and \"Write-Ahead Log\" [https://martinfowler.com/articles/patterns-of-distributed-systems/wal.html page] and \"Lamdera Data Storage\" [https://realmario.notion.site/Lamdera-Data-Storage-faf9d90bc31e45cc9959caec5ced4ad2 page]."
+      },
+      "date": 1686100851862
+    },
+    {
+      "type": "edit",
+      "id": "1dbb60315889e20a",
+      "item": {
+        "type": "paragraph",
+        "id": "1dbb60315889e20a",
+        "text": "refactor: [[Journal]] type alias to an empty record,\n\nrefactor: test: RED Decode JSON into Page\n\nThis [https://github.com/RalfBarkow/vite-elm-dojo/commit/5fe85629abb1cc74450f3303f9a9a470e31e8c2b commit] refactors the Journal type alias in the Wiki module. It changes the previous definition of { storyEdits : [[List]] StoryEdit } to an empty record {}.\n\ntest case output: [⇒ [[Create New Page Test]] > JSON]\n\nOk { journal = [{}], story = [{ id = \"b8a8a898990b9b70\", text = \"We could not find this page.\", title = \"Create New Page Test\", type_ = \"future\" }], title = \"Create New Page Test\" }"
+      },
+      "date": 1686115932203
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d7207ed0b8a523c1"
+      },
+      "id": "d7207ed0b8a523c1",
+      "type": "add",
+      "after": "b4a92dbc86f784d4",
+      "date": 1686116156515
+    },
+    {
+      "id": "d7207ed0b8a523c1",
+      "type": "move",
+      "order": [
+        "1dbb60315889e20a",
+        "d7207ed0b8a523c1",
+        "0857064b9bf6e357",
+        "a45d193afaca11fd",
+        "ec40d7b1de0e24f2",
+        "49c3d37601f15f85",
+        "190db611d9c89728",
+        "3b50406bc98b0886",
+        "2a5143b241383532",
+        "9ada78c71b7a766d",
+        "2585e6a310490fcb",
+        "fccd6a492da9ad58",
+        "860d7b43c1609e56",
+        "f3fce432e4a66552",
+        "83ed4a81aabbbce0",
+        "cfab0e51092bbf2d",
+        "19205ffe61b5bce9",
+        "af33aa210dfe0b72",
+        "2d3010a6ccaf92b0",
+        "82bbda23d7c0097b",
+        "9d65a2e0dafe6e25",
+        "e2ba990422080644",
+        "5a40346d17a3ea4a",
+        "88310b4b22e25b92",
+        "de11a7c1d9fed671",
+        "284876386a942311",
+        "73890548cdd5685d",
+        "5fdb7485c7026bc7",
+        "8199a1d23db2d2bb",
+        "af66e06b1145a27c",
+        "de89785ef15e874e",
+        "e774564c0062ffc0",
+        "3ce24052fd94c237",
+        "e0b4999c1425f223",
+        "e2da9212c5fb8d57",
+        "b0dfe375b16dbc94",
+        "354226a5b8ca95aa",
+        "7424f0aaecd64d60",
+        "f0cc9784c0683ccd",
+        "7fcb483c11a70de7",
+        "23cce28c79384a7a",
+        "6b24816dbeb8f8cb",
+        "41ac27e2c330ba88",
+        "48f82f3a8412e886",
+        "d88a65214d7d480a",
+        "fd0f8c80e03cf7f6",
+        "b4a92dbc86f784d4"
+      ],
+      "date": 1686116181164
+    },
+    {
+      "type": "edit",
+      "id": "d7207ed0b8a523c1",
+      "item": {
+        "type": "code",
+        "id": "d7207ed0b8a523c1",
+        "text": "{\n  \"title\": \"Create New Page Test\",\n  \"story\": [\n    {\n      \"id\": \"a753f30993d4523a\",\n      \"type\": \"future\",\n      \"text\": \"We could not find this page.\",\n      \"title\": \"Create New Page Test\"\n    }\n  ],\n  \"journal\": []\n}"
+      },
+      "date": 1686116196585
+    },
+    {
+      "type": "edit",
+      "id": "0857064b9bf6e357",
+      "item": {
+        "type": "paragraph",
+        "id": "0857064b9bf6e357",
+        "text": "JSON"
+      },
+      "date": 1686116266519
+    },
+    {
+      "type": "add",
+      "id": "2b05187232405950",
+      "item": {
+        "type": "paragraph",
+        "id": "2b05187232405950",
+        "text": "The difference you're observing is related to how Elm represents empty records ({}) and empty lists ([]) in its output. (chat.openai)"
+      },
+      "after": "0857064b9bf6e357",
+      "date": 1686116280458
+    },
+    {
+      "type": "edit",
+      "id": "0857064b9bf6e357",
+      "item": {
+        "type": "paragraph",
+        "id": "0857064b9bf6e357",
+        "text": "< JSON"
+      },
+      "date": 1686116288059
+    },
+    {
+      "type": "edit",
+      "id": "0857064b9bf6e357",
+      "item": {
+        "type": "paragraph",
+        "id": "0857064b9bf6e357",
+        "text": ">> JSON"
+      },
+      "date": 1686116331014
+    },
+    {
+      "type": "edit",
+      "id": "0857064b9bf6e357",
+      "item": {
+        "type": "paragraph",
+        "id": "0857064b9bf6e357",
+        "text": "< JSON"
+      },
+      "date": 1686116352404
+    },
+    {
+      "type": "edit",
+      "id": "1dbb60315889e20a",
+      "item": {
+        "type": "paragraph",
+        "id": "1dbb60315889e20a",
+        "text": "refactor: [[Journal]] type alias to an empty record,\n\nrefactor: test: RED Decode JSON into Page\n\nThis [https://github.com/RalfBarkow/vite-elm-dojo/commit/5fe85629abb1cc74450f3303f9a9a470e31e8c2b commit] refactors the Journal type alias in the Wiki module. It changes the previous definition of { storyEdits : [[List]] StoryEdit } to an empty record {}.\n\n"
+      },
+      "date": 1686116485355
+    },
+    {
+      "type": "add",
+      "id": "b069e9231c3d59f7",
+      "item": {
+        "type": "paragraph",
+        "id": "b069e9231c3d59f7",
+        "text": "test case output: [⇒ [[Create New Page Test]] > JSON]\n\nOk { journal = [{}], story = [{ id = \"a753f30993d4523a\", text = \"We could not find this page.\", title = \"Create New Page Test\", type_ = \"future\" }], title = \"Create New Page Test\" }"
+      },
+      "after": "1dbb60315889e20a",
+      "date": 1686116490774
+    },
+    {
+      "type": "edit",
+      "id": "49c3d37601f15f85",
+      "item": {
+        "type": "paragraph",
+        "id": "49c3d37601f15f85",
+        "text": "In your case, even though the rawData JSON specifies \"journal\": [], Elm decodes it as an empty list with one element, which is an empty record. This is a quirk of Elm's JSON decoding mechanism. It's important to note that although the representation might differ, both journal = [{}] and journal = [] effectively [[indicate]] an empty journal."
+      },
+      "date": 1686116561685
+    },
+    {
+      "type": "edit",
+      "id": "9ada78c71b7a766d",
+      "item": {
+        "type": "paragraph",
+        "id": "9ada78c71b7a766d",
+        "text": "I would like to model the Journal as a stream of events. See [[Event Sourcing]], \"Write-Ahead Log\" [https://martinfowler.com/articles/patterns-of-distributed-systems/wal.html page] and \"Lamdera Data Storage\" [https://realmario.notion.site/Lamdera-Data-Storage-faf9d90bc31e45cc9959caec5ced4ad2 page]."
+      },
+      "date": 1686116650098
+    },
+    {
+      "type": "edit",
+      "id": "9ada78c71b7a766d",
+      "item": {
+        "type": "paragraph",
+        "id": "9ada78c71b7a766d",
+        "text": "I would like to model the Journal as a stream of events. See [[Event Sourcing]], \"[[Write-Ahead-Log]]\" [https://martinfowler.com/articles/patterns-of-distributed-systems/wal.html page] and \"Lamdera Data Storage\" [https://realmario.notion.site/Lamdera-Data-Storage-faf9d90bc31e45cc9959caec5ced4ad2 page]."
+      },
+      "date": 1686116762175
+    }
+  ]
+}
