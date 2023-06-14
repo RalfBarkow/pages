@@ -1,0 +1,1841 @@
+{
+  "title": "2023-06-14",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "f5c8a1d276014352",
+      "text": "The errors reported by [[elm-review]] are related to unused type constructors and unused values in your code. Here are the suggested fixes for each error: (ChatGPT May 24 Version)"
+    },
+    {
+      "type": "paragraph",
+      "id": "564621064689c164",
+      "text": "1. NoUnused.CustomTypeConstructors: Type constructor Unknown is not used."
+    },
+    {
+      "type": "markdown",
+      "id": "a506945ff46d056e",
+      "text": "* To fix this error, you can remove the Unknown type constructor from the Msg type if it is no longer needed."
+    },
+    {
+      "type": "paragraph",
+      "id": "4a6b36e15050cc8d",
+      "text": "2. NoUnused.Patterns: Value internals is not used."
+    },
+    {
+      "type": "markdown",
+      "id": "8a8be92b0a73498d",
+      "text": "* To fix this error, you can replace the internals value with an underscore (_) if it is not used in the pattern. This indicates that the value is intentionally ignored."
+    },
+    {
+      "type": "paragraph",
+      "id": "92eacdec37d86f23",
+      "text": "3. NoDebug.TodoOrToString: Remove the use of Debug.toString before shipping to production."
+    },
+    {
+      "type": "markdown",
+      "id": "6c4066bfdf5d019e",
+      "text": "* To fix this error, you should remove the use of Debug.toString before deploying your code to production. This function is useful for debugging but should not be used in production code."
+    },
+    {
+      "type": "paragraph",
+      "id": "f4f95ef41ac5347b",
+      "text": "4. NoUnused.CustomTypeConstructorArgs: Argument is never extracted and therefore never used."
+    },
+    {
+      "type": "markdown",
+      "id": "87f6c8e438a23a65",
+      "text": "* These errors indicate that the arguments for certain type constructors are not used. You can remove the unused arguments or modify the code to use them if needed."
+    },
+    {
+      "type": "paragraph",
+      "id": "462019a12db74907",
+      "text": "It's important to review the suggested fixes and make adjustments based on your specific requirements. Remember to test your code after making the changes to ensure that it functions as expected."
+    },
+    {
+      "type": "pagefold",
+      "id": "4f703d860675b96b",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "7924f44af9ceb33d",
+      "text": "elm-review points out these code passages:"
+    },
+    {
+      "type": "code",
+      "id": "8a12ef594dbb506e",
+      "text": "type Msg\n    = UpdateInput String\n    | ParseJson\n    | Unknown Decode.Value"
+    },
+    {
+      "type": "code",
+      "id": "a4eb8be904009062",
+      "text": "type ParsedJson\n    = NotParsed\n    | Parsed Wiki.Page"
+    },
+    {
+      "type": "paragraph",
+      "id": "aaae600dd7615e4f",
+      "text": "… and 2 (?!) cases in the update function"
+    },
+    {
+      "type": "code",
+      "id": "a72aba1dfb0002e2",
+      "text": "ParseJson ->\n    let\n        json : String.String\n        json =\n            trim model.input\n    in\n    case Decode.decodeString Wiki.pageDecoder json of\n        Ok value ->\n            ( { model | parsedJson = Parsed value, output = Wiki.pageEncoder value |> Encode.encode 0 }, Cmd.none )\n\n        Err _ ->\n            ( { model | parsedJson = NotParsed, output = \"\" }, Cmd.none )\n\nUnknown internals ->\n    -- Handle the Unknown <internals> event with the JSON data\n    -- You can parse the JSON, update the model, or perform any other actions\n    -- based on the jsonData\n    ( model, Cmd.none ) "
+    },
+    {
+      "type": "paragraph",
+      "id": "c67f7da04f9c7fda",
+      "text": "[...] The Ok and Err branches deal with different model updates: Parsed and NotParsed. The Parsed value includes the Unknown <internals> events. I would like to filter out these internals."
+    },
+    {
+      "type": "paragraph",
+      "id": "e527dcd53b35e675",
+      "text": "If you want to filter out the Unknown <internals> events from the Parsed value, you can modify the code as follows: (ChatGPT May 24 Version)"
+    },
+    {
+      "type": "code",
+      "id": "933c986bc04b8a9c",
+      "text": "update : Msg -> Model -> ( Model, Cmd Msg )\nupdate msg model =\n    case msg of\n        -- Existing cases...\n\n        ParseJson ->\n            let\n                json : String\n                json =\n                    trim model.input\n            in\n            case Decode.decodeValue Wiki.pageDecoder json of\n                Ok parsedValue ->\n                    let\n                        filteredValue =\n                            filterUnknownInternals parsedValue\n                    in\n                    ( { model | parsedJson = filteredValue }, Cmd.none )"
+    },
+    {
+      "type": "paragraph",
+      "id": "c6ab51c7d279ebda",
+      "text": "[Note: The output = Wiki.pageEncoder value |> Encode.encode 0 was omitted here by the chat thing. And we delete the Unknown internals branch. RB] ⇒ refactor(Main): delete the Unknown msg branch from update [https://github.com/RalfBarkow/vite-elm-dojo/commit/fb00e4b324d80f8e4c83a10a73737a9296192162 commit] "
+    },
+    {
+      "type": "code",
+      "id": "020683dbab18546f",
+      "text": "\n\n                Err _ ->\n                    ( { model | parsedJson = NotParsed, output = \"\" }, Cmd.none )\n\n        -- ...\n\n\nfilterUnknownInternals : ParsedJson -> ParsedJson\nfilterUnknownInternals parsedValue =\n    case parsedValue of\n        Parsed page ->\n            let\n                filteredJournal =\n                    filterUnknownEvents page.journal\n            in\n            Parsed { page | journal = filteredJournal }\n\n        _ ->\n            parsedValue\n\n\nfilterUnknownEvents : List Wiki.JournalEntry -> List Wiki.JournalEntry\nfilterUnknownEvents entries =\n    List.filter isNotUnknownInternal entries\n\n\nisNotUnknownInternal : Wiki.JournalEntry -> Bool\nisNotUnknownInternal entry =\n    case entry of\n        Wiki.Unknown _ ->\n            False\n\n        _ ->\n            True\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "9c19a6fadafa684c",
+      "text": "In this modified code, we introduce two helper functions: filterUnknownInternals and filterUnknownEvents."
+    },
+    {
+      "type": "paragraph",
+      "id": "7002a00ff5e345f2",
+      "text": "The filterUnknownInternals function takes a ParsedJson value and checks if it's a Parsed value. If it is, it filters out the unknown internal events from the journal field by applying the filterUnknownEvents function."
+    },
+    {
+      "type": "paragraph",
+      "id": "3604b1d5125515cf",
+      "text": "The filterUnknownEvents function takes a list of Wiki.JournalEntry values and filters out the entries that are Unknown events, keeping only the known journal entries.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "da8403111daa6374",
+      "text": "By using these helper functions, we can filter out the unknown internal events from the Parsed value of the parsedJson field in the model."
+    },
+    {
+      "type": "paragraph",
+      "id": "ba03e9f84532789f",
+      "text": "I hope this clarification helps. Let me know if you have any further questions!"
+    },
+    {
+      "type": "pagefold",
+      "id": "14239609427d7e07",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "160b2ff59a853ba3",
+      "text": "Ok, sounds interesting. Since we are doing TDD, we write the test case first."
+    },
+    {
+      "type": "paragraph",
+      "id": "f23953e8b11e9deb",
+      "text": "Certainly! Let's write a test case to verify that the Unknown <internals> events are filtered out from the Parsed value in the update function. (ChatGPT May 24 Version)"
+    },
+    {
+      "type": "code",
+      "id": "43262399e63e1cb0",
+      "text": "import Expect exposing (expect)\nimport Main exposing (Model, Msg(..), ParsedJson(..), init, update)\n\n\nfilterUnknownInternalsTest : Test\nfilterUnknownInternalsTest =\n    let\n        inputModel : Model\n        inputModel =\n            { input = \"\"\n            , parsedJson =\n                Parsed\n                    { title = \"Test\"\n                    , journal =\n                        [ Unknown \"event1\"\n                        , { type = \"create\", item = { title = \"Page 1\" }, date = 1 }\n                        , Unknown \"event2\"\n                        , { type = \"edit\", item = { title = \"Page 2\" }, date = 2 }\n                        ]\n                    }\n            , output = \"\"\n            }\n\n        expectedModel : Model\n        expectedModel =\n            { input = \"\"\n            , parsedJson =\n                Parsed\n                    { title = \"Test\"\n                    , journal =\n                        [ { type = \"create\", item = { title = \"Page 1\" }, date = 1 }\n                        , { type = \"edit\", item = { title = \"Page 2\" }, date = 2 }\n                        ]\n                    }\n            , output = \"\"\n            }\n\n        ( updatedModel, _ ) =\n            update ParseJson inputModel\n    in\n    expect updatedModel\n        |> toEqual expectedModel\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "6464f687571b3111",
+      "text": "In this test case, we set up an input model with a Parsed value in the parsedJson field. The journal field contains a mixture of Unknown events and known events. We expect that the Unknown events will be filtered out in the updated model."
+    },
+    {
+      "type": "paragraph",
+      "id": "315d33948481f47e",
+      "text": "We then call the update function with the ParseJson message and the input model. We extract the updated model and compare it with the expected model using the toEqual assertion from the Expect module.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "1d102388f60a1989",
+      "text": "This test case ensures that the Unknown <internals> events are correctly filtered out when the ParseJson message is received."
+    },
+    {
+      "type": "paragraph",
+      "id": "d1a87e2361290202",
+      "text": "Remember to import the necessary modules and include this test case in your test suite."
+    },
+    {
+      "type": "pagefold",
+      "id": "0dd529660968de3d",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "3d85ac1762d25ea2",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "dcc02c441ee7f1d2",
+      "text": "Almost. But the output must be the same as before - not filtered. The filtered output should create a new HTML element. "
+    },
+    {
+      "type": "paragraph",
+      "id": "a6edffc3aa87a52b",
+      "text": "[…] If the goal is to generate a new HTML element containing the filtered JSON string, we can update the filterUnknownInternals function to return both the filtered ParsedJson and the filtered JSON string. "
+    },
+    {
+      "type": "paragraph",
+      "id": "21672d51b5422441",
+      "text": "[Note: The chat thing writes: \"filtered ParsedJson\". RB]"
+    },
+    {
+      "type": "paragraph",
+      "id": "f08e62855c295b3e",
+      "text": "Then, in the test case, we can compare the updated model's output field with the expected filtered JSON string. (ChatGPT May 24 Version)"
+    },
+    {
+      "type": "paragraph",
+      "id": "96d631659a11df30",
+      "text": "Here's the updated code snippet:"
+    },
+    {
+      "type": "code",
+      "id": "5c29692cb510f8f7",
+      "text": "import Expect exposing (expect)\nimport Html exposing (div, pre, text)\nimport Main exposing (Model, Msg(..), ParsedJson(..), init, update)\n\n\nfilterUnknownInternalsTest : Test\nfilterUnknownInternalsTest =\n    let\n        inputModel : Model\n        inputModel =\n            { input = \"\"\n            , parsedJson =\n                Parsed\n                    { title = \"Test\"\n                    , journal =\n                        [ Unknown \"event1\"\n                        , { type = \"create\", item = { title = \"Page 1\" }, date = 1 }\n                        , Unknown \"event2\"\n                        , { type = \"edit\", item = { title = \"Page 2\" }, date = 2 }\n                        ]\n                    }\n            , output = \"\"\n            }\n\n        expectedFilteredJsonString : String\n        expectedFilteredJsonString =\n            \"\"\"\n            {\n              \"title\": \"Test\",\n              \"journal\": [\n                {\n                  \"type\": \"create\",\n                  \"item\": {\n                    \"title\": \"Page 1\"\n                  },\n                  \"date\": 1\n                },\n                {\n                  \"type\": \"edit\",\n                  \"item\": {\n                    \"title\": \"Page 2\"\n                  },\n                  \"date\": 2\n                }\n              ]\n            }\n            \"\"\"\n\n        filterUnknownInternals : ParsedJson -> ( ParsedJson, String )\n        filterUnknownInternals parsedJson =\n            -- Implement the filtering logic here\n            let\n                filteredJsonString =\n                    -- Generate the filtered JSON string\n                    parsedJson\n                        |> Wiki.pageEncoder\n                        |> Encode.encode 0\n                        |> String.fromList\n            in\n            ( parsedJson, filteredJsonString )\n\n        ( updatedModel, _ ) =\n            update ParseJson inputModel\n                |> Tuple.mapFirst (\\model -> { model | output = \"Original output\" })\n                |> Tuple.mapFirst (\\model ->\n                       let\n                           ( filteredParsedJson, filteredJsonString ) =\n                               filterUnknownInternals model.parsedJson\n                       in\n                       { model | parsedJson = filteredParsedJson, output = filteredJsonString }\n                   )\n    in\n    expect updatedModel.output\n        |> toEqual expectedFilteredJsonString\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "c6f5a40ae86c19b6",
+      "text": "In this updated version, the filterUnknownInternals function now returns a tuple containing the […] ParsedJson and the filtered JSON string. The filterUnknownInternals function can be implemented with the desired logic to filter out the Unknown events and generate the filtered JSON string."
+    },
+    {
+      "type": "paragraph",
+      "id": "d1697f28eb6ea6fa",
+      "text": "[…]"
+    },
+    {
+      "type": "pagefold",
+      "id": "8c694595f17cf24c",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "5675d791734d88b2",
+      "text": "Compare "
+    },
+    {
+      "type": "code",
+      "id": "472423ee78dd448b",
+      "text": "filterUnknownInternals : ParsedJson -> (ParsedJson, String)\nfilterUnknownInternals parsedJson =\n    let\n        filteredJsonString =\n            parsedJson\n                |> Wiki.pageEncoder\n                |> Encode.encode 0\n    in\n    (parsedJson, filteredJsonString)\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "0578e981094b5587",
+      "text": "to"
+    },
+    {
+      "type": "code",
+      "id": "d23716ef89e1b8a6",
+      "text": "Ok value ->\n    ( { model\n        | parsedJson = Parsed value\n        , output = Wiki.pageEncoder value |> Encode.encode 0\n      }\n    , Cmd.none\n    )"
+    }
+  ],
+  "journal": [
+    {
+      "type": "edit",
+      "id": "f5c8a1d276014352",
+      "item": {
+        "type": "paragraph",
+        "id": "f5c8a1d276014352",
+        "text": "The errors reported by [[elm-review]] are related to unused type constructors and unused values in your code. Here are the suggested fixes for each error: (ChatGPT May 24 Version)"
+      },
+      "date": 1686720386432
+    },
+    {
+      "type": "edit",
+      "id": "f5c8a1d276014352",
+      "item": {
+        "type": "paragraph",
+        "id": "f5c8a1d276014352",
+        "text": "The errors reported by [[elm-review]] are related to unused type constructors and unused values in your code. Here are the suggested fixes for each error: (ChatGPT May 24 Version)"
+      },
+      "date": 1686720377618
+    },
+    {
+      "type": "edit",
+      "id": "f5c8a1d276014352",
+      "item": {
+        "type": "paragraph",
+        "id": "f5c8a1d276014352",
+        "text": "The errors reported by [[elm-review]] are related to unused type constructors and unused values in your code. Here are the suggested fixes for each error: (ChatGPT May 24 Version)"
+      },
+      "date": 1686720370912
+    },
+    {
+      "type": "edit",
+      "id": "f5c8a1d276014352",
+      "item": {
+        "type": "paragraph",
+        "id": "f5c8a1d276014352",
+        "text": "The errors reported by [[elm-review]] are related to unused type constructors and unused values in your code. Here are the suggested fixes for each error: (ChatGPT May 24 Version)"
+      },
+      "date": 1686720359438
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "f5c8a1d276014352",
+        "text": "The errors reported by [[elm-review]] are related to unused type constructors and unused values in your code. Here are the suggested fixes for each error: (ChatGPT May 24 Version)"
+      },
+      "id": "f5c8a1d276014352",
+      "type": "add",
+      "date": 1686720358164
+    },
+    {
+      "type": "create",
+      "item": {
+        "title": "2023-06-14",
+        "story": []
+      },
+      "date": 1686720356831
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "564621064689c164",
+        "text": "1. NoUnused.CustomTypeConstructors: Type constructor Unknown is not used."
+      },
+      "id": "564621064689c164",
+      "type": "add",
+      "after": "f5c8a1d276014352",
+      "date": 1686720528915
+    },
+    {
+      "type": "edit",
+      "id": "564621064689c164",
+      "item": {
+        "type": "paragraph",
+        "id": "564621064689c164",
+        "text": "1. NoUnused.CustomTypeConstructors: Type constructor Unknown is not used."
+      },
+      "date": 1686720531961
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "4a6b36e15050cc8d",
+        "text": "2. NoUnused.Patterns: Value internals is not used."
+      },
+      "id": "4a6b36e15050cc8d",
+      "type": "add",
+      "after": "564621064689c164",
+      "date": 1686720538358
+    },
+    {
+      "type": "edit",
+      "id": "4a6b36e15050cc8d",
+      "item": {
+        "type": "paragraph",
+        "id": "4a6b36e15050cc8d",
+        "text": "2. NoUnused.Patterns: Value internals is not used."
+      },
+      "date": 1686720541114
+    },
+    {
+      "type": "add",
+      "id": "a506945ff46d056e",
+      "item": {
+        "type": "markdown",
+        "id": "a506945ff46d056e",
+        "text": "* To fix this error, you can remove the Unknown type constructor from the Msg type if it is no longer needed."
+      },
+      "after": "564621064689c164",
+      "date": 1686720549841
+    },
+    {
+      "type": "edit",
+      "id": "a506945ff46d056e",
+      "item": {
+        "type": "markdown",
+        "id": "a506945ff46d056e",
+        "text": "* To fix this error, you can remove the Unknown type constructor from the Msg type if it is no longer needed."
+      },
+      "date": 1686720551733
+    },
+    {
+      "type": "add",
+      "id": "8a8be92b0a73498d",
+      "item": {
+        "type": "markdown",
+        "id": "8a8be92b0a73498d",
+        "text": "* To fix this error, you can replace the internals value with an underscore (_) if it is not used in the pattern. This indicates that the value is intentionally ignored."
+      },
+      "after": "4a6b36e15050cc8d",
+      "date": 1686720567676
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "92eacdec37d86f23",
+        "text": "3. NoDebug.TodoOrToString: Remove the use of Debug.toString before shipping to production."
+      },
+      "id": "92eacdec37d86f23",
+      "type": "add",
+      "after": "8a8be92b0a73498d",
+      "date": 1686720606614
+    },
+    {
+      "type": "edit",
+      "id": "92eacdec37d86f23",
+      "item": {
+        "type": "paragraph",
+        "id": "92eacdec37d86f23",
+        "text": "3. NoDebug.TodoOrToString: Remove the use of Debug.toString before shipping to production."
+      },
+      "date": 1686720609471
+    },
+    {
+      "item": {
+        "type": "markdown",
+        "id": "6c4066bfdf5d019e",
+        "text": "* To fix this error, you should remove the use of Debug.toString before deploying your code to production. This function is useful for debugging but should not be used in production code."
+      },
+      "id": "6c4066bfdf5d019e",
+      "type": "add",
+      "after": "92eacdec37d86f23",
+      "date": 1686720633795
+    },
+    {
+      "type": "edit",
+      "id": "6c4066bfdf5d019e",
+      "item": {
+        "type": "markdown",
+        "id": "6c4066bfdf5d019e",
+        "text": "* To fix this error, you should remove the use of Debug.toString before deploying your code to production. This function is useful for debugging but should not be used in production code."
+      },
+      "date": 1686720636316
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "f4f95ef41ac5347b",
+        "text": "4. NoUnused.CustomTypeConstructorArgs: Argument is never extracted and therefore never used."
+      },
+      "id": "f4f95ef41ac5347b",
+      "type": "add",
+      "after": "6c4066bfdf5d019e",
+      "date": 1686720642965
+    },
+    {
+      "type": "edit",
+      "id": "f4f95ef41ac5347b",
+      "item": {
+        "type": "paragraph",
+        "id": "f4f95ef41ac5347b",
+        "text": "4. NoUnused.CustomTypeConstructorArgs: Argument is never extracted and therefore never used."
+      },
+      "date": 1686720645701
+    },
+    {
+      "item": {
+        "type": "markdown",
+        "id": "87f6c8e438a23a65",
+        "text": "* These errors indicate that the arguments for certain type constructors are not used. You can remove the unused arguments or modify the code to use them if needed."
+      },
+      "id": "87f6c8e438a23a65",
+      "type": "add",
+      "after": "f4f95ef41ac5347b",
+      "date": 1686720655319
+    },
+    {
+      "type": "edit",
+      "id": "87f6c8e438a23a65",
+      "item": {
+        "type": "markdown",
+        "id": "87f6c8e438a23a65",
+        "text": "* These errors indicate that the arguments for certain type constructors are not used. You can remove the unused arguments or modify the code to use them if needed."
+      },
+      "date": 1686720659736
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "462019a12db74907",
+        "text": "It's important to review the suggested fixes and make adjustments based on your specific requirements. Remember to test your code after making the changes to ensure that it functions as expected."
+      },
+      "id": "462019a12db74907",
+      "type": "add",
+      "after": "87f6c8e438a23a65",
+      "date": 1686720666241
+    },
+    {
+      "type": "edit",
+      "id": "462019a12db74907",
+      "item": {
+        "type": "paragraph",
+        "id": "462019a12db74907",
+        "text": "It's important to review the suggested fixes and make adjustments based on your specific requirements. Remember to test your code after making the changes to ensure that it functions as expected."
+      },
+      "date": 1686720667431
+    },
+    {
+      "type": "edit",
+      "id": "8a8be92b0a73498d",
+      "item": {
+        "type": "markdown",
+        "id": "8a8be92b0a73498d",
+        "text": "* To fix this error, you can replace the internals value with an underscore (_) if it is not used in the pattern. This indicates that the value is intentionally ignored."
+      },
+      "date": 1686720669439
+    },
+    {
+      "type": "edit",
+      "id": "6c4066bfdf5d019e",
+      "item": {
+        "type": "markdown",
+        "id": "6c4066bfdf5d019e",
+        "text": "* To fix this error, you should remove the use of Debug.toString before deploying your code to production. This function is useful for debugging but should not be used in production code."
+      },
+      "date": 1686720670459
+    },
+    {
+      "type": "edit",
+      "id": "87f6c8e438a23a65",
+      "item": {
+        "type": "markdown",
+        "id": "87f6c8e438a23a65",
+        "text": "* These errors indicate that the arguments for certain type constructors are not used. You can remove the unused arguments or modify the code to use them if needed."
+      },
+      "date": 1686720671845
+    },
+    {
+      "item": {
+        "type": "pagefold",
+        "id": "4f703d860675b96b",
+        "text": "~"
+      },
+      "id": "4f703d860675b96b",
+      "type": "add",
+      "after": "462019a12db74907",
+      "date": 1686720744257
+    },
+    {
+      "type": "edit",
+      "id": "4f703d860675b96b",
+      "item": {
+        "type": "pagefold",
+        "id": "4f703d860675b96b",
+        "text": "~"
+      },
+      "date": 1686720748486
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "8a12ef594dbb506e",
+        "text": "type Msg\n    = UpdateInput String\n    | ParseJson\n    | Unknown Decode.Value"
+      },
+      "id": "8a12ef594dbb506e",
+      "type": "add",
+      "after": "4f703d860675b96b",
+      "date": 1686720749786
+    },
+    {
+      "type": "edit",
+      "id": "8a12ef594dbb506e",
+      "item": {
+        "type": "code",
+        "id": "8a12ef594dbb506e",
+        "text": "type Msg\n    = UpdateInput String\n    | ParseJson\n    | Unknown Decode.Value"
+      },
+      "date": 1686720752091
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "a72aba1dfb0002e2",
+        "text": "ParseJson ->\n    let\n        json : String.String\n        json =\n            trim model.input\n    in\n    case Decode.decodeString Wiki.pageDecoder json of\n        Ok value ->\n            ( { model | parsedJson = Parsed value, output = Wiki.pageEncoder value |> Encode.encode 0 }, Cmd.none )\n\n        Err _ ->\n            ( { model | parsedJson = NotParsed, output = \"\" }, Cmd.none )\n\nUnknown internals ->\n    -- Handle the Unknown <internals> event with the JSON data\n    -- You can parse the JSON, update the model, or perform any other actions\n    -- based on the jsonData\n    ( model, Cmd.none ) "
+      },
+      "id": "a72aba1dfb0002e2",
+      "type": "add",
+      "after": "8a12ef594dbb506e",
+      "date": 1686720773648
+    },
+    {
+      "type": "edit",
+      "id": "a72aba1dfb0002e2",
+      "item": {
+        "type": "code",
+        "id": "a72aba1dfb0002e2",
+        "text": "ParseJson ->\n    let\n        json : String.String\n        json =\n            trim model.input\n    in\n    case Decode.decodeString Wiki.pageDecoder json of\n        Ok value ->\n            ( { model | parsedJson = Parsed value, output = Wiki.pageEncoder value |> Encode.encode 0 }, Cmd.none )\n\n        Err _ ->\n            ( { model | parsedJson = NotParsed, output = \"\" }, Cmd.none )\n\nUnknown internals ->\n    -- Handle the Unknown <internals> event with the JSON data\n    -- You can parse the JSON, update the model, or perform any other actions\n    -- based on the jsonData\n    ( model, Cmd.none ) "
+      },
+      "date": 1686720775896
+    },
+    {
+      "type": "edit",
+      "id": "a72aba1dfb0002e2",
+      "item": {
+        "type": "code",
+        "id": "a72aba1dfb0002e2",
+        "text": "ParseJson ->\n    let\n        json : String.String\n        json =\n            trim model.input\n    in\n    case Decode.decodeString Wiki.pageDecoder json of\n        Ok value ->\n            ( { model | parsedJson = Parsed value, output = Wiki.pageEncoder value |> Encode.encode 0 }, Cmd.none )\n\n        Err _ ->\n            ( { model | parsedJson = NotParsed, output = \"\" }, Cmd.none )\n\nUnknown internals ->\n    -- Handle the Unknown <internals> event with the JSON data\n    -- You can parse the JSON, update the model, or perform any other actions\n    -- based on the jsonData\n    ( model, Cmd.none ) "
+      },
+      "date": 1686720831612
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "7924f44af9ceb33d",
+        "text": "elm-review draws attention to these code passages:"
+      },
+      "id": "7924f44af9ceb33d",
+      "type": "add",
+      "after": "a72aba1dfb0002e2",
+      "date": 1686720881344
+    },
+    {
+      "type": "edit",
+      "id": "7924f44af9ceb33d",
+      "item": {
+        "type": "paragraph",
+        "id": "7924f44af9ceb33d",
+        "text": "elm-review draws attention to these code passages:"
+      },
+      "date": 1686720883459
+    },
+    {
+      "id": "7924f44af9ceb33d",
+      "type": "move",
+      "order": [
+        "f5c8a1d276014352",
+        "564621064689c164",
+        "a506945ff46d056e",
+        "4a6b36e15050cc8d",
+        "8a8be92b0a73498d",
+        "92eacdec37d86f23",
+        "6c4066bfdf5d019e",
+        "f4f95ef41ac5347b",
+        "87f6c8e438a23a65",
+        "462019a12db74907",
+        "4f703d860675b96b",
+        "7924f44af9ceb33d",
+        "8a12ef594dbb506e",
+        "a72aba1dfb0002e2"
+      ],
+      "date": 1686720888379,
+      "error": {
+        "type": "error",
+        "msg": "Internal Server Error",
+        "response": "Server Ignoring move. Try reload."
+      }
+    },
+    {
+      "type": "fork",
+      "date": 1686720893858
+    },
+    {
+      "type": "edit",
+      "id": "7924f44af9ceb33d",
+      "item": {
+        "type": "paragraph",
+        "id": "7924f44af9ceb33d",
+        "text": "elm-review points out these code passages:"
+      },
+      "date": 1686720954402
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a4eb8be904009062"
+      },
+      "id": "a4eb8be904009062",
+      "type": "add",
+      "after": "a72aba1dfb0002e2",
+      "date": 1686720971944
+    },
+    {
+      "type": "edit",
+      "id": "a4eb8be904009062",
+      "item": {
+        "type": "code",
+        "id": "a4eb8be904009062",
+        "text": "type ParsedJson\n    = NotParsed\n    | Parsed Wiki.Page"
+      },
+      "date": 1686720973979
+    },
+    {
+      "id": "a4eb8be904009062",
+      "type": "move",
+      "order": [
+        "f5c8a1d276014352",
+        "564621064689c164",
+        "a506945ff46d056e",
+        "4a6b36e15050cc8d",
+        "8a8be92b0a73498d",
+        "92eacdec37d86f23",
+        "6c4066bfdf5d019e",
+        "f4f95ef41ac5347b",
+        "87f6c8e438a23a65",
+        "462019a12db74907",
+        "4f703d860675b96b",
+        "7924f44af9ceb33d",
+        "8a12ef594dbb506e",
+        "a4eb8be904009062",
+        "a72aba1dfb0002e2"
+      ],
+      "date": 1686720977910
+    },
+    {
+      "type": "add",
+      "id": "aaae600dd7615e4f",
+      "item": {
+        "type": "paragraph",
+        "id": "aaae600dd7615e4f",
+        "text": "and 2 (?!) cases in the update function"
+      },
+      "after": "7924f44af9ceb33d",
+      "date": 1686721010989
+    },
+    {
+      "id": "aaae600dd7615e4f",
+      "type": "move",
+      "order": [
+        "f5c8a1d276014352",
+        "564621064689c164",
+        "a506945ff46d056e",
+        "4a6b36e15050cc8d",
+        "8a8be92b0a73498d",
+        "92eacdec37d86f23",
+        "6c4066bfdf5d019e",
+        "f4f95ef41ac5347b",
+        "87f6c8e438a23a65",
+        "462019a12db74907",
+        "4f703d860675b96b",
+        "7924f44af9ceb33d",
+        "8a12ef594dbb506e",
+        "a4eb8be904009062",
+        "aaae600dd7615e4f",
+        "a72aba1dfb0002e2"
+      ],
+      "date": 1686721013561
+    },
+    {
+      "type": "edit",
+      "id": "aaae600dd7615e4f",
+      "item": {
+        "type": "paragraph",
+        "id": "aaae600dd7615e4f",
+        "text": "… and 2 (?!) cases in the update function"
+      },
+      "date": 1686721017461
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c67f7da04f9c7fda"
+      },
+      "id": "c67f7da04f9c7fda",
+      "type": "add",
+      "after": "a72aba1dfb0002e2",
+      "date": 1686721716295
+    },
+    {
+      "type": "edit",
+      "id": "c67f7da04f9c7fda",
+      "item": {
+        "type": "paragraph",
+        "id": "c67f7da04f9c7fda",
+        "text": "[…] "
+      },
+      "date": 1686721720287
+    },
+    {
+      "type": "edit",
+      "id": "c67f7da04f9c7fda",
+      "item": {
+        "type": "paragraph",
+        "id": "c67f7da04f9c7fda",
+        "text": "[…] Ok and Err branch are dealing with different model updates: Parsed and NotParsed. Part of the Parsed value are the Unknown <internals> event. I want to filter out those internals."
+      },
+      "date": 1686721723329
+    },
+    {
+      "type": "edit",
+      "id": "c67f7da04f9c7fda",
+      "item": {
+        "type": "paragraph",
+        "id": "c67f7da04f9c7fda",
+        "text": "[…] Ok and Err branch deal with different model updates: Parsed and NotParsed. Part of the Parsed value are the Unknown <internals> event. I want to filter out those internals."
+      },
+      "date": 1686721772575
+    },
+    {
+      "type": "edit",
+      "id": "c67f7da04f9c7fda",
+      "item": {
+        "type": "paragraph",
+        "id": "c67f7da04f9c7fda",
+        "text": "[…] The Ok and Err branches deal with different model updates: Parsed and NotParsed. Part of the Parsed value are the Unknown <internals> event. I want to filter out those internals."
+      },
+      "date": 1686721786684
+    },
+    {
+      "type": "edit",
+      "id": "c67f7da04f9c7fda",
+      "item": {
+        "type": "paragraph",
+        "id": "c67f7da04f9c7fda",
+        "text": "[...] The Ok and Err branches deal with different model updates: Parsed and NotParsed. The Parsed value includes the Unknown <internals> events. I would like to filter out these internals."
+      },
+      "date": 1686721847313
+    },
+    {
+      "type": "add",
+      "id": "e527dcd53b35e675",
+      "item": {
+        "type": "paragraph",
+        "id": "e527dcd53b35e675",
+        "text": "If you want to filter out the Unknown <internals> events from the Parsed value, you can modify the code as follows:"
+      },
+      "after": "c67f7da04f9c7fda",
+      "date": 1686722030476
+    },
+    {
+      "type": "edit",
+      "id": "e527dcd53b35e675",
+      "item": {
+        "type": "paragraph",
+        "id": "e527dcd53b35e675",
+        "text": "If you want to filter out the Unknown <internals> events from the Parsed value, you can modify the code as follows: (ChatGPT May 24 Version)"
+      },
+      "date": 1686722039440
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "020683dbab18546f"
+      },
+      "id": "020683dbab18546f",
+      "type": "add",
+      "after": "e527dcd53b35e675",
+      "date": 1686722049585
+    },
+    {
+      "type": "edit",
+      "id": "020683dbab18546f",
+      "item": {
+        "type": "code",
+        "id": "020683dbab18546f",
+        "text": "update : Msg -> Model -> ( Model, Cmd Msg )\nupdate msg model =\n    case msg of\n        -- Existing cases...\n\n        ParseJson ->\n            let\n                json : String\n                json =\n                    trim model.input\n            in\n            case Decode.decodeValue Wiki.pageDecoder json of\n                Ok parsedValue ->\n                    let\n                        filteredValue =\n                            filterUnknownInternals parsedValue\n                    in\n                    ( { model | parsedJson = filteredValue }, Cmd.none )\n\n                Err _ ->\n                    ( { model | parsedJson = NotParsed, output = \"\" }, Cmd.none )\n\n        -- ...\n\n\nfilterUnknownInternals : ParsedJson -> ParsedJson\nfilterUnknownInternals parsedValue =\n    case parsedValue of\n        Parsed page ->\n            let\n                filteredJournal =\n                    filterUnknownEvents page.journal\n            in\n            Parsed { page | journal = filteredJournal }\n\n        _ ->\n            parsedValue\n\n\nfilterUnknownEvents : List Wiki.JournalEntry -> List Wiki.JournalEntry\nfilterUnknownEvents entries =\n    List.filter isNotUnknownInternal entries\n\n\nisNotUnknownInternal : Wiki.JournalEntry -> Bool\nisNotUnknownInternal entry =\n    case entry of\n        Wiki.Unknown _ ->\n            False\n\n        _ ->\n            True\n"
+      },
+      "date": 1686722053266
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9c19a6fadafa684c"
+      },
+      "id": "9c19a6fadafa684c",
+      "type": "add",
+      "after": "020683dbab18546f",
+      "date": 1686722141451
+    },
+    {
+      "type": "edit",
+      "id": "9c19a6fadafa684c",
+      "item": {
+        "type": "paragraph",
+        "id": "9c19a6fadafa684c",
+        "text": "In this modified code, we introduce two helper functions: filterUnknownInternals and filterUnknownEvents."
+      },
+      "date": 1686722143333
+    },
+    {
+      "type": "add",
+      "id": "7002a00ff5e345f2",
+      "item": {
+        "type": "paragraph",
+        "id": "7002a00ff5e345f2",
+        "text": "The filterUnknownInternals function takes a ParsedJson value and checks if it's a Parsed value. If it is, it filters out the unknown internal events from the journal field by applying the filterUnknownEvents function.\n\n"
+      },
+      "after": "9c19a6fadafa684c",
+      "date": 1686722154889
+    },
+    {
+      "type": "edit",
+      "id": "7002a00ff5e345f2",
+      "item": {
+        "type": "paragraph",
+        "id": "7002a00ff5e345f2",
+        "text": "The filterUnknownInternals function takes a ParsedJson value and checks if it's a Parsed value. If it is, it filters out the unknown internal events from the journal field by applying the filterUnknownEvents function."
+      },
+      "date": 1686722163823
+    },
+    {
+      "type": "add",
+      "id": "3604b1d5125515cf",
+      "item": {
+        "type": "paragraph",
+        "id": "3604b1d5125515cf",
+        "text": "The filterUnknownEvents function takes a list of Wiki.JournalEntry values and filters out the entries that are Unknown events, keeping only the known journal entries.\n"
+      },
+      "after": "7002a00ff5e345f2",
+      "date": 1686722164743
+    },
+    {
+      "type": "add",
+      "id": "da8403111daa6374",
+      "item": {
+        "type": "paragraph",
+        "id": "da8403111daa6374",
+        "text": "By using these helper functions, we can filter out the unknown internal events from the Parsed value of the parsedJson field in the model."
+      },
+      "after": "3604b1d5125515cf",
+      "date": 1686722198165
+    },
+    {
+      "type": "add",
+      "id": "ba03e9f84532789f",
+      "item": {
+        "type": "paragraph",
+        "id": "ba03e9f84532789f",
+        "text": "I hope this clarification helps. Let me know if you have any further questions!"
+      },
+      "after": "da8403111daa6374",
+      "date": 1686722214586
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "14239609427d7e07"
+      },
+      "id": "14239609427d7e07",
+      "type": "add",
+      "after": "ba03e9f84532789f",
+      "date": 1686722220979
+    },
+    {
+      "type": "edit",
+      "id": "14239609427d7e07",
+      "item": {
+        "type": "pagefold",
+        "id": "14239609427d7e07",
+        "text": "~"
+      },
+      "date": 1686722223463
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "160b2ff59a853ba3"
+      },
+      "id": "160b2ff59a853ba3",
+      "type": "add",
+      "after": "14239609427d7e07",
+      "date": 1686722250266
+    },
+    {
+      "type": "edit",
+      "id": "160b2ff59a853ba3",
+      "item": {
+        "type": "paragraph",
+        "id": "160b2ff59a853ba3",
+        "text": "Ok, sounds interesting. Since we are doing TDD, we write the test case first."
+      },
+      "date": 1686722251941
+    },
+    {
+      "type": "add",
+      "id": "f23953e8b11e9deb",
+      "item": {
+        "type": "paragraph",
+        "id": "f23953e8b11e9deb",
+        "text": "Certainly! Let's write a test case to verify that the Unknown <internals> events are filtered out from the Parsed value in the update function. ()"
+      },
+      "after": "160b2ff59a853ba3",
+      "date": 1686722269830
+    },
+    {
+      "type": "edit",
+      "id": "f23953e8b11e9deb",
+      "item": {
+        "type": "paragraph",
+        "id": "f23953e8b11e9deb",
+        "text": "Certainly! Let's write a test case to verify that the Unknown <internals> events are filtered out from the Parsed value in the update function. (ChatGPT May 24 Version)"
+      },
+      "date": 1686722285731
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "43262399e63e1cb0"
+      },
+      "id": "43262399e63e1cb0",
+      "type": "add",
+      "after": "f23953e8b11e9deb",
+      "date": 1686722293202
+    },
+    {
+      "type": "edit",
+      "id": "43262399e63e1cb0",
+      "item": {
+        "type": "code",
+        "id": "43262399e63e1cb0",
+        "text": "import Expect exposing (expect)\nimport Main exposing (Model, Msg(..), ParsedJson(..), init, update)\n\n\nfilterUnknownInternalsTest : Test\nfilterUnknownInternalsTest =\n    let\n        inputModel : Model\n        inputModel =\n            { input = \"\"\n            , parsedJson =\n                Parsed\n                    { title = \"Test\"\n                    , journal =\n                        [ Unknown \"event1\"\n                        , { type = \"create\", item = { title = \"Page 1\" }, date = 1 }\n                        , Unknown \"event2\"\n                        , { type = \"edit\", item = { title = \"Page 2\" }, date = 2 }\n                        ]\n                    }\n            , output = \"\"\n            }\n\n        expectedModel : Model\n        expectedModel =\n            { input = \"\"\n            , parsedJson =\n                Parsed\n                    { title = \"Test\"\n                    , journal =\n                        [ { type = \"create\", item = { title = \"Page 1\" }, date = 1 }\n                        , { type = \"edit\", item = { title = \"Page 2\" }, date = 2 }\n                        ]\n                    }\n            , output = \"\"\n            }\n\n        ( updatedModel, _ ) =\n            update ParseJson inputModel\n    in\n    expect updatedModel\n        |> toEqual expectedModel\n"
+      },
+      "date": 1686722295860
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6464f687571b3111"
+      },
+      "id": "6464f687571b3111",
+      "type": "add",
+      "after": "43262399e63e1cb0",
+      "date": 1686722308834
+    },
+    {
+      "type": "edit",
+      "id": "6464f687571b3111",
+      "item": {
+        "type": "paragraph",
+        "id": "6464f687571b3111",
+        "text": "In this test case, we set up an input model with a Parsed value in the parsedJson field. The journal field contains a mixture of Unknown events and known events. We expect that the Unknown events will be filtered out in the updated model.\n\n"
+      },
+      "date": 1686722310501
+    },
+    {
+      "type": "edit",
+      "id": "6464f687571b3111",
+      "item": {
+        "type": "paragraph",
+        "id": "6464f687571b3111",
+        "text": "In this test case, we set up an input model with a Parsed value in the parsedJson field. The journal field contains a mixture of Unknown events and known events. We expect that the Unknown events will be filtered out in the updated model."
+      },
+      "date": 1686722334143
+    },
+    {
+      "type": "add",
+      "id": "315d33948481f47e",
+      "item": {
+        "type": "paragraph",
+        "id": "315d33948481f47e",
+        "text": "We then call the update function with the ParseJson message and the input model. We extract the updated model and compare it with the expected model using the toEqual assertion from the Expect module.\n"
+      },
+      "after": "6464f687571b3111",
+      "date": 1686722335132
+    },
+    {
+      "type": "add",
+      "id": "1d102388f60a1989",
+      "item": {
+        "type": "paragraph",
+        "id": "1d102388f60a1989",
+        "text": "This test case ensures that the Unknown <internals> events are correctly filtered out when the ParseJson message is received."
+      },
+      "after": "315d33948481f47e",
+      "date": 1686722368119
+    },
+    {
+      "type": "add",
+      "id": "d1a87e2361290202",
+      "item": {
+        "type": "paragraph",
+        "id": "d1a87e2361290202",
+        "text": "Remember to import the necessary modules and include this test case in your test suite."
+      },
+      "after": "1d102388f60a1989",
+      "date": 1686722378020
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0dd529660968de3d"
+      },
+      "id": "0dd529660968de3d",
+      "type": "add",
+      "after": "d1a87e2361290202",
+      "date": 1686722845265
+    },
+    {
+      "type": "edit",
+      "id": "0dd529660968de3d",
+      "item": {
+        "type": "pagefold",
+        "id": "0dd529660968de3d",
+        "text": "~"
+      },
+      "date": 1686722848100
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3d85ac1762d25ea2"
+      },
+      "id": "3d85ac1762d25ea2",
+      "type": "add",
+      "after": "0dd529660968de3d",
+      "date": 1686722849453
+    },
+    {
+      "type": "edit",
+      "id": "3d85ac1762d25ea2",
+      "item": {
+        "type": "paragraph",
+        "id": "3d85ac1762d25ea2",
+        "text": "[…]"
+      },
+      "date": 1686722851823
+    },
+    {
+      "type": "add",
+      "id": "dcc02c441ee7f1d2",
+      "item": {
+        "type": "paragraph",
+        "id": "dcc02c441ee7f1d2",
+        "text": "Almost. But output must give as the output as before – not filtered. Filtered output should create a new HTML element. "
+      },
+      "after": "3d85ac1762d25ea2",
+      "date": 1686722853061
+    },
+    {
+      "type": "edit",
+      "id": "dcc02c441ee7f1d2",
+      "item": {
+        "type": "paragraph",
+        "id": "dcc02c441ee7f1d2",
+        "text": "Almost. But the output must be the same as before - not filtered. The filtered output should create a new HTML element. "
+      },
+      "date": 1686722893061
+    },
+    {
+      "type": "add",
+      "id": "a6edffc3aa87a52b",
+      "item": {
+        "type": "paragraph",
+        "id": "a6edffc3aa87a52b",
+        "text": "[…] Almost. But the output must be the same as before - not filtered. The filtered output should create a new HTML element. "
+      },
+      "after": "dcc02c441ee7f1d2",
+      "date": 1686722906983
+    },
+    {
+      "type": "edit",
+      "id": "a6edffc3aa87a52b",
+      "item": {
+        "type": "paragraph",
+        "id": "a6edffc3aa87a52b",
+        "text": "[…] If the goal is to generate a new HTML element containing the filtered JSON string, we can update the filterUnknownInternals function to return both the filtered ParsedJson and the filtered JSON string. Then, in the test case, we can compare the updated model's output field with the expected filtered JSON string.\n\n"
+      },
+      "date": 1686722913628
+    },
+    {
+      "type": "edit",
+      "id": "a6edffc3aa87a52b",
+      "item": {
+        "type": "paragraph",
+        "id": "a6edffc3aa87a52b",
+        "text": "[…] If the goal is to generate a new HTML element containing the filtered JSON string, we can update the filterUnknownInternals function to return both the filtered ParsedJson and the filtered JSON string. Then, in the test case, we can compare the updated model's output field with the expected filtered JSON string. (ChatGPT May 24 Version)"
+      },
+      "date": 1686722967955
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "96d631659a11df30"
+      },
+      "id": "96d631659a11df30",
+      "type": "add",
+      "after": "a6edffc3aa87a52b",
+      "date": 1686722974089
+    },
+    {
+      "type": "edit",
+      "id": "96d631659a11df30",
+      "item": {
+        "type": "paragraph",
+        "id": "96d631659a11df30",
+        "text": "Here's the updated code snippet:"
+      },
+      "date": 1686722975401
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f4645193311f21f2"
+      },
+      "id": "f4645193311f21f2",
+      "type": "add",
+      "after": "96d631659a11df30",
+      "date": 1686722980460
+    },
+    {
+      "type": "edit",
+      "id": "f4645193311f21f2",
+      "item": {
+        "type": "paragraph",
+        "id": "f4645193311f21f2",
+        "text": "import Expect exposing (expect)\nimport Html exposing (div, pre, text)\nimport Main exposing (Model, Msg(..), ParsedJson(..), init, update)\n\n\nfilterUnknownInternalsTest : Test\nfilterUnknownInternalsTest =\n    let\n        inputModel : Model\n        inputModel =\n            { input = \"\"\n            , parsedJson =\n                Parsed\n                    { title = \"Test\"\n                    , journal =\n                        [ Unknown \"event1\"\n                        , { type = \"create\", item = { title = \"Page 1\" }, date = 1 }\n                        , Unknown \"event2\"\n                        , { type = \"edit\", item = { title = \"Page 2\" }, date = 2 }\n                        ]\n                    }\n            , output = \"\"\n            }\n\n        expectedFilteredJsonString : String\n        expectedFilteredJsonString =\n            \"\"\"\n            {\n              \"title\": \"Test\",\n              \"journal\": [\n                {\n                  \"type\": \"create\",\n                  \"item\": {\n                    \"title\": \"Page 1\"\n                  },\n                  \"date\": 1\n                },\n                {\n                  \"type\": \"edit\",\n                  \"item\": {\n                    \"title\": \"Page 2\"\n                  },\n                  \"date\": 2\n                }\n              ]\n            }\n            \"\"\"\n\n        filterUnknownInternals : ParsedJson -> ( ParsedJson, String )\n        filterUnknownInternals parsedJson =\n            -- Implement the filtering logic here\n            let\n                filteredJsonString =\n                    -- Generate the filtered JSON string\n                    parsedJson\n                        |> Wiki.pageEncoder\n                        |> Encode.encode 0\n                        |> String.fromList\n            in\n            ( parsedJson, filteredJsonString )\n\n        ( updatedModel, _ ) =\n            update ParseJson inputModel\n                |> Tuple.mapFirst (\\model -> { model | output = \"Original output\" })\n                |> Tuple.mapFirst (\\model ->\n                       let\n                           ( filteredParsedJson, filteredJsonString ) =\n                               filterUnknownInternals model.parsedJson\n                       in\n                       { model | parsedJson = filteredParsedJson, output = filteredJsonString }\n                   )\n    in\n    expect updatedModel.output\n        |> toEqual expectedFilteredJsonString\n"
+      },
+      "date": 1686722981742
+    },
+    {
+      "type": "remove",
+      "id": "f4645193311f21f2",
+      "date": 1686722988127
+    },
+    {
+      "type": "edit",
+      "id": "171d08d01adcb526",
+      "item": {
+        "type": "code",
+        "id": "171d08d01adcb526",
+        "text": "import Expect exposing (expect)\nimport Html exposing (div, pre, text)\nimport Main exposing (Model, Msg(..), ParsedJson(..), init, update)\n\n\nfilterUnknownInternalsTest : Test\nfilterUnknownInternalsTest =\n    let\n        inputModel : Model\n        inputModel =\n            { input = \"\"\n            , parsedJson =\n                Parsed\n                    { title = \"Test\"\n                    , journal =\n                        [ Unknown \"event1\"\n                        , { type = \"create\", item = { title = \"Page 1\" }, date = 1 }\n                        , Unknown \"event2\"\n                        , { type = \"edit\", item = { title = \"Page 2\" }, date = 2 }\n                        ]\n                    }\n            , output = \"\"\n            }\n\n        expectedFilteredJsonString : String\n        expectedFilteredJsonString =\n            \"\"\"\n            {\n              \"title\": \"Test\",\n              \"journal\": [\n                {\n                  \"type\": \"create\",\n                  \"item\": {\n                    \"title\": \"Page 1\"\n                  },\n                  \"date\": 1\n                },\n                {\n                  \"type\": \"edit\",\n                  \"item\": {\n                    \"title\": \"Page 2\"\n                  },\n                  \"date\": 2\n                }\n              ]\n            }\n            \"\"\"\n\n        filterUnknownInternals : ParsedJson -> ( ParsedJson, String )\n        filterUnknownInternals parsedJson =\n            -- Implement the filtering logic here\n            let\n                filteredJsonString =\n                    -- Generate the filtered JSON string\n                    parsedJson\n                        |> Wiki.pageEncoder\n                        |> Encode.encode 0\n                        |> String.fromList\n            in\n            ( parsedJson, filteredJsonString )\n\n        ( updatedModel, _ ) =\n            update ParseJson inputModel\n                |> Tuple.mapFirst (\\model -> { model | output = \"Original output\" })\n                |> Tuple.mapFirst (\\model ->\n                       let\n                           ( filteredParsedJson, filteredJsonString ) =\n                               filterUnknownInternals model.parsedJson\n                       in\n                       { model | parsedJson = filteredParsedJson, output = filteredJsonString }\n                   )\n    in\n    expect updatedModel.output\n        |> toEqual expectedFilteredJsonString\n"
+      },
+      "date": 1686722990983
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "933c986bc04b8a9c"
+      },
+      "id": "933c986bc04b8a9c",
+      "type": "add",
+      "after": "171d08d01adcb526",
+      "date": 1686724349217
+    },
+    {
+      "id": "933c986bc04b8a9c",
+      "type": "move",
+      "order": [
+        "f5c8a1d276014352",
+        "564621064689c164",
+        "a506945ff46d056e",
+        "4a6b36e15050cc8d",
+        "8a8be92b0a73498d",
+        "92eacdec37d86f23",
+        "6c4066bfdf5d019e",
+        "f4f95ef41ac5347b",
+        "87f6c8e438a23a65",
+        "462019a12db74907",
+        "4f703d860675b96b",
+        "7924f44af9ceb33d",
+        "8a12ef594dbb506e",
+        "a4eb8be904009062",
+        "aaae600dd7615e4f",
+        "a72aba1dfb0002e2",
+        "c67f7da04f9c7fda",
+        "933c986bc04b8a9c",
+        "e527dcd53b35e675",
+        "020683dbab18546f",
+        "9c19a6fadafa684c",
+        "7002a00ff5e345f2",
+        "3604b1d5125515cf",
+        "da8403111daa6374",
+        "ba03e9f84532789f",
+        "14239609427d7e07",
+        "160b2ff59a853ba3",
+        "f23953e8b11e9deb",
+        "43262399e63e1cb0",
+        "6464f687571b3111",
+        "315d33948481f47e",
+        "1d102388f60a1989",
+        "d1a87e2361290202",
+        "0dd529660968de3d",
+        "3d85ac1762d25ea2",
+        "dcc02c441ee7f1d2",
+        "a6edffc3aa87a52b",
+        "96d631659a11df30"
+      ],
+      "date": 1686724409066
+    },
+    {
+      "id": "e527dcd53b35e675",
+      "type": "move",
+      "order": [
+        "f5c8a1d276014352",
+        "564621064689c164",
+        "a506945ff46d056e",
+        "4a6b36e15050cc8d",
+        "8a8be92b0a73498d",
+        "92eacdec37d86f23",
+        "6c4066bfdf5d019e",
+        "f4f95ef41ac5347b",
+        "87f6c8e438a23a65",
+        "462019a12db74907",
+        "4f703d860675b96b",
+        "7924f44af9ceb33d",
+        "8a12ef594dbb506e",
+        "a4eb8be904009062",
+        "aaae600dd7615e4f",
+        "a72aba1dfb0002e2",
+        "c67f7da04f9c7fda",
+        "e527dcd53b35e675",
+        "933c986bc04b8a9c",
+        "020683dbab18546f",
+        "9c19a6fadafa684c",
+        "7002a00ff5e345f2",
+        "3604b1d5125515cf",
+        "da8403111daa6374",
+        "ba03e9f84532789f",
+        "14239609427d7e07",
+        "160b2ff59a853ba3",
+        "f23953e8b11e9deb",
+        "43262399e63e1cb0",
+        "6464f687571b3111",
+        "315d33948481f47e",
+        "1d102388f60a1989",
+        "d1a87e2361290202",
+        "0dd529660968de3d",
+        "3d85ac1762d25ea2",
+        "dcc02c441ee7f1d2",
+        "a6edffc3aa87a52b",
+        "96d631659a11df30"
+      ],
+      "date": 1686724415695
+    },
+    {
+      "type": "edit",
+      "id": "020683dbab18546f",
+      "item": {
+        "type": "code",
+        "id": "020683dbab18546f",
+        "text": "\n\n                Err _ ->\n                    ( { model | parsedJson = NotParsed, output = \"\" }, Cmd.none )\n\n        -- ...\n\n\nfilterUnknownInternals : ParsedJson -> ParsedJson\nfilterUnknownInternals parsedValue =\n    case parsedValue of\n        Parsed page ->\n            let\n                filteredJournal =\n                    filterUnknownEvents page.journal\n            in\n            Parsed { page | journal = filteredJournal }\n\n        _ ->\n            parsedValue\n\n\nfilterUnknownEvents : List Wiki.JournalEntry -> List Wiki.JournalEntry\nfilterUnknownEvents entries =\n    List.filter isNotUnknownInternal entries\n\n\nisNotUnknownInternal : Wiki.JournalEntry -> Bool\nisNotUnknownInternal entry =\n    case entry of\n        Wiki.Unknown _ ->\n            False\n\n        _ ->\n            True\n"
+      },
+      "date": 1686724423466
+    },
+    {
+      "type": "edit",
+      "id": "933c986bc04b8a9c",
+      "item": {
+        "type": "code",
+        "id": "933c986bc04b8a9c",
+        "text": "update : Msg -> Model -> ( Model, Cmd Msg )\nupdate msg model =\n    case msg of\n        -- Existing cases...\n\n        ParseJson ->\n            let\n                json : String\n                json =\n                    trim model.input\n            in\n            case Decode.decodeValue Wiki.pageDecoder json of\n                Ok parsedValue ->\n                    let\n                        filteredValue =\n                            filterUnknownInternals parsedValue\n                    in\n                    ( { model | parsedJson = filteredValue }, Cmd.none )"
+      },
+      "date": 1686724424229
+    },
+    {
+      "type": "add",
+      "id": "c6ab51c7d279ebda",
+      "item": {
+        "type": "paragraph",
+        "id": "c6ab51c7d279ebda",
+        "text": "[Note: The output = Wiki.pageEncoder value |> Encode.encode 0 was omitted here by the chat thing. And we delete the Unknown internals branch. RB]"
+      },
+      "after": "e527dcd53b35e675",
+      "date": 1686724452552
+    },
+    {
+      "id": "c6ab51c7d279ebda",
+      "type": "move",
+      "order": [
+        "f5c8a1d276014352",
+        "564621064689c164",
+        "a506945ff46d056e",
+        "4a6b36e15050cc8d",
+        "8a8be92b0a73498d",
+        "92eacdec37d86f23",
+        "6c4066bfdf5d019e",
+        "f4f95ef41ac5347b",
+        "87f6c8e438a23a65",
+        "462019a12db74907",
+        "4f703d860675b96b",
+        "7924f44af9ceb33d",
+        "8a12ef594dbb506e",
+        "a4eb8be904009062",
+        "aaae600dd7615e4f",
+        "a72aba1dfb0002e2",
+        "c67f7da04f9c7fda",
+        "e527dcd53b35e675",
+        "933c986bc04b8a9c",
+        "c6ab51c7d279ebda",
+        "020683dbab18546f",
+        "9c19a6fadafa684c",
+        "7002a00ff5e345f2",
+        "3604b1d5125515cf",
+        "da8403111daa6374",
+        "ba03e9f84532789f",
+        "14239609427d7e07",
+        "160b2ff59a853ba3",
+        "f23953e8b11e9deb",
+        "43262399e63e1cb0",
+        "6464f687571b3111",
+        "315d33948481f47e",
+        "1d102388f60a1989",
+        "d1a87e2361290202",
+        "0dd529660968de3d",
+        "3d85ac1762d25ea2",
+        "dcc02c441ee7f1d2",
+        "a6edffc3aa87a52b",
+        "96d631659a11df30"
+      ],
+      "date": 1686724456249
+    },
+    {
+      "type": "edit",
+      "id": "c6ab51c7d279ebda",
+      "item": {
+        "type": "paragraph",
+        "id": "c6ab51c7d279ebda",
+        "text": "[Note: The output = Wiki.pageEncoder value |> Encode.encode 0 was omitted here by the chat thing. And we delete the Unknown internals branch. RB]"
+      },
+      "date": 1686724503582
+    },
+    {
+      "type": "edit",
+      "id": "c6ab51c7d279ebda",
+      "item": {
+        "type": "paragraph",
+        "id": "c6ab51c7d279ebda",
+        "text": "[Note: The output = Wiki.pageEncoder value |> Encode.encode 0 was omitted here by the chat thing. And we delete the Unknown internals branch. RB]"
+      },
+      "date": 1686724518769
+    },
+    {
+      "type": "edit",
+      "id": "c6ab51c7d279ebda",
+      "item": {
+        "type": "paragraph",
+        "id": "c6ab51c7d279ebda",
+        "text": "[Note: The output = Wiki.pageEncoder value |> Encode.encode 0 was omitted here by the chat thing. And we delete the Unknown internals branch. RB]"
+      },
+      "date": 1686724544903
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "5c29692cb510f8f7",
+        "text": "import Expect exposing (expect)\nimport Html exposing (div, pre, text)\nimport Main exposing (Model, Msg(..), ParsedJson(..), init, update)\n\n\nfilterUnknownInternalsTest : Test\nfilterUnknownInternalsTest =\n    let\n        inputModel : Model\n        inputModel =\n            { input = \"\"\n            , parsedJson =\n                Parsed\n                    { title = \"Test\"\n                    , journal =\n                        [ Unknown \"event1\"\n                        , { type = \"create\", item = { title = \"Page 1\" }, date = 1 }\n                        , Unknown \"event2\"\n                        , { type = \"edit\", item = { title = \"Page 2\" }, date = 2 }\n                        ]\n                    }\n            , output = \"\"\n            }\n\n        expectedFilteredJsonString : String\n        expectedFilteredJsonString =\n            \"\"\"\n            {\n              \"title\": \"Test\",\n              \"journal\": [\n                {\n                  \"type\": \"create\",\n                  \"item\": {\n                    \"title\": \"Page 1\"\n                  },\n                  \"date\": 1\n                },\n                {\n                  \"type\": \"edit\",\n                  \"item\": {\n                    \"title\": \"Page 2\"\n                  },\n                  \"date\": 2\n                }\n              ]\n            }\n            \"\"\"\n\n        filterUnknownInternals : ParsedJson -> ( ParsedJson, String )\n        filterUnknownInternals parsedJson =\n            -- Implement the filtering logic here\n            let\n                filteredJsonString =\n                    -- Generate the filtered JSON string\n                    parsedJson\n                        |> Wiki.pageEncoder\n                        |> Encode.encode 0\n                        |> String.fromList\n            in\n            ( parsedJson, filteredJsonString )\n\n        ( updatedModel, _ ) =\n            update ParseJson inputModel\n                |> Tuple.mapFirst (\\model -> { model | output = \"Original output\" })\n                |> Tuple.mapFirst (\\model ->\n                       let\n                           ( filteredParsedJson, filteredJsonString ) =\n                               filterUnknownInternals model.parsedJson\n                       in\n                       { model | parsedJson = filteredParsedJson, output = filteredJsonString }\n                   )\n    in\n    expect updatedModel.output\n        |> toEqual expectedFilteredJsonString\n"
+      },
+      "id": "5c29692cb510f8f7",
+      "type": "add",
+      "after": "96d631659a11df30",
+      "date": 1686724651449
+    },
+    {
+      "type": "edit",
+      "id": "5c29692cb510f8f7",
+      "item": {
+        "type": "code",
+        "id": "5c29692cb510f8f7",
+        "text": "import Expect exposing (expect)\nimport Html exposing (div, pre, text)\nimport Main exposing (Model, Msg(..), ParsedJson(..), init, update)\n\n\nfilterUnknownInternalsTest : Test\nfilterUnknownInternalsTest =\n    let\n        inputModel : Model\n        inputModel =\n            { input = \"\"\n            , parsedJson =\n                Parsed\n                    { title = \"Test\"\n                    , journal =\n                        [ Unknown \"event1\"\n                        , { type = \"create\", item = { title = \"Page 1\" }, date = 1 }\n                        , Unknown \"event2\"\n                        , { type = \"edit\", item = { title = \"Page 2\" }, date = 2 }\n                        ]\n                    }\n            , output = \"\"\n            }\n\n        expectedFilteredJsonString : String\n        expectedFilteredJsonString =\n            \"\"\"\n            {\n              \"title\": \"Test\",\n              \"journal\": [\n                {\n                  \"type\": \"create\",\n                  \"item\": {\n                    \"title\": \"Page 1\"\n                  },\n                  \"date\": 1\n                },\n                {\n                  \"type\": \"edit\",\n                  \"item\": {\n                    \"title\": \"Page 2\"\n                  },\n                  \"date\": 2\n                }\n              ]\n            }\n            \"\"\"\n\n        filterUnknownInternals : ParsedJson -> ( ParsedJson, String )\n        filterUnknownInternals parsedJson =\n            -- Implement the filtering logic here\n            let\n                filteredJsonString =\n                    -- Generate the filtered JSON string\n                    parsedJson\n                        |> Wiki.pageEncoder\n                        |> Encode.encode 0\n                        |> String.fromList\n            in\n            ( parsedJson, filteredJsonString )\n\n        ( updatedModel, _ ) =\n            update ParseJson inputModel\n                |> Tuple.mapFirst (\\model -> { model | output = \"Original output\" })\n                |> Tuple.mapFirst (\\model ->\n                       let\n                           ( filteredParsedJson, filteredJsonString ) =\n                               filterUnknownInternals model.parsedJson\n                       in\n                       { model | parsedJson = filteredParsedJson, output = filteredJsonString }\n                   )\n    in\n    expect updatedModel.output\n        |> toEqual expectedFilteredJsonString\n"
+      },
+      "date": 1686724654792
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "c6f5a40ae86c19b6",
+        "text": "In this updated version, the filterUnknownInternals function now returns a tuple containing the […] ParsedJson and the filtered JSON string. The filterUnknownInternals function can be implemented with the desired logic to filter out the Unknown events and generate the filtered JSON string."
+      },
+      "id": "c6f5a40ae86c19b6",
+      "type": "add",
+      "after": "5c29692cb510f8f7",
+      "date": 1686724684336
+    },
+    {
+      "type": "edit",
+      "id": "c6f5a40ae86c19b6",
+      "item": {
+        "type": "paragraph",
+        "id": "c6f5a40ae86c19b6",
+        "text": "In this updated version, the filterUnknownInternals function now returns a tuple containing the […] ParsedJson and the filtered JSON string. The filterUnknownInternals function can be implemented with the desired logic to filter out the Unknown events and generate the filtered JSON string."
+      },
+      "date": 1686724686599
+    },
+    {
+      "type": "edit",
+      "id": "c6ab51c7d279ebda",
+      "item": {
+        "type": "paragraph",
+        "id": "c6ab51c7d279ebda",
+        "text": "[Note: The output = Wiki.pageEncoder value |> Encode.encode 0 was omitted here by the chat thing. And we delete the Unknown internals branch. RB]"
+      },
+      "date": 1686724862594
+    },
+    {
+      "type": "edit",
+      "id": "a6edffc3aa87a52b",
+      "item": {
+        "type": "paragraph",
+        "id": "a6edffc3aa87a52b",
+        "text": "[…] If the goal is to generate a new HTML element containing the filtered JSON string, we can update the filterUnknownInternals function to return both the filtered ParsedJson and the filtered JSON string. "
+      },
+      "date": 1686725000684
+    },
+    {
+      "type": "add",
+      "id": "21672d51b5422441",
+      "item": {
+        "type": "paragraph",
+        "id": "21672d51b5422441",
+        "text": "[Note: The chat thing writes: \"filtered ParsedJson\". RB]"
+      },
+      "after": "a6edffc3aa87a52b",
+      "date": 1686725031947
+    },
+    {
+      "type": "add",
+      "id": "f08e62855c295b3e",
+      "item": {
+        "type": "paragraph",
+        "id": "f08e62855c295b3e",
+        "text": "Then, in the test case, we can compare the updated model's output field with the expected filtered JSON string. (ChatGPT May 24 Version)"
+      },
+      "after": "21672d51b5422441",
+      "date": 1686725032414
+    },
+    {
+      "type": "edit",
+      "id": "21672d51b5422441",
+      "item": {
+        "type": "paragraph",
+        "id": "21672d51b5422441",
+        "text": "[Note: The chat thing writes: \"filtered ParsedJson\". RB]"
+      },
+      "date": 1686725039919
+    },
+    {
+      "type": "add",
+      "id": "d1697f28eb6ea6fa",
+      "item": {
+        "type": "paragraph",
+        "id": "d1697f28eb6ea6fa",
+        "text": "[…]"
+      },
+      "after": "c6f5a40ae86c19b6",
+      "date": 1686725085733
+    },
+    {
+      "type": "edit",
+      "id": "c6f5a40ae86c19b6",
+      "item": {
+        "type": "paragraph",
+        "id": "c6f5a40ae86c19b6",
+        "text": "In this updated version, the filterUnknownInternals function now returns a tuple containing the […] ParsedJson and the filtered JSON string. The filterUnknownInternals function can be implemented with the desired logic to filter out the Unknown events and generate the filtered JSON string."
+      },
+      "date": 1686725124172
+    },
+    {
+      "type": "edit",
+      "id": "d1697f28eb6ea6fa",
+      "item": {
+        "type": "paragraph",
+        "id": "d1697f28eb6ea6fa",
+        "text": "[…]"
+      },
+      "date": 1686725213014
+    },
+    {
+      "item": {
+        "type": "pagefold",
+        "id": "8c694595f17cf24c",
+        "text": "~"
+      },
+      "id": "8c694595f17cf24c",
+      "type": "add",
+      "after": "d1697f28eb6ea6fa",
+      "date": 1686725214974
+    },
+    {
+      "type": "edit",
+      "id": "8c694595f17cf24c",
+      "item": {
+        "type": "pagefold",
+        "id": "8c694595f17cf24c",
+        "text": "~"
+      },
+      "date": 1686725218337
+    },
+    {
+      "item": {
+        "type": "audio",
+        "id": "618ede5cea08dfbc",
+        "text": ""
+      },
+      "id": "618ede5cea08dfbc",
+      "type": "add",
+      "after": "8c694595f17cf24c",
+      "date": 1686725224474
+    },
+    {
+      "type": "edit",
+      "id": "618ede5cea08dfbc",
+      "item": {
+        "type": "audio",
+        "id": "618ede5cea08dfbc",
+        "text": ""
+      },
+      "date": 1686725235407
+    },
+    {
+      "type": "remove",
+      "id": "618ede5cea08dfbc",
+      "date": 1686725242041
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "472423ee78dd448b",
+        "text": "filterUnknownInternals : ParsedJson -> (ParsedJson, String)\nfilterUnknownInternals parsedJson =\n    let\n        filteredJsonString =\n            parsedJson\n                |> Wiki.pageEncoder\n                |> Encode.encode 0\n    in\n    (parsedJson, filteredJsonString)\n"
+      },
+      "id": "472423ee78dd448b",
+      "type": "add",
+      "after": "8c694595f17cf24c",
+      "date": 1686725243213
+    },
+    {
+      "type": "edit",
+      "id": "472423ee78dd448b",
+      "item": {
+        "type": "code",
+        "id": "472423ee78dd448b",
+        "text": "filterUnknownInternals : ParsedJson -> (ParsedJson, String)\nfilterUnknownInternals parsedJson =\n    let\n        filteredJsonString =\n            parsedJson\n                |> Wiki.pageEncoder\n                |> Encode.encode 0\n    in\n    (parsedJson, filteredJsonString)\n"
+      },
+      "date": 1686725244894
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "5675d791734d88b2",
+        "text": "Compare "
+      },
+      "id": "5675d791734d88b2",
+      "type": "add",
+      "after": "472423ee78dd448b",
+      "date": 1686725354224
+    },
+    {
+      "type": "edit",
+      "id": "5675d791734d88b2",
+      "item": {
+        "type": "paragraph",
+        "id": "5675d791734d88b2",
+        "text": "Compare "
+      },
+      "date": 1686725356852
+    },
+    {
+      "type": "add",
+      "id": "4f40fc6f67b818ad",
+      "item": {
+        "type": "paragraph",
+        "id": "4f40fc6f67b818ad",
+        "text": ""
+      },
+      "after": "5675d791734d88b2",
+      "date": 1686725357717
+    },
+    {
+      "item": {
+        "type": "code",
+        "id": "d23716ef89e1b8a6",
+        "text": "Ok value ->\n    ( { model\n        | parsedJson = Parsed value\n        , output = Wiki.pageEncoder value |> Encode.encode 0\n      }\n    , Cmd.none\n    )"
+      },
+      "id": "d23716ef89e1b8a6",
+      "type": "add",
+      "after": "4f40fc6f67b818ad",
+      "date": 1686725362314
+    },
+    {
+      "type": "remove",
+      "id": "4f40fc6f67b818ad",
+      "date": 1686725363568
+    },
+    {
+      "type": "edit",
+      "id": "d23716ef89e1b8a6",
+      "item": {
+        "type": "code",
+        "id": "d23716ef89e1b8a6",
+        "text": "Ok value ->\n    ( { model\n        | parsedJson = Parsed value\n        , output = Wiki.pageEncoder value |> Encode.encode 0\n      }\n    , Cmd.none\n    )"
+      },
+      "date": 1686725364825
+    },
+    {
+      "type": "edit",
+      "id": "5675d791734d88b2",
+      "item": {
+        "type": "paragraph",
+        "id": "5675d791734d88b2",
+        "text": "Compare "
+      },
+      "date": 1686725437091
+    },
+    {
+      "id": "5675d791734d88b2",
+      "type": "move",
+      "order": [
+        "f5c8a1d276014352",
+        "564621064689c164",
+        "a506945ff46d056e",
+        "4a6b36e15050cc8d",
+        "8a8be92b0a73498d",
+        "92eacdec37d86f23",
+        "6c4066bfdf5d019e",
+        "f4f95ef41ac5347b",
+        "87f6c8e438a23a65",
+        "462019a12db74907",
+        "4f703d860675b96b",
+        "7924f44af9ceb33d",
+        "8a12ef594dbb506e",
+        "a4eb8be904009062",
+        "aaae600dd7615e4f",
+        "a72aba1dfb0002e2",
+        "c67f7da04f9c7fda",
+        "e527dcd53b35e675",
+        "933c986bc04b8a9c",
+        "c6ab51c7d279ebda",
+        "020683dbab18546f",
+        "9c19a6fadafa684c",
+        "7002a00ff5e345f2",
+        "3604b1d5125515cf",
+        "da8403111daa6374",
+        "ba03e9f84532789f",
+        "14239609427d7e07",
+        "160b2ff59a853ba3",
+        "f23953e8b11e9deb",
+        "43262399e63e1cb0",
+        "6464f687571b3111",
+        "315d33948481f47e",
+        "1d102388f60a1989",
+        "d1a87e2361290202",
+        "0dd529660968de3d",
+        "3d85ac1762d25ea2",
+        "dcc02c441ee7f1d2",
+        "a6edffc3aa87a52b",
+        "21672d51b5422441",
+        "f08e62855c295b3e",
+        "96d631659a11df30",
+        "5c29692cb510f8f7",
+        "c6f5a40ae86c19b6",
+        "d1697f28eb6ea6fa",
+        "8c694595f17cf24c",
+        "5675d791734d88b2",
+        "472423ee78dd448b",
+        "0578e981094b5587",
+        "d23716ef89e1b8a6"
+      ],
+      "date": 1686725439290,
+      "error": {
+        "type": "error",
+        "msg": "Internal Server Error",
+        "response": "Server Ignoring move. Try reload."
+      }
+    },
+    {
+      "type": "add",
+      "id": "0578e981094b5587",
+      "item": {
+        "type": "paragraph",
+        "id": "0578e981094b5587",
+        "text": "to"
+      },
+      "after": "5675d791734d88b2",
+      "date": 1686725440048
+    },
+    {
+      "type": "fork",
+      "date": 1686725448088
+    },
+    {
+      "id": "0578e981094b5587",
+      "type": "move",
+      "order": [
+        "f5c8a1d276014352",
+        "564621064689c164",
+        "a506945ff46d056e",
+        "4a6b36e15050cc8d",
+        "8a8be92b0a73498d",
+        "92eacdec37d86f23",
+        "6c4066bfdf5d019e",
+        "f4f95ef41ac5347b",
+        "87f6c8e438a23a65",
+        "462019a12db74907",
+        "4f703d860675b96b",
+        "7924f44af9ceb33d",
+        "8a12ef594dbb506e",
+        "a4eb8be904009062",
+        "aaae600dd7615e4f",
+        "a72aba1dfb0002e2",
+        "c67f7da04f9c7fda",
+        "e527dcd53b35e675",
+        "933c986bc04b8a9c",
+        "c6ab51c7d279ebda",
+        "020683dbab18546f",
+        "9c19a6fadafa684c",
+        "7002a00ff5e345f2",
+        "3604b1d5125515cf",
+        "da8403111daa6374",
+        "ba03e9f84532789f",
+        "14239609427d7e07",
+        "160b2ff59a853ba3",
+        "f23953e8b11e9deb",
+        "43262399e63e1cb0",
+        "6464f687571b3111",
+        "315d33948481f47e",
+        "1d102388f60a1989",
+        "d1a87e2361290202",
+        "0dd529660968de3d",
+        "3d85ac1762d25ea2",
+        "dcc02c441ee7f1d2",
+        "a6edffc3aa87a52b",
+        "21672d51b5422441",
+        "f08e62855c295b3e",
+        "96d631659a11df30",
+        "5c29692cb510f8f7",
+        "c6f5a40ae86c19b6",
+        "d1697f28eb6ea6fa",
+        "8c694595f17cf24c",
+        "5675d791734d88b2",
+        "472423ee78dd448b",
+        "0578e981094b5587",
+        "d23716ef89e1b8a6"
+      ],
+      "date": 1686725738393
+    },
+    {
+      "type": "fork",
+      "date": 1686725744409
+    },
+    {
+      "type": "fork",
+      "date": 1686725783061
+    },
+    {
+      "type": "fork",
+      "date": 1686725848280
+    },
+    {
+      "type": "edit",
+      "id": "c6ab51c7d279ebda",
+      "item": {
+        "type": "paragraph",
+        "id": "c6ab51c7d279ebda",
+        "text": "[Note: The output = Wiki.pageEncoder value |> Encode.encode 0 was omitted here by the chat thing. And we delete the Unknown internals branch. RB] ⇒ refactor(Main): delete the Unknown msg branch from update "
+      },
+      "date": 1686726805874
+    },
+    {
+      "type": "edit",
+      "id": "c6ab51c7d279ebda",
+      "item": {
+        "type": "paragraph",
+        "id": "c6ab51c7d279ebda",
+        "text": "[Note: The output = Wiki.pageEncoder value |> Encode.encode 0 was omitted here by the chat thing. And we delete the Unknown internals branch. RB] ⇒ refactor(Main): delete the Unknown msg branch from update [https://github.com/RalfBarkow/vite-elm-dojo/commit/fb00e4b324d80f8e4c83a10a73737a9296192162 commit] "
+      },
+      "date": 1686726820855
+    },
+    {
+      "type": "fork",
+      "date": 1686726860020
+    }
+  ]
+}
