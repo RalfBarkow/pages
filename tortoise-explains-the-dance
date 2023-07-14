@@ -1,0 +1,1162 @@
+{
+  "title": "Tortoise Explains the Dance",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "484e092159df2d01",
+      "text": "We turn to a story about the code behind our [[First Dancing Turtle]] and how words on the page inspire it to move."
+    },
+    {
+      "type": "paragraph",
+      "id": "bb019e3b0951c959",
+      "text": "Our title for this page unabashedly alludes to dialogs between Tortoise and Achilles in Gödel, Escher, and Bach. For those who have not read that book, those dialogs feature many self-referential and recursive puzzles. One of our favorite experiences with turtle geometry came from mentoring a gifted fifth grader in programming using fractals and recursion. [https://dobbse.net/thinair/2008/12/logo-fractals-recursion.html blog]"
+    },
+    {
+      "type": "paragraph",
+      "id": "9d70446e022f0942",
+      "text": "Finding the right song was a pleasant surprise. Once we had the actions() generator function transforming prose into turtle instructions, we needed an example poem to show off the code. Our first thought was Shakespeare, but in brief searching did not quickly find. Maybe a song? The Byrds' Turn, Turn, Turn? Wait! Are there moves in Turn the Beat Around? \"Move your feet when you feel that beat, yeah!\""
+    },
+    {
+      "type": "paragraph",
+      "id": "c279a55e00aedc49",
+      "text": "We also want to explain the code and some of the surprises in how it came to be."
+    },
+    {
+      "type": "paragraph",
+      "id": "4c3a87231ca8c791",
+      "text": "Several imported functions must appear first for the javascript module to compile, but are not the most important part of the story. The addTurtle() function attaches a turtle geometry object to an SVG <path> element—so we can display the geometry. The context() and resize() functions from frame.js enable some specific communication with this wiki page."
+    },
+    {
+      "type": "code",
+      "id": "e8d9e2d46a82e270",
+      "text": "import {addTurtle} from \"https://turtle.dbbs.co/assets/turtle/svg-path.js\"\nimport {context, resize} from \"https://turtle.dbbs.co/assets/turtle/frame.js\""
+    },
+    {
+      "type": "paragraph",
+      "id": "5e8b305a47040729",
+      "text": "The actions() generator function is where we convert prose into a collection of turtle instructions. Our current dance vocabulary recognizes only two words. Move is translated into fifteen steps in the collection. Turn changes the turtle's direction and takes one more step to make that turn immediately visible."
+    },
+    {
+      "type": "code",
+      "id": "faad423ee216d9b7",
+      "text": "function* actions(prose) {\n  const re = /move|turn/g // TODO synonyms?\n  for (let [action] of prose.matchAll(re)) {\n    if (action == \"move\") {\n      for (let i=0; i<15; i++) {\n        yield (turtle => turtle.move().draw())\n      }\n    } else if (action == \"turn\") {\n      yield (turtle => turtle.turn().move().draw())\n    }\n  }\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "a9b40a6177af7000",
+      "text": "We anticipate expanding this vocabulary with synonyms of move and turn and also words to change the angle of our turns, the color, or the stroke width. Perhaps we can also teach turtles to leave named trail markers along the path."
+    },
+    {
+      "type": "paragraph",
+      "id": "ba7b6371595ba300",
+      "text": "A little diversion into the backstory."
+    },
+    {
+      "type": "paragraph",
+      "id": "342b7a72cee993fd",
+      "text": "We have been tinkering with different implementations of turtle geometry in javascript for over a decade and interested in animation for several decades. Even in our first implementation of a turtle we created an animation of a pair of fractals: von Koch snowflake and Peano curve."
+    },
+    {
+      "type": "frame",
+      "id": "ed0d1fb8057b4c8c",
+      "text": "https://turtle.dbbs.co/assets/turtle/two-fractals.html\nFractals from Interactive Turtle Graphics in a Web Browser [http://dobbse.net/thinair/2011/01/phone-turtle.html blog]"
+    },
+    {
+      "type": "paragraph",
+      "id": "100582c002c0a85e",
+      "text": "Given that backstory, we envisioned animating the path of our turtle. While writing actions() we considered 5 steps and 10 steps and settled on 15 steps. At the time we made this decision we had not yet chosen frames per second for our animation. We made this choice from a gut feeling."
+    },
+    {
+      "type": "paragraph",
+      "id": "caec12539df17d81",
+      "text": "A bigger surprise came from a whim in choosing to include one move after each turn. We weighed the question about including some glyph to represent the turtle and visualize its position and direction. That seemed like too much work for this stage of development. One step in the new direction was a shortcut. But the visual results created a delightful little asymmetry—well, there's almost always radial symmetry."
+    },
+    {
+      "type": "paragraph",
+      "id": "a3c898f882187fac",
+      "text": "The code inside animate() feels the most confusing."
+    },
+    {
+      "type": "paragraph",
+      "id": "e450bb8814f28f6a",
+      "text": "We create an infinite iterator from an immediately invoked function expression (IIFE) that is also an anonymous generator function. It repeatedly follows the instructions from the given prose and every six repetitions it clears the path to start over. The choice of six repetitions derives from what we know about the default turn size: our turtle turns 60 degrees and six such turns will complete a hexigon."
+    },
+    {
+      "type": "paragraph",
+      "id": "47f75e6cc07e6fe7",
+      "text": "Then we also create an asynchronous recursive function that combines setTimeout() and requestAnimationFrame() as a clock to take steps through the infinite iterator. Feels like there should be a more expressive way to invoke the steps in the iterator inside the async clock."
+    },
+    {
+      "type": "code",
+      "id": "3242fe783d2ee061",
+      "text": "function animate(el, prose) {\n  const fps = 30\n  let requestId, i=0\n  let iterator = (function* () {\n    do {\n      if (i%6==0) {\n        yield (turtle => turtle.clear().draw())\n      }\n      yield* actions(prose)\n    } while (++i)\n  })()\n  function step() {\n    setTimeout(function () {\n      requestId = window.requestAnimationFrame(step)\n      let what = iterator.next()\n      what.value(el.turtle)\n      rescale(el.closest('svg'))\n      resize()\n    }, 1000/fps) // setTimeout used to allow speed to be controlled with fps\n  }\n  step()\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "6cff97f440b1121d",
+      "text": "The attributes on an <svg> element often restrict the scale in \"scalable vector graphics\". The rescale() method removed width and height attributes and overrides the width defined in the style attribute. It also adds (or replaces) the viewBox attribute with values from the getBBox() method plus 1% additional padding. We use this within the animate() method to recompute the viewBox with each additional step to keep the entire path in view. One thing we discovered in testing, this method only works for SVGs that have been appended to the DOM."
+    },
+    {
+      "type": "code",
+      "id": "26880ecc484da230",
+      "text": "function rescale (svg) {\n  let {x,y,width,height} = svg.getBBox()\n  let p = Math.min(width,height)*0.01\n  svg.setAttribute('viewBox',\n    `${x-p} ${y-p} ${width+2*p} ${height+2*p}`)\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  svg.style.width=\"100%\"\n  return svg\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "313907154e6512d9",
+      "text": "The last two async functions are how we participate in the expectations of our [[ESM Snippet Template]]. The emit() function puts our SVG element on the page containing a single path. The bind() function awaits the page content from context()—one of the things we imported at the top of the program—and filters the story for paragraphs to joint into the prose for our dance instructions. It instruments the <path> with a turtle and begins the animation loop."
+    },
+    {
+      "type": "code",
+      "id": "5eb6b67568179aa3",
+      "text": "export async function emit(el) {\n  el.innerHTML = `<svg viewBox=\"-100 -100 200 200\"><path id=\"it\" d=\"\" fill=\"none\" stroke=\"black\"/></svg>`\n}\n\nexport async function bind(el) {\n const {page:{story}} = await context()\n const text = story\n   .filter(item => item.type == \"paragraph\")\n   .map(item => item.text.toLowerCase())\n   .join(\"\\n\")\n addTurtle(it)\n animate(it, text)\n document.body.insertAdjacentHTML(\n   'afterbegin',\n   `<p>${text}</p>`)\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "caa626ac93aa7d4c",
+      "text": "In the frame below we can view the results."
+    },
+    {
+      "type": "frame",
+      "id": "6cf52409eec3988c",
+      "text": "//turtle.dbbs.co/assets/turtle/esm.html"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Tortoise Explains the Dance",
+        "story": [
+          {
+            "type": "paragraph",
+            "id": "484e092159df2d01",
+            "text": "Explain what this does."
+          },
+          {
+            "type": "code",
+            "id": "5eb6b67568179aa3",
+            "text": "export async function emit(el) {\n  el.innerHTML = `<h2>Hello, World!</h2>`\n}\n\nexport async function bind(el) {\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+          },
+          {
+            "type": "paragraph",
+            "id": "caa626ac93aa7d4c",
+            "text": "In the frame below we can view the results."
+          },
+          {
+            "type": "frame",
+            "id": "6cf52409eec3988c",
+            "text": "//turtle.dbbs.co/assets/turtle/esm.html"
+          },
+          {
+            "type": "paragraph",
+            "id": "4af3e06016116216",
+            "text": "See [[About Frame Plugin]]."
+          },
+          {
+            "type": "paragraph",
+            "id": "da49ee08fd0e2a07",
+            "text": "See [[About Frame Integrations]]."
+          }
+        ]
+      },
+      "date": 1688825036922
+    },
+    {
+      "type": "edit",
+      "id": "484e092159df2d01",
+      "item": {
+        "type": "paragraph",
+        "id": "484e092159df2d01",
+        "text": "We turn to a story about the code behind our [[First Dancing Turtle]] and how it moves."
+      },
+      "date": 1688825047434
+    },
+    {
+      "type": "remove",
+      "id": "da49ee08fd0e2a07",
+      "date": 1688825057816
+    },
+    {
+      "type": "remove",
+      "id": "4af3e06016116216",
+      "date": 1688825059439
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import {addTurtle} from \"https://turtle.dbbs.co/assets/turtle/svg-path.js\"\nimport * as frame from \"https://turtle.dbbs.co/assets/turtle/frame.js\"\n\nexport async function emit(el) {\n  el.innerHTML = `<svg viewBox=\"-100 -100 200 200\"><path id=\"it\" d=\"\" fill=\"none\" stroke=\"black\"/></svg>`\n}\n\nexport async function bind(el) {\n function helloWorld(el) {\n   Array.from({length:16*3}).forEach(() => {\n     el.turtle.move().turn().nextMovesize()\n   })\n   el.turtle.draw()\n   rescale(el.closest('svg'))\n }\n function rescale (svg) {\n   let {x,y,width,height} = svg.getBBox()\n   let padding = Math.min(width,height)*0.01\n   svg.setAttribute('viewBox',\n                    `${x-padding} ${y-padding} ${width+2*padding} ${height+2*padding}`)\n   svg.removeAttribute(\"width\")\n   svg.removeAttribute(\"height\")\n   svg.style.width=\"100%\"\n   return svg\n }\n function* actions(prose) {\n   const re = /move|turn/g // TODO synonyms?\n   for (let [action] of prose.matchAll(re)) {\n     if (action == \"move\") {\n       for (let i=0; i<15; i++) {\n         yield (turtle => turtle.move().draw())\n       }\n     } else if (action == \"turn\") {\n       yield (turtle => turtle.turn().move().draw())\n     }\n   }\n }\n function animate(el, prose) {\n   const fps = 30\n   let requestId\n   let iterator = (function* () {\n     while (true) {\n       yield (turtle => turtle.clear().draw())\n       for (let i=0; i < 6; i++) {\n         yield* actions(prose)\n       }\n     }\n   })()\n   function step() {\n     setTimeout(function () {\n       requestId = window.requestAnimationFrame(step)\n       let what = iterator.next()\n       what.value(el.turtle)\n       rescale(el.closest('svg'))\n       resize()\n     }, 1000/fps) // setTimeout used to allow speed to be controlled with fps\n   }\n   step()\n }\n function resize() {\n   window.parent.postMessage({\n     action: \"resize\",\n     height: document.body.offsetHeight\n   }, \"*\")\n }\n async function main() {\n   const {page:{story}} = await frame.context()\n   const text = story\n     .filter(item => item.type == \"paragraph\")\n     .map(item => item.text.toLowerCase())\n     .join(\"\\n\")\n   addTurtle(it)\n   helloWorld(it)\n   animate(it, text)\n   document.body.insertAdjacentHTML('afterbegin', `<p>${text}</p>`)\n }\n main()\n}"
+      },
+      "date": 1688826720664
+    },
+    {
+      "type": "add",
+      "id": "4c3a87231ca8c791",
+      "item": {
+        "type": "paragraph",
+        "id": "4c3a87231ca8c791",
+        "text": "The addTurtle() function attaches a turtle geometry object to an SVG <path> element. The context() and resize() functions from frame.js enable some specific communication with the wiki page."
+      },
+      "after": "484e092159df2d01",
+      "date": 1688828770785
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import {addTurtle} from \"https://turtle.dbbs.co/assets/turtle/svg-path.js\"\nimport {context, resize} from \"https://turtle.dbbs.co/assets/turtle/frame.js\"\n\nexport async function emit(el) {\n  el.innerHTML = `<svg viewBox=\"-100 -100 200 200\"><path id=\"it\" d=\"\" fill=\"none\" stroke=\"black\"/></svg>`\n}\n\nexport async function bind(el) {\n function helloWorld(el) {\n   Array.from({length:16*3}).forEach(() => {\n     el.turtle.move().turn().nextMovesize()\n   })\n   el.turtle.draw()\n   rescale(el.closest('svg'))\n }\n function rescale (svg) {\n   let {x,y,width,height} = svg.getBBox()\n   let padding = Math.min(width,height)*0.01\n   svg.setAttribute('viewBox',\n                    `${x-padding} ${y-padding} ${width+2*padding} ${height+2*padding}`)\n   svg.removeAttribute(\"width\")\n   svg.removeAttribute(\"height\")\n   svg.style.width=\"100%\"\n   return svg\n }\n function* actions(prose) {\n   const re = /move|turn/g // TODO synonyms?\n   for (let [action] of prose.matchAll(re)) {\n     if (action == \"move\") {\n       for (let i=0; i<15; i++) {\n         yield (turtle => turtle.move().draw())\n       }\n     } else if (action == \"turn\") {\n       yield (turtle => turtle.turn().move().draw())\n     }\n   }\n }\n function animate(el, prose) {\n   const fps = 30\n   let requestId\n   let iterator = (function* () {\n     while (true) {\n       yield (turtle => turtle.clear().draw())\n       for (let i=0; i < 6; i++) {\n         yield* actions(prose)\n       }\n     }\n   })()\n   function step() {\n     setTimeout(function () {\n       requestId = window.requestAnimationFrame(step)\n       let what = iterator.next()\n       what.value(el.turtle)\n       rescale(el.closest('svg'))\n       resize()\n     }, 1000/fps) // setTimeout used to allow speed to be controlled with fps\n   }\n   step()\n }\n function resize() {\n   window.parent.postMessage({\n     action: \"resize\",\n     height: document.body.offsetHeight\n   }, \"*\")\n }\n async function main() {\n   const {page:{story}} = await frame.context()\n   const text = story\n     .filter(item => item.type == \"paragraph\")\n     .map(item => item.text.toLowerCase())\n     .join(\"\\n\")\n   addTurtle(it)\n   helloWorld(it)\n   animate(it, text)\n   document.body.insertAdjacentHTML('afterbegin', `<p>${text}</p>`)\n }\n main()\n}"
+      },
+      "date": 1688828789708
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import {addTurtle} from \"https://turtle.dbbs.co/assets/turtle/svg-path.js\"\nimport {context, resize} from \"https://turtle.dbbs.co/assets/turtle/frame.js\"\n\nexport async function emit(el) {\n  el.innerHTML = `<svg viewBox=\"-100 -100 200 200\"><path id=\"it\" d=\"\" fill=\"none\" stroke=\"black\"/></svg>`\n}\n\nexport async function bind(el) {\n function helloWorld(el) {\n   Array.from({length:16*3}).forEach(() => {\n     el.turtle.move().turn().nextMovesize()\n   })\n   el.turtle.draw()\n   rescale(el.closest('svg'))\n }\n function rescale (svg) {\n   let {x,y,width,height} = svg.getBBox()\n   let padding = Math.min(width,height)*0.01\n   svg.setAttribute('viewBox',\n                    `${x-padding} ${y-padding} ${width+2*padding} ${height+2*padding}`)\n   svg.removeAttribute(\"width\")\n   svg.removeAttribute(\"height\")\n   svg.style.width=\"100%\"\n   return svg\n }\n function* actions(prose) {\n   const re = /move|turn/g // TODO synonyms?\n   for (let [action] of prose.matchAll(re)) {\n     if (action == \"move\") {\n       for (let i=0; i<15; i++) {\n         yield (turtle => turtle.move().draw())\n       }\n     } else if (action == \"turn\") {\n       yield (turtle => turtle.turn().move().draw())\n     }\n   }\n }\n function animate(el, prose) {\n   const fps = 30\n   let requestId\n   let iterator = (function* () {\n     while (true) {\n       yield (turtle => turtle.clear().draw())\n       for (let i=0; i < 6; i++) {\n         yield* actions(prose)\n       }\n     }\n   })()\n   function step() {\n     setTimeout(function () {\n       requestId = window.requestAnimationFrame(step)\n       let what = iterator.next()\n       what.value(el.turtle)\n       rescale(el.closest('svg'))\n       resize()\n     }, 1000/fps) // setTimeout used to allow speed to be controlled with fps\n   }\n   step()\n }\n async function main() {\n   const {page:{story}} = await context()\n   const text = story\n     .filter(item => item.type == \"paragraph\")\n     .map(item => item.text.toLowerCase())\n     .join(\"\\n\")\n   addTurtle(it)\n   helloWorld(it)\n   animate(it, text)\n   document.body.insertAdjacentHTML('afterbegin', `<p>${text}</p>`)\n }\n main()\n}"
+      },
+      "date": 1688828817819
+    },
+    {
+      "type": "edit",
+      "id": "4c3a87231ca8c791",
+      "item": {
+        "type": "paragraph",
+        "id": "4c3a87231ca8c791",
+        "text": "The addTurtle() function attaches a turtle geometry object to an SVG <path> element—so we can display the geometry. The context() and resize() functions from frame.js enable some specific communication with this wiki page."
+      },
+      "date": 1688830005253
+    },
+    {
+      "type": "add",
+      "id": "e8d9e2d46a82e270",
+      "item": {
+        "type": "paragraph",
+        "id": "e8d9e2d46a82e270",
+        "text": "..."
+      },
+      "after": "4c3a87231ca8c791",
+      "date": 1688830011231
+    },
+    {
+      "type": "edit",
+      "id": "4c3a87231ca8c791",
+      "item": {
+        "type": "paragraph",
+        "id": "4c3a87231ca8c791",
+        "text": "These several imported functions must appear first for the javascript module to compile, but are not the most important part of the story. The addTurtle() function attaches a turtle geometry object to an SVG <path> element—so we can display the geometry. The context() and resize() functions from frame.js enable some specific communication with this wiki page."
+      },
+      "date": 1688830234758
+    },
+    {
+      "type": "add",
+      "id": "faad423ee216d9b7",
+      "item": {
+        "type": "paragraph",
+        "id": "faad423ee216d9b7",
+        "text": "// code"
+      },
+      "after": "e8d9e2d46a82e270",
+      "date": 1688830453867
+    },
+    {
+      "type": "add",
+      "id": "a9b40a6177af7000",
+      "item": {
+        "type": "paragraph",
+        "id": "a9b40a6177af7000",
+        "text": "..."
+      },
+      "after": "faad423ee216d9b7",
+      "date": 1688830455248
+    },
+    {
+      "type": "edit",
+      "id": "faad423ee216d9b7",
+      "item": {
+        "type": "code",
+        "id": "faad423ee216d9b7",
+        "text": "function* actions(prose) {\n  const re = /move|turn/g // TODO synonyms?\n  for (let [action] of prose.matchAll(re)) {\n    if (action == \"move\") {\n      for (let i=0; i<15; i++) {\n        yield (turtle => turtle.move().draw())\n      }\n    } else if (action == \"turn\") {\n      yield (turtle => turtle.turn().move().draw())\n    }\n  }\n}\n"
+      },
+      "date": 1688830501569
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import {addTurtle} from \"https://turtle.dbbs.co/assets/turtle/svg-path.js\"\nimport {context, resize} from \"https://turtle.dbbs.co/assets/turtle/frame.js\"\n\nexport async function emit(el) {\n  el.innerHTML = `<svg viewBox=\"-100 -100 200 200\"><path id=\"it\" d=\"\" fill=\"none\" stroke=\"black\"/></svg>`\n}\n\nexport async function bind(el) {\n function helloWorld(el) {\n   Array.from({length:16*3}).forEach(() => {\n     el.turtle.move().turn().nextMovesize()\n   })\n   el.turtle.draw()\n   rescale(el.closest('svg'))\n }\n function rescale (svg) {\n   let {x,y,width,height} = svg.getBBox()\n   let padding = Math.min(width,height)*0.01\n   svg.setAttribute('viewBox',\n                    `${x-padding} ${y-padding} ${width+2*padding} ${height+2*padding}`)\n   svg.removeAttribute(\"width\")\n   svg.removeAttribute(\"height\")\n   svg.style.width=\"100%\"\n   return svg\n }\n function animate(el, prose) {\n   const fps = 30\n   let requestId\n   let iterator = (function* () {\n     while (true) {\n       yield (turtle => turtle.clear().draw())\n       for (let i=0; i < 6; i++) {\n         yield* actions(prose)\n       }\n     }\n   })()\n   function step() {\n     setTimeout(function () {\n       requestId = window.requestAnimationFrame(step)\n       let what = iterator.next()\n       what.value(el.turtle)\n       rescale(el.closest('svg'))\n       resize()\n     }, 1000/fps) // setTimeout used to allow speed to be controlled with fps\n   }\n   step()\n }\n async function main() {\n   const {page:{story}} = await context()\n   const text = story\n     .filter(item => item.type == \"paragraph\")\n     .map(item => item.text.toLowerCase())\n     .join(\"\\n\")\n   addTurtle(it)\n   helloWorld(it)\n   animate(it, text)\n   document.body.insertAdjacentHTML('afterbegin', `<p>${text}</p>`)\n }\n main()\n}"
+      },
+      "date": 1688830532387
+    },
+    {
+      "type": "edit",
+      "id": "e8d9e2d46a82e270",
+      "item": {
+        "type": "paragraph",
+        "id": "e8d9e2d46a82e270",
+        "text": "//code"
+      },
+      "date": 1688830567669
+    },
+    {
+      "type": "add",
+      "id": "5e8b305a47040729",
+      "item": {
+        "type": "paragraph",
+        "id": "5e8b305a47040729",
+        "text": "..."
+      },
+      "after": "e8d9e2d46a82e270",
+      "date": 1688830571148
+    },
+    {
+      "type": "edit",
+      "id": "e8d9e2d46a82e270",
+      "item": {
+        "type": "code",
+        "id": "e8d9e2d46a82e270",
+        "text": "import {addTurtle} from \"https://turtle.dbbs.co/assets/turtle/svg-path.js\"\nimport {context, resize} from \"https://turtle.dbbs.co/assets/turtle/frame.js\""
+      },
+      "date": 1688830588671
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `<svg viewBox=\"-100 -100 200 200\"><path id=\"it\" d=\"\" fill=\"none\" stroke=\"black\"/></svg>`\n}\n\nexport async function bind(el) {\n function helloWorld(el) {\n   Array.from({length:16*3}).forEach(() => {\n     el.turtle.move().turn().nextMovesize()\n   })\n   el.turtle.draw()\n   rescale(el.closest('svg'))\n }\n function rescale (svg) {\n   let {x,y,width,height} = svg.getBBox()\n   let padding = Math.min(width,height)*0.01\n   svg.setAttribute('viewBox',\n                    `${x-padding} ${y-padding} ${width+2*padding} ${height+2*padding}`)\n   svg.removeAttribute(\"width\")\n   svg.removeAttribute(\"height\")\n   svg.style.width=\"100%\"\n   return svg\n }\n function animate(el, prose) {\n   const fps = 30\n   let requestId\n   let iterator = (function* () {\n     while (true) {\n       yield (turtle => turtle.clear().draw())\n       for (let i=0; i < 6; i++) {\n         yield* actions(prose)\n       }\n     }\n   })()\n   function step() {\n     setTimeout(function () {\n       requestId = window.requestAnimationFrame(step)\n       let what = iterator.next()\n       what.value(el.turtle)\n       rescale(el.closest('svg'))\n       resize()\n     }, 1000/fps) // setTimeout used to allow speed to be controlled with fps\n   }\n   step()\n }\n async function main() {\n   const {page:{story}} = await context()\n   const text = story\n     .filter(item => item.type == \"paragraph\")\n     .map(item => item.text.toLowerCase())\n     .join(\"\\n\")\n   addTurtle(it)\n   helloWorld(it)\n   animate(it, text)\n   document.body.insertAdjacentHTML('afterbegin', `<p>${text}</p>`)\n }\n main()\n}"
+      },
+      "date": 1688830595805
+    },
+    {
+      "type": "edit",
+      "id": "5e8b305a47040729",
+      "item": {
+        "type": "paragraph",
+        "id": "5e8b305a47040729",
+        "text": "The actions() generator function is where we convert prose into a collection of turtle instructions. Our current dance vocabulary recognizes only two words. Move is translated into fifteen steps in the collection. Turn changes the turtle's direction and takes one more step to make that change in direction immediately visible."
+      },
+      "date": 1688831177712
+    },
+    {
+      "type": "edit",
+      "id": "5e8b305a47040729",
+      "item": {
+        "type": "paragraph",
+        "id": "5e8b305a47040729",
+        "text": "The actions() generator function is where we convert prose into a collection of turtle instructions. Our current dance vocabulary recognizes only two words. Move is translated into fifteen steps in the collection. Turn changes the turtle's direction and takes one more step to make that turn immediately visible."
+      },
+      "date": 1688831226673
+    },
+    {
+      "type": "edit",
+      "id": "a9b40a6177af7000",
+      "item": {
+        "type": "paragraph",
+        "id": "a9b40a6177af7000",
+        "text": "We anticipate expanding this vocabulary with synonyms of move and turn and also words to change the angle of our turns."
+      },
+      "date": 1688831415256
+    },
+    {
+      "type": "edit",
+      "id": "a9b40a6177af7000",
+      "item": {
+        "type": "paragraph",
+        "id": "a9b40a6177af7000",
+        "text": "We anticipate expanding this vocabulary with synonyms of move and turn and also words to change the angle of our turns, the color, or the stroke width. Perhaps we can also teach turtles to leave named trail markers along the path."
+      },
+      "date": 1688833202049
+    },
+    {
+      "type": "edit",
+      "id": "484e092159df2d01",
+      "item": {
+        "type": "paragraph",
+        "id": "484e092159df2d01",
+        "text": "We turn to a story about the code behind our [[First Dancing Turtle]] and how words on the page inspire it to move."
+      },
+      "date": 1688833298227
+    },
+    {
+      "type": "edit",
+      "id": "4c3a87231ca8c791",
+      "item": {
+        "type": "paragraph",
+        "id": "4c3a87231ca8c791",
+        "text": "Several imported functions must appear first for the javascript module to compile, but are not the most important part of the story. The addTurtle() function attaches a turtle geometry object to an SVG <path> element—so we can display the geometry. The context() and resize() functions from frame.js enable some specific communication with this wiki page."
+      },
+      "date": 1688833422583
+    },
+    {
+      "type": "add",
+      "id": "a3c898f882187fac",
+      "item": {
+        "type": "paragraph",
+        "id": "a3c898f882187fac",
+        "text": "...explain animate"
+      },
+      "after": "a9b40a6177af7000",
+      "date": 1688833520463
+    },
+    {
+      "type": "add",
+      "id": "3242fe783d2ee061",
+      "item": {
+        "type": "paragraph",
+        "id": "3242fe783d2ee061",
+        "text": "//code"
+      },
+      "after": "a3c898f882187fac",
+      "date": 1688833523937
+    },
+    {
+      "type": "add",
+      "id": "6cff97f440b1121d",
+      "item": {
+        "type": "paragraph",
+        "id": "6cff97f440b1121d",
+        "text": "..."
+      },
+      "after": "3242fe783d2ee061",
+      "date": 1688833526271
+    },
+    {
+      "type": "edit",
+      "id": "3242fe783d2ee061",
+      "item": {
+        "type": "code",
+        "id": "3242fe783d2ee061",
+        "text": "function animate(el, prose) {\n  const fps = 30\n  let requestId\n  let iterator = (function* () {\n    while (true) {\n      yield (turtle => turtle.clear().draw())\n      for (let i=0; i < 6; i++) {\n        yield* actions(prose)\n      }\n    }\n  })()\n  function step() {\n    setTimeout(function () {\n      requestId = window.requestAnimationFrame(step)\n      let what = iterator.next()\n      what.value(el.turtle)\n      rescale(el.closest('svg'))\n      resize()\n    }, 1000/fps) // setTimeout used to allow speed to be controlled with fps\n  }\n  step()\n}"
+      },
+      "date": 1688833580079
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `<svg viewBox=\"-100 -100 200 200\"><path id=\"it\" d=\"\" fill=\"none\" stroke=\"black\"/></svg>`\n}\n\nexport async function bind(el) {\n function helloWorld(el) {\n   Array.from({length:16*3}).forEach(() => {\n     el.turtle.move().turn().nextMovesize()\n   })\n   el.turtle.draw()\n   rescale(el.closest('svg'))\n }\n function rescale (svg) {\n   let {x,y,width,height} = svg.getBBox()\n   let padding = Math.min(width,height)*0.01\n   svg.setAttribute('viewBox',\n                    `${x-padding} ${y-padding} ${width+2*padding} ${height+2*padding}`)\n   svg.removeAttribute(\"width\")\n   svg.removeAttribute(\"height\")\n   svg.style.width=\"100%\"\n   return svg\n }\n async function main() {\n   const {page:{story}} = await context()\n   const text = story\n     .filter(item => item.type == \"paragraph\")\n     .map(item => item.text.toLowerCase())\n     .join(\"\\n\")\n   addTurtle(it)\n   helloWorld(it)\n   animate(it, text)\n   document.body.insertAdjacentHTML('afterbegin', `<p>${text}</p>`)\n }\n main()\n}"
+      },
+      "date": 1688833612019
+    },
+    {
+      "type": "edit",
+      "id": "6cff97f440b1121d",
+      "item": {
+        "type": "paragraph",
+        "id": "6cff97f440b1121d",
+        "text": "...explain rescale()"
+      },
+      "date": 1688833658943
+    },
+    {
+      "type": "add",
+      "id": "26880ecc484da230",
+      "item": {
+        "type": "paragraph",
+        "id": "26880ecc484da230",
+        "text": "//code"
+      },
+      "after": "6cff97f440b1121d",
+      "date": 1688833660530
+    },
+    {
+      "type": "add",
+      "id": "313907154e6512d9",
+      "item": {
+        "type": "paragraph",
+        "id": "313907154e6512d9",
+        "text": "..."
+      },
+      "after": "26880ecc484da230",
+      "date": 1688833661691
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `<svg viewBox=\"-100 -100 200 200\"><path id=\"it\" d=\"\" fill=\"none\" stroke=\"black\"/></svg>`\n}\n\nexport async function bind(el) {\n function helloWorld(el) {\n   Array.from({length:16*3}).forEach(() => {\n     el.turtle.move().turn().nextMovesize()\n   })\n   el.turtle.draw()\n   rescale(el.closest('svg'))\n }\n async function main() {\n   const {page:{story}} = await context()\n   const text = story\n     .filter(item => item.type == \"paragraph\")\n     .map(item => item.text.toLowerCase())\n     .join(\"\\n\")\n   addTurtle(it)\n   helloWorld(it)\n   animate(it, text)\n   document.body.insertAdjacentHTML('afterbegin', `<p>${text}</p>`)\n }\n main()\n}"
+      },
+      "date": 1688833690464
+    },
+    {
+      "type": "edit",
+      "id": "26880ecc484da230",
+      "item": {
+        "type": "code",
+        "id": "26880ecc484da230",
+        "text": "function rescale (svg) {\n  let {x,y,width,height} = svg.getBBox()\n  let p = Math.min(width,height)*0.01\n  svg.setAttribute('viewBox',\n    `${x-p} ${y-p} ${width+2*p} ${height+2*p}`)\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  svg.style.width=\"100%\"\n  return svg\n}"
+      },
+      "date": 1688833790180
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `<svg viewBox=\"-100 -100 200 200\"><path id=\"it\" d=\"\" fill=\"none\" stroke=\"black\"/></svg>`\n}\n\nexport async function bind(el) {\n const {page:{story}} = await context()\n const text = story\n   .filter(item => item.type == \"paragraph\")\n   .map(item => item.text.toLowerCase())\n   .join(\"\\n\")\n addTurtle(it)\n animate(it, text)\n document.body.insertAdjacentHTML(\n   'afterbegin',\n   `<p>${text}</p>`)\n}\n"
+      },
+      "date": 1688833900951
+    },
+    {
+      "type": "edit",
+      "id": "6cff97f440b1121d",
+      "item": {
+        "type": "paragraph",
+        "id": "6cff97f440b1121d",
+        "text": "The attributes on an <svg> element often restrict the scale in \"scalable vector graphics\". The rescale() method removed width and height attributes and overrides the width defined in the style attribute. It also adds (or replaces) the viewBox attribute with values from the getBBox() method. We use this within the animate() method to recompute the viewBox with each additional step to keep the entire path in view."
+      },
+      "date": 1688862309361
+    },
+    {
+      "type": "edit",
+      "id": "6cff97f440b1121d",
+      "item": {
+        "type": "paragraph",
+        "id": "6cff97f440b1121d",
+        "text": "The attributes on an <svg> element often restrict the scale in \"scalable vector graphics\". The rescale() method removed width and height attributes and overrides the width defined in the style attribute. It also adds (or replaces) the viewBox attribute with values from the getBBox() method. We use this within the animate() method to recompute the viewBox with each additional step to keep the entire path in view. One thing we discovered in testing, this method only works for SVGs that have been appended to the DOM."
+      },
+      "date": 1688862365881
+    },
+    {
+      "type": "edit",
+      "id": "6cff97f440b1121d",
+      "item": {
+        "type": "paragraph",
+        "id": "6cff97f440b1121d",
+        "text": "The attributes on an <svg> element often restrict the scale in \"scalable vector graphics\". The rescale() method removed width and height attributes and overrides the width defined in the style attribute. It also adds (or replaces) the viewBox attribute with values from the getBBox() method plus 1% additional padding. We use this within the animate() method to recompute the viewBox with each additional step to keep the entire path in view. One thing we discovered in testing, this method only works for SVGs that have been appended to the DOM."
+      },
+      "date": 1688862476553
+    },
+    {
+      "type": "edit",
+      "id": "313907154e6512d9",
+      "item": {
+        "type": "paragraph",
+        "id": "313907154e6512d9",
+        "text": "The last two async functions are how we participate in the expectations of our [[ESM Snippet Template]]. The emit() function puts our SVG element on the page containing a single path. The bind() function awaits the page content from context()—one of the things we imported at the top of the program—and filters the story for paragraphs to joint into the prose for our dance instructions. It instruments the <path> with a turtle and begins the animation loop."
+      },
+      "date": 1688863005026
+    },
+    {
+      "type": "edit",
+      "id": "3242fe783d2ee061",
+      "item": {
+        "type": "code",
+        "id": "3242fe783d2ee061",
+        "text": "function animate(el, prose) {\n  const fps = 30\n  let requestId, i=0\n  let iterator = (function* () {\n    do {\n      if (i%6==0) {\n        yield (turtle => turtle.clear().draw())\n      }\n      yield* actions(prose)\n    } while (i++ >=0)\n  })()\n  function step() {\n    setTimeout(function () {\n      requestId = window.requestAnimationFrame(step)\n      let what = iterator.next()\n      what.value(el.turtle)\n      rescale(el.closest('svg'))\n      resize()\n    }, 1000/fps) // setTimeout used to allow speed to be controlled with fps\n  }\n  step()\n}"
+      },
+      "date": 1688863231647
+    },
+    {
+      "type": "edit",
+      "id": "3242fe783d2ee061",
+      "item": {
+        "type": "code",
+        "id": "3242fe783d2ee061",
+        "text": "function animate(el, prose) {\n  const fps = 30\n  let requestId, i=0\n  let iterator = (function* () {\n    do {\n      if (i%6==0) {\n        yield (turtle => turtle.clear().draw())\n      }\n      yield* actions(prose)\n    } while (++i)\n  })()\n  function step() {\n    setTimeout(function () {\n      requestId = window.requestAnimationFrame(step)\n      let what = iterator.next()\n      what.value(el.turtle)\n      rescale(el.closest('svg'))\n      resize()\n    }, 1000/fps) // setTimeout used to allow speed to be controlled with fps\n  }\n  step()\n}"
+      },
+      "date": 1688863350862
+    },
+    {
+      "type": "edit",
+      "id": "a3c898f882187fac",
+      "item": {
+        "type": "paragraph",
+        "id": "a3c898f882187fac",
+        "text": "The code inside animate() feels the most confusing "
+      },
+      "date": 1688919189948
+    },
+    {
+      "type": "edit",
+      "id": "a3c898f882187fac",
+      "item": {
+        "type": "paragraph",
+        "id": "a3c898f882187fac",
+        "text": "The code inside animate() feels the most confusing. We create an infinite iterator from an anonymous generator function. It repeatedly follows the instructions from the given prose and every six repetitions it clears the path to start over. "
+      },
+      "date": 1688919689534
+    },
+    {
+      "type": "edit",
+      "id": "a3c898f882187fac",
+      "item": {
+        "type": "paragraph",
+        "id": "a3c898f882187fac",
+        "text": "The code inside animate() feels the most confusing."
+      },
+      "date": 1688919765424
+    },
+    {
+      "type": "add",
+      "id": "e450bb8814f28f6a",
+      "item": {
+        "type": "paragraph",
+        "id": "e450bb8814f28f6a",
+        "text": "We create an infinite iterator from an immediately invoked function expression (IIFE) that is also an anonymous generator function. It repeatedly follows the instructions from the given prose and every six repetitions it clears the path to start over."
+      },
+      "after": "a3c898f882187fac",
+      "date": 1688919785135
+    },
+    {
+      "type": "add",
+      "id": "47f75e6cc07e6fe7",
+      "item": {
+        "type": "paragraph",
+        "id": "47f75e6cc07e6fe7",
+        "text": "Then we also create a recursive function "
+      },
+      "after": "e450bb8814f28f6a",
+      "date": 1688919802967
+    },
+    {
+      "type": "edit",
+      "id": "47f75e6cc07e6fe7",
+      "item": {
+        "type": "paragraph",
+        "id": "47f75e6cc07e6fe7",
+        "text": "Then we also create an asynchronous recursive function that combines setTimeout and requestAnimationFrame() to "
+      },
+      "date": 1688920795628
+    },
+    {
+      "type": "edit",
+      "id": "47f75e6cc07e6fe7",
+      "item": {
+        "type": "paragraph",
+        "id": "47f75e6cc07e6fe7",
+        "text": "Then we also create an asynchronous recursive function that combines setTimeout() and requestAnimationFrame() as a clock to take steps through the infinite iterator. Feels like there should be a more expressive way to invoke the steps in the iterator inside the async clock."
+      },
+      "date": 1688920962343
+    },
+    {
+      "type": "add",
+      "id": "4b76dd7865610a3b",
+      "item": {
+        "type": "paragraph",
+        "id": "4b76dd7865610a3b",
+        "text": "... explain why we chose a song ... and why the particular song we chose ..."
+      },
+      "after": "484e092159df2d01",
+      "date": 1688921103450
+    },
+    {
+      "type": "add",
+      "id": "342b7a72cee993fd",
+      "item": {
+        "type": "paragraph",
+        "id": "342b7a72cee993fd",
+        "text": "... explain the happy accident of 15 steps per move and one extra move per turn ... "
+      },
+      "after": "5e8b305a47040729",
+      "date": 1688921982674
+    },
+    {
+      "type": "add",
+      "id": "9d70446e022f0942",
+      "item": {
+        "type": "paragraph",
+        "id": "9d70446e022f0942",
+        "text": "Happy accidents"
+      },
+      "after": "4b76dd7865610a3b",
+      "date": 1688923381838
+    },
+    {
+      "id": "4b76dd7865610a3b",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "9d70446e022f0942",
+        "4b76dd7865610a3b",
+        "4c3a87231ca8c791",
+        "e8d9e2d46a82e270",
+        "5e8b305a47040729",
+        "342b7a72cee993fd",
+        "faad423ee216d9b7",
+        "a9b40a6177af7000",
+        "a3c898f882187fac",
+        "e450bb8814f28f6a",
+        "47f75e6cc07e6fe7",
+        "3242fe783d2ee061",
+        "6cff97f440b1121d",
+        "26880ecc484da230",
+        "313907154e6512d9",
+        "5eb6b67568179aa3",
+        "caa626ac93aa7d4c",
+        "6cf52409eec3988c"
+      ],
+      "date": 1688923384171
+    },
+    {
+      "id": "342b7a72cee993fd",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "9d70446e022f0942",
+        "4b76dd7865610a3b",
+        "342b7a72cee993fd",
+        "4c3a87231ca8c791",
+        "e8d9e2d46a82e270",
+        "5e8b305a47040729",
+        "faad423ee216d9b7",
+        "a9b40a6177af7000",
+        "a3c898f882187fac",
+        "e450bb8814f28f6a",
+        "47f75e6cc07e6fe7",
+        "3242fe783d2ee061",
+        "6cff97f440b1121d",
+        "26880ecc484da230",
+        "313907154e6512d9",
+        "5eb6b67568179aa3",
+        "caa626ac93aa7d4c",
+        "6cf52409eec3988c"
+      ],
+      "date": 1688923390183
+    },
+    {
+      "type": "edit",
+      "id": "342b7a72cee993fd",
+      "item": {
+        "type": "paragraph",
+        "id": "342b7a72cee993fd",
+        "text": "... explain the happy accident of 15 steps per move and one extra move per turn ..."
+      },
+      "date": 1688923415616
+    },
+    {
+      "type": "add",
+      "id": "83c839d472315dab",
+      "item": {
+        "type": "paragraph",
+        "id": "83c839d472315dab",
+        "text": "... explain our interest in being able to use frames per second in animate and how that drove the implementation ... explain the journey to choose 30 fps and how it informed 15 steps per move ..."
+      },
+      "after": "342b7a72cee993fd",
+      "date": 1688923520857
+    },
+    {
+      "type": "add",
+      "id": "8642ec2ba398f5c4",
+      "item": {
+        "type": "paragraph",
+        "id": "8642ec2ba398f5c4",
+        "text": "... explain the constraint of our default turn size and how that informed the choice of 6 loops before we clear ..."
+      },
+      "after": "83c839d472315dab",
+      "date": 1688923613664
+    },
+    {
+      "type": "edit",
+      "id": "9d70446e022f0942",
+      "item": {
+        "type": "paragraph",
+        "id": "9d70446e022f0942",
+        "text": "Pleasant surprises."
+      },
+      "date": 1688943553729
+    },
+    {
+      "type": "edit",
+      "id": "4b76dd7865610a3b",
+      "item": {
+        "type": "paragraph",
+        "id": "4b76dd7865610a3b",
+        "text": "Upon implementing the actions() generator function to transform prose into a series of turtle instructions, we needed an example poem to show off the code. We briefly searched for something by Shakespeare."
+      },
+      "date": 1688943833815
+    },
+    {
+      "type": "edit",
+      "id": "4b76dd7865610a3b",
+      "item": {
+        "type": "paragraph",
+        "id": "4b76dd7865610a3b",
+        "text": "Upon implementing the actions() generator function to transform prose into a series of turtle instructions, we needed an example poem to show off the code. Our first thought was for something by Shakespeare, but in brief searching did not quickly find. Our head is full of songs from the 1980s"
+      },
+      "date": 1688945954501
+    },
+    {
+      "type": "edit",
+      "id": "4b76dd7865610a3b",
+      "item": {
+        "type": "paragraph",
+        "id": "4b76dd7865610a3b",
+        "text": "Upon implementing the actions() generator function to transform prose into a series of turtle instructions, we needed an example poem to show off the code. Our first thought was for something by Shakespeare, but in brief searching did not quickly find. Maybe a song? What songs do we know with turns and moves?"
+      },
+      "date": 1688946421305
+    },
+    {
+      "type": "edit",
+      "id": "4b76dd7865610a3b",
+      "item": {
+        "type": "paragraph",
+        "id": "4b76dd7865610a3b",
+        "text": "Upon implementing the actions() generator function to transform prose into a series of turtle instructions, we needed an example poem to show off the code. Our first thought was for something by Shakespeare, but in brief searching did not quickly find. Maybe a song? What songs do we know with turns and moves? The Byrds? Wait! Turn the Beat Around! Does that one move?"
+      },
+      "date": 1688947258059
+    },
+    {
+      "type": "edit",
+      "id": "4b76dd7865610a3b",
+      "item": {
+        "type": "paragraph",
+        "id": "4b76dd7865610a3b",
+        "text": "Upon implementing the actions() generator function to transform prose into a series of turtle instructions, we needed an example poem to show off the code. Our first thought was for something by Shakespeare, but in brief searching did not quickly find. Maybe a song? What songs do we know with turns and moves? The Byrds? Wait! Turn the Beat Around! \"Move your feet when you feel that beat, yeah!\""
+      },
+      "date": 1688947734487
+    },
+    {
+      "type": "edit",
+      "id": "4b76dd7865610a3b",
+      "item": {
+        "type": "paragraph",
+        "id": "4b76dd7865610a3b",
+        "text": "Upon implementing the actions() generator function to transform prose into a series of turtle instructions, we needed an example poem to show off the code. Our first thought was for something by Shakespeare, but in brief searching did not quickly find. Maybe a song? The Byrds? Wait! Turn the Beat Around! \"Move your feet when you feel that beat, yeah!\""
+      },
+      "date": 1688947949573
+    },
+    {
+      "type": "edit",
+      "id": "4b76dd7865610a3b",
+      "item": {
+        "type": "paragraph",
+        "id": "4b76dd7865610a3b",
+        "text": "Upon implementing the actions() generator function to transform prose into a series of turtle instructions, we needed an example poem to show off the code. Our first thought was for something by Shakespeare, but in brief searching did not quickly find. Maybe a song that turns and moves? The Byrds? Wait! Turn the Beat Around! \"Move your feet when you feel that beat, yeah!\""
+      },
+      "date": 1688947990438
+    },
+    {
+      "type": "edit",
+      "id": "4b76dd7865610a3b",
+      "item": {
+        "type": "paragraph",
+        "id": "4b76dd7865610a3b",
+        "text": "Upon implementing the actions() generator function to transform prose into a series of turtle instructions, we needed an example poem to show off the code. Our first thought was for something by Shakespeare, but in brief searching did not quickly find. Maybe a song that moves? The Byrds? Wait! Turn the Beat Around! \"Move your feet when you feel that beat, yeah!\""
+      },
+      "date": 1688948015394
+    },
+    {
+      "type": "edit",
+      "id": "4b76dd7865610a3b",
+      "item": {
+        "type": "paragraph",
+        "id": "4b76dd7865610a3b",
+        "text": "Upon implementing the actions() generator function to transform prose into a series of turtle instructions, we needed an example poem to show off the code. Our first thought was for something by Shakespeare, but in brief searching did not quickly find. Maybe a song that moves? The Byrds' Turn, Turn, Turn? Wait! Turn the Beat Around! \"Move your feet when you feel that beat, yeah!\""
+      },
+      "date": 1688948064384
+    },
+    {
+      "type": "edit",
+      "id": "4b76dd7865610a3b",
+      "item": {
+        "type": "paragraph",
+        "id": "4b76dd7865610a3b",
+        "text": "Upon implementing the actions() generator function to transform prose into a series of turtle instructions, we needed an example poem to show off the code. Our first thought was for something by Shakespeare, but in brief searching did not quickly find. Maybe a song? The Byrds' Turn, Turn, Turn? Wait! Are there moves in Turn the Beat Around? \"Move your feet when you feel that beat, yeah!\""
+      },
+      "date": 1688948143243
+    },
+    {
+      "type": "remove",
+      "id": "4b76dd7865610a3b",
+      "date": 1688948228613
+    },
+    {
+      "type": "edit",
+      "id": "9d70446e022f0942",
+      "item": {
+        "type": "paragraph",
+        "id": "9d70446e022f0942",
+        "text": "Finding the right song was a pleasant surprise. Once we had the actions() generator function transforming prose into turtle instructions, we needed an example poem to show off the code. Our first thought was Shakespeare, but in brief searching did not quickly find. Maybe a song? The Byrds' Turn, Turn, Turn? Wait! Are there moves in Turn the Beat Around? \"Move your feet when you feel that beat, yeah!\""
+      },
+      "date": 1688948379759
+    },
+    {
+      "id": "342b7a72cee993fd",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "9d70446e022f0942",
+        "83c839d472315dab",
+        "8642ec2ba398f5c4",
+        "4c3a87231ca8c791",
+        "e8d9e2d46a82e270",
+        "5e8b305a47040729",
+        "faad423ee216d9b7",
+        "342b7a72cee993fd",
+        "a9b40a6177af7000",
+        "a3c898f882187fac",
+        "e450bb8814f28f6a",
+        "47f75e6cc07e6fe7",
+        "3242fe783d2ee061",
+        "6cff97f440b1121d",
+        "26880ecc484da230",
+        "313907154e6512d9",
+        "5eb6b67568179aa3",
+        "caa626ac93aa7d4c",
+        "6cf52409eec3988c"
+      ],
+      "date": 1688948401415
+    },
+    {
+      "id": "83c839d472315dab",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "9d70446e022f0942",
+        "8642ec2ba398f5c4",
+        "4c3a87231ca8c791",
+        "e8d9e2d46a82e270",
+        "5e8b305a47040729",
+        "faad423ee216d9b7",
+        "342b7a72cee993fd",
+        "a9b40a6177af7000",
+        "a3c898f882187fac",
+        "e450bb8814f28f6a",
+        "47f75e6cc07e6fe7",
+        "3242fe783d2ee061",
+        "83c839d472315dab",
+        "6cff97f440b1121d",
+        "26880ecc484da230",
+        "313907154e6512d9",
+        "5eb6b67568179aa3",
+        "caa626ac93aa7d4c",
+        "6cf52409eec3988c"
+      ],
+      "date": 1688948442872
+    },
+    {
+      "id": "8642ec2ba398f5c4",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "9d70446e022f0942",
+        "4c3a87231ca8c791",
+        "e8d9e2d46a82e270",
+        "5e8b305a47040729",
+        "faad423ee216d9b7",
+        "342b7a72cee993fd",
+        "a9b40a6177af7000",
+        "a3c898f882187fac",
+        "e450bb8814f28f6a",
+        "47f75e6cc07e6fe7",
+        "3242fe783d2ee061",
+        "8642ec2ba398f5c4",
+        "83c839d472315dab",
+        "6cff97f440b1121d",
+        "26880ecc484da230",
+        "313907154e6512d9",
+        "5eb6b67568179aa3",
+        "caa626ac93aa7d4c",
+        "6cf52409eec3988c"
+      ],
+      "date": 1688948468954
+    },
+    {
+      "type": "add",
+      "id": "c279a55e00aedc49",
+      "item": {
+        "type": "paragraph",
+        "id": "c279a55e00aedc49",
+        "text": "We also want to explain the code and some of the surprised in how it came to be."
+      },
+      "after": "9d70446e022f0942",
+      "date": 1689079086687
+    },
+    {
+      "type": "edit",
+      "id": "c279a55e00aedc49",
+      "item": {
+        "type": "paragraph",
+        "id": "c279a55e00aedc49",
+        "text": "We also want to explain the code and some of the surprises in how it came to be."
+      },
+      "date": 1689079092901
+    },
+    {
+      "type": "edit",
+      "id": "342b7a72cee993fd",
+      "item": {
+        "type": "paragraph",
+        "id": "342b7a72cee993fd",
+        "text": "We have been tinkering with different implementations of turtle geometry in javascript for over a decade and interested in animation for several decades. Even in our first implementation of a turtle we created an animation of a pair of fractals: von Koch snowflake and Peano curve. See [http://dobbse.net/thinair/2011/01/phone-turtle.html blog]"
+      },
+      "date": 1689079888287
+    },
+    {
+      "type": "add",
+      "id": "ed0d1fb8057b4c8c",
+      "item": {
+        "type": "factory",
+        "id": "ed0d1fb8057b4c8c",
+        "text": "...frame"
+      },
+      "after": "342b7a72cee993fd",
+      "date": 1689080324106
+    },
+    {
+      "type": "edit",
+      "id": "ed0d1fb8057b4c8c",
+      "item": {
+        "type": "frame",
+        "id": "ed0d1fb8057b4c8c",
+        "text": "https://dobbs.github.io"
+      },
+      "date": 1689080337563
+    },
+    {
+      "type": "edit",
+      "id": "ed0d1fb8057b4c8c",
+      "item": {
+        "type": "frame",
+        "id": "ed0d1fb8057b4c8c",
+        "text": "https://turtle.dbbs.co/assets/turtle/two-fractals.html"
+      },
+      "date": 1689081028711
+    },
+    {
+      "type": "edit",
+      "id": "342b7a72cee993fd",
+      "item": {
+        "type": "paragraph",
+        "id": "342b7a72cee993fd",
+        "text": "We have been tinkering with different implementations of turtle geometry in javascript for over a decade and interested in animation for several decades. Even in our first implementation of a turtle we created an animation of a pair of fractals: von Koch snowflake and Peano curve."
+      },
+      "date": 1689081077494
+    },
+    {
+      "type": "edit",
+      "id": "ed0d1fb8057b4c8c",
+      "item": {
+        "type": "frame",
+        "id": "ed0d1fb8057b4c8c",
+        "text": "https://turtle.dbbs.co/assets/turtle/two-fractals.html\nFractals from Interactive Turtle Graphics in a Web Browser [http://dobbse.net/thinair/2011/01/phone-turtle.html blog]"
+      },
+      "date": 1689081141305
+    },
+    {
+      "type": "add",
+      "id": "ba7b6371595ba300",
+      "item": {
+        "type": "paragraph",
+        "id": "ba7b6371595ba300",
+        "text": "A little diversion into the backstory."
+      },
+      "after": "faad423ee216d9b7",
+      "date": 1689081243770
+    },
+    {
+      "id": "a9b40a6177af7000",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "9d70446e022f0942",
+        "c279a55e00aedc49",
+        "4c3a87231ca8c791",
+        "e8d9e2d46a82e270",
+        "5e8b305a47040729",
+        "faad423ee216d9b7",
+        "a9b40a6177af7000",
+        "ba7b6371595ba300",
+        "342b7a72cee993fd",
+        "ed0d1fb8057b4c8c",
+        "a3c898f882187fac",
+        "e450bb8814f28f6a",
+        "47f75e6cc07e6fe7",
+        "3242fe783d2ee061",
+        "8642ec2ba398f5c4",
+        "83c839d472315dab",
+        "6cff97f440b1121d",
+        "26880ecc484da230",
+        "313907154e6512d9",
+        "5eb6b67568179aa3",
+        "caa626ac93aa7d4c",
+        "6cf52409eec3988c"
+      ],
+      "date": 1689081284318
+    },
+    {
+      "type": "add",
+      "id": "100582c002c0a85e",
+      "item": {
+        "type": "paragraph",
+        "id": "100582c002c0a85e",
+        "text": "Given that backstory, we envisioned animating the path of our turtle. While writing actions() we considered 5 steps and 10 steps and settled on 15 steps. At the time we made this decision we had not yet chosen frames per second for our animation. We made this choice from a gut feeling."
+      },
+      "after": "ed0d1fb8057b4c8c",
+      "date": 1689081708271
+    },
+    {
+      "type": "add",
+      "id": "caec12539df17d81",
+      "item": {
+        "type": "paragraph",
+        "id": "caec12539df17d81",
+        "text": "A bigger surprise came from a whim in choosing to include one move after each turn. We weighed the question about including some glyph to represent the turtle and visualize its position and direction. That seemed like too much work for this stage of development. One step in the new direction was a shortcut. But the visual results created a delightful little asymmetry—well, there's almost always radial symmetry."
+      },
+      "after": "100582c002c0a85e",
+      "date": 1689082043223
+    },
+    {
+      "type": "edit",
+      "id": "e450bb8814f28f6a",
+      "item": {
+        "type": "paragraph",
+        "id": "e450bb8814f28f6a",
+        "text": "We create an infinite iterator from an immediately invoked function expression (IIFE) that is also an anonymous generator function. It repeatedly follows the instructions from the given prose and every six repetitions it clears the path to start over. The choice of six repetitions derives from what we know about the default turn size: our turtle turns 60 degrees and six such turns will complete a hexigon."
+      },
+      "date": 1689082218388
+    },
+    {
+      "type": "remove",
+      "id": "8642ec2ba398f5c4",
+      "date": 1689082232950
+    },
+    {
+      "type": "remove",
+      "id": "83c839d472315dab",
+      "date": 1689082278103
+    },
+    {
+      "type": "add",
+      "id": "bb019e3b0951c959",
+      "item": {
+        "type": "paragraph",
+        "id": "bb019e3b0951c959",
+        "text": "Our title for this page unabashedly alludes to dialogs between Tortoise and Achilles in Gödel, Escher, and Bach."
+      },
+      "after": "484e092159df2d01",
+      "date": 1689083097219
+    },
+    {
+      "type": "edit",
+      "id": "bb019e3b0951c959",
+      "item": {
+        "type": "paragraph",
+        "id": "bb019e3b0951c959",
+        "text": "Our title for this page unabashedly alludes to dialogs between Tortoise and Achilles in Gödel, Escher, and Bach. For those who have not read that book, those dialogs feature many self-referential and recursive puzzles. One of our favorite experiences with turtle geometry came from mentoring a gifted fifth grader in programming using fractals and recursion. [https://dobbse.net/thinair/2008/12/logo-fractals-recursion.html blog]"
+      },
+      "date": 1689083495933
+    },
+    {
+      "type": "fork",
+      "site": "turtle.dbbs.co",
+      "date": 1689312175598
+    }
+  ]
+}
