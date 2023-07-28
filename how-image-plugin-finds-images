@@ -1,0 +1,859 @@
+{
+  "title": "How Image Plugin Finds Images",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "25cbe24e78c1456c",
+      "text": "There is something slightly mysterious about how the image plugin finds images. Here I will take a look at how this works."
+    },
+    {
+      "type": "markdown",
+      "id": "eaa2b7ef254ec53d",
+      "text": "# Backstory"
+    },
+    {
+      "type": "paragraph",
+      "id": "0f2f0a8bf65765bc",
+      "text": "The early versions of the image plugin solved the problem of where the image was by injecting the URL encoded version of the image into the page. This could make pages very big. Something not helped by the image item getting saved in the journal each time the caption was edited. But, this did have the advantage as the image travelled along with the page."
+    },
+    {
+      "type": "paragraph",
+      "id": "ace48534f8a79666",
+      "text": "Sometimes the half page width image that the plugin provided was not big enough. To get a full page image the HTML plugin was used. But, there was no consistent solution. Sometimes the image would still be visible on a forked paged. But, when a relative URL to image was used it wouldn't be. But, often there a reliance either the original wiki, or other service hosting the image. Sometimes they disappear."
+    },
+    {
+      "type": "html",
+      "id": "61442e4794ed6d1f",
+      "text": "<center>❖ ❖ ❖</center>"
+    },
+    {
+      "type": "markdown",
+      "id": "578b0e23dfaa6dea",
+      "text": "A 2022 update of the image plugin changed this by:\n* giving image files a name using a hash of the image file,\n* saving compressed image files in an well known location in the assets folder.\n* using the wiki page's context to find the image file, and\n* providing a mechanism for forking an image file."
+    },
+    {
+      "type": "reference",
+      "id": "68300925447d1c50",
+      "site": "photos.ward.dojo.fed.wiki",
+      "slug": "daily-photo-challenge",
+      "title": "Daily Photo Challenge",
+      "text": "Lets use an image item from Ward's daily photo challenge."
+    },
+    {
+      "type": "image",
+      "id": "6f5472890e6cc304",
+      "prompt": "Image for Sunday",
+      "location": {
+        "latitude": "45.47148888888889",
+        "longitude": "-122.74859722222223"
+      },
+      "text": "chain fence playground slide",
+      "size": "wide",
+      "width": 420,
+      "height": 315,
+      "url": "/assets/plugins/image/4a3c8b6b73f40dab6e34d2ab8cd00c5e.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "239623aa3b401802",
+      "text": "The JSON for this image item is:"
+    },
+    {
+      "type": "code",
+      "id": "bbfafa5dd2c0438a",
+      "text": "{\n  \"type\": \"image\",\n  \"id\": \"6f5472890e6cc304\",\n  \"prompt\": \"Image for Sunday\",\n  \"location\": {\n    \"latitude\": \"45.47148888888889\",\n    \"longitude\": \"-122.74859722222223\"\n    },\n  \"text\": \"chain fence playground slide\",\n  \"size\": \"wide\",\n  \"width\": 420,\n  \"height\": 315,\n  \"url\": \"/assets/plugins/image/4a3c8b6b73f40dab6e34d2ab8cd00c5e.jpg\"\n}"
+    },
+    {
+      "type": "markdown",
+      "id": "a44f037eabe45de8",
+      "text": "You will notice that there is a relative URL. This is used as the initial value for the image source in the generated HTML. But if you examine the HTML you will see:"
+    },
+    {
+      "type": "code",
+      "id": "64ad962b77032583",
+      "text": "<img \n  class=\"wide\" \n  src=\"//photos.ward.dojo.fed.wiki/assets/plugins/image/4a3c8b6b73f40dab6e34d2ab8cd00c5e.jpg\" \n  width=\"420\" \n  height=\"315\"\n>"
+    },
+    {
+      "type": "paragraph",
+      "id": "c3e97a632a1220c6",
+      "text": "There is nothing in the image item to suggest that image is over on Ward's wiki, rather than in the origin. Let's look at the code to see what is happening."
+    },
+    {
+      "type": "markdown",
+      "id": "6289d0b92351b430",
+      "text": "**Note:** The code shown below is in CoffeeScript"
+    },
+    {
+      "type": "markdown",
+      "id": "1b394e7a45ab4ff1",
+      "text": "In `emit()` we see:"
+    },
+    {
+      "type": "code",
+      "id": "c22ea76cdcbcaa55",
+      "text": "  $item.append \"<img class='#{item.size or 'thumbnail'}' src='#{item.url}'> <p>#{wiki.resolveLinks(item.text)}</p>\"\n"
+    },
+    {
+      "type": "markdown",
+      "id": "1a93a4486dabf591",
+      "text": "This looks fairly standard, but `src` is getting set to the item's url attribute, and when we looked in the HTML we had a `src` over on `photos.ward.dojo.wiki`."
+    },
+    {
+      "type": "markdown",
+      "id": "2d115701572354de",
+      "text": "As I don't have a copy of the image in my wiki, we would expect to have a broken image."
+    },
+    {
+      "type": "markdown",
+      "id": "be70d33748691eb4",
+      "text": "Looking further we see that the plugin is adding an error handler:"
+    },
+    {
+      "type": "code",
+      "id": "20d0dbabd76d1289",
+      "text": "img.on('error', () ->\n    sites = $( this ).data('sites')\n    site = sites.shift()\n    $( this ).data('sites', sites)\n    $( this ).attr('src', site )\n    if sites.length is 0\n      $( this ).off('error')\n    )"
+    },
+    {
+      "type": "markdown",
+      "id": "7fe2d3a223a2f963",
+      "text": "and some data for it to use:"
+    },
+    {
+      "type": "code",
+      "id": "1b46ab27eeeab508",
+      "text": "img.data('sites', alternates($item))"
+    },
+    {
+      "type": "markdown",
+      "id": "fba555b2fe430a15",
+      "text": "`alternates()` looks at the wiki page's journal, and extracts the page's context (list of sites). While is used to create an array of links, using the site adapter `getURL()`."
+    },
+    {
+      "type": "code",
+      "id": "89a98818d1ac85d0",
+      "text": "alternates = ($item) ->\n    sites = []\n    if remote = $item.parents('.page').data('site')\n      unless remote == location.host\n        sites.push remote\n    journal = $item.parents('.page').data('data').journal\n    for action in journal.slice(0).reverse()\n      if action.site? and not sites.includes(action.site)\n        sites.push action.site\n      if action.attribution?.site? and not sites.includes(action.attribution.site)\n        sites.push action.attribution.site\n    sites.map( (site) -> wiki.site(site).getURL(item.url.replace(/^\\//, '')))"
+    },
+    {
+      "type": "markdown",
+      "id": "a27358ff2dbb28a8",
+      "text": "So, stepping through what is happening."
+    },
+    {
+      "type": "markdown",
+      "id": "9f43dba54d9fdf1b",
+      "text": "When the image item is first added to the page, image source will be `/assets/plugins/image/4a3c8b6b73f40dab6e34d2ab8cd00c5e.jpg`, and the `sites` data item `[//photos.ward.dojo.fed.wiki/assets/plugins/image/4a3c8b6b73f40dab6e34d2ab8cd00c5e.jpg]`."
+    },
+    {
+      "type": "markdown",
+      "id": "e717c168e0116256",
+      "text": "The image will fail to load, and trigger the img's `onerror` event. This will take the first item off the `sites` array, and set the img's `src` to that value. It will also update the saved list of site's, in this case now an empty array. As the list of sites is now empty it will also remove the `onerror` event handler."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "How Image Plugin Finds Images",
+        "story": []
+      },
+      "date": 1689672413644
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "25cbe24e78c1456c"
+      },
+      "id": "25cbe24e78c1456c",
+      "type": "add",
+      "date": 1689672500877
+    },
+    {
+      "type": "edit",
+      "id": "25cbe24e78c1456c",
+      "item": {
+        "type": "paragraph",
+        "id": "25cbe24e78c1456c",
+        "text": "There is something slightly mysterious about how the image plugin finds images. Here I will take a look at how this works."
+      },
+      "date": 1689672645897
+    },
+    {
+      "type": "add",
+      "id": "0f2f0a8bf65765bc",
+      "item": {
+        "type": "paragraph",
+        "id": "0f2f0a8bf65765bc",
+        "text": "The early versions of the image plugin solved the problem of where the image was by injecting the URL encoded version of the image into the page. This could make pages very big. Something not helped by the image item getting saved in the journal each time the caption was edited."
+      },
+      "after": "25cbe24e78c1456c",
+      "date": 1689673011637
+    },
+    {
+      "type": "edit",
+      "id": "0f2f0a8bf65765bc",
+      "item": {
+        "type": "paragraph",
+        "id": "0f2f0a8bf65765bc",
+        "text": "The early versions of the image plugin solved the problem of where the image was by injecting the URL encoded version of the image into the page. This could make pages very big. Something not helped by the image item getting saved in the journal each time the caption was edited. But, this did have the advantage as the image travelled along with the page."
+      },
+      "date": 1689673081613
+    },
+    {
+      "type": "add",
+      "id": "eaa2b7ef254ec53d",
+      "item": {
+        "type": "factory",
+        "id": "eaa2b7ef254ec53d",
+        "text": "#"
+      },
+      "after": "25cbe24e78c1456c",
+      "date": 1689673143975
+    },
+    {
+      "type": "edit",
+      "id": "eaa2b7ef254ec53d",
+      "item": {
+        "type": "markdown",
+        "id": "eaa2b7ef254ec53d",
+        "text": "# Backstory"
+      },
+      "date": 1689673153007
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ace48534f8a79666"
+      },
+      "id": "ace48534f8a79666",
+      "type": "add",
+      "after": "0f2f0a8bf65765bc",
+      "date": 1689673156549
+    },
+    {
+      "type": "edit",
+      "id": "ace48534f8a79666",
+      "item": {
+        "type": "paragraph",
+        "id": "ace48534f8a79666",
+        "text": "Sometimes the half page width image that the plugin provided was not big enough. To get a full page image the HTML plugin was used. But, there was no consistent solution. Sometimes the image would still be visible on a forked paged. But, when a relative URL to image was used it wouldn't be. But, often there a reliance either the original wiki, or other service hosting the image. Sometimes they disappear."
+      },
+      "date": 1689674088342
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f19525561dae28c4"
+      },
+      "id": "f19525561dae28c4",
+      "type": "add",
+      "after": "ace48534f8a79666",
+      "date": 1689674093987
+    },
+    {
+      "type": "edit",
+      "id": "f19525561dae28c4",
+      "item": {
+        "type": "paragraph",
+        "id": "f19525561dae28c4",
+        "text": "# "
+      },
+      "date": 1689674259745
+    },
+    {
+      "type": "remove",
+      "id": "f19525561dae28c4",
+      "date": 1689674352932
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "387a2be2a8b6395a"
+      },
+      "id": "387a2be2a8b6395a",
+      "type": "add",
+      "after": "ace48534f8a79666",
+      "date": 1689674354921
+    },
+    {
+      "type": "remove",
+      "id": "387a2be2a8b6395a",
+      "date": 1689674365422
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e1959bc030e77195"
+      },
+      "id": "e1959bc030e77195",
+      "type": "add",
+      "after": "ace48534f8a79666",
+      "date": 1689674370105
+    },
+    {
+      "type": "remove",
+      "id": "e1959bc030e77195",
+      "date": 1689674389226
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "61442e4794ed6d1f"
+      },
+      "id": "61442e4794ed6d1f",
+      "type": "add",
+      "after": "ace48534f8a79666",
+      "date": 1689678071738
+    },
+    {
+      "type": "edit",
+      "id": "61442e4794ed6d1f",
+      "item": {
+        "type": "html",
+        "id": "61442e4794ed6d1f",
+        "text": "<center>❖ ❖ ❖</center>"
+      },
+      "date": 1689678276813
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "578b0e23dfaa6dea"
+      },
+      "id": "578b0e23dfaa6dea",
+      "type": "add",
+      "after": "61442e4794ed6d1f",
+      "date": 1689691870712
+    },
+    {
+      "type": "edit",
+      "id": "578b0e23dfaa6dea",
+      "item": {
+        "type": "markdown",
+        "id": "578b0e23dfaa6dea",
+        "text": "A 2022 update of the image plugin changed this by:\n* giving image files a name using a hash of the image file,\n* saving compressed image files in an well known location in the assets folder.\n* using the wiki page's context to find the image file."
+      },
+      "date": 1689692169902
+    },
+    {
+      "type": "add",
+      "id": "000e2a2d79ceab5c",
+      "item": {
+        "type": "markdown",
+        "id": "000e2a2d79ceab5c",
+        "text": "With page forking the image file might not be in "
+      },
+      "after": "578b0e23dfaa6dea",
+      "date": 1689692253992
+    },
+    {
+      "type": "edit",
+      "id": "578b0e23dfaa6dea",
+      "item": {
+        "type": "markdown",
+        "id": "578b0e23dfaa6dea",
+        "text": "A 2022 update of the image plugin changed this by:\n* giving image files a name using a hash of the image file,\n* saving compressed image files in an well known location in the assets folder.\n* using the wiki page's context to find the image file, and\n* providing a mechanism for forking an image file."
+      },
+      "date": 1689692282211
+    },
+    {
+      "type": "remove",
+      "id": "000e2a2d79ceab5c",
+      "date": 1689692335414
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "cfe09c22a3f67cea"
+      },
+      "id": "cfe09c22a3f67cea",
+      "type": "add",
+      "after": "578b0e23dfaa6dea",
+      "date": 1689692498694
+    },
+    {
+      "type": "edit",
+      "id": "cfe09c22a3f67cea",
+      "item": {
+        "type": "paragraph",
+        "id": "cfe09c22a3f67cea",
+        "text": "Lets use an image item from Ward's [[daily photo challenge]]."
+      },
+      "date": 1689692571428
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "68300925447d1c50"
+      },
+      "id": "68300925447d1c50",
+      "type": "add",
+      "after": "cfe09c22a3f67cea",
+      "date": 1689692604178
+    },
+    {
+      "type": "edit",
+      "id": "68300925447d1c50",
+      "item": {
+        "type": "reference",
+        "id": "68300925447d1c50",
+        "site": "photos.ward.dojo.fed.wiki",
+        "slug": "daily-photo-challenge",
+        "title": "Daily Photo Challenge",
+        "text": "We take and share a well crafted photograph every day. Each week we start a new page and let the first photograph set an agenda for the week."
+      },
+      "date": 1689692607851
+    },
+    {
+      "type": "remove",
+      "id": "cfe09c22a3f67cea",
+      "date": 1689692624270
+    },
+    {
+      "type": "edit",
+      "id": "68300925447d1c50",
+      "item": {
+        "type": "reference",
+        "id": "68300925447d1c50",
+        "site": "photos.ward.dojo.fed.wiki",
+        "slug": "daily-photo-challenge",
+        "title": "Daily Photo Challenge",
+        "text": "Lets use an image item from Ward's daily photo challenge."
+      },
+      "date": 1689692648492
+    },
+    {
+      "id": "6f5472890e6cc304",
+      "type": "add",
+      "item": {
+        "type": "image",
+        "id": "6f5472890e6cc304",
+        "prompt": "Image for Sunday",
+        "location": {
+          "latitude": "45.47148888888889",
+          "longitude": "-122.74859722222223"
+        },
+        "text": "chain fence playground slide",
+        "size": "wide",
+        "width": 420,
+        "height": 315,
+        "url": "/assets/plugins/image/4a3c8b6b73f40dab6e34d2ab8cd00c5e.jpg"
+      },
+      "after": "68300925447d1c50",
+      "attribution": {
+        "page": "July 16th Photos",
+        "site": "photos.ward.dojo.fed.wiki"
+      },
+      "date": 1689692674272
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "239623aa3b401802"
+      },
+      "id": "239623aa3b401802",
+      "type": "add",
+      "after": "6f5472890e6cc304",
+      "date": 1689692706598
+    },
+    {
+      "type": "edit",
+      "id": "239623aa3b401802",
+      "item": {
+        "type": "paragraph",
+        "id": "239623aa3b401802",
+        "text": "The JSON for this image item is:"
+      },
+      "date": 1689692778791
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bbfafa5dd2c0438a"
+      },
+      "id": "bbfafa5dd2c0438a",
+      "type": "add",
+      "after": "239623aa3b401802",
+      "date": 1689692787107
+    },
+    {
+      "type": "edit",
+      "id": "bbfafa5dd2c0438a",
+      "item": {
+        "type": "code",
+        "id": "bbfafa5dd2c0438a",
+        "text": "{\n  \"type\": \"image\",\n  \"id\": \"6f5472890e6cc304\",\n  \"prompt\": \"Image for Sunday\",\n  \"location\": {\n    \"latitude\": \"45.47148888888889\",\n    \"longitude\": \"-122.74859722222223\"\n    },\n  \"text\": \"chain fence playground slide\",\n  \"size\": \"wide\",\n  \"width\": 420,\n  \"height\": 315,\n  \"url\": \"/assets/plugins/image/4a3c8b6b73f40dab6e34d2ab8cd00c5e.jpg\"\n}"
+      },
+      "date": 1689692860500
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a44f037eabe45de8"
+      },
+      "id": "a44f037eabe45de8",
+      "type": "add",
+      "after": "bbfafa5dd2c0438a",
+      "date": 1689692881336
+    },
+    {
+      "type": "edit",
+      "id": "a44f037eabe45de8",
+      "item": {
+        "type": "markdown",
+        "id": "a44f037eabe45de8",
+        "text": "You will notice that there is a relative URL. This is used as the initial value for the image source in the generated HTML. But if you examine the HTML you will see:"
+      },
+      "date": 1689693429149
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "64ad962b77032583"
+      },
+      "id": "64ad962b77032583",
+      "type": "add",
+      "after": "a44f037eabe45de8",
+      "date": 1689693430724
+    },
+    {
+      "type": "edit",
+      "id": "64ad962b77032583",
+      "item": {
+        "type": "code",
+        "id": "64ad962b77032583",
+        "text": "<img \n  class=\"wide\" \n  src=\"//photos.ward.dojo.fed.wiki/assets/plugins/image/4a3c8b6b73f40dab6e34d2ab8cd00c5e.jpg\" \n  width=\"420\" \n  height=\"315\"\n>"
+      },
+      "date": 1689693461897
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c3e97a632a1220c6"
+      },
+      "id": "c3e97a632a1220c6",
+      "type": "add",
+      "after": "64ad962b77032583",
+      "date": 1689693476074
+    },
+    {
+      "type": "edit",
+      "id": "c3e97a632a1220c6",
+      "item": {
+        "type": "paragraph",
+        "id": "c3e97a632a1220c6",
+        "text": "There is nothing in the image item to suggest that image is over on Ward's wiki, rather than in the origin. Let's look at the code to see what is happening."
+      },
+      "date": 1689693585175
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1b394e7a45ab4ff1"
+      },
+      "id": "1b394e7a45ab4ff1",
+      "type": "add",
+      "after": "c3e97a632a1220c6",
+      "date": 1689693720503
+    },
+    {
+      "type": "edit",
+      "id": "1b394e7a45ab4ff1",
+      "item": {
+        "type": "markdown",
+        "id": "1b394e7a45ab4ff1",
+        "text": "In `emit()` we see:"
+      },
+      "date": 1689693921193
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c22ea76cdcbcaa55"
+      },
+      "id": "c22ea76cdcbcaa55",
+      "type": "add",
+      "after": "1b394e7a45ab4ff1",
+      "date": 1689693930201
+    },
+    {
+      "type": "edit",
+      "id": "c22ea76cdcbcaa55",
+      "item": {
+        "type": "code",
+        "id": "c22ea76cdcbcaa55",
+        "text": "  $item.append \"<img class='#{item.size or 'thumbnail'}' src='#{item.url}'> <p>#{wiki.resolveLinks(item.text)}</p>\"\n"
+      },
+      "date": 1689693934604
+    },
+    {
+      "type": "add",
+      "id": "6289d0b92351b430",
+      "item": {
+        "type": "factory",
+        "id": "6289d0b92351b430",
+        "text": "**Note:** "
+      },
+      "after": "c3e97a632a1220c6",
+      "date": 1689693962720
+    },
+    {
+      "type": "edit",
+      "id": "6289d0b92351b430",
+      "item": {
+        "type": "markdown",
+        "id": "6289d0b92351b430",
+        "text": "**Note:** The code shown below is in CoffeeScript"
+      },
+      "date": 1689693984346
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1a93a4486dabf591"
+      },
+      "id": "1a93a4486dabf591",
+      "type": "add",
+      "after": "c22ea76cdcbcaa55",
+      "date": 1689694004373
+    },
+    {
+      "type": "edit",
+      "id": "1a93a4486dabf591",
+      "item": {
+        "type": "markdown",
+        "id": "1a93a4486dabf591",
+        "text": "This looks fairly standard, but `src` is getting set to the item's url attribute, and when we looked in the HTML we had a `src` over on `photos.ward.dojo.wiki`."
+      },
+      "date": 1689694189634
+    },
+    {
+      "type": "add",
+      "id": "2d115701572354de",
+      "item": {
+        "type": "markdown",
+        "id": "2d115701572354de",
+        "text": "As I don't have a copy of the image in my wiki, we would expect to have a broken image."
+      },
+      "after": "1a93a4486dabf591",
+      "date": 1689694368567
+    },
+    {
+      "type": "add",
+      "id": "be70d33748691eb4",
+      "item": {
+        "type": "markdown",
+        "id": "be70d33748691eb4",
+        "text": "Looking further we see that the plugin is adding an error handler:"
+      },
+      "after": "2d115701572354de",
+      "date": 1689694445751
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "20d0dbabd76d1289"
+      },
+      "id": "20d0dbabd76d1289",
+      "type": "add",
+      "after": "be70d33748691eb4",
+      "date": 1689694474540
+    },
+    {
+      "type": "edit",
+      "id": "20d0dbabd76d1289",
+      "item": {
+        "type": "code",
+        "id": "20d0dbabd76d1289",
+        "text": "img.on('error', () ->\n    sites = $( this ).data('sites')\n    site = sites.shift()\n    $( this ).data('sites', sites)\n    $( this ).attr('src', site )\n    if sites.length is 0\n      $( this ).off('error')\n    )"
+      },
+      "date": 1689694481348
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7fe2d3a223a2f963"
+      },
+      "id": "7fe2d3a223a2f963",
+      "type": "add",
+      "after": "20d0dbabd76d1289",
+      "date": 1689694489827
+    },
+    {
+      "type": "edit",
+      "id": "7fe2d3a223a2f963",
+      "item": {
+        "type": "markdown",
+        "id": "7fe2d3a223a2f963",
+        "text": "and some data for it to use:"
+      },
+      "date": 1689694524796
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1b46ab27eeeab508"
+      },
+      "id": "1b46ab27eeeab508",
+      "type": "add",
+      "after": "7fe2d3a223a2f963",
+      "date": 1689694533250
+    },
+    {
+      "type": "edit",
+      "id": "1b46ab27eeeab508",
+      "item": {
+        "type": "code",
+        "id": "1b46ab27eeeab508",
+        "text": "img.data('sites', alternates($item))"
+      },
+      "date": 1689694537655
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "89a98818d1ac85d0"
+      },
+      "id": "89a98818d1ac85d0",
+      "type": "add",
+      "after": "1b46ab27eeeab508",
+      "date": 1689694557443
+    },
+    {
+      "type": "edit",
+      "id": "89a98818d1ac85d0",
+      "item": {
+        "type": "code",
+        "id": "89a98818d1ac85d0",
+        "text": "alternates = ($item) ->\n    sites = []\n    if remote = $item.parents('.page').data('site')\n      unless remote == location.host\n        sites.push remote\n    journal = $item.parents('.page').data('data').journal\n    for action in journal.slice(0).reverse()\n      if action.site? and not sites.includes(action.site)\n        sites.push action.site\n      if action.attribution?.site? and not sites.includes(action.attribution.site)\n        sites.push action.attribution.site\n    sites.map( (site) -> wiki.site(site).getURL(item.url.replace(/^\\//, '')))"
+      },
+      "date": 1689694563080
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fba555b2fe430a15"
+      },
+      "id": "fba555b2fe430a15",
+      "type": "add",
+      "after": "89a98818d1ac85d0",
+      "date": 1689694572808
+    },
+    {
+      "id": "fba555b2fe430a15",
+      "type": "move",
+      "order": [
+        "25cbe24e78c1456c",
+        "eaa2b7ef254ec53d",
+        "0f2f0a8bf65765bc",
+        "ace48534f8a79666",
+        "61442e4794ed6d1f",
+        "578b0e23dfaa6dea",
+        "68300925447d1c50",
+        "6f5472890e6cc304",
+        "239623aa3b401802",
+        "bbfafa5dd2c0438a",
+        "a44f037eabe45de8",
+        "64ad962b77032583",
+        "c3e97a632a1220c6",
+        "6289d0b92351b430",
+        "1b394e7a45ab4ff1",
+        "c22ea76cdcbcaa55",
+        "1a93a4486dabf591",
+        "2d115701572354de",
+        "be70d33748691eb4",
+        "20d0dbabd76d1289",
+        "7fe2d3a223a2f963",
+        "1b46ab27eeeab508",
+        "fba555b2fe430a15",
+        "89a98818d1ac85d0"
+      ],
+      "date": 1689694574939
+    },
+    {
+      "type": "edit",
+      "id": "fba555b2fe430a15",
+      "item": {
+        "type": "markdown",
+        "id": "fba555b2fe430a15",
+        "text": "`alternates()` looks at the wiki page's journal, and extracts the page's context (list of sites). While is used to create an array of links, using the site adapter `getURL()`."
+      },
+      "date": 1689694776418
+    },
+    {
+      "type": "edit",
+      "id": "89a98818d1ac85d0",
+      "item": {
+        "type": "code",
+        "id": "89a98818d1ac85d0",
+        "text": "alternates = ($item) ->\n    sites = []\n    if remote = $item.parents('.page').data('site')\n      unless remote == location.host\n        sites.push remote\n    journal = $item.parents('.page').data('data').journal\n    for action in journal.slice(0).reverse()\n      if action.site? and not sites.includes(action.site)\n        sites.push action.site\n      if action.attribution?.site? and not sites.includes(action.attribution.site)\n        sites.push action.attribution.site\n    sites.map( (site) -> wiki.site(site).getURL(item.url.replace(/^\\//, '')))"
+      },
+      "date": 1689694853041
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a27358ff2dbb28a8"
+      },
+      "id": "a27358ff2dbb28a8",
+      "type": "add",
+      "after": "89a98818d1ac85d0",
+      "date": 1689694981394
+    },
+    {
+      "type": "edit",
+      "id": "a27358ff2dbb28a8",
+      "item": {
+        "type": "markdown",
+        "id": "a27358ff2dbb28a8",
+        "text": "So, stepping through what is happening."
+      },
+      "date": 1689695163646
+    },
+    {
+      "type": "add",
+      "id": "9f43dba54d9fdf1b",
+      "item": {
+        "type": "markdown",
+        "id": "9f43dba54d9fdf1b",
+        "text": "When the image item is first added to the page, image source will be `/assets/plugins/image/4a3c8b6b73f40dab6e34d2ab8cd00c5e.jpg`, and the `sites` data item `[//photos.ward.dojo.fed.wiki/assets/plugins/image/4a3c8b6b73f40dab6e34d2ab8cd00c5e.jpg]`."
+      },
+      "after": "a27358ff2dbb28a8",
+      "date": 1689695168292
+    },
+    {
+      "type": "add",
+      "id": "e717c168e0116256",
+      "item": {
+        "type": "markdown",
+        "id": "e717c168e0116256",
+        "text": "The image will fail to load, and trigger the onError"
+      },
+      "after": "9f43dba54d9fdf1b",
+      "date": 1689695200873
+    },
+    {
+      "type": "edit",
+      "id": "e717c168e0116256",
+      "item": {
+        "type": "markdown",
+        "id": "e717c168e0116256",
+        "text": "The image will fail to load, and trigger the img's `onerror` event. This will take the first item off the `sites` array, and set the img's `src` to that value. It will also update the saved list of site's, in this case now an empty array. As the list of sites is now empty it will also remove the `onerror` event handler."
+      },
+      "date": 1689695541277
+    },
+    {
+      "type": "fork",
+      "date": 1689695807843
+    },
+    {
+      "type": "fork",
+      "site": "goals.pod.rodwell.me",
+      "date": 1689790843801
+    },
+    {
+      "type": "fork",
+      "site": "photos.pixiereport.com",
+      "date": 1690414923894
+    }
+  ]
+}

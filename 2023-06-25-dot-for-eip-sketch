@@ -1,0 +1,689 @@
+{
+  "title": "2023-06-25 DOT for EIP Sketch",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "5ce3c9373fbf4315",
+      "text": "We saw strange rendering behavior in one of Marc's graphviz diagrams. Seemed a bit like we'd found some non-determinism in graphiz layout algorithm. I fiddled around with a different DOT expression, using [https:edotor.net edotor.net] to try and find what the error might be."
+    },
+    {
+      "type": "reference",
+      "id": "a6bb453164079c69",
+      "site": "metapho.relocalizecreativity.net",
+      "slug": "eip-sketch",
+      "title": "EIP Sketch",
+      "text": "This one will be a challenge. It may be difficult for me to explain what problem this graphic framework is meant to address. It took me several years to have this sketch emerge."
+    },
+    {
+      "type": "pagefold",
+      "id": "a6c01993fc5c6636",
+      "text": "❉ ❉ ❉"
+    },
+    {
+      "type": "paragraph",
+      "id": "0e1f6ae22a93ea6d",
+      "text": "Over in the Graphviz forums I see [https://forum.graphviz.org/t/rendering-produces-varying-and-frequently-wrong-results/656 Rendering produces varying and frequently wrong results]. There is a suggestion that this could be a know problem, and also offers a workaround by moving edges that have an end outside the subgraph outside the subgraph."
+    },
+    {
+      "type": "paragraph",
+      "id": "86a5d531521d3202",
+      "text": "Below is the original dot, with some indentation added."
+    },
+    {
+      "type": "code",
+      "id": "d0fd0c286ed61037",
+      "text": "digraph G {\n  rankdir=BT\n  fontname=\"Helvetica,Arial,sans-serif\"\n  node [fontname=\"Helvetica,Arial,sans-serif\"]\n  edge [fontname=\"Helvetica,Arial,sans-serif\"]\n\n  subgraph cluster_0 {\n    label = \"EcoBioPhysical\\nWorld\";\n    style=filled;\n    color=\"#aaf098\";\n    node [style=filled,color=white];\n    fontsize=18;\n    x ->\"Aliveness Of Homestead\" [style=invis]\n    \"Aliveness Of Homestead\" ->\"Aliveness Of Landscape\" -> \"Aliveness Of Ecosystem\" -> \"Aliveness Of Watershed\" -> \"Aliveness Of Bioregion\" -> \"Aliveness Of Earth\\n(Gaia)\"\n  }\n\n  y [style=invis]\n  x [style=invis]\n\n  subgraph cluster_1 {\n    label = \"GeoPolitical\\nWorld\";\n    style=filled;\n    color=\"#5ccfec\";\n    node [style=filled,color=white];\n    fontsize=18;\n\n    y -> \"Aliveness Of Individual\" [style=invis]\n\n    \"Aliveness Of Individual\" ->\"Aliveness Of Household\" ->\"Aliveness Of Neighborhood\"->\"Aliveness Of Municipality\"->\"Aliveness Of County\"->\"Aliveness Of State\"-> \"Aliveness Of Nation\" -> \"Aliveness Of\\nMultinational Alliance\" -> \"Aliveness Of\\nUnited Nations\";\t\t\n  }\n\n  subgraph cluster_2 {\n    label = \"       Institutions       \";\n    node [style=filled];\n    color=white;\n    fontsize=30; \n    y ->\"Aliveness Of Individual\" [style=invis];\n    a [style=invis]\n    a->{\"Aliveness Of Individual\" \"Aliveness Of Homestead\"}[style=invis]\t\n    [color=black penwith=7]\n  }\n}\n"
+    },
+    {
+      "type": "markdown",
+      "id": "363b6df4ac2acc9a",
+      "text": "Using this as a starting point in edotor. The graph jumped between the different forms that had been seen on the dojo call just by adding or removing blank lines."
+    },
+    {
+      "type": "markdown",
+      "id": "3f709af022434df0",
+      "text": "It is not clear where `x` and `y` are meant to be. The first occurrence of `x` is in `cluster_0`, and `y` is outside."
+    },
+    {
+      "type": "markdown",
+      "id": "0f71238566f7c363",
+      "text": "dot documentation, via the forum post mentioned above:"
+    },
+    {
+      "type": "markdown",
+      "id": "4d0ab46ac14d77d2",
+      "text": "> If an edge belongs to a cluster, its endpoints belong to that cluster. Thus, where you put an edge can effect a layout, as clusters are sometimes laid out recursively."
+    },
+    {
+      "type": "markdown",
+      "id": "e317197af45941ed",
+      "text": "So, `x` and `y` look to belong in cluster 0 and 1 respectively. Probably a red herring, but saves graphviz from having to choose."
+    },
+    {
+      "type": "markdown",
+      "id": "22bc43b57ee15f0c",
+      "text": "By the same rule the edges `y -> ...`, and probably `a -> ...` don't belong in `cluster_2`."
+    },
+    {
+      "type": "markdown",
+      "id": "b8e4ae86bb9136f0",
+      "text": "The `y -> ...` edge is just a duplicate, so can be removed."
+    },
+    {
+      "type": "markdown",
+      "id": "b7a0b1455e88fe00",
+      "text": "The `a -> ...` edge is probably the real problem, in the different renderings there is some variation on which cluster the involved nodes are."
+    },
+    {
+      "type": "graphviz",
+      "id": "4966e1016cfff368",
+      "text": "digraph G {\n  rankdir=BT\n  fontname=\"Helvetica,Arial,sans-serif\"\n  node [fontname=\"Helvetica,Arial,sans-serif\"]\n  edge [fontname=\"Helvetica,Arial,sans-serif\"]\n\n  subgraph cluster_0 {\n    label = \"EcoBioPhysical\\nWorld\";\n    style=filled;\n    color=\"#aaf098\";\n    node [style=filled,color=white];\n    fontsize=18;\n    x [style=invis];\n    x ->\"Aliveness Of Homestead\" [style=invis];\n    \"Aliveness Of Homestead\" ->\"Aliveness Of Landscape\" -> \"Aliveness Of Ecosystem\" -> \"Aliveness Of Watershed\" -> \"Aliveness Of Bioregion\" -> \"Aliveness Of Earth\\n(Gaia)\";\t\n}\n  subgraph cluster_1 {\n\tlabel = \"GeoPolitical\\nWorld\";\n\tstyle=filled;\n\tcolor=\"#5ccfec\";\n\tnode [style=filled,color=white];\n\tfontsize=18;\n\ty [style=invis];\n\ty -> \"Aliveness Of Individual\" [style=invis];\n    \"Aliveness Of Individual\" ->\"Aliveness Of Household\" ->\"Aliveness Of Neighborhood\"->\"Aliveness Of Municipality\"->\"Aliveness Of County\"->\"Aliveness Of State\"-> \"Aliveness Of Nation\" -> \"Aliveness Of\\nMultinational Alliance\" -> \"Aliveness Of\\nUnited Nations\";\t\t\n  }\n  subgraph cluster_2 {\n\tlabel = \"       Institutions       \";\n\tnode [style=filled];\n\tcolor=white;\n\tfontsize=30;\n\ta [style=invis];\n  }\n  a->{\"Aliveness Of Individual\" \"Aliveness Of Homestead\"}[style=invis];\n}\n",
+      "dot": "digraph G {\n  rankdir=BT\n  fontname=\"Helvetica,Arial,sans-serif\"\n  node [fontname=\"Helvetica,Arial,sans-serif\"]\n  edge [fontname=\"Helvetica,Arial,sans-serif\"]\n\n  subgraph cluster_0 {\n    label = \"EcoBioPhysical\\nWorld\";\n    style=filled;\n    color=\"#aaf098\";\n    node [style=filled,color=white];\n    fontsize=18;\n    x [style=invis];\n    x ->\"Aliveness Of Homestead\" [style=invis];\n    \"Aliveness Of Homestead\" ->\"Aliveness Of Landscape\" -> \"Aliveness Of Ecosystem\" -> \"Aliveness Of Watershed\" -> \"Aliveness Of Bioregion\" -> \"Aliveness Of Earth\\n(Gaia)\";\t\n}\n  subgraph cluster_1 {\n\tlabel = \"GeoPolitical\\nWorld\";\n\tstyle=filled;\n\tcolor=\"#5ccfec\";\n\tnode [style=filled,color=white];\n\tfontsize=18;\n\ty [style=invis];\n\ty -> \"Aliveness Of Individual\" [style=invis];\n    \"Aliveness Of Individual\" ->\"Aliveness Of Household\" ->\"Aliveness Of Neighborhood\"->\"Aliveness Of Municipality\"->\"Aliveness Of County\"->\"Aliveness Of State\"-> \"Aliveness Of Nation\" -> \"Aliveness Of\\nMultinational Alliance\" -> \"Aliveness Of\\nUnited Nations\";\t\t\n  }\n  subgraph cluster_2 {\n\tlabel = \"       Institutions       \";\n\tnode [style=filled];\n\tcolor=white;\n\tfontsize=30;\n\ta [style=invis];\n  }\n  a->{\"Aliveness Of Individual\" \"Aliveness Of Homestead\"}[style=invis];\n}\n",
+      "svg": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<!-- Generated by graphviz version 8.0.5 (0)\n -->\n<!-- Title: G Pages: 1 -->\n<svg width=\"784pt\" height=\"844pt\"\n viewBox=\"0.00 0.00 784.00 843.69\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n<g id=\"graph0\" class=\"graph\" transform=\"scale(1 1) rotate(0) translate(4 839.69)\">\n<title>G</title>\n<polygon fill=\"white\" stroke=\"none\" points=\"-4,4 -4,-839.69 780,-839.69 780,4 -4,4\"/>\n<g id=\"clust1\" class=\"cluster\">\n<title>cluster_0</title>\n<polygon fill=\"#aaf098\" stroke=\"#aaf098\" points=\"8,-8 8,-566.03 240,-566.03 240,-8 8,-8\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-39\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">EcoBioPhysical</text>\n<text text-anchor=\"middle\" x=\"124\" y=\"-17.4\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">World</text>\n</g>\n<g id=\"clust2\" class=\"cluster\">\n<title>cluster_1</title>\n<polygon fill=\"#5ccfec\" stroke=\"#5ccfec\" points=\"512,-8 512,-827.69 768,-827.69 768,-8 512,-8\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-39\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">GeoPolitical</text>\n<text text-anchor=\"middle\" x=\"640\" y=\"-17.4\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">World</text>\n</g>\n<g id=\"clust3\" class=\"cluster\">\n<title>cluster_2</title>\n<polygon fill=\"none\" stroke=\"white\" points=\"248,-15.2 248,-111.2 504,-111.2 504,-15.2 248,-15.2\"/>\n<text text-anchor=\"middle\" x=\"376\" y=\"-28.2\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"30.00\"> &#160;&#160;&#160;&#160;&#160;&#160;Institutions &#160;&#160;&#160;&#160;&#160;&#160;</text>\n</g>\n<!-- x -->\n<!-- Aliveness Of Homestead -->\n<g id=\"node2\" class=\"node\">\n<title>Aliveness Of Homestead</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-157.2\" rx=\"107.58\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-153\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Homestead</text>\n</g>\n<!-- x&#45;&gt;Aliveness Of Homestead -->\n<!-- Aliveness Of Landscape -->\n<g id=\"node3\" class=\"node\">\n<title>Aliveness Of Landscape</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-229.2\" rx=\"105.43\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-225\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Landscape</text>\n</g>\n<!-- Aliveness Of Homestead&#45;&gt;Aliveness Of Landscape -->\n<g id=\"edge2\" class=\"edge\">\n<title>Aliveness Of Homestead&#45;&gt;Aliveness Of Landscape</title>\n<path fill=\"none\" stroke=\"black\" d=\"M124,-175.5C124,-182.96 124,-191.88 124,-200.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"120.5,-200.1 124,-210.1 127.5,-200.1 120.5,-200.1\"/>\n</g>\n<!-- Aliveness Of Ecosystem -->\n<g id=\"node4\" class=\"node\">\n<title>Aliveness Of Ecosystem</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-301.2\" rx=\"105.98\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-297\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Ecosystem</text>\n</g>\n<!-- Aliveness Of Landscape&#45;&gt;Aliveness Of Ecosystem -->\n<g id=\"edge3\" class=\"edge\">\n<title>Aliveness Of Landscape&#45;&gt;Aliveness Of Ecosystem</title>\n<path fill=\"none\" stroke=\"black\" d=\"M124,-247.5C124,-254.96 124,-263.88 124,-272.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"120.5,-272.1 124,-282.1 127.5,-272.1 120.5,-272.1\"/>\n</g>\n<!-- Aliveness Of Watershed -->\n<g id=\"node5\" class=\"node\">\n<title>Aliveness Of Watershed</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-373.2\" rx=\"105.43\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-369\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Watershed</text>\n</g>\n<!-- Aliveness Of Ecosystem&#45;&gt;Aliveness Of Watershed -->\n<g id=\"edge4\" class=\"edge\">\n<title>Aliveness Of Ecosystem&#45;&gt;Aliveness Of Watershed</title>\n<path fill=\"none\" stroke=\"black\" d=\"M124,-319.5C124,-326.96 124,-335.88 124,-344.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"120.5,-344.1 124,-354.1 127.5,-344.1 120.5,-344.1\"/>\n</g>\n<!-- Aliveness Of Bioregion -->\n<g id=\"node6\" class=\"node\">\n<title>Aliveness Of Bioregion</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-445.2\" rx=\"102.76\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-441\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Bioregion</text>\n</g>\n<!-- Aliveness Of Watershed&#45;&gt;Aliveness Of Bioregion -->\n<g id=\"edge5\" class=\"edge\">\n<title>Aliveness Of Watershed&#45;&gt;Aliveness Of Bioregion</title>\n<path fill=\"none\" stroke=\"black\" d=\"M124,-391.5C124,-398.96 124,-407.88 124,-416.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"120.5,-416.1 124,-426.1 127.5,-416.1 120.5,-416.1\"/>\n</g>\n<!-- Aliveness Of Earth\\n(Gaia) -->\n<g id=\"node7\" class=\"node\">\n<title>Aliveness Of Earth\\n(Gaia)</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-528.62\" rx=\"87.19\" ry=\"29.42\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-532.82\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Earth</text>\n<text text-anchor=\"middle\" x=\"124\" y=\"-516.02\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">(Gaia)</text>\n</g>\n<!-- Aliveness Of Bioregion&#45;&gt;Aliveness Of Earth\\n(Gaia) -->\n<g id=\"edge6\" class=\"edge\">\n<title>Aliveness Of Bioregion&#45;&gt;Aliveness Of Earth\\n(Gaia)</title>\n<path fill=\"none\" stroke=\"black\" d=\"M124,-463.47C124,-470.69 124,-479.4 124,-488.04\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"120.5,-487.84 124,-497.84 127.5,-487.84 120.5,-487.84\"/>\n</g>\n<!-- y -->\n<!-- Aliveness Of Individual -->\n<g id=\"node9\" class=\"node\">\n<title>Aliveness Of Individual</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"625\" cy=\"-157.2\" rx=\"103.83\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"625\" y=\"-153\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Individual</text>\n</g>\n<!-- y&#45;&gt;Aliveness Of Individual -->\n<!-- Aliveness Of Household -->\n<g id=\"node10\" class=\"node\">\n<title>Aliveness Of Household</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"633\" cy=\"-229.2\" rx=\"105.98\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"633\" y=\"-225\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Household</text>\n</g>\n<!-- Aliveness Of Individual&#45;&gt;Aliveness Of Household -->\n<g id=\"edge8\" class=\"edge\">\n<title>Aliveness Of Individual&#45;&gt;Aliveness Of Household</title>\n<path fill=\"none\" stroke=\"black\" d=\"M626.98,-175.5C627.83,-182.96 628.85,-191.88 629.8,-200.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"626.43,-200.56 631.05,-210.1 633.39,-199.76 626.43,-200.56\"/>\n</g>\n<!-- Aliveness Of Neighborhood -->\n<g id=\"node11\" class=\"node\">\n<title>Aliveness Of Neighborhood</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"640\" cy=\"-301.2\" rx=\"119.93\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-297\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Neighborhood</text>\n</g>\n<!-- Aliveness Of Household&#45;&gt;Aliveness Of Neighborhood -->\n<g id=\"edge9\" class=\"edge\">\n<title>Aliveness Of Household&#45;&gt;Aliveness Of Neighborhood</title>\n<path fill=\"none\" stroke=\"black\" d=\"M634.73,-247.5C635.48,-254.96 636.37,-263.88 637.2,-272.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"633.81,-272.49 638.29,-282.1 640.78,-271.8 633.81,-272.49\"/>\n</g>\n<!-- Aliveness Of Municipality -->\n<g id=\"node12\" class=\"node\">\n<title>Aliveness Of Municipality</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"640\" cy=\"-373.2\" rx=\"114.03\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-369\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Municipality</text>\n</g>\n<!-- Aliveness Of Neighborhood&#45;&gt;Aliveness Of Municipality -->\n<g id=\"edge10\" class=\"edge\">\n<title>Aliveness Of Neighborhood&#45;&gt;Aliveness Of Municipality</title>\n<path fill=\"none\" stroke=\"black\" d=\"M640,-319.5C640,-326.96 640,-335.88 640,-344.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"636.5,-344.1 640,-354.1 643.5,-344.1 636.5,-344.1\"/>\n</g>\n<!-- Aliveness Of County -->\n<g id=\"node13\" class=\"node\">\n<title>Aliveness Of County</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"640\" cy=\"-445.2\" rx=\"92.58\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-441\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of County</text>\n</g>\n<!-- Aliveness Of Municipality&#45;&gt;Aliveness Of County -->\n<g id=\"edge11\" class=\"edge\">\n<title>Aliveness Of Municipality&#45;&gt;Aliveness Of County</title>\n<path fill=\"none\" stroke=\"black\" d=\"M640,-391.5C640,-398.96 640,-407.88 640,-416.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"636.5,-416.1 640,-426.1 643.5,-416.1 636.5,-416.1\"/>\n</g>\n<!-- Aliveness Of State -->\n<g id=\"node14\" class=\"node\">\n<title>Aliveness Of State</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"640\" cy=\"-528.62\" rx=\"83.45\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-524.42\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of State</text>\n</g>\n<!-- Aliveness Of County&#45;&gt;Aliveness Of State -->\n<g id=\"edge12\" class=\"edge\">\n<title>Aliveness Of County&#45;&gt;Aliveness Of State</title>\n<path fill=\"none\" stroke=\"black\" d=\"M640,-463.47C640,-473.94 640,-487.55 640,-499.53\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"636.5,-499.37 640,-509.37 643.5,-499.37 636.5,-499.37\"/>\n</g>\n<!-- Aliveness Of Nation -->\n<g id=\"node15\" class=\"node\">\n<title>Aliveness Of Nation</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"640\" cy=\"-612.03\" rx=\"90.42\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-607.83\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Nation</text>\n</g>\n<!-- Aliveness Of State&#45;&gt;Aliveness Of Nation -->\n<g id=\"edge13\" class=\"edge\">\n<title>Aliveness Of State&#45;&gt;Aliveness Of Nation</title>\n<path fill=\"none\" stroke=\"black\" d=\"M640,-546.88C640,-557.35 640,-570.96 640,-582.95\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"636.5,-582.79 640,-592.79 643.5,-582.79 636.5,-582.79\"/>\n</g>\n<!-- Aliveness Of\\nMultinational Alliance -->\n<g id=\"node16\" class=\"node\">\n<title>Aliveness Of\\nMultinational Alliance</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"640\" cy=\"-695.45\" rx=\"101.21\" ry=\"29.42\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-699.65\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of</text>\n<text text-anchor=\"middle\" x=\"640\" y=\"-682.85\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Multinational Alliance</text>\n</g>\n<!-- Aliveness Of Nation&#45;&gt;Aliveness Of\\nMultinational Alliance -->\n<g id=\"edge14\" class=\"edge\">\n<title>Aliveness Of Nation&#45;&gt;Aliveness Of\\nMultinational Alliance</title>\n<path fill=\"none\" stroke=\"black\" d=\"M640,-630.3C640,-637.52 640,-646.23 640,-654.88\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"636.5,-654.67 640,-664.67 643.5,-654.67 636.5,-654.67\"/>\n</g>\n<!-- Aliveness Of\\nUnited Nations -->\n<g id=\"node17\" class=\"node\">\n<title>Aliveness Of\\nUnited Nations</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"640\" cy=\"-790.28\" rx=\"71.53\" ry=\"29.42\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-794.48\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of</text>\n<text text-anchor=\"middle\" x=\"640\" y=\"-777.68\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">United Nations</text>\n</g>\n<!-- Aliveness Of\\nMultinational Alliance&#45;&gt;Aliveness Of\\nUnited Nations -->\n<g id=\"edge15\" class=\"edge\">\n<title>Aliveness Of\\nMultinational Alliance&#45;&gt;Aliveness Of\\nUnited Nations</title>\n<path fill=\"none\" stroke=\"black\" d=\"M640,-725.31C640,-732.99 640,-741.43 640,-749.59\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"636.5,-749.43 640,-759.43 643.5,-749.43 636.5,-749.43\"/>\n</g>\n<!-- a -->\n<!-- a&#45;&gt;Aliveness Of Homestead -->\n<!-- a&#45;&gt;Aliveness Of Individual -->\n</g>\n</svg>\n"
+    },
+    {
+      "type": "reference",
+      "id": "a776afffe8ca5951",
+      "site": "eric.dojo.fed.wiki",
+      "slug": "2023-06-25-dot-for-eip-sketch",
+      "title": "2023-06-25 DOT for EIP Sketch",
+      "text": "Eric took a different approach, which doesn't use the invisible nodes a, x, y, and edges, to arrange the clusters, so doesn't have the gap below the nodes."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "2023-06-25 DOT for EIP Sketch",
+        "story": []
+      },
+      "date": 1687720862373
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5ce3c9373fbf4315"
+      },
+      "id": "5ce3c9373fbf4315",
+      "type": "add",
+      "date": 1687720869596
+    },
+    {
+      "type": "edit",
+      "id": "5ce3c9373fbf4315",
+      "item": {
+        "type": "paragraph",
+        "id": "5ce3c9373fbf4315",
+        "text": "We saw strange rendering behavior in one of Marc's graphviz diagrams. Seemed a bit like we'd found some non-determinism in graphiz layout algorithm. I fiddled around with a different DOT expression to try and achieve the intended layout in a different way."
+      },
+      "date": 1687720985658
+    },
+    {
+      "type": "add",
+      "id": "562a9ef79be301e2",
+      "item": {
+        "type": "paragraph",
+        "id": "562a9ef79be301e2",
+        "text": "My general experience is that it is easier for me to reverse-engineer the layouts I want if I lean on nodes. I have a harder time with labels in subgraphs. So I've replaced the labels from Marc's layout with nodes. The other key trick is to use constraint=none and style=invis for the column labels at the bottom of the graph."
+      },
+      "after": "5ce3c9373fbf4315",
+      "date": 1687721110619
+    },
+    {
+      "id": "4966e1016cfff368",
+      "type": "add",
+      "item": {
+        "type": "graphviz",
+        "id": "4966e1016cfff368",
+        "text": "digraph G {\nrankdir=BT\nfontname=\"Helvetica,Arial,sans-serif\"\nnode [fontname=\"Helvetica,Arial,sans-serif\"]\nedge [fontname=\"Helvetica,Arial,sans-serif\"]\n\nsubgraph cluster_0 {\nlabel = \"EcoBioPhysical\\nWorld\";\nstyle=filled;\ncolor=\"#aaf098\";\nnode [style=filled,color=white];\nfontsize=18;\n\nx ->\"Aliveness Of Homestead\" [style=invis]\n\n\"Aliveness Of Homestead\" ->\"Aliveness Of Landscape\" -> \"Aliveness Of Ecosystem\" -> \"Aliveness Of Watershed\" -> \"Aliveness Of Bioregion\" -> \"Aliveness Of Earth\\n(Gaia)\"\n\t\t\n}\n\ny [style=invis]\nx [style=invis]\nsubgraph cluster_1 {\nlabel = \"GeoPolitical\\nWorld\";\nstyle=filled;\ncolor=\"#5ccfec\";\nnode [style=filled,color=white];\nfontsize=18;\n\ny -> \"Aliveness Of Individual\" [style=invis]\n\n    \"Aliveness Of Individual\" ->\"Aliveness Of Household\" ->\"Aliveness Of Neighborhood\"->\"Aliveness Of Municipality\"->\"Aliveness Of County\"->\"Aliveness Of State\"-> \"Aliveness Of Nation\" -> \"Aliveness Of\\nMultinational Alliance\" -> \"Aliveness Of\\nUnited Nations\";\t\t\n}\n\nsubgraph cluster_2 {\nlabel = \"       Institutions       \";\nnode [style=filled];\ncolor=white;\nfontsize=30; \n\ny ->\"Aliveness Of Individual\" [style=invis];\n\na [style=invis]\n\na->{\"Aliveness Of Individual\" \"Aliveness Of Homestead\"}[style=invis]\n\n\t\t\n[color=black penwith=7]\n\n\n\n\n}\n\n}\n",
+        "dot": "digraph G {\nrankdir=BT\nfontname=\"Helvetica,Arial,sans-serif\"\nnode [fontname=\"Helvetica,Arial,sans-serif\"]\nedge [fontname=\"Helvetica,Arial,sans-serif\"]\n\nsubgraph cluster_0 {\nlabel = \"EcoBioPhysical\\nWorld\";\nstyle=filled;\ncolor=\"#aaf098\";\nnode [style=filled,color=white];\nfontsize=18;\n\nx ->\"Aliveness Of Homestead\" [style=invis]\n\n\"Aliveness Of Homestead\" ->\"Aliveness Of Landscape\" -> \"Aliveness Of Ecosystem\" -> \"Aliveness Of Watershed\" -> \"Aliveness Of Bioregion\" -> \"Aliveness Of Earth\\n(Gaia)\"\n\t\t\n}\n\ny [style=invis]\nx [style=invis]\nsubgraph cluster_1 {\nlabel = \"GeoPolitical\\nWorld\";\nstyle=filled;\ncolor=\"#5ccfec\";\nnode [style=filled,color=white];\nfontsize=18;\n\ny -> \"Aliveness Of Individual\" [style=invis]\n\n    \"Aliveness Of Individual\" ->\"Aliveness Of Household\" ->\"Aliveness Of Neighborhood\"->\"Aliveness Of Municipality\"->\"Aliveness Of County\"->\"Aliveness Of State\"-> \"Aliveness Of Nation\" -> \"Aliveness Of\\nMultinational Alliance\" -> \"Aliveness Of\\nUnited Nations\";\t\t\n}\n\nsubgraph cluster_2 {\nlabel = \"       Institutions       \";\nnode [style=filled];\ncolor=white;\nfontsize=30; \n\ny ->\"Aliveness Of Individual\" [style=invis];\n\na [style=invis]\n\na->{\"Aliveness Of Individual\" \"Aliveness Of Homestead\"}[style=invis]\n\n\t\t\n[color=black penwith=7]\n\n\n\n\n}\n\n}\n",
+        "svg": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<!-- Generated by graphviz version 8.0.5 (0)\n -->\n<!-- Title: G Pages: 1 -->\n<svg width=\"626pt\" height=\"883pt\"\n viewBox=\"0.00 0.00 626.00 882.89\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n<g id=\"graph0\" class=\"graph\" transform=\"scale(1 1) rotate(0) translate(4 878.89)\">\n<title>G</title>\n<polygon fill=\"white\" stroke=\"none\" points=\"-4,4 -4,-878.89 622,-878.89 622,4 -4,4\"/>\n<g id=\"clust2\" class=\"cluster\">\n<title>cluster_1</title>\n<polygon fill=\"#5ccfec\" stroke=\"#5ccfec\" points=\"354,-8 354,-866.89 610,-866.89 610,-8 354,-8\"/>\n<text text-anchor=\"middle\" x=\"482\" y=\"-39\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">GeoPolitical</text>\n<text text-anchor=\"middle\" x=\"482\" y=\"-17.4\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">World</text>\n</g>\n<g id=\"clust3\" class=\"cluster\">\n<title>cluster_2</title>\n<polygon fill=\"none\" stroke=\"white\" points=\"90,-15.2 90,-183.2 346,-183.2 346,-15.2 90,-15.2\"/>\n<text text-anchor=\"middle\" x=\"218\" y=\"-28.2\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"30.00\"> &#160;&#160;&#160;&#160;&#160;&#160;Institutions &#160;&#160;&#160;&#160;&#160;&#160;</text>\n</g>\n<g id=\"clust1\" class=\"cluster\">\n<title>cluster_0</title>\n<polygon fill=\"#aaf098\" stroke=\"#aaf098\" points=\"8,-191.2 8,-605.23 306,-605.23 306,-191.2 8,-191.2\"/>\n<text text-anchor=\"middle\" x=\"157\" y=\"-222.2\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">EcoBioPhysical</text>\n<text text-anchor=\"middle\" x=\"157\" y=\"-200.6\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">World</text>\n</g>\n<!-- x -->\n<!-- Aliveness Of Homestead -->\n<g id=\"node2\" class=\"node\">\n<title>Aliveness Of Homestead</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"230\" cy=\"-157.2\" rx=\"107.58\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"230\" y=\"-153\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Homestead</text>\n</g>\n<!-- x&#45;&gt;Aliveness Of Homestead -->\n<!-- Aliveness Of Landscape -->\n<g id=\"node3\" class=\"node\">\n<title>Aliveness Of Landscape</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"121\" cy=\"-268.4\" rx=\"105.43\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"121\" y=\"-264.2\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Landscape</text>\n</g>\n<!-- Aliveness Of Homestead&#45;&gt;Aliveness Of Landscape -->\n<g id=\"edge2\" class=\"edge\">\n<title>Aliveness Of Homestead&#45;&gt;Aliveness Of Landscape</title>\n<path fill=\"none\" stroke=\"black\" d=\"M212.97,-175.26C194.89,-193.37 166.15,-222.16 145.61,-242.74\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"143.5,-239.91 138.91,-249.46 148.45,-244.85 143.5,-239.91\"/>\n</g>\n<!-- Aliveness Of Ecosystem -->\n<g id=\"node4\" class=\"node\">\n<title>Aliveness Of Ecosystem</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"122\" cy=\"-340.4\" rx=\"105.98\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"122\" y=\"-336.2\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Ecosystem</text>\n</g>\n<!-- Aliveness Of Landscape&#45;&gt;Aliveness Of Ecosystem -->\n<g id=\"edge3\" class=\"edge\">\n<title>Aliveness Of Landscape&#45;&gt;Aliveness Of Ecosystem</title>\n<path fill=\"none\" stroke=\"black\" d=\"M121.25,-286.7C121.35,-294.16 121.48,-303.08 121.6,-311.43\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"118.11,-311.35 121.76,-321.3 125.11,-311.25 118.11,-311.35\"/>\n</g>\n<!-- Aliveness Of Watershed -->\n<g id=\"node5\" class=\"node\">\n<title>Aliveness Of Watershed</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"122\" cy=\"-412.4\" rx=\"105.43\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"122\" y=\"-408.2\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Watershed</text>\n</g>\n<!-- Aliveness Of Ecosystem&#45;&gt;Aliveness Of Watershed -->\n<g id=\"edge4\" class=\"edge\">\n<title>Aliveness Of Ecosystem&#45;&gt;Aliveness Of Watershed</title>\n<path fill=\"none\" stroke=\"black\" d=\"M122,-358.7C122,-366.16 122,-375.08 122,-383.43\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"118.5,-383.3 122,-393.3 125.5,-383.3 118.5,-383.3\"/>\n</g>\n<!-- Aliveness Of Bioregion -->\n<g id=\"node6\" class=\"node\">\n<title>Aliveness Of Bioregion</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"122\" cy=\"-484.4\" rx=\"102.76\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"122\" y=\"-480.2\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Bioregion</text>\n</g>\n<!-- Aliveness Of Watershed&#45;&gt;Aliveness Of Bioregion -->\n<g id=\"edge5\" class=\"edge\">\n<title>Aliveness Of Watershed&#45;&gt;Aliveness Of Bioregion</title>\n<path fill=\"none\" stroke=\"black\" d=\"M122,-430.7C122,-438.16 122,-447.08 122,-455.43\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"118.5,-455.3 122,-465.3 125.5,-455.3 118.5,-455.3\"/>\n</g>\n<!-- Aliveness Of Earth\\n(Gaia) -->\n<g id=\"node7\" class=\"node\">\n<title>Aliveness Of Earth\\n(Gaia)</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"122\" cy=\"-567.82\" rx=\"87.19\" ry=\"29.42\"/>\n<text text-anchor=\"middle\" x=\"122\" y=\"-572.02\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Earth</text>\n<text text-anchor=\"middle\" x=\"122\" y=\"-555.22\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">(Gaia)</text>\n</g>\n<!-- Aliveness Of Bioregion&#45;&gt;Aliveness Of Earth\\n(Gaia) -->\n<g id=\"edge6\" class=\"edge\">\n<title>Aliveness Of Bioregion&#45;&gt;Aliveness Of Earth\\n(Gaia)</title>\n<path fill=\"none\" stroke=\"black\" d=\"M122,-502.67C122,-509.89 122,-518.6 122,-527.24\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"118.5,-527.04 122,-537.04 125.5,-527.04 118.5,-527.04\"/>\n</g>\n<!-- y -->\n<!-- Aliveness Of Individual -->\n<g id=\"node9\" class=\"node\">\n<title>Aliveness Of Individual</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"467\" cy=\"-157.2\" rx=\"103.83\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"467\" y=\"-153\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Individual</text>\n</g>\n<!-- y&#45;&gt;Aliveness Of Individual -->\n<!-- y&#45;&gt;Aliveness Of Individual -->\n<!-- Aliveness Of Household -->\n<g id=\"node10\" class=\"node\">\n<title>Aliveness Of Household</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"475\" cy=\"-268.4\" rx=\"105.98\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"475\" y=\"-264.2\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Household</text>\n</g>\n<!-- Aliveness Of Individual&#45;&gt;Aliveness Of Household -->\n<g id=\"edge8\" class=\"edge\">\n<title>Aliveness Of Individual&#45;&gt;Aliveness Of Household</title>\n<path fill=\"none\" stroke=\"black\" d=\"M468.25,-175.26C469.5,-192.39 471.46,-219.07 472.94,-239.32\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"469.51,-239.38 473.73,-249.1 476.49,-238.87 469.51,-239.38\"/>\n</g>\n<!-- Aliveness Of Neighborhood -->\n<g id=\"node11\" class=\"node\">\n<title>Aliveness Of Neighborhood</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"482\" cy=\"-340.4\" rx=\"119.93\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"482\" y=\"-336.2\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Neighborhood</text>\n</g>\n<!-- Aliveness Of Household&#45;&gt;Aliveness Of Neighborhood -->\n<g id=\"edge9\" class=\"edge\">\n<title>Aliveness Of Household&#45;&gt;Aliveness Of Neighborhood</title>\n<path fill=\"none\" stroke=\"black\" d=\"M476.73,-286.7C477.48,-294.16 478.37,-303.08 479.2,-311.43\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"475.81,-311.69 480.29,-321.3 482.78,-311 475.81,-311.69\"/>\n</g>\n<!-- Aliveness Of Municipality -->\n<g id=\"node12\" class=\"node\">\n<title>Aliveness Of Municipality</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"482\" cy=\"-412.4\" rx=\"114.03\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"482\" y=\"-408.2\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Municipality</text>\n</g>\n<!-- Aliveness Of Neighborhood&#45;&gt;Aliveness Of Municipality -->\n<g id=\"edge10\" class=\"edge\">\n<title>Aliveness Of Neighborhood&#45;&gt;Aliveness Of Municipality</title>\n<path fill=\"none\" stroke=\"black\" d=\"M482,-358.7C482,-366.16 482,-375.08 482,-383.43\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"478.5,-383.3 482,-393.3 485.5,-383.3 478.5,-383.3\"/>\n</g>\n<!-- Aliveness Of County -->\n<g id=\"node13\" class=\"node\">\n<title>Aliveness Of County</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"482\" cy=\"-484.4\" rx=\"92.58\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"482\" y=\"-480.2\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of County</text>\n</g>\n<!-- Aliveness Of Municipality&#45;&gt;Aliveness Of County -->\n<g id=\"edge11\" class=\"edge\">\n<title>Aliveness Of Municipality&#45;&gt;Aliveness Of County</title>\n<path fill=\"none\" stroke=\"black\" d=\"M482,-430.7C482,-438.16 482,-447.08 482,-455.43\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"478.5,-455.3 482,-465.3 485.5,-455.3 478.5,-455.3\"/>\n</g>\n<!-- Aliveness Of State -->\n<g id=\"node14\" class=\"node\">\n<title>Aliveness Of State</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"482\" cy=\"-567.82\" rx=\"83.45\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"482\" y=\"-563.62\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of State</text>\n</g>\n<!-- Aliveness Of County&#45;&gt;Aliveness Of State -->\n<g id=\"edge12\" class=\"edge\">\n<title>Aliveness Of County&#45;&gt;Aliveness Of State</title>\n<path fill=\"none\" stroke=\"black\" d=\"M482,-502.67C482,-513.14 482,-526.75 482,-538.73\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"478.5,-538.57 482,-548.57 485.5,-538.57 478.5,-538.57\"/>\n</g>\n<!-- Aliveness Of Nation -->\n<g id=\"node15\" class=\"node\">\n<title>Aliveness Of Nation</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"482\" cy=\"-651.23\" rx=\"90.42\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"482\" y=\"-647.03\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Nation</text>\n</g>\n<!-- Aliveness Of State&#45;&gt;Aliveness Of Nation -->\n<g id=\"edge13\" class=\"edge\">\n<title>Aliveness Of State&#45;&gt;Aliveness Of Nation</title>\n<path fill=\"none\" stroke=\"black\" d=\"M482,-586.08C482,-596.55 482,-610.16 482,-622.15\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"478.5,-621.99 482,-631.99 485.5,-621.99 478.5,-621.99\"/>\n</g>\n<!-- Aliveness Of\\nMultinational Alliance -->\n<g id=\"node16\" class=\"node\">\n<title>Aliveness Of\\nMultinational Alliance</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"482\" cy=\"-734.65\" rx=\"101.21\" ry=\"29.42\"/>\n<text text-anchor=\"middle\" x=\"482\" y=\"-738.85\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of</text>\n<text text-anchor=\"middle\" x=\"482\" y=\"-722.05\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Multinational Alliance</text>\n</g>\n<!-- Aliveness Of Nation&#45;&gt;Aliveness Of\\nMultinational Alliance -->\n<g id=\"edge14\" class=\"edge\">\n<title>Aliveness Of Nation&#45;&gt;Aliveness Of\\nMultinational Alliance</title>\n<path fill=\"none\" stroke=\"black\" d=\"M482,-669.5C482,-676.72 482,-685.43 482,-694.08\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"478.5,-693.87 482,-703.87 485.5,-693.87 478.5,-693.87\"/>\n</g>\n<!-- Aliveness Of\\nUnited Nations -->\n<g id=\"node17\" class=\"node\">\n<title>Aliveness Of\\nUnited Nations</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"482\" cy=\"-829.48\" rx=\"71.53\" ry=\"29.42\"/>\n<text text-anchor=\"middle\" x=\"482\" y=\"-833.68\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of</text>\n<text text-anchor=\"middle\" x=\"482\" y=\"-816.88\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">United Nations</text>\n</g>\n<!-- Aliveness Of\\nMultinational Alliance&#45;&gt;Aliveness Of\\nUnited Nations -->\n<g id=\"edge15\" class=\"edge\">\n<title>Aliveness Of\\nMultinational Alliance&#45;&gt;Aliveness Of\\nUnited Nations</title>\n<path fill=\"none\" stroke=\"black\" d=\"M482,-764.51C482,-772.19 482,-780.63 482,-788.79\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"478.5,-788.63 482,-798.63 485.5,-788.63 478.5,-788.63\"/>\n</g>\n<!-- a -->\n<!-- a&#45;&gt;Aliveness Of Homestead -->\n<!-- a&#45;&gt;Aliveness Of Individual -->\n</g>\n</svg>\n"
+      },
+      "after": "562a9ef79be301e2",
+      "attribution": {
+        "page": "EIP Sketch",
+        "site": "metapho.relocalizecreativity.net"
+      },
+      "date": 1687721116547
+    },
+    {
+      "type": "add",
+      "id": "1f9314465436b7b4",
+      "item": {
+        "type": "factory",
+        "id": "1f9314465436b7b4",
+        "text": "... revision"
+      },
+      "after": "562a9ef79be301e2",
+      "date": 1687721128040
+    },
+    {
+      "type": "edit",
+      "id": "1f9314465436b7b4",
+      "item": {
+        "type": "graphviz",
+        "id": "1f9314465436b7b4",
+        "text": "digraph G {\nrankdir=BT\nfontname=\"Helvetica,Arial,sans-serif\"\nnode [fontname=\"Helvetica,Arial,sans-serif\"]\nedge [fontname=\"Helvetica,Arial,sans-serif\"]\n\n{\n    node [fontsize=20 style=filled shape=box]\n    EW [label=\"EcoBioPhysical\\nWorld\" color=\"#aaf098\"]\n    I [label=\"Institutions\" color=white fontsize=30]\n    GW [label=\"GeoPolitical\\nWorld\" color=\"#5ccfec\"]\n    EW -> I -> GW [constraint=none style=invis]\n}\n\nsubgraph cluster_0 {\nstyle=filled;\ncolor=\"#aaf098\";\nnode [style=filled,color=white];\n\nEW -> \"Aliveness Of Homestead\" [style=invis]\n\n\"Aliveness Of Homestead\" ->\"Aliveness Of Landscape\" -> \"Aliveness Of Ecosystem\" -> \"Aliveness Of Watershed\" -> \"Aliveness Of Bioregion\" -> \"Aliveness Of Earth\\n(Gaia)\"\n}\n\nsubgraph cluster_1 {\nstyle=filled;\ncolor=white;\nI\n}\n\nsubgraph cluster_2 {\nstyle=filled;\ncolor=\"#5ccfec\";\nnode [style=filled,color=white];\n\nGW -> \"Aliveness Of Individual\" [style=invis]\n\n    \"Aliveness Of Individual\" ->\"Aliveness Of Household\" ->\"Aliveness Of Neighborhood\"->\"Aliveness Of Municipality\"->\"Aliveness Of County\"->\"Aliveness Of State\"-> \"Aliveness Of Nation\" -> \"Aliveness Of\\nMultinational Alliance\" -> \"Aliveness Of\\nUnited Nations\";\t\t\n}\n\n}\n"
+      },
+      "date": 1687721149040
+    },
+    {
+      "type": "remove",
+      "id": "1f9314465436b7b4",
+      "date": 1687721185257
+    },
+    {
+      "type": "edit",
+      "id": "4966e1016cfff368",
+      "item": {
+        "type": "graphviz",
+        "id": "4966e1016cfff368",
+        "text": "digraph G {\nrankdir=BT\nfontname=\"Helvetica,Arial,sans-serif\"\nnode [fontname=\"Helvetica,Arial,sans-serif\"]\nedge [fontname=\"Helvetica,Arial,sans-serif\"]\n\n{\n    node [fontsize=20 style=filled shape=box]\n    EW [label=\"EcoBioPhysical\\nWorld\" color=\"#aaf098\"]\n    I [label=\"Institutions\" color=white fontsize=30]\n    GW [label=\"GeoPolitical\\nWorld\" color=\"#5ccfec\"]\n    EW -> I -> GW [constraint=none style=invis]\n}\n\nsubgraph cluster_0 {\nstyle=filled;\ncolor=\"#aaf098\";\nnode [style=filled,color=white];\n\nEW -> \"Aliveness Of Homestead\" [style=invis]\n\n\"Aliveness Of Homestead\" ->\"Aliveness Of Landscape\" -> \"Aliveness Of Ecosystem\" -> \"Aliveness Of Watershed\" -> \"Aliveness Of Bioregion\" -> \"Aliveness Of Earth\\n(Gaia)\"\n}\n\nsubgraph cluster_1 {\nstyle=filled;\ncolor=white;\nI\n}\n\nsubgraph cluster_2 {\nstyle=filled;\ncolor=\"#5ccfec\";\nnode [style=filled,color=white];\n\nGW -> \"Aliveness Of Individual\" [style=invis]\n\n    \"Aliveness Of Individual\" ->\"Aliveness Of Household\" ->\"Aliveness Of Neighborhood\"->\"Aliveness Of Municipality\"->\"Aliveness Of County\"->\"Aliveness Of State\"-> \"Aliveness Of Nation\" -> \"Aliveness Of\\nMultinational Alliance\" -> \"Aliveness Of\\nUnited Nations\";\t\t\n}\n\n}\n",
+        "dot": "digraph G {\nrankdir=BT\nfontname=\"Helvetica,Arial,sans-serif\"\nnode [fontname=\"Helvetica,Arial,sans-serif\"]\nedge [fontname=\"Helvetica,Arial,sans-serif\"]\n\nsubgraph cluster_0 {\nlabel = \"EcoBioPhysical\\nWorld\";\nstyle=filled;\ncolor=\"#aaf098\";\nnode [style=filled,color=white];\nfontsize=18;\n\nx ->\"Aliveness Of Homestead\" [style=invis]\n\n\"Aliveness Of Homestead\" ->\"Aliveness Of Landscape\" -> \"Aliveness Of Ecosystem\" -> \"Aliveness Of Watershed\" -> \"Aliveness Of Bioregion\" -> \"Aliveness Of Earth\\n(Gaia)\"\n\t\t\n}\n\ny [style=invis]\nx [style=invis]\nsubgraph cluster_1 {\nlabel = \"GeoPolitical\\nWorld\";\nstyle=filled;\ncolor=\"#5ccfec\";\nnode [style=filled,color=white];\nfontsize=18;\n\ny -> \"Aliveness Of Individual\" [style=invis]\n\n    \"Aliveness Of Individual\" ->\"Aliveness Of Household\" ->\"Aliveness Of Neighborhood\"->\"Aliveness Of Municipality\"->\"Aliveness Of County\"->\"Aliveness Of State\"-> \"Aliveness Of Nation\" -> \"Aliveness Of\\nMultinational Alliance\" -> \"Aliveness Of\\nUnited Nations\";\t\t\n}\n\nsubgraph cluster_2 {\nlabel = \"       Institutions       \";\nnode [style=filled];\ncolor=white;\nfontsize=30; \n\ny ->\"Aliveness Of Individual\" [style=invis];\n\na [style=invis]\n\na->{\"Aliveness Of Individual\" \"Aliveness Of Homestead\"}[style=invis]\n\n\t\t\n[color=black penwith=7]\n\n\n\n\n}\n\n}\n",
+        "svg": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<!-- Generated by graphviz version 8.0.5 (0)\n -->\n<!-- Title: G Pages: 1 -->\n<svg width=\"615pt\" height=\"876pt\"\n viewBox=\"0.00 0.00 615.00 875.69\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n<g id=\"graph0\" class=\"graph\" transform=\"scale(1 1) rotate(0) translate(4 871.69)\">\n<title>G</title>\n<polygon fill=\"white\" stroke=\"none\" points=\"-4,4 -4,-871.69 611,-871.69 611,4 -4,4\"/>\n<g id=\"clust3\" class=\"cluster\">\n<title>cluster_2</title>\n<polygon fill=\"none\" stroke=\"white\" points=\"126,-8 126,-176 583,-176 583,-8 126,-8\"/>\n<text text-anchor=\"middle\" x=\"354.5\" y=\"-21\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"30.00\"> &#160;&#160;&#160;&#160;&#160;&#160;Institutions &#160;&#160;&#160;&#160;&#160;&#160;</text>\n</g>\n<g id=\"clust2\" class=\"cluster\">\n<title>cluster_1</title>\n<polygon fill=\"#5ccfec\" stroke=\"#5ccfec\" points=\"343,-184 343,-859.69 599,-859.69 599,-184 343,-184\"/>\n<text text-anchor=\"middle\" x=\"471\" y=\"-215\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">GeoPolitical</text>\n<text text-anchor=\"middle\" x=\"471\" y=\"-193.4\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">World</text>\n</g>\n<g id=\"clust1\" class=\"cluster\">\n<title>cluster_0</title>\n<polygon fill=\"#aaf098\" stroke=\"#aaf098\" points=\"8,-184 8,-598.03 306,-598.03 306,-184 8,-184\"/>\n<text text-anchor=\"middle\" x=\"157\" y=\"-215\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">EcoBioPhysical</text>\n<text text-anchor=\"middle\" x=\"157\" y=\"-193.4\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">World</text>\n</g>\n<!-- x -->\n<!-- Aliveness Of Homestead -->\n<g id=\"node2\" class=\"node\">\n<title>Aliveness Of Homestead</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"242\" cy=\"-150\" rx=\"107.58\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"242\" y=\"-145.8\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Homestead</text>\n</g>\n<!-- x&#45;&gt;Aliveness Of Homestead -->\n<!-- Aliveness Of Landscape -->\n<g id=\"node3\" class=\"node\">\n<title>Aliveness Of Landscape</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"121\" cy=\"-261.2\" rx=\"105.43\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"121\" y=\"-257\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Landscape</text>\n</g>\n<!-- Aliveness Of Homestead&#45;&gt;Aliveness Of Landscape -->\n<g id=\"edge2\" class=\"edge\">\n<title>Aliveness Of Homestead&#45;&gt;Aliveness Of Landscape</title>\n<path fill=\"none\" stroke=\"black\" d=\"M223.09,-168.06C202.85,-186.33 170.56,-215.47 147.72,-236.09\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"145.85,-232.96 140.77,-242.26 150.54,-238.16 145.85,-232.96\"/>\n</g>\n<!-- Aliveness Of Ecosystem -->\n<g id=\"node4\" class=\"node\">\n<title>Aliveness Of Ecosystem</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"122\" cy=\"-333.2\" rx=\"105.98\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"122\" y=\"-329\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Ecosystem</text>\n</g>\n<!-- Aliveness Of Landscape&#45;&gt;Aliveness Of Ecosystem -->\n<g id=\"edge3\" class=\"edge\">\n<title>Aliveness Of Landscape&#45;&gt;Aliveness Of Ecosystem</title>\n<path fill=\"none\" stroke=\"black\" d=\"M121.25,-279.5C121.35,-286.96 121.48,-295.88 121.6,-304.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"118.11,-304.15 121.76,-314.1 125.11,-304.05 118.11,-304.15\"/>\n</g>\n<!-- Aliveness Of Watershed -->\n<g id=\"node5\" class=\"node\">\n<title>Aliveness Of Watershed</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"122\" cy=\"-405.2\" rx=\"105.43\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"122\" y=\"-401\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Watershed</text>\n</g>\n<!-- Aliveness Of Ecosystem&#45;&gt;Aliveness Of Watershed -->\n<g id=\"edge4\" class=\"edge\">\n<title>Aliveness Of Ecosystem&#45;&gt;Aliveness Of Watershed</title>\n<path fill=\"none\" stroke=\"black\" d=\"M122,-351.5C122,-358.96 122,-367.88 122,-376.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"118.5,-376.1 122,-386.1 125.5,-376.1 118.5,-376.1\"/>\n</g>\n<!-- Aliveness Of Bioregion -->\n<g id=\"node6\" class=\"node\">\n<title>Aliveness Of Bioregion</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"122\" cy=\"-477.2\" rx=\"102.76\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"122\" y=\"-473\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Bioregion</text>\n</g>\n<!-- Aliveness Of Watershed&#45;&gt;Aliveness Of Bioregion -->\n<g id=\"edge5\" class=\"edge\">\n<title>Aliveness Of Watershed&#45;&gt;Aliveness Of Bioregion</title>\n<path fill=\"none\" stroke=\"black\" d=\"M122,-423.5C122,-430.96 122,-439.88 122,-448.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"118.5,-448.1 122,-458.1 125.5,-448.1 118.5,-448.1\"/>\n</g>\n<!-- Aliveness Of Earth\\n(Gaia) -->\n<g id=\"node7\" class=\"node\">\n<title>Aliveness Of Earth\\n(Gaia)</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"122\" cy=\"-560.62\" rx=\"87.19\" ry=\"29.42\"/>\n<text text-anchor=\"middle\" x=\"122\" y=\"-564.82\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Earth</text>\n<text text-anchor=\"middle\" x=\"122\" y=\"-548.02\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">(Gaia)</text>\n</g>\n<!-- Aliveness Of Bioregion&#45;&gt;Aliveness Of Earth\\n(Gaia) -->\n<g id=\"edge6\" class=\"edge\">\n<title>Aliveness Of Bioregion&#45;&gt;Aliveness Of Earth\\n(Gaia)</title>\n<path fill=\"none\" stroke=\"black\" d=\"M122,-495.47C122,-502.69 122,-511.4 122,-520.04\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"118.5,-519.84 122,-529.84 125.5,-519.84 118.5,-519.84\"/>\n</g>\n<!-- y -->\n<!-- Aliveness Of Individual -->\n<g id=\"node9\" class=\"node\">\n<title>Aliveness Of Individual</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"471\" cy=\"-150\" rx=\"103.83\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"471\" y=\"-145.8\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Individual</text>\n</g>\n<!-- y&#45;&gt;Aliveness Of Individual -->\n<!-- y&#45;&gt;Aliveness Of Individual -->\n<!-- Aliveness Of Household -->\n<g id=\"node10\" class=\"node\">\n<title>Aliveness Of Household</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"471\" cy=\"-261.2\" rx=\"105.98\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"471\" y=\"-257\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Household</text>\n</g>\n<!-- Aliveness Of Individual&#45;&gt;Aliveness Of Household -->\n<g id=\"edge8\" class=\"edge\">\n<title>Aliveness Of Individual&#45;&gt;Aliveness Of Household</title>\n<path fill=\"none\" stroke=\"black\" d=\"M471,-168.06C471,-185.19 471,-211.87 471,-232.12\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"467.5,-231.9 471,-241.9 474.5,-231.9 467.5,-231.9\"/>\n</g>\n<!-- Aliveness Of Neighborhood -->\n<g id=\"node11\" class=\"node\">\n<title>Aliveness Of Neighborhood</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"471\" cy=\"-333.2\" rx=\"119.93\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"471\" y=\"-329\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Neighborhood</text>\n</g>\n<!-- Aliveness Of Household&#45;&gt;Aliveness Of Neighborhood -->\n<g id=\"edge9\" class=\"edge\">\n<title>Aliveness Of Household&#45;&gt;Aliveness Of Neighborhood</title>\n<path fill=\"none\" stroke=\"black\" d=\"M471,-279.5C471,-286.96 471,-295.88 471,-304.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"467.5,-304.1 471,-314.1 474.5,-304.1 467.5,-304.1\"/>\n</g>\n<!-- Aliveness Of Municipality -->\n<g id=\"node12\" class=\"node\">\n<title>Aliveness Of Municipality</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"471\" cy=\"-405.2\" rx=\"114.03\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"471\" y=\"-401\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Municipality</text>\n</g>\n<!-- Aliveness Of Neighborhood&#45;&gt;Aliveness Of Municipality -->\n<g id=\"edge10\" class=\"edge\">\n<title>Aliveness Of Neighborhood&#45;&gt;Aliveness Of Municipality</title>\n<path fill=\"none\" stroke=\"black\" d=\"M471,-351.5C471,-358.96 471,-367.88 471,-376.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"467.5,-376.1 471,-386.1 474.5,-376.1 467.5,-376.1\"/>\n</g>\n<!-- Aliveness Of County -->\n<g id=\"node13\" class=\"node\">\n<title>Aliveness Of County</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"471\" cy=\"-477.2\" rx=\"92.58\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"471\" y=\"-473\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of County</text>\n</g>\n<!-- Aliveness Of Municipality&#45;&gt;Aliveness Of County -->\n<g id=\"edge11\" class=\"edge\">\n<title>Aliveness Of Municipality&#45;&gt;Aliveness Of County</title>\n<path fill=\"none\" stroke=\"black\" d=\"M471,-423.5C471,-430.96 471,-439.88 471,-448.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"467.5,-448.1 471,-458.1 474.5,-448.1 467.5,-448.1\"/>\n</g>\n<!-- Aliveness Of State -->\n<g id=\"node14\" class=\"node\">\n<title>Aliveness Of State</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"471\" cy=\"-560.62\" rx=\"83.45\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"471\" y=\"-556.42\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of State</text>\n</g>\n<!-- Aliveness Of County&#45;&gt;Aliveness Of State -->\n<g id=\"edge12\" class=\"edge\">\n<title>Aliveness Of County&#45;&gt;Aliveness Of State</title>\n<path fill=\"none\" stroke=\"black\" d=\"M471,-495.47C471,-505.94 471,-519.55 471,-531.53\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"467.5,-531.37 471,-541.37 474.5,-531.37 467.5,-531.37\"/>\n</g>\n<!-- Aliveness Of Nation -->\n<g id=\"node15\" class=\"node\">\n<title>Aliveness Of Nation</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"471\" cy=\"-644.03\" rx=\"90.42\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"471\" y=\"-639.83\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Nation</text>\n</g>\n<!-- Aliveness Of State&#45;&gt;Aliveness Of Nation -->\n<g id=\"edge13\" class=\"edge\">\n<title>Aliveness Of State&#45;&gt;Aliveness Of Nation</title>\n<path fill=\"none\" stroke=\"black\" d=\"M471,-578.88C471,-589.35 471,-602.96 471,-614.95\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"467.5,-614.79 471,-624.79 474.5,-614.79 467.5,-614.79\"/>\n</g>\n<!-- Aliveness Of\\nMultinational Alliance -->\n<g id=\"node16\" class=\"node\">\n<title>Aliveness Of\\nMultinational Alliance</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"471\" cy=\"-727.45\" rx=\"101.21\" ry=\"29.42\"/>\n<text text-anchor=\"middle\" x=\"471\" y=\"-731.65\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of</text>\n<text text-anchor=\"middle\" x=\"471\" y=\"-714.85\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Multinational Alliance</text>\n</g>\n<!-- Aliveness Of Nation&#45;&gt;Aliveness Of\\nMultinational Alliance -->\n<g id=\"edge14\" class=\"edge\">\n<title>Aliveness Of Nation&#45;&gt;Aliveness Of\\nMultinational Alliance</title>\n<path fill=\"none\" stroke=\"black\" d=\"M471,-662.3C471,-669.52 471,-678.23 471,-686.88\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"467.5,-686.67 471,-696.67 474.5,-686.67 467.5,-686.67\"/>\n</g>\n<!-- Aliveness Of\\nUnited Nations -->\n<g id=\"node17\" class=\"node\">\n<title>Aliveness Of\\nUnited Nations</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"471\" cy=\"-822.28\" rx=\"71.53\" ry=\"29.42\"/>\n<text text-anchor=\"middle\" x=\"471\" y=\"-826.48\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of</text>\n<text text-anchor=\"middle\" x=\"471\" y=\"-809.68\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">United Nations</text>\n</g>\n<!-- Aliveness Of\\nMultinational Alliance&#45;&gt;Aliveness Of\\nUnited Nations -->\n<g id=\"edge15\" class=\"edge\">\n<title>Aliveness Of\\nMultinational Alliance&#45;&gt;Aliveness Of\\nUnited Nations</title>\n<path fill=\"none\" stroke=\"black\" d=\"M471,-757.31C471,-764.99 471,-773.43 471,-781.59\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"467.5,-781.43 471,-791.43 474.5,-781.43 467.5,-781.43\"/>\n</g>\n<!-- a -->\n<!-- a&#45;&gt;Aliveness Of Homestead -->\n<!-- a&#45;&gt;Aliveness Of Individual -->\n</g>\n</svg>\n"
+      },
+      "date": 1687721191143
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a6bb453164079c69"
+      },
+      "id": "a6bb453164079c69",
+      "type": "add",
+      "after": "4966e1016cfff368",
+      "date": 1687721201986
+    },
+    {
+      "type": "edit",
+      "id": "a6bb453164079c69",
+      "item": {
+        "type": "reference",
+        "id": "a6bb453164079c69",
+        "site": "metapho.relocalizecreativity.net",
+        "slug": "eip-sketch",
+        "title": "EIP Sketch",
+        "text": "This one will be a challenge. It may be difficult for me to explain what problem this graphic framework is meant to address. It took me several years to have this sketch emerge."
+      },
+      "date": 1687721205986
+    },
+    {
+      "id": "a6bb453164079c69",
+      "type": "move",
+      "order": [
+        "5ce3c9373fbf4315",
+        "562a9ef79be301e2",
+        "a6bb453164079c69",
+        "4966e1016cfff368"
+      ],
+      "date": 1687721210748
+    },
+    {
+      "type": "fork",
+      "site": "eric.dojo.fed.wiki",
+      "date": 1687767553095
+    },
+    {
+      "type": "remove",
+      "id": "562a9ef79be301e2",
+      "date": 1687767568935
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a6c01993fc5c6636"
+      },
+      "id": "a6c01993fc5c6636",
+      "type": "add",
+      "after": "4966e1016cfff368",
+      "date": 1687767573669
+    },
+    {
+      "type": "edit",
+      "id": "a6c01993fc5c6636",
+      "item": {
+        "type": "pagefold",
+        "id": "a6c01993fc5c6636",
+        "text": "❉ ❉ ❉"
+      },
+      "date": 1687767609262
+    },
+    {
+      "id": "a6c01993fc5c6636",
+      "type": "move",
+      "order": [
+        "5ce3c9373fbf4315",
+        "a6bb453164079c69",
+        "a6c01993fc5c6636",
+        "4966e1016cfff368"
+      ],
+      "date": 1687767613300
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0e1f6ae22a93ea6d"
+      },
+      "id": "0e1f6ae22a93ea6d",
+      "type": "add",
+      "after": "4966e1016cfff368",
+      "date": 1687767622468
+    },
+    {
+      "id": "0e1f6ae22a93ea6d",
+      "type": "move",
+      "order": [
+        "5ce3c9373fbf4315",
+        "a6bb453164079c69",
+        "a6c01993fc5c6636",
+        "0e1f6ae22a93ea6d",
+        "4966e1016cfff368"
+      ],
+      "date": 1687767624148
+    },
+    {
+      "type": "edit",
+      "id": "5ce3c9373fbf4315",
+      "item": {
+        "type": "paragraph",
+        "id": "5ce3c9373fbf4315",
+        "text": "We saw strange rendering behavior in one of Marc's graphviz diagrams. Seemed a bit like we'd found some non-determinism in graphiz layout algorithm. I fiddled around with a different DOT expression to try and find what the error might be."
+      },
+      "date": 1687767725171
+    },
+    {
+      "type": "edit",
+      "id": "4966e1016cfff368",
+      "item": {
+        "type": "graphviz",
+        "id": "4966e1016cfff368",
+        "text": "digraph G {\n  rankdir=BT;\n  fontname=\"Helvetica,Arial,sans-serif\";\n  node [fontname=\"Helvetica,Arial,sans-serif\"];\n  edge [fontname=\"Helvetica,Arial,sans-serif\"];\n\n  subgraph cluster_0 {\n    label = \"EcoBioPhysical\\nWorld\";\n    style=filled;\n    color=\"#aaf098\";\n    node [style=filled,color=white];\n    fontsize=18;\n    x [style=invis];\n    x ->\"Aliveness Of Homestead\" [style=invis];\n    \"Aliveness Of Homestead\" ->\"Aliveness Of Landscape\" -> \"Aliveness Of Ecosystem\" -> \"Aliveness Of Watershed\" -> \"Aliveness Of Bioregion\" -> \"Aliveness Of Earth\\n(Gaia)\";\t\n}\n  subgraph cluster_1 {\n\tlabel = \"GeoPolitical\\nWorld\";\n\tstyle=filled;\n\tcolor=\"#5ccfec\";\n\tnode [style=filled,color=white];\n\tfontsize=18;\n\ty [style=invis];\n\ty -> \"Aliveness Of Individual\" [style=invis];\n    \"Aliveness Of Individual\" ->\"Aliveness Of Household\" ->\"Aliveness Of Neighborhood\"->\"Aliveness Of Municipality\"->\"Aliveness Of County\"->\"Aliveness Of State\"-> \"Aliveness Of Nation\" -> \"Aliveness Of\\nMultinational Alliance\" -> \"Aliveness Of\\nUnited Nations\";\t\t\n  }\n  subgraph cluster_2 {\n\tlabel = \"       Institutions       \";\n\tnode [style=filled];\n\tcolor=white;\n\tfontsize=30;\n\ta [style=invis];\n  }\n  a->{\"Aliveness Of Individual\" \"Aliveness Of Homestead\"}[style=invis];\n}\n",
+        "dot": "digraph G {\nrankdir=BT\nfontname=\"Helvetica,Arial,sans-serif\"\nnode [fontname=\"Helvetica,Arial,sans-serif\"]\nedge [fontname=\"Helvetica,Arial,sans-serif\"]\n\n{\n    node [fontsize=20 style=filled shape=box]\n    EW [label=\"EcoBioPhysical\\nWorld\" color=\"#aaf098\"]\n    I [label=\"Institutions\" color=white fontsize=30]\n    GW [label=\"GeoPolitical\\nWorld\" color=\"#5ccfec\"]\n    EW -> I -> GW [constraint=none style=invis]\n}\n\nsubgraph cluster_0 {\nstyle=filled;\ncolor=\"#aaf098\";\nnode [style=filled,color=white];\n\nEW -> \"Aliveness Of Homestead\" [style=invis]\n\n\"Aliveness Of Homestead\" ->\"Aliveness Of Landscape\" -> \"Aliveness Of Ecosystem\" -> \"Aliveness Of Watershed\" -> \"Aliveness Of Bioregion\" -> \"Aliveness Of Earth\\n(Gaia)\"\n}\n\nsubgraph cluster_1 {\nstyle=filled;\ncolor=white;\nI\n}\n\nsubgraph cluster_2 {\nstyle=filled;\ncolor=\"#5ccfec\";\nnode [style=filled,color=white];\n\nGW -> \"Aliveness Of Individual\" [style=invis]\n\n    \"Aliveness Of Individual\" ->\"Aliveness Of Household\" ->\"Aliveness Of Neighborhood\"->\"Aliveness Of Municipality\"->\"Aliveness Of County\"->\"Aliveness Of State\"-> \"Aliveness Of Nation\" -> \"Aliveness Of\\nMultinational Alliance\" -> \"Aliveness Of\\nUnited Nations\";\t\t\n}\n\n}\n",
+        "svg": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<!-- Generated by graphviz version 8.0.5 (0)\n -->\n<!-- Title: G Pages: 1 -->\n<svg width=\"696pt\" height=\"812pt\"\n viewBox=\"0.00 0.00 696.00 812.49\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n<g id=\"graph0\" class=\"graph\" transform=\"scale(1 1) rotate(0) translate(4 808.49)\">\n<title>G</title>\n<polygon fill=\"white\" stroke=\"none\" points=\"-4,4 -4,-808.49 692,-808.49 692,4 -4,4\"/>\n<g id=\"clust3\" class=\"cluster\">\n<title>cluster_1</title>\n<polygon fill=\"white\" stroke=\"white\" points=\"248,-14 248,-74 416,-74 416,-14 248,-14\"/>\n</g>\n<g id=\"clust2\" class=\"cluster\">\n<title>cluster_0</title>\n<polygon fill=\"#aaf098\" stroke=\"#aaf098\" points=\"8,-8 8,-534.83 240,-534.83 240,-8 8,-8\"/>\n</g>\n<g id=\"clust4\" class=\"cluster\">\n<title>cluster_2</title>\n<polygon fill=\"#5ccfec\" stroke=\"#5ccfec\" points=\"424,-8 424,-796.49 680,-796.49 680,-8 424,-8\"/>\n</g>\n<!-- EW -->\n<g id=\"node1\" class=\"node\">\n<title>EW</title>\n<polygon fill=\"#aaf098\" stroke=\"#aaf098\" points=\"195.88,-72 52.12,-72 52.12,-16 195.88,-16 195.88,-72\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-50\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"20.00\">EcoBioPhysical</text>\n<text text-anchor=\"middle\" x=\"124\" y=\"-26\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"20.00\">World</text>\n</g>\n<!-- I -->\n<g id=\"node2\" class=\"node\">\n<title>I</title>\n<polygon fill=\"white\" stroke=\"white\" points=\"407.51,-66 256.49,-66 256.49,-22 407.51,-22 407.51,-66\"/>\n<text text-anchor=\"middle\" x=\"332\" y=\"-35\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"30.00\">Institutions</text>\n</g>\n<!-- EW&#45;&gt;I -->\n<!-- Aliveness Of Homestead -->\n<g id=\"node4\" class=\"node\">\n<title>Aliveness Of Homestead</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-126\" rx=\"107.58\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-121.8\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Homestead</text>\n</g>\n<!-- EW&#45;&gt;Aliveness Of Homestead -->\n<!-- GW -->\n<g id=\"node3\" class=\"node\">\n<title>GW</title>\n<polygon fill=\"#5ccfec\" stroke=\"#5ccfec\" points=\"609.99,-72 494.01,-72 494.01,-16 609.99,-16 609.99,-72\"/>\n<text text-anchor=\"middle\" x=\"552\" y=\"-50\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"20.00\">GeoPolitical</text>\n<text text-anchor=\"middle\" x=\"552\" y=\"-26\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"20.00\">World</text>\n</g>\n<!-- I&#45;&gt;GW -->\n<!-- Aliveness Of Individual -->\n<g id=\"node10\" class=\"node\">\n<title>Aliveness Of Individual</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"552\" cy=\"-126\" rx=\"103.83\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"552\" y=\"-121.8\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Individual</text>\n</g>\n<!-- GW&#45;&gt;Aliveness Of Individual -->\n<!-- Aliveness Of Landscape -->\n<g id=\"node5\" class=\"node\">\n<title>Aliveness Of Landscape</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-198\" rx=\"105.43\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-193.8\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Landscape</text>\n</g>\n<!-- Aliveness Of Homestead&#45;&gt;Aliveness Of Landscape -->\n<g id=\"edge4\" class=\"edge\">\n<title>Aliveness Of Homestead&#45;&gt;Aliveness Of Landscape</title>\n<path fill=\"none\" stroke=\"black\" d=\"M124,-144.3C124,-151.76 124,-160.68 124,-169.03\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"120.5,-168.9 124,-178.9 127.5,-168.9 120.5,-168.9\"/>\n</g>\n<!-- Aliveness Of Ecosystem -->\n<g id=\"node6\" class=\"node\">\n<title>Aliveness Of Ecosystem</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-270\" rx=\"105.98\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-265.8\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Ecosystem</text>\n</g>\n<!-- Aliveness Of Landscape&#45;&gt;Aliveness Of Ecosystem -->\n<g id=\"edge5\" class=\"edge\">\n<title>Aliveness Of Landscape&#45;&gt;Aliveness Of Ecosystem</title>\n<path fill=\"none\" stroke=\"black\" d=\"M124,-216.3C124,-223.76 124,-232.68 124,-241.03\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"120.5,-240.9 124,-250.9 127.5,-240.9 120.5,-240.9\"/>\n</g>\n<!-- Aliveness Of Watershed -->\n<g id=\"node7\" class=\"node\">\n<title>Aliveness Of Watershed</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-342\" rx=\"105.43\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-337.8\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Watershed</text>\n</g>\n<!-- Aliveness Of Ecosystem&#45;&gt;Aliveness Of Watershed -->\n<g id=\"edge6\" class=\"edge\">\n<title>Aliveness Of Ecosystem&#45;&gt;Aliveness Of Watershed</title>\n<path fill=\"none\" stroke=\"black\" d=\"M124,-288.3C124,-295.76 124,-304.68 124,-313.03\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"120.5,-312.9 124,-322.9 127.5,-312.9 120.5,-312.9\"/>\n</g>\n<!-- Aliveness Of Bioregion -->\n<g id=\"node8\" class=\"node\">\n<title>Aliveness Of Bioregion</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-414\" rx=\"102.76\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-409.8\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Bioregion</text>\n</g>\n<!-- Aliveness Of Watershed&#45;&gt;Aliveness Of Bioregion -->\n<g id=\"edge7\" class=\"edge\">\n<title>Aliveness Of Watershed&#45;&gt;Aliveness Of Bioregion</title>\n<path fill=\"none\" stroke=\"black\" d=\"M124,-360.3C124,-367.76 124,-376.68 124,-385.03\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"120.5,-384.9 124,-394.9 127.5,-384.9 120.5,-384.9\"/>\n</g>\n<!-- Aliveness Of Earth\\n(Gaia) -->\n<g id=\"node9\" class=\"node\">\n<title>Aliveness Of Earth\\n(Gaia)</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-497.42\" rx=\"87.19\" ry=\"29.42\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-501.62\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Earth</text>\n<text text-anchor=\"middle\" x=\"124\" y=\"-484.82\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">(Gaia)</text>\n</g>\n<!-- Aliveness Of Bioregion&#45;&gt;Aliveness Of Earth\\n(Gaia) -->\n<g id=\"edge8\" class=\"edge\">\n<title>Aliveness Of Bioregion&#45;&gt;Aliveness Of Earth\\n(Gaia)</title>\n<path fill=\"none\" stroke=\"black\" d=\"M124,-432.27C124,-439.49 124,-448.2 124,-456.84\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"120.5,-456.64 124,-466.64 127.5,-456.64 120.5,-456.64\"/>\n</g>\n<!-- Aliveness Of Household -->\n<g id=\"node11\" class=\"node\">\n<title>Aliveness Of Household</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"552\" cy=\"-198\" rx=\"105.98\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"552\" y=\"-193.8\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Household</text>\n</g>\n<!-- Aliveness Of Individual&#45;&gt;Aliveness Of Household -->\n<g id=\"edge10\" class=\"edge\">\n<title>Aliveness Of Individual&#45;&gt;Aliveness Of Household</title>\n<path fill=\"none\" stroke=\"black\" d=\"M552,-144.3C552,-151.76 552,-160.68 552,-169.03\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"548.5,-168.9 552,-178.9 555.5,-168.9 548.5,-168.9\"/>\n</g>\n<!-- Aliveness Of Neighborhood -->\n<g id=\"node12\" class=\"node\">\n<title>Aliveness Of Neighborhood</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"552\" cy=\"-270\" rx=\"119.93\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"552\" y=\"-265.8\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Neighborhood</text>\n</g>\n<!-- Aliveness Of Household&#45;&gt;Aliveness Of Neighborhood -->\n<g id=\"edge11\" class=\"edge\">\n<title>Aliveness Of Household&#45;&gt;Aliveness Of Neighborhood</title>\n<path fill=\"none\" stroke=\"black\" d=\"M552,-216.3C552,-223.76 552,-232.68 552,-241.03\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"548.5,-240.9 552,-250.9 555.5,-240.9 548.5,-240.9\"/>\n</g>\n<!-- Aliveness Of Municipality -->\n<g id=\"node13\" class=\"node\">\n<title>Aliveness Of Municipality</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"552\" cy=\"-342\" rx=\"114.03\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"552\" y=\"-337.8\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Municipality</text>\n</g>\n<!-- Aliveness Of Neighborhood&#45;&gt;Aliveness Of Municipality -->\n<g id=\"edge12\" class=\"edge\">\n<title>Aliveness Of Neighborhood&#45;&gt;Aliveness Of Municipality</title>\n<path fill=\"none\" stroke=\"black\" d=\"M552,-288.3C552,-295.76 552,-304.68 552,-313.03\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"548.5,-312.9 552,-322.9 555.5,-312.9 548.5,-312.9\"/>\n</g>\n<!-- Aliveness Of County -->\n<g id=\"node14\" class=\"node\">\n<title>Aliveness Of County</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"552\" cy=\"-414\" rx=\"92.58\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"552\" y=\"-409.8\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of County</text>\n</g>\n<!-- Aliveness Of Municipality&#45;&gt;Aliveness Of County -->\n<g id=\"edge13\" class=\"edge\">\n<title>Aliveness Of Municipality&#45;&gt;Aliveness Of County</title>\n<path fill=\"none\" stroke=\"black\" d=\"M552,-360.3C552,-367.76 552,-376.68 552,-385.03\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"548.5,-384.9 552,-394.9 555.5,-384.9 548.5,-384.9\"/>\n</g>\n<!-- Aliveness Of State -->\n<g id=\"node15\" class=\"node\">\n<title>Aliveness Of State</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"552\" cy=\"-497.42\" rx=\"83.45\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"552\" y=\"-493.22\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of State</text>\n</g>\n<!-- Aliveness Of County&#45;&gt;Aliveness Of State -->\n<g id=\"edge14\" class=\"edge\">\n<title>Aliveness Of County&#45;&gt;Aliveness Of State</title>\n<path fill=\"none\" stroke=\"black\" d=\"M552,-432.27C552,-442.74 552,-456.35 552,-468.33\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"548.5,-468.17 552,-478.17 555.5,-468.17 548.5,-468.17\"/>\n</g>\n<!-- Aliveness Of Nation -->\n<g id=\"node16\" class=\"node\">\n<title>Aliveness Of Nation</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"552\" cy=\"-580.83\" rx=\"90.42\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"552\" y=\"-576.63\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Nation</text>\n</g>\n<!-- Aliveness Of State&#45;&gt;Aliveness Of Nation -->\n<g id=\"edge15\" class=\"edge\">\n<title>Aliveness Of State&#45;&gt;Aliveness Of Nation</title>\n<path fill=\"none\" stroke=\"black\" d=\"M552,-515.68C552,-526.15 552,-539.76 552,-551.75\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"548.5,-551.59 552,-561.59 555.5,-551.59 548.5,-551.59\"/>\n</g>\n<!-- Aliveness Of\\nMultinational Alliance -->\n<g id=\"node17\" class=\"node\">\n<title>Aliveness Of\\nMultinational Alliance</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"552\" cy=\"-664.25\" rx=\"101.21\" ry=\"29.42\"/>\n<text text-anchor=\"middle\" x=\"552\" y=\"-668.45\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of</text>\n<text text-anchor=\"middle\" x=\"552\" y=\"-651.65\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Multinational Alliance</text>\n</g>\n<!-- Aliveness Of Nation&#45;&gt;Aliveness Of\\nMultinational Alliance -->\n<g id=\"edge16\" class=\"edge\">\n<title>Aliveness Of Nation&#45;&gt;Aliveness Of\\nMultinational Alliance</title>\n<path fill=\"none\" stroke=\"black\" d=\"M552,-599.1C552,-606.32 552,-615.03 552,-623.68\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"548.5,-623.47 552,-633.47 555.5,-623.47 548.5,-623.47\"/>\n</g>\n<!-- Aliveness Of\\nUnited Nations -->\n<g id=\"node18\" class=\"node\">\n<title>Aliveness Of\\nUnited Nations</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"552\" cy=\"-759.08\" rx=\"71.53\" ry=\"29.42\"/>\n<text text-anchor=\"middle\" x=\"552\" y=\"-763.28\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of</text>\n<text text-anchor=\"middle\" x=\"552\" y=\"-746.48\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">United Nations</text>\n</g>\n<!-- Aliveness Of\\nMultinational Alliance&#45;&gt;Aliveness Of\\nUnited Nations -->\n<g id=\"edge17\" class=\"edge\">\n<title>Aliveness Of\\nMultinational Alliance&#45;&gt;Aliveness Of\\nUnited Nations</title>\n<path fill=\"none\" stroke=\"black\" d=\"M552,-694.11C552,-701.79 552,-710.23 552,-718.39\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"548.5,-718.23 552,-728.23 555.5,-718.23 548.5,-718.23\"/>\n</g>\n</g>\n</svg>\n"
+      },
+      "date": 1687767763669
+    },
+    {
+      "type": "edit",
+      "id": "0e1f6ae22a93ea6d",
+      "item": {
+        "type": "paragraph",
+        "id": "0e1f6ae22a93ea6d",
+        "text": "Over in the Graphviz forums I see Rendering produces varying and frequently wrong results"
+      },
+      "date": 1687767864079
+    },
+    {
+      "type": "edit",
+      "id": "0e1f6ae22a93ea6d",
+      "item": {
+        "type": "paragraph",
+        "id": "0e1f6ae22a93ea6d",
+        "text": "Over in the Graphviz forums I see [https://forum.graphviz.org/t/rendering-produces-varying-and-frequently-wrong-results/656 Rendering produces varying and frequently wrong results]. There is a suggestion that this could be a know problem, and also offers a workaround by moving edges that have an end outside the subgraph outside the subgraph."
+      },
+      "date": 1687768034932
+    },
+    {
+      "type": "add",
+      "id": "86a5d531521d3202",
+      "item": {
+        "type": "paragraph",
+        "id": "86a5d531521d3202",
+        "text": "A closer look also shows "
+      },
+      "after": "0e1f6ae22a93ea6d",
+      "date": 1687768089993
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d0fd0c286ed61037"
+      },
+      "id": "d0fd0c286ed61037",
+      "type": "add",
+      "after": "4966e1016cfff368",
+      "date": 1687768107873
+    },
+    {
+      "id": "d0fd0c286ed61037",
+      "type": "move",
+      "order": [
+        "5ce3c9373fbf4315",
+        "a6bb453164079c69",
+        "a6c01993fc5c6636",
+        "0e1f6ae22a93ea6d",
+        "86a5d531521d3202",
+        "d0fd0c286ed61037",
+        "4966e1016cfff368"
+      ],
+      "date": 1687768111834
+    },
+    {
+      "type": "edit",
+      "id": "d0fd0c286ed61037",
+      "item": {
+        "type": "code",
+        "id": "d0fd0c286ed61037",
+        "text": "digraph G {\n  rankdir=BT\n  fontname=\"Helvetica,Arial,sans-serif\"\n  node [fontname=\"Helvetica,Arial,sans-serif\"]\n  edge [fontname=\"Helvetica,Arial,sans-serif\"]\n\n  subgraph cluster_0 {\n    label = \"EcoBioPhysical\\nWorld\";\n    style=filled;\n    color=\"#aaf098\";\n    node [style=filled,color=white];\n    fontsize=18;\n    x ->\"Aliveness Of Homestead\" [style=invis]\n    \"Aliveness Of Homestead\" ->\"Aliveness Of Landscape\" -> \"Aliveness Of Ecosystem\" -> \"Aliveness Of Watershed\" -> \"Aliveness Of Bioregion\" -> \"Aliveness Of Earth\\n(Gaia)\"\n  }\n\n  y [style=invis]\n  x [style=invis]\n\n  subgraph cluster_1 {\n    label = \"GeoPolitical\\nWorld\";\n    style=filled;\n    color=\"#5ccfec\";\n    node [style=filled,color=white];\n    fontsize=18;\n\n    y -> \"Aliveness Of Individual\" [style=invis]\n\n    \"Aliveness Of Individual\" ->\"Aliveness Of Household\" ->\"Aliveness Of Neighborhood\"->\"Aliveness Of Municipality\"->\"Aliveness Of County\"->\"Aliveness Of State\"-> \"Aliveness Of Nation\" -> \"Aliveness Of\\nMultinational Alliance\" -> \"Aliveness Of\\nUnited Nations\";\t\t\n  }\n\n  subgraph cluster_2 {\n    label = \"       Institutions       \";\n    node [style=filled];\n    color=white;\n    fontsize=30; \n    y ->\"Aliveness Of Individual\" [style=invis];\n    a [style=invis]\n    a->{\"Aliveness Of Individual\" \"Aliveness Of Homestead\"}[style=invis]\t\n    [color=black penwith=7]\n  }\n}\n"
+      },
+      "date": 1687768320731
+    },
+    {
+      "type": "edit",
+      "id": "86a5d531521d3202",
+      "item": {
+        "type": "paragraph",
+        "id": "86a5d531521d3202",
+        "text": "Below is the original dot, with some indentation added."
+      },
+      "date": 1687768445839
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "363b6df4ac2acc9a"
+      },
+      "id": "363b6df4ac2acc9a",
+      "type": "add",
+      "after": "4966e1016cfff368",
+      "date": 1687768449956
+    },
+    {
+      "id": "363b6df4ac2acc9a",
+      "type": "move",
+      "order": [
+        "5ce3c9373fbf4315",
+        "a6bb453164079c69",
+        "a6c01993fc5c6636",
+        "0e1f6ae22a93ea6d",
+        "86a5d531521d3202",
+        "d0fd0c286ed61037",
+        "363b6df4ac2acc9a",
+        "4966e1016cfff368"
+      ],
+      "date": 1687768451869
+    },
+    {
+      "type": "edit",
+      "id": "363b6df4ac2acc9a",
+      "item": {
+        "type": "markdown",
+        "id": "363b6df4ac2acc9a",
+        "text": "It is not clear where `x` and `y` are meant to be. The first occurrence of `x` is in `cluster_0`, and `y` is outside."
+      },
+      "date": 1687768615575
+    },
+    {
+      "type": "add",
+      "id": "0f71238566f7c363",
+      "item": {
+        "type": "markdown",
+        "id": "0f71238566f7c363",
+        "text": "dot documentation, via the forum post mentioned above:\n>"
+      },
+      "after": "363b6df4ac2acc9a",
+      "date": 1687768672857
+    },
+    {
+      "type": "edit",
+      "id": "0f71238566f7c363",
+      "item": {
+        "type": "markdown",
+        "id": "0f71238566f7c363",
+        "text": "dot documentation, via the forum post mentioned above:\n> If an edge belongs to a cluster, its endpoints belong to that cluster. Thus, where you put an edge can effect a layout, as clusters are sometimes laid out recursively.\nSo, "
+      },
+      "date": 1687768715811
+    },
+    {
+      "type": "edit",
+      "id": "0f71238566f7c363",
+      "item": {
+        "type": "markdown",
+        "id": "0f71238566f7c363",
+        "text": "dot documentation, via the forum post mentioned above:\n> If an edge belongs to a cluster, its endpoints belong to that cluster. Thus, where you put an edge can effect a layout, as clusters are sometimes laid out recursively."
+      },
+      "date": 1687768798805
+    },
+    {
+      "type": "edit",
+      "id": "0f71238566f7c363",
+      "item": {
+        "type": "markdown",
+        "id": "0f71238566f7c363",
+        "text": "dot documentation, via the forum post mentioned above:"
+      },
+      "date": 1687768806658
+    },
+    {
+      "type": "add",
+      "id": "4d0ab46ac14d77d2",
+      "item": {
+        "type": "markdown",
+        "id": "4d0ab46ac14d77d2",
+        "text": "> If an edge belongs to a cluster, its endpoints belong to that cluster. Thus, where you put an edge can effect a layout, as clusters are sometimes laid out recursively."
+      },
+      "after": "0f71238566f7c363",
+      "date": 1687768813846
+    },
+    {
+      "type": "add",
+      "id": "e317197af45941ed",
+      "item": {
+        "type": "markdown",
+        "id": "e317197af45941ed",
+        "text": "So, `x` and `y` look to belong in cluster 0 and 1 respectively"
+      },
+      "after": "4d0ab46ac14d77d2",
+      "date": 1687768814824
+    },
+    {
+      "type": "edit",
+      "id": "e317197af45941ed",
+      "item": {
+        "type": "markdown",
+        "id": "e317197af45941ed",
+        "text": "So, `x` and `y` look to belong in cluster 0 and 1 respectively."
+      },
+      "date": 1687768836121
+    },
+    {
+      "type": "add",
+      "id": "22bc43b57ee15f0c",
+      "item": {
+        "type": "markdown",
+        "id": "22bc43b57ee15f0c",
+        "text": "By the same rule the edges `y -> ...`, and `a -> ...` don't belong in `cluster_2`."
+      },
+      "after": "e317197af45941ed",
+      "date": 1687768910214
+    },
+    {
+      "type": "edit",
+      "id": "4966e1016cfff368",
+      "item": {
+        "type": "graphviz",
+        "id": "4966e1016cfff368",
+        "text": "digraph G {\n  rankdir=BT\n  fontname=\"Helvetica,Arial,sans-serif\"\n  node [fontname=\"Helvetica,Arial,sans-serif\"]\n  edge [fontname=\"Helvetica,Arial,sans-serif\"]\n\n  subgraph cluster_0 {\n    label = \"EcoBioPhysical\\nWorld\";\n    style=filled;\n    color=\"#aaf098\";\n    node [style=filled,color=white];\n    fontsize=18;\n    x [style=invis];\n    x ->\"Aliveness Of Homestead\" [style=invis];\n    \"Aliveness Of Homestead\" ->\"Aliveness Of Landscape\" -> \"Aliveness Of Ecosystem\" -> \"Aliveness Of Watershed\" -> \"Aliveness Of Bioregion\" -> \"Aliveness Of Earth\\n(Gaia)\";\t\n}\n  subgraph cluster_1 {\n\tlabel = \"GeoPolitical\\nWorld\";\n\tstyle=filled;\n\tcolor=\"#5ccfec\";\n\tnode [style=filled,color=white];\n\tfontsize=18;\n\ty [style=invis];\n\ty -> \"Aliveness Of Individual\" [style=invis];\n    \"Aliveness Of Individual\" ->\"Aliveness Of Household\" ->\"Aliveness Of Neighborhood\"->\"Aliveness Of Municipality\"->\"Aliveness Of County\"->\"Aliveness Of State\"-> \"Aliveness Of Nation\" -> \"Aliveness Of\\nMultinational Alliance\" -> \"Aliveness Of\\nUnited Nations\";\t\t\n  }\n  subgraph cluster_2 {\n\tlabel = \"       Institutions       \";\n\tnode [style=filled];\n\tcolor=white;\n\tfontsize=30;\n\ta [style=invis];\n  }\n  a->{\"Aliveness Of Individual\" \"Aliveness Of Homestead\"}[style=invis];\n}\n",
+        "dot": "digraph G {\n  rankdir=BT;\n  fontname=\"Helvetica,Arial,sans-serif\";\n  node [fontname=\"Helvetica,Arial,sans-serif\"];\n  edge [fontname=\"Helvetica,Arial,sans-serif\"];\n\n  subgraph cluster_0 {\n    label = \"EcoBioPhysical\\nWorld\";\n    style=filled;\n    color=\"#aaf098\";\n    node [style=filled,color=white];\n    fontsize=18;\n    x [style=invis];\n    x ->\"Aliveness Of Homestead\" [style=invis];\n    \"Aliveness Of Homestead\" ->\"Aliveness Of Landscape\" -> \"Aliveness Of Ecosystem\" -> \"Aliveness Of Watershed\" -> \"Aliveness Of Bioregion\" -> \"Aliveness Of Earth\\n(Gaia)\";\t\n}\n  subgraph cluster_1 {\n\tlabel = \"GeoPolitical\\nWorld\";\n\tstyle=filled;\n\tcolor=\"#5ccfec\";\n\tnode [style=filled,color=white];\n\tfontsize=18;\n\ty [style=invis];\n\ty -> \"Aliveness Of Individual\" [style=invis];\n    \"Aliveness Of Individual\" ->\"Aliveness Of Household\" ->\"Aliveness Of Neighborhood\"->\"Aliveness Of Municipality\"->\"Aliveness Of County\"->\"Aliveness Of State\"-> \"Aliveness Of Nation\" -> \"Aliveness Of\\nMultinational Alliance\" -> \"Aliveness Of\\nUnited Nations\";\t\t\n  }\n  subgraph cluster_2 {\n\tlabel = \"       Institutions       \";\n\tnode [style=filled];\n\tcolor=white;\n\tfontsize=30;\n\ta [style=invis];\n  }\n  a->{\"Aliveness Of Individual\" \"Aliveness Of Homestead\"}[style=invis];\n}\n",
+        "svg": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<!-- Generated by graphviz version 8.0.5 (0)\n -->\n<!-- Title: G Pages: 1 -->\n<svg width=\"784pt\" height=\"844pt\"\n viewBox=\"0.00 0.00 784.00 843.69\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n<g id=\"graph0\" class=\"graph\" transform=\"scale(1 1) rotate(0) translate(4 839.69)\">\n<title>G</title>\n<polygon fill=\"white\" stroke=\"none\" points=\"-4,4 -4,-839.69 780,-839.69 780,4 -4,4\"/>\n<g id=\"clust1\" class=\"cluster\">\n<title>cluster_0</title>\n<polygon fill=\"#aaf098\" stroke=\"#aaf098\" points=\"8,-8 8,-566.03 240,-566.03 240,-8 8,-8\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-39\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">EcoBioPhysical</text>\n<text text-anchor=\"middle\" x=\"124\" y=\"-17.4\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">World</text>\n</g>\n<g id=\"clust3\" class=\"cluster\">\n<title>cluster_2</title>\n<polygon fill=\"none\" stroke=\"white\" points=\"248,-15.2 248,-111.2 504,-111.2 504,-15.2 248,-15.2\"/>\n<text text-anchor=\"middle\" x=\"376\" y=\"-28.2\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"30.00\"> &#160;&#160;&#160;&#160;&#160;&#160;Institutions &#160;&#160;&#160;&#160;&#160;&#160;</text>\n</g>\n<g id=\"clust2\" class=\"cluster\">\n<title>cluster_1</title>\n<polygon fill=\"#5ccfec\" stroke=\"#5ccfec\" points=\"512,-8 512,-827.69 768,-827.69 768,-8 512,-8\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-39\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">GeoPolitical</text>\n<text text-anchor=\"middle\" x=\"640\" y=\"-17.4\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"18.00\">World</text>\n</g>\n<!-- x -->\n<!-- Aliveness Of Homestead -->\n<g id=\"node2\" class=\"node\">\n<title>Aliveness Of Homestead</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-157.2\" rx=\"107.58\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-153\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Homestead</text>\n</g>\n<!-- x&#45;&gt;Aliveness Of Homestead -->\n<!-- Aliveness Of Landscape -->\n<g id=\"node3\" class=\"node\">\n<title>Aliveness Of Landscape</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-229.2\" rx=\"105.43\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-225\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Landscape</text>\n</g>\n<!-- Aliveness Of Homestead&#45;&gt;Aliveness Of Landscape -->\n<g id=\"edge2\" class=\"edge\">\n<title>Aliveness Of Homestead&#45;&gt;Aliveness Of Landscape</title>\n<path fill=\"none\" stroke=\"black\" d=\"M124,-175.5C124,-182.96 124,-191.88 124,-200.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"120.5,-200.1 124,-210.1 127.5,-200.1 120.5,-200.1\"/>\n</g>\n<!-- Aliveness Of Ecosystem -->\n<g id=\"node4\" class=\"node\">\n<title>Aliveness Of Ecosystem</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-301.2\" rx=\"105.98\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-297\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Ecosystem</text>\n</g>\n<!-- Aliveness Of Landscape&#45;&gt;Aliveness Of Ecosystem -->\n<g id=\"edge3\" class=\"edge\">\n<title>Aliveness Of Landscape&#45;&gt;Aliveness Of Ecosystem</title>\n<path fill=\"none\" stroke=\"black\" d=\"M124,-247.5C124,-254.96 124,-263.88 124,-272.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"120.5,-272.1 124,-282.1 127.5,-272.1 120.5,-272.1\"/>\n</g>\n<!-- Aliveness Of Watershed -->\n<g id=\"node5\" class=\"node\">\n<title>Aliveness Of Watershed</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-373.2\" rx=\"105.43\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-369\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Watershed</text>\n</g>\n<!-- Aliveness Of Ecosystem&#45;&gt;Aliveness Of Watershed -->\n<g id=\"edge4\" class=\"edge\">\n<title>Aliveness Of Ecosystem&#45;&gt;Aliveness Of Watershed</title>\n<path fill=\"none\" stroke=\"black\" d=\"M124,-319.5C124,-326.96 124,-335.88 124,-344.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"120.5,-344.1 124,-354.1 127.5,-344.1 120.5,-344.1\"/>\n</g>\n<!-- Aliveness Of Bioregion -->\n<g id=\"node6\" class=\"node\">\n<title>Aliveness Of Bioregion</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-445.2\" rx=\"102.76\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-441\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Bioregion</text>\n</g>\n<!-- Aliveness Of Watershed&#45;&gt;Aliveness Of Bioregion -->\n<g id=\"edge5\" class=\"edge\">\n<title>Aliveness Of Watershed&#45;&gt;Aliveness Of Bioregion</title>\n<path fill=\"none\" stroke=\"black\" d=\"M124,-391.5C124,-398.96 124,-407.88 124,-416.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"120.5,-416.1 124,-426.1 127.5,-416.1 120.5,-416.1\"/>\n</g>\n<!-- Aliveness Of Earth\\n(Gaia) -->\n<g id=\"node7\" class=\"node\">\n<title>Aliveness Of Earth\\n(Gaia)</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"124\" cy=\"-528.62\" rx=\"87.19\" ry=\"29.42\"/>\n<text text-anchor=\"middle\" x=\"124\" y=\"-532.82\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Earth</text>\n<text text-anchor=\"middle\" x=\"124\" y=\"-516.02\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">(Gaia)</text>\n</g>\n<!-- Aliveness Of Bioregion&#45;&gt;Aliveness Of Earth\\n(Gaia) -->\n<g id=\"edge6\" class=\"edge\">\n<title>Aliveness Of Bioregion&#45;&gt;Aliveness Of Earth\\n(Gaia)</title>\n<path fill=\"none\" stroke=\"black\" d=\"M124,-463.47C124,-470.69 124,-479.4 124,-488.04\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"120.5,-487.84 124,-497.84 127.5,-487.84 120.5,-487.84\"/>\n</g>\n<!-- y -->\n<!-- Aliveness Of Individual -->\n<g id=\"node9\" class=\"node\">\n<title>Aliveness Of Individual</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"625\" cy=\"-157.2\" rx=\"103.83\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"625\" y=\"-153\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Individual</text>\n</g>\n<!-- y&#45;&gt;Aliveness Of Individual -->\n<!-- Aliveness Of Household -->\n<g id=\"node10\" class=\"node\">\n<title>Aliveness Of Household</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"633\" cy=\"-229.2\" rx=\"105.98\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"633\" y=\"-225\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Household</text>\n</g>\n<!-- Aliveness Of Individual&#45;&gt;Aliveness Of Household -->\n<g id=\"edge8\" class=\"edge\">\n<title>Aliveness Of Individual&#45;&gt;Aliveness Of Household</title>\n<path fill=\"none\" stroke=\"black\" d=\"M626.98,-175.5C627.83,-182.96 628.85,-191.88 629.8,-200.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"626.43,-200.56 631.05,-210.1 633.39,-199.76 626.43,-200.56\"/>\n</g>\n<!-- Aliveness Of Neighborhood -->\n<g id=\"node11\" class=\"node\">\n<title>Aliveness Of Neighborhood</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"640\" cy=\"-301.2\" rx=\"119.93\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-297\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Neighborhood</text>\n</g>\n<!-- Aliveness Of Household&#45;&gt;Aliveness Of Neighborhood -->\n<g id=\"edge9\" class=\"edge\">\n<title>Aliveness Of Household&#45;&gt;Aliveness Of Neighborhood</title>\n<path fill=\"none\" stroke=\"black\" d=\"M634.73,-247.5C635.48,-254.96 636.37,-263.88 637.2,-272.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"633.81,-272.49 638.29,-282.1 640.78,-271.8 633.81,-272.49\"/>\n</g>\n<!-- Aliveness Of Municipality -->\n<g id=\"node12\" class=\"node\">\n<title>Aliveness Of Municipality</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"640\" cy=\"-373.2\" rx=\"114.03\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-369\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Municipality</text>\n</g>\n<!-- Aliveness Of Neighborhood&#45;&gt;Aliveness Of Municipality -->\n<g id=\"edge10\" class=\"edge\">\n<title>Aliveness Of Neighborhood&#45;&gt;Aliveness Of Municipality</title>\n<path fill=\"none\" stroke=\"black\" d=\"M640,-319.5C640,-326.96 640,-335.88 640,-344.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"636.5,-344.1 640,-354.1 643.5,-344.1 636.5,-344.1\"/>\n</g>\n<!-- Aliveness Of County -->\n<g id=\"node13\" class=\"node\">\n<title>Aliveness Of County</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"640\" cy=\"-445.2\" rx=\"92.58\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-441\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of County</text>\n</g>\n<!-- Aliveness Of Municipality&#45;&gt;Aliveness Of County -->\n<g id=\"edge11\" class=\"edge\">\n<title>Aliveness Of Municipality&#45;&gt;Aliveness Of County</title>\n<path fill=\"none\" stroke=\"black\" d=\"M640,-391.5C640,-398.96 640,-407.88 640,-416.23\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"636.5,-416.1 640,-426.1 643.5,-416.1 636.5,-416.1\"/>\n</g>\n<!-- Aliveness Of State -->\n<g id=\"node14\" class=\"node\">\n<title>Aliveness Of State</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"640\" cy=\"-528.62\" rx=\"83.45\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-524.42\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of State</text>\n</g>\n<!-- Aliveness Of County&#45;&gt;Aliveness Of State -->\n<g id=\"edge12\" class=\"edge\">\n<title>Aliveness Of County&#45;&gt;Aliveness Of State</title>\n<path fill=\"none\" stroke=\"black\" d=\"M640,-463.47C640,-473.94 640,-487.55 640,-499.53\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"636.5,-499.37 640,-509.37 643.5,-499.37 636.5,-499.37\"/>\n</g>\n<!-- Aliveness Of Nation -->\n<g id=\"node15\" class=\"node\">\n<title>Aliveness Of Nation</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"640\" cy=\"-612.03\" rx=\"90.42\" ry=\"18\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-607.83\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of Nation</text>\n</g>\n<!-- Aliveness Of State&#45;&gt;Aliveness Of Nation -->\n<g id=\"edge13\" class=\"edge\">\n<title>Aliveness Of State&#45;&gt;Aliveness Of Nation</title>\n<path fill=\"none\" stroke=\"black\" d=\"M640,-546.88C640,-557.35 640,-570.96 640,-582.95\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"636.5,-582.79 640,-592.79 643.5,-582.79 636.5,-582.79\"/>\n</g>\n<!-- Aliveness Of\\nMultinational Alliance -->\n<g id=\"node16\" class=\"node\">\n<title>Aliveness Of\\nMultinational Alliance</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"640\" cy=\"-695.45\" rx=\"101.21\" ry=\"29.42\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-699.65\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of</text>\n<text text-anchor=\"middle\" x=\"640\" y=\"-682.85\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Multinational Alliance</text>\n</g>\n<!-- Aliveness Of Nation&#45;&gt;Aliveness Of\\nMultinational Alliance -->\n<g id=\"edge14\" class=\"edge\">\n<title>Aliveness Of Nation&#45;&gt;Aliveness Of\\nMultinational Alliance</title>\n<path fill=\"none\" stroke=\"black\" d=\"M640,-630.3C640,-637.52 640,-646.23 640,-654.88\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"636.5,-654.67 640,-664.67 643.5,-654.67 636.5,-654.67\"/>\n</g>\n<!-- Aliveness Of\\nUnited Nations -->\n<g id=\"node17\" class=\"node\">\n<title>Aliveness Of\\nUnited Nations</title>\n<ellipse fill=\"white\" stroke=\"white\" cx=\"640\" cy=\"-790.28\" rx=\"71.53\" ry=\"29.42\"/>\n<text text-anchor=\"middle\" x=\"640\" y=\"-794.48\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">Aliveness Of</text>\n<text text-anchor=\"middle\" x=\"640\" y=\"-777.68\" font-family=\"Helvetica,Arial,sans-serif\" font-size=\"14.00\">United Nations</text>\n</g>\n<!-- Aliveness Of\\nMultinational Alliance&#45;&gt;Aliveness Of\\nUnited Nations -->\n<g id=\"edge15\" class=\"edge\">\n<title>Aliveness Of\\nMultinational Alliance&#45;&gt;Aliveness Of\\nUnited Nations</title>\n<path fill=\"none\" stroke=\"black\" d=\"M640,-725.31C640,-732.99 640,-741.43 640,-749.59\"/>\n<polygon fill=\"black\" stroke=\"black\" points=\"636.5,-749.43 640,-759.43 643.5,-749.43 636.5,-749.43\"/>\n</g>\n<!-- a -->\n<!-- a&#45;&gt;Aliveness Of Homestead -->\n<!-- a&#45;&gt;Aliveness Of Individual -->\n</g>\n</svg>\n"
+      },
+      "date": 1687768979908
+    },
+    {
+      "type": "add",
+      "id": "798202ad469d82a9",
+      "item": {
+        "type": "markdown",
+        "id": "798202ad469d82a9",
+        "text": "Making those changes, "
+      },
+      "after": "22bc43b57ee15f0c",
+      "date": 1687769136901
+    },
+    {
+      "type": "remove",
+      "id": "798202ad469d82a9",
+      "date": 1687769309277
+    },
+    {
+      "type": "edit",
+      "id": "5ce3c9373fbf4315",
+      "item": {
+        "type": "paragraph",
+        "id": "5ce3c9373fbf4315",
+        "text": "We saw strange rendering behavior in one of Marc's graphviz diagrams. Seemed a bit like we'd found some non-determinism in graphiz layout algorithm. I fiddled around with a different DOT expression, using edotor. to try and find what the error might be."
+      },
+      "date": 1687769421619
+    },
+    {
+      "type": "edit",
+      "id": "5ce3c9373fbf4315",
+      "item": {
+        "type": "paragraph",
+        "id": "5ce3c9373fbf4315",
+        "text": "We saw strange rendering behavior in one of Marc's graphviz diagrams. Seemed a bit like we'd found some non-determinism in graphiz layout algorithm. I fiddled around with a different DOT expression, using [httpedotor.net] to try and find what the error might be."
+      },
+      "date": 1687769443809
+    },
+    {
+      "type": "edit",
+      "id": "5ce3c9373fbf4315",
+      "item": {
+        "type": "paragraph",
+        "id": "5ce3c9373fbf4315",
+        "text": "We saw strange rendering behavior in one of Marc's graphviz diagrams. Seemed a bit like we'd found some non-determinism in graphiz layout algorithm. I fiddled around with a different DOT expression, using [https:edotor.net edotor.net] to try and find what the error might be."
+      },
+      "date": 1687769458262
+    },
+    {
+      "type": "edit",
+      "id": "22bc43b57ee15f0c",
+      "item": {
+        "type": "markdown",
+        "id": "22bc43b57ee15f0c",
+        "text": "By the same rule the edges `y -> ...`, and probably `a -> ...` don't belong in `cluster_2`."
+      },
+      "date": 1687769567659
+    },
+    {
+      "type": "edit",
+      "id": "363b6df4ac2acc9a",
+      "item": {
+        "type": "markdown",
+        "id": "363b6df4ac2acc9a",
+        "text": "Using this as a starting point in edotor. The graph jumped between the different forms that had been seen on the dojo call just by adding or removing blank lines."
+      },
+      "date": 1687769737672
+    },
+    {
+      "type": "add",
+      "id": "3f709af022434df0",
+      "item": {
+        "type": "markdown",
+        "id": "3f709af022434df0",
+        "text": "It is not clear where `x` and `y` are meant to be. The first occurrence of `x` is in `cluster_0`, and `y` is outside."
+      },
+      "after": "363b6df4ac2acc9a",
+      "date": 1687769738896
+    },
+    {
+      "type": "edit",
+      "id": "e317197af45941ed",
+      "item": {
+        "type": "markdown",
+        "id": "e317197af45941ed",
+        "text": "So, `x` and `y` look to belong in cluster 0 and 1 respectively. Probably a red herring, but saves graphviz from having to choose."
+      },
+      "date": 1687769922700
+    },
+    {
+      "type": "add",
+      "id": "b8e4ae86bb9136f0",
+      "item": {
+        "type": "markdown",
+        "id": "b8e4ae86bb9136f0",
+        "text": "The `y -> ...` edge is just a duplicate, so can be removed."
+      },
+      "after": "22bc43b57ee15f0c",
+      "date": 1687769998370
+    },
+    {
+      "type": "add",
+      "id": "b7a0b1455e88fe00",
+      "item": {
+        "type": "markdown",
+        "id": "b7a0b1455e88fe00",
+        "text": "The `a -> ...` edge is probably the real problem, in the different renderings there is some variation on which cluster the involved nodes are."
+      },
+      "after": "b8e4ae86bb9136f0",
+      "date": 1687770986861
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a776afffe8ca5951"
+      },
+      "id": "a776afffe8ca5951",
+      "type": "add",
+      "after": "4966e1016cfff368",
+      "date": 1687771095652
+    },
+    {
+      "type": "edit",
+      "id": "a776afffe8ca5951",
+      "item": {
+        "type": "reference",
+        "id": "a776afffe8ca5951",
+        "site": "eric.dojo.fed.wiki",
+        "slug": "2023-06-25-dot-for-eip-sketch",
+        "title": "2023-06-25 DOT for EIP Sketch",
+        "text": "We saw strange rendering behavior in one of Marc's graphviz diagrams. Seemed a bit like we'd found some non-determinism in graphiz layout algorithm. I fiddled around with a different DOT expression to try and achieve the intended layout in a different way."
+      },
+      "date": 1687771133145
+    },
+    {
+      "type": "edit",
+      "id": "a776afffe8ca5951",
+      "item": {
+        "type": "reference",
+        "id": "a776afffe8ca5951",
+        "site": "eric.dojo.fed.wiki",
+        "slug": "2023-06-25-dot-for-eip-sketch",
+        "title": "2023-06-25 DOT for EIP Sketch",
+        "text": "Eric took a different look, which doesn't use the invisible nodes a, x, y to arrange the clusters, so doesn't have the gap below the nodes."
+      },
+      "date": 1687771301121
+    },
+    {
+      "type": "edit",
+      "id": "a776afffe8ca5951",
+      "item": {
+        "type": "reference",
+        "id": "a776afffe8ca5951",
+        "site": "eric.dojo.fed.wiki",
+        "slug": "2023-06-25-dot-for-eip-sketch",
+        "title": "2023-06-25 DOT for EIP Sketch",
+        "text": "Eric took a different approach, which doesn't use the invisible nodes a, x, y to arrange the clusters, so doesn't have the gap below the nodes."
+      },
+      "date": 1687771392133
+    },
+    {
+      "type": "edit",
+      "id": "a776afffe8ca5951",
+      "item": {
+        "type": "reference",
+        "id": "a776afffe8ca5951",
+        "site": "eric.dojo.fed.wiki",
+        "slug": "2023-06-25-dot-for-eip-sketch",
+        "title": "2023-06-25 DOT for EIP Sketch",
+        "text": "Eric took a different approach, which doesn't use the invisible nodes a, x, y, and edges, to arrange the clusters, so doesn't have the gap below the nodes."
+      },
+      "date": 1687771408019
+    },
+    {
+      "type": "fork",
+      "site": "paul.dojo.fed.wiki",
+      "date": 1690525721495
+    }
+  ]
+}

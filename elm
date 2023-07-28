@@ -93,7 +93,7 @@
       "site": "wiki.ralfbarkow.ch",
       "slug": "elm-and-vite",
       "title": "Elm and Vite",
-      "text": "[[Lindsay Wardell]] joins the Elm Radio Hosts [[Dillon Kearns]] and [[Jeroen Engels]] to talk about [[Vite]] and how to set it up for your [[Elm]] project. [https://elm-radio.com/episode/vite/ page]"
+      "text": "[[Lindsay Wardell]] joins the Elm Radio Hosts [[Dillon Kearns]] and [[Jeroen Engels]] to talk about [[Vite]] and how to set it up for your Elm project. [https://elm-radio.com/episode/vite/ page]"
     },
     {
       "type": "reference",
@@ -516,6 +516,19 @@
       "type": "fork",
       "site": "elm.dreyeck.ch",
       "date": 1686387561899
+    },
+    {
+      "type": "edit",
+      "id": "ec0ce795f4bfaa36",
+      "item": {
+        "type": "reference",
+        "id": "ec0ce795f4bfaa36",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "elm-and-vite",
+        "title": "Elm and Vite",
+        "text": "[[Lindsay Wardell]] joins the Elm Radio Hosts [[Dillon Kearns]] and [[Jeroen Engels]] to talk about [[Vite]] and how to set it up for your Elm project. [https://elm-radio.com/episode/vite/ page]"
+      },
+      "date": 1689573548805
     }
   ]
 }
