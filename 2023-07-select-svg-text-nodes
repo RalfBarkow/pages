@@ -1,0 +1,949 @@
+{
+  "title": "2023-07 Select SVG Text Nodes",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "484e092159df2d01",
+      "text": "Marc has a big collection of SVGs. Can we find a more general-purpose way to enrich them with wiki's internal links?"
+    },
+    {
+      "type": "reference",
+      "id": "ed0406c069d44b58",
+      "text": "One collection of Marc's SVGs",
+      "site": "marc.tries.fed.wiki",
+      "slug": "enrich-any-svg",
+      "title": "Enrich Any SVG"
+    },
+    {
+      "type": "paragraph",
+      "id": "7b4ec9f8e0d77c29",
+      "text": "We collect various examples."
+    },
+    {
+      "type": "code",
+      "id": "bdede7d6a331414e",
+      "text": "let base = 'http://marc.tries.fed.wiki/assets/'\nlet example = {\n  mermaid: `${base}mermaiddiagram.svg`,\n  omnigraffle: `${base}OmnigraffleTransit.svg`,\n  opm: `${base}Tripod%20Beta%20-%20SD%20SD_svg.svg`,\n  \"mind map\":`${base}Mind%20map.svg`,\n  yEd: `${base}yEdTest.svg`,\n  SVGedit: `${base}SVGedit.svg`,\n  Neo4j: `${base}CarLNeighborhoodNeo4j.svg`\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "bcd6f36e4bf49faa",
+      "text": "We have devised a generator function to visit every DOM component and emit the elements that contain text."
+    },
+    {
+      "type": "code",
+      "id": "d177c7d9fa324df8",
+      "text": "function* selectTextNodes(el) {\n  if (el.nodeType != Element.ELEMENT_NODE) return\n  for (let item of el.childNodes) {\n    if (item.nodeType == Element.ELEMENT_NODE) {\n      yield* selectTextNodes(item)\n    } else {\n      yield [item.textContent, el]\n    }\n  }\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "215568d47d01e316",
+      "text": "Since we have more than one challenging example, we will create buttons for each one."
+    },
+    {
+      "type": "code",
+      "id": "7b55afb88166c6dd",
+      "text": "function button(label, url) {\n  return `<button data-url=\"${url}\">\n${label}\n</button>`\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "d8338c884d779830",
+      "text": "When the buttons are clicked, we will fetch the diagram, parse it, find the strings, and display both the diagram and the text we found."
+    },
+    {
+      "type": "code",
+      "id": "541ea5084e36c872",
+      "text": "async function click(event) {\n  let button = event.target\n  let {url} = button.dataset\n  let payload = await fetch(url).then(res => res.text())\n  window.diagram.innerHTML = payload\n  let svg = window.diagram.querySelector('svg')\n  rescale(svg)\n  window.log.innerText = \"\"\n  for (let [text, el] of selectTextNodes(svg)) {\n    if (text.match(/\\S/)) {\n      // ignore the child nodes with only whitespace\n      window.log.innerText += `<${el.nodeName}> ${text}\\n`\n    }\n  }\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "1120d9d276f56db4",
+      "text": "Some examples don't fit in our narrow pages. Here we have devised a general approach to putting the scalable back into scalable vector graphics."
+    },
+    {
+      "type": "code",
+      "id": "7993941610ebf2c5",
+      "text": "function rescale (svg) {\n  let {x,y,width,height} = svg.getBBox()\n  svg.setAttribute('viewBox',\n    `${x} ${y} ${width} ${height}`)\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  svg.style.width=\"100%\"\n  return svg\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "7a05fd0d5a2cd67d",
+      "text": "Here we construct the functions for our general purpose frame script. emit() creates placeholders in the DOM. bind() generates buttons for each of our examples and binds the click handler to each one."
+    },
+    {
+      "type": "code",
+      "id": "5eb6b67568179aa3",
+      "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"buttons\"></div>\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  for(let [label, url] of Object.entries(example)) {\n    window.buttons.innerHTML += button(label, url)\n  }\n  for(let button of window.buttons.children) {\n    button.onclick = click\n  }\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "caa626ac93aa7d4c",
+      "text": "In the frame below we can view the results."
+    },
+    {
+      "type": "frame",
+      "id": "6cf52409eec3988c",
+      "text": "//eric.dojo.fed.wiki/assets/pages/snippet-template/esm.html"
+    },
+    {
+      "type": "paragraph",
+      "id": "4af3e06016116216",
+      "text": "See [[About Frame Plugin]]."
+    },
+    {
+      "type": "paragraph",
+      "id": "da49ee08fd0e2a07",
+      "text": "See [[About Frame Integrations]]."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "2023-07 Select SVG Text Nodes",
+        "story": [
+          {
+            "type": "paragraph",
+            "id": "484e092159df2d01",
+            "text": "Explain what this does."
+          },
+          {
+            "type": "code",
+            "id": "5eb6b67568179aa3",
+            "text": "export async function emit(el) {\n  el.innerHTML = `<h2>Hello, World!</h2>`\n}\n\nexport async function bind(el) {\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+          },
+          {
+            "type": "paragraph",
+            "id": "caa626ac93aa7d4c",
+            "text": "In the frame below we can view the results."
+          },
+          {
+            "type": "frame",
+            "id": "6cf52409eec3988c",
+            "text": "//eric.dojo.fed.wiki/assets/pages/snippet-template/esm.html"
+          },
+          {
+            "type": "paragraph",
+            "id": "4af3e06016116216",
+            "text": "See [[About Frame Plugin]]."
+          },
+          {
+            "type": "paragraph",
+            "id": "da49ee08fd0e2a07",
+            "text": "See [[About Frame Integrations]]."
+          }
+        ]
+      },
+      "date": 1688392882611
+    },
+    {
+      "type": "edit",
+      "id": "484e092159df2d01",
+      "item": {
+        "type": "paragraph",
+        "id": "484e092159df2d01",
+        "text": "Marc has a big collection of SVGs. Can we find a more general-purpose way to enrich them with wiki's internal links?"
+      },
+      "date": 1688392995281
+    },
+    {
+      "type": "add",
+      "id": "ed0406c069d44b58",
+      "item": {
+        "type": "factory",
+        "id": "ed0406c069d44b58",
+        "text": "..."
+      },
+      "after": "484e092159df2d01",
+      "date": 1688392997568
+    },
+    {
+      "type": "edit",
+      "id": "ed0406c069d44b58",
+      "item": {
+        "type": "reference",
+        "id": "ed0406c069d44b58",
+        "text": "The top grey box is a Asset Plugin. Drag any file onto it to upload the file to this asset plug in.",
+        "site": "marc.tries.fed.wiki",
+        "slug": "enrich-any-svg",
+        "title": "Enrich Any SVG"
+      },
+      "date": 1688393004162
+    },
+    {
+      "type": "edit",
+      "id": "ed0406c069d44b58",
+      "item": {
+        "type": "reference",
+        "id": "ed0406c069d44b58",
+        "text": "One collection of Marc's SVGs",
+        "site": "marc.tries.fed.wiki",
+        "slug": "enrich-any-svg",
+        "title": "Enrich Any SVG"
+      },
+      "date": 1688393034919
+    },
+    {
+      "type": "add",
+      "id": "7b4ec9f8e0d77c29",
+      "item": {
+        "type": "paragraph",
+        "id": "7b4ec9f8e0d77c29",
+        "text": "..."
+      },
+      "after": "484e092159df2d01",
+      "date": 1688393089653
+    },
+    {
+      "id": "7b4ec9f8e0d77c29",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "ed0406c069d44b58",
+        "7b4ec9f8e0d77c29",
+        "5eb6b67568179aa3",
+        "caa626ac93aa7d4c",
+        "6cf52409eec3988c",
+        "4af3e06016116216",
+        "da49ee08fd0e2a07"
+      ],
+      "date": 1688393092894
+    },
+    {
+      "type": "edit",
+      "id": "7b4ec9f8e0d77c29",
+      "item": {
+        "type": "paragraph",
+        "id": "7b4ec9f8e0d77c29",
+        "text": "One challenging example is the SVG from mermaidjs."
+      },
+      "date": 1688393119898
+    },
+    {
+      "type": "add",
+      "id": "bdede7d6a331414e",
+      "item": {
+        "type": "paragraph",
+        "id": "bdede7d6a331414e",
+        "text": "..."
+      },
+      "after": "7b4ec9f8e0d77c29",
+      "date": 1688393128524
+    },
+    {
+      "type": "add",
+      "id": "bcd6f36e4bf49faa",
+      "item": {
+        "type": "paragraph",
+        "id": "bcd6f36e4bf49faa",
+        "text": "..."
+      },
+      "after": "bdede7d6a331414e",
+      "date": 1688393163312
+    },
+    {
+      "type": "edit",
+      "id": "bdede7d6a331414e",
+      "item": {
+        "type": "code",
+        "id": "bdede7d6a331414e",
+        "text": "let original = 'http://marc.tries.fed.wiki/assets/mermaiddiagram.svg'"
+      },
+      "date": 1688393203422
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  window.log.innerHTML += \"Hello, World!\"\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688393344493
+    },
+    {
+      "type": "edit",
+      "id": "bcd6f36e4bf49faa",
+      "item": {
+        "type": "paragraph",
+        "id": "bcd6f36e4bf49faa",
+        "text": "We have devised a generator function to visit every DOM component and emit the elements that contain text."
+      },
+      "date": 1688393428902
+    },
+    {
+      "type": "add",
+      "id": "d177c7d9fa324df8",
+      "item": {
+        "type": "factory",
+        "id": "d177c7d9fa324df8",
+        "text": "..."
+      },
+      "after": "bcd6f36e4bf49faa",
+      "date": 1688393431342
+    },
+    {
+      "type": "edit",
+      "id": "d177c7d9fa324df8",
+      "item": {
+        "type": "code",
+        "id": "d177c7d9fa324df8",
+        "text": "function* selectTextNodes(el) {\n  if (el.nodeType != Element.ELEMENT_NODE) return\n  for (let item of el.childNodes) {\n    if (item.nodeType == Element.ELEMENT_NODE) {\n      yield* selectTextNodes(item)\n    } else {\n      yield [item.textContent, el]\n    }\n  }\n}"
+      },
+      "date": 1688393446927
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  window.log.innerHTML += \"Hello, World!\"\n  let svg = fetch(original).then(res => res.text())\n  window.diagram.innerHTML = svg\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688393604126
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  window.log.innerHTML += \"Hello, World!\"\n  let svg = await fetch(original).then(res => res.text())\n  window.diagram.innerHTML = svg\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688393618824
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  window.log.innerHTML += \"Hello, World!\"\n  let svg = await fetch(original).then(res => res.text())\n  window.diagram.innerHTML = svg\n\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688393696518
+    },
+    {
+      "type": "add",
+      "id": "10764004caf661ce",
+      "item": {
+        "type": "paragraph",
+        "id": "10764004caf661ce",
+        "text": "..."
+      },
+      "after": "bcd6f36e4bf49faa",
+      "date": 1688393898489
+    },
+    {
+      "id": "10764004caf661ce",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "ed0406c069d44b58",
+        "7b4ec9f8e0d77c29",
+        "bdede7d6a331414e",
+        "bcd6f36e4bf49faa",
+        "d177c7d9fa324df8",
+        "10764004caf661ce",
+        "5eb6b67568179aa3",
+        "caa626ac93aa7d4c",
+        "6cf52409eec3988c",
+        "4af3e06016116216",
+        "da49ee08fd0e2a07"
+      ],
+      "date": 1688393901313
+    },
+    {
+      "type": "add",
+      "id": "289c8839040000b8",
+      "item": {
+        "type": "paragraph",
+        "id": "289c8839040000b8",
+        "text": "..."
+      },
+      "after": "10764004caf661ce",
+      "date": 1688393905567
+    },
+    {
+      "type": "edit",
+      "id": "10764004caf661ce",
+      "item": {
+        "type": "paragraph",
+        "id": "10764004caf661ce",
+        "text": "We will use the browser's DOMParser."
+      },
+      "date": 1688393923609
+    },
+    {
+      "type": "edit",
+      "id": "289c8839040000b8",
+      "item": {
+        "type": "paragraph",
+        "id": "289c8839040000b8",
+        "text": "const {parseFromString} = new DOMParser()"
+      },
+      "date": 1688393945782
+    },
+    {
+      "type": "edit",
+      "id": "289c8839040000b8",
+      "item": {
+        "type": "code",
+        "id": "289c8839040000b8",
+        "text": "const {parseFromString} = new DOMParser()\n/*  */"
+      },
+      "date": 1688394002377
+    },
+    {
+      "type": "edit",
+      "id": "289c8839040000b8",
+      "item": {
+        "type": "code",
+        "id": "289c8839040000b8",
+        "text": "const {parseFromString} = new DOMParser()\n/* https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString */"
+      },
+      "date": 1688394019672
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  window.log.innerHTML += \"Hello, World!\"\n  let text = await fetch(original).then(res => res.text())\n  window.diagram.innerHTML = text\n  let svg = parseFromString(text, 'image/xml+svg')\n\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688394096487
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  window.log.innerHTML += \"Hello, World!\"\n  let svg = await fetch(original).then(res => res.text())\n  window.diagram.innerHTML = svg\n  window.svg = svg\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688394188119
+    },
+    {
+      "type": "edit",
+      "id": "289c8839040000b8",
+      "item": {
+        "type": "code",
+        "id": "289c8839040000b8",
+        "text": "/* https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString */\n\nfunction parseSvg(text) {\n  const parser = new DOMParser()\n  parser.parseFromString(text, 'image/svg+xml')\n}\n"
+      },
+      "date": 1688394423983
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  window.log.innerHTML += \"Hello, World!\"\n  let text = await fetch(original).then(res => res.text())\n  window.diagram.innerHTML = text\n  window.svg = parseSvg(text)\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688394453209
+    },
+    {
+      "type": "edit",
+      "id": "289c8839040000b8",
+      "item": {
+        "type": "code",
+        "id": "289c8839040000b8",
+        "text": "/* https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString */\n\nfunction parseSvg(text) {\n  const parser = new DOMParser()\n  const dom = parser.parseFromString(\n    text, 'image/svg+xml')\n  return dom.documentElement\n}\n"
+      },
+      "date": 1688394582473
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  window.log.innerHTML += \"Hello, World!\"\n  let payload = await fetch(original).then(res => res.text())\n  window.diagram.innerHTML = payload\n  window.svg = parseSvg(text)\n  for (let row of selectTextNodes(window.svg)) {\n    let [text, el] = row\n    window.log.innerHTML += `${text} (${el.nodeName})\\n`\n  }\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688394799972
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  window.log.innerHTML += \"Hello, World!\"\n  let payload = await fetch(original).then(res => res.text())\n  window.diagram.innerHTML = payload\n  window.svg = parseSvg(payload)\n  for (let row of selectTextNodes(window.svg)) {\n    let [text, el] = row\n    window.log.innerHTML += `${text} (${el.nodeName})\\n`\n  }\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688394830116
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  window.log.innerHTML += \"Hello, World!\"\n  let payload = await fetch(original).then(res => res.text())\n  window.diagram.innerHTML = payload\n  window.svg = parseSvg(payload)\n  for (let row of selectTextNodes(window.svg)) {\n    let [text, el] = row\n    window.log.innerHTML += `${text} <${el.nodeName}>\\n`\n  }\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688394870754
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  window.log.innerHTML += \"Hello, World!\"\n  let payload = await fetch(original).then(res => res.text())\n  window.diagram.innerHTML = payload\n  window.svg = parseSvg(payload)\n  for (let row of selectTextNodes(window.svg)) {\n    let [text, el] = row\n    window.log.innerText += `${text} <${el.nodeName}>\\n`\n  }\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688394910370
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  window.log.innerHTML += \"Hello, World!\"\n  let payload = await fetch(original).then(res => res.text())\n  window.diagram.innerHTML = payload\n  window.svg = parseSvg(payload)\n  for (let row of selectTextNodes(window.svg)) {\n    let [text, el] = row\n    window.log.innerText += `<${el.nodeName}>: ${text} \\n`\n  }\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688394952694
+    },
+    {
+      "type": "add",
+      "id": "7a05fd0d5a2cd67d",
+      "item": {
+        "type": "paragraph",
+        "id": "7a05fd0d5a2cd67d",
+        "text": "..."
+      },
+      "after": "10764004caf661ce",
+      "date": 1688395034141
+    },
+    {
+      "id": "7a05fd0d5a2cd67d",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "ed0406c069d44b58",
+        "7b4ec9f8e0d77c29",
+        "bdede7d6a331414e",
+        "bcd6f36e4bf49faa",
+        "d177c7d9fa324df8",
+        "10764004caf661ce",
+        "289c8839040000b8",
+        "7a05fd0d5a2cd67d",
+        "5eb6b67568179aa3",
+        "caa626ac93aa7d4c",
+        "6cf52409eec3988c",
+        "4af3e06016116216",
+        "da49ee08fd0e2a07"
+      ],
+      "date": 1688395036462
+    },
+    {
+      "type": "edit",
+      "id": "7a05fd0d5a2cd67d",
+      "item": {
+        "type": "paragraph",
+        "id": "7a05fd0d5a2cd67d",
+        "text": "Here we construct the functions for our general purpose frame script. emit() creates placeholders in the DOM. bind() fills those placeholders using the previously defined functions."
+      },
+      "date": 1688395121681
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  let payload = await fetch(original).then(res => res.text())\n  window.diagram.innerHTML = payload\n  window.svg = parseSvg(payload)\n  for (let row of selectTextNodes(window.svg)) {\n    let [text, el] = row\n    window.log.innerText += `<${el.nodeName}>: ${text} \\n`\n  }\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688478815117
+    },
+    {
+      "type": "edit",
+      "id": "bdede7d6a331414e",
+      "item": {
+        "type": "code",
+        "id": "bdede7d6a331414e",
+        "text": "let examples = {\n  mermaid: 'http://marc.tries.fed.wiki/assets/mermaiddiagram.svg',\n  omnigraffle: ''\n}\nlet original = example.mermaid\n"
+      },
+      "date": 1688478935409
+    },
+    {
+      "type": "edit",
+      "id": "bdede7d6a331414e",
+      "item": {
+        "type": "code",
+        "id": "bdede7d6a331414e",
+        "text": "let example = {\n  mermaid: 'http://marc.tries.fed.wiki/assets/mermaiddiagram.svg',\n  omnigraffle: ''\n}\nlet original = example.mermaid\n"
+      },
+      "date": 1688478945692
+    },
+    {
+      "type": "edit",
+      "id": "bdede7d6a331414e",
+      "item": {
+        "type": "code",
+        "id": "bdede7d6a331414e",
+        "text": "let example = {\n  mermaid: 'http://marc.tries.fed.wiki/assets/mermaiddiagram.svg',\n  omnigraffle: 'http://marc.tries.fed.wiki/assets/OmnigraffleTransit.svg'\n}\nlet original = example.mermaid\n"
+      },
+      "date": 1688478980563
+    },
+    {
+      "type": "edit",
+      "id": "bdede7d6a331414e",
+      "item": {
+        "type": "code",
+        "id": "bdede7d6a331414e",
+        "text": "let example = {\n  mermaid: 'http://marc.tries.fed.wiki/assets/mermaiddiagram.svg',\n  omnigraffle: 'http://marc.tries.fed.wiki/assets/OmnigraffleTransit.svg'\n}\nlet original = example.omnigraffle\n"
+      },
+      "date": 1688478991906
+    },
+    {
+      "type": "edit",
+      "id": "7b4ec9f8e0d77c29",
+      "item": {
+        "type": "paragraph",
+        "id": "7b4ec9f8e0d77c29",
+        "text": "We collect some challenging examples."
+      },
+      "date": 1688481303961
+    },
+    {
+      "type": "edit",
+      "id": "10764004caf661ce",
+      "item": {
+        "type": "paragraph",
+        "id": "10764004caf661ce",
+        "text": "We will use the browser's DOMParser.parseFromString(). See [https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString mdn]"
+      },
+      "date": 1688481798052
+    },
+    {
+      "type": "edit",
+      "id": "289c8839040000b8",
+      "item": {
+        "type": "code",
+        "id": "289c8839040000b8",
+        "text": "function parseSvg(text) {\n  const parser = new DOMParser()\n  const dom = parser.parseFromString(\n    text, 'image/svg+xml')\n  return dom.documentElement\n}\n"
+      },
+      "date": 1688481806815
+    },
+    {
+      "type": "add",
+      "id": "215568d47d01e316",
+      "item": {
+        "type": "paragraph",
+        "id": "215568d47d01e316",
+        "text": "Since we have more than one challenging example, we will create buttons for each one."
+      },
+      "after": "289c8839040000b8",
+      "date": 1688481887692
+    },
+    {
+      "type": "add",
+      "id": "7b55afb88166c6dd",
+      "item": {
+        "type": "factory",
+        "id": "7b55afb88166c6dd",
+        "text": "..."
+      },
+      "after": "215568d47d01e316",
+      "date": 1688481889454
+    },
+    {
+      "type": "edit",
+      "id": "7b55afb88166c6dd",
+      "item": {
+        "type": "code",
+        "id": "7b55afb88166c6dd",
+        "text": "function button(label, url) {\n  return `<button data-url=\"${url}\">\n${label}\n</button>`\n}"
+      },
+      "date": 1688482221411
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"buttons\"></div>\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  //TODO: click handler\n}"
+      },
+      "date": 1688482268521
+    },
+    {
+      "type": "add",
+      "id": "d8338c884d779830",
+      "item": {
+        "type": "paragraph",
+        "id": "d8338c884d779830",
+        "text": "When the buttons are clicked, we will fetch the diagram, parse it, find the strings, and display both the diagram and the text we found."
+      },
+      "after": "7b55afb88166c6dd",
+      "date": 1688482333221
+    },
+    {
+      "type": "add",
+      "id": "541ea5084e36c872",
+      "item": {
+        "type": "factory",
+        "id": "541ea5084e36c872",
+        "text": "..."
+      },
+      "after": "d8338c884d779830",
+      "date": 1688482335368
+    },
+    {
+      "type": "edit",
+      "id": "541ea5084e36c872",
+      "item": {
+        "type": "code",
+        "id": "541ea5084e36c872",
+        "text": "async function click(event) {\n  let button = event.target\n  let {url} = button.dataset\n  let payload = await fetch(url).then(res => res.text())\n  window.diagram.innerHTML = payload\n  let svg = parseSvg(payload)\n  window.log.innerText = \"\"\n  for (let [text, el] of selectTextNodes(svg)) {\n    if (text.match(/\\S/) {\n      // ignore the child nodes with only whitespace\n      window.log.innerText += `<${el.nodeName}> ${text}\\n`\n    }\n  }\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688482671313
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"buttons\"></div>\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  for([label, url] of Object.entries(example)) {\n    window.buttons.innerHTML += button(label, url)\n  }\n  window.buttons.querySelectorAll('button')\n    .forEach(button => button.onclick = click)\n}"
+      },
+      "date": 1688482916033
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"buttons\"></div>\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  for(let [label, url] of Object.entries(example)) {\n    window.buttons.innerHTML += button(label, url)\n  }\n  window.buttons.querySelectorAll('button')\n    .forEach(button => button.onclick = click)\n}"
+      },
+      "date": 1688482946463
+    },
+    {
+      "type": "edit",
+      "id": "541ea5084e36c872",
+      "item": {
+        "type": "code",
+        "id": "541ea5084e36c872",
+        "text": "async function click(event) {\n  let button = event.target\n  let {url} = button.dataset\n  let payload = await fetch(url).then(res => res.text())\n  window.diagram.innerHTML = payload\n  let svg = parseSvg(payload)\n  window.log.innerText = \"\"\n  for (let [text, el] of selectTextNodes(svg)) {\n    if (text.match(/\\S/)) {\n      // ignore the child nodes with only whitespace\n      window.log.innerText += `<${el.nodeName}> ${text}\\n`\n    }\n  }\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688482964548
+    },
+    {
+      "type": "edit",
+      "id": "bdede7d6a331414e",
+      "item": {
+        "type": "code",
+        "id": "bdede7d6a331414e",
+        "text": "let example = {\n  mermaid: 'http://marc.tries.fed.wiki/assets/mermaiddiagram.svg',\n  omnigraffle: 'http://marc.tries.fed.wiki/assets/OmnigraffleTransit.svg',\n  opm: 'http://marc.tries.fed.wiki/assets/Tripod%20Beta%20-%20SD%20SD_svg.svg'\n}\nlet original = example.omnigraffle\n"
+      },
+      "date": 1688483316446
+    },
+    {
+      "type": "edit",
+      "id": "7b4ec9f8e0d77c29",
+      "item": {
+        "type": "paragraph",
+        "id": "7b4ec9f8e0d77c29",
+        "text": "We collect various examples."
+      },
+      "date": 1688483672102
+    },
+    {
+      "type": "edit",
+      "id": "bdede7d6a331414e",
+      "item": {
+        "type": "code",
+        "id": "bdede7d6a331414e",
+        "text": "let example = {\n  mermaid: 'http://marc.tries.fed.wiki/assets/mermaiddiagram.svg',\n  omnigraffle: 'http://marc.tries.fed.wiki/assets/OmnigraffleTransit.svg',\n  opm: 'http://marc.tries.fed.wiki/assets/Tripod%20Beta%20-%20SD%20SD_svg.svg',\n  \"mind map\":'http://marc.tries.fed.wiki/assets/Mind%20map.svg'\n}\n"
+      },
+      "date": 1688483739356
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<div id=\"buttons\"></div>\n<div id=\"diagram\"></div>\n<pre id=\"log\"></pre>`\n}\n\nexport async function bind(el) {\n  for(let [label, url] of Object.entries(example)) {\n    window.buttons.innerHTML += button(label, url)\n  }\n  for(let button of window.buttons.children) {\n    button.onclick = click\n  }\n}"
+      },
+      "date": 1688483941286
+    },
+    {
+      "type": "edit",
+      "id": "bdede7d6a331414e",
+      "item": {
+        "type": "code",
+        "id": "bdede7d6a331414e",
+        "text": "let base = 'http://marc.tries.fed.wiki/assets/'\nlet example = {\n  mermaid: `mermaiddiagram.svg`,\n  omnigraffle: 'http://marc.tries.fed.wiki/assets/OmnigraffleTransit.svg',\n  opm: 'http://marc.tries.fed.wiki/assets/Tripod%20Beta%20-%20SD%20SD_svg.svg',\n  \"mind map\":'http://marc.tries.fed.wiki/assets/Mind%20map.svg'\n}\n"
+      },
+      "date": 1688484243206
+    },
+    {
+      "type": "edit",
+      "id": "bdede7d6a331414e",
+      "item": {
+        "type": "code",
+        "id": "bdede7d6a331414e",
+        "text": "let base = 'http://marc.tries.fed.wiki/assets/'\nlet example = {\n  mermaid: `${base}mermaiddiagram.svg`,\n  omnigraffle: `${base}OmnigraffleTransit.svg',\n  opm: `${base}Tripod%20Beta%20-%20SD%20SD_svg.svg`,\n  \"mind map\":`${base}Mind%20map.svg`\n}\n"
+      },
+      "date": 1688484330821
+    },
+    {
+      "type": "edit",
+      "id": "bdede7d6a331414e",
+      "item": {
+        "type": "code",
+        "id": "bdede7d6a331414e",
+        "text": "let base = 'http://marc.tries.fed.wiki/assets/'\nlet example = {\n  mermaid: `${base}mermaiddiagram.svg`,\n  omnigraffle: `${base}OmnigraffleTransit.svg`,\n  opm: `${base}Tripod%20Beta%20-%20SD%20SD_svg.svg`,\n  \"mind map\":`${base}Mind%20map.svg`\n}\n"
+      },
+      "date": 1688484347773
+    },
+    {
+      "type": "edit",
+      "id": "7a05fd0d5a2cd67d",
+      "item": {
+        "type": "paragraph",
+        "id": "7a05fd0d5a2cd67d",
+        "text": "Here we construct the functions for our general purpose frame script. emit() creates placeholders in the DOM. bind() generates buttons for each of our examples and binds the click handler to each one."
+      },
+      "date": 1688485365847
+    },
+    {
+      "type": "add",
+      "id": "1120d9d276f56db4",
+      "item": {
+        "type": "paragraph",
+        "id": "1120d9d276f56db4",
+        "text": "Some examples don't fit in our narrow pages. Here we have devised a general approach to putting the scalable back into scalable vector graphics."
+      },
+      "after": "541ea5084e36c872",
+      "date": 1688485501851
+    },
+    {
+      "type": "add",
+      "id": "7993941610ebf2c5",
+      "item": {
+        "type": "paragraph",
+        "id": "7993941610ebf2c5",
+        "text": "..."
+      },
+      "after": "1120d9d276f56db4",
+      "date": 1688485503233
+    },
+    {
+      "type": "edit",
+      "id": "7993941610ebf2c5",
+      "item": {
+        "type": "code",
+        "id": "7993941610ebf2c5",
+        "text": "function scalable (svg) {\n  let {x,y,width,height} = svg.getBBox()\n  svg.setAttribute('viewBox',\n    `${x} ${y} ${width} ${height}`)\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  svg.style.width=\"100%\"\n}"
+      },
+      "date": 1688485626988
+    },
+    {
+      "type": "edit",
+      "id": "541ea5084e36c872",
+      "item": {
+        "type": "code",
+        "id": "541ea5084e36c872",
+        "text": "async function click(event) {\n  let button = event.target\n  let {url} = button.dataset\n  let payload = await fetch(url).then(res => res.text())\n  window.diagram.innerHTML = payload\n  let svg = scalable(parseSvg(payload))\n  window.log.innerText = \"\"\n  for (let [text, el] of selectTextNodes(svg)) {\n    if (text.match(/\\S/)) {\n      // ignore the child nodes with only whitespace\n      window.log.innerText += `<${el.nodeName}> ${text}\\n`\n    }\n  }\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688485654599
+    },
+    {
+      "type": "edit",
+      "id": "7993941610ebf2c5",
+      "item": {
+        "type": "code",
+        "id": "7993941610ebf2c5",
+        "text": "function scalable (svg) {\n  let {x,y,width,height} = svg.getBBox()\n  svg.setAttribute('viewBox',\n    `${x} ${y} ${width} ${height}`)\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  svg.style.width=\"100%\"\n  return svg\n}"
+      },
+      "date": 1688485677292
+    },
+    {
+      "type": "edit",
+      "id": "541ea5084e36c872",
+      "item": {
+        "type": "code",
+        "id": "541ea5084e36c872",
+        "text": "async function click(event) {\n  let button = event.target\n  let {url} = button.dataset\n  let payload = await fetch(url).then(res => res.text())\n  let svg = scalable(parseSvg(payload))\n  window.diagram.appendChild(svg)\n  window.log.innerText = \"\"\n  for (let [text, el] of selectTextNodes(svg)) {\n    if (text.match(/\\S/)) {\n      // ignore the child nodes with only whitespace\n      window.log.innerText += `<${el.nodeName}> ${text}\\n`\n    }\n  }\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688485769803
+    },
+    {
+      "type": "edit",
+      "id": "541ea5084e36c872",
+      "item": {
+        "type": "code",
+        "id": "541ea5084e36c872",
+        "text": "async function click(event) {\n  let button = event.target\n  let {url} = button.dataset\n  let payload = await fetch(url).then(res => res.text())\n  window.diagram.innerHTML = payload\n  let svg = window.diagram.firstChild\n  scalable(svg)\n  window.log.innerText = \"\"\n  for (let [text, el] of selectTextNodes(svg)) {\n    if (text.match(/\\S/)) {\n      // ignore the child nodes with only whitespace\n      window.log.innerText += `<${el.nodeName}> ${text}\\n`\n    }\n  }\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688485927941
+    },
+    {
+      "type": "remove",
+      "id": "10764004caf661ce",
+      "date": 1688486005942
+    },
+    {
+      "type": "remove",
+      "id": "289c8839040000b8",
+      "date": 1688486009188
+    },
+    {
+      "type": "edit",
+      "id": "541ea5084e36c872",
+      "item": {
+        "type": "code",
+        "id": "541ea5084e36c872",
+        "text": "async function click(event) {\n  let button = event.target\n  let {url} = button.dataset\n  let payload = await fetch(url).then(res => res.text())\n  window.diagram.innerHTML = payload\n  let svg = window.diagram.querySelector('svg')\n  scalable(svg)\n  window.log.innerText = \"\"\n  for (let [text, el] of selectTextNodes(svg)) {\n    if (text.match(/\\S/)) {\n      // ignore the child nodes with only whitespace\n      window.log.innerText += `<${el.nodeName}> ${text}\\n`\n    }\n  }\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688486028032
+    },
+    {
+      "type": "edit",
+      "id": "bdede7d6a331414e",
+      "item": {
+        "type": "code",
+        "id": "bdede7d6a331414e",
+        "text": "let base = 'http://marc.tries.fed.wiki/assets/'\nlet example = {\n  mermaid: `${base}mermaiddiagram.svg`,\n  omnigraffle: `${base}OmnigraffleTransit.svg`,\n  opm: `${base}Tripod%20Beta%20-%20SD%20SD_svg.svg`,\n  \"mind map\":`${base}Mind%20map.svg`,\n  yEd: `${base}yEdTest.svg`\n}\n"
+      },
+      "date": 1688486176412
+    },
+    {
+      "type": "edit",
+      "id": "bdede7d6a331414e",
+      "item": {
+        "type": "code",
+        "id": "bdede7d6a331414e",
+        "text": "let base = 'http://marc.tries.fed.wiki/assets/'\nlet example = {\n  mermaid: `${base}mermaiddiagram.svg`,\n  omnigraffle: `${base}OmnigraffleTransit.svg`,\n  opm: `${base}Tripod%20Beta%20-%20SD%20SD_svg.svg`,\n  \"mind map\":`${base}Mind%20map.svg`,\n  yEd: `${base}yEdTest.svg`,\n  SVGedit: `${base}SVGedit.svg`,\n  Neo4j: `${base}CarLNeighborhoodNeo4j.svg`\n}\n"
+      },
+      "date": 1688486359614
+    },
+    {
+      "type": "edit",
+      "id": "7993941610ebf2c5",
+      "item": {
+        "type": "code",
+        "id": "7993941610ebf2c5",
+        "text": "function rescale (svg) {\n  let {x,y,width,height} = svg.getBBox()\n  svg.setAttribute('viewBox',\n    `${x} ${y} ${width} ${height}`)\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  svg.style.width=\"100%\"\n  return svg\n}"
+      },
+      "date": 1688487271491
+    },
+    {
+      "type": "edit",
+      "id": "541ea5084e36c872",
+      "item": {
+        "type": "code",
+        "id": "541ea5084e36c872",
+        "text": "async function click(event) {\n  let button = event.target\n  let {url} = button.dataset\n  let payload = await fetch(url).then(res => res.text())\n  window.diagram.innerHTML = payload\n  let svg = window.diagram.querySelector('svg')\n  rescale(svg)\n  window.log.innerText = \"\"\n  for (let [text, el] of selectTextNodes(svg)) {\n    if (text.match(/\\S/)) {\n      // ignore the child nodes with only whitespace\n      window.log.innerText += `<${el.nodeName}> ${text}\\n`\n    }\n  }\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1688487279422
+    },
+    {
+      "type": "fork",
+      "site": "eric.dojo.fed.wiki",
+      "date": 1690791987683
+    }
+  ]
+}
