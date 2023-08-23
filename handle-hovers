@@ -1,0 +1,1692 @@
+{
+  "title": "Handle Hovers",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "bdf029d15dc5b5b5",
+      "text": "Target handles hovers over items and actions. (wiki-client) [https://github.com/fedwiki/wiki-client/blob/b079e3f90863e594e01e520082b7950b2ba62209/lib/target.coffee#L1-L5 code]"
+    },
+    {
+      "type": "paragraph",
+      "id": "f8a6f98f8beeacc5",
+      "text": "Other visible items and actions with the same id will highlight. In some cases an 'align-item' event is generated inviting other pages to scroll the item into view."
+    },
+    {
+      "type": "paragraph",
+      "id": "1abf4310e0b39e5f",
+      "text": "Target [[track]]s hovering even when not requested so that highlighting can be immediate when requested."
+    },
+    {
+      "type": "paragraph",
+      "id": "7edc8a20fa67fdea",
+      "text": "[[Eliminate What Is NOT]] to arrive at what is possible. Rather than considering a solution, consider all solutions by omitting the non-solutions."
+    },
+    {
+      "type": "pagefold",
+      "id": "a12158ec57465b41",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "38af149e372a55b9",
+      "text": "wiki-client target.coffee [https://github.com/fedwiki/wiki-client/blob/b079e3f90863e594e01e520082b7950b2ba62209/lib/target.coffee#L1-L5 code] (actions ⇒ [[Journal Actions]] ⇒ addToJournal.coffee) ⇒ [[Perspective]]: How do you represent a [[Point of View]] into that [[Stream]] of changes?"
+    },
+    {
+      "type": "paragraph",
+      "id": "38a96592752c04e7",
+      "text": "Pattern: Time Travel [⇒ [[Time Travel Project]]] ⇒ [[Version History]]: You have an object whose changes you need to track. Split the object into two parts. One part is immutable. One is a snapshot of the changeable state."
+    },
+    {
+      "type": "paragraph",
+      "id": "cf044a4d0eb4d761",
+      "text": "⇒ [[Connect 2 Apps]] ⇒ [[Connect 2 Letters]]"
+    },
+    {
+      "type": "pagefold",
+      "id": "9214ea43f1d2c672",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "0cfe83cd2dcddc1a",
+      "text": "target.coffee [https://github.com/fedwiki/wiki-client/blob/b079e3f90863e594e01e520082b7950b2ba62209/lib/target.coffee#L1-L5 code] appears to be written in CoffeeScript and uses jQuery to handle various interactions in a web application. I (ChatGPT August 3 Version) will break down the code section by section to explain its functionality:"
+    },
+    {
+      "type": "paragraph",
+      "id": "39a041faca059d8d",
+      "text": "Initialization:"
+    },
+    {
+      "type": "code",
+      "id": "e2d509ea01c937ce",
+      "text": "targeting = false\nitem = null\naction = null\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "eba46d0958119d8a",
+      "text": "Here, three variables (targeting, item, and action) are initialized. These variables are used to keep track of the application's state."
+    },
+    {
+      "type": "paragraph",
+      "id": "6047763ce732ce42",
+      "text": "bind Function:"
+    },
+    {
+      "type": "code",
+      "id": "bafe6fb9d05180b1",
+      "text": "bind = ->\n  # Event handlers for keydown and keyup on the document\n  $(document)\n    .keydown (e) -> startTargeting e if e.keyCode == 16\n    .keyup (e) -> stopTargeting e if e.keyCode == 16\n  # Event delegation for mouseenter and mouseleave on elements with class '.item', '.action', and '.page'\n  $('.main')\n    .delegate '.item', 'mouseenter', enterItem\n    .delegate '.item', 'mouseleave', leaveItem\n    .delegate '.action', 'mouseenter', enterAction\n    .delegate '.action', 'mouseleave', leaveAction\n    .delegate '.page', 'align-item', alignItem\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "63d8b638bfbcd829",
+      "text": "This bind function sets up event handlers for keydown and keyup events on the entire document and delegates mouseenter [https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseenter_event mdn] and mouseleave [https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseleave_event mdn] events for elements with specific classes within an element with class '.main'."
+    },
+    {
+      "type": "markdown",
+      "id": "496a987613046a6e",
+      "text": "* Element: mouseenter event [https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseenter_event mdn]\n* Element: mouseleave event [https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseleave_event mdn]"
+    },
+    {
+      "type": "paragraph",
+      "id": "9fc01e92643140b6",
+      "text": "startTargeting Function:"
+    },
+    {
+      "type": "code",
+      "id": "8a296dd1ce36dd92",
+      "text": "startTargeting = (e) ->\n  targeting = e.shiftKey\n  if targeting\n    if id = item || action\n      $(\"[data-id=#{id}]\").addClass('target')\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "559a222b0fad09ef",
+      "text": "This function is called when the shift key is pressed (keydown). It sets the targeting variable to true if the shift key is pressed and adds a 'target' class to an element with a specific data-id if either item or action is defined."
+    },
+    {
+      "type": "markdown",
+      "id": "9b50b3da6338d298",
+      "text": "* MouseEvent: shiftKey property [https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/shiftKey mdn]"
+    },
+    {
+      "type": "paragraph",
+      "id": "9a104951805db867",
+      "text": "stopTargeting Function:"
+    },
+    {
+      "type": "code",
+      "id": "5af58448772523a1",
+      "text": "stopTargeting = (e) ->\n  targeting = e.shiftKey\n  unless targeting\n    $('.item, .action').removeClass 'target'\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "1f34bf4b287941fa",
+      "text": "This function is called when the shift key is released (keyup). It sets the targeting variable to false if the shift key is released and removes the 'target' class from elements with classes '.item' and '.action'."
+    },
+    {
+      "type": "paragraph",
+      "id": "362ad35b727f5b70",
+      "text": "enterItem Function:"
+    },
+    {
+      "type": "code",
+      "id": "3c6202e11bbddc9f",
+      "text": "enterItem = (e) ->\n  item = $(this).attr('data-id')\n  if targeting\n\n    # Add 'target' class to the item\n    $(\"[data-id=#{item}]\").addClass('target')\n\n    # Trigger the 'align-item' event on the '.page' element with some data\n    key = $(this).parents('.page:first').data('key')\n    $('.page').trigger('align-item', {key, id:item})\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "d2c7dec05e1dd894",
+      "text": "This function is called when the mouse enters an element with class '.item'. It sets the item variable to the data-id attribute of the element and adds a 'target' class to it if targeting is active. It also triggers an 'align-item' event on the '.page' element."
+    },
+    {
+      "type": "paragraph",
+      "id": "d6860747c999f8e7",
+      "text": "leaveItem Function:"
+    },
+    {
+      "type": "code",
+      "id": "76473bf1c5df4b99",
+      "text": "leaveItem = (e) ->\n  if targeting\n    $('.item, .action').removeClass('target')\n  item = null\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "2fb1bc1a1fff5421",
+      "text": "This function is called when the mouse leaves an element with class '.item'. It removes the 'target' class from all elements with classes '.item' and '.action' if targeting is active and resets the item variable to null."
+    },
+    {
+      "type": "paragraph",
+      "id": "38f4018247b5801b",
+      "text": "enterAction Function:"
+    },
+    {
+      "type": "code",
+      "id": "578d49aaa4398421",
+      "text": "enterAction = (e) ->\n  action = $(this).data('id')\n  if targeting\n\n    # Add 'target' class to the action\n    $(\"[data-id=#{action}]\").addClass('target')\n\n    # Trigger the 'align-item' event on the '.page' element with some data\n    key = $(this).parents('.page:first').data('key')\n    $('.page').trigger('align-item', {key, id:action})\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "5557b8676cd2c292",
+      "text": "This function is similar to enterItem but works for elements with class '.action'."
+    },
+    {
+      "type": "paragraph",
+      "id": "6a7572ede859dea0",
+      "text": "leaveAction Function:"
+    },
+    {
+      "type": "code",
+      "id": "2f0893769fd9a189",
+      "text": "leaveAction = (e) ->\n  if targeting\n    $(\"[data-id=#{action}]\").removeClass('target')\n  action = null\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "af0bfd6927f91ae2",
+      "text": "Similar to leaveItem, this function is called when the mouse leaves an element with class '.action' and resets the action variable to null."
+    },
+    {
+      "type": "paragraph",
+      "id": "18f0469f2279710c",
+      "text": "alignItem Function:"
+    },
+    {
+      "type": "code",
+      "id": "44b849205cc276e4",
+      "text": "alignItem = (e, align) ->\n  # Handle alignment logic based on the provided data\n  $page = $(this)\n  return if $page.data('key') == align.key\n  $item = $page.find(\".item[data-id=#{align.id}]\")\n  return unless $item.length\n  position = $item.offset().top + $page.scrollTop() - $page.height()/2\n  $page.stop().animate {scrollTop: position}, 'slow'"
+    },
+    {
+      "type": "paragraph",
+      "id": "9cadf4db233eb4b6",
+      "text": "This function handles alignment logic based on data provided. It's triggered when the 'align-item' event is fired on a '.page' element."
+    },
+    {
+      "type": "paragraph",
+      "id": "1f05d476d23f6257",
+      "text": "Exporting the bind function:"
+    },
+    {
+      "type": "code",
+      "id": "069294533110524f",
+      "text": "module.exports = {bind}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "c86054a75b3c5317",
+      "text": "This line exports the bind function, making it accessible to other parts of the codebase.\n"
+    },
+    {
+      "type": "pagefold",
+      "id": "07f8db61aea88bdf",
+      "text": "~"
+    },
+    {
+      "type": "graphviz",
+      "id": "04c0b9d9e4a57b34",
+      "text": "DOT FROM lambda-browsing"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Handle Hovers",
+        "story": []
+      },
+      "date": 1692706162184
+    },
+    {
+      "id": "bdf029d15dc5b5b5",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "bdf029d15dc5b5b5",
+        "text": "Target handles hovers over items and actions. Other visible items and actions with the same id will highlight. In some cases an event is generated inviting other pages to scroll the item into view. Target tracks hovering even when not requested so that highlighting can be immediate when requested."
+      },
+      "attribution": {
+        "page": "2023-08-22"
+      },
+      "date": 1692706165281
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a12158ec57465b41"
+      },
+      "id": "a12158ec57465b41",
+      "type": "add",
+      "after": "bdf029d15dc5b5b5",
+      "date": 1692706171895
+    },
+    {
+      "type": "edit",
+      "id": "a12158ec57465b41",
+      "item": {
+        "type": "pagefold",
+        "id": "a12158ec57465b41",
+        "text": "~"
+      },
+      "date": 1692706174893
+    },
+    {
+      "id": "38af149e372a55b9",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "38af149e372a55b9",
+        "text": "wiki-client target.coffee (actions > addToJournal.coffee) ⇒ [[Perspective]]: How do you represent a [[Point of View]] into that [[Stream]] of changes? ⇒ [[Handle Hovers]]"
+      },
+      "after": "a12158ec57465b41",
+      "attribution": {
+        "page": "2023-08-22"
+      },
+      "date": 1692706180530
+    },
+    {
+      "type": "edit",
+      "id": "bdf029d15dc5b5b5",
+      "item": {
+        "type": "paragraph",
+        "id": "bdf029d15dc5b5b5",
+        "text": "Target handles hovers over items and actions. https://github.com/fedwiki/wiki-client/blob/b079e3f90863e594e01e520082b7950b2ba62209/lib/target.coffee#L1-L5Other visible items and actions with the same id will highlight. In some cases an event is generated inviting other pages to scroll the item into view. Target tracks hovering even when not requested so that highlighting can be immediate when requested."
+      },
+      "date": 1692706271349
+    },
+    {
+      "type": "edit",
+      "id": "bdf029d15dc5b5b5",
+      "item": {
+        "type": "paragraph",
+        "id": "bdf029d15dc5b5b5",
+        "text": "Target handles hovers over items and actions. https://github.com/fedwiki/wiki-client/blob/b079e3f90863e594e01e520082b7950b2ba62209/lib/target.coffee#L1-L5 code] Other visible items and actions with the same id will highlight. In some cases an event is generated inviting other pages to scroll the item into view. Target tracks hovering even when not requested so that highlighting can be immediate when requested."
+      },
+      "date": 1692706302442
+    },
+    {
+      "type": "edit",
+      "id": "bdf029d15dc5b5b5",
+      "item": {
+        "type": "paragraph",
+        "id": "bdf029d15dc5b5b5",
+        "text": "Target handles hovers over items and actions. [https://github.com/fedwiki/wiki-client/blob/b079e3f90863e594e01e520082b7950b2ba62209/lib/target.coffee#L1-L5 code] Other visible items and actions with the same id will highlight. In some cases an event is generated inviting other pages to scroll the item into view. Target tracks hovering even when not requested so that highlighting can be immediate when requested."
+      },
+      "date": 1692706307618
+    },
+    {
+      "type": "edit",
+      "id": "bdf029d15dc5b5b5",
+      "item": {
+        "type": "paragraph",
+        "id": "bdf029d15dc5b5b5",
+        "text": "Target handles hovers over items and actions. [https://github.com/fedwiki/wiki-client/blob/b079e3f90863e594e01e520082b7950b2ba62209/lib/target.coffee#L1-L5 code]"
+      },
+      "date": 1692706313291
+    },
+    {
+      "type": "add",
+      "id": "f8a6f98f8beeacc5",
+      "item": {
+        "type": "paragraph",
+        "id": "f8a6f98f8beeacc5",
+        "text": "Other visible items and actions with the same id will highlight. In some cases an event is generated inviting other pages to scroll the item into view. Target tracks hovering even when not requested so that highlighting can be immediate when requested."
+      },
+      "after": "bdf029d15dc5b5b5",
+      "date": 1692706313810
+    },
+    {
+      "type": "edit",
+      "id": "f8a6f98f8beeacc5",
+      "item": {
+        "type": "paragraph",
+        "id": "f8a6f98f8beeacc5",
+        "text": "Other visible items and actions with the same id will highlight. In some cases an event is generated inviting other pages to scroll the item into view."
+      },
+      "date": 1692706334390
+    },
+    {
+      "type": "add",
+      "id": "1abf4310e0b39e5f",
+      "item": {
+        "type": "paragraph",
+        "id": "1abf4310e0b39e5f",
+        "text": "Target tracks hovering even when not requested so that highlighting can be immediate when requested."
+      },
+      "after": "f8a6f98f8beeacc5",
+      "date": 1692706334948
+    },
+    {
+      "id": "7edc8a20fa67fdea",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "7edc8a20fa67fdea",
+        "text": "This new perspective has evolved into [[Constraint-Based Reasoning]]. Eliminate what is NOT to arrive at what is possible. Rather than considering a solution, consider all solutions by omitting the non-solutions."
+      },
+      "after": "38af149e372a55b9",
+      "attribution": {
+        "page": "2023-08-22"
+      },
+      "date": 1692706361610
+    },
+    {
+      "type": "edit",
+      "id": "38af149e372a55b9",
+      "item": {
+        "type": "paragraph",
+        "id": "38af149e372a55b9",
+        "text": "wiki-client target.coffee (actions > addToJournal.coffee) ⇒ [[Perspective]]: How do you represent a [[Point of View]] into that [[Stream]] of changes?"
+      },
+      "date": 1692706376461
+    },
+    {
+      "type": "edit",
+      "id": "7edc8a20fa67fdea",
+      "item": {
+        "type": "paragraph",
+        "id": "7edc8a20fa67fdea",
+        "text": "This new perspective has evolved into [[Constraint-Based Reasoning]]. [[Eliminate What Is NOT]] to arrive at what is possible. Rather than considering a solution, consider all solutions by omitting the non-solutions."
+      },
+      "date": 1692706888742
+    },
+    {
+      "id": "38a96592752c04e7",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "38a96592752c04e7",
+        "text": "Pattern: [[Time Travel]]. [https://github.com/RalfBarkow/time-travel-project github]"
+      },
+      "after": "38af149e372a55b9",
+      "attribution": {
+        "page": "Time Travel Project"
+      },
+      "date": 1692707804325
+    },
+    {
+      "type": "fork",
+      "date": 1692708018101
+    },
+    {
+      "type": "edit",
+      "id": "38a96592752c04e7",
+      "item": {
+        "type": "paragraph",
+        "id": "38a96592752c04e7",
+        "text": "Pattern: [[Time Travel]] ⇒ [[Time Travel Project]]"
+      },
+      "date": 1692708028863
+    },
+    {
+      "type": "add",
+      "id": "d9c3e790ba0bc4b7",
+      "item": {
+        "type": "paragraph",
+        "id": "d9c3e790ba0bc4b7",
+        "text": "You have an object whose changes you need to track. Split the object into two parts. One part is immutable. One is a snapshot of the changeable state"
+      },
+      "after": "38a96592752c04e7",
+      "date": 1692708049213
+    },
+    {
+      "type": "edit",
+      "id": "d9c3e790ba0bc4b7",
+      "item": {
+        "type": "paragraph",
+        "id": "d9c3e790ba0bc4b7",
+        "text": "You have an object whose changes you need to track. Split the object into two parts. One part is immutable. One is a snapshot of the changeable state."
+      },
+      "date": 1692708059734
+    },
+    {
+      "type": "edit",
+      "id": "1abf4310e0b39e5f",
+      "item": {
+        "type": "paragraph",
+        "id": "1abf4310e0b39e5f",
+        "text": "Target [[track]]s hovering even when not requested so that highlighting can be immediate when requested."
+      },
+      "date": 1692708229970
+    },
+    {
+      "type": "edit",
+      "id": "38af149e372a55b9",
+      "item": {
+        "type": "paragraph",
+        "id": "38af149e372a55b9",
+        "text": "wiki-client target.coffee [https://github.com/fedwiki/wiki-client/blob/b079e3f90863e594e01e520082b7950b2ba62209/lib/target.coffee#L1-L5 code] (actions > addToJournal.coffee) ⇒ [[Perspective]]: How do you represent a [[Point of View]] into that [[Stream]] of changes?"
+      },
+      "date": 1692708636829
+    },
+    {
+      "type": "edit",
+      "id": "38af149e372a55b9",
+      "item": {
+        "type": "paragraph",
+        "id": "38af149e372a55b9",
+        "text": "wiki-client target.coffee [https://github.com/fedwiki/wiki-client/blob/b079e3f90863e594e01e520082b7950b2ba62209/lib/target.coffee#L1-L5 code] (actions ⇒ [[Journal Actions]] ⇒ addToJournal.coffee) ⇒ [[Perspective]]: How do you represent a [[Point of View]] into that [[Stream]] of changes?"
+      },
+      "date": 1692708877157
+    },
+    {
+      "type": "edit",
+      "id": "7edc8a20fa67fdea",
+      "item": {
+        "type": "paragraph",
+        "id": "7edc8a20fa67fdea",
+        "text": "[[Eliminate What Is NOT]] to arrive at what is possible. Rather than considering a solution, consider all solutions by omitting the non-solutions."
+      },
+      "date": 1692709995852
+    },
+    {
+      "id": "7edc8a20fa67fdea",
+      "type": "move",
+      "order": [
+        "bdf029d15dc5b5b5",
+        "f8a6f98f8beeacc5",
+        "1abf4310e0b39e5f",
+        "7edc8a20fa67fdea",
+        "a12158ec57465b41",
+        "38af149e372a55b9",
+        "38a96592752c04e7",
+        "d9c3e790ba0bc4b7"
+      ],
+      "date": 1692709998426
+    },
+    {
+      "type": "edit",
+      "id": "38a96592752c04e7",
+      "item": {
+        "type": "paragraph",
+        "id": "38a96592752c04e7",
+        "text": "Pattern: [[Time Travel]] ⇒ [[Time Travel Project]] ⇒ [[Version History]]:"
+      },
+      "date": 1692710257451
+    },
+    {
+      "type": "add",
+      "id": "cf044a4d0eb4d761",
+      "item": {
+        "type": "paragraph",
+        "id": "cf044a4d0eb4d761",
+        "text": " ⇒ [[Connect 2 Apps]]"
+      },
+      "after": "d9c3e790ba0bc4b7",
+      "date": 1692710301436
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9fc01e92643140b6"
+      },
+      "id": "9fc01e92643140b6",
+      "type": "add",
+      "after": "cf044a4d0eb4d761",
+      "date": 1692711351902
+    },
+    {
+      "type": "edit",
+      "id": "9fc01e92643140b6",
+      "item": {
+        "type": "paragraph",
+        "id": "9fc01e92643140b6",
+        "text": "artTargeting Function:"
+      },
+      "date": 1692711354005
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8a296dd1ce36dd92"
+      },
+      "id": "8a296dd1ce36dd92",
+      "type": "add",
+      "after": "9fc01e92643140b6",
+      "date": 1692711358536
+    },
+    {
+      "type": "edit",
+      "id": "8a296dd1ce36dd92",
+      "item": {
+        "type": "code",
+        "id": "8a296dd1ce36dd92",
+        "text": "startTargeting = (e) ->\n  targeting = e.shiftKey\n  if targeting\n    if id = item || action\n      $(\"[data-id=#{id}]\").addClass('target')\n"
+      },
+      "date": 1692711360349
+    },
+    {
+      "type": "edit",
+      "id": "9fc01e92643140b6",
+      "item": {
+        "type": "paragraph",
+        "id": "9fc01e92643140b6",
+        "text": "startTargeting Function:"
+      },
+      "date": 1692711367095
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "559a222b0fad09ef"
+      },
+      "id": "559a222b0fad09ef",
+      "type": "add",
+      "after": "8a296dd1ce36dd92",
+      "date": 1692711411253
+    },
+    {
+      "type": "edit",
+      "id": "559a222b0fad09ef",
+      "item": {
+        "type": "paragraph",
+        "id": "559a222b0fad09ef",
+        "text": "This function is called when the shift key is pressed (keydown). It sets the targeting variable to true if the shift key is pressed and adds a 'target' class to an element with a specific data-id if either item or action is defined."
+      },
+      "date": 1692711413050
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9a104951805db867"
+      },
+      "id": "9a104951805db867",
+      "type": "add",
+      "after": "559a222b0fad09ef",
+      "date": 1692711460791
+    },
+    {
+      "type": "edit",
+      "id": "9a104951805db867",
+      "item": {
+        "type": "paragraph",
+        "id": "9a104951805db867",
+        "text": "stopTargeting Function:"
+      },
+      "date": 1692711465555
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5af58448772523a1"
+      },
+      "id": "5af58448772523a1",
+      "type": "add",
+      "after": "9a104951805db867",
+      "date": 1692711470033
+    },
+    {
+      "type": "edit",
+      "id": "5af58448772523a1",
+      "item": {
+        "type": "code",
+        "id": "5af58448772523a1",
+        "text": "stopTargeting = (e) ->\n  targeting = e.shiftKey\n  unless targeting\n    $('.item, .action').removeClass 'target'\n"
+      },
+      "date": 1692711471932
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1f34bf4b287941fa"
+      },
+      "id": "1f34bf4b287941fa",
+      "type": "add",
+      "after": "5af58448772523a1",
+      "date": 1692711493871
+    },
+    {
+      "type": "edit",
+      "id": "1f34bf4b287941fa",
+      "item": {
+        "type": "paragraph",
+        "id": "1f34bf4b287941fa",
+        "text": "This function is called when the shift key is released (keyup). It sets the targeting variable to false if the shift key is released and removes the 'target' class from elements with classes '.item' and '.action'."
+      },
+      "date": 1692711495492
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "362ad35b727f5b70"
+      },
+      "id": "362ad35b727f5b70",
+      "type": "add",
+      "after": "1f34bf4b287941fa",
+      "date": 1692711545715
+    },
+    {
+      "type": "edit",
+      "id": "362ad35b727f5b70",
+      "item": {
+        "type": "paragraph",
+        "id": "362ad35b727f5b70",
+        "text": "nterItem Function:"
+      },
+      "date": 1692711548396
+    },
+    {
+      "type": "edit",
+      "id": "362ad35b727f5b70",
+      "item": {
+        "type": "paragraph",
+        "id": "362ad35b727f5b70",
+        "text": "enterItem Function:"
+      },
+      "date": 1692711551740
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3c6202e11bbddc9f"
+      },
+      "id": "3c6202e11bbddc9f",
+      "type": "add",
+      "after": "362ad35b727f5b70",
+      "date": 1692711569412
+    },
+    {
+      "type": "edit",
+      "id": "3c6202e11bbddc9f",
+      "item": {
+        "type": "code",
+        "id": "3c6202e11bbddc9f",
+        "text": "enterItem = (e) ->\n  item = $(this).attr('data-id')\n  if targeting\n    # Add 'target' class to the item\n    # Trigger the 'align-item' event on the '.page' element with some data\n"
+      },
+      "date": 1692711571105
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d2c7dec05e1dd894"
+      },
+      "id": "d2c7dec05e1dd894",
+      "type": "add",
+      "after": "3c6202e11bbddc9f",
+      "date": 1692711815253
+    },
+    {
+      "type": "edit",
+      "id": "d2c7dec05e1dd894",
+      "item": {
+        "type": "paragraph",
+        "id": "d2c7dec05e1dd894",
+        "text": "This function is called when the mouse enters an element with class '.item'. It sets the item variable to the data-id attribute of the element and adds a 'target' class to it if targeting is active. It also triggers an 'align-item' event on the '.page' element."
+      },
+      "date": 1692711816985
+    },
+    {
+      "type": "edit",
+      "id": "3c6202e11bbddc9f",
+      "item": {
+        "type": "code",
+        "id": "3c6202e11bbddc9f",
+        "text": "enterItem = (e) ->\n  item = $(this).attr('data-id')\n  if targeting\n    # Add 'target' class to the item\n    $(\"[data-id=#{item}]\").addClass('target')\n    # Trigger the 'align-item' event on the '.page' element with some data\n    key = $(this).parents('.page:first').data('key')\n    $('.page').trigger('align-item', {key, id:item})\n"
+      },
+      "date": 1692711929764
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d6860747c999f8e7"
+      },
+      "id": "d6860747c999f8e7",
+      "type": "add",
+      "after": "d2c7dec05e1dd894",
+      "date": 1692711986525
+    },
+    {
+      "type": "edit",
+      "id": "d6860747c999f8e7",
+      "item": {
+        "type": "paragraph",
+        "id": "d6860747c999f8e7",
+        "text": "leaveItem Function:"
+      },
+      "date": 1692711990235
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "76473bf1c5df4b99"
+      },
+      "id": "76473bf1c5df4b99",
+      "type": "add",
+      "after": "d6860747c999f8e7",
+      "date": 1692711996366
+    },
+    {
+      "type": "edit",
+      "id": "76473bf1c5df4b99",
+      "item": {
+        "type": "code",
+        "id": "76473bf1c5df4b99",
+        "text": "leaveItem = (e) ->\n  if targeting\n    $('.item, .action').removeClass('target')\n  item = null\n"
+      },
+      "date": 1692711998189
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2fb1bc1a1fff5421"
+      },
+      "id": "2fb1bc1a1fff5421",
+      "type": "add",
+      "after": "76473bf1c5df4b99",
+      "date": 1692712015613
+    },
+    {
+      "type": "edit",
+      "id": "2fb1bc1a1fff5421",
+      "item": {
+        "type": "paragraph",
+        "id": "2fb1bc1a1fff5421",
+        "text": "This function is called when the mouse leaves an element with class '.item'. It removes the 'target' class from all elements with classes '.item' and '.action' if targeting is active and resets the item variable to null."
+      },
+      "date": 1692712017249
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "38f4018247b5801b"
+      },
+      "id": "38f4018247b5801b",
+      "type": "add",
+      "after": "2fb1bc1a1fff5421",
+      "date": 1692712054167
+    },
+    {
+      "type": "edit",
+      "id": "38f4018247b5801b",
+      "item": {
+        "type": "paragraph",
+        "id": "38f4018247b5801b",
+        "text": "enterAction Function:"
+      },
+      "date": 1692712060225
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "578d49aaa4398421"
+      },
+      "id": "578d49aaa4398421",
+      "type": "add",
+      "after": "38f4018247b5801b",
+      "date": 1692712063972
+    },
+    {
+      "type": "edit",
+      "id": "578d49aaa4398421",
+      "item": {
+        "type": "code",
+        "id": "578d49aaa4398421",
+        "text": "enterAction = (e) ->\n  action = $(this).data('id')\n  if targeting\n    # Add 'target' class to the action\n    # Trigger the 'align-item' event on the '.page' element with some data\n"
+      },
+      "date": 1692712065928
+    },
+    {
+      "type": "edit",
+      "id": "3c6202e11bbddc9f",
+      "item": {
+        "type": "code",
+        "id": "3c6202e11bbddc9f",
+        "text": "enterItem = (e) ->\n  item = $(this).attr('data-id')\n  if targeting\n\n    # Add 'target' class to the item\n    $(\"[data-id=#{item}]\").addClass('target')\n\n    # Trigger the 'align-item' event on the '.page' element with some data\n    key = $(this).parents('.page:first').data('key')\n    $('.page').trigger('align-item', {key, id:item})\n"
+      },
+      "date": 1692712094902
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5557b8676cd2c292"
+      },
+      "id": "5557b8676cd2c292",
+      "type": "add",
+      "after": "578d49aaa4398421",
+      "date": 1692712117261
+    },
+    {
+      "type": "edit",
+      "id": "5557b8676cd2c292",
+      "item": {
+        "type": "paragraph",
+        "id": "5557b8676cd2c292",
+        "text": "This function is similar to enterItem but works for elements with class '.action'."
+      },
+      "date": 1692712119228
+    },
+    {
+      "type": "edit",
+      "id": "578d49aaa4398421",
+      "item": {
+        "type": "code",
+        "id": "578d49aaa4398421",
+        "text": "enterAction = (e) ->\n  action = $(this).data('id')\n  if targeting\n\n    # Add 'target' class to the \n    $(\"[data-id=#{action}]\").addClass('target')\n\n    # Trigger the 'align-item' event on the '.page' element with some data\n\n    key = $(this).parents('.page:first').data('key')\n    $('.page').trigger('align-item', {key, id:action})\n"
+      },
+      "date": 1692712153792
+    },
+    {
+      "type": "edit",
+      "id": "578d49aaa4398421",
+      "item": {
+        "type": "code",
+        "id": "578d49aaa4398421",
+        "text": "enterAction = (e) ->\n  action = $(this).data('id')\n  if targeting\n\n    # Add 'target' class to the \n    $(\"[data-id=#{action}]\").addClass('target')\n\n    # Trigger the 'align-item' event on the '.page' element with some data\n    key = $(this).parents('.page:first').data('key')\n    $('.page').trigger('align-item', {key, id:action})\n"
+      },
+      "date": 1692712158451
+    },
+    {
+      "type": "edit",
+      "id": "578d49aaa4398421",
+      "item": {
+        "type": "code",
+        "id": "578d49aaa4398421",
+        "text": "enterAction = (e) ->\n  action = $(this).data('id')\n  if targeting\n\n    # Add 'target' class to the action\n    $(\"[data-id=#{action}]\").addClass('target')\n\n    # Trigger the 'align-item' event on the '.page' element with some data\n    key = $(this).parents('.page:first').data('key')\n    $('.page').trigger('align-item', {key, id:action})\n"
+      },
+      "date": 1692712190933
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6a7572ede859dea0"
+      },
+      "id": "6a7572ede859dea0",
+      "type": "add",
+      "after": "5557b8676cd2c292",
+      "date": 1692712221655
+    },
+    {
+      "type": "edit",
+      "id": "6a7572ede859dea0",
+      "item": {
+        "type": "paragraph",
+        "id": "6a7572ede859dea0",
+        "text": "leaveAction Function:"
+      },
+      "date": 1692712227711
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2f0893769fd9a189"
+      },
+      "id": "2f0893769fd9a189",
+      "type": "add",
+      "after": "6a7572ede859dea0",
+      "date": 1692712233496
+    },
+    {
+      "type": "edit",
+      "id": "2f0893769fd9a189",
+      "item": {
+        "type": "code",
+        "id": "2f0893769fd9a189",
+        "text": "leaveAction = (e) ->\n  if targeting\n    $(\"[data-id=#{action}]\").removeClass('target')\n  action = null\n"
+      },
+      "date": 1692712235087
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "af0bfd6927f91ae2"
+      },
+      "id": "af0bfd6927f91ae2",
+      "type": "add",
+      "after": "2f0893769fd9a189",
+      "date": 1692712258500
+    },
+    {
+      "type": "edit",
+      "id": "af0bfd6927f91ae2",
+      "item": {
+        "type": "paragraph",
+        "id": "af0bfd6927f91ae2",
+        "text": "Similar to leaveItem, this function is called when the mouse leaves an element with class '.action' and resets the action variable to null."
+      },
+      "date": 1692712261416
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "18f0469f2279710c"
+      },
+      "id": "18f0469f2279710c",
+      "type": "add",
+      "after": "af0bfd6927f91ae2",
+      "date": 1692712284886
+    },
+    {
+      "type": "edit",
+      "id": "18f0469f2279710c",
+      "item": {
+        "type": "paragraph",
+        "id": "18f0469f2279710c",
+        "text": "alignItem Function:"
+      },
+      "date": 1692712290310
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "44b849205cc276e4"
+      },
+      "id": "44b849205cc276e4",
+      "type": "add",
+      "after": "18f0469f2279710c",
+      "date": 1692712307007
+    },
+    {
+      "type": "edit",
+      "id": "44b849205cc276e4",
+      "item": {
+        "type": "code",
+        "id": "44b849205cc276e4",
+        "text": "alignItem = (e, align) ->\n  $page = $(this)\n  return if $page.data('key') == align.key\n  $item = $page.find(\".item[data-id=#{align.id}]\")\n  return unless $item.length\n  position = $item.offset().top + $page.scrollTop() - $page.height()/2\n  $page.stop().animate {scrollTop: position}, 'slow'"
+      },
+      "date": 1692712310432
+    },
+    {
+      "type": "edit",
+      "id": "44b849205cc276e4",
+      "item": {
+        "type": "code",
+        "id": "44b849205cc276e4",
+        "text": "alignItem = (e, align) ->\n  # Handle alignment logic based on the provided data\n  $page = $(this)\n  return if $page.data('key') == align.key\n  $item = $page.find(\".item[data-id=#{align.id}]\")\n  return unless $item.length\n  position = $item.offset().top + $page.scrollTop() - $page.height()/2\n  $page.stop().animate {scrollTop: position}, 'slow'"
+      },
+      "date": 1692712326212
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9cadf4db233eb4b6"
+      },
+      "id": "9cadf4db233eb4b6",
+      "type": "add",
+      "after": "44b849205cc276e4",
+      "date": 1692712343569
+    },
+    {
+      "type": "edit",
+      "id": "9cadf4db233eb4b6",
+      "item": {
+        "type": "paragraph",
+        "id": "9cadf4db233eb4b6",
+        "text": "This function handles alignment logic based on data provided. It's triggered when the 'align-item' event is fired on a '.page' element."
+      },
+      "date": 1692712345223
+    },
+    {
+      "type": "edit",
+      "id": "cf044a4d0eb4d761",
+      "item": {
+        "type": "paragraph",
+        "id": "cf044a4d0eb4d761",
+        "text": "⇒ [[Connect 2 Apps]]"
+      },
+      "date": 1692712634855
+    },
+    {
+      "type": "add",
+      "id": "0cfe83cd2dcddc1a",
+      "item": {
+        "type": "paragraph",
+        "id": "0cfe83cd2dcddc1a",
+        "text": "target.coffee [https://github.com/fedwiki/wiki-client/blob/b079e3f90863e594e01e520082b7950b2ba62209/lib/target.coffee#L1-L5 code]"
+      },
+      "after": "cf044a4d0eb4d761",
+      "date": 1692712636054
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9214ea43f1d2c672"
+      },
+      "id": "9214ea43f1d2c672",
+      "type": "add",
+      "after": "9cadf4db233eb4b6",
+      "date": 1692712645331
+    },
+    {
+      "id": "9214ea43f1d2c672",
+      "type": "move",
+      "order": [
+        "bdf029d15dc5b5b5",
+        "f8a6f98f8beeacc5",
+        "1abf4310e0b39e5f",
+        "7edc8a20fa67fdea",
+        "a12158ec57465b41",
+        "38af149e372a55b9",
+        "38a96592752c04e7",
+        "d9c3e790ba0bc4b7",
+        "cf044a4d0eb4d761",
+        "9214ea43f1d2c672",
+        "0cfe83cd2dcddc1a",
+        "9fc01e92643140b6",
+        "8a296dd1ce36dd92",
+        "559a222b0fad09ef",
+        "9a104951805db867",
+        "5af58448772523a1",
+        "1f34bf4b287941fa",
+        "362ad35b727f5b70",
+        "3c6202e11bbddc9f",
+        "d2c7dec05e1dd894",
+        "d6860747c999f8e7",
+        "76473bf1c5df4b99",
+        "2fb1bc1a1fff5421",
+        "38f4018247b5801b",
+        "578d49aaa4398421",
+        "5557b8676cd2c292",
+        "6a7572ede859dea0",
+        "2f0893769fd9a189",
+        "af0bfd6927f91ae2",
+        "18f0469f2279710c",
+        "44b849205cc276e4",
+        "9cadf4db233eb4b6"
+      ],
+      "date": 1692712658397
+    },
+    {
+      "type": "edit",
+      "id": "9214ea43f1d2c672",
+      "item": {
+        "type": "pagefold",
+        "id": "9214ea43f1d2c672",
+        "text": "~"
+      },
+      "date": 1692712662299
+    },
+    {
+      "type": "add",
+      "id": "39a041faca059d8d",
+      "item": {
+        "type": "paragraph",
+        "id": "39a041faca059d8d",
+        "text": "Initialization:"
+      },
+      "after": "0cfe83cd2dcddc1a",
+      "date": 1692712692407
+    },
+    {
+      "type": "edit",
+      "id": "0cfe83cd2dcddc1a",
+      "item": {
+        "type": "paragraph",
+        "id": "0cfe83cd2dcddc1a",
+        "text": "target.coffee [https://github.com/fedwiki/wiki-client/blob/b079e3f90863e594e01e520082b7950b2ba62209/lib/target.coffee#L1-L5 code] appears to be written in CoffeeScript and uses jQuery to handle various interactions in a web application. I'll break down the code section by section to explain its functionality:"
+      },
+      "date": 1692712711973
+    },
+    {
+      "type": "edit",
+      "id": "0cfe83cd2dcddc1a",
+      "item": {
+        "type": "paragraph",
+        "id": "0cfe83cd2dcddc1a",
+        "text": "target.coffee [https://github.com/fedwiki/wiki-client/blob/b079e3f90863e594e01e520082b7950b2ba62209/lib/target.coffee#L1-L5 code] appears to be written in CoffeeScript and uses jQuery to handle various interactions in a web application. I (ChatGPT August 3 Version) will break down the code section by section to explain its functionality:"
+      },
+      "date": 1692712757212
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e2d509ea01c937ce"
+      },
+      "id": "e2d509ea01c937ce",
+      "type": "add",
+      "after": "9cadf4db233eb4b6",
+      "date": 1692712770988
+    },
+    {
+      "id": "e2d509ea01c937ce",
+      "type": "move",
+      "order": [
+        "bdf029d15dc5b5b5",
+        "f8a6f98f8beeacc5",
+        "1abf4310e0b39e5f",
+        "7edc8a20fa67fdea",
+        "a12158ec57465b41",
+        "38af149e372a55b9",
+        "38a96592752c04e7",
+        "d9c3e790ba0bc4b7",
+        "cf044a4d0eb4d761",
+        "9214ea43f1d2c672",
+        "0cfe83cd2dcddc1a",
+        "39a041faca059d8d",
+        "e2d509ea01c937ce",
+        "9fc01e92643140b6",
+        "8a296dd1ce36dd92",
+        "559a222b0fad09ef",
+        "9a104951805db867",
+        "5af58448772523a1",
+        "1f34bf4b287941fa",
+        "362ad35b727f5b70",
+        "3c6202e11bbddc9f",
+        "d2c7dec05e1dd894",
+        "d6860747c999f8e7",
+        "76473bf1c5df4b99",
+        "2fb1bc1a1fff5421",
+        "38f4018247b5801b",
+        "578d49aaa4398421",
+        "5557b8676cd2c292",
+        "6a7572ede859dea0",
+        "2f0893769fd9a189",
+        "af0bfd6927f91ae2",
+        "18f0469f2279710c",
+        "44b849205cc276e4",
+        "9cadf4db233eb4b6"
+      ],
+      "date": 1692712784279
+    },
+    {
+      "type": "edit",
+      "id": "e2d509ea01c937ce",
+      "item": {
+        "type": "code",
+        "id": "e2d509ea01c937ce",
+        "text": "targeting = false\nitem = null\naction = null\n"
+      },
+      "date": 1692712786068
+    },
+    {
+      "type": "add",
+      "id": "eba46d0958119d8a",
+      "item": {
+        "type": "paragraph",
+        "id": "eba46d0958119d8a",
+        "text": "Here, three variables (targeting, item, and action) are initialized. These variables are used to keep track of the application's state."
+      },
+      "after": "39a041faca059d8d",
+      "date": 1692712794590
+    },
+    {
+      "id": "e2d509ea01c937ce",
+      "type": "move",
+      "order": [
+        "bdf029d15dc5b5b5",
+        "f8a6f98f8beeacc5",
+        "1abf4310e0b39e5f",
+        "7edc8a20fa67fdea",
+        "a12158ec57465b41",
+        "38af149e372a55b9",
+        "38a96592752c04e7",
+        "d9c3e790ba0bc4b7",
+        "cf044a4d0eb4d761",
+        "9214ea43f1d2c672",
+        "0cfe83cd2dcddc1a",
+        "39a041faca059d8d",
+        "e2d509ea01c937ce",
+        "eba46d0958119d8a",
+        "9fc01e92643140b6",
+        "8a296dd1ce36dd92",
+        "559a222b0fad09ef",
+        "9a104951805db867",
+        "5af58448772523a1",
+        "1f34bf4b287941fa",
+        "362ad35b727f5b70",
+        "3c6202e11bbddc9f",
+        "d2c7dec05e1dd894",
+        "d6860747c999f8e7",
+        "76473bf1c5df4b99",
+        "2fb1bc1a1fff5421",
+        "38f4018247b5801b",
+        "578d49aaa4398421",
+        "5557b8676cd2c292",
+        "6a7572ede859dea0",
+        "2f0893769fd9a189",
+        "af0bfd6927f91ae2",
+        "18f0469f2279710c",
+        "44b849205cc276e4",
+        "9cadf4db233eb4b6"
+      ],
+      "date": 1692712796326
+    },
+    {
+      "type": "add",
+      "id": "6047763ce732ce42",
+      "item": {
+        "type": "paragraph",
+        "id": "6047763ce732ce42",
+        "text": "bind Function:"
+      },
+      "after": "eba46d0958119d8a",
+      "date": 1692712816533
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bafe6fb9d05180b1"
+      },
+      "id": "bafe6fb9d05180b1",
+      "type": "add",
+      "after": "9cadf4db233eb4b6",
+      "date": 1692712829620
+    },
+    {
+      "id": "bafe6fb9d05180b1",
+      "type": "move",
+      "order": [
+        "bdf029d15dc5b5b5",
+        "f8a6f98f8beeacc5",
+        "1abf4310e0b39e5f",
+        "7edc8a20fa67fdea",
+        "a12158ec57465b41",
+        "38af149e372a55b9",
+        "38a96592752c04e7",
+        "d9c3e790ba0bc4b7",
+        "cf044a4d0eb4d761",
+        "9214ea43f1d2c672",
+        "0cfe83cd2dcddc1a",
+        "39a041faca059d8d",
+        "e2d509ea01c937ce",
+        "eba46d0958119d8a",
+        "6047763ce732ce42",
+        "bafe6fb9d05180b1",
+        "9fc01e92643140b6",
+        "8a296dd1ce36dd92",
+        "559a222b0fad09ef",
+        "9a104951805db867",
+        "5af58448772523a1",
+        "1f34bf4b287941fa",
+        "362ad35b727f5b70",
+        "3c6202e11bbddc9f",
+        "d2c7dec05e1dd894",
+        "d6860747c999f8e7",
+        "76473bf1c5df4b99",
+        "2fb1bc1a1fff5421",
+        "38f4018247b5801b",
+        "578d49aaa4398421",
+        "5557b8676cd2c292",
+        "6a7572ede859dea0",
+        "2f0893769fd9a189",
+        "af0bfd6927f91ae2",
+        "18f0469f2279710c",
+        "44b849205cc276e4",
+        "9cadf4db233eb4b6"
+      ],
+      "date": 1692712840093
+    },
+    {
+      "type": "edit",
+      "id": "bafe6fb9d05180b1",
+      "item": {
+        "type": "code",
+        "id": "bafe6fb9d05180b1",
+        "text": "bind = ->\n  # Event handlers for keydown and keyup on the document\n  $(document)\n    .keydown (e) -> startTargeting e if e.keyCode == 16\n    .keyup (e) -> stopTargeting e if e.keyCode == 16\n  # Event delegation for mouseenter and mouseleave on elements with class '.item', '.action', and '.page'\n  $('.main')\n    .delegate '.item', 'mouseenter', enterItem\n    .delegate '.item', 'mouseleave', leaveItem\n    .delegate '.action', 'mouseenter', enterAction\n    .delegate '.action', 'mouseleave', leaveAction\n    .delegate '.page', 'align-item', alignItem\n"
+      },
+      "date": 1692712841912
+    },
+    {
+      "type": "add",
+      "id": "63d8b638bfbcd829",
+      "item": {
+        "type": "paragraph",
+        "id": "63d8b638bfbcd829",
+        "text": "This bind function sets up event handlers for keydown and keyup events on the entire document and delegates mouseenter and mouseleave events for elements with specific classes within an element with class '.main'."
+      },
+      "after": "6047763ce732ce42",
+      "date": 1692712924444
+    },
+    {
+      "id": "63d8b638bfbcd829",
+      "type": "move",
+      "order": [
+        "bdf029d15dc5b5b5",
+        "f8a6f98f8beeacc5",
+        "1abf4310e0b39e5f",
+        "7edc8a20fa67fdea",
+        "a12158ec57465b41",
+        "38af149e372a55b9",
+        "38a96592752c04e7",
+        "d9c3e790ba0bc4b7",
+        "cf044a4d0eb4d761",
+        "9214ea43f1d2c672",
+        "0cfe83cd2dcddc1a",
+        "39a041faca059d8d",
+        "e2d509ea01c937ce",
+        "eba46d0958119d8a",
+        "6047763ce732ce42",
+        "bafe6fb9d05180b1",
+        "63d8b638bfbcd829",
+        "9fc01e92643140b6",
+        "8a296dd1ce36dd92",
+        "559a222b0fad09ef",
+        "9a104951805db867",
+        "5af58448772523a1",
+        "1f34bf4b287941fa",
+        "362ad35b727f5b70",
+        "3c6202e11bbddc9f",
+        "d2c7dec05e1dd894",
+        "d6860747c999f8e7",
+        "76473bf1c5df4b99",
+        "2fb1bc1a1fff5421",
+        "38f4018247b5801b",
+        "578d49aaa4398421",
+        "5557b8676cd2c292",
+        "6a7572ede859dea0",
+        "2f0893769fd9a189",
+        "af0bfd6927f91ae2",
+        "18f0469f2279710c",
+        "44b849205cc276e4",
+        "9cadf4db233eb4b6"
+      ],
+      "date": 1692712925925
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1f05d476d23f6257"
+      },
+      "id": "1f05d476d23f6257",
+      "type": "add",
+      "after": "9cadf4db233eb4b6",
+      "date": 1692712972951
+    },
+    {
+      "type": "edit",
+      "id": "1f05d476d23f6257",
+      "item": {
+        "type": "paragraph",
+        "id": "1f05d476d23f6257",
+        "text": "Exporting the bind function:"
+      },
+      "date": 1692712974859
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "069294533110524f"
+      },
+      "id": "069294533110524f",
+      "type": "add",
+      "after": "1f05d476d23f6257",
+      "date": 1692712983393
+    },
+    {
+      "type": "edit",
+      "id": "069294533110524f",
+      "item": {
+        "type": "code",
+        "id": "069294533110524f",
+        "text": "module.exports = {bind}\n"
+      },
+      "date": 1692712987759
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c86054a75b3c5317"
+      },
+      "id": "c86054a75b3c5317",
+      "type": "add",
+      "after": "069294533110524f",
+      "date": 1692712995745
+    },
+    {
+      "type": "edit",
+      "id": "c86054a75b3c5317",
+      "item": {
+        "type": "paragraph",
+        "id": "c86054a75b3c5317",
+        "text": "This line exports the bind function, making it accessible to other parts of the codebase.\n"
+      },
+      "date": 1692712997103
+    },
+    {
+      "type": "edit",
+      "id": "f8a6f98f8beeacc5",
+      "item": {
+        "type": "paragraph",
+        "id": "f8a6f98f8beeacc5",
+        "text": "Other visible items and actions with the same id will highlight. In some cases an 'align-item' event is generated inviting other pages to scroll the item into view."
+      },
+      "date": 1692713190043
+    },
+    {
+      "type": "edit",
+      "id": "bdf029d15dc5b5b5",
+      "item": {
+        "type": "paragraph",
+        "id": "bdf029d15dc5b5b5",
+        "text": "Target handles hovers over items and actions. [https://github.com/fedwiki/wiki-client/blob/b079e3f90863e594e01e520082b7950b2ba62209/lib/target.coffee#L1-L5 code] (wiki-client)"
+      },
+      "date": 1692715555812
+    },
+    {
+      "type": "edit",
+      "id": "bdf029d15dc5b5b5",
+      "item": {
+        "type": "paragraph",
+        "id": "bdf029d15dc5b5b5",
+        "text": "Target handles hovers over items and actions. (wiki-client) "
+      },
+      "date": 1692715582777
+    },
+    {
+      "type": "edit",
+      "id": "bdf029d15dc5b5b5",
+      "item": {
+        "type": "paragraph",
+        "id": "bdf029d15dc5b5b5",
+        "text": "Target handles hovers over items and actions. (wiki-client) [https://github.com/fedwiki/wiki-client/blob/b079e3f90863e594e01e520082b7950b2ba62209/lib/target.coffee#L1-L5 code]"
+      },
+      "date": 1692715586618
+    },
+    {
+      "type": "remove",
+      "id": "d9c3e790ba0bc4b7",
+      "date": 1692715706499
+    },
+    {
+      "type": "edit",
+      "id": "38a96592752c04e7",
+      "item": {
+        "type": "paragraph",
+        "id": "38a96592752c04e7",
+        "text": "Pattern: [[Time Travel]] ⇒ [[Time Travel Project]] ⇒ [[Version History]]: You have an object whose changes you need to track. Split the object into two parts. One part is immutable. One is a snapshot of the changeable state."
+      },
+      "date": 1692715707433
+    },
+    {
+      "type": "edit",
+      "id": "38a96592752c04e7",
+      "item": {
+        "type": "paragraph",
+        "id": "38a96592752c04e7",
+        "text": "Pattern: [[Time Travel]] [⇒ [[Time Travel Project]]] ⇒ [[Version History]]: You have an object whose changes you need to track. Split the object into two parts. One part is immutable. One is a snapshot of the changeable state."
+      },
+      "date": 1692715720991
+    },
+    {
+      "type": "edit",
+      "id": "cf044a4d0eb4d761",
+      "item": {
+        "type": "paragraph",
+        "id": "cf044a4d0eb4d761",
+        "text": "⇒ [[Connect 2 Apps]] ⇒ [[Connect 2 Letters]]"
+      },
+      "date": 1692719031235
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "07f8db61aea88bdf"
+      },
+      "id": "07f8db61aea88bdf",
+      "type": "add",
+      "after": "c86054a75b3c5317",
+      "date": 1692719034100
+    },
+    {
+      "type": "edit",
+      "id": "07f8db61aea88bdf",
+      "item": {
+        "type": "pagefold",
+        "id": "07f8db61aea88bdf",
+        "text": "~"
+      },
+      "date": 1692719040090
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "04c0b9d9e4a57b34"
+      },
+      "id": "04c0b9d9e4a57b34",
+      "type": "add",
+      "after": "07f8db61aea88bdf",
+      "date": 1692719041556
+    },
+    {
+      "type": "edit",
+      "id": "04c0b9d9e4a57b34",
+      "item": {
+        "type": "graphviz",
+        "id": "04c0b9d9e4a57b34",
+        "text": "DOT FROM lambda-browsing"
+      },
+      "date": 1692719049932
+    },
+    {
+      "type": "edit",
+      "id": "38a96592752c04e7",
+      "item": {
+        "type": "paragraph",
+        "id": "38a96592752c04e7",
+        "text": "Pattern: Time Travel [⇒ [[Time Travel Project]]] ⇒ [[Version History]]: You have an object whose changes you need to track. Split the object into two parts. One part is immutable. One is a snapshot of the changeable state."
+      },
+      "date": 1692719088416
+    },
+    {
+      "type": "edit",
+      "id": "63d8b638bfbcd829",
+      "item": {
+        "type": "paragraph",
+        "id": "63d8b638bfbcd829",
+        "text": "This bind function sets up event handlers for keydown and keyup events on the entire document and delegates mouseenter [https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseenter_event mdn] and mouseleave events for elements with specific classes within an element with class '.main'."
+      },
+      "date": 1692734747552
+    },
+    {
+      "type": "add",
+      "id": "496a987613046a6e",
+      "item": {
+        "type": "paragraph",
+        "id": "496a987613046a6e",
+        "text": "Element: mouseenter event"
+      },
+      "after": "63d8b638bfbcd829",
+      "date": 1692734803283
+    },
+    {
+      "type": "edit",
+      "id": "496a987613046a6e",
+      "item": {
+        "type": "paragraph",
+        "id": "496a987613046a6e",
+        "text": "Element: mouseenter event [https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseenter_event mdn]"
+      },
+      "date": 1692734813634
+    },
+    {
+      "type": "add",
+      "id": "2519a0879f31d072",
+      "item": {
+        "type": "paragraph",
+        "id": "2519a0879f31d072",
+        "text": "[https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseleave_event mdn]"
+      },
+      "after": "496a987613046a6e",
+      "date": 1692735085565
+    },
+    {
+      "type": "edit",
+      "id": "2519a0879f31d072",
+      "item": {
+        "type": "paragraph",
+        "id": "2519a0879f31d072",
+        "text": "Element: mouseenter event [https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseleave_event mdn]"
+      },
+      "date": 1692735098763
+    },
+    {
+      "type": "edit",
+      "id": "496a987613046a6e",
+      "item": {
+        "type": "paragraph",
+        "id": "496a987613046a6e",
+        "text": "* Element: mouseenter event [https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseenter_event mdn]"
+      },
+      "date": 1692735110010
+    },
+    {
+      "type": "edit",
+      "id": "496a987613046a6e",
+      "item": {
+        "type": "markdown",
+        "id": "496a987613046a6e",
+        "text": "* Element: mouseenter event [https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseenter_event mdn]"
+      },
+      "date": 1692735111145
+    },
+    {
+      "type": "remove",
+      "id": "2519a0879f31d072",
+      "date": 1692735114929
+    },
+    {
+      "type": "edit",
+      "id": "496a987613046a6e",
+      "item": {
+        "type": "markdown",
+        "id": "496a987613046a6e",
+        "text": "* Element: mouseenter event [https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseenter_event mdn]\n* Element: mouseenter event [https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseleave_event mdn]"
+      },
+      "date": 1692735117984
+    },
+    {
+      "type": "edit",
+      "id": "496a987613046a6e",
+      "item": {
+        "type": "markdown",
+        "id": "496a987613046a6e",
+        "text": "* Element: mouseenter event [https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseenter_event mdn]\n* Element: mouseleave event [https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseleave_event mdn]"
+      },
+      "date": 1692735149306
+    },
+    {
+      "type": "add",
+      "id": "9b50b3da6338d298",
+      "item": {
+        "type": "paragraph",
+        "id": "9b50b3da6338d298",
+        "text": "* MouseEvent: shiftKey property"
+      },
+      "after": "559a222b0fad09ef",
+      "date": 1692735819395
+    },
+    {
+      "type": "edit",
+      "id": "9b50b3da6338d298",
+      "item": {
+        "type": "paragraph",
+        "id": "9b50b3da6338d298",
+        "text": "* MouseEvent: shiftKey property [https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/shiftKey mdn]"
+      },
+      "date": 1692735833621
+    },
+    {
+      "type": "edit",
+      "id": "9b50b3da6338d298",
+      "item": {
+        "type": "markdown",
+        "id": "9b50b3da6338d298",
+        "text": "* MouseEvent: shiftKey property [https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/shiftKey mdn]"
+      },
+      "date": 1692735835936
+    },
+    {
+      "type": "edit",
+      "id": "63d8b638bfbcd829",
+      "item": {
+        "type": "paragraph",
+        "id": "63d8b638bfbcd829",
+        "text": "This bind function sets up event handlers for keydown and keyup events on the entire document and delegates mouseenter [https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseenter_event mdn] and mouseleave [https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseleave_event mdn] events for elements with specific classes within an element with class '.main'."
+      },
+      "date": 1692736116188
+    }
+  ]
+}

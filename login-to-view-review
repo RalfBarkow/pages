@@ -1,0 +1,1211 @@
+{
+  "title": "Login to View (review)",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "9e0082f7a61432c4",
+      "text": "Looking again at Login to View. It is now 5 years since this feature was originally added. So, taking a look at it to remind ourselves how it is configured, and how it works, and if it works the way we expect."
+    },
+    {
+      "type": "pagefold",
+      "id": "6fc040e652a24d32",
+      "text": "reference"
+    },
+    {
+      "type": "paragraph",
+      "id": "3e7903cb5df94a2c",
+      "text": "Original pull request - [https://github.com/fedwiki/wiki-security-passportjs/pull/17 github]"
+    },
+    {
+      "type": "reference",
+      "id": "240426afb674ea86",
+      "site": "path.ward.asia.wiki.org",
+      "slug": "login-to-view",
+      "title": "Login to View",
+      "text": "We imagine controlling visibility of wiki pages on a site or farm similar to operating a server on a private LAN but using distinguished logins rather than network access."
+    },
+    {
+      "type": "markdown",
+      "id": "fed1b308ab83ef09",
+      "text": "[[Login to View]] references [[Register Plugin]] via [[Registration Workflows]]. *It should be noted that the register plug-in has seen changes since the original login to view to tailor it for use with the friends security plugin.*"
+    },
+    {
+      "type": "markdown",
+      "id": "07a0430ad8f4bc51",
+      "text": "There are two open github issue/PR looking at using a custom [[Login Required]] page, but providing a method of extending the default pages.\n* [https://github.com/fedwiki/wiki-security-passportjs/issues/20 Custom \"Login Required\" text for restricted Sites], and\n* [https://github.com/fedwiki/wiki-server/pull/144 Configure to overlay defaults from site]."
+    },
+    {
+      "type": "pagefold",
+      "id": "8760b52e182cdf44",
+      "text": "."
+    },
+    {
+      "type": "markdown",
+      "id": "a3d5897eab187202",
+      "text": "Login to View is part of the `wiki-security-passportjs` package. Code on [https://github.com/fedwiki/wiki-security-passportjs/blame/cec8c04417f30587e161517f1d17cc70366c0b69/server/social.coffee#L381-L427 github]"
+    },
+    {
+      "type": "markdown",
+      "id": "6f197b07e5fe54a6",
+      "text": "Although little is written about configuration, there are some examples in the linked github pages."
+    },
+    {
+      "type": "html",
+      "id": "79d716c7f3550e57",
+      "text": "The parameters used are :-\n<dl>\n  <dt><b>restricted</b></dt>\n  <dd>set to true to restrict access to logged in users.</dd>\n  <dt><b>allowed_domains</b></dt>\n  <dd>an array of email domains that will be granted access.</dd>\n  <dt><b>details</b></dt>\n  <dd>a URL link to a page with details shown when accessed without being logged in. <i>[http://ward.asia.wiki.org/login-to-view.html default page]</i>.</dd>\n</dl>"
+    },
+    {
+      "type": "paragraph",
+      "id": "a27b9e8aa9a9d383",
+      "text": "Let's try this locally, using caddy with private cert, and the localtest.me domain (which just points to loopback 127.0.0.1)."
+    },
+    {
+      "type": "markdown",
+      "id": "e58cda87cfe683a5",
+      "text": "The configuration makes\n* uses Google for authentication,\n* requires `https:` for login *this is actually a Google requirement*.\n* user's cookie will only be shared over `https:`.\n* `localhost.me` and all its subdomains login to view,\n* require the user to have an email in `gmail.com` domain."
+    },
+    {
+      "type": "code",
+      "id": "fcd59b5a7b15ea48",
+      "text": "{\n  \"farm\": true,\n  \"security_type\": \"passportjs\",\n  \"google_clientID\": “secret.clientID….apps.googleusercontent.com\",\n  \"google_clientSecret\": “client…secret…”,\n  \"wikiDomains\": {\n    \"localtest.me\": {\n      \"restricted\": true,\n      \"allowed_domains\": [\"gmail.com\"],\n      \"security_useHttps\": true,\n      \"secure_cookie\": true}\n  }\n}"
+    },
+    {
+      "type": "markdown",
+      "id": "f4bc503c845d6f35",
+      "text": "**Some observation:**"
+    },
+    {
+      "type": "markdown",
+      "id": "4d8032991559a314",
+      "text": "As an unauthenticated user I get `Login Required` as expected when accessing a claimed wiki, but get `Welcome Visitors` if the wiki is unclaimed."
+    },
+    {
+      "type": "markdown",
+      "id": "f48e38c62597ca5f",
+      "text": "An unclaimed wiki can be claimed by anybody with a Google login, not restricted by `allowed_domains`!"
+    },
+    {
+      "type": "markdown",
+      "id": "43f3c4e750d95176",
+      "text": "As a user in an allowed domain, starting from the `Login Required` page, and logging in. The login completes with the padlock open, or tilted if I'm not the owner, and still showing `Login Required`. Requiring a page reload to get to `Welcome Visitors`."
+    },
+    {
+      "type": "markdown",
+      "id": "131eb62d9f7c82f4",
+      "text": "As a user from a different domain, starting from the `Login Required` page. The login completes, with the padlock tilted. A page reload stays with the `Login Required` page. *If accessing a wiki owned by this user, the padlock is open and a page reload required to get to `Welcome Visitors`."
+    },
+    {
+      "type": "markdown",
+      "id": "0ec55ae379a3b886",
+      "text": "As an authenticated user, with an email address with the right domain. Access a wiki I'm the owner of shows `Welcome Visitors`. However access a wiki either unclaimed, or claimed by somebody else, I get shown `Login Required`. Again this appears to be wrong."
+    },
+    {
+      "type": "markdown",
+      "id": "3711b5030c0800a9",
+      "text": "The client appears to fail when fetching sitemaps, and I assume indexes, for other wiki that have login required."
+    },
+    {
+      "type": "markdown",
+      "id": "95b3ef11679e3f7a",
+      "text": "**Some thoughts:**"
+    },
+    {
+      "type": "paragraph",
+      "id": "45519de57b8bbd61",
+      "text": "There seem to be two different behaviours going on here."
+    },
+    {
+      "type": "markdown",
+      "id": "0d568ee05b258783",
+      "text": "Allowing some external person to create a wiki, but not see content of other wiki. I have a memory of this being an original requirement, to provide a trusted person from outside to share content. If still required `allowed: '*'` should be used to prevent misuse."
+    },
+    {
+      "type": "markdown",
+      "id": "d69f07cb67cbb566",
+      "text": "Failure to fetch the sitemaps and index for remote wiki that are also login to view, looks to be caused by the request of favicon and sitemap having a 200 response, and not the 'Not Found'. This means that the it is not recorded that the remote site requires credentials to be passed with requests."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Login to View (review)",
+        "story": []
+      },
+      "date": 1692089411112
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9e0082f7a61432c4"
+      },
+      "id": "9e0082f7a61432c4",
+      "type": "add",
+      "date": 1692089413443
+    },
+    {
+      "type": "edit",
+      "id": "9e0082f7a61432c4",
+      "item": {
+        "type": "paragraph",
+        "id": "9e0082f7a61432c4",
+        "text": "Looking again at Login to View. It is now 5 years since this feature was was originally added. So, taking a look at it to remind ourselves how it is configured, and how it works, and if it works the way we expect."
+      },
+      "date": 1692089573353
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6fc040e652a24d32"
+      },
+      "id": "6fc040e652a24d32",
+      "type": "add",
+      "after": "9e0082f7a61432c4",
+      "date": 1692089578765
+    },
+    {
+      "type": "edit",
+      "id": "6fc040e652a24d32",
+      "item": {
+        "type": "factory",
+        "id": "6fc040e652a24d32",
+        "text": "Reference"
+      },
+      "date": 1692089618974
+    },
+    {
+      "type": "edit",
+      "id": "6fc040e652a24d32",
+      "item": {
+        "type": "pagefold",
+        "id": "6fc040e652a24d32",
+        "text": "reference"
+      },
+      "date": 1692089631628
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3e7903cb5df94a2c"
+      },
+      "id": "3e7903cb5df94a2c",
+      "type": "add",
+      "after": "6fc040e652a24d32",
+      "date": 1692089633922
+    },
+    {
+      "type": "edit",
+      "id": "3e7903cb5df94a2c",
+      "item": {
+        "type": "paragraph",
+        "id": "3e7903cb5df94a2c",
+        "text": "Original pull request - [https://github.com/fedwiki/wiki-security-passportjs/pull/17 github]"
+      },
+      "date": 1692089669315
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "96a7c1002d2f7ca2"
+      },
+      "id": "96a7c1002d2f7ca2",
+      "type": "add",
+      "after": "3e7903cb5df94a2c",
+      "date": 1692089676936
+    },
+    {
+      "type": "edit",
+      "id": "96a7c1002d2f7ca2",
+      "item": {
+        "type": "reference",
+        "id": "96a7c1002d2f7ca2",
+        "site": "ward.asia.wiki.org",
+        "slug": "login-to-view",
+        "title": "Login to View",
+        "text": "We imagine controlling visibility of wiki pages on a site or farm similar to operating a server on a private LAN but using distinguished logins rather than network access."
+      },
+      "date": 1692089683548
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8760b52e182cdf44"
+      },
+      "id": "8760b52e182cdf44",
+      "type": "add",
+      "after": "96a7c1002d2f7ca2",
+      "date": 1692092378965
+    },
+    {
+      "type": "edit",
+      "id": "8760b52e182cdf44",
+      "item": {
+        "type": "pagefold",
+        "id": "8760b52e182cdf44",
+        "text": " "
+      },
+      "date": 1692092384598
+    },
+    {
+      "type": "edit",
+      "id": "8760b52e182cdf44",
+      "item": {
+        "type": "pagefold",
+        "id": "8760b52e182cdf44",
+        "text": "\n"
+      },
+      "date": 1692092394745
+    },
+    {
+      "type": "edit",
+      "id": "8760b52e182cdf44",
+      "item": {
+        "type": "pagefold",
+        "id": "8760b52e182cdf44",
+        "text": "."
+      },
+      "date": 1692092399065
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fed1b308ab83ef09"
+      },
+      "id": "fed1b308ab83ef09",
+      "type": "add",
+      "after": "8760b52e182cdf44",
+      "date": 1692092407700
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "240426afb674ea86"
+      },
+      "id": "240426afb674ea86",
+      "type": "add",
+      "after": "fed1b308ab83ef09",
+      "date": 1692092432611
+    },
+    {
+      "id": "240426afb674ea86",
+      "type": "move",
+      "order": [
+        "9e0082f7a61432c4",
+        "6fc040e652a24d32",
+        "3e7903cb5df94a2c",
+        "96a7c1002d2f7ca2",
+        "240426afb674ea86",
+        "8760b52e182cdf44",
+        "fed1b308ab83ef09"
+      ],
+      "date": 1692092436757
+    },
+    {
+      "type": "edit",
+      "id": "240426afb674ea86",
+      "item": {
+        "type": "reference",
+        "id": "240426afb674ea86",
+        "site": "path.ward.asia.wiki.org",
+        "slug": "login-to-view",
+        "title": "Login to View",
+        "text": "We imagine controlling visibility of wiki pages on a site or farm similar to operating a server on a private LAN but using distinguished logins rather than network access."
+      },
+      "date": 1692092446428
+    },
+    {
+      "type": "remove",
+      "id": "96a7c1002d2f7ca2",
+      "date": 1692092452594
+    },
+    {
+      "id": "fed1b308ab83ef09",
+      "type": "move",
+      "order": [
+        "9e0082f7a61432c4",
+        "6fc040e652a24d32",
+        "3e7903cb5df94a2c",
+        "240426afb674ea86",
+        "fed1b308ab83ef09",
+        "8760b52e182cdf44"
+      ],
+      "date": 1692092594246
+    },
+    {
+      "type": "edit",
+      "id": "fed1b308ab83ef09",
+      "item": {
+        "type": "paragraph",
+        "id": "fed1b308ab83ef09",
+        "text": "[[Login to View]] references [[Register Plugin]] via [[Registration Workflows]]. It should be noted that the register plug-in has seen changes since the original login to view to tailor it for use with the friends security plugin."
+      },
+      "date": 1692092926628
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a3d5897eab187202"
+      },
+      "id": "a3d5897eab187202",
+      "type": "add",
+      "after": "8760b52e182cdf44",
+      "date": 1692093017198
+    },
+    {
+      "type": "edit",
+      "id": "a3d5897eab187202",
+      "item": {
+        "type": "paragraph",
+        "id": "a3d5897eab187202",
+        "text": "Little is written about how to configure login to view."
+      },
+      "date": 1692093076299
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "07a0430ad8f4bc51"
+      },
+      "id": "07a0430ad8f4bc51",
+      "type": "add",
+      "after": "a3d5897eab187202",
+      "date": 1692093078723
+    },
+    {
+      "id": "07a0430ad8f4bc51",
+      "type": "move",
+      "order": [
+        "9e0082f7a61432c4",
+        "6fc040e652a24d32",
+        "3e7903cb5df94a2c",
+        "240426afb674ea86",
+        "fed1b308ab83ef09",
+        "07a0430ad8f4bc51",
+        "8760b52e182cdf44",
+        "a3d5897eab187202"
+      ],
+      "date": 1692093307578
+    },
+    {
+      "type": "edit",
+      "id": "07a0430ad8f4bc51",
+      "item": {
+        "type": "factory",
+        "id": "07a0430ad8f4bc51",
+        "text": "There are two open github issue/PR looking at using a custom [[Login Required]] page, but providing a method of extending the default pages.["
+      },
+      "date": 1692093482205
+    },
+    {
+      "type": "edit",
+      "id": "07a0430ad8f4bc51",
+      "item": {
+        "type": "markdown",
+        "id": "07a0430ad8f4bc51",
+        "text": "There are two open github issue/PR looking at using a custom [[Login Required]] page, but providing a method of extending the default pages.\n* ["
+      },
+      "date": 1692093491838
+    },
+    {
+      "type": "edit",
+      "id": "07a0430ad8f4bc51",
+      "item": {
+        "type": "markdown",
+        "id": "07a0430ad8f4bc51",
+        "text": "There are two open github issue/PR looking at using a custom [[Login Required]] page, but providing a method of extending the default pages.\n* [https://github.com/fedwiki/wiki-security-passportjs/issues/20 Custom \"Login Required\" text for restricted Sites], and\n* "
+      },
+      "date": 1692093526678
+    },
+    {
+      "type": "edit",
+      "id": "07a0430ad8f4bc51",
+      "item": {
+        "type": "markdown",
+        "id": "07a0430ad8f4bc51",
+        "text": "There are two open github issue/PR looking at using a custom [[Login Required]] page, but providing a method of extending the default pages.\n* [https://github.com/fedwiki/wiki-security-passportjs/issues/20 Custom \"Login Required\" text for restricted Sites], and\n* [https://github.com/fedwiki/wiki-server/pull/144 Configure to overlay defaults from site]."
+      },
+      "date": 1692093559367
+    },
+    {
+      "type": "edit",
+      "id": "fed1b308ab83ef09",
+      "item": {
+        "type": "markdown",
+        "id": "fed1b308ab83ef09",
+        "text": "[[Login to View]] references [[Register Plugin]] via [[Registration Workflows]]. *It should be noted that the register plug-in has seen changes since the original login to view to tailor it for use with the friends security plugin.*"
+      },
+      "date": 1692093856730
+    },
+    {
+      "type": "edit",
+      "id": "a3d5897eab187202",
+      "item": {
+        "type": "factory",
+        "id": "a3d5897eab187202",
+        "text": "Login to View is part of the `wiki-security-passportjs` package.Little is written about how to configure login to view."
+      },
+      "date": 1692094099444
+    },
+    {
+      "type": "edit",
+      "id": "a3d5897eab187202",
+      "item": {
+        "type": "markdown",
+        "id": "a3d5897eab187202",
+        "text": "Login to View is part of the `wiki-security-passportjs` package."
+      },
+      "date": 1692094175719
+    },
+    {
+      "type": "add",
+      "id": "6f197b07e5fe54a6",
+      "item": {
+        "type": "markdown",
+        "id": "6f197b07e5fe54a6",
+        "text": "Although little is written about configuration, there are some examples in the linked "
+      },
+      "after": "a3d5897eab187202",
+      "date": 1692094269091
+    },
+    {
+      "type": "edit",
+      "id": "a3d5897eab187202",
+      "item": {
+        "type": "markdown",
+        "id": "a3d5897eab187202",
+        "text": "Login to View is part of the `wiki-security-passportjs` package. [https://github.com/fedwiki/wiki-security-passportjs/blame/cec8c04417f30587e161517f1d17cc70366c0b69/server/social.coffee#L381-L427 github]"
+      },
+      "date": 1692094415861
+    },
+    {
+      "type": "edit",
+      "id": "a3d5897eab187202",
+      "item": {
+        "type": "markdown",
+        "id": "a3d5897eab187202",
+        "text": "Login to View is part of the `wiki-security-passportjs` package. Code on [https://github.com/fedwiki/wiki-security-passportjs/blame/cec8c04417f30587e161517f1d17cc70366c0b69/server/social.coffee#L381-L427 github]"
+      },
+      "date": 1692094432330
+    },
+    {
+      "type": "edit",
+      "id": "6f197b07e5fe54a6",
+      "item": {
+        "type": "markdown",
+        "id": "6f197b07e5fe54a6",
+        "text": "Although little is written about configuration, there are some examples in the linked github pages."
+      },
+      "date": 1692094460658
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f3eae1ce48075c74"
+      },
+      "id": "f3eae1ce48075c74",
+      "type": "add",
+      "after": "6f197b07e5fe54a6",
+      "date": 1692094463983
+    },
+    {
+      "type": "remove",
+      "id": "f3eae1ce48075c74",
+      "date": 1692094505875
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "79d716c7f3550e57"
+      },
+      "id": "79d716c7f3550e57",
+      "type": "add",
+      "after": "6f197b07e5fe54a6",
+      "date": 1692094540996
+    },
+    {
+      "type": "edit",
+      "id": "79d716c7f3550e57",
+      "item": {
+        "type": "html",
+        "id": "79d716c7f3550e57",
+        "text": "<dl>\n  <dt> </dt>\n\n</dl>"
+      },
+      "date": 1692094560480
+    },
+    {
+      "type": "edit",
+      "id": "79d716c7f3550e57",
+      "item": {
+        "type": "html",
+        "id": "79d716c7f3550e57",
+        "text": "<dl>\n  <dt>restricted</dt>\n  <dd> </dd>\n</dl>"
+      },
+      "date": 1692094586717
+    },
+    {
+      "type": "edit",
+      "id": "79d716c7f3550e57",
+      "item": {
+        "type": "html",
+        "id": "79d716c7f3550e57",
+        "text": "<dl>\n  <dt>restricted</dt>\n  <dd>set to true to restrict access to logged in users.</dd>\n</dl>"
+      },
+      "date": 1692094636264
+    },
+    {
+      "type": "edit",
+      "id": "79d716c7f3550e57",
+      "item": {
+        "type": "html",
+        "id": "79d716c7f3550e57",
+        "text": "<dl>\n  <dt><b>restricted</b></dt>\n  <dd>set to true to restrict access to logged in users.</dd>\n</dl>"
+      },
+      "date": 1692094666681
+    },
+    {
+      "type": "edit",
+      "id": "79d716c7f3550e57",
+      "item": {
+        "type": "html",
+        "id": "79d716c7f3550e57",
+        "text": "<dl>\n  <dt><b>restricted</b></dt>\n  <dd>set to true to restrict access to logged in users.</dd>\n  <dt><b>restricted</b></dt>\n  <dd>set to true to restrict access to logged in users.</dd>\n</dl>"
+      },
+      "date": 1692094707280
+    },
+    {
+      "type": "edit",
+      "id": "79d716c7f3550e57",
+      "item": {
+        "type": "html",
+        "id": "79d716c7f3550e57",
+        "text": "<dl>\n  <dt><b>restricted</b></dt>\n  <dd>set to true to restrict access to logged in users.</dd>\n  <dt><b>allow_domains</b></dt>\n  <dd>an array of email domains that will be granted access.</dd>\n</dl>"
+      },
+      "date": 1692094756120
+    },
+    {
+      "type": "edit",
+      "id": "79d716c7f3550e57",
+      "item": {
+        "type": "html",
+        "id": "79d716c7f3550e57",
+        "text": "<dl>\n  <dt><b>restricted</b></dt>\n  <dd>set to true to restrict access to logged in users.</dd>\n  <dt><b>allow_domains</b></dt>\n  <dd>an array of email domains that will be granted access.</dd>\n  <dt><b>details</b></dt>\n  <dd>a URL link to a page with details shown when accessed without being logged in.</dd>\n</dl>"
+      },
+      "date": 1692094960872
+    },
+    {
+      "type": "edit",
+      "id": "79d716c7f3550e57",
+      "item": {
+        "type": "html",
+        "id": "79d716c7f3550e57",
+        "text": "<dl><dt><b>restricted</b></dt>\n  <dd>set to true to restrict access to logged in users.</dd>\n  <dt><b>allow_domains</b></dt>\n  <dd>an array of email domains that will be granted access.</dd>\n  <dt><b>details</b></dt>\n  <dd>a URL link to a page with details shown when accessed without being logged in.</dd>\n</dl>"
+      },
+      "date": 1692094989537
+    },
+    {
+      "type": "edit",
+      "id": "79d716c7f3550e57",
+      "item": {
+        "type": "html",
+        "id": "79d716c7f3550e57",
+        "text": "<dl>\n  <dt><b>restricted</b></dt>\n  <dd>set to true to restrict access to logged in users.</dd>\n  <dt><b>allow_domains</b></dt>\n  <dd>an array of email domains that will be granted access.</dd>\n  <dt><b>details</b></dt>\n  <dd>a URL link to a page with details shown when accessed without being logged in.</dd>\n</dl>"
+      },
+      "date": 1692094997288
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7ff4944961a924c7"
+      },
+      "id": "7ff4944961a924c7",
+      "type": "add",
+      "after": "79d716c7f3550e57",
+      "date": 1692095120953
+    },
+    {
+      "type": "remove",
+      "id": "7ff4944961a924c7",
+      "date": 1692095144765
+    },
+    {
+      "type": "edit",
+      "id": "79d716c7f3550e57",
+      "item": {
+        "type": "html",
+        "id": "79d716c7f3550e57",
+        "text": "<dl>\n  <dt><b>restricted</b></dt>\n  <dd>set to true to restrict access to logged in users.</dd>\n  <dt><b>allow_domains</b></dt>\n  <dd>an array of email domains that will be granted access.</dd>\n  <dt><b>details</b></dt>\n  <dd>a URL link to a page with details shown when accessed without being logged in. <i>The [http://ward.asia.wiki.org/login-to-view.html default page].</dd>\n</dl>"
+      },
+      "date": 1692095285123
+    },
+    {
+      "type": "edit",
+      "id": "79d716c7f3550e57",
+      "item": {
+        "type": "html",
+        "id": "79d716c7f3550e57",
+        "text": "<dl>\n  <dt><b>restricted</b></dt>\n  <dd>set to true to restrict access to logged in users.</dd>\n  <dt><b>allow_domains</b></dt>\n  <dd>an array of email domains that will be granted access.</dd>\n  <dt><b>details</b></dt>\n  <dd>a URL link to a page with details shown when accessed without being logged in. <i>[http://ward.asia.wiki.org/login-to-view.html default page]</i>.</dd>\n</dl>"
+      },
+      "date": 1692095308602
+    },
+    {
+      "type": "edit",
+      "id": "79d716c7f3550e57",
+      "item": {
+        "type": "html",
+        "id": "79d716c7f3550e57",
+        "text": "The parameters used are:\n<dl>\n  <dt><b>restricted</b></dt>\n  <dd>set to true to restrict access to logged in users.</dd>\n  <dt><b>allow_domains</b></dt>\n  <dd>an array of email domains that will be granted access.</dd>\n  <dt><b>details</b></dt>\n  <dd>a URL link to a page with details shown when accessed without being logged in. <i>[http://ward.asia.wiki.org/login-to-view.html default page]</i>.</dd>\n</dl>"
+      },
+      "date": 1692095363783
+    },
+    {
+      "type": "edit",
+      "id": "79d716c7f3550e57",
+      "item": {
+        "type": "html",
+        "id": "79d716c7f3550e57",
+        "text": "The parameters used are :\n<dl>\n  <dt><b>restricted</b></dt>\n  <dd>set to true to restrict access to logged in users.</dd>\n  <dt><b>allow_domains</b></dt>\n  <dd>an array of email domains that will be granted access.</dd>\n  <dt><b>details</b></dt>\n  <dd>a URL link to a page with details shown when accessed without being logged in. <i>[http://ward.asia.wiki.org/login-to-view.html default page]</i>.</dd>\n</dl>"
+      },
+      "date": 1692095372074
+    },
+    {
+      "type": "edit",
+      "id": "79d716c7f3550e57",
+      "item": {
+        "type": "html",
+        "id": "79d716c7f3550e57",
+        "text": "The parameters used are :-\n<dl>\n  <dt><b>restricted</b></dt>\n  <dd>set to true to restrict access to logged in users.</dd>\n  <dt><b>allow_domains</b></dt>\n  <dd>an array of email domains that will be granted access.</dd>\n  <dt><b>details</b></dt>\n  <dd>a URL link to a page with details shown when accessed without being logged in. <i>[http://ward.asia.wiki.org/login-to-view.html default page]</i>.</dd>\n</dl>"
+      },
+      "date": 1692095378239
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a27b9e8aa9a9d383"
+      },
+      "id": "a27b9e8aa9a9d383",
+      "type": "add",
+      "after": "79d716c7f3550e57",
+      "date": 1692095382278
+    },
+    {
+      "type": "edit",
+      "id": "a27b9e8aa9a9d383",
+      "item": {
+        "type": "paragraph",
+        "id": "a27b9e8aa9a9d383",
+        "text": "Let's try this locally, using caddy with private cert, and the localtest.me domain (which just points to the 127.0.0.1 or )"
+      },
+      "date": 1692095719370
+    },
+    {
+      "type": "edit",
+      "id": "a27b9e8aa9a9d383",
+      "item": {
+        "type": "paragraph",
+        "id": "a27b9e8aa9a9d383",
+        "text": "Let's try this locally, using caddy with private cert, and the localtest.me domain (which just points to loopback 127.0.0.1)."
+      },
+      "date": 1692096006233
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fcd59b5a7b15ea48"
+      },
+      "id": "fcd59b5a7b15ea48",
+      "type": "add",
+      "after": "a27b9e8aa9a9d383",
+      "date": 1692096019262
+    },
+    {
+      "type": "edit",
+      "id": "fcd59b5a7b15ea48",
+      "item": {
+        "type": "code",
+        "id": "fcd59b5a7b15ea48",
+        "text": "{\n  \"farm\": true,\n  \"security_type\": \"passportjs\",\n  \"google_clientID\": “secret.clientID….apps.googleusercontent.com\",\n  \"google_clientSecret\": “client…secret…”,\n  \"wikiDomains\": {\n    \"localtest.me\": {\n      \"restricted\": true,\n      \"allow_domains\": [\"gmail.com\"],\n      \"security_useHttps\": true,\n      \"secure_cookie\": true}\n  }\n}"
+      },
+      "date": 1692096032595
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e58cda87cfe683a5"
+      },
+      "id": "e58cda87cfe683a5",
+      "type": "add",
+      "after": "fcd59b5a7b15ea48",
+      "date": 1692096050637
+    },
+    {
+      "id": "e58cda87cfe683a5",
+      "type": "move",
+      "order": [
+        "9e0082f7a61432c4",
+        "6fc040e652a24d32",
+        "3e7903cb5df94a2c",
+        "240426afb674ea86",
+        "fed1b308ab83ef09",
+        "07a0430ad8f4bc51",
+        "8760b52e182cdf44",
+        "a3d5897eab187202",
+        "6f197b07e5fe54a6",
+        "79d716c7f3550e57",
+        "a27b9e8aa9a9d383",
+        "e58cda87cfe683a5",
+        "fcd59b5a7b15ea48"
+      ],
+      "date": 1692096052150
+    },
+    {
+      "type": "edit",
+      "id": "e58cda87cfe683a5",
+      "item": {
+        "type": "factory",
+        "id": "e58cda87cfe683a5",
+        "text": "The configuration makes `localhost.me` and all its subdomains login to view, requires https "
+      },
+      "date": 1692096130236
+    },
+    {
+      "type": "edit",
+      "id": "e58cda87cfe683a5",
+      "item": {
+        "type": "markdown",
+        "id": "e58cda87cfe683a5",
+        "text": "The configuration makes\n* uses Google for authentication,\n* requires `https:` for login *this is actually a Google requirement*.\n* user's cookie will only be shared over `https:`.\n* `localhost.me` and all its subdomains login to view,\n* require the user to have an email in `gmail.com` domain."
+      },
+      "date": 1692096343285
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f4bc503c845d6f35"
+      },
+      "id": "f4bc503c845d6f35",
+      "type": "add",
+      "after": "fcd59b5a7b15ea48",
+      "date": 1692096419104
+    },
+    {
+      "type": "edit",
+      "id": "f4bc503c845d6f35",
+      "item": {
+        "type": "paragraph",
+        "id": "f4bc503c845d6f35",
+        "text": "Some observation:"
+      },
+      "date": 1692096609295
+    },
+    {
+      "type": "add",
+      "id": "9530c5eac0ec46cf",
+      "item": {
+        "type": "factory",
+        "id": "9530c5eac0ec46cf",
+        "text": "As an unauthenticated user I get the `"
+      },
+      "after": "f4bc503c845d6f35",
+      "date": 1692096672085
+    },
+    {
+      "type": "edit",
+      "id": "9530c5eac0ec46cf",
+      "item": {
+        "type": "markdown",
+        "id": "9530c5eac0ec46cf",
+        "text": "As an unauthenticated user I get `Login Required` as expected when accessing an existing claimed wiki. However, accessing an unclaimed wiki shows `Welcome Visitors`, this appears to be wrong."
+      },
+      "date": 1692096816060
+    },
+    {
+      "type": "add",
+      "id": "43f3c4e750d95176",
+      "item": {
+        "type": "markdown",
+        "id": "43f3c4e750d95176",
+        "text": "Starting from the `Login Required` page, and logging in. The login completes with the padlock tilted, and still showing `Login Required`. Requiring a page reload to complete the login.\n"
+      },
+      "after": "9530c5eac0ec46cf",
+      "date": 1692097123487
+    },
+    {
+      "type": "edit",
+      "id": "43f3c4e750d95176",
+      "item": {
+        "type": "markdown",
+        "id": "43f3c4e750d95176",
+        "text": "Starting from the `Login Required` page, and logging in. The login completes with the padlock tilted, and still showing `Login Required`. Requiring a page reload to complete the login."
+      },
+      "date": 1692097534920
+    },
+    {
+      "type": "add",
+      "id": "0ec55ae379a3b886",
+      "item": {
+        "type": "markdown",
+        "id": "0ec55ae379a3b886",
+        "text": "As an authenticated user, with an email address with the right domain. Access a wiki I'm the owner of shows `Welcome Visitors`. However access a wiki either unclaimed, or claimed by somebody else, I get shown `Login Required`. Again this appears to be wrong."
+      },
+      "after": "43f3c4e750d95176",
+      "date": 1692097755377
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a4bbbcde1719377a"
+      },
+      "id": "a4bbbcde1719377a",
+      "type": "add",
+      "after": "0ec55ae379a3b886",
+      "date": 1692097828462
+    },
+    {
+      "type": "edit",
+      "id": "a4bbbcde1719377a",
+      "item": {
+        "type": "markdown",
+        "id": "a4bbbcde1719377a",
+        "text": "As an authenticated user, with an email address in a wrong domain. "
+      },
+      "date": 1692097866735
+    },
+    {
+      "type": "edit",
+      "id": "a4bbbcde1719377a",
+      "item": {
+        "type": "markdown",
+        "id": "a4bbbcde1719377a",
+        "text": "As an authenticated user, with an email address in a wrong domain. I get the `Login Required` page when accessing both claimed and unclaimed wiki. However, on an unclaimed wiki I am offered the ability to claim the wiki, and able to complete the claim."
+      },
+      "date": 1692098067682
+    },
+    {
+      "type": "edit",
+      "id": "f4bc503c845d6f35",
+      "item": {
+        "type": "markdown",
+        "id": "f4bc503c845d6f35",
+        "text": "**Some observation:**"
+      },
+      "date": 1692098103186
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "95b3ef11679e3f7a"
+      },
+      "id": "95b3ef11679e3f7a",
+      "type": "add",
+      "after": "a4bbbcde1719377a",
+      "date": 1692098185224
+    },
+    {
+      "type": "edit",
+      "id": "95b3ef11679e3f7a",
+      "item": {
+        "type": "markdown",
+        "id": "95b3ef11679e3f7a",
+        "text": "**Thoughts**"
+      },
+      "date": 1692098197137
+    },
+    {
+      "type": "edit",
+      "id": "95b3ef11679e3f7a",
+      "item": {
+        "type": "markdown",
+        "id": "95b3ef11679e3f7a",
+        "text": "**Some thoughts:**"
+      },
+      "date": 1692098217018
+    },
+    {
+      "type": "edit",
+      "id": "9530c5eac0ec46cf",
+      "item": {
+        "type": "markdown",
+        "id": "9530c5eac0ec46cf",
+        "text": "As an unauthenticated user I get `Login Required` as expected when accessing an existing claimed wiki."
+      },
+      "date": 1692098609508
+    },
+    {
+      "type": "edit",
+      "id": "9530c5eac0ec46cf",
+      "item": {
+        "type": "markdown",
+        "id": "9530c5eac0ec46cf",
+        "text": "As an unauthenticated user I get `Login Required` as expected when accessing an existing both claimed and unclaimed wiki."
+      },
+      "date": 1692098822641
+    },
+    {
+      "type": "add",
+      "id": "755467daeae16914",
+      "item": {
+        "type": "markdown",
+        "id": "755467daeae16914",
+        "text": "**Needs review**"
+      },
+      "after": "f4bc503c845d6f35",
+      "date": 1692098974439
+    },
+    {
+      "type": "edit",
+      "id": "755467daeae16914",
+      "item": {
+        "type": "markdown",
+        "id": "755467daeae16914",
+        "text": "*Needs review, as I made some local variations to diagnose one of the failure cases.*"
+      },
+      "date": 1692099016717
+    },
+    {
+      "type": "edit",
+      "id": "9530c5eac0ec46cf",
+      "item": {
+        "type": "markdown",
+        "id": "9530c5eac0ec46cf",
+        "text": "As an unauthenticated user I get `Login Required` as expected when accessing a claimed wiki, but get `Welcome Visitors` if the wiki is unclaimed."
+      },
+      "date": 1692105514464
+    },
+    {
+      "type": "add",
+      "id": "f48e38c62597ca5f",
+      "item": {
+        "type": "markdown",
+        "id": "f48e38c62597ca5f",
+        "text": "An unclaimed wiki can be claimed by anybody with a Google login, not restricted by `allow_domains`!"
+      },
+      "after": "9530c5eac0ec46cf",
+      "date": 1692105814042
+    },
+    {
+      "type": "edit",
+      "id": "43f3c4e750d95176",
+      "item": {
+        "type": "markdown",
+        "id": "43f3c4e750d95176",
+        "text": "Starting from the `Login Required` page, and logging in. The login completes with the padlock open, or tilted if I'm not the owner, and still showing `Login Required`. Requiring a page reload to complete the login."
+      },
+      "date": 1692105906248
+    },
+    {
+      "type": "edit",
+      "id": "43f3c4e750d95176",
+      "item": {
+        "type": "markdown",
+        "id": "43f3c4e750d95176",
+        "text": "As a user in an allowed domain, starting from the `Login Required` page, and logging in. The login completes with the padlock open, or tilted if I'm not the owner, and still showing `Login Required`. Requiring a page reload to complete the login."
+      },
+      "date": 1692105985317
+    },
+    {
+      "type": "add",
+      "id": "131eb62d9f7c82f4",
+      "item": {
+        "type": "markdown",
+        "id": "131eb62d9f7c82f4",
+        "text": "As a user from a different domain, starting from the `Login Required` page. The login completes, with the padlock tilted. A page reload stays with the `Login Required` page. *If accessing a wiki owned by this user, the padlock is open and a page reload required to get to `Welcome Visitors`."
+      },
+      "after": "43f3c4e750d95176",
+      "date": 1692106252357
+    },
+    {
+      "type": "edit",
+      "id": "43f3c4e750d95176",
+      "item": {
+        "type": "markdown",
+        "id": "43f3c4e750d95176",
+        "text": "As a user in an allowed domain, starting from the `Login Required` page, and logging in. The login completes with the padlock open, or tilted if I'm not the owner, and still showing `Login Required`. Requiring a page reload to get to `Welcome Visitors`."
+      },
+      "date": 1692106277884
+    },
+    {
+      "type": "remove",
+      "id": "a4bbbcde1719377a",
+      "date": 1692106764631
+    },
+    {
+      "type": "remove",
+      "id": "755467daeae16914",
+      "date": 1692106769941
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "45519de57b8bbd61"
+      },
+      "id": "45519de57b8bbd61",
+      "type": "add",
+      "after": "95b3ef11679e3f7a",
+      "date": 1692106798037
+    },
+    {
+      "type": "edit",
+      "id": "45519de57b8bbd61",
+      "item": {
+        "type": "paragraph",
+        "id": "45519de57b8bbd61",
+        "text": "Some of this behaviour "
+      },
+      "date": 1692106911344
+    },
+    {
+      "type": "edit",
+      "id": "45519de57b8bbd61",
+      "item": {
+        "type": "paragraph",
+        "id": "45519de57b8bbd61",
+        "text": "There seem to be two different behaviours going on here."
+      },
+      "date": 1692106994292
+    },
+    {
+      "type": "add",
+      "id": "0d568ee05b258783",
+      "item": {
+        "type": "factory",
+        "id": "0d568ee05b258783",
+        "text": "Allowing some external person to create a wiki, but not see content of other wiki. I have a memory of this being an original requirement, to provide a trusted person from outside to share content. If "
+      },
+      "after": "45519de57b8bbd61",
+      "date": 1692107284603
+    },
+    {
+      "type": "edit",
+      "id": "0d568ee05b258783",
+      "item": {
+        "type": "markdown",
+        "id": "0d568ee05b258783",
+        "text": "Allowing some external person to create a wiki, but not see content of other wiki. I have a memory of this being an original requirement, to provide a trusted person from outside to share content. If still required `allowed: '*'` should be used to prevent misuse."
+      },
+      "date": 1692107420332
+    },
+    {
+      "type": "add",
+      "id": "d69f07cb67cbb566",
+      "item": {
+        "type": "markdown",
+        "id": "d69f07cb67cbb566",
+        "text": "The "
+      },
+      "after": "0d568ee05b258783",
+      "date": 1692107627814
+    },
+    {
+      "type": "edit",
+      "id": "d69f07cb67cbb566",
+      "item": {
+        "type": "markdown",
+        "id": "d69f07cb67cbb566",
+        "text": "The code that does the check if the user is allowed to view content appears to be broken. As it hasn't been touched in 5 years I wonder if it ever worked."
+      },
+      "date": 1692107798134
+    },
+    {
+      "type": "edit",
+      "id": "fcd59b5a7b15ea48",
+      "item": {
+        "type": "code",
+        "id": "fcd59b5a7b15ea48",
+        "text": "{\n  \"farm\": true,\n  \"security_type\": \"passportjs\",\n  \"google_clientID\": “secret.clientID….apps.googleusercontent.com\",\n  \"google_clientSecret\": “client…secret…”,\n  \"wikiDomains\": {\n    \"localtest.me\": {\n      \"restricted\": true,\n      \"allowed_domains\": [\"gmail.com\"],\n      \"security_useHttps\": true,\n      \"secure_cookie\": true}\n  }\n}"
+      },
+      "date": 1692115034111
+    },
+    {
+      "type": "edit",
+      "id": "9530c5eac0ec46cf",
+      "item": {
+        "type": "markdown",
+        "id": "9530c5eac0ec46cf",
+        "text": "*Updated to correct config error.*"
+      },
+      "date": 1692115268332
+    },
+    {
+      "type": "add",
+      "id": "4d8032991559a314",
+      "item": {
+        "type": "markdown",
+        "id": "4d8032991559a314",
+        "text": "As an unauthenticated user I get `Login Required` as expected when accessing a claimed wiki, but get `Welcome Visitors` if the wiki is unclaimed."
+      },
+      "after": "9530c5eac0ec46cf",
+      "date": 1692115269355
+    },
+    {
+      "type": "edit",
+      "id": "79d716c7f3550e57",
+      "item": {
+        "type": "html",
+        "id": "79d716c7f3550e57",
+        "text": "The parameters used are :-\n<dl>\n  <dt><b>restricted</b></dt>\n  <dd>set to true to restrict access to logged in users.</dd>\n  <dt><b>allowed_domains</b></dt>\n  <dd>an array of email domains that will be granted access.</dd>\n  <dt><b>details</b></dt>\n  <dd>a URL link to a page with details shown when accessed without being logged in. <i>[http://ward.asia.wiki.org/login-to-view.html default page]</i>.</dd>\n</dl>"
+      },
+      "date": 1692115369065
+    },
+    {
+      "type": "edit",
+      "id": "f48e38c62597ca5f",
+      "item": {
+        "type": "markdown",
+        "id": "f48e38c62597ca5f",
+        "text": "An unclaimed wiki can be claimed by anybody with a Google login, not restricted by `allowed_domains`!"
+      },
+      "date": 1692115416338
+    },
+    {
+      "type": "add",
+      "id": "3711b5030c0800a9",
+      "item": {
+        "type": "markdown",
+        "id": "3711b5030c0800a9",
+        "text": "The client appears to fail when fetching sitemaps, and I assume indexes, for other wiki that have login required."
+      },
+      "after": "0ec55ae379a3b886",
+      "date": 1692116611651
+    },
+    {
+      "type": "remove",
+      "id": "9530c5eac0ec46cf",
+      "date": 1692116616071
+    },
+    {
+      "type": "edit",
+      "id": "d69f07cb67cbb566",
+      "item": {
+        "type": "markdown",
+        "id": "d69f07cb67cbb566",
+        "text": "Failure to fetch the sitemaps and index for remote wiki that are also login to view, is worrying. Cur"
+      },
+      "date": 1692116827478
+    },
+    {
+      "type": "edit",
+      "id": "d69f07cb67cbb566",
+      "item": {
+        "type": "markdown",
+        "id": "d69f07cb67cbb566",
+        "text": "Failure to fetch the sitemaps and index for remote wiki that are also login to view, looks to be caused by the request of favicon and sitemap having a 200 response, and not the 'Not Found'. This means that the it is not recorded that the remote site requires credentials to be passed with requests."
+      },
+      "date": 1692117101458
+    },
+    {
+      "type": "fork",
+      "site": "goals.pod.rodwell.me",
+      "date": 1692713935426
+    },
+    {
+      "type": "edit",
+      "id": "9e0082f7a61432c4",
+      "item": {
+        "type": "paragraph",
+        "id": "9e0082f7a61432c4",
+        "text": "Looking again at Login to View. It is now 5 years since this feature was originally added. So, taking a look at it to remind ourselves how it is configured, and how it works, and if it works the way we expect."
+      },
+      "date": 1692714139417
+    }
+  ]
+}
