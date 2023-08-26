@@ -4,7 +4,7 @@
     {
       "type": "markdown",
       "id": "8d6718551c4923f8",
-      "text": "jq is a lightweight and flexible command-line [[JSON]] processor. [https://stedolan.github.io/jq/ site]\n\n"
+      "text": "is a lightweight and flexible command-line [[JSON]] processor. [https://stedolan.github.io/jq/ site]\n\n"
     },
     {
       "type": "markdown",
@@ -251,6 +251,16 @@
         "text": "> jq [options...] filter [files...]\n\njq  can  [[transform]] JSON in various ways, by selecting, iterating, reducing and otherwise mangling JSON documents.\n\nFor instance, running the command jq 'map(.price) | add' will take an array of JSON objects as input  and  return the sum of their \"price\" fields.\n\njq can accept text input as well, but by default, jq reads a stream of JSON entities (including numbers and other literals) from stdin. Whitespace is only needed to separate entities such as 1 and 2, and true and false. One  or more files may be specified, in which case jq will read input from those instead.\n\nThe options are described in the INVOKING JQ section; they mostly concern input and output formatting. The filter is written in the jq language and specifies how to transform the input file or document."
       },
       "date": 1661393513700
+    },
+    {
+      "type": "edit",
+      "id": "8d6718551c4923f8",
+      "item": {
+        "type": "markdown",
+        "id": "8d6718551c4923f8",
+        "text": "is a lightweight and flexible command-line [[JSON]] processor. [https://stedolan.github.io/jq/ site]\n\n"
+      },
+      "date": 1693032112306
     }
   ]
 }

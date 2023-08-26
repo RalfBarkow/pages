@@ -1,0 +1,928 @@
+{
+  "title": "The Elm-Pages Architecture",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "24f75b28ed4cd45b",
+      "text": "Let's look at the lifecycle of a request in an elm-pages app. [https://elm-pages.com/docs/architecture page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "daabf10ad2dbf764",
+      "text": "This will walk through 3 different interactions."
+    },
+    {
+      "type": "markdown",
+      "id": "be8a2cd68e814efa",
+      "text": "1. Open Page\n1. Click Button\n1. Submit [[Form]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "b807a85303e3d9c7",
+      "text": "These 3 interactions show the key components of The elm-pages Architecture."
+    },
+    {
+      "type": "paragraph",
+      "id": "2dc0b6b6510b6ec3",
+      "text": "Interaction 1 - Open Page. [https://elm-pages.com/docs/architecture/#interaction-1---open-page page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "5d4f7ec10581a462",
+      "text": "If we open our browser to a server-rendered [[elm-pages]] [[Route]] https://my-app.com/feed, it will render from our Route module app/Route/Feed.elm."
+    },
+    {
+      "type": "paragraph",
+      "id": "659ce77637252725",
+      "text": "1a - Resolving data. [https://elm-pages.com/docs/architecture/#1a---resolving-data page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "4229137a4f19cdb9",
+      "text": "Resolve BackendTask, elm-pages Engine, custom-backend-task.ts, Backend App (Server)"
+    },
+    {
+      "type": "image",
+      "id": "b3c39f121cc30867",
+      "text": "[https://elm-pages.com/images/architecture-1.png png]",
+      "size": "wide",
+      "width": 430,
+      "height": 231,
+      "url": "/assets/plugins/image/ae604dd94b0243baf56b988ef8b0c9b5.jpg"
+    },
+    {
+      "type": "markdown",
+      "id": "7eaafced82256847",
+      "text": "1. data is resolved first\n1. The elm-pages Engine resolves our data, performing HTTP requests, reading data, and running any custom tasks we've defined.\n1. BackendTask's BackendTask.Custom.run are executed by running our custom-backend-task Node module, which elm-pages transpiles using [[ESBuild]]."
+    },
+    {
+      "type": "paragraph",
+      "id": "bcc3176ef1a94359",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d6687448bc1e6726",
+      "text": "The Code [https://elm-pages.com/docs/architecture/#the-code page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "40d58cd73fab8d17",
+      "text": "We could define our Route Module like this: [https://github.com/dreyeck/blog/blob/e1955b5d5942d5be5af145a18a6ef50ea9869dd0/elm-pages-starter-express/app/Route/View/Slug_/SPLAT__.elm app/Route/View/Slug_/SPLAT__.elm]"
+    },
+    {
+      "type": "paragraph",
+      "id": "1d559cb417ed15f2",
+      "text": "Compare our view function with the Feed example:"
+    },
+    {
+      "type": "code",
+      "id": "0bdfdf61ff1c5d89",
+      "text": "view :\n    RouteBuilder.App Data ActionData RouteParams\n    -> Shared.Model\n    -> Model\n    -> View.View (PagesMsg Msg)\nview app shared model =\n    { title = \"Feed\"\n    , body =\n        [ navbarView app.data.user ToggleMenu model.showMenu\n        , postsView app\n        ]\n    }\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "93361391c8e5490f",
+      "text": "?: navbarView, postsView"
+    },
+    {
+      "type": "pagefold",
+      "id": "111fdbfe32f47e0c",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "43c6126bcdf2baaa",
+      "text": "[[elm-pages]] makes building websites fun again. i've ([[Dwight Doane]]) throughly enjoyed spinning up my latest website. I really hope elm on the frontend adopts a BackendTask style api for FFI instead of ports. i love being able to grab just a bit from a custom-backend-task and combine that with another BackendTask, keeping most of the business in Elm. Building a blog with elm-pages has been way easier than with next.js imho\nIm pulling in a list of markdown files' names with node in a custom backend task, but then i transform and combine them into a List of backendtasks to load all those markdown files' data to turn into a list of blog posts. (idk if thats the right way, but it works great) [https://elmlang.slack.com/archives/CNSNETV37/p1689787826223299 post]"
+    },
+    {
+      "type": "code",
+      "id": "45be13cee3fca123",
+      "text": "data : BackendTask FatalError Data\ndata =\n    (BackendTask.Custom.run \"blogPosts\"\n        Encode.null\n        (Decode.list Decode.string)\n        |> BackendTask.allowFatal\n    )\n        |> BackendTask.map\n            (\\files ->\n                files\n                    |> List.filter (String.contains \".md\")\n                    |> List.map\n                        (\\file ->\n                            [ \"./posts/\", file ]\n                                |> String.concat\n                                |> BackendTask.File.bodyWithFrontmatter BlogPost.decoder\n                                |> BackendTask.allowFatal\n                        )\n            )\n        |> BackendTask.andThen BackendTask.combine\n        |> BackendTask.map Data"
+    },
+    {
+      "type": "paragraph",
+      "id": "c52f034886acf7c9",
+      "text": "script/custom-backend-task.ts"
+    },
+    {
+      "type": "code",
+      "id": "20b2838998a260a1",
+      "text": "export async function blogPosts() {\n  const dir = path.join(\"posts\");\n  const files = await readdir(dir);\n\n  return files;\n}"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "The Elm-Pages Architecture",
+        "story": []
+      },
+      "date": 1692872650573
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "24f75b28ed4cd45b"
+      },
+      "id": "24f75b28ed4cd45b",
+      "type": "add",
+      "date": 1692872651778
+    },
+    {
+      "type": "edit",
+      "id": "24f75b28ed4cd45b",
+      "item": {
+        "type": "paragraph",
+        "id": "24f75b28ed4cd45b",
+        "text": "[https://elm-pages.com/docs/architecture page"
+      },
+      "date": 1692872657041
+    },
+    {
+      "type": "edit",
+      "id": "24f75b28ed4cd45b",
+      "item": {
+        "type": "paragraph",
+        "id": "24f75b28ed4cd45b",
+        "text": "[https://elm-pages.com/docs/architecture page]"
+      },
+      "date": 1692872660620
+    },
+    {
+      "type": "edit",
+      "id": "24f75b28ed4cd45b",
+      "item": {
+        "type": "paragraph",
+        "id": "24f75b28ed4cd45b",
+        "text": "Let's look at the lifecycle of a request in an elm-pages app. [https://elm-pages.com/docs/architecture page]"
+      },
+      "date": 1692872680218
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2dc0b6b6510b6ec3"
+      },
+      "id": "2dc0b6b6510b6ec3",
+      "type": "add",
+      "after": "24f75b28ed4cd45b",
+      "date": 1692941423893
+    },
+    {
+      "type": "edit",
+      "id": "2dc0b6b6510b6ec3",
+      "item": {
+        "type": "paragraph",
+        "id": "2dc0b6b6510b6ec3",
+        "text": "[…]"
+      },
+      "date": 1692941426859
+    },
+    {
+      "type": "add",
+      "id": "659ce77637252725",
+      "item": {
+        "type": "paragraph",
+        "id": "659ce77637252725",
+        "text": "1a - Resolving data"
+      },
+      "after": "2dc0b6b6510b6ec3",
+      "date": 1692941428513
+    },
+    {
+      "type": "edit",
+      "id": "659ce77637252725",
+      "item": {
+        "type": "paragraph",
+        "id": "659ce77637252725",
+        "text": "1a - Resolving data [https://elm-pages.com/docs/architecture/#1a---resolving-data page]"
+      },
+      "date": 1692941436910
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b3c39f121cc30867"
+      },
+      "id": "b3c39f121cc30867",
+      "type": "add",
+      "after": "659ce77637252725",
+      "date": 1692941455578
+    },
+    {
+      "type": "edit",
+      "id": "b3c39f121cc30867",
+      "item": {
+        "type": "image",
+        "id": "b3c39f121cc30867",
+        "text": "[https://elm-pages.com/images/architecture-1.png png]",
+        "size": "wide",
+        "width": 430,
+        "height": 231,
+        "url": "/assets/plugins/image/ae604dd94b0243baf56b988ef8b0c9b5.jpg"
+      },
+      "date": 1692941470746
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4229137a4f19cdb9"
+      },
+      "id": "4229137a4f19cdb9",
+      "type": "add",
+      "after": "b3c39f121cc30867",
+      "date": 1692941563212
+    },
+    {
+      "type": "edit",
+      "id": "4229137a4f19cdb9",
+      "item": {
+        "type": "paragraph",
+        "id": "4229137a4f19cdb9",
+        "text": "Resolve BackendTask"
+      },
+      "date": 1692941568932
+    },
+    {
+      "type": "add",
+      "id": "c52f034886acf7c9",
+      "item": {
+        "type": "paragraph",
+        "id": "c52f034886acf7c9",
+        "text": "script/custom-backend-task.ts"
+      },
+      "after": "4229137a4f19cdb9",
+      "date": 1692941770171
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "43c6126bcdf2baaa"
+      },
+      "id": "43c6126bcdf2baaa",
+      "type": "add",
+      "after": "c52f034886acf7c9",
+      "date": 1692941881785
+    },
+    {
+      "type": "edit",
+      "id": "43c6126bcdf2baaa",
+      "item": {
+        "type": "paragraph",
+        "id": "43c6126bcdf2baaa",
+        "text": "elm-pages makes building websites fun again. i've throughly enjoyed spinning up my latest website. I really hope elm on the frontend adopts a BackendTask style api for FFI instead of ports. i love being able to grab just a bit from a custom-backend-task and combine that with another BackendTask, keeping most of the business in Elm. Building a blog with elm-pages has been way easier than with next.js imho\nIm pulling in a list of markdown files' names with node in a custom backend task, but then i transform and combine them into a List of backendtasks to load all those markdown files' data to turn into a list of blog posts. (idk if thats the right way, but it works great)"
+      },
+      "date": 1692941883517
+    },
+    {
+      "type": "edit",
+      "id": "43c6126bcdf2baaa",
+      "item": {
+        "type": "paragraph",
+        "id": "43c6126bcdf2baaa",
+        "text": "elm-pages makes building websites fun again. i've throughly enjoyed spinning up my latest website. I really hope elm on the frontend adopts a BackendTask style api for FFI instead of ports. i love being able to grab just a bit from a custom-backend-task and combine that with another BackendTask, keeping most of the business in Elm. Building a blog with elm-pages has been way easier than with next.js imho\nIm pulling in a list of markdown files' names with node in a custom backend task, but then i transform and combine them into a List of backendtasks to load all those markdown files' data to turn into a list of blog posts. (idk if thats the right way, but it works great) [https://elmlang.slack.com/archives/CNSNETV37/p1689787826223299 post]"
+      },
+      "date": 1692941905010
+    },
+    {
+      "type": "edit",
+      "id": "43c6126bcdf2baaa",
+      "item": {
+        "type": "paragraph",
+        "id": "43c6126bcdf2baaa",
+        "text": "[[elm-pages]] makes building websites fun again. i've throughly enjoyed spinning up my latest website. I really hope elm on the frontend adopts a BackendTask style api for FFI instead of ports. i love being able to grab just a bit from a custom-backend-task and combine that with another BackendTask, keeping most of the business in Elm. Building a blog with elm-pages has been way easier than with next.js imho\nIm pulling in a list of markdown files' names with node in a custom backend task, but then i transform and combine them into a List of backendtasks to load all those markdown files' data to turn into a list of blog posts. (idk if thats the right way, but it works great) [https://elmlang.slack.com/archives/CNSNETV37/p1689787826223299 post]"
+      },
+      "date": 1692941928552
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "45be13cee3fca123"
+      },
+      "id": "45be13cee3fca123",
+      "type": "add",
+      "after": "43c6126bcdf2baaa",
+      "date": 1692941999573
+    },
+    {
+      "type": "edit",
+      "id": "45be13cee3fca123",
+      "item": {
+        "type": "code",
+        "id": "45be13cee3fca123",
+        "text": "data : BackendTask FatalError Data\ndata =\n    (BackendTask.Custom.run \"blogPosts\"\n        Encode.null\n        (Decode.list Decode.string)\n        |> BackendTask.allowFatal\n    )\n        |> BackendTask.map\n            (\\files ->\n                files\n                    |> List.filter (String.contains \".md\")\n                    |> List.map\n                        (\\file ->\n                            [ \"./posts/\", file ]\n                                |> String.concat\n                                |> BackendTask.File.bodyWithFrontmatter BlogPost.decoder\n                                |> BackendTask.allowFatal\n                        )\n            )\n        |> BackendTask.andThen BackendTask.combine\n        |> BackendTask.map Data"
+      },
+      "date": 1692942001996
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "20b2838998a260a1"
+      },
+      "id": "20b2838998a260a1",
+      "type": "add",
+      "after": "45be13cee3fca123",
+      "date": 1692942030750
+    },
+    {
+      "type": "edit",
+      "id": "20b2838998a260a1",
+      "item": {
+        "type": "code",
+        "id": "20b2838998a260a1",
+        "text": "export async function blogPosts() {\n  const dir = path.join(\"posts\");\n  const files = await readdir(dir);\n\n  return files;\n}"
+      },
+      "date": 1692942033219
+    },
+    {
+      "id": "c52f034886acf7c9",
+      "type": "move",
+      "order": [
+        "24f75b28ed4cd45b",
+        "2dc0b6b6510b6ec3",
+        "659ce77637252725",
+        "b3c39f121cc30867",
+        "4229137a4f19cdb9",
+        "43c6126bcdf2baaa",
+        "45be13cee3fca123",
+        "c52f034886acf7c9",
+        "20b2838998a260a1"
+      ],
+      "date": 1692942069348
+    },
+    {
+      "type": "edit",
+      "id": "43c6126bcdf2baaa",
+      "item": {
+        "type": "paragraph",
+        "id": "43c6126bcdf2baaa",
+        "text": "[[elm-pages]] makes building websites fun again. i've ([[Dwight Doane]]) throughly enjoyed spinning up my latest website. I really hope elm on the frontend adopts a BackendTask style api for FFI instead of ports. i love being able to grab just a bit from a custom-backend-task and combine that with another BackendTask, keeping most of the business in Elm. Building a blog with elm-pages has been way easier than with next.js imho\nIm pulling in a list of markdown files' names with node in a custom backend task, but then i transform and combine them into a List of backendtasks to load all those markdown files' data to turn into a list of blog posts. (idk if thats the right way, but it works great) [https://elmlang.slack.com/archives/CNSNETV37/p1689787826223299 post]"
+      },
+      "date": 1692942113885
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1692942642855
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7eaafced82256847"
+      },
+      "id": "7eaafced82256847",
+      "type": "add",
+      "after": "20b2838998a260a1",
+      "date": 1692943182451
+    },
+    {
+      "id": "7eaafced82256847",
+      "type": "move",
+      "order": [
+        "24f75b28ed4cd45b",
+        "2dc0b6b6510b6ec3",
+        "659ce77637252725",
+        "b3c39f121cc30867",
+        "4229137a4f19cdb9",
+        "7eaafced82256847",
+        "43c6126bcdf2baaa",
+        "45be13cee3fca123",
+        "c52f034886acf7c9",
+        "20b2838998a260a1"
+      ],
+      "date": 1692943194534
+    },
+    {
+      "type": "edit",
+      "id": "7eaafced82256847",
+      "item": {
+        "type": "markdown",
+        "id": "7eaafced82256847",
+        "text": "1. data is resolved first\n1. The elm-pages Engine resolves our data, performing HTTP requests, reading data, and running any custom tasks we've defined.\n1. BackendTask's BackendTask.Custom.run are executed by running our custom-backend-task Node module, which elm-pages transpiles using esbuild."
+      },
+      "date": 1692943216737
+    },
+    {
+      "type": "edit",
+      "id": "4229137a4f19cdb9",
+      "item": {
+        "type": "paragraph",
+        "id": "4229137a4f19cdb9",
+        "text": "Resolve BackendTask, elm-pages Engine, "
+      },
+      "date": 1692943305560
+    },
+    {
+      "type": "edit",
+      "id": "4229137a4f19cdb9",
+      "item": {
+        "type": "paragraph",
+        "id": "4229137a4f19cdb9",
+        "text": "Resolve BackendTask, elm-pages Engine, custom-backend-task.ts"
+      },
+      "date": 1692943312186
+    },
+    {
+      "type": "edit",
+      "id": "7eaafced82256847",
+      "item": {
+        "type": "markdown",
+        "id": "7eaafced82256847",
+        "text": "1. data is resolved first\n1. The elm-pages Engine resolves our data, performing HTTP requests, reading data, and running any custom tasks we've defined.\n1. BackendTask's BackendTask.Custom.run are executed by running our custom-backend-task Node module, which elm-pages transpiles using [[esbuild]]."
+      },
+      "date": 1692943563014
+    },
+    {
+      "type": "fork",
+      "site": "blog.dreyeck.ch",
+      "date": 1692943585956
+    },
+    {
+      "id": "d1274cd86298806e",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "d1274cd86298806e",
+        "text": "[https://github.com/evanw/esbuild github]"
+      },
+      "after": "7eaafced82256847",
+      "attribution": {
+        "page": "esbuild"
+      },
+      "date": 1692943662212
+    },
+    {
+      "type": "edit",
+      "id": "7eaafced82256847",
+      "item": {
+        "type": "markdown",
+        "id": "7eaafced82256847",
+        "text": "1. data is resolved first\n1. The elm-pages Engine resolves our data, performing HTTP requests, reading data, and running any custom tasks we've defined.\n1. BackendTask's BackendTask.Custom.run are executed by running our custom-backend-task Node module, which elm-pages transpiles using [[ESBuild]]."
+      },
+      "date": 1692943673286
+    },
+    {
+      "id": "d1274cd86298806e",
+      "type": "remove",
+      "removedTo": {
+        "page": "ESBuild"
+      },
+      "date": 1692943690618
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "111fdbfe32f47e0c"
+      },
+      "id": "111fdbfe32f47e0c",
+      "type": "add",
+      "after": "20b2838998a260a1",
+      "date": 1692943763335
+    },
+    {
+      "id": "111fdbfe32f47e0c",
+      "type": "move",
+      "order": [
+        "24f75b28ed4cd45b",
+        "2dc0b6b6510b6ec3",
+        "659ce77637252725",
+        "b3c39f121cc30867",
+        "4229137a4f19cdb9",
+        "7eaafced82256847",
+        "111fdbfe32f47e0c",
+        "43c6126bcdf2baaa",
+        "45be13cee3fca123",
+        "c52f034886acf7c9",
+        "20b2838998a260a1"
+      ],
+      "date": 1692943767803
+    },
+    {
+      "type": "edit",
+      "id": "111fdbfe32f47e0c",
+      "item": {
+        "type": "pagefold",
+        "id": "111fdbfe32f47e0c",
+        "text": "~"
+      },
+      "date": 1692943771349
+    },
+    {
+      "id": "4229137a4f19cdb9",
+      "type": "move",
+      "order": [
+        "24f75b28ed4cd45b",
+        "2dc0b6b6510b6ec3",
+        "659ce77637252725",
+        "4229137a4f19cdb9",
+        "b3c39f121cc30867",
+        "7eaafced82256847",
+        "111fdbfe32f47e0c",
+        "43c6126bcdf2baaa",
+        "45be13cee3fca123",
+        "c52f034886acf7c9",
+        "20b2838998a260a1"
+      ],
+      "date": 1692943801216
+    },
+    {
+      "type": "edit",
+      "id": "4229137a4f19cdb9",
+      "item": {
+        "type": "paragraph",
+        "id": "4229137a4f19cdb9",
+        "text": "Resolve BackendTask, elm-pages Engine, custom-backend-task.ts, Backend App (Server)"
+      },
+      "date": 1692943841511
+    },
+    {
+      "id": "7eaafced82256847",
+      "type": "move",
+      "order": [
+        "24f75b28ed4cd45b",
+        "2dc0b6b6510b6ec3",
+        "659ce77637252725",
+        "7eaafced82256847",
+        "4229137a4f19cdb9",
+        "b3c39f121cc30867",
+        "111fdbfe32f47e0c",
+        "43c6126bcdf2baaa",
+        "45be13cee3fca123",
+        "c52f034886acf7c9",
+        "20b2838998a260a1"
+      ],
+      "date": 1692943866812
+    },
+    {
+      "id": "4229137a4f19cdb9",
+      "type": "move",
+      "order": [
+        "24f75b28ed4cd45b",
+        "2dc0b6b6510b6ec3",
+        "659ce77637252725",
+        "7eaafced82256847",
+        "b3c39f121cc30867",
+        "4229137a4f19cdb9",
+        "111fdbfe32f47e0c",
+        "43c6126bcdf2baaa",
+        "45be13cee3fca123",
+        "c52f034886acf7c9",
+        "20b2838998a260a1"
+      ],
+      "date": 1692943875055
+    },
+    {
+      "id": "4229137a4f19cdb9",
+      "type": "move",
+      "order": [
+        "24f75b28ed4cd45b",
+        "2dc0b6b6510b6ec3",
+        "659ce77637252725",
+        "4229137a4f19cdb9",
+        "7eaafced82256847",
+        "b3c39f121cc30867",
+        "111fdbfe32f47e0c",
+        "43c6126bcdf2baaa",
+        "45be13cee3fca123",
+        "c52f034886acf7c9",
+        "20b2838998a260a1"
+      ],
+      "date": 1692943934910
+    },
+    {
+      "id": "b3c39f121cc30867",
+      "type": "move",
+      "order": [
+        "24f75b28ed4cd45b",
+        "2dc0b6b6510b6ec3",
+        "659ce77637252725",
+        "4229137a4f19cdb9",
+        "b3c39f121cc30867",
+        "7eaafced82256847",
+        "111fdbfe32f47e0c",
+        "43c6126bcdf2baaa",
+        "45be13cee3fca123",
+        "c52f034886acf7c9",
+        "20b2838998a260a1"
+      ],
+      "date": 1692943941125
+    },
+    {
+      "type": "add",
+      "id": "daabf10ad2dbf764",
+      "item": {
+        "type": "paragraph",
+        "id": "daabf10ad2dbf764",
+        "text": "This will walk through 3 different interactions."
+      },
+      "after": "24f75b28ed4cd45b",
+      "date": 1692943983077
+    },
+    {
+      "type": "add",
+      "id": "be8a2cd68e814efa",
+      "item": {
+        "type": "paragraph",
+        "id": "be8a2cd68e814efa",
+        "text": "1. Open Page\n1. Click Button\n1. Submit Form"
+      },
+      "after": "daabf10ad2dbf764",
+      "date": 1692943995183
+    },
+    {
+      "type": "add",
+      "id": "b807a85303e3d9c7",
+      "item": {
+        "type": "paragraph",
+        "id": "b807a85303e3d9c7",
+        "text": "These 3 interactions show the key components of The elm-pages Architecture."
+      },
+      "after": "be8a2cd68e814efa",
+      "date": 1692943996715
+    },
+    {
+      "type": "edit",
+      "id": "be8a2cd68e814efa",
+      "item": {
+        "type": "markdown",
+        "id": "be8a2cd68e814efa",
+        "text": "1. Open Page\n1. Click Button\n1. Submit Form"
+      },
+      "date": 1692943999605
+    },
+    {
+      "type": "edit",
+      "id": "be8a2cd68e814efa",
+      "item": {
+        "type": "markdown",
+        "id": "be8a2cd68e814efa",
+        "text": "1. Open Page\n1. Click Button\n1. Submit [[Form]]"
+      },
+      "date": 1692944012938
+    },
+    {
+      "type": "edit",
+      "id": "2dc0b6b6510b6ec3",
+      "item": {
+        "type": "paragraph",
+        "id": "2dc0b6b6510b6ec3",
+        "text": "Interaction 1 - Open Page"
+      },
+      "date": 1692944035747
+    },
+    {
+      "type": "edit",
+      "id": "2dc0b6b6510b6ec3",
+      "item": {
+        "type": "paragraph",
+        "id": "2dc0b6b6510b6ec3",
+        "text": "Interaction 1 - Open Page [https://elm-pages.com/docs/architecture/#interaction-1---open-page page]"
+      },
+      "date": 1692944053402
+    },
+    {
+      "type": "edit",
+      "id": "2dc0b6b6510b6ec3",
+      "item": {
+        "type": "paragraph",
+        "id": "2dc0b6b6510b6ec3",
+        "text": "Interaction 1 - Open Page. [https://elm-pages.com/docs/architecture/#interaction-1---open-page page]"
+      },
+      "date": 1692944061610
+    },
+    {
+      "type": "edit",
+      "id": "659ce77637252725",
+      "item": {
+        "type": "paragraph",
+        "id": "659ce77637252725",
+        "text": "1a - Resolving data. [https://elm-pages.com/docs/architecture/#1a---resolving-data page]"
+      },
+      "date": 1692944066258
+    },
+    {
+      "type": "add",
+      "id": "5d4f7ec10581a462",
+      "item": {
+        "type": "paragraph",
+        "id": "5d4f7ec10581a462",
+        "text": "If we open our browser to a server-rendered elm-pages Route https://my-app.com/feed, it will render from our Route module app/Route/Feed.elm."
+      },
+      "after": "2dc0b6b6510b6ec3",
+      "date": 1692944076392
+    },
+    {
+      "type": "edit",
+      "id": "5d4f7ec10581a462",
+      "item": {
+        "type": "paragraph",
+        "id": "5d4f7ec10581a462",
+        "text": "If we open our browser to a server-rendered [[elm-pages]] [[Route]] https://my-app.com/feed, it will render from our Route module app/Route/Feed.elm."
+      },
+      "date": 1692944093945
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bcc3176ef1a94359"
+      },
+      "id": "bcc3176ef1a94359",
+      "type": "add",
+      "after": "20b2838998a260a1",
+      "date": 1692944326510
+    },
+    {
+      "id": "bcc3176ef1a94359",
+      "type": "move",
+      "order": [
+        "24f75b28ed4cd45b",
+        "daabf10ad2dbf764",
+        "be8a2cd68e814efa",
+        "b807a85303e3d9c7",
+        "2dc0b6b6510b6ec3",
+        "5d4f7ec10581a462",
+        "659ce77637252725",
+        "4229137a4f19cdb9",
+        "b3c39f121cc30867",
+        "7eaafced82256847",
+        "bcc3176ef1a94359",
+        "111fdbfe32f47e0c",
+        "43c6126bcdf2baaa",
+        "45be13cee3fca123",
+        "c52f034886acf7c9",
+        "20b2838998a260a1"
+      ],
+      "date": 1692944332709
+    },
+    {
+      "type": "edit",
+      "id": "bcc3176ef1a94359",
+      "item": {
+        "type": "paragraph",
+        "id": "bcc3176ef1a94359",
+        "text": "[…]"
+      },
+      "date": 1692944335709
+    },
+    {
+      "type": "add",
+      "id": "d6687448bc1e6726",
+      "item": {
+        "type": "paragraph",
+        "id": "d6687448bc1e6726",
+        "text": "The Code"
+      },
+      "after": "bcc3176ef1a94359",
+      "date": 1692944541028
+    },
+    {
+      "type": "edit",
+      "id": "d6687448bc1e6726",
+      "item": {
+        "type": "paragraph",
+        "id": "d6687448bc1e6726",
+        "text": "The Code [https://elm-pages.com/docs/architecture/#the-code page]"
+      },
+      "date": 1692944551174
+    },
+    {
+      "type": "add",
+      "id": "40d58cd73fab8d17",
+      "item": {
+        "type": "paragraph",
+        "id": "40d58cd73fab8d17",
+        "text": "We could define our Route Module like this:"
+      },
+      "after": "d6687448bc1e6726",
+      "date": 1692944560628
+    },
+    {
+      "type": "edit",
+      "id": "40d58cd73fab8d17",
+      "item": {
+        "type": "paragraph",
+        "id": "40d58cd73fab8d17",
+        "text": "We could define our Route Module like this: [https://github.com/dreyeck/blog/blob/e1955b5d5942d5be5af145a18a6ef50ea9869dd0/elm-pages-starter-express/app/Route/View/Slug_/SPLAT__.elm app/Route/View/Slug_/SPLAT__.elm]"
+      },
+      "date": 1692944674942
+    },
+    {
+      "type": "add",
+      "id": "1d559cb417ed15f2",
+      "item": {
+        "type": "paragraph",
+        "id": "1d559cb417ed15f2",
+        "text": "Compare our view function with the example:"
+      },
+      "after": "40d58cd73fab8d17",
+      "date": 1692944928991
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0bdfdf61ff1c5d89"
+      },
+      "id": "0bdfdf61ff1c5d89",
+      "type": "add",
+      "after": "20b2838998a260a1",
+      "date": 1692944931801
+    },
+    {
+      "id": "0bdfdf61ff1c5d89",
+      "type": "move",
+      "order": [
+        "24f75b28ed4cd45b",
+        "daabf10ad2dbf764",
+        "be8a2cd68e814efa",
+        "b807a85303e3d9c7",
+        "2dc0b6b6510b6ec3",
+        "5d4f7ec10581a462",
+        "659ce77637252725",
+        "4229137a4f19cdb9",
+        "b3c39f121cc30867",
+        "7eaafced82256847",
+        "bcc3176ef1a94359",
+        "d6687448bc1e6726",
+        "40d58cd73fab8d17",
+        "1d559cb417ed15f2",
+        "0bdfdf61ff1c5d89",
+        "111fdbfe32f47e0c",
+        "43c6126bcdf2baaa",
+        "45be13cee3fca123",
+        "c52f034886acf7c9",
+        "20b2838998a260a1"
+      ],
+      "date": 1692944937209
+    },
+    {
+      "type": "edit",
+      "id": "0bdfdf61ff1c5d89",
+      "item": {
+        "type": "code",
+        "id": "0bdfdf61ff1c5d89",
+        "text": "view :\n    RouteBuilder.App Data ActionData RouteParams\n    -> Shared.Model\n    -> Model\n    -> View.View (PagesMsg Msg)\nview app shared model =\n    { title = \"Feed\"\n    , body =\n        [ navbarView app.data.user ToggleMenu model.showMenu\n        , postsView app\n        ]\n    }\n"
+      },
+      "date": 1692944939240
+    },
+    {
+      "type": "edit",
+      "id": "1d559cb417ed15f2",
+      "item": {
+        "type": "paragraph",
+        "id": "1d559cb417ed15f2",
+        "text": "Compare our view function with the Feed example:"
+      },
+      "date": 1692945037503
+    },
+    {
+      "type": "add",
+      "id": "93361391c8e5490f",
+      "item": {
+        "type": "paragraph",
+        "id": "93361391c8e5490f",
+        "text": "navbarView"
+      },
+      "after": "1d559cb417ed15f2",
+      "date": 1692945262069
+    },
+    {
+      "id": "93361391c8e5490f",
+      "type": "move",
+      "order": [
+        "24f75b28ed4cd45b",
+        "daabf10ad2dbf764",
+        "be8a2cd68e814efa",
+        "b807a85303e3d9c7",
+        "2dc0b6b6510b6ec3",
+        "5d4f7ec10581a462",
+        "659ce77637252725",
+        "4229137a4f19cdb9",
+        "b3c39f121cc30867",
+        "7eaafced82256847",
+        "bcc3176ef1a94359",
+        "d6687448bc1e6726",
+        "40d58cd73fab8d17",
+        "1d559cb417ed15f2",
+        "0bdfdf61ff1c5d89",
+        "93361391c8e5490f",
+        "111fdbfe32f47e0c",
+        "43c6126bcdf2baaa",
+        "45be13cee3fca123",
+        "c52f034886acf7c9",
+        "20b2838998a260a1"
+      ],
+      "date": 1692945265630
+    },
+    {
+      "type": "edit",
+      "id": "93361391c8e5490f",
+      "item": {
+        "type": "paragraph",
+        "id": "93361391c8e5490f",
+        "text": "?: navbarView, postsView"
+      },
+      "date": 1692945280944
+    }
+  ]
+}
