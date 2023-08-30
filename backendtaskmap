@@ -1,0 +1,93 @@
+{
+  "title": "BackendTask.map",
+  "story": [
+    {
+      "type": "code",
+      "id": "b108fd8d1f7ad758",
+      "text": "map : (a -> b) -> BackendTask error a -> BackendTask error b"
+    },
+    {
+      "type": "paragraph",
+      "id": "d76f0c0c345acbfa",
+      "text": "Transform a request into an arbitrary value. The same underlying task will be performed, but mapping allows you to change the resulting values by applying functions to the results. [https://package.elm-lang.org/packages/dillonkearns/elm-pages/10.0.1/BackendTask#map page]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "BackendTask.map",
+        "story": []
+      },
+      "date": 1693403349084
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d76f0c0c345acbfa"
+      },
+      "id": "d76f0c0c345acbfa",
+      "type": "add",
+      "date": 1693403350354
+    },
+    {
+      "type": "edit",
+      "id": "d76f0c0c345acbfa",
+      "item": {
+        "type": "paragraph",
+        "id": "d76f0c0c345acbfa",
+        "text": "[https://package.elm-lang.org/packages/dillonkearns/elm-pages/10.0.1/BackendTask#map page]"
+      },
+      "date": 1693403357440
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b108fd8d1f7ad758"
+      },
+      "id": "b108fd8d1f7ad758",
+      "type": "add",
+      "after": "d76f0c0c345acbfa",
+      "date": 1693403364986
+    },
+    {
+      "type": "edit",
+      "id": "b108fd8d1f7ad758",
+      "item": {
+        "type": "code",
+        "id": "b108fd8d1f7ad758",
+        "text": "BackendTask\n\nIn an elm-pages app, each Route Module can define a value data which is a BackendTask that will be resolved before init is called. That means it is also available when the page's HTML is pre-rendered during the build step. You can also access the resolved data in head to use it for the page's SEO meta tags.\n\nA BackendTask lets you pull in data from:\n\n    Local files (BackendTask.File)\n    HTTP requests (BackendTask.Http)\n    Globs, i.e. listing out local files based on a pattern like content/*.txt (BackendTask.Glob)\n    Ports, i.e. getting JSON data from running custom NodeJS, similar to a port in a vanilla Elm app except run at build-time in NodeJS, rather than at run-time in the browser (BackendTask.Custom)\n    Hardcoded data (BackendTask.succeed \"Hello!\")\n    Or any combination of the above, using BackendTask.map2, BackendTask.andThen, or other combining/continuing helpers from this module\n\nBackendTask's vs. Effect's/Cmd's\n\nBackendTask's are always resolved before the page is rendered and sent to the browser. A BackendTask is never executed in the Browser. Instead, the resolved data from the BackendTask is passed down to the Browser - it has been resolved before any client-side JavaScript ever executes. In the case of a pre-rendered route, this is during the CLI build phase, and for server-rendered routes its BackendTask is resolved on the server.\n\nEffect's/Cmd's are never executed on the CLI or server, they are only executed in the Browser. The data from a Route Module's init function is used to render the initial HTML on the server or build step, but the Effect isn't executed and update is never called before the page is hydrated in the Browser. This gives a deterministic mental model of what the first render will look like, and a nicely typed way to define the initial Data you have to render your initial view.\n\nBecause elm-pages hydrates into a full Elm single-page app, it does need the data in order to initialize the Elm app. So why not just get the data the old-fashioned way, with elm/http, for example?\n\nA few reasons:\n\n    BackendTask's allow you to pull in data that you wouldn't normally be able to access from an Elm app, like local files, or listings of files in a folder. Not only that, but the dev server knows to automatically hot reload the data when the files it depends on change, so you can edit the files you used in your BackendTask and see the page hot reload as you save!\n    You can pre-render HTML for your pages, including the SEO meta tags, with all that rich, well-typed Elm data available! That's something you can't accomplish with a vanilla Elm app, and it's one of the main use cases for elm-pages.\n    Because elm-pages has a build step, you know that your BackendTask.Http requests succeeded, your decoders succeeded, your custom BackendTask validations succeeded, and everything went smoothly. If something went wrong, you get a build failure and can deal with the issues before the site goes live. That means your users won't see those errors, and as a developer you don't need to handle those error cases in your code! Think of it as \"parse, don't validate\", but for your entire build. In the case of server-rendered routes, a BackendTask failure will render a 500 page, so more care needs to be taken to make sure all common errors are handled properly, but the tradeoff is that you can use BackendTask's to pull in highly dynamic data and even render user-specific pages.\n    For static routes, you don't have to worry about an API being down, or hitting it repeatedly. You can build in data and it will end up as optimized binary-encoded data served up with all the other assets of your site. If your CDN (static site host) is down, then the rest of your site is probably down anyway. If your site host is up, then so is all of your BackendTask data. Also, it will be served up extremely quickly without needing to wait for any database queries to be performed, andThen requests to be resolved, etc., because all of that work and waiting was done at build-time!\n\nMental Model\n\nYou can think of a BackendTask as a declarative (not imperative) definition of data. It represents where to get the data from, and how to transform it (map, combine with other BackendTasks, etc.).\nHow do I actually use a BackendTask?\n\nThis is very similar to Cmd's in Elm. You don't perform a Cmd just by running that code, as you might in a language like JavaScript. Instead, a Cmd will not do anything unless you pass it to The Elm Architecture to have it perform it for you. You pass a Cmd to The Elm Architecture by returning it in init or update. So actually a Cmd is just data describing a side-effect that the Elm runtime can perform, and how to build a Msg once it's done.\n\nBackendTask's are very similar. A BackendTask doesn't do anything just by \"running\" it. Just like a Cmd, it's only data that describes a side-effect to perform. Specifically, it describes a side-effect that the elm-pages runtime can perform. There are a few places where we can pass a BackendTask to the elm-pages runtime so it can perform it. Most commonly, you give a field called data in your Route Module's definition. Instead of giving a Msg when the side-effects are complete, the page will render once all of the side-effects have run and all the data is resolved. elm-pages makes the resolved data available your Route Module's init, view, update, and head functions, similar to how a regular Elm app passes Msg's in to update.\n\nAny place in your elm-pages app where the framework lets you pass in a value of type BackendTask is a place where you can give elm-pages a BackendTask to perform (for example, Site.head where you define global head tags for your site).\nBasics\ntype alias BackendTask error value =\n    RawRequest error value\n\nA BackendTask represents data that will be gathered at build time. Multiple BackendTasks can be combined together using the mapN functions, very similar to how you can manipulate values with Json Decoders in Elm.\nmap : (a -> b) -> BackendTask error a -> BackendTask error b"
+      },
+      "date": 1693403366869
+    },
+    {
+      "type": "edit",
+      "id": "b108fd8d1f7ad758",
+      "item": {
+        "type": "code",
+        "id": "b108fd8d1f7ad758",
+        "text": "map : (a -> b) -> BackendTask error a -> BackendTask error b"
+      },
+      "date": 1693403388773
+    },
+    {
+      "type": "edit",
+      "id": "d76f0c0c345acbfa",
+      "item": {
+        "type": "paragraph",
+        "id": "d76f0c0c345acbfa",
+        "text": "Transform a request into an arbitrary value. The same underlying task will be performed, but mapping allows you to change the resulting values by applying functions to the results. [https://package.elm-lang.org/packages/dillonkearns/elm-pages/10.0.1/BackendTask#map page]"
+      },
+      "date": 1693403404169
+    },
+    {
+      "id": "b108fd8d1f7ad758",
+      "type": "move",
+      "order": [
+        "b108fd8d1f7ad758",
+        "d76f0c0c345acbfa"
+      ],
+      "date": 1693403441185
+    }
+  ]
+}

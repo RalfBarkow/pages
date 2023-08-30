@@ -1,0 +1,1497 @@
+{
+  "title": "2023-08-30",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "1b2378adcb99c95e",
+      "text": "⇒ [[View Route Module]] ⇒ [[BackendTask.allowFatal]] ⇒ [[FatalError]]"
+    },
+    {
+      "type": "code",
+      "id": "3469ea8f6e7d143c",
+      "text": "BackendTask.Custom.run \"hello\"\n    (Encode.string routeParams.slug)\n    Decode.string\n    |> BackendTask.allowFatal\n    |> BackendTask.map\n        (\\hello -> Server.Response.render { hello = hello })\n"
+    },
+    {
+      "type": "markdown",
+      "id": "1757d656c6b17cb8",
+      "text": "render : data -> Server.Response.Response data error\nrender data\nRender the Route Module with the supplied data. Used for both the data and action functions in a server-rendered Route Module."
+    },
+    {
+      "type": "code",
+      "id": "ba17c63bd9806fd6",
+      "text": "type alias Data =\n    { hello : String }\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "7fc6fc1c59631e7d",
+      "text": "Here's what's happening inside the data function:"
+    },
+    {
+      "type": "paragraph",
+      "id": "8fcda43f9d64156c",
+      "text": "[[BackendTask.Custom.run]] \"hello\":\nThis will call the async JavaScript function hello(name) from the definition in a file called `[[custom-backend-task]].js` in your project's root directory. The function receives the input JSON value, and the Decoder is used to decode the return value of the async function.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "f7ea964c36fd55bc",
+      "text": "(Encode.string routeParams.slug):\nThis line encodes the slug value from routeParams as a string. It sets up the name parameter of the hello(name) function of the request to be sent to a backend server. The Encode.string function is used to encode the slug value."
+    },
+    {
+      "type": "paragraph",
+      "id": "9d857c5c90e3ebcb",
+      "text": "Decode.string:\nThis line specifies that the response data should be decoded as a string when it's received. It's essentially telling Elm how to interpret the data that comes back from the backend."
+    },
+    {
+      "type": "paragraph",
+      "id": "3ae8a6dc542278b4",
+      "text": "Note: "
+    },
+    {
+      "type": "code",
+      "id": "5f35df1c40aa31b7",
+      "text": "type alias Data =\n    { hello : String }\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "f0d44956c0aefc94",
+      "text": "[[BackendTask.allowFatal]]:\nThis line allows the backend task to handle fatal errors. It might be setting up error handling or error recovery logic. ⇒ [[FatalError]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "79a3471c9bba2aa0",
+      "text": "[[BackendTask.map]] (\\hello -> Server.Response.render { hello = hello }):\nThis line maps over the result of the backend task. When the task completes successfully, it takes the result (in this case, a string referred to as hello) and uses it to create a Server.Response.Response object with a hello field."
+    },
+    {
+      "type": "paragraph",
+      "id": "24e7bbd598c2aca9",
+      "text": "In summary, the data function appears to define a backend task that involves making a request, encoding parameters, decoding the response, handling errors, and creating a response object. The exact purpose and details of this function depend on the broader context of your Elm/elm-pages application and the backend it interacts with."
+    },
+    {
+      "type": "pagefold",
+      "id": "4b701bcc079a7a26",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "28e3437780560105",
+      "text": "owner:dillonkearns File.jsonFile [https://github.com/search?q=owner%3Adillonkearns+File.jsonFile&type=code search], [https://github.com/dillonkearns/elm-pages/blob/36ccccfddab510119fd2e289d4966ca8b26aee9a/examples/end-to-end/app/Route/FileData.elm#L50 code]: "
+    },
+    {
+      "type": "code",
+      "id": "9e9ad8d0c23db5c9",
+      "text": "data : BackendTask FatalError Data\ndata =\n    \"my-json-data.json\"\n        |> BackendTask.File.jsonFile (Decode.field \"greeting\" Decode.string)\n        |> BackendTask.allowFatal\n        |> BackendTask.map Data"
+    },
+    {
+      "type": "paragraph",
+      "id": "4ab10354d49eb3ed",
+      "text": "We change our data function to"
+    },
+    {
+      "type": "code",
+      "id": "1f8339389f7cd5e6",
+      "text": "data :\n    RouteParams\n    -> Server.Request.Request\n    -> BackendTask.BackendTask FatalError.FatalError (Server.Response.Response Data ErrorPage.ErrorPage)\ndata routeParams request =\n    \"../pages/\"\n        ++ routeParams.slug\n        |> File.jsonFile (Decode.field \"title\" Decode.string)\n        |> BackendTask.allowFatal\n        |> BackendTask.map\n            (\\title -> Server.Response.render { title = title })\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "e0173497ce0d521f",
+      "text": "using a [[BackendTask.File]].jsonFile [https://package.elm-lang.org/packages/dillonkearns/elm-pages-v3-beta/latest/BackendTask-File#jsonFile page] and "
+    },
+    {
+      "type": "code",
+      "id": "676522f6a9b9d122",
+      "text": "type alias Data =\n    { title : String }\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "48354b171397325c",
+      "text": "We change our view function to:"
+    },
+    {
+      "type": "code",
+      "id": "9ae191be26eb4959",
+      "text": "view :\n    App Data ActionData RouteParams\n    -> Shared.Model\n    -> Model\n    -> View.View (PagesMsg.PagesMsg Msg)\nview app shared model =\n    { title = \"View.Slug_.SPLAT__\"\n    , body =\n        [ Html.h2 [] [ Html.text app.data.title ]\n        , Html.p [] [ Html.text (\"splat: \" ++ splat app) ]\n        ]\n    }\n"
+    },
+    {
+      "type": "code",
+      "id": "71a3f99258c639d2",
+      "text": "/view/welcome-visitors/view/2023-08-30"
+    },
+    {
+      "type": "image",
+      "id": "32fc3f6f04aa0785",
+      "text": "http://localhost:1234/view/welcome-visitors/view/2023-08-30",
+      "size": "wide",
+      "width": 430,
+      "height": 149,
+      "url": "/assets/plugins/image/0eb7099000ec591f20e07f08e39e38f4.jpg"
+    },
+    {
+      "type": "pagefold",
+      "id": "fe63a4ec8f896146",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "839b91af74945d0d",
+      "text": "-- WIRE ISSUES ---------------  ⇒ [[View Route Module]]\n\nI found one or more Route Modules with Data types that contain functions.\n\n- Wiki.Data.journal Unknown must not contain kernel type `Value` from elm/json:Json.Encode\n\nSee <https://dashboard.lamdera.app/docs/wire> [https://dashboard.lamdera.app/docs/wire page] for more info. ⇒ [[Wire]]\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "b12b24b823ddf063",
+      "text": "Wire issue after adding the Wiki module (src/Wiki.elm)  [https://github.com/dreyeck/blog/commit/dd07adb5a574f1493048bd9a76abb35e275f054b commit]"
+    },
+    {
+      "type": "code",
+      "id": "3ac67313ef36d02e",
+      "text": "-- The \"journal\" collects story edits.\n\n\ntype Event\n    = Create CreateEvent\n    | Add AddEvent\n    | Edit EditEvent\n    | Unknown Decode.Value\n\n"
+    },
+    {
+      "type": "code",
+      "id": "8e9126f3b2e784b0",
+      "text": "eventDecoder : Decode.Decoder Event\neventDecoder =\n    Decode.oneOf\n        [ Decode.map Create createEventDecoder\n        , Decode.map Add addEventDecoder\n\n        -- , Decode.map Edit editEventDecoder\n        -- Add decoders for other journal event variants as needed\n        , Decode.map Unknown Decode.value\n        ]\n\n"
+    },
+    {
+      "type": "code",
+      "id": "9a79e7d38a15f7f8",
+      "text": "journalEncoder : Event -> Encode.Value\njournalEncoder event =\n    case event of\n        Create createEvent ->\n            let\n                eventItem : StoryItemAlias\n                eventItem =\n                    createEvent.item\n            in\n            Encode.object\n                [ ( \"type\", Encode.string \"create\" )\n                , ( \"item\", storyItemEncoder eventItem )\n                , ( \"date\", Encode.int createEvent.date )\n                ]\n\n        Add addEvent ->\n            let\n                eventItem : FactoryItemAlias\n                eventItem =\n                    addEvent.item\n            in\n            Encode.object\n                [ ( \"item\", factoryItemEncoder eventItem )\n                , ( \"id\", Encode.string addEvent.id )\n                , ( \"type\", Encode.string \"add\" )\n                , ( \"date\", Encode.int addEvent.date )\n                ]\n\n        Edit editEvent ->\n            let\n                eventItem : ParagraphItemAlias\n                eventItem =\n                    editEvent.item\n            in\n            Encode.object\n                [ ( \"type\", Encode.string \"edit\" )\n                , ( \"id\", Encode.string editEvent.id )\n                , ( \"item\", paragraphItemEncoder eventItem )\n                , ( \"date\", Encode.int editEvent.date )\n                ]\n\n        -- Add encoders for other journal event variants as needed\n        Unknown _ ->\n            Encode.null\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "5477a75fb624ec6e",
+      "text": "tests (vite-elm-dojo)"
+    },
+    {
+      "type": "paragraph",
+      "id": "4a8cfeee84a18f4a",
+      "text": "✗ handle Unknown <internals>\n"
+    },
+    {
+      "type": "markdown",
+      "id": "fa69092fe5a45f5b",
+      "text": "## Missing (Unknown) Events\nSee Unknown Decode.Value in Type Event\n- [ ] move\n- [ ] fork\n- [ ] remove"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "2023-08-30",
+        "story": []
+      },
+      "date": 1693388004317
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3469ea8f6e7d143c"
+      },
+      "id": "3469ea8f6e7d143c",
+      "type": "add",
+      "date": 1693388005523
+    },
+    {
+      "type": "edit",
+      "id": "3469ea8f6e7d143c",
+      "item": {
+        "type": "code",
+        "id": "3469ea8f6e7d143c",
+        "text": "BackendTask.Custom.run \"hello\"\n    (Encode.string routeParams.slug)\n    Decode.string\n    |> BackendTask.allowFatal\n    |> BackendTask.map\n        (\\hello -> Server.Response.render { hello = hello })\n"
+      },
+      "date": 1693388007477
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7fc6fc1c59631e7d"
+      },
+      "id": "7fc6fc1c59631e7d",
+      "type": "add",
+      "after": "3469ea8f6e7d143c",
+      "date": 1693388018122
+    },
+    {
+      "type": "edit",
+      "id": "7fc6fc1c59631e7d",
+      "item": {
+        "type": "paragraph",
+        "id": "7fc6fc1c59631e7d",
+        "text": "Here's what's happening inside the data function:"
+      },
+      "date": 1693388019513
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1b2378adcb99c95e"
+      },
+      "id": "1b2378adcb99c95e",
+      "type": "add",
+      "after": "7fc6fc1c59631e7d",
+      "date": 1693388037471
+    },
+    {
+      "id": "1b2378adcb99c95e",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "3469ea8f6e7d143c",
+        "7fc6fc1c59631e7d"
+      ],
+      "date": 1693388038791
+    },
+    {
+      "type": "edit",
+      "id": "1b2378adcb99c95e",
+      "item": {
+        "type": "paragraph",
+        "id": "1b2378adcb99c95e",
+        "text": "⇒ [[View Route Module]]"
+      },
+      "date": 1693388046762
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8fcda43f9d64156c"
+      },
+      "id": "8fcda43f9d64156c",
+      "type": "add",
+      "after": "7fc6fc1c59631e7d",
+      "date": 1693388059724
+    },
+    {
+      "type": "edit",
+      "id": "8fcda43f9d64156c",
+      "item": {
+        "type": "paragraph",
+        "id": "8fcda43f9d64156c",
+        "text": "\nBackendTask.Custom.run \"hello\":\nThis line seems to be starting a custom backend task named \"hello.\" It's indicating that you want to perform a specific operation or request data related to \"hello.\"\n(Encode.string routeParams.slug):\nThis line encodes the slug value from routeParams as a string. It's likely preparing a part of the request to be sent to a backend server. The Encode.string function is used for encoding the slug value.\nDecode.string:\nThis line specifies that the response data should be decoded as a string when it's received. It's essentially telling Elm how to interpret the data that comes back from the backend.\nBackendTask.allowFatal:\nThis line allows the backend task to handle fatal errors. It might be setting up error handling or error recovery logic.\nBackendTask.map (\\hello -> Server.Response.render { hello = hello }):\nThis line maps over the result of the backend task. When the task completes successfully, it takes the result (in this case, a string referred to as hello) and uses it to create a Server.Response.Response object with a hello field.\nIn summary, the data function appears to define a backend task that involves making a request, encoding parameters, decoding the response, handling errors, and creating a response object. The exact purpose and details of this function depend on the broader context of your Elm/elm-pages application and the backend it interacts with."
+      },
+      "date": 1693388061031
+    },
+    {
+      "type": "edit",
+      "id": "8fcda43f9d64156c",
+      "item": {
+        "type": "paragraph",
+        "id": "8fcda43f9d64156c",
+        "text": "BackendTask.Custom.run \"hello\":\nThis line seems to be starting a custom backend task named \"hello.\" It's indicating that you want to perform a specific operation or request data related to \"hello.\"\n(Encode.string routeParams.slug):\nThis line encodes the slug value from routeParams as a string. It's likely preparing a part of the request to be sent to a backend server. The Encode.string function is used for encoding the slug value.\nDecode.string:\nThis line specifies that the response data should be decoded as a string when it's received. It's essentially telling Elm how to interpret the data that comes back from the backend.\nBackendTask.allowFatal:\nThis line allows the backend task to handle fatal errors. It might be setting up error handling or error recovery logic.\nBackendTask.map (\\hello -> Server.Response.render { hello = hello }):\nThis line maps over the result of the backend task. When the task completes successfully, it takes the result (in this case, a string referred to as hello) and uses it to create a Server.Response.Response object with a hello field."
+      },
+      "date": 1693388072480
+    },
+    {
+      "type": "add",
+      "id": "24e7bbd598c2aca9",
+      "item": {
+        "type": "paragraph",
+        "id": "24e7bbd598c2aca9",
+        "text": "In summary, the data function appears to define a backend task that involves making a request, encoding parameters, decoding the response, handling errors, and creating a response object. The exact purpose and details of this function depend on the broader context of your Elm/elm-pages application and the backend it interacts with."
+      },
+      "after": "8fcda43f9d64156c",
+      "date": 1693388073608
+    },
+    {
+      "type": "edit",
+      "id": "8fcda43f9d64156c",
+      "item": {
+        "type": "paragraph",
+        "id": "8fcda43f9d64156c",
+        "text": "BackendTask.Custom.run \"hello\":\nThis line seems to be starting a custom backend task named \"hello.\" It's indicating that you want to perform a specific operation or request data related to \"hello.\""
+      },
+      "date": 1693388118311
+    },
+    {
+      "type": "add",
+      "id": "f7ea964c36fd55bc",
+      "item": {
+        "type": "paragraph",
+        "id": "f7ea964c36fd55bc",
+        "text": "(Encode.string routeParams.slug):\nThis line encodes the slug value from routeParams as a string. It's likely preparing a part of the request to be sent to a backend server. The Encode.string function is used for encoding the slug value."
+      },
+      "after": "8fcda43f9d64156c",
+      "date": 1693388119773
+    },
+    {
+      "type": "add",
+      "id": "9d857c5c90e3ebcb",
+      "item": {
+        "type": "paragraph",
+        "id": "9d857c5c90e3ebcb",
+        "text": "Decode.string:\nThis line specifies that the response data should be decoded as a string when it's received. It's essentially telling Elm how to interpret the data that comes back from the backend."
+      },
+      "after": "f7ea964c36fd55bc",
+      "date": 1693388125647
+    },
+    {
+      "type": "add",
+      "id": "f0d44956c0aefc94",
+      "item": {
+        "type": "paragraph",
+        "id": "f0d44956c0aefc94",
+        "text": "BackendTask.allowFatal:\nThis line allows the backend task to handle fatal errors. It might be setting up error handling or error recovery logic."
+      },
+      "after": "9d857c5c90e3ebcb",
+      "date": 1693388127918
+    },
+    {
+      "type": "add",
+      "id": "79a3471c9bba2aa0",
+      "item": {
+        "type": "paragraph",
+        "id": "79a3471c9bba2aa0",
+        "text": "BackendTask.map (\\hello -> Server.Response.render { hello = hello }):\nThis line maps over the result of the backend task. When the task completes successfully, it takes the result (in this case, a string referred to as hello) and uses it to create a Server.Response.Response object with a hello field."
+      },
+      "after": "f0d44956c0aefc94",
+      "date": 1693388142806
+    },
+    {
+      "type": "edit",
+      "id": "8fcda43f9d64156c",
+      "item": {
+        "type": "paragraph",
+        "id": "8fcda43f9d64156c",
+        "text": "[[BackendTask.Custom.run]] \"hello\":\nThis line seems to be starting a custom backend task named \"hello.\" It's indicating that you want to perform a specific operation or request data related to \"hello.\""
+      },
+      "date": 1693389877361
+    },
+    {
+      "type": "edit",
+      "id": "f0d44956c0aefc94",
+      "item": {
+        "type": "paragraph",
+        "id": "f0d44956c0aefc94",
+        "text": "[[BackendTask.allowFatal]]:\nThis line allows the backend task to handle fatal errors. It might be setting up error handling or error recovery logic."
+      },
+      "date": 1693389890649
+    },
+    {
+      "type": "edit",
+      "id": "79a3471c9bba2aa0",
+      "item": {
+        "type": "paragraph",
+        "id": "79a3471c9bba2aa0",
+        "text": "[[BackendTask.map]] (\\hello -> Server.Response.render { hello = hello }):\nThis line maps over the result of the backend task. When the task completes successfully, it takes the result (in this case, a string referred to as hello) and uses it to create a Server.Response.Response object with a hello field."
+      },
+      "date": 1693389901762
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4b701bcc079a7a26"
+      },
+      "id": "4b701bcc079a7a26",
+      "type": "add",
+      "after": "24e7bbd598c2aca9",
+      "date": 1693392558693
+    },
+    {
+      "type": "edit",
+      "id": "4b701bcc079a7a26",
+      "item": {
+        "type": "pagefold",
+        "id": "4b701bcc079a7a26",
+        "text": "~"
+      },
+      "date": 1693392562537
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "28e3437780560105"
+      },
+      "id": "28e3437780560105",
+      "type": "add",
+      "after": "4b701bcc079a7a26",
+      "date": 1693392564251
+    },
+    {
+      "type": "edit",
+      "id": "28e3437780560105",
+      "item": {
+        "type": "paragraph",
+        "id": "28e3437780560105",
+        "text": "https://github.com/search?q=owner%3Adillonkearns+File.jsonFile&type=code search"
+      },
+      "date": 1693392569668
+    },
+    {
+      "type": "edit",
+      "id": "28e3437780560105",
+      "item": {
+        "type": "paragraph",
+        "id": "28e3437780560105",
+        "text": "owner:dillonkearns File.jsonFile [https://github.com/search?q=owner%3Adillonkearns+File.jsonFile&type=code search]"
+      },
+      "date": 1693392581414
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9e9ad8d0c23db5c9"
+      },
+      "id": "9e9ad8d0c23db5c9",
+      "type": "add",
+      "after": "28e3437780560105",
+      "date": 1693392597460
+    },
+    {
+      "type": "edit",
+      "id": "9e9ad8d0c23db5c9",
+      "item": {
+        "type": "code",
+        "id": "9e9ad8d0c23db5c9",
+        "text": "data : BackendTask FatalError Data\ndata =\n    \"my-json-data.json\"\n        |> BackendTask.File.jsonFile (Decode.field \"greeting\" Decode.string)\n        |> BackendTask.allowFatal\n        |> BackendTask.map Data"
+      },
+      "date": 1693392599551
+    },
+    {
+      "type": "edit",
+      "id": "28e3437780560105",
+      "item": {
+        "type": "paragraph",
+        "id": "28e3437780560105",
+        "text": "owner:dillonkearns File.jsonFile [https://github.com/search?q=owner%3Adillonkearns+File.jsonFile&type=code search], [https://github.com/dillonkearns/elm-pages/blob/36ccccfddab510119fd2e289d4966ca8b26aee9a/examples/end-to-end/app/Route/FileData.elm#L50 code]: "
+      },
+      "date": 1693392625011
+    },
+    {
+      "type": "edit",
+      "id": "1b2378adcb99c95e",
+      "item": {
+        "type": "paragraph",
+        "id": "1b2378adcb99c95e",
+        "text": "⇒ [[View Route Module]] ⇒ [[BackendTask.allowFatal]]"
+      },
+      "date": 1693393249381
+    },
+    {
+      "type": "edit",
+      "id": "1b2378adcb99c95e",
+      "item": {
+        "type": "paragraph",
+        "id": "1b2378adcb99c95e",
+        "text": "⇒ [[View Route Module]] ⇒ [[BackendTask.allowFatal]] ⇒ [[FatalError]]"
+      },
+      "date": 1693393274132
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4ab10354d49eb3ed"
+      },
+      "id": "4ab10354d49eb3ed",
+      "type": "add",
+      "after": "9e9ad8d0c23db5c9",
+      "date": 1693393922256
+    },
+    {
+      "type": "edit",
+      "id": "4ab10354d49eb3ed",
+      "item": {
+        "type": "paragraph",
+        "id": "4ab10354d49eb3ed",
+        "text": "We change our data function to:"
+      },
+      "date": 1693393937715
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1f8339389f7cd5e6"
+      },
+      "id": "1f8339389f7cd5e6",
+      "type": "add",
+      "after": "4ab10354d49eb3ed",
+      "date": 1693393939072
+    },
+    {
+      "type": "edit",
+      "id": "1f8339389f7cd5e6",
+      "item": {
+        "type": "code",
+        "id": "1f8339389f7cd5e6",
+        "text": "data :\n    RouteParams\n    -> Server.Request.Request\n    -> BackendTask.BackendTask FatalError.FatalError (Server.Response.Response Data ErrorPage.ErrorPage)\ndata routeParams request =\n    \"../pages/\"\n        ++ routeParams.slug\n        |> File.jsonFile (Decode.field \"title\" Decode.string)\n        |> BackendTask.allowFatal\n        |> BackendTask.map\n            (\\title -> Server.Response.render { title = title })\n\n"
+      },
+      "date": 1693393940647
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e0173497ce0d521f"
+      },
+      "id": "e0173497ce0d521f",
+      "type": "add",
+      "after": "1f8339389f7cd5e6",
+      "date": 1693394633863
+    },
+    {
+      "type": "edit",
+      "id": "e0173497ce0d521f",
+      "item": {
+        "type": "paragraph",
+        "id": "e0173497ce0d521f",
+        "text": "with"
+      },
+      "date": 1693394636321
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "676522f6a9b9d122"
+      },
+      "id": "676522f6a9b9d122",
+      "type": "add",
+      "after": "e0173497ce0d521f",
+      "date": 1693394638315
+    },
+    {
+      "type": "edit",
+      "id": "676522f6a9b9d122",
+      "item": {
+        "type": "code",
+        "id": "676522f6a9b9d122",
+        "text": "type alias Data =\n    { title : String }\n"
+      },
+      "date": 1693394639880
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "48354b171397325c"
+      },
+      "id": "48354b171397325c",
+      "type": "add",
+      "after": "676522f6a9b9d122",
+      "date": 1693394809579
+    },
+    {
+      "type": "edit",
+      "id": "48354b171397325c",
+      "item": {
+        "type": "paragraph",
+        "id": "48354b171397325c",
+        "text": "We change our view function to:"
+      },
+      "date": 1693394821161
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9ae191be26eb4959"
+      },
+      "id": "9ae191be26eb4959",
+      "type": "add",
+      "after": "48354b171397325c",
+      "date": 1693394823211
+    },
+    {
+      "type": "edit",
+      "id": "9ae191be26eb4959",
+      "item": {
+        "type": "code",
+        "id": "9ae191be26eb4959",
+        "text": "view :\n    App Data ActionData RouteParams\n    -> Shared.Model\n    -> Model\n    -> View.View (PagesMsg.PagesMsg Msg)\nview app shared model =\n    { title = \"View.Slug_.SPLAT__\"\n    , body =\n        [ Html.h2 [] [ Html.text app.data.title ]\n        , Html.p [] [ Html.text (\"splat: \" ++ splat app) ]\n        ]\n    }\n"
+      },
+      "date": 1693394825160
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "71a3f99258c639d2"
+      },
+      "id": "71a3f99258c639d2",
+      "type": "add",
+      "after": "9ae191be26eb4959",
+      "date": 1693394955177
+    },
+    {
+      "type": "edit",
+      "id": "71a3f99258c639d2",
+      "item": {
+        "type": "code",
+        "id": "71a3f99258c639d2",
+        "text": "/view/welcome-visitors"
+      },
+      "date": 1693394956826
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "32fc3f6f04aa0785"
+      },
+      "id": "32fc3f6f04aa0785",
+      "type": "add",
+      "after": "71a3f99258c639d2",
+      "date": 1693394970759
+    },
+    {
+      "type": "edit",
+      "id": "71a3f99258c639d2",
+      "item": {
+        "type": "code",
+        "id": "71a3f99258c639d2",
+        "text": "/view/welcome-visitors/view/2023-08-30"
+      },
+      "date": 1693394980234
+    },
+    {
+      "type": "edit",
+      "id": "32fc3f6f04aa0785",
+      "item": {
+        "type": "image",
+        "id": "32fc3f6f04aa0785",
+        "text": "Uploaded image",
+        "size": "wide",
+        "width": 430,
+        "height": 149,
+        "url": "/assets/plugins/image/0eb7099000ec591f20e07f08e39e38f4.jpg"
+      },
+      "date": 1693395091467
+    },
+    {
+      "type": "edit",
+      "id": "32fc3f6f04aa0785",
+      "item": {
+        "type": "image",
+        "id": "32fc3f6f04aa0785",
+        "text": "http://localhost:1234/view/welcome-visitors/view/2023-08-30",
+        "size": "wide",
+        "width": 430,
+        "height": 149,
+        "url": "/assets/plugins/image/0eb7099000ec591f20e07f08e39e38f4.jpg"
+      },
+      "date": 1693395096529
+    },
+    {
+      "type": "edit",
+      "id": "e0173497ce0d521f",
+      "item": {
+        "type": "paragraph",
+        "id": "e0173497ce0d521f",
+        "text": "using a [[BackendTask.File]] and "
+      },
+      "date": 1693402068124
+    },
+    {
+      "type": "edit",
+      "id": "4ab10354d49eb3ed",
+      "item": {
+        "type": "paragraph",
+        "id": "4ab10354d49eb3ed",
+        "text": "We change our data function to"
+      },
+      "date": 1693402201723
+    },
+    {
+      "type": "fork",
+      "date": 1693402256323
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ba17c63bd9806fd6"
+      },
+      "id": "ba17c63bd9806fd6",
+      "type": "add",
+      "after": "32fc3f6f04aa0785",
+      "date": 1693402550332
+    },
+    {
+      "id": "ba17c63bd9806fd6",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "3469ea8f6e7d143c",
+        "ba17c63bd9806fd6",
+        "7fc6fc1c59631e7d",
+        "8fcda43f9d64156c",
+        "f7ea964c36fd55bc",
+        "9d857c5c90e3ebcb",
+        "f0d44956c0aefc94",
+        "79a3471c9bba2aa0",
+        "24e7bbd598c2aca9",
+        "4b701bcc079a7a26",
+        "28e3437780560105",
+        "9e9ad8d0c23db5c9",
+        "4ab10354d49eb3ed",
+        "1f8339389f7cd5e6",
+        "e0173497ce0d521f",
+        "676522f6a9b9d122",
+        "48354b171397325c",
+        "9ae191be26eb4959",
+        "71a3f99258c639d2",
+        "32fc3f6f04aa0785"
+      ],
+      "date": 1693402560416
+    },
+    {
+      "type": "edit",
+      "id": "ba17c63bd9806fd6",
+      "item": {
+        "type": "code",
+        "id": "ba17c63bd9806fd6",
+        "text": "type alias Data =\n    { hello : String }\n"
+      },
+      "date": 1693402566237
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1757d656c6b17cb8"
+      },
+      "id": "1757d656c6b17cb8",
+      "type": "add",
+      "after": "32fc3f6f04aa0785",
+      "date": 1693402624555
+    },
+    {
+      "id": "1757d656c6b17cb8",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "3469ea8f6e7d143c",
+        "1757d656c6b17cb8",
+        "ba17c63bd9806fd6",
+        "7fc6fc1c59631e7d",
+        "8fcda43f9d64156c",
+        "f7ea964c36fd55bc",
+        "9d857c5c90e3ebcb",
+        "f0d44956c0aefc94",
+        "79a3471c9bba2aa0",
+        "24e7bbd598c2aca9",
+        "4b701bcc079a7a26",
+        "28e3437780560105",
+        "9e9ad8d0c23db5c9",
+        "4ab10354d49eb3ed",
+        "1f8339389f7cd5e6",
+        "e0173497ce0d521f",
+        "676522f6a9b9d122",
+        "48354b171397325c",
+        "9ae191be26eb4959",
+        "71a3f99258c639d2",
+        "32fc3f6f04aa0785"
+      ],
+      "date": 1693402631433
+    },
+    {
+      "type": "edit",
+      "id": "1757d656c6b17cb8",
+      "item": {
+        "type": "markdown",
+        "id": "1757d656c6b17cb8",
+        "text": "render : data -> Server.Response.Response data error\nrender data\nRender the Route Module with the supplied data. Used for both the data and action functions in a server-rendered Route Module.\n\nResponse.render project"
+      },
+      "date": 1693402633403
+    },
+    {
+      "type": "edit",
+      "id": "1757d656c6b17cb8",
+      "item": {
+        "type": "markdown",
+        "id": "1757d656c6b17cb8",
+        "text": "render : data -> Server.Response.Response data error\nrender data\nRender the Route Module with the supplied data. Used for both the data and action functions in a server-rendered Route Module.\n"
+      },
+      "date": 1693402681952
+    },
+    {
+      "type": "edit",
+      "id": "1757d656c6b17cb8",
+      "item": {
+        "type": "markdown",
+        "id": "1757d656c6b17cb8",
+        "text": "render : data -> Server.Response.Response data error\nrender data\nRender the Route Module with the supplied data. Used for both the data and action functions in a server-rendered Route Module."
+      },
+      "date": 1693402686016
+    },
+    {
+      "type": "edit",
+      "id": "8fcda43f9d64156c",
+      "item": {
+        "type": "paragraph",
+        "id": "8fcda43f9d64156c",
+        "text": "[[BackendTask.Custom.run]] \"hello\":\nThis will call an async JavaScript function with the given name from the definition in a file called `[[custom-backend-task]].js` in your project's root directory. The function receives the input JSON value, and the Decoder is used to decode the return value of the async function.\n"
+      },
+      "date": 1693402788872
+    },
+    {
+      "type": "edit",
+      "id": "8fcda43f9d64156c",
+      "item": {
+        "type": "paragraph",
+        "id": "8fcda43f9d64156c",
+        "text": "[[BackendTask.Custom.run]] \"hello\":\nThis will call the async JavaScript function hello(name) from the definition in a file called `[[custom-backend-task]].js` in your project's root directory. The function receives the input JSON value, and the Decoder is used to decode the return value of the async function.\n"
+      },
+      "date": 1693402899530
+    },
+    {
+      "type": "edit",
+      "id": "f7ea964c36fd55bc",
+      "item": {
+        "type": "paragraph",
+        "id": "f7ea964c36fd55bc",
+        "text": "(Encode.string routeParams.slug):\nThis line encodes the slug value from routeParams as a string. It's preparing the parameter name of the request to be sent to a backend server. The Encode.string function is used for encoding the slug value."
+      },
+      "date": 1693403024003
+    },
+    {
+      "type": "edit",
+      "id": "f7ea964c36fd55bc",
+      "item": {
+        "type": "paragraph",
+        "id": "f7ea964c36fd55bc",
+        "text": "(Encode.string routeParams.slug):\nThis line encodes the slug value from routeParams as a string. It sets up the name parameter of the hello(name) function of the request to be sent to a backend server. The Encode.string function is used to encode the slug value."
+      },
+      "date": 1693403161109
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5f35df1c40aa31b7"
+      },
+      "id": "5f35df1c40aa31b7",
+      "type": "add",
+      "after": "32fc3f6f04aa0785",
+      "date": 1693403226188
+    },
+    {
+      "id": "5f35df1c40aa31b7",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "3469ea8f6e7d143c",
+        "1757d656c6b17cb8",
+        "ba17c63bd9806fd6",
+        "7fc6fc1c59631e7d",
+        "8fcda43f9d64156c",
+        "f7ea964c36fd55bc",
+        "5f35df1c40aa31b7",
+        "9d857c5c90e3ebcb",
+        "f0d44956c0aefc94",
+        "79a3471c9bba2aa0",
+        "24e7bbd598c2aca9",
+        "4b701bcc079a7a26",
+        "28e3437780560105",
+        "9e9ad8d0c23db5c9",
+        "4ab10354d49eb3ed",
+        "1f8339389f7cd5e6",
+        "e0173497ce0d521f",
+        "676522f6a9b9d122",
+        "48354b171397325c",
+        "9ae191be26eb4959",
+        "71a3f99258c639d2",
+        "32fc3f6f04aa0785"
+      ],
+      "date": 1693403240271
+    },
+    {
+      "type": "edit",
+      "id": "5f35df1c40aa31b7",
+      "item": {
+        "type": "code",
+        "id": "5f35df1c40aa31b7",
+        "text": "type alias Data =\n    { hello : String }\n"
+      },
+      "date": 1693403242027
+    },
+    {
+      "type": "add",
+      "id": "3ae8a6dc542278b4",
+      "item": {
+        "type": "paragraph",
+        "id": "3ae8a6dc542278b4",
+        "text": "Note: "
+      },
+      "after": "f7ea964c36fd55bc",
+      "date": 1693403247706
+    },
+    {
+      "id": "9d857c5c90e3ebcb",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "3469ea8f6e7d143c",
+        "1757d656c6b17cb8",
+        "ba17c63bd9806fd6",
+        "7fc6fc1c59631e7d",
+        "8fcda43f9d64156c",
+        "f7ea964c36fd55bc",
+        "9d857c5c90e3ebcb",
+        "3ae8a6dc542278b4",
+        "5f35df1c40aa31b7",
+        "f0d44956c0aefc94",
+        "79a3471c9bba2aa0",
+        "24e7bbd598c2aca9",
+        "4b701bcc079a7a26",
+        "28e3437780560105",
+        "9e9ad8d0c23db5c9",
+        "4ab10354d49eb3ed",
+        "1f8339389f7cd5e6",
+        "e0173497ce0d521f",
+        "676522f6a9b9d122",
+        "48354b171397325c",
+        "9ae191be26eb4959",
+        "71a3f99258c639d2",
+        "32fc3f6f04aa0785"
+      ],
+      "date": 1693403253104
+    },
+    {
+      "id": "634b753f3ff4b2de",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "634b753f3ff4b2de",
+        "text": "⇒ [[FatalError]]"
+      },
+      "after": "f0d44956c0aefc94",
+      "attribution": {
+        "page": "BackendTask.allowFatal"
+      },
+      "date": 1693403279925
+    },
+    {
+      "type": "remove",
+      "id": "634b753f3ff4b2de",
+      "date": 1693403283540
+    },
+    {
+      "type": "edit",
+      "id": "f0d44956c0aefc94",
+      "item": {
+        "type": "paragraph",
+        "id": "f0d44956c0aefc94",
+        "text": "[[BackendTask.allowFatal]]:\nThis line allows the backend task to handle fatal errors. It might be setting up error handling or error recovery logic. ⇒ [[FatalError]]"
+      },
+      "date": 1693403284264
+    },
+    {
+      "type": "edit",
+      "id": "e0173497ce0d521f",
+      "item": {
+        "type": "paragraph",
+        "id": "e0173497ce0d521f",
+        "text": "using a [[BackendTask.File]] [https://package.elm-lang.org/packages/dillonkearns/elm-pages-v3-beta/latest/BackendTask-File#jsonFile page] and "
+      },
+      "date": 1693403599959
+    },
+    {
+      "type": "edit",
+      "id": "e0173497ce0d521f",
+      "item": {
+        "type": "paragraph",
+        "id": "e0173497ce0d521f",
+        "text": "using a [[BackendTask.File]].jsonFile [https://package.elm-lang.org/packages/dillonkearns/elm-pages-v3-beta/latest/BackendTask-File#jsonFile page] and "
+      },
+      "date": 1693403617672
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fe63a4ec8f896146"
+      },
+      "id": "fe63a4ec8f896146",
+      "type": "add",
+      "after": "32fc3f6f04aa0785",
+      "date": 1693406566185
+    },
+    {
+      "type": "edit",
+      "id": "fe63a4ec8f896146",
+      "item": {
+        "type": "pagefold",
+        "id": "fe63a4ec8f896146",
+        "text": "~"
+      },
+      "date": 1693406572521
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "839b91af74945d0d"
+      },
+      "id": "839b91af74945d0d",
+      "type": "add",
+      "after": "fe63a4ec8f896146",
+      "date": 1693406573688
+    },
+    {
+      "type": "edit",
+      "id": "839b91af74945d0d",
+      "item": {
+        "type": "paragraph",
+        "id": "839b91af74945d0d",
+        "text": "\n\n-- WIRE ISSUES --------------- \n\nI found one or more Route Modules with Data types that contain functions.\n\n- Wiki.Data.journal Unknown must not contain kernel type `Value` from elm/json:Json.Encode\n\nSee <https://dashboard.lamdera.app/docs/wire> for more info.\n\n"
+      },
+      "date": 1693406575173
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d00a2f15fc8b0607"
+      },
+      "id": "d00a2f15fc8b0607",
+      "type": "add",
+      "after": "839b91af74945d0d",
+      "date": 1693406763920
+    },
+    {
+      "type": "edit",
+      "id": "d00a2f15fc8b0607",
+      "item": {
+        "type": "paragraph",
+        "id": "d00a2f15fc8b0607",
+        "text": "[https://dashboard.lamdera.app/docs/wire page]"
+      },
+      "date": 1693406768110
+    },
+    {
+      "type": "edit",
+      "id": "d00a2f15fc8b0607",
+      "item": {
+        "type": "paragraph",
+        "id": "d00a2f15fc8b0607",
+        "text": "Send messages (Wire) [https://dashboard.lamdera.app/docs/wire page]"
+      },
+      "date": 1693406776371
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5d1a089c22c0d457"
+      },
+      "id": "5d1a089c22c0d457",
+      "type": "add",
+      "after": "d00a2f15fc8b0607",
+      "date": 1693407103102
+    },
+    {
+      "type": "edit",
+      "id": "5d1a089c22c0d457",
+      "item": {
+        "type": "paragraph",
+        "id": "5d1a089c22c0d457",
+        "text": "Wire is the mechanism by which ToBackend and ToFrontend message values are transferred between the frontend and the backend."
+      },
+      "date": 1693407104423
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "04ce2d9e2e704d7b"
+      },
+      "id": "04ce2d9e2e704d7b",
+      "type": "add",
+      "after": "5d1a089c22c0d457",
+      "date": 1693407140776
+    },
+    {
+      "type": "edit",
+      "id": "04ce2d9e2e704d7b",
+      "item": {
+        "type": "paragraph",
+        "id": "04ce2d9e2e704d7b",
+        "text": "Lamdera automatically handles encoding, transfer and decoding of these values, as well as type-checking they are being used correctly."
+      },
+      "date": 1693407142193
+    },
+    {
+      "type": "edit",
+      "id": "d00a2f15fc8b0607",
+      "item": {
+        "type": "paragraph",
+        "id": "d00a2f15fc8b0607",
+        "text": "Send messages ([[Wire]]) [https://dashboard.lamdera.app/docs/wire page]"
+      },
+      "date": 1693407161291
+    },
+    {
+      "id": "5d1a089c22c0d457",
+      "type": "remove",
+      "removedTo": {
+        "page": "Wire"
+      },
+      "date": 1693407167402
+    },
+    {
+      "id": "d00a2f15fc8b0607",
+      "type": "remove",
+      "removedTo": {
+        "page": "Wire"
+      },
+      "date": 1693407185884
+    },
+    {
+      "id": "04ce2d9e2e704d7b",
+      "type": "remove",
+      "removedTo": {
+        "page": "Wire"
+      },
+      "date": 1693407201184
+    },
+    {
+      "type": "edit",
+      "id": "839b91af74945d0d",
+      "item": {
+        "type": "paragraph",
+        "id": "839b91af74945d0d",
+        "text": "\n-- WIRE ISSUES --------------- \n\nI found one or more Route Modules with Data types that contain functions.\n\n- Wiki.Data.journal Unknown must not contain kernel type `Value` from elm/json:Json.Encode\n\nSee <https://dashboard.lamdera.app/docs/wire> for more info. ⇒ [[Wire]]\n"
+      },
+      "date": 1693407219169
+    },
+    {
+      "type": "edit",
+      "id": "839b91af74945d0d",
+      "item": {
+        "type": "paragraph",
+        "id": "839b91af74945d0d",
+        "text": "-- WIRE ISSUES --------------- \n\nI found one or more Route Modules with Data types that contain functions.\n\n- Wiki.Data.journal Unknown must not contain kernel type `Value` from elm/json:Json.Encode\n\nSee <https://dashboard.lamdera.app/docs/wire> for more info. ⇒ [[Wire]]\n"
+      },
+      "date": 1693407501262
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b12b24b823ddf063"
+      },
+      "id": "b12b24b823ddf063",
+      "type": "add",
+      "after": "839b91af74945d0d",
+      "date": 1693408306287
+    },
+    {
+      "type": "edit",
+      "id": "b12b24b823ddf063",
+      "item": {
+        "type": "paragraph",
+        "id": "b12b24b823ddf063",
+        "text": "https://github.com/dreyeck/blog/commit/dd07adb5a574f1493048bd9a76abb35e275f054b"
+      },
+      "date": 1693408309649
+    },
+    {
+      "type": "edit",
+      "id": "b12b24b823ddf063",
+      "item": {
+        "type": "paragraph",
+        "id": "b12b24b823ddf063",
+        "text": "Wire issue after adding the Wiki module (src/Wiki.elm)  [https://github.com/dreyeck/blog/commit/dd07adb5a574f1493048bd9a76abb35e275f054b commit]"
+      },
+      "date": 1693408329183
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5477a75fb624ec6e"
+      },
+      "id": "5477a75fb624ec6e",
+      "type": "add",
+      "after": "b12b24b823ddf063",
+      "date": 1693408420967
+    },
+    {
+      "type": "edit",
+      "id": "5477a75fb624ec6e",
+      "item": {
+        "type": "paragraph",
+        "id": "5477a75fb624ec6e",
+        "text": "tests"
+      },
+      "date": 1693408423299
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3ac67313ef36d02e"
+      },
+      "id": "3ac67313ef36d02e",
+      "type": "add",
+      "after": "5477a75fb624ec6e",
+      "date": 1693408606033
+    },
+    {
+      "id": "3ac67313ef36d02e",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "3469ea8f6e7d143c",
+        "1757d656c6b17cb8",
+        "ba17c63bd9806fd6",
+        "7fc6fc1c59631e7d",
+        "8fcda43f9d64156c",
+        "f7ea964c36fd55bc",
+        "9d857c5c90e3ebcb",
+        "3ae8a6dc542278b4",
+        "5f35df1c40aa31b7",
+        "f0d44956c0aefc94",
+        "79a3471c9bba2aa0",
+        "24e7bbd598c2aca9",
+        "4b701bcc079a7a26",
+        "28e3437780560105",
+        "9e9ad8d0c23db5c9",
+        "4ab10354d49eb3ed",
+        "1f8339389f7cd5e6",
+        "e0173497ce0d521f",
+        "676522f6a9b9d122",
+        "48354b171397325c",
+        "9ae191be26eb4959",
+        "71a3f99258c639d2",
+        "32fc3f6f04aa0785",
+        "fe63a4ec8f896146",
+        "839b91af74945d0d",
+        "b12b24b823ddf063",
+        "3ac67313ef36d02e",
+        "5477a75fb624ec6e"
+      ],
+      "date": 1693408608600
+    },
+    {
+      "type": "edit",
+      "id": "3ac67313ef36d02e",
+      "item": {
+        "type": "code",
+        "id": "3ac67313ef36d02e",
+        "text": "-- The \"journal\" collects story edits.\n\n\ntype Event\n    = Create CreateEvent\n    | Add AddEvent\n    | Edit EditEvent\n    | Unknown Decode.Value\n\n"
+      },
+      "date": 1693408610083
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8e9126f3b2e784b0"
+      },
+      "id": "8e9126f3b2e784b0",
+      "type": "add",
+      "after": "5477a75fb624ec6e",
+      "date": 1693408644817
+    },
+    {
+      "id": "8e9126f3b2e784b0",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "3469ea8f6e7d143c",
+        "1757d656c6b17cb8",
+        "ba17c63bd9806fd6",
+        "7fc6fc1c59631e7d",
+        "8fcda43f9d64156c",
+        "f7ea964c36fd55bc",
+        "9d857c5c90e3ebcb",
+        "3ae8a6dc542278b4",
+        "5f35df1c40aa31b7",
+        "f0d44956c0aefc94",
+        "79a3471c9bba2aa0",
+        "24e7bbd598c2aca9",
+        "4b701bcc079a7a26",
+        "28e3437780560105",
+        "9e9ad8d0c23db5c9",
+        "4ab10354d49eb3ed",
+        "1f8339389f7cd5e6",
+        "e0173497ce0d521f",
+        "676522f6a9b9d122",
+        "48354b171397325c",
+        "9ae191be26eb4959",
+        "71a3f99258c639d2",
+        "32fc3f6f04aa0785",
+        "fe63a4ec8f896146",
+        "839b91af74945d0d",
+        "b12b24b823ddf063",
+        "3ac67313ef36d02e",
+        "8e9126f3b2e784b0",
+        "5477a75fb624ec6e"
+      ],
+      "date": 1693408647368
+    },
+    {
+      "type": "edit",
+      "id": "8e9126f3b2e784b0",
+      "item": {
+        "type": "code",
+        "id": "8e9126f3b2e784b0",
+        "text": "eventDecoder : Decode.Decoder Event\neventDecoder =\n    Decode.oneOf\n        [ Decode.map Create createEventDecoder\n        , Decode.map Add addEventDecoder\n\n        -- , Decode.map Edit editEventDecoder\n        -- Add decoders for other journal event variants as needed\n        , Decode.map Unknown Decode.value\n        ]\n\n"
+      },
+      "date": 1693408648893
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9a79e7d38a15f7f8"
+      },
+      "id": "9a79e7d38a15f7f8",
+      "type": "add",
+      "after": "5477a75fb624ec6e",
+      "date": 1693408696598
+    },
+    {
+      "id": "9a79e7d38a15f7f8",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "3469ea8f6e7d143c",
+        "1757d656c6b17cb8",
+        "ba17c63bd9806fd6",
+        "7fc6fc1c59631e7d",
+        "8fcda43f9d64156c",
+        "f7ea964c36fd55bc",
+        "9d857c5c90e3ebcb",
+        "3ae8a6dc542278b4",
+        "5f35df1c40aa31b7",
+        "f0d44956c0aefc94",
+        "79a3471c9bba2aa0",
+        "24e7bbd598c2aca9",
+        "4b701bcc079a7a26",
+        "28e3437780560105",
+        "9e9ad8d0c23db5c9",
+        "4ab10354d49eb3ed",
+        "1f8339389f7cd5e6",
+        "e0173497ce0d521f",
+        "676522f6a9b9d122",
+        "48354b171397325c",
+        "9ae191be26eb4959",
+        "71a3f99258c639d2",
+        "32fc3f6f04aa0785",
+        "fe63a4ec8f896146",
+        "839b91af74945d0d",
+        "b12b24b823ddf063",
+        "3ac67313ef36d02e",
+        "8e9126f3b2e784b0",
+        "9a79e7d38a15f7f8",
+        "5477a75fb624ec6e"
+      ],
+      "date": 1693408699020
+    },
+    {
+      "type": "edit",
+      "id": "9a79e7d38a15f7f8",
+      "item": {
+        "type": "code",
+        "id": "9a79e7d38a15f7f8",
+        "text": "journalEncoder : Event -> Encode.Value\njournalEncoder event =\n    case event of\n        Create createEvent ->\n            let\n                eventItem : StoryItemAlias\n                eventItem =\n                    createEvent.item\n            in\n            Encode.object\n                [ ( \"type\", Encode.string \"create\" )\n                , ( \"item\", storyItemEncoder eventItem )\n                , ( \"date\", Encode.int createEvent.date )\n                ]\n\n        Add addEvent ->\n            let\n                eventItem : FactoryItemAlias\n                eventItem =\n                    addEvent.item\n            in\n            Encode.object\n                [ ( \"item\", factoryItemEncoder eventItem )\n                , ( \"id\", Encode.string addEvent.id )\n                , ( \"type\", Encode.string \"add\" )\n                , ( \"date\", Encode.int addEvent.date )\n                ]\n\n        Edit editEvent ->\n            let\n                eventItem : ParagraphItemAlias\n                eventItem =\n                    editEvent.item\n            in\n            Encode.object\n                [ ( \"type\", Encode.string \"edit\" )\n                , ( \"id\", Encode.string editEvent.id )\n                , ( \"item\", paragraphItemEncoder eventItem )\n                , ( \"date\", Encode.int editEvent.date )\n                ]\n\n        -- Add encoders for other journal event variants as needed\n        Unknown _ ->\n            Encode.null\n"
+      },
+      "date": 1693408700556
+    },
+    {
+      "type": "edit",
+      "id": "839b91af74945d0d",
+      "item": {
+        "type": "paragraph",
+        "id": "839b91af74945d0d",
+        "text": "-- WIRE ISSUES ---------------  ⇒ [[View Route Module]]\n\nI found one or more Route Modules with Data types that contain functions.\n\n- Wiki.Data.journal Unknown must not contain kernel type `Value` from elm/json:Json.Encode\n\nSee <https://dashboard.lamdera.app/docs/wire> for more info. ⇒ [[Wire]]\n"
+      },
+      "date": 1693408751054
+    },
+    {
+      "type": "edit",
+      "id": "839b91af74945d0d",
+      "item": {
+        "type": "paragraph",
+        "id": "839b91af74945d0d",
+        "text": "-- WIRE ISSUES ---------------  ⇒ [[View Route Module]]\n\nI found one or more Route Modules with Data types that contain functions.\n\n- Wiki.Data.journal Unknown must not contain kernel type `Value` from elm/json:Json.Encode\n\nSee <https://dashboard.lamdera.app/docs/wire> [https://dashboard.lamdera.app/docs/wire page] for more info. ⇒ [[Wire]]\n"
+      },
+      "date": 1693408786020
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4a8cfeee84a18f4a"
+      },
+      "id": "4a8cfeee84a18f4a",
+      "type": "add",
+      "after": "5477a75fb624ec6e",
+      "date": 1693408915557
+    },
+    {
+      "type": "edit",
+      "id": "5477a75fb624ec6e",
+      "item": {
+        "type": "paragraph",
+        "id": "5477a75fb624ec6e",
+        "text": "tests (vite-elm-dojo)"
+      },
+      "date": 1693409049818
+    },
+    {
+      "type": "edit",
+      "id": "4a8cfeee84a18f4a",
+      "item": {
+        "type": "paragraph",
+        "id": "4a8cfeee84a18f4a",
+        "text": "✗ handle Unknown <internals>\n"
+      },
+      "date": 1693409213271
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fa69092fe5a45f5b"
+      },
+      "id": "fa69092fe5a45f5b",
+      "type": "add",
+      "after": "4a8cfeee84a18f4a",
+      "date": 1693409403119
+    },
+    {
+      "type": "edit",
+      "id": "fa69092fe5a45f5b",
+      "item": {
+        "type": "markdown",
+        "id": "fa69092fe5a45f5b",
+        "text": "- [ ] move\n- [ ] fork"
+      },
+      "date": 1693409414761
+    },
+    {
+      "type": "edit",
+      "id": "fa69092fe5a45f5b",
+      "item": {
+        "type": "markdown",
+        "id": "fa69092fe5a45f5b",
+        "text": "- [ ] move\n- [ ] fork\n- [ ] remove"
+      },
+      "date": 1693409661306
+    },
+    {
+      "type": "fork",
+      "date": 1693409761139
+    },
+    {
+      "type": "edit",
+      "id": "fa69092fe5a45f5b",
+      "item": {
+        "type": "markdown",
+        "id": "fa69092fe5a45f5b",
+        "text": "missing (unknown) events\n- [ ] move\n- [ ] fork\n- [ ] remove"
+      },
+      "date": 1693409823780
+    },
+    {
+      "type": "edit",
+      "id": "fa69092fe5a45f5b",
+      "item": {
+        "type": "markdown",
+        "id": "fa69092fe5a45f5b",
+        "text": "## Missing (Unknown) Events\n- [ ] move\n- [ ] fork\n- [ ] remove"
+      },
+      "date": 1693409837531
+    },
+    {
+      "type": "edit",
+      "id": "fa69092fe5a45f5b",
+      "item": {
+        "type": "markdown",
+        "id": "fa69092fe5a45f5b",
+        "text": "## Missing (Unknown) Events\nSee Unknown Decode.Value\n- [ ] move\n- [ ] fork\n- [ ] remove"
+      },
+      "date": 1693409906343
+    },
+    {
+      "type": "edit",
+      "id": "fa69092fe5a45f5b",
+      "item": {
+        "type": "markdown",
+        "id": "fa69092fe5a45f5b",
+        "text": "## Missing (Unknown) Events\nSee Unknown Decode.Value in Type Event\n- [ ] move\n- [ ] fork\n- [ ] remove"
+      },
+      "date": 1693409926210
+    }
+  ]
+}
