@@ -1,0 +1,1177 @@
+{
+  "title": "2023-09-01",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "1b2378adcb99c95e",
+      "text": "⇐ [[View Route Module]] ⇒ import Wiki\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "2483b53f75047d9a",
+      "text": "Add the missing journal event types:"
+    },
+    {
+      "type": "markdown",
+      "id": "fa69092fe5a45f5b",
+      "text": "- [ ] remove\n- [ ] move\n- [ ] fork\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "8f5c1123ec1a876d",
+      "text": "⇒ eventDecoder"
+    },
+    {
+      "type": "code",
+      "id": "d21a221a6450193e",
+      "text": "type Event\n    = Create CreateEvent\n    | AddFactory AddFactoryEvent\n    | Edit EditEvent\n\n"
+    },
+    {
+      "type": "code",
+      "id": "537a9d364a78ba23",
+      "text": "eventDecoder : Decode.Decoder Event\neventDecoder =\n    Decode.oneOf\n        [ Decode.map Create createEventDecoder\n        , Decode.map Edit editEventDecoder\n        , Decode.map AddFactory addFactoryEventDecoder\n\n        -- Add decoders for other journal event variants as needed\n        -- remove\n        -- move\n        -- fork\n        ]\n"
+    },
+    {
+      "type": "pagefold",
+      "id": "b12db66a8fc69a5d",
+      "text": "~"
+    },
+    {
+      "type": "code",
+      "id": "e8299b99a8d60cc6",
+      "text": "type alias Page =\n    { title : String\n    , story : List Story\n    , journal : List Event\n    }"
+    },
+    {
+      "type": "paragraph",
+      "id": "54e3bbedebc035f6",
+      "text": "⇒ [[Point-in-Time Recovery]] (PITR) [⇒ [[Lamdera Data Storage]]] ⇒ [[Write-Ahead-Log]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "5348857b8de3c3cd",
+      "text": "⇒ [[Determine the Length of a List]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3fdcfb13ed188f26",
+      "text": "⇐ [[View Route Module]] ⇒ [[Create New Page Test]]. [http://localhost:1234/view/create-new-page-test localhost]: We see 2 lists below the title and the \"splat: \"."
+    },
+    {
+      "type": "paragraph",
+      "id": "523476b6ff368108",
+      "text": "story : List Story of length 1:"
+    },
+    {
+      "type": "code",
+      "id": "ac4f2f03bd6be6de",
+      "text": "[Paragraph { id = \"eacbfcc1e964204d\", text = \"double-clicked to edit and entered this text.\", type_ = \"paragraph\" }]"
+    },
+    {
+      "type": "paragraph",
+      "id": "deda5a3971093bf5",
+      "text": "and journal : List Event of length 3:"
+    },
+    {
+      "type": "code",
+      "id": "80524c2169ac4473",
+      "text": "[Create { date = 1693518954747, item = { story = EmptyStory, title = \"Create New Page Test\" }, type_ = \"create\" },AddFactory { date = 1693519254045, id = \"eacbfcc1e964204d\", item = { id = \"eacbfcc1e964204d\", type_ = \"factory\" }, type_ = \"add\" },Edit { date = 1693520732730, id = \"eacbfcc1e964204d\", item = { id = \"eacbfcc1e964204d\", text = \"double-clicked to edit and entered this text.\", type_ = \"paragraph\" }, type_ = \"edit\" }]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e59b1f75c1d7bd86",
+      "text": "-- Mapping a List, see [https://elmprogramming.com/list.html#mapping-a-list page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "b575fa4108ff73aa",
+      "text": "Elm Destructuring (or Pattern Matching) cheatsheet [https://gist.github.com/yang-wei/4f563fbf81ff843e8b1e page], Simple pattern matching [https://github.com/exercism/elm/blob/c73a1d05d04663cdb718f0f9d97006bd7331bbb1/exercises/concept/story-name/.docs/introduction.md#simple-pattern-matching page], [https://github.com/exercism/elm/pull/461#pullrequestreview-880842790 comment]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6c768a8d9fc76be3",
+      "text": "The syntax for anonymous functions […]"
+    },
+    {
+      "type": "code",
+      "id": "6548acfddba0cebe",
+      "text": "        |> BackendTask.map\n            (\\page ->\n                Server.Response.render page\n            )\n"
+    },
+    {
+      "type": "pagefold",
+      "id": "20cb74601dc2ff9c",
+      "text": "ChatGPT August 3 Version + me"
+    },
+    {
+      "type": "paragraph",
+      "id": "037f2bc8f10b8654",
+      "text": "To re-create the Story from a list of Journal actions (journal : List Event), you will need to process each action in the list and apply the changes described in each action to create the story as it was at the desired time.."
+    },
+    {
+      "type": "paragraph",
+      "id": "e5ba5318060b8d6f",
+      "text": "Here's how you can do it in Elm:\n\nFirst, define your Story and Journal types:"
+    },
+    {
+      "type": "code",
+      "id": "ed946759a67ad95f",
+      "text": "module Wiki exposing (Story(..), Journal(..), StoryUpdate)\n\ntype Story\n    = Paragraph Paragraph\n    | Future FutureItemAlias\n    | Factory FactoryItemAlias\n    | EmptyStory\n\ntype alias Paragraph =\n    { id : String\n    , text : String\n    , type_ : String\n    }\n\n-- Define other types like Future, Factory, and EmptyStory as needed\n\ntype Journal\n    = Create CreateItemAlias\n    | AddFactory AddFactoryItemAlias\n    | Edit EditItemAlias\n\n-- Define Create, AddFactory, and Edit types as needed\n\ntype StoryUpdate\n    = UpdatedStory Story\n    | NoChange\n\n-- Function to apply a Journal action to a Story\napplyJournalToStory : Journal -> Story -> StoryUpdate\napplyJournalToStory journal story =\n    case (journal, story) of\n        (Create create, EmptyStory) ->\n            UpdatedStory (Paragraph { id = create.item.id, text = create.item.title, type_ = \"paragraph\" })\n\n        (AddFactory addFactory, Paragraph paragraph) ->\n            if addFactory.id == paragraph.id then\n                UpdatedStory (Factory addFactory.item)\n            else\n                NoChange\n\n        (Edit edit, Factory factory) ->\n            if edit.id == factory.id then\n                UpdatedStory (Paragraph { id = factory.id, text = edit.item.text, type_ = \"paragraph\" })\n            else\n                NoChange\n\n        -- Handle other cases here as needed\n        _ ->\n            NoChange\n\n-- Function to apply a list of Journal actions to build a Story\nbuildStoryFromJournal : List Journal -> Story\nbuildStoryFromJournal journalActions =\n    List.foldl applyJournalToStory EmptyStory journalActions\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "1562386dfa82fc95",
+      "text": "In this code:\n\napplyJournalToStory is a function that takes a Journal action and a Story, and it applies the action to update the Story. It handles cases like creating a new Paragraph, adding a Factory to an existing Paragraph, and editing a Factory to update the Paragraph text."
+    },
+    {
+      "type": "paragraph",
+      "id": "bec7e73c03aeced6",
+      "text": "buildStoryFromJournal is a function that takes a list of Journal actions and builds the final Story by applying each action sequentially."
+    },
+    {
+      "type": "paragraph",
+      "id": "9bfc15e8ababb34f",
+      "text": "You can then use buildStoryFromJournal with your list of Journal actions to recreate the Story based on the provided Journal actions."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "2023-09-01",
+        "story": []
+      },
+      "date": 1693523346220
+    },
+    {
+      "id": "2483b53f75047d9a",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "2483b53f75047d9a",
+        "text": "Add the missing journal event types:"
+      },
+      "attribution": {
+        "page": "2023-08-31"
+      },
+      "date": 1693523370037
+    },
+    {
+      "id": "fa69092fe5a45f5b",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "fa69092fe5a45f5b",
+        "text": "- [ ] move\n- [ ] fork\n- [ ] remove"
+      },
+      "after": "2483b53f75047d9a",
+      "attribution": {
+        "page": "2023-08-31"
+      },
+      "date": 1693523373204
+    },
+    {
+      "id": "1b2378adcb99c95e",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "1b2378adcb99c95e",
+        "text": "⇐ [[View Route Module]] ⇒ [[Wire]] Issue ⇒ Json Decoding Error"
+      },
+      "attribution": {
+        "page": "2023-08-31"
+      },
+      "date": 1693523397019
+    },
+    {
+      "type": "edit",
+      "id": "1b2378adcb99c95e",
+      "item": {
+        "type": "paragraph",
+        "id": "1b2378adcb99c95e",
+        "text": "⇐ [[View Route Module]] ⇒ import Wiki\n"
+      },
+      "date": 1693523433100
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8f5c1123ec1a876d"
+      },
+      "id": "8f5c1123ec1a876d",
+      "type": "add",
+      "after": "fa69092fe5a45f5b",
+      "date": 1693523628101
+    },
+    {
+      "type": "edit",
+      "id": "8f5c1123ec1a876d",
+      "item": {
+        "type": "paragraph",
+        "id": "8f5c1123ec1a876d",
+        "text": "eventDecoder"
+      },
+      "date": 1693523630036
+    },
+    {
+      "type": "edit",
+      "id": "fa69092fe5a45f5b",
+      "item": {
+        "type": "markdown",
+        "id": "fa69092fe5a45f5b",
+        "text": "- [ ] remove\n- [ ] move\n- [ ] fork\n"
+      },
+      "date": 1693523799931
+    },
+    {
+      "type": "edit",
+      "id": "8f5c1123ec1a876d",
+      "item": {
+        "type": "paragraph",
+        "id": "8f5c1123ec1a876d",
+        "text": "⇒ eventDecoder"
+      },
+      "date": 1693523850154
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d21a221a6450193e"
+      },
+      "id": "d21a221a6450193e",
+      "type": "add",
+      "after": "8f5c1123ec1a876d",
+      "date": 1693523914570
+    },
+    {
+      "type": "edit",
+      "id": "d21a221a6450193e",
+      "item": {
+        "type": "code",
+        "id": "d21a221a6450193e",
+        "text": "type Event\n    = Create CreateEvent\n    | AddFactory AddFactoryEvent\n    | Edit EditEvent\n\n"
+      },
+      "date": 1693523916270
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "537a9d364a78ba23"
+      },
+      "id": "537a9d364a78ba23",
+      "type": "add",
+      "after": "d21a221a6450193e",
+      "date": 1693523927003
+    },
+    {
+      "type": "edit",
+      "id": "537a9d364a78ba23",
+      "item": {
+        "type": "code",
+        "id": "537a9d364a78ba23",
+        "text": "eventDecoder : Decode.Decoder Event\neventDecoder =\n    Decode.oneOf\n        [ Decode.map Create createEventDecoder\n        , Decode.map Edit editEventDecoder\n        , Decode.map AddFactory addFactoryEventDecoder\n\n        -- Add decoders for other journal event variants as needed\n        -- remove\n        -- move\n        -- fork\n        ]\n"
+      },
+      "date": 1693523929001
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "20cb74601dc2ff9c"
+      },
+      "id": "20cb74601dc2ff9c",
+      "type": "add",
+      "after": "537a9d364a78ba23",
+      "date": 1693555352727
+    },
+    {
+      "type": "edit",
+      "id": "20cb74601dc2ff9c",
+      "item": {
+        "type": "pagefold",
+        "id": "20cb74601dc2ff9c",
+        "text": "~"
+      },
+      "date": 1693555356356
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "037f2bc8f10b8654"
+      },
+      "id": "037f2bc8f10b8654",
+      "type": "add",
+      "after": "20cb74601dc2ff9c",
+      "date": 1693555357571
+    },
+    {
+      "type": "edit",
+      "id": "037f2bc8f10b8654",
+      "item": {
+        "type": "paragraph",
+        "id": "037f2bc8f10b8654",
+        "text": "To recreate the Story from a list of Journal actions, you will need to process each action in the list, applying the changes described in each action to build the Story. Here's how you can do it in Elm:\n\nFirst, define your Story and Journal types:"
+      },
+      "date": 1693555358985
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ed946759a67ad95f"
+      },
+      "id": "ed946759a67ad95f",
+      "type": "add",
+      "after": "037f2bc8f10b8654",
+      "date": 1693555374038
+    },
+    {
+      "type": "edit",
+      "id": "ed946759a67ad95f",
+      "item": {
+        "type": "code",
+        "id": "ed946759a67ad95f",
+        "text": "module Wiki exposing (Story(..), Journal(..), StoryUpdate)\n\ntype Story\n    = Paragraph Paragraph\n    | Future FutureItemAlias\n    | Factory FactoryItemAlias\n    | EmptyStory\n\ntype alias Paragraph =\n    { id : String\n    , text : String\n    , type_ : String\n    }\n\n-- Define other types like Future, Factory, and EmptyStory as needed\n\ntype Journal\n    = Create CreateItemAlias\n    | AddFactory AddFactoryItemAlias\n    | Edit EditItemAlias\n\n-- Define Create, AddFactory, and Edit types as needed\n\ntype StoryUpdate\n    = UpdatedStory Story\n    | NoChange\n\n-- Function to apply a Journal action to a Story\napplyJournalToStory : Journal -> Story -> StoryUpdate\napplyJournalToStory journal story =\n    case (journal, story) of\n        (Create create, EmptyStory) ->\n            UpdatedStory (Paragraph { id = create.item.id, text = create.item.title, type_ = \"paragraph\" })\n\n        (AddFactory addFactory, Paragraph paragraph) ->\n            if addFactory.id == paragraph.id then\n                UpdatedStory (Factory addFactory.item)\n            else\n                NoChange\n\n        (Edit edit, Factory factory) ->\n            if edit.id == factory.id then\n                UpdatedStory (Paragraph { id = factory.id, text = edit.item.text, type_ = \"paragraph\" })\n            else\n                NoChange\n\n        -- Handle other cases here as needed\n        _ ->\n            NoChange\n\n-- Function to apply a list of Journal actions to build a Story\nbuildStoryFromJournal : List Journal -> Story\nbuildStoryFromJournal journalActions =\n    List.foldl applyJournalToStory EmptyStory journalActions\n"
+      },
+      "date": 1693555375512
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1562386dfa82fc95"
+      },
+      "id": "1562386dfa82fc95",
+      "type": "add",
+      "after": "ed946759a67ad95f",
+      "date": 1693555452033
+    },
+    {
+      "type": "edit",
+      "id": "1562386dfa82fc95",
+      "item": {
+        "type": "paragraph",
+        "id": "1562386dfa82fc95",
+        "text": "In this code:\n\napplyJournalToStory is a function that takes a Journal action and a Story, and it applies the action to update the Story. It handles cases like creating a new Paragraph, adding a Factory to an existing Paragraph, and editing a Factory to update the Paragraph text.\nbuildStoryFromJournal is a function that takes a list of Journal actions and builds the final Story by applying each action sequentially.\nYou can then use buildStoryFromJournal with your list of Journal actions to recreate the Story based on the provided Journal actions."
+      },
+      "date": 1693555453367
+    },
+    {
+      "type": "edit",
+      "id": "1562386dfa82fc95",
+      "item": {
+        "type": "paragraph",
+        "id": "1562386dfa82fc95",
+        "text": "In this code:\n\napplyJournalToStory is a function that takes a Journal action and a Story, and it applies the action to update the Story. It handles cases like creating a new Paragraph, adding a Factory to an existing Paragraph, and editing a Factory to update the Paragraph text."
+      },
+      "date": 1693555461031
+    },
+    {
+      "type": "add",
+      "id": "bec7e73c03aeced6",
+      "item": {
+        "type": "paragraph",
+        "id": "bec7e73c03aeced6",
+        "text": "buildStoryFromJournal is a function that takes a list of Journal actions and builds the final Story by applying each action sequentially."
+      },
+      "after": "1562386dfa82fc95",
+      "date": 1693555464998
+    },
+    {
+      "type": "add",
+      "id": "9bfc15e8ababb34f",
+      "item": {
+        "type": "paragraph",
+        "id": "9bfc15e8ababb34f",
+        "text": "You can then use buildStoryFromJournal with your list of Journal actions to recreate the Story based on the provided Journal actions."
+      },
+      "after": "bec7e73c03aeced6",
+      "date": 1693555465318
+    },
+    {
+      "type": "edit",
+      "id": "20cb74601dc2ff9c",
+      "item": {
+        "type": "pagefold",
+        "id": "20cb74601dc2ff9c",
+        "text": "ChatGPT August 3 Version"
+      },
+      "date": 1693555498381
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b12db66a8fc69a5d"
+      },
+      "id": "b12db66a8fc69a5d",
+      "type": "add",
+      "after": "9bfc15e8ababb34f",
+      "date": 1693555563874
+    },
+    {
+      "id": "b12db66a8fc69a5d",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "2483b53f75047d9a",
+        "fa69092fe5a45f5b",
+        "8f5c1123ec1a876d",
+        "d21a221a6450193e",
+        "537a9d364a78ba23",
+        "b12db66a8fc69a5d",
+        "20cb74601dc2ff9c",
+        "037f2bc8f10b8654",
+        "ed946759a67ad95f",
+        "1562386dfa82fc95",
+        "bec7e73c03aeced6",
+        "9bfc15e8ababb34f"
+      ],
+      "date": 1693555572424
+    },
+    {
+      "type": "edit",
+      "id": "b12db66a8fc69a5d",
+      "item": {
+        "type": "pagefold",
+        "id": "b12db66a8fc69a5d",
+        "text": "~"
+      },
+      "date": 1693555576836
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e8299b99a8d60cc6"
+      },
+      "id": "e8299b99a8d60cc6",
+      "type": "add",
+      "after": "9bfc15e8ababb34f",
+      "date": 1693555581271
+    },
+    {
+      "id": "e8299b99a8d60cc6",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "2483b53f75047d9a",
+        "fa69092fe5a45f5b",
+        "8f5c1123ec1a876d",
+        "d21a221a6450193e",
+        "537a9d364a78ba23",
+        "e8299b99a8d60cc6",
+        "b12db66a8fc69a5d",
+        "20cb74601dc2ff9c",
+        "037f2bc8f10b8654",
+        "ed946759a67ad95f",
+        "1562386dfa82fc95",
+        "bec7e73c03aeced6",
+        "9bfc15e8ababb34f"
+      ],
+      "date": 1693555597324
+    },
+    {
+      "id": "b12db66a8fc69a5d",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "2483b53f75047d9a",
+        "fa69092fe5a45f5b",
+        "8f5c1123ec1a876d",
+        "d21a221a6450193e",
+        "537a9d364a78ba23",
+        "b12db66a8fc69a5d",
+        "e8299b99a8d60cc6",
+        "20cb74601dc2ff9c",
+        "037f2bc8f10b8654",
+        "ed946759a67ad95f",
+        "1562386dfa82fc95",
+        "bec7e73c03aeced6",
+        "9bfc15e8ababb34f"
+      ],
+      "date": 1693555600387
+    },
+    {
+      "type": "edit",
+      "id": "e8299b99a8d60cc6",
+      "item": {
+        "type": "code",
+        "id": "e8299b99a8d60cc6",
+        "text": "type alias Page =\n    { title : String\n    , story : List Story\n    , journal : List Event\n    }"
+      },
+      "date": 1693555602350
+    },
+    {
+      "type": "edit",
+      "id": "20cb74601dc2ff9c",
+      "item": {
+        "type": "pagefold",
+        "id": "20cb74601dc2ff9c",
+        "text": "ChatGPT August 3 Version + me"
+      },
+      "date": 1693555622944
+    },
+    {
+      "type": "edit",
+      "id": "037f2bc8f10b8654",
+      "item": {
+        "type": "paragraph",
+        "id": "037f2bc8f10b8654",
+        "text": "To recreate the Story from a list of Journal actions (journal : List Event), you will need to process each action in the list, applying the changes described in each action to build the Story. Here's how you can do it in Elm:\n\nFirst, define your Story and Journal types:"
+      },
+      "date": 1693555643490
+    },
+    {
+      "type": "edit",
+      "id": "037f2bc8f10b8654",
+      "item": {
+        "type": "paragraph",
+        "id": "037f2bc8f10b8654",
+        "text": "To recreate the Story from a list of Journal actions (journal : List Event), you will need to process each action in the list, applying the changes described in each action to build the Story at the desired point in time."
+      },
+      "date": 1693555766578
+    },
+    {
+      "type": "add",
+      "id": "e5ba5318060b8d6f",
+      "item": {
+        "type": "paragraph",
+        "id": "e5ba5318060b8d6f",
+        "text": "Here's how you can do it in Elm:\n\nFirst, define your Story and Journal types:"
+      },
+      "after": "037f2bc8f10b8654",
+      "date": 1693555767244
+    },
+    {
+      "type": "edit",
+      "id": "037f2bc8f10b8654",
+      "item": {
+        "type": "paragraph",
+        "id": "037f2bc8f10b8654",
+        "text": "To recreate the Story from a list of Journal actions (journal : List Event), you will need to process each action in the list and apply the changes described in each action to create the story at the desired time."
+      },
+      "date": 1693555839507
+    },
+    {
+      "type": "edit",
+      "id": "037f2bc8f10b8654",
+      "item": {
+        "type": "paragraph",
+        "id": "037f2bc8f10b8654",
+        "text": "To recreate the Story from a list of Journal actions (journal : List Event), you will need to process each action in the list and apply the changes described in each action to create the story as it appeared at the desired time.."
+      },
+      "date": 1693555958196
+    },
+    {
+      "type": "edit",
+      "id": "037f2bc8f10b8654",
+      "item": {
+        "type": "paragraph",
+        "id": "037f2bc8f10b8654",
+        "text": "To re-create the Story from a list of Journal actions (journal : List Event), you will need to process each action in the list and apply the changes described in each action to create the story as it appeared at the desired time.."
+      },
+      "date": 1693556104082
+    },
+    {
+      "type": "edit",
+      "id": "037f2bc8f10b8654",
+      "item": {
+        "type": "paragraph",
+        "id": "037f2bc8f10b8654",
+        "text": "To re-create the Story from a list of Journal actions (journal : List Event), you will need to process each action in the list and apply the changes described in each action to create the story as it was at the desired time.."
+      },
+      "date": 1693556304955
+    },
+    {
+      "type": "add",
+      "id": "54e3bbedebc035f6",
+      "item": {
+        "type": "paragraph",
+        "id": "54e3bbedebc035f6",
+        "text": "Point In Time\nRecovery (PITR) "
+      },
+      "after": "8f5c1123ec1a876d",
+      "date": 1693556808701
+    },
+    {
+      "id": "54e3bbedebc035f6",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "2483b53f75047d9a",
+        "fa69092fe5a45f5b",
+        "8f5c1123ec1a876d",
+        "d21a221a6450193e",
+        "537a9d364a78ba23",
+        "b12db66a8fc69a5d",
+        "e8299b99a8d60cc6",
+        "54e3bbedebc035f6",
+        "20cb74601dc2ff9c",
+        "037f2bc8f10b8654",
+        "e5ba5318060b8d6f",
+        "ed946759a67ad95f",
+        "1562386dfa82fc95",
+        "bec7e73c03aeced6",
+        "9bfc15e8ababb34f"
+      ],
+      "date": 1693556812988
+    },
+    {
+      "type": "edit",
+      "id": "54e3bbedebc035f6",
+      "item": {
+        "type": "paragraph",
+        "id": "54e3bbedebc035f6",
+        "text": "Point In Time Recovery (PITR) "
+      },
+      "date": 1693556827322
+    },
+    {
+      "type": "edit",
+      "id": "54e3bbedebc035f6",
+      "item": {
+        "type": "paragraph",
+        "id": "54e3bbedebc035f6",
+        "text": "Point In Time Recovery (PITR) [⇒ [[Lamdera Data Storage]]"
+      },
+      "date": 1693556850028
+    },
+    {
+      "type": "edit",
+      "id": "54e3bbedebc035f6",
+      "item": {
+        "type": "paragraph",
+        "id": "54e3bbedebc035f6",
+        "text": "Point In Time Recovery (PITR) [⇒ [[Lamdera Data Storage]]]"
+      },
+      "date": 1693556854572
+    },
+    {
+      "type": "edit",
+      "id": "54e3bbedebc035f6",
+      "item": {
+        "type": "paragraph",
+        "id": "54e3bbedebc035f6",
+        "text": "⇒ [[Point-in-Time Recovery]] (PITR) [⇒ [[Lamdera Data Storage]]]"
+      },
+      "date": 1693556933523
+    },
+    {
+      "type": "add",
+      "id": "5348857b8de3c3cd",
+      "item": {
+        "type": "paragraph",
+        "id": "5348857b8de3c3cd",
+        "text": "⇒ [[Determine the Length of a List]]"
+      },
+      "after": "54e3bbedebc035f6",
+      "date": 1693566005695
+    },
+    {
+      "type": "add",
+      "id": "3fdcfb13ed188f26",
+      "item": {
+        "type": "paragraph",
+        "id": "3fdcfb13ed188f26",
+        "text": "[[Create New Page Test]] "
+      },
+      "after": "5348857b8de3c3cd",
+      "date": 1693566710207
+    },
+    {
+      "type": "edit",
+      "id": "3fdcfb13ed188f26",
+      "item": {
+        "type": "paragraph",
+        "id": "3fdcfb13ed188f26",
+        "text": "[[Create New Page Test]] [http://localhost:1234/view/create-new-page-test localhost]"
+      },
+      "date": 1693566749868
+    },
+    {
+      "type": "edit",
+      "id": "3fdcfb13ed188f26",
+      "item": {
+        "type": "paragraph",
+        "id": "3fdcfb13ed188f26",
+        "text": "[[Create New Page Test]]. [http://localhost:1234/view/create-new-page-test localhost]"
+      },
+      "date": 1693566754501
+    },
+    {
+      "type": "edit",
+      "id": "3fdcfb13ed188f26",
+      "item": {
+        "type": "paragraph",
+        "id": "3fdcfb13ed188f26",
+        "text": "[[Create New Page Test]]. [http://localhost:1234/view/create-new-page-test localhost]: We see 2 lists beneath the title."
+      },
+      "date": 1693566784972
+    },
+    {
+      "type": "edit",
+      "id": "3fdcfb13ed188f26",
+      "item": {
+        "type": "paragraph",
+        "id": "3fdcfb13ed188f26",
+        "text": "[[Create New Page Test]]. [http://localhost:1234/view/create-new-page-test localhost]: We see 2 lists below the title."
+      },
+      "date": 1693566798949
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ac4f2f03bd6be6de"
+      },
+      "id": "ac4f2f03bd6be6de",
+      "type": "add",
+      "after": "9bfc15e8ababb34f",
+      "date": 1693566817712
+    },
+    {
+      "id": "ac4f2f03bd6be6de",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "2483b53f75047d9a",
+        "fa69092fe5a45f5b",
+        "8f5c1123ec1a876d",
+        "d21a221a6450193e",
+        "537a9d364a78ba23",
+        "b12db66a8fc69a5d",
+        "e8299b99a8d60cc6",
+        "54e3bbedebc035f6",
+        "5348857b8de3c3cd",
+        "3fdcfb13ed188f26",
+        "ac4f2f03bd6be6de",
+        "20cb74601dc2ff9c",
+        "037f2bc8f10b8654",
+        "e5ba5318060b8d6f",
+        "ed946759a67ad95f",
+        "1562386dfa82fc95",
+        "bec7e73c03aeced6",
+        "9bfc15e8ababb34f"
+      ],
+      "date": 1693566831597
+    },
+    {
+      "type": "edit",
+      "id": "ac4f2f03bd6be6de",
+      "item": {
+        "type": "code",
+        "id": "ac4f2f03bd6be6de",
+        "text": "[Paragraph { id = \"eacbfcc1e964204d\", text = \"double-clicked to edit and entered this text.\", type_ = \"paragraph\" }]"
+      },
+      "date": 1693566833514
+    },
+    {
+      "type": "edit",
+      "id": "3fdcfb13ed188f26",
+      "item": {
+        "type": "paragraph",
+        "id": "3fdcfb13ed188f26",
+        "text": "[[Create New Page Test]]. [http://localhost:1234/view/create-new-page-test localhost]: We see 2 lists below the title. The "
+      },
+      "date": 1693566845415
+    },
+    {
+      "type": "edit",
+      "id": "3fdcfb13ed188f26",
+      "item": {
+        "type": "paragraph",
+        "id": "3fdcfb13ed188f26",
+        "text": "[[Create New Page Test]]. [http://localhost:1234/view/create-new-page-test localhost]: We see 2 lists below the title."
+      },
+      "date": 1693566896289
+    },
+    {
+      "type": "add",
+      "id": "523476b6ff368108",
+      "item": {
+        "type": "paragraph",
+        "id": "523476b6ff368108",
+        "text": "story : List Story"
+      },
+      "after": "3fdcfb13ed188f26",
+      "date": 1693566897715
+    },
+    {
+      "type": "add",
+      "id": "deda5a3971093bf5",
+      "item": {
+        "type": "paragraph",
+        "id": "deda5a3971093bf5",
+        "text": "and"
+      },
+      "after": "523476b6ff368108",
+      "date": 1693566902054
+    },
+    {
+      "id": "deda5a3971093bf5",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "2483b53f75047d9a",
+        "fa69092fe5a45f5b",
+        "8f5c1123ec1a876d",
+        "d21a221a6450193e",
+        "537a9d364a78ba23",
+        "b12db66a8fc69a5d",
+        "e8299b99a8d60cc6",
+        "54e3bbedebc035f6",
+        "5348857b8de3c3cd",
+        "3fdcfb13ed188f26",
+        "523476b6ff368108",
+        "ac4f2f03bd6be6de",
+        "deda5a3971093bf5",
+        "20cb74601dc2ff9c",
+        "037f2bc8f10b8654",
+        "e5ba5318060b8d6f",
+        "ed946759a67ad95f",
+        "1562386dfa82fc95",
+        "bec7e73c03aeced6",
+        "9bfc15e8ababb34f"
+      ],
+      "date": 1693566905407
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "80524c2169ac4473"
+      },
+      "id": "80524c2169ac4473",
+      "type": "add",
+      "after": "9bfc15e8ababb34f",
+      "date": 1693566916959
+    },
+    {
+      "id": "80524c2169ac4473",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "2483b53f75047d9a",
+        "fa69092fe5a45f5b",
+        "8f5c1123ec1a876d",
+        "d21a221a6450193e",
+        "537a9d364a78ba23",
+        "b12db66a8fc69a5d",
+        "e8299b99a8d60cc6",
+        "54e3bbedebc035f6",
+        "5348857b8de3c3cd",
+        "3fdcfb13ed188f26",
+        "523476b6ff368108",
+        "ac4f2f03bd6be6de",
+        "deda5a3971093bf5",
+        "80524c2169ac4473",
+        "20cb74601dc2ff9c",
+        "037f2bc8f10b8654",
+        "e5ba5318060b8d6f",
+        "ed946759a67ad95f",
+        "1562386dfa82fc95",
+        "bec7e73c03aeced6",
+        "9bfc15e8ababb34f"
+      ],
+      "date": 1693566923407
+    },
+    {
+      "type": "edit",
+      "id": "80524c2169ac4473",
+      "item": {
+        "type": "code",
+        "id": "80524c2169ac4473",
+        "text": "[Create { date = 1693518954747, item = { story = EmptyStory, title = \"Create New Page Test\" }, type_ = \"create\" },AddFactory { date = 1693519254045, id = \"eacbfcc1e964204d\", item = { id = \"eacbfcc1e964204d\", type_ = \"factory\" }, type_ = \"add\" },Edit { date = 1693520732730, id = \"eacbfcc1e964204d\", item = { id = \"eacbfcc1e964204d\", text = \"double-clicked to edit and entered this text.\", type_ = \"paragraph\" }, type_ = \"edit\" }]"
+      },
+      "date": 1693566925205
+    },
+    {
+      "type": "edit",
+      "id": "523476b6ff368108",
+      "item": {
+        "type": "paragraph",
+        "id": "523476b6ff368108",
+        "text": "story : List Story of length 1:"
+      },
+      "date": 1693567903144
+    },
+    {
+      "type": "edit",
+      "id": "deda5a3971093bf5",
+      "item": {
+        "type": "paragraph",
+        "id": "deda5a3971093bf5",
+        "text": "and journal : List Event of length 3:"
+      },
+      "date": 1693567930573
+    },
+    {
+      "type": "add",
+      "id": "6c768a8d9fc76be3",
+      "item": {
+        "type": "paragraph",
+        "id": "6c768a8d9fc76be3",
+        "text": "he syntax for anonymous functions"
+      },
+      "after": "deda5a3971093bf5",
+      "date": 1693568101258
+    },
+    {
+      "id": "6c768a8d9fc76be3",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "2483b53f75047d9a",
+        "fa69092fe5a45f5b",
+        "8f5c1123ec1a876d",
+        "d21a221a6450193e",
+        "537a9d364a78ba23",
+        "b12db66a8fc69a5d",
+        "e8299b99a8d60cc6",
+        "54e3bbedebc035f6",
+        "5348857b8de3c3cd",
+        "3fdcfb13ed188f26",
+        "523476b6ff368108",
+        "ac4f2f03bd6be6de",
+        "deda5a3971093bf5",
+        "80524c2169ac4473",
+        "6c768a8d9fc76be3",
+        "20cb74601dc2ff9c",
+        "037f2bc8f10b8654",
+        "e5ba5318060b8d6f",
+        "ed946759a67ad95f",
+        "1562386dfa82fc95",
+        "bec7e73c03aeced6",
+        "9bfc15e8ababb34f"
+      ],
+      "date": 1693568103187
+    },
+    {
+      "type": "edit",
+      "id": "6c768a8d9fc76be3",
+      "item": {
+        "type": "paragraph",
+        "id": "6c768a8d9fc76be3",
+        "text": "The syntax for anonymous functions […]"
+      },
+      "date": 1693568111343
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6548acfddba0cebe"
+      },
+      "id": "6548acfddba0cebe",
+      "type": "add",
+      "after": "9bfc15e8ababb34f",
+      "date": 1693568142817
+    },
+    {
+      "id": "6548acfddba0cebe",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "2483b53f75047d9a",
+        "fa69092fe5a45f5b",
+        "8f5c1123ec1a876d",
+        "d21a221a6450193e",
+        "537a9d364a78ba23",
+        "b12db66a8fc69a5d",
+        "e8299b99a8d60cc6",
+        "54e3bbedebc035f6",
+        "5348857b8de3c3cd",
+        "3fdcfb13ed188f26",
+        "523476b6ff368108",
+        "ac4f2f03bd6be6de",
+        "deda5a3971093bf5",
+        "80524c2169ac4473",
+        "6c768a8d9fc76be3",
+        "6548acfddba0cebe",
+        "20cb74601dc2ff9c",
+        "037f2bc8f10b8654",
+        "e5ba5318060b8d6f",
+        "ed946759a67ad95f",
+        "1562386dfa82fc95",
+        "bec7e73c03aeced6",
+        "9bfc15e8ababb34f"
+      ],
+      "date": 1693568150435
+    },
+    {
+      "type": "edit",
+      "id": "6548acfddba0cebe",
+      "item": {
+        "type": "code",
+        "id": "6548acfddba0cebe",
+        "text": "        |> BackendTask.map\n            (\\page ->\n                Server.Response.render page\n            )\n"
+      },
+      "date": 1693568152143
+    },
+    {
+      "type": "edit",
+      "id": "3fdcfb13ed188f26",
+      "item": {
+        "type": "paragraph",
+        "id": "3fdcfb13ed188f26",
+        "text": "[[Create New Page Test]]. [http://localhost:1234/view/create-new-page-test localhost]: We see 2 lists below the title and the spa"
+      },
+      "date": 1693568182230
+    },
+    {
+      "type": "edit",
+      "id": "3fdcfb13ed188f26",
+      "item": {
+        "type": "paragraph",
+        "id": "3fdcfb13ed188f26",
+        "text": "[[Create New Page Test]]. [http://localhost:1234/view/create-new-page-test localhost]: We see 2 lists below the title and the splat."
+      },
+      "date": 1693568188638
+    },
+    {
+      "type": "edit",
+      "id": "3fdcfb13ed188f26",
+      "item": {
+        "type": "paragraph",
+        "id": "3fdcfb13ed188f26",
+        "text": "[[Create New Page Test]]. [http://localhost:1234/view/create-new-page-test localhost]: We see 2 lists below the title and the \"splat: \"."
+      },
+      "date": 1693568222940
+    },
+    {
+      "type": "add",
+      "id": "e59b1f75c1d7bd86",
+      "item": {
+        "type": "paragraph",
+        "id": "e59b1f75c1d7bd86",
+        "text": "-- Mapping a List, see <https://elmprogramming.com/list.html#mapping-a-list>\n"
+      },
+      "after": "deda5a3971093bf5",
+      "date": 1693568337506
+    },
+    {
+      "id": "e59b1f75c1d7bd86",
+      "type": "move",
+      "order": [
+        "1b2378adcb99c95e",
+        "2483b53f75047d9a",
+        "fa69092fe5a45f5b",
+        "8f5c1123ec1a876d",
+        "d21a221a6450193e",
+        "537a9d364a78ba23",
+        "b12db66a8fc69a5d",
+        "e8299b99a8d60cc6",
+        "54e3bbedebc035f6",
+        "5348857b8de3c3cd",
+        "3fdcfb13ed188f26",
+        "523476b6ff368108",
+        "ac4f2f03bd6be6de",
+        "deda5a3971093bf5",
+        "80524c2169ac4473",
+        "e59b1f75c1d7bd86",
+        "6c768a8d9fc76be3",
+        "6548acfddba0cebe",
+        "20cb74601dc2ff9c",
+        "037f2bc8f10b8654",
+        "e5ba5318060b8d6f",
+        "ed946759a67ad95f",
+        "1562386dfa82fc95",
+        "bec7e73c03aeced6",
+        "9bfc15e8ababb34f"
+      ],
+      "date": 1693568339767
+    },
+    {
+      "type": "edit",
+      "id": "e59b1f75c1d7bd86",
+      "item": {
+        "type": "paragraph",
+        "id": "e59b1f75c1d7bd86",
+        "text": "-- Mapping a List, see [https://elmprogramming.com/list.html#mapping-a-list page]\n"
+      },
+      "date": 1693568352202
+    },
+    {
+      "type": "edit",
+      "id": "54e3bbedebc035f6",
+      "item": {
+        "type": "paragraph",
+        "id": "54e3bbedebc035f6",
+        "text": "⇒ [[Point-in-Time Recovery]] (PITR) [⇒ [[Lamdera Data Storage]]] ⇒ [[Write-Ahead-Log]]"
+      },
+      "date": 1693578334934
+    },
+    {
+      "type": "edit",
+      "id": "3fdcfb13ed188f26",
+      "item": {
+        "type": "paragraph",
+        "id": "3fdcfb13ed188f26",
+        "text": "⇐ [[View Route Module]]  [[Create New Page Test]]. [http://localhost:1234/view/create-new-page-test localhost]: We see 2 lists below the title and the \"splat: \"."
+      },
+      "date": 1693578377699
+    },
+    {
+      "type": "edit",
+      "id": "3fdcfb13ed188f26",
+      "item": {
+        "type": "paragraph",
+        "id": "3fdcfb13ed188f26",
+        "text": "⇐ [[View Route Module]] ⇒ [[Create New Page Test]]. [http://localhost:1234/view/create-new-page-test localhost]: We see 2 lists below the title and the \"splat: \"."
+      },
+      "date": 1693578384839
+    },
+    {
+      "type": "edit",
+      "id": "e59b1f75c1d7bd86",
+      "item": {
+        "type": "paragraph",
+        "id": "e59b1f75c1d7bd86",
+        "text": "-- Mapping a List, see [https://elmprogramming.com/list.html#mapping-a-list page]"
+      },
+      "date": 1693581864281
+    },
+    {
+      "type": "add",
+      "id": "b575fa4108ff73aa",
+      "item": {
+        "type": "paragraph",
+        "id": "b575fa4108ff73aa",
+        "text": "Elm Destructuring (or Pattern Matching) cheatsheet "
+      },
+      "after": "e59b1f75c1d7bd86",
+      "date": 1693581867755
+    },
+    {
+      "type": "edit",
+      "id": "b575fa4108ff73aa",
+      "item": {
+        "type": "paragraph",
+        "id": "b575fa4108ff73aa",
+        "text": "Elm Destructuring (or Pattern Matching) cheatsheet [https://gist.github.com/yang-wei/4f563fbf81ff843e8b1e page]"
+      },
+      "date": 1693581929184
+    },
+    {
+      "type": "edit",
+      "id": "b575fa4108ff73aa",
+      "item": {
+        "type": "paragraph",
+        "id": "b575fa4108ff73aa",
+        "text": "Elm Destructuring (or Pattern Matching) cheatsheet [https://gist.github.com/yang-wei/4f563fbf81ff843e8b1e page], Simple pattern matching "
+      },
+      "date": 1693582172442
+    },
+    {
+      "type": "edit",
+      "id": "b575fa4108ff73aa",
+      "item": {
+        "type": "paragraph",
+        "id": "b575fa4108ff73aa",
+        "text": "Elm Destructuring (or Pattern Matching) cheatsheet [https://gist.github.com/yang-wei/4f563fbf81ff843e8b1e page], Simple pattern matching [https://github.com/exercism/elm/blob/c73a1d05d04663cdb718f0f9d97006bd7331bbb1/exercises/concept/story-name/.docs/introduction.md#simple-pattern-matching page]"
+      },
+      "date": 1693582184093
+    },
+    {
+      "type": "edit",
+      "id": "b575fa4108ff73aa",
+      "item": {
+        "type": "paragraph",
+        "id": "b575fa4108ff73aa",
+        "text": "Elm Destructuring (or Pattern Matching) cheatsheet [https://gist.github.com/yang-wei/4f563fbf81ff843e8b1e page], Simple pattern matching [https://github.com/exercism/elm/blob/c73a1d05d04663cdb718f0f9d97006bd7331bbb1/exercises/concept/story-name/.docs/introduction.md#simple-pattern-matching page], [https://github.com/exercism/elm/pull/461#pullrequestreview-880842790 comment]"
+      },
+      "date": 1693582322944
+    }
+  ]
+}
