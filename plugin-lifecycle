@@ -1,0 +1,983 @@
+{
+  "title": "Plugin Lifecycle",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "eac75ee343b72f0b",
+      "text": "We consider where plugins come from and how they travel. We start with issues of software development, distribution, installation, configuration and then operation."
+    },
+    {
+      "type": "html",
+      "id": "3677fcbf46e546ce",
+      "text": "<h3> Programming"
+    },
+    {
+      "type": "paragraph",
+      "id": "cce53f95a1b2fbfe",
+      "text": "Plugins are javascript modules written in coffeescript that conform to and use a specific module interface now tending towards those used by node.js."
+    },
+    {
+      "type": "paragraph",
+      "id": "995d38b5e8b79334",
+      "text": "Plugins occupy individual subdirectories of the server's plugins directory. Code, metadata and documentation files are served directly from the directory."
+    },
+    {
+      "type": "paragraph",
+      "id": "05626e7aa1edfb48",
+      "text": "Plugin subdirectory names correspond to the item type they interpret. There is no universal registry of type names. However, a federated wiki server is expected to serve pages with items of types consistent with the available plugins."
+    },
+    {
+      "type": "paragraph",
+      "id": "0ef3cdba4e252850",
+      "text": "Plugins are generally debugged with console.log or other programmer oriented browser features such as single stepping."
+    },
+    {
+      "type": "paragraph",
+      "id": "7c9f42b0f2faa9fd",
+      "text": "Development can start by hand editing the json for an item of the new type, seeing errors when that type is not correctly rendered, and then revising the plugin until satisfied. This has been captured into a plugin generator script. See [[Make Plugin Script]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "64f2a6d348d024d5",
+      "text": "Plugins can contribute tests which will be rolled up to build a single page of mocha tests called runtests.html. Privileged access to plugin resources may be provided to aid testing."
+    },
+    {
+      "type": "html",
+      "id": "7b73a2744328f901",
+      "text": "<h3> Configuration"
+    },
+    {
+      "type": "paragraph",
+      "id": "829b4aae4b9539cb",
+      "text": "Plugins persist configuration information by storing fields in the items they interpret."
+    },
+    {
+      "type": "paragraph",
+      "id": "b1757c62e3d947e0",
+      "text": "The plugin's documentation can include pre-configured examples that can be copied and used as if they were many distinct plugins. The 'changes' plugin offers two versions this way. See [[About Changes Plugin]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "744e35336dbcc87a",
+      "text": "The plugin's documentation can describe user configuration options made available through special markup interpreted by the plugin when it starts on behalf of each item. The text editor can revise this markup and will reinstall the plugin when it is finished. The 'radar' visualization plugin accepts axis selections and limits this way. See [[About Radar Plugin]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "77c0f15947b296ec",
+      "text": "The plugin's configuration can involve interpreting a domain specific language (DSL) that behaves one way on the page and cooperatively but distinctly differently on the sever. The 'report' email scheduling plugin works this way. See [[About Report Plugin]]"
+    },
+    {
+      "type": "html",
+      "id": "e9b1e2d896ae3ab3",
+      "text": "<h3> Operation"
+    },
+    {
+      "type": "paragraph",
+      "id": "87f58777721507e7",
+      "text": "A Plugin is dynamically loaded when an item of its type is rendered on the screen. The loading will always be from the origin server even if the item came with a page from a remote site."
+    },
+    {
+      "type": "paragraph",
+      "id": "2dca21eb60b28708",
+      "text": "The plugin offers two entry points, emit and bind. For some plugins, notably 'paragraph' and 'image' the dom objects may have been constructed by the server and need not be emitted. Beyond this case, emit and bind are called right after one another and can be used interchangeably."
+    },
+    {
+      "type": "paragraph",
+      "id": "52e86ba8bc6c8c18",
+      "text": "A plugin can dynamically load additional resources including code and data. It becomes the plugin's responsibility to schedule callbacks to complete rendering when the loads are complete."
+    },
+    {
+      "type": "paragraph",
+      "id": "e82a7027c9a858b2",
+      "text": "A plugin can dynamically locate resources in the dom. Our current approach is to find these resources by looking for pages or items with jQuery. Page rendering is intentionally serialized so that items above and pages to the left will have emitted their dom elements before subsequent plugins attempt to bind."
+    },
+    {
+      "type": "paragraph",
+      "id": "2fc88d7f33f87a93",
+      "text": "A plugin that sources data will emit dom elements of a class that is easily recognized by plugins that consume data. The 'data' plugin sources data and the 'radar' plugin consumes it. The 'method' plugin consumes data it finds before itself in the dom and offers results it calculates to plugins that come after it. See [[About Method Plugin]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "1c0eb0852cede538",
+      "text": "A plugin can register for events and make updates to its dom elements in response to those events. See [[Well Known Events]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "a52fe70e4d016403",
+      "text": "A plugin can schedule timers and make updates to its dom elements in response to timer events."
+    },
+    {
+      "type": "paragraph",
+      "id": "580283924a2cf90d",
+      "text": "A plugin can open websocket connections with a server-side component and source or sink data through it."
+    },
+    {
+      "type": "paragraph",
+      "id": "190874d6427486db",
+      "text": "A plugin is not (yet) explicitly stopped when a page is discarded. Browsers may stop clock ticks when a page is not visible. More real time will have elapsed than expected when tick events resume."
+    },
+    {
+      "type": "paragraph",
+      "id": "500c4834d131df8a",
+      "text": "A plugin may retrieve objects from other pages and ask those objects to perform computations based on how they might be configured. The 'reduce' plugin finds pages with 'methods', creates inputs for them, and retrieves outputs from them, possibly without the pages being visible on the screen. See [[About Reduce Plugin]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d197cb53328cc550",
+      "text": "We've adopted a step-by-step method for merging pull requests where the order of steps depends on the complexity of the change. In the simplest form, we merge in GitHub and then double check on localhost. See [[Step by Step Merge]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Plugin Lifecycle",
+        "story": []
+      },
+      "date": 1387046742705
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "eac75ee343b72f0b"
+      },
+      "id": "eac75ee343b72f0b",
+      "type": "add",
+      "date": 1387046744487
+    },
+    {
+      "type": "edit",
+      "id": "eac75ee343b72f0b",
+      "item": {
+        "type": "paragraph",
+        "id": "eac75ee343b72f0b",
+        "text": "We consider where plugins come from and how they travel. We start with issues of software development, distribution, installation, configuration and then operation."
+      },
+      "date": 1387046903634
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "3677fcbf46e546ce",
+        "text": ""
+      },
+      "id": "3677fcbf46e546ce",
+      "type": "add",
+      "after": "eac75ee343b72f0b",
+      "date": 1387046904139
+    },
+    {
+      "type": "edit",
+      "id": "3677fcbf46e546ce",
+      "item": {
+        "type": "paragraph",
+        "id": "3677fcbf46e546ce",
+        "text": "<h3> Programming"
+      },
+      "date": 1387046927481
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "cce53f95a1b2fbfe",
+        "text": ""
+      },
+      "id": "cce53f95a1b2fbfe",
+      "type": "add",
+      "after": "3677fcbf46e546ce",
+      "date": 1387046927986
+    },
+    {
+      "type": "edit",
+      "id": "cce53f95a1b2fbfe",
+      "item": {
+        "type": "paragraph",
+        "id": "cce53f95a1b2fbfe",
+        "text": "Plugins are javascript modules written in the coffeescript dialect."
+      },
+      "date": 1387047206049
+    },
+    {
+      "type": "edit",
+      "id": "cce53f95a1b2fbfe",
+      "item": {
+        "type": "paragraph",
+        "id": "cce53f95a1b2fbfe",
+        "text": "Plugins are javascript modules written in coffeescript that conform to and use a specific module interface now tending towards those used by node.js. See [[Your First Plugin]]"
+      },
+      "date": 1387047353252
+    },
+    {
+      "type": "edit",
+      "id": "cce53f95a1b2fbfe",
+      "item": {
+        "type": "paragraph",
+        "id": "cce53f95a1b2fbfe",
+        "text": "Plugins are javascript modules written in coffeescript that conform to and use a specific module interface now tending towards those used by node.js."
+      },
+      "date": 1387047369034
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "995d38b5e8b79334",
+        "text": ""
+      },
+      "id": "995d38b5e8b79334",
+      "type": "add",
+      "after": "cce53f95a1b2fbfe",
+      "date": 1387047369540
+    },
+    {
+      "type": "edit",
+      "id": "995d38b5e8b79334",
+      "item": {
+        "type": "paragraph",
+        "id": "995d38b5e8b79334",
+        "text": "Plugins occupy individual subdirectories of the server's plugins directory. Code, metadata and documentation files are served directly from the directory."
+      },
+      "date": 1387047702276
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "05626e7aa1edfb48",
+        "text": ""
+      },
+      "id": "05626e7aa1edfb48",
+      "type": "add",
+      "after": "995d38b5e8b79334",
+      "date": 1387047702784
+    },
+    {
+      "type": "edit",
+      "id": "05626e7aa1edfb48",
+      "item": {
+        "type": "paragraph",
+        "id": "05626e7aa1edfb48",
+        "text": "Plugin subdirectory names correspond to the item type they interpret. There is no universal registry of type names. However, a federated wiki server is expected to serve pages with items of types consistent with the available plugins."
+      },
+      "date": 1387047916397
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "0ef3cdba4e252850",
+        "text": ""
+      },
+      "id": "0ef3cdba4e252850",
+      "type": "add",
+      "after": "05626e7aa1edfb48",
+      "date": 1387047916902
+    },
+    {
+      "type": "edit",
+      "id": "0ef3cdba4e252850",
+      "item": {
+        "type": "paragraph",
+        "id": "0ef3cdba4e252850",
+        "text": "Plugins are generally debugged with console.log or other programmer oriented browser features such as single stepping."
+      },
+      "date": 1387048243317
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "7c9f42b0f2faa9fd",
+        "text": ""
+      },
+      "id": "7c9f42b0f2faa9fd",
+      "type": "add",
+      "after": "0ef3cdba4e252850",
+      "date": 1387048243824
+    },
+    {
+      "type": "edit",
+      "id": "7c9f42b0f2faa9fd",
+      "item": {
+        "type": "paragraph",
+        "id": "7c9f42b0f2faa9fd",
+        "text": "Development can start by manufacturing an item of the new type, seeing errors when that type is not correctly rendered, and then revising the plugin until satisfied."
+      },
+      "date": 1387048390359
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "64f2a6d348d024d5",
+        "text": ""
+      },
+      "id": "64f2a6d348d024d5",
+      "type": "add",
+      "after": "7c9f42b0f2faa9fd",
+      "date": 1387048390864
+    },
+    {
+      "type": "edit",
+      "id": "64f2a6d348d024d5",
+      "item": {
+        "type": "paragraph",
+        "id": "64f2a6d348d024d5",
+        "text": "Plugins can contribute tests which will be rolled up to build a single page of mocha tests called runtests.html."
+      },
+      "date": 1387048491316
+    },
+    {
+      "type": "edit",
+      "id": "64f2a6d348d024d5",
+      "item": {
+        "type": "paragraph",
+        "id": "64f2a6d348d024d5",
+        "text": "Plugins can contribute tests which will be rolled up to build a single page of mocha tests called runtests.html. Privileged access to plugin resources may be provided to aid testing."
+      },
+      "date": 1387048594891
+    },
+    {
+      "type": "edit",
+      "id": "7c9f42b0f2faa9fd",
+      "item": {
+        "type": "paragraph",
+        "id": "7c9f42b0f2faa9fd",
+        "text": "Development can start by hand editing an item of the new type, seeing errors when that type is not correctly rendered, and then revising the plugin until satisfied."
+      },
+      "date": 1387048636264
+    },
+    {
+      "type": "edit",
+      "id": "7c9f42b0f2faa9fd",
+      "item": {
+        "type": "paragraph",
+        "id": "7c9f42b0f2faa9fd",
+        "text": "Development can start by hand editing the json for an item of the new type, seeing errors when that type is not correctly rendered, and then revising the plugin until satisfied."
+      },
+      "date": 1387048653432
+    },
+    {
+      "type": "edit",
+      "id": "7c9f42b0f2faa9fd",
+      "item": {
+        "type": "paragraph",
+        "id": "7c9f42b0f2faa9fd",
+        "text": "Development can start by hand editing the json for an item of the new type, seeing errors when that type is not correctly rendered, and then revising the plugin until satisfied. This has been captured into a plugin generator script. See [[Make Plugin Script]]"
+      },
+      "date": 1387048786382
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7b73a2744328f901"
+      },
+      "id": "7b73a2744328f901",
+      "type": "add",
+      "after": "64f2a6d348d024d5",
+      "date": 1387048850501
+    },
+    {
+      "type": "edit",
+      "id": "7b73a2744328f901",
+      "item": {
+        "type": "paragraph",
+        "id": "7b73a2744328f901",
+        "text": "<h3> Configuration"
+      },
+      "date": 1387048863179
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "829b4aae4b9539cb",
+        "text": ""
+      },
+      "id": "829b4aae4b9539cb",
+      "type": "add",
+      "after": "7b73a2744328f901",
+      "date": 1387048863684
+    },
+    {
+      "type": "edit",
+      "id": "829b4aae4b9539cb",
+      "item": {
+        "type": "paragraph",
+        "id": "829b4aae4b9539cb",
+        "text": "Plugins persist configuration by storing fields in the items they interpret."
+      },
+      "date": 1387049173161
+    },
+    {
+      "type": "edit",
+      "id": "829b4aae4b9539cb",
+      "item": {
+        "type": "paragraph",
+        "id": "829b4aae4b9539cb",
+        "text": "Plugins persist configuration information by storing fields in the items they interpret."
+      },
+      "date": 1387049183409
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "b1757c62e3d947e0",
+        "text": ""
+      },
+      "id": "b1757c62e3d947e0",
+      "type": "add",
+      "after": "829b4aae4b9539cb",
+      "date": 1387049187183
+    },
+    {
+      "type": "edit",
+      "id": "b1757c62e3d947e0",
+      "item": {
+        "type": "paragraph",
+        "id": "b1757c62e3d947e0",
+        "text": "The plugin's documentation can include pre-configured examples that can be copied and used as if they were many distinct plugins. See [[About Changes Plugin]]"
+      },
+      "date": 1387049275476
+    },
+    {
+      "type": "edit",
+      "id": "b1757c62e3d947e0",
+      "item": {
+        "type": "paragraph",
+        "id": "b1757c62e3d947e0",
+        "text": "The plugin's documentation can include pre-configured examples that can be copied and used as if they were many distinct plugins. The <b>changes</b> plugin offers two versions this way. See [[About Changes Plugin]]"
+      },
+      "date": 1387049356445
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "744e35336dbcc87a",
+        "text": ""
+      },
+      "id": "744e35336dbcc87a",
+      "type": "add",
+      "after": "b1757c62e3d947e0",
+      "date": 1387049395439
+    },
+    {
+      "type": "edit",
+      "id": "744e35336dbcc87a",
+      "item": {
+        "type": "paragraph",
+        "id": "744e35336dbcc87a",
+        "text": "The plugin's documentation can describe user configuration options made available through special markup interpreted by the plugin when it starts on behalf of each item. The text editor can revise this markup and will reinstall the plugin when it is finished."
+      },
+      "date": 1387049578879
+    },
+    {
+      "type": "edit",
+      "id": "744e35336dbcc87a",
+      "item": {
+        "type": "paragraph",
+        "id": "744e35336dbcc87a",
+        "text": "The plugin's documentation can describe user configuration options made available through special markup interpreted by the plugin when it starts on behalf of each item. The text editor can revise this markup and will reinstall the plugin when it is finished. The <b>radar</b> visualization plugin accepts axis selections and limits this way. See [[About Radar Plugin]]"
+      },
+      "date": 1387049851736
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "77c0f15947b296ec",
+        "text": ""
+      },
+      "id": "77c0f15947b296ec",
+      "type": "add",
+      "after": "744e35336dbcc87a",
+      "date": 1387049862365
+    },
+    {
+      "type": "edit",
+      "id": "77c0f15947b296ec",
+      "item": {
+        "type": "paragraph",
+        "id": "77c0f15947b296ec",
+        "text": "The plugin's configuration can involve interpreting a domain specific language (DSL) that behaves one way on the page and cooperatively but distinctly differently on the sever. The <b>report</b> email scheduling plugin works this way. See [[About Report Plugin]] "
+      },
+      "date": 1387050172108
+    },
+    {
+      "type": "edit",
+      "id": "77c0f15947b296ec",
+      "item": {
+        "type": "paragraph",
+        "id": "77c0f15947b296ec",
+        "text": "The plugin's configuration can involve interpreting a domain specific language (DSL) that behaves one way on the page and cooperatively but distinctly differently on the sever. The <b>report</b> email scheduling plugin works this way. See [[About Report Plugin]]"
+      },
+      "date": 1387050234507
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "e9b1e2d896ae3ab3",
+        "text": ""
+      },
+      "id": "e9b1e2d896ae3ab3",
+      "type": "add",
+      "after": "77c0f15947b296ec",
+      "date": 1387050235013
+    },
+    {
+      "type": "edit",
+      "id": "e9b1e2d896ae3ab3",
+      "item": {
+        "type": "paragraph",
+        "id": "e9b1e2d896ae3ab3",
+        "text": "<h3> Execution"
+      },
+      "date": 1387050243266
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "7a3bb6726747cfbc",
+        "text": ""
+      },
+      "id": "7a3bb6726747cfbc",
+      "type": "add",
+      "after": "e9b1e2d896ae3ab3",
+      "date": 1387050243772
+    },
+    {
+      "type": "remove",
+      "id": "7a3bb6726747cfbc",
+      "date": 1387050255636
+    },
+    {
+      "type": "edit",
+      "id": "e9b1e2d896ae3ab3",
+      "item": {
+        "type": "paragraph",
+        "id": "e9b1e2d896ae3ab3",
+        "text": "<h3> Operation"
+      },
+      "date": 1387050270402
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "87f58777721507e7",
+        "text": ""
+      },
+      "id": "87f58777721507e7",
+      "type": "add",
+      "after": "e9b1e2d896ae3ab3",
+      "date": 1387050270908
+    },
+    {
+      "type": "edit",
+      "id": "87f58777721507e7",
+      "item": {
+        "type": "paragraph",
+        "id": "87f58777721507e7",
+        "text": "A Plugin is dynamically loaded when an item of its type is rendered on the screen. The loading will always be from the origin server even if the item came with a page from a remote site."
+      },
+      "date": 1387050363023
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "2dca21eb60b28708",
+        "text": ""
+      },
+      "id": "2dca21eb60b28708",
+      "type": "add",
+      "after": "87f58777721507e7",
+      "date": 1387050363529
+    },
+    {
+      "type": "edit",
+      "id": "2dca21eb60b28708",
+      "item": {
+        "type": "paragraph",
+        "id": "2dca21eb60b28708",
+        "text": "The plugin offers two entry points, emit and bind. For some plugins, notably <b>paragraph</b> and <b>image</b> the dom objects may have been constructed by the server and need not be emitted. Beyond this case, emit and bind are called right after one another and can be used interchangeably."
+      },
+      "date": 1387050547978
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "52e86ba8bc6c8c18",
+        "text": ""
+      },
+      "id": "52e86ba8bc6c8c18",
+      "type": "add",
+      "after": "2dca21eb60b28708",
+      "date": 1387050579010
+    },
+    {
+      "type": "edit",
+      "id": "52e86ba8bc6c8c18",
+      "item": {
+        "type": "paragraph",
+        "id": "52e86ba8bc6c8c18",
+        "text": "A plugin can dynamically load additional resources including code and data. It becomes the plugin's responsibility to schedule callbacks to complete rendering when the loads are complete."
+      },
+      "date": 1387050685455
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "e82a7027c9a858b2",
+        "text": ""
+      },
+      "id": "e82a7027c9a858b2",
+      "type": "add",
+      "after": "52e86ba8bc6c8c18",
+      "date": 1387050685962
+    },
+    {
+      "type": "edit",
+      "id": "e82a7027c9a858b2",
+      "item": {
+        "type": "paragraph",
+        "id": "e82a7027c9a858b2",
+        "text": "A plugin can dynamically locate resources in the dom. Our current approach is to find these resources by looking for pages or items with jQuery. Page rendering is intentionally serialized so that items above and pages to the left will have emitted their dom elements before subsequent plugins attempt to bind."
+      },
+      "date": 1387050975789
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "3c238cf8a25e3a94",
+        "text": ""
+      },
+      "id": "3c238cf8a25e3a94",
+      "type": "add",
+      "after": "e82a7027c9a858b2",
+      "date": 1387050976295
+    },
+    {
+      "type": "remove",
+      "id": "3c238cf8a25e3a94",
+      "date": 1387051008776
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "2fc88d7f33f87a93",
+        "text": "A plugin will often emit a special class that makes them easy "
+      },
+      "id": "2fc88d7f33f87a93",
+      "type": "add",
+      "after": "e82a7027c9a858b2",
+      "date": 1387051064782
+    },
+    {
+      "type": "edit",
+      "id": "2fc88d7f33f87a93",
+      "item": {
+        "type": "paragraph",
+        "id": "2fc88d7f33f87a93",
+        "text": "A plugin that sources data will emit dom elements of a class that is easily recognized by plugins that consume data. The <b>data</b> plugin sources data and the <b>radar</b> plugin consumes it. The <b>method</b> plugin consumes data it finds before itself in the dom and offers results it calculates to plugins that come after it."
+      },
+      "date": 1387051327469
+    },
+    {
+      "type": "edit",
+      "id": "2fc88d7f33f87a93",
+      "item": {
+        "type": "paragraph",
+        "id": "2fc88d7f33f87a93",
+        "text": "A plugin that sources data will emit dom elements of a class that is easily recognized by plugins that consume data. The <b>data</b> plugin sources data and the <b>radar</b> plugin consumes it. The <b>method</b> plugin consumes data it finds before itself in the dom and offers results it calculates to plugins that come after it. See [[About Method Plugin]]"
+      },
+      "date": 1387051355146
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1c0eb0852cede538"
+      },
+      "id": "1c0eb0852cede538",
+      "type": "add",
+      "after": "2fc88d7f33f87a93",
+      "date": 1387051379849
+    },
+    {
+      "type": "edit",
+      "id": "1c0eb0852cede538",
+      "item": {
+        "type": "paragraph",
+        "id": "1c0eb0852cede538",
+        "text": "A plugin can register for events and make updates to its dom elements in response to those events."
+      },
+      "date": 1387051441443
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "a52fe70e4d016403",
+        "text": ""
+      },
+      "id": "a52fe70e4d016403",
+      "type": "add",
+      "after": "1c0eb0852cede538",
+      "date": 1387051441948
+    },
+    {
+      "type": "edit",
+      "id": "a52fe70e4d016403",
+      "item": {
+        "type": "paragraph",
+        "id": "a52fe70e4d016403",
+        "text": "A plugin can schedule a timer and perform operations or make updates to its dom elements in response to timer events."
+      },
+      "date": 1387051506431
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "f5b61748d894a58b",
+        "text": ""
+      },
+      "id": "f5b61748d894a58b",
+      "type": "add",
+      "after": "a52fe70e4d016403",
+      "date": 1387051506937
+    },
+    {
+      "type": "remove",
+      "id": "f5b61748d894a58b",
+      "date": 1387051513144
+    },
+    {
+      "type": "edit",
+      "id": "a52fe70e4d016403",
+      "item": {
+        "type": "paragraph",
+        "id": "a52fe70e4d016403",
+        "text": "A plugin can schedule a timer and make updates to its dom elements in response to timer events."
+      },
+      "date": 1387051523838
+    },
+    {
+      "type": "edit",
+      "id": "a52fe70e4d016403",
+      "item": {
+        "type": "paragraph",
+        "id": "a52fe70e4d016403",
+        "text": "A plugin can schedule timers and make updates to its dom elements in response to timer events."
+      },
+      "date": 1387051537973
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "580283924a2cf90d",
+        "text": ""
+      },
+      "id": "580283924a2cf90d",
+      "type": "add",
+      "after": "a52fe70e4d016403",
+      "date": 1387051563165
+    },
+    {
+      "type": "edit",
+      "id": "580283924a2cf90d",
+      "item": {
+        "type": "paragraph",
+        "id": "580283924a2cf90d",
+        "text": "A plugin can open websocket connections with a server-side component and source or sink data through it."
+      },
+      "date": 1387051632714
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "190874d6427486db",
+        "text": ""
+      },
+      "id": "190874d6427486db",
+      "type": "add",
+      "after": "580283924a2cf90d",
+      "date": 1387051653989
+    },
+    {
+      "type": "edit",
+      "id": "190874d6427486db",
+      "item": {
+        "type": "paragraph",
+        "id": "190874d6427486db",
+        "text": "A plugin is not (yet) explicitly stopped when a page is discarded. Browsers may stop clock ticks when a page is not visible. More real time will have elapsed than expected when tick events resume."
+      },
+      "date": 1387051900227
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "500c4834d131df8a",
+        "text": ""
+      },
+      "id": "500c4834d131df8a",
+      "type": "add",
+      "after": "190874d6427486db",
+      "date": 1387051933510
+    },
+    {
+      "type": "edit",
+      "id": "500c4834d131df8a",
+      "item": {
+        "type": "paragraph",
+        "id": "500c4834d131df8a",
+        "text": "A plugin may retrieve objects from other pages and ask those objects to perform computations based on how they might be configured. The <b>reduce</b> plugin finds pages with <b>methods</b>, creates inputs for them, and retrieves outputs from them, possibly without the pages being visible on the screen. See [[Reduce Plugin]]"
+      },
+      "date": 1387052305353
+    },
+    {
+      "type": "edit",
+      "id": "500c4834d131df8a",
+      "item": {
+        "type": "paragraph",
+        "id": "500c4834d131df8a",
+        "text": "A plugin may retrieve objects from other pages and ask those objects to perform computations based on how they might be configured. The <b>reduce</b> plugin finds pages with <b>methods</b>, creates inputs for them, and retrieves outputs from them, possibly without the pages being visible on the screen. See [[About Reduce Plugin]]"
+      },
+      "date": 1387052316160
+    },
+    {
+      "type": "edit",
+      "id": "1c0eb0852cede538",
+      "item": {
+        "type": "paragraph",
+        "id": "1c0eb0852cede538",
+        "text": "A plugin can register for events and make updates to its dom elements in response to those events. See [[Well Known Events]]"
+      },
+      "date": 1400464956043
+    },
+    {
+      "type": "edit",
+      "id": "3677fcbf46e546ce",
+      "item": {
+        "type": "html",
+        "id": "3677fcbf46e546ce",
+        "text": "<h3> Programming"
+      },
+      "date": 1418517186126
+    },
+    {
+      "type": "edit",
+      "id": "7b73a2744328f901",
+      "item": {
+        "type": "html",
+        "id": "7b73a2744328f901",
+        "text": "<h3> Configuration"
+      },
+      "date": 1418517191790
+    },
+    {
+      "type": "edit",
+      "id": "b1757c62e3d947e0",
+      "item": {
+        "type": "paragraph",
+        "id": "b1757c62e3d947e0",
+        "text": "The plugin's documentation can include pre-configured examples that can be copied and used as if they were many distinct plugins. The 'changes' plugin offers two versions this way. See [[About Changes Plugin]]"
+      },
+      "date": 1418517208571
+    },
+    {
+      "type": "edit",
+      "id": "744e35336dbcc87a",
+      "item": {
+        "type": "paragraph",
+        "id": "744e35336dbcc87a",
+        "text": "The plugin's documentation can describe user configuration options made available through special markup interpreted by the plugin when it starts on behalf of each item. The text editor can revise this markup and will reinstall the plugin when it is finished. The 'radar' visualization plugin accepts axis selections and limits this way. See [[About Radar Plugin]]"
+      },
+      "date": 1418517222717
+    },
+    {
+      "type": "edit",
+      "id": "77c0f15947b296ec",
+      "item": {
+        "type": "paragraph",
+        "id": "77c0f15947b296ec",
+        "text": "The plugin's configuration can involve interpreting a domain specific language (DSL) that behaves one way on the page and cooperatively but distinctly differently on the sever. The 'report' email scheduling plugin works this way. See [[About Report Plugin]]"
+      },
+      "date": 1418517239921
+    },
+    {
+      "type": "edit",
+      "id": "e9b1e2d896ae3ab3",
+      "item": {
+        "type": "html",
+        "id": "e9b1e2d896ae3ab3",
+        "text": "<h3> Operation"
+      },
+      "date": 1418517248641
+    },
+    {
+      "type": "edit",
+      "id": "2dca21eb60b28708",
+      "item": {
+        "type": "paragraph",
+        "id": "2dca21eb60b28708",
+        "text": "The plugin offers two entry points, emit and bind. For some plugins, notably 'paragraph' and 'image' the dom objects may have been constructed by the server and need not be emitted. Beyond this case, emit and bind are called right after one another and can be used interchangeably."
+      },
+      "date": 1418517271263
+    },
+    {
+      "type": "edit",
+      "id": "2fc88d7f33f87a93",
+      "item": {
+        "type": "paragraph",
+        "id": "2fc88d7f33f87a93",
+        "text": "A plugin that sources data will emit dom elements of a class that is easily recognized by plugins that consume data. The 'data' plugin sources data and the 'radar' plugin consumes it. The 'method' plugin consumes data it finds before itself in the dom and offers results it calculates to plugins that come after it. See [[About Method Plugin]]"
+      },
+      "date": 1418517303548
+    },
+    {
+      "type": "edit",
+      "id": "500c4834d131df8a",
+      "item": {
+        "type": "paragraph",
+        "id": "500c4834d131df8a",
+        "text": "A plugin may retrieve objects from other pages and ask those objects to perform computations based on how they might be configured. The 'reduce' plugin finds pages with 'methods', creates inputs for them, and retrieves outputs from them, possibly without the pages being visible on the screen. See [[About Reduce Plugin]]"
+      },
+      "date": 1418517334372
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d197cb53328cc550"
+      },
+      "id": "d197cb53328cc550",
+      "type": "add",
+      "after": "500c4834d131df8a",
+      "date": 1681413067747
+    },
+    {
+      "type": "edit",
+      "id": "d197cb53328cc550",
+      "item": {
+        "type": "paragraph",
+        "id": "d197cb53328cc550",
+        "text": "We've adopted a step-by-step method for merging pull requests where the order of steps depends on the complexity of the change. In the simples form, we merge in GitHub and then double check on localhost."
+      },
+      "date": 1681413180733
+    },
+    {
+      "type": "edit",
+      "id": "d197cb53328cc550",
+      "item": {
+        "type": "paragraph",
+        "id": "d197cb53328cc550",
+        "text": "We've adopted a step-by-step method for merging pull requests where the order of steps depends on the complexity of the change. In the simples form, we merge in GitHub and then double check on localhost. See [[Step by Step Merge]]"
+      },
+      "date": 1681413203743
+    },
+    {
+      "type": "edit",
+      "id": "d197cb53328cc550",
+      "item": {
+        "type": "paragraph",
+        "id": "d197cb53328cc550",
+        "text": "We've adopted a step-by-step method for merging pull requests where the order of steps depends on the complexity of the change. In the simplest form, we merge in GitHub and then double check on localhost. See [[Step by Step Merge]]"
+      },
+      "date": 1681413246533
+    },
+    {
+      "type": "fork",
+      "site": "plugins.fed.wiki.org",
+      "date": 1693839036678
+    }
+  ]
+}

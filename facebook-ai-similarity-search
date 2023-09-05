@@ -1,0 +1,868 @@
+{
+  "title": "Facebook AI Similarity Search",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "6a1a586f6c07dbe1",
+      "text": "Stories have the power to change human perspectives and have applications in game development and film making."
+    },
+    {
+      "type": "paragraph",
+      "id": "62b542d2b9203a30",
+      "text": "An intelligent system can generate appropriate stories for a set of keywords. We aim to build a system capable of getting stories by providing keywords as input. The stories must have a relation with the input keyword. We experimented with the ROCStory dataset. The preprocessed data are encoded using a sentence transformer, called msmarco-distilbert-base-prod-v3. We relied on a search approach based on Facebook AI Similarity Search (FAISS) to generate appropriate stories. The output story has been converted to audio via pyttsx3. The performance of the proposed model is compared with that of the sentence transformer paraphrase-MiniLM-L6-v2 approach. We made a subjective evaluation. The results show that the proposed approach outperforms the baseline method."
+    },
+    {
+      "type": "pagefold",
+      "id": "c19ddd9edf45804d",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "2a4bf616694d3bca",
+      "text": "GEORGE, Godwin and RAJAN, Rajeev, 2022. A FAISS-based Search for Story Generation. In: 2022 IEEE 19th India Council International Conference (INDICON). November 2022. p. 1–6. DOI 10.1109/INDICON56171.2022.10039758."
+    },
+    {
+      "type": "markdown",
+      "id": "e94ec0d22768939a",
+      "text": "# Research Foundations of Faiss [https://faiss.ai/#research-foundations-of-faiss page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "7f82bb42c7df702a",
+      "text": "Faiss is based on years of research. Most notably it implements:\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "9977600dad48184c",
+      "text": "The inverted file from “Video google: A text retrieval approach to object matching in videos.”, Sivic & Zisserman, ICCV 2003. This is the key to non-exhaustive search in large datasets. Otherwise all searches would need to scan all elements in the index, which is prohibitive even if the operation to apply for each element is fast"
+    },
+    {
+      "type": "paragraph",
+      "id": "07e1583cd062e67d",
+      "text": "The product quantization (PQ) method from “Product quantization for nearest neighbor search”, Jégou & al., PAMI 2011. This can be seen as a lossy compression technique for high-dimensional vectors, that allows relatively accurate reconstructions and distance computations in the compressed domain."
+    },
+    {
+      "type": "paragraph",
+      "id": "21cdcbe7361b29c8",
+      "text": "The three-level quantization (IVFADC-R aka IndexIVFPQR) method from “Searching in one billion vectors: re-rank with source coding”, Tavenard & al., ICASSP’11."
+    },
+    {
+      "type": "paragraph",
+      "id": "1fa632f4217706db",
+      "text": "The inverted multi-index from “The inverted multi-index”, Babenko & Lempitsky, CVPR 2012. This method greatly improves the speed of inverted indexing for fast/less accurate operating points."
+    },
+    {
+      "type": "paragraph",
+      "id": "735d8a1c114a88b5",
+      "text": "The optimized PQ from “Optimized product quantization”, He & al, CVPR 2013. This method can be seen as a linear transformation of the vector space to make it more amenable for indexing with a product quantizer."
+    },
+    {
+      "type": "paragraph",
+      "id": "47699c5cc9e73e94",
+      "text": "The pre-filtering of product quantizer distances from “Polysemous codes”, Douze & al., ECCV 2016. This technique performs a binary filtering stage before computing PQ distances."
+    },
+    {
+      "type": "paragraph",
+      "id": "559ecf86e49c4324",
+      "text": "The GPU implementation and fast k-selection is described in “Billion-scale similarity search with GPUs”, Johnson & al, ArXiv 1702.08734, 2017"
+    },
+    {
+      "type": "paragraph",
+      "id": "baa7b7be3260694a",
+      "text": "The HNSW indexing method from “Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs”, Malkov & al., ArXiv 1603.09320, 2016"
+    },
+    {
+      "type": "paragraph",
+      "id": "b8f88d7be5872700",
+      "text": "A general paper about product quantization and related methods: “A Survey of Product Quantization”, Yusuke Matsui, Yusuke Uchida, Hervé Jégou, Shin’ichi Satoh, ITE transactions on MTA, 2018."
+    },
+    {
+      "type": "paragraph",
+      "id": "d6714cd20270ed7c",
+      "text": "The overview image below is from that paper (click on the image to enlarge it):"
+    },
+    {
+      "type": "image",
+      "id": "6550184809e8619b",
+      "text": "[https://raw.githubusercontent.com/wiki/facebookresearch/faiss/PQ_variants_Faiss_annotated.png png]",
+      "size": "wide",
+      "width": 430,
+      "height": 174,
+      "url": "/assets/plugins/image/5a39050fa9881265ea6af9c9d416f641.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "b38da4a3ef401b31",
+      "text": "Image credit: [[Yusuke Matsui]], thanks for allowing us to use it!"
+    },
+    {
+      "type": "paragraph",
+      "id": "ad9179e1184acb09",
+      "text": "Methods that are implemented in Faiss are highlighted in red."
+    },
+    {
+      "type": "pagefold",
+      "id": "58c7e7775feb8e2c",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "91376390afa46826",
+      "text": "\nSIVIC and ZISSERMAN, 2003. Video Google: a text retrieval approach to object matching in videos. In: Proceedings Ninth IEEE International Conference on Computer Vision. October 2003. p. 1470–1477 vol.2. DOI 10.1109/ICCV.2003.1238663. We describe an approach to object and scene retrieval which searches for and localizes all the occurrences of a user outlined object in a video. The object is represented by a set of viewpoint invariant region descriptors so that recognition can proceed successfully despite changes in viewpoint, illumination and partial occlusion. The temporal continuity of the video within a shot is used to track the regions in order to reject unstable regions and reduce the effects of noise in the descriptors. The analogy with text retrieval is in the implementation where matches on descriptors are pre-computed (using vector quantization), and inverted file systems and document rankings are used. The result is that retrieved is immediate, returning a ranked list of key frames/shots in the manner of Google. The method is illustrated for matching in two full length feature films.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "45c0707c880d2a09",
+      "text": "\nJÉGOU, H, DOUZE, M and SCHMID, C, 2011. Product Quantization for Nearest Neighbor Search. IEEE Transactions on Pattern Analysis and Machine Intelligence. January 2011. Vol. 33, no. 1, p. 117–128. DOI 10.1109/TPAMI.2010.57. This paper introduces a product quantization based approach for approximate nearest neighbor search. The idea is to decomposes the space into a Cartesian product of low dimensional subspaces and to quantize each subspace separately. A vector is represented by a short code composed of its subspace quantization indices. The Euclidean distance between two vectors can be efﬁciently estimated from their codes. An asymmetric version increases precision, as it computes the approximate distance between a vector and a code.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "dd165463902b1494",
+      "text": "JÉGOU, Hervé, TAVENARD, Romain, DOUZE, Matthijs and AMSALEG, Laurent, 2011. Searching in one billion vectors: re-rank with source coding. Online. 18 February 2011. arXiv. arXiv:1102.3828. [Accessed 5 September 2023]. Available from: http://arxiv.org/abs/1102.3828 Recent indexing techniques inspired by source coding have been shown successful to index billions of high-dimensional vectors in memory. In this paper, we propose an approach that re-ranks the neighbor hypotheses obtained by these compressed-domain indexing methods. In contrast to the usual post-veriﬁcation scheme, which performs exact distance calculation on the short-list of hypotheses, the estimated distances are reﬁned based on short quantization codes, to avoid reading the full vectors from disk.arXiv:1102.3828 [cs]\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "aaa18a9d1c226907",
+      "text": "\nBABENKO, Artem and LEMPITSKY, Victor, 2012. The inverted multi-index. In: 2012 IEEE Conference on Computer Vision and Pattern Recognition. June 2012. p. 3069–3076. DOI 10.1109/CVPR.2012.6248038. A new data structure for efficient similarity search in very large dataseis of high-dimensional vectors is introduced. This structure called the inverted multi-index generalizes the inverted index idea by replacing the standard quantization within inverted indices with product quantization. For very similar retrieval complexity and preprocessing time, inverted multi-indices achieve a much denser subdivision of the search space compared to inverted indices, while retaining their memory efficiency. Our experiments with large dataseis of SIFT and GIST vectors demonstrate that because of the denser subdivision, inverted multi-indices are able to return much shorter candidate lists with higher recall. Augmented with a suitable reranking procedure, multi-indices were able to improve the speed of approximate nearest neighbor search on the dataset of 1 billion SIFT vectors by an order of magnitude compared to the best previously published systems, while achieving better recall and incurring only few percent of memory overhead.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "320d8099f8936b19",
+      "text": "\nDOUZE, Matthijs, JÉGOU, Hervé and PERRONNIN, Florent, 2016. Polysemous Codes. In: LEIBE, Bastian, MATAS, Jiri, SEBE, Nicu and WELLING, Max (eds.), Computer Vision – ECCV 2016. Cham: Springer International Publishing. 2016. p. 785–801. Lecture Notes in Computer Science. ISBN 978-3-319-46475-6. DOI 10.1007/978-3-319-46475-6_48. This paper considers the problem of approximate nearest neighbor search in the compressed domain. We introduce polysemous codes, which offer both the distance estimation quality of product quantization and the efficient comparison of binary codes with Hamming distance. Their design is inspired by algorithms introduced in the 90’s to construct channel-optimized vector quantizers. At search time, this dual interpretation accelerates the search. Most of the indexed vectors are filtered out with Hamming distance, letting only a fraction of the vectors to be ranked with an asymmetric distance estimator. The method is complementary with a coarse partitioning of the feature space such as the inverted multi-index. This is shown by our experiments performed on several public benchmarks such as the BIGANN dataset comprising one billion vectors, for which we report state-of-the-art results for query times below 0.3 millisecond per core. Last but not least, our approach allows the approximate computation of the k-NN graph associated with the Yahoo Flickr Creative Commons 100M, described by CNN image descriptors, in less than 8 h on a single machine.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "91f49a8398e1fe6c",
+      "text": "\nJOHNSON, Jeff, DOUZE, Matthijs and JÉGOU, Hervé, 2017. Billion-scale similarity search with GPUs. Online. 28 February 2017. arXiv. arXiv:1702.08734. [Accessed 5 September 2023]. Similarity search finds application in specialized database systems handling complex data such as images or videos, which are typically represented by high-dimensional features and require specific indexing structures. This paper tackles the problem of better utilizing GPUs for this task. While GPUs excel at data-parallel tasks, prior approaches are bottlenecked by algorithms that expose less parallelism, such as k-min selection, or make poor use of the memory hierarchy. We propose a design for k-selection that operates at up to 55% of theoretical peak performance, enabling a nearest neighbor implementation that is 8.5x faster than prior GPU state of the art. We apply it in different similarity search scenarios, by proposing optimized design for brute-force, approximate and compressed-domain search based on product quantization. In all these setups, we outperform the state of the art by large margins. Our implementation enables the construction of a high accuracy k-NN graph on 95 million images from the Yfcc100M dataset in 35 minutes, and of a graph connecting 1 billion vectors in less than 12 hours on 4 Maxwell Titan X GPUs. We have open-sourced our approach for the sake of comparison and reproducibility.arXiv:1702.08734 [cs]\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "683329fc3f8e9622",
+      "text": "\nMALKOV, Yu A. and YASHUNIN, D. A., 2018. Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs. Online. 14 August 2018. arXiv. arXiv:1603.09320. [Accessed 5 September 2023]. We present a new approach for the approximate K-nearest neighbor search based on navigable small world graphs with controllable hierarchy (Hierarchical NSW, HNSW). The proposed solution is fully graph-based, without any need for additional search structures, which are typically used at the coarse search stage of the most proximity graph techniques. Hierarchical NSW incrementally builds a multi-layer structure consisting from hierarchical set of proximity graphs (layers) for nested subsets of the stored elements. The maximum layer in which an element is present is selected randomly with an exponentially decaying probability distribution. This allows producing graphs similar to the previously studied Navigable Small World (NSW) structures while additionally having the links separated by their characteristic distance scales. Starting search from the upper layer together with utilizing the scale separation boosts the performance compared to NSW and allows a logarithmic complexity scaling. Additional employment of a heuristic for selecting proximity graph neighbors significantly increases performance at high recall and in case of highly clustered data. Performance evaluation has demonstrated that the proposed general metric space search index is able to strongly outperform previous opensource state-of-the-art vector-only approaches. Similarity of the algorithm to the skip list structure allows straightforward balanced distributed implementation.arXiv:1603.09320 [cs]\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "11d354ff85e9e0dd",
+      "text": "MATSUI, Yusuke, UCHIDA, Yusuke, JEGOU, Herve and SATOH, Shin’ichi, 2018. Paper A Survey of Product Quantization. 2018. Vol. 6, no. 1. Product Quantization (PQ) search and its derivatives are popular and successful methods for large-scale approximated nearest neighbor search. In this paper, we review the fundamental algorithm of this class of algorithms and provide executable sample codes. We then provide a comprehensive survey of the recent PQ-based methods.\n"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Facebook AI Similarity Search",
+        "story": []
+      },
+      "date": 1693910644905
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2a4bf616694d3bca"
+      },
+      "id": "2a4bf616694d3bca",
+      "type": "add",
+      "date": 1693910646461
+    },
+    {
+      "type": "edit",
+      "id": "2a4bf616694d3bca",
+      "item": {
+        "type": "paragraph",
+        "id": "2a4bf616694d3bca",
+        "text": "\nGEORGE, Godwin and RAJAN, Rajeev, 2022. A FAISS-based Search for Story Generation. In: 2022 IEEE 19th India Council International Conference (INDICON). November 2022. p. 1–6. DOI 10.1109/INDICON56171.2022.10039758. Stories have the power to change human perspectives and have applications in game development and film making. An intelligent system can generate appropriate stories for a set of keywords. We aim to build a system capable of getting stories by providing keywords as input. The stories must have a relation with the input keyword. We experimented with the ROCStory dataset. The preprocessed data are encoded using a sentence transformer, called msmarco-distilbert-base-prod-v3. We relied on a search approach based on Facebook AI Similarity Search (FAISS) to generate appropriate stories. The output story has been converted to audio via pyttsx3. The performance of the proposed model is compared with that of the sentence transformer paraphrase-MiniLM-L6-v2 approach. We made a subjective evaluation. The results show that the proposed approach outperforms the baseline method.\n"
+      },
+      "date": 1693910648053
+    },
+    {
+      "type": "edit",
+      "id": "2a4bf616694d3bca",
+      "item": {
+        "type": "paragraph",
+        "id": "2a4bf616694d3bca",
+        "text": "GEORGE, Godwin and RAJAN, Rajeev, 2022. A FAISS-based Search for Story Generation. In: 2022 IEEE 19th India Council International Conference (INDICON). November 2022. p. 1–6. DOI 10.1109/INDICON56171.2022.10039758."
+      },
+      "date": 1693910654335
+    },
+    {
+      "type": "add",
+      "id": "6a1a586f6c07dbe1",
+      "item": {
+        "type": "paragraph",
+        "id": "6a1a586f6c07dbe1",
+        "text": "Stories have the power to change human perspectives and have applications in game development and film making. An intelligent system can generate appropriate stories for a set of keywords. We aim to build a system capable of getting stories by providing keywords as input. The stories must have a relation with the input keyword. We experimented with the ROCStory dataset. The preprocessed data are encoded using a sentence transformer, called msmarco-distilbert-base-prod-v3. We relied on a search approach based on Facebook AI Similarity Search (FAISS) to generate appropriate stories. The output story has been converted to audio via pyttsx3. The performance of the proposed model is compared with that of the sentence transformer paraphrase-MiniLM-L6-v2 approach. We made a subjective evaluation. The results show that the proposed approach outperforms the baseline method."
+      },
+      "after": "2a4bf616694d3bca",
+      "date": 1693910655105
+    },
+    {
+      "id": "6a1a586f6c07dbe1",
+      "type": "move",
+      "order": [
+        "6a1a586f6c07dbe1",
+        "2a4bf616694d3bca"
+      ],
+      "date": 1693910657639
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c19ddd9edf45804d"
+      },
+      "id": "c19ddd9edf45804d",
+      "type": "add",
+      "after": "2a4bf616694d3bca",
+      "date": 1693910659573
+    },
+    {
+      "id": "c19ddd9edf45804d",
+      "type": "move",
+      "order": [
+        "6a1a586f6c07dbe1",
+        "c19ddd9edf45804d",
+        "2a4bf616694d3bca"
+      ],
+      "date": 1693910661656
+    },
+    {
+      "type": "edit",
+      "id": "c19ddd9edf45804d",
+      "item": {
+        "type": "pagefold",
+        "id": "c19ddd9edf45804d",
+        "text": "~"
+      },
+      "date": 1693910664159
+    },
+    {
+      "type": "edit",
+      "id": "6a1a586f6c07dbe1",
+      "item": {
+        "type": "paragraph",
+        "id": "6a1a586f6c07dbe1",
+        "text": "Stories have the power to change human perspectives and have applications in game development and film making."
+      },
+      "date": 1693910853639
+    },
+    {
+      "type": "add",
+      "id": "62b542d2b9203a30",
+      "item": {
+        "type": "paragraph",
+        "id": "62b542d2b9203a30",
+        "text": "An intelligent system can generate appropriate stories for a set of keywords. We aim to build a system capable of getting stories by providing keywords as input. The stories must have a relation with the input keyword. We experimented with the ROCStory dataset. The preprocessed data are encoded using a sentence transformer, called msmarco-distilbert-base-prod-v3. We relied on a search approach based on Facebook AI Similarity Search (FAISS) to generate appropriate stories. The output story has been converted to audio via pyttsx3. The performance of the proposed model is compared with that of the sentence transformer paraphrase-MiniLM-L6-v2 approach. We made a subjective evaluation. The results show that the proposed approach outperforms the baseline method."
+      },
+      "after": "6a1a586f6c07dbe1",
+      "date": 1693910854226
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e94ec0d22768939a"
+      },
+      "id": "e94ec0d22768939a",
+      "type": "add",
+      "after": "2a4bf616694d3bca",
+      "date": 1693912618718
+    },
+    {
+      "type": "edit",
+      "id": "e94ec0d22768939a",
+      "item": {
+        "type": "paragraph",
+        "id": "e94ec0d22768939a",
+        "text": "Research Foundations of Faiss"
+      },
+      "date": 1693912620702
+    },
+    {
+      "type": "edit",
+      "id": "e94ec0d22768939a",
+      "item": {
+        "type": "paragraph",
+        "id": "e94ec0d22768939a",
+        "text": "Research Foundations of Faiss [https://faiss.ai/#research-foundations-of-faiss page]"
+      },
+      "date": 1693912639772
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7f82bb42c7df702a"
+      },
+      "id": "7f82bb42c7df702a",
+      "type": "add",
+      "after": "e94ec0d22768939a",
+      "date": 1693912691946
+    },
+    {
+      "type": "edit",
+      "id": "7f82bb42c7df702a",
+      "item": {
+        "type": "paragraph",
+        "id": "7f82bb42c7df702a",
+        "text": "aiss is based on years of research. Most notably it implements:\n\n"
+      },
+      "date": 1693912693631
+    },
+    {
+      "type": "edit",
+      "id": "7f82bb42c7df702a",
+      "item": {
+        "type": "paragraph",
+        "id": "7f82bb42c7df702a",
+        "text": "Faiss is based on years of research. Most notably it implements:\n\n"
+      },
+      "date": 1693912697729
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9977600dad48184c"
+      },
+      "id": "9977600dad48184c",
+      "type": "add",
+      "after": "7f82bb42c7df702a",
+      "date": 1693912707504
+    },
+    {
+      "type": "edit",
+      "id": "9977600dad48184c",
+      "item": {
+        "type": "paragraph",
+        "id": "9977600dad48184c",
+        "text": "The inverted file from “Video google: A text retrieval approach to object matching in videos.”, Sivic & Zisserman, ICCV 2003. This is the key to non-exhaustive search in large datasets. Otherwise all searches would need to scan all elements in the index, which is prohibitive even if the operation to apply for each element is fast"
+      },
+      "date": 1693912708909
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "58c7e7775feb8e2c"
+      },
+      "id": "58c7e7775feb8e2c",
+      "type": "add",
+      "after": "9977600dad48184c",
+      "date": 1693913017479
+    },
+    {
+      "type": "edit",
+      "id": "58c7e7775feb8e2c",
+      "item": {
+        "type": "pagefold",
+        "id": "58c7e7775feb8e2c",
+        "text": "~"
+      },
+      "date": 1693913020677
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "91376390afa46826"
+      },
+      "id": "91376390afa46826",
+      "type": "add",
+      "after": "58c7e7775feb8e2c",
+      "date": 1693913022056
+    },
+    {
+      "type": "edit",
+      "id": "91376390afa46826",
+      "item": {
+        "type": "paragraph",
+        "id": "91376390afa46826",
+        "text": "\nSIVIC and ZISSERMAN, 2003. Video Google: a text retrieval approach to object matching in videos. In: Proceedings Ninth IEEE International Conference on Computer Vision. October 2003. p. 1470–1477 vol.2. DOI 10.1109/ICCV.2003.1238663. We describe an approach to object and scene retrieval which searches for and localizes all the occurrences of a user outlined object in a video. The object is represented by a set of viewpoint invariant region descriptors so that recognition can proceed successfully despite changes in viewpoint, illumination and partial occlusion. The temporal continuity of the video within a shot is used to track the regions in order to reject unstable regions and reduce the effects of noise in the descriptors. The analogy with text retrieval is in the implementation where matches on descriptors are pre-computed (using vector quantization), and inverted file systems and document rankings are used. The result is that retrieved is immediate, returning a ranked list of key frames/shots in the manner of Google. The method is illustrated for matching in two full length feature films.\n"
+      },
+      "date": 1693913023548
+    },
+    {
+      "type": "add",
+      "id": "07e1583cd062e67d",
+      "item": {
+        "type": "paragraph",
+        "id": "07e1583cd062e67d",
+        "text": "The product quantization (PQ) method from “Product quantization for nearest neighbor search”, Jégou & al., PAMI 2011. This can be seen as a lossy compression technique for high-dimensional vectors, that allows relatively accurate reconstructions and distance computations in the compressed domain."
+      },
+      "after": "9977600dad48184c",
+      "date": 1693913059756
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "45c0707c880d2a09"
+      },
+      "id": "45c0707c880d2a09",
+      "type": "add",
+      "after": "91376390afa46826",
+      "date": 1693913124757
+    },
+    {
+      "type": "edit",
+      "id": "45c0707c880d2a09",
+      "item": {
+        "type": "paragraph",
+        "id": "45c0707c880d2a09",
+        "text": "\nJÉGOU, H, DOUZE, M and SCHMID, C, 2011. Product Quantization for Nearest Neighbor Search. IEEE Transactions on Pattern Analysis and Machine Intelligence. January 2011. Vol. 33, no. 1, p. 117–128. DOI 10.1109/TPAMI.2010.57. This paper introduces a product quantization based approach for approximate nearest neighbor search. The idea is to decomposes the space into a Cartesian product of low dimensional subspaces and to quantize each subspace separately. A vector is represented by a short code composed of its subspace quantization indices. The Euclidean distance between two vectors can be efﬁciently estimated from their codes. An asymmetric version increases precision, as it computes the approximate distance between a vector and a code.\n"
+      },
+      "date": 1693913126174
+    },
+    {
+      "type": "add",
+      "id": "75b23bfd71bfe3df",
+      "item": {
+        "type": "paragraph",
+        "id": "75b23bfd71bfe3df",
+        "text": ".\n\nThe three-level quantization (IVFADC-R aka IndexIVFPQR) method from “Searching in one billion vectors: re-rank with source coding”, Tavenard & al., ICASSP’11."
+      },
+      "after": "62b542d2b9203a30",
+      "date": 1693913152694
+    },
+    {
+      "type": "remove",
+      "id": "75b23bfd71bfe3df",
+      "date": 1693913164462
+    },
+    {
+      "type": "edit",
+      "id": "07e1583cd062e67d",
+      "item": {
+        "type": "paragraph",
+        "id": "07e1583cd062e67d",
+        "text": "The product quantization (PQ) method from “Product quantization for nearest neighbor search”, Jégou & al., PAMI 2011. This can be seen as a lossy compression technique for high-dimensional vectors, that allows relatively accurate reconstructions and distance computations in the compressed domain.\nThe three-level quantization (IVFADC-R aka IndexIVFPQR) method from “Searching in one billion vectors: re-rank with source coding”, Tavenard & al., ICASSP’11."
+      },
+      "date": 1693913172067
+    },
+    {
+      "type": "edit",
+      "id": "07e1583cd062e67d",
+      "item": {
+        "type": "paragraph",
+        "id": "07e1583cd062e67d",
+        "text": "The product quantization (PQ) method from “Product quantization for nearest neighbor search”, Jégou & al., PAMI 2011. This can be seen as a lossy compression technique for high-dimensional vectors, that allows relatively accurate reconstructions and distance computations in the compressed domain."
+      },
+      "date": 1693913178720
+    },
+    {
+      "type": "add",
+      "id": "21cdcbe7361b29c8",
+      "item": {
+        "type": "paragraph",
+        "id": "21cdcbe7361b29c8",
+        "text": "The three-level quantization (IVFADC-R aka IndexIVFPQR) method from “Searching in one billion vectors: re-rank with source coding”, Tavenard & al., ICASSP’11."
+      },
+      "after": "07e1583cd062e67d",
+      "date": 1693913179121
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dd165463902b1494"
+      },
+      "id": "dd165463902b1494",
+      "type": "add",
+      "after": "45c0707c880d2a09",
+      "date": 1693913220774
+    },
+    {
+      "type": "edit",
+      "id": "dd165463902b1494",
+      "item": {
+        "type": "paragraph",
+        "id": "dd165463902b1494",
+        "text": "\nJÉGOU, Hervé, TAVENARD, Romain, DOUZE, Matthijs and AMSALEG, Laurent, 2011. Searching in one billion vectors: re-rank with source coding. Online. 18 February 2011. arXiv. arXiv:1102.3828. [Accessed 5 September 2023]. Available from: http://arxiv.org/abs/1102.3828Recent indexing techniques inspired by source coding have been shown successful to index billions of high-dimensional vectors in memory. In this paper, we propose an approach that re-ranks the neighbor hypotheses obtained by these compressed-domain indexing methods. In contrast to the usual post-veriﬁcation scheme, which performs exact distance calculation on the short-list of hypotheses, the estimated distances are reﬁned based on short quantization codes, to avoid reading the full vectors from disk.arXiv:1102.3828 [cs]\n"
+      },
+      "date": 1693913222101
+    },
+    {
+      "type": "edit",
+      "id": "dd165463902b1494",
+      "item": {
+        "type": "paragraph",
+        "id": "dd165463902b1494",
+        "text": "JÉGOU, Hervé, TAVENARD, Romain, DOUZE, Matthijs and AMSALEG, Laurent, 2011. Searching in one billion vectors: re-rank with source coding. Online. 18 February 2011. arXiv. arXiv:1102.3828. [Accessed 5 September 2023]. Available from: http://arxiv.org/abs/1102.3828 Recent indexing techniques inspired by source coding have been shown successful to index billions of high-dimensional vectors in memory. In this paper, we propose an approach that re-ranks the neighbor hypotheses obtained by these compressed-domain indexing methods. In contrast to the usual post-veriﬁcation scheme, which performs exact distance calculation on the short-list of hypotheses, the estimated distances are reﬁned based on short quantization codes, to avoid reading the full vectors from disk.arXiv:1102.3828 [cs]\n"
+      },
+      "date": 1693913236275
+    },
+    {
+      "type": "add",
+      "id": "1fa632f4217706db",
+      "item": {
+        "type": "paragraph",
+        "id": "1fa632f4217706db",
+        "text": "The inverted multi-index from “The inverted multi-index”, Babenko & Lempitsky, CVPR 2012. This method greatly improves the speed of inverted indexing for fast/less accurate operating points."
+      },
+      "after": "21cdcbe7361b29c8",
+      "date": 1693913300794
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "aaa18a9d1c226907"
+      },
+      "id": "aaa18a9d1c226907",
+      "type": "add",
+      "after": "dd165463902b1494",
+      "date": 1693913368280
+    },
+    {
+      "type": "edit",
+      "id": "aaa18a9d1c226907",
+      "item": {
+        "type": "paragraph",
+        "id": "aaa18a9d1c226907",
+        "text": "\nBABENKO, Artem and LEMPITSKY, Victor, 2012. The inverted multi-index. In: 2012 IEEE Conference on Computer Vision and Pattern Recognition. June 2012. p. 3069–3076. DOI 10.1109/CVPR.2012.6248038. A new data structure for efficient similarity search in very large dataseis of high-dimensional vectors is introduced. This structure called the inverted multi-index generalizes the inverted index idea by replacing the standard quantization within inverted indices with product quantization. For very similar retrieval complexity and preprocessing time, inverted multi-indices achieve a much denser subdivision of the search space compared to inverted indices, while retaining their memory efficiency. Our experiments with large dataseis of SIFT and GIST vectors demonstrate that because of the denser subdivision, inverted multi-indices are able to return much shorter candidate lists with higher recall. Augmented with a suitable reranking procedure, multi-indices were able to improve the speed of approximate nearest neighbor search on the dataset of 1 billion SIFT vectors by an order of magnitude compared to the best previously published systems, while achieving better recall and incurring only few percent of memory overhead.\n"
+      },
+      "date": 1693913369844
+    },
+    {
+      "type": "add",
+      "id": "735d8a1c114a88b5",
+      "item": {
+        "type": "paragraph",
+        "id": "735d8a1c114a88b5",
+        "text": "The optimized PQ from “Optimized product quantization”, He & al, CVPR 2013. This method can be seen as a linear transformation of the vector space to make it more amenable for indexing with a product quantizer."
+      },
+      "after": "1fa632f4217706db",
+      "date": 1693913391565
+    },
+    {
+      "type": "edit",
+      "id": "e94ec0d22768939a",
+      "item": {
+        "type": "paragraph",
+        "id": "e94ec0d22768939a",
+        "text": "# Research Foundations of Faiss [https://faiss.ai/#research-foundations-of-faiss page]"
+      },
+      "date": 1693913635609
+    },
+    {
+      "type": "edit",
+      "id": "e94ec0d22768939a",
+      "item": {
+        "type": "markdown",
+        "id": "e94ec0d22768939a",
+        "text": "# Research Foundations of Faiss [https://faiss.ai/#research-foundations-of-faiss page]"
+      },
+      "date": 1693913636974
+    },
+    {
+      "type": "add",
+      "id": "47699c5cc9e73e94",
+      "item": {
+        "type": "paragraph",
+        "id": "47699c5cc9e73e94",
+        "text": "The pre-filtering of product quantizer distances from “Polysemous codes”, Douze & al., ECCV 2016. This technique performs a binary filtering stage before computing PQ distances."
+      },
+      "after": "735d8a1c114a88b5",
+      "date": 1693913651984
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "320d8099f8936b19"
+      },
+      "id": "320d8099f8936b19",
+      "type": "add",
+      "after": "aaa18a9d1c226907",
+      "date": 1693913743149
+    },
+    {
+      "type": "edit",
+      "id": "320d8099f8936b19",
+      "item": {
+        "type": "paragraph",
+        "id": "320d8099f8936b19",
+        "text": "\nDOUZE, Matthijs, JÉGOU, Hervé and PERRONNIN, Florent, 2016. Polysemous Codes. In: LEIBE, Bastian, MATAS, Jiri, SEBE, Nicu and WELLING, Max (eds.), Computer Vision – ECCV 2016. Cham: Springer International Publishing. 2016. p. 785–801. Lecture Notes in Computer Science. ISBN 978-3-319-46475-6. DOI 10.1007/978-3-319-46475-6_48. This paper considers the problem of approximate nearest neighbor search in the compressed domain. We introduce polysemous codes, which offer both the distance estimation quality of product quantization and the efficient comparison of binary codes with Hamming distance. Their design is inspired by algorithms introduced in the 90’s to construct channel-optimized vector quantizers. At search time, this dual interpretation accelerates the search. Most of the indexed vectors are filtered out with Hamming distance, letting only a fraction of the vectors to be ranked with an asymmetric distance estimator. The method is complementary with a coarse partitioning of the feature space such as the inverted multi-index. This is shown by our experiments performed on several public benchmarks such as the BIGANN dataset comprising one billion vectors, for which we report state-of-the-art results for query times below 0.3 millisecond per core. Last but not least, our approach allows the approximate computation of the k-NN graph associated with the Yahoo Flickr Creative Commons 100M, described by CNN image descriptors, in less than 8 h on a single machine.\n"
+      },
+      "date": 1693913744787
+    },
+    {
+      "type": "add",
+      "id": "559ecf86e49c4324",
+      "item": {
+        "type": "paragraph",
+        "id": "559ecf86e49c4324",
+        "text": "The GPU implementation and fast k-selection is described in “Billion-scale similarity search with GPUs”, Johnson & al, ArXiv 1702.08734, 2017"
+      },
+      "after": "47699c5cc9e73e94",
+      "date": 1693913799669
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "91f49a8398e1fe6c"
+      },
+      "id": "91f49a8398e1fe6c",
+      "type": "add",
+      "after": "320d8099f8936b19",
+      "date": 1693913836480
+    },
+    {
+      "type": "edit",
+      "id": "91f49a8398e1fe6c",
+      "item": {
+        "type": "paragraph",
+        "id": "91f49a8398e1fe6c",
+        "text": "\nJOHNSON, Jeff, DOUZE, Matthijs and JÉGOU, Hervé, 2017. Billion-scale similarity search with GPUs. Online. 28 February 2017. arXiv. arXiv:1702.08734. [Accessed 5 September 2023]. Similarity search finds application in specialized database systems handling complex data such as images or videos, which are typically represented by high-dimensional features and require specific indexing structures. This paper tackles the problem of better utilizing GPUs for this task. While GPUs excel at data-parallel tasks, prior approaches are bottlenecked by algorithms that expose less parallelism, such as k-min selection, or make poor use of the memory hierarchy. We propose a design for k-selection that operates at up to 55% of theoretical peak performance, enabling a nearest neighbor implementation that is 8.5x faster than prior GPU state of the art. We apply it in different similarity search scenarios, by proposing optimized design for brute-force, approximate and compressed-domain search based on product quantization. In all these setups, we outperform the state of the art by large margins. Our implementation enables the construction of a high accuracy k-NN graph on 95 million images from the Yfcc100M dataset in 35 minutes, and of a graph connecting 1 billion vectors in less than 12 hours on 4 Maxwell Titan X GPUs. We have open-sourced our approach for the sake of comparison and reproducibility.arXiv:1702.08734 [cs]\n"
+      },
+      "date": 1693913838141
+    },
+    {
+      "type": "add",
+      "id": "baa7b7be3260694a",
+      "item": {
+        "type": "paragraph",
+        "id": "baa7b7be3260694a",
+        "text": "The HNSW indexing method from “Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs”, Malkov & al., ArXiv 1603.09320, 2016"
+      },
+      "after": "559ecf86e49c4324",
+      "date": 1693913884863
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "683329fc3f8e9622"
+      },
+      "id": "683329fc3f8e9622",
+      "type": "add",
+      "after": "91f49a8398e1fe6c",
+      "date": 1693913920365
+    },
+    {
+      "type": "edit",
+      "id": "683329fc3f8e9622",
+      "item": {
+        "type": "paragraph",
+        "id": "683329fc3f8e9622",
+        "text": "\nMALKOV, Yu A. and YASHUNIN, D. A., 2018. Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs. Online. 14 August 2018. arXiv. arXiv:1603.09320. [Accessed 5 September 2023]. We present a new approach for the approximate K-nearest neighbor search based on navigable small world graphs with controllable hierarchy (Hierarchical NSW, HNSW). The proposed solution is fully graph-based, without any need for additional search structures, which are typically used at the coarse search stage of the most proximity graph techniques. Hierarchical NSW incrementally builds a multi-layer structure consisting from hierarchical set of proximity graphs (layers) for nested subsets of the stored elements. The maximum layer in which an element is present is selected randomly with an exponentially decaying probability distribution. This allows producing graphs similar to the previously studied Navigable Small World (NSW) structures while additionally having the links separated by their characteristic distance scales. Starting search from the upper layer together with utilizing the scale separation boosts the performance compared to NSW and allows a logarithmic complexity scaling. Additional employment of a heuristic for selecting proximity graph neighbors significantly increases performance at high recall and in case of highly clustered data. Performance evaluation has demonstrated that the proposed general metric space search index is able to strongly outperform previous opensource state-of-the-art vector-only approaches. Similarity of the algorithm to the skip list structure allows straightforward balanced distributed implementation.arXiv:1603.09320 [cs]\n"
+      },
+      "date": 1693913922208
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b8f88d7be5872700"
+      },
+      "id": "b8f88d7be5872700",
+      "type": "add",
+      "after": "683329fc3f8e9622",
+      "date": 1693913938739
+    },
+    {
+      "type": "edit",
+      "id": "b8f88d7be5872700",
+      "item": {
+        "type": "paragraph",
+        "id": "b8f88d7be5872700",
+        "text": "A general paper about product quantization and related methods: “A Survey of Product Quantization”, Yusuke Matsui, Yusuke Uchida, Hervé Jégou, Shin’ichi Satoh, ITE transactions on MTA, 2018."
+      },
+      "date": 1693913940250
+    },
+    {
+      "id": "b8f88d7be5872700",
+      "type": "move",
+      "order": [
+        "6a1a586f6c07dbe1",
+        "62b542d2b9203a30",
+        "c19ddd9edf45804d",
+        "2a4bf616694d3bca",
+        "e94ec0d22768939a",
+        "7f82bb42c7df702a",
+        "9977600dad48184c",
+        "07e1583cd062e67d",
+        "21cdcbe7361b29c8",
+        "1fa632f4217706db",
+        "735d8a1c114a88b5",
+        "47699c5cc9e73e94",
+        "559ecf86e49c4324",
+        "baa7b7be3260694a",
+        "b8f88d7be5872700",
+        "58c7e7775feb8e2c",
+        "91376390afa46826",
+        "45c0707c880d2a09",
+        "dd165463902b1494",
+        "aaa18a9d1c226907",
+        "320d8099f8936b19",
+        "91f49a8398e1fe6c",
+        "683329fc3f8e9622"
+      ],
+      "date": 1693913956790
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "11d354ff85e9e0dd"
+      },
+      "id": "11d354ff85e9e0dd",
+      "type": "add",
+      "after": "683329fc3f8e9622",
+      "date": 1693914063757
+    },
+    {
+      "type": "edit",
+      "id": "11d354ff85e9e0dd",
+      "item": {
+        "type": "paragraph",
+        "id": "11d354ff85e9e0dd",
+        "text": "\nMATSUI, Yusuke, UCHIDA, Yusuke, JEGOU, Herve and SATOH, Shin’ichi, 2018. Paper A Survey of Product Quantization. . 2018. Vol. 6, no. 1. Product Quantization (PQ) search and its derivatives are popular and successful methods for large-scale approximated nearest neighbor search. In this paper, we review the fundamental algorithm of this class of algorithms and provide executable sample codes. We then provide a comprehensive survey of the recent PQ-based methods.\n"
+      },
+      "date": 1693914066392
+    },
+    {
+      "type": "add",
+      "id": "d6714cd20270ed7c",
+      "item": {
+        "type": "paragraph",
+        "id": "d6714cd20270ed7c",
+        "text": "The overview image below is from that paper (click on the image to enlarge it):"
+      },
+      "after": "b8f88d7be5872700",
+      "date": 1693914111241
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6550184809e8619b"
+      },
+      "id": "6550184809e8619b",
+      "type": "add",
+      "after": "11d354ff85e9e0dd",
+      "date": 1693914116178
+    },
+    {
+      "id": "6550184809e8619b",
+      "type": "move",
+      "order": [
+        "6a1a586f6c07dbe1",
+        "62b542d2b9203a30",
+        "c19ddd9edf45804d",
+        "2a4bf616694d3bca",
+        "e94ec0d22768939a",
+        "7f82bb42c7df702a",
+        "9977600dad48184c",
+        "07e1583cd062e67d",
+        "21cdcbe7361b29c8",
+        "1fa632f4217706db",
+        "735d8a1c114a88b5",
+        "47699c5cc9e73e94",
+        "559ecf86e49c4324",
+        "baa7b7be3260694a",
+        "b8f88d7be5872700",
+        "d6714cd20270ed7c",
+        "6550184809e8619b",
+        "58c7e7775feb8e2c",
+        "91376390afa46826",
+        "45c0707c880d2a09",
+        "dd165463902b1494",
+        "aaa18a9d1c226907",
+        "320d8099f8936b19",
+        "91f49a8398e1fe6c",
+        "683329fc3f8e9622",
+        "11d354ff85e9e0dd"
+      ],
+      "date": 1693914131192
+    },
+    {
+      "type": "fork",
+      "date": 1693914164435
+    },
+    {
+      "type": "edit",
+      "id": "6550184809e8619b",
+      "item": {
+        "type": "image",
+        "id": "6550184809e8619b",
+        "text": "Uploaded image",
+        "size": "wide",
+        "width": 430,
+        "height": 174,
+        "url": "/assets/plugins/image/5a39050fa9881265ea6af9c9d416f641.jpg"
+      },
+      "date": 1693914178686
+    },
+    {
+      "type": "edit",
+      "id": "6550184809e8619b",
+      "item": {
+        "type": "image",
+        "id": "6550184809e8619b",
+        "text": "[https://raw.githubusercontent.com/wiki/facebookresearch/faiss/PQ_variants_Faiss_annotated.png png]",
+        "size": "wide",
+        "width": 430,
+        "height": 174,
+        "url": "/assets/plugins/image/5a39050fa9881265ea6af9c9d416f641.jpg"
+      },
+      "date": 1693914190506
+    },
+    {
+      "type": "add",
+      "id": "b38da4a3ef401b31",
+      "item": {
+        "type": "paragraph",
+        "id": "b38da4a3ef401b31",
+        "text": "Image credit: [[Yusuke Matsui]], thanks for allowing us to use it!"
+      },
+      "after": "d6714cd20270ed7c",
+      "date": 1693914217473
+    },
+    {
+      "id": "b38da4a3ef401b31",
+      "type": "move",
+      "order": [
+        "6a1a586f6c07dbe1",
+        "62b542d2b9203a30",
+        "c19ddd9edf45804d",
+        "2a4bf616694d3bca",
+        "e94ec0d22768939a",
+        "7f82bb42c7df702a",
+        "9977600dad48184c",
+        "07e1583cd062e67d",
+        "21cdcbe7361b29c8",
+        "1fa632f4217706db",
+        "735d8a1c114a88b5",
+        "47699c5cc9e73e94",
+        "559ecf86e49c4324",
+        "baa7b7be3260694a",
+        "b8f88d7be5872700",
+        "d6714cd20270ed7c",
+        "6550184809e8619b",
+        "b38da4a3ef401b31",
+        "58c7e7775feb8e2c",
+        "91376390afa46826",
+        "45c0707c880d2a09",
+        "dd165463902b1494",
+        "aaa18a9d1c226907",
+        "320d8099f8936b19",
+        "91f49a8398e1fe6c",
+        "683329fc3f8e9622",
+        "11d354ff85e9e0dd"
+      ],
+      "date": 1693914219272
+    },
+    {
+      "type": "add",
+      "id": "ad9179e1184acb09",
+      "item": {
+        "type": "paragraph",
+        "id": "ad9179e1184acb09",
+        "text": "Methods that are implemented in Faiss are highlighted in red."
+      },
+      "after": "b38da4a3ef401b31",
+      "date": 1693914228041
+    },
+    {
+      "type": "fork",
+      "date": 1693914297462
+    },
+    {
+      "type": "edit",
+      "id": "11d354ff85e9e0dd",
+      "item": {
+        "type": "paragraph",
+        "id": "11d354ff85e9e0dd",
+        "text": "MATSUI, Yusuke, UCHIDA, Yusuke, JEGOU, Herve and SATOH, Shin’ichi, 2018. Paper A Survey of Product Quantization. 2018. Vol. 6, no. 1. Product Quantization (PQ) search and its derivatives are popular and successful methods for large-scale approximated nearest neighbor search. In this paper, we review the fundamental algorithm of this class of algorithms and provide executable sample codes. We then provide a comprehensive survey of the recent PQ-based methods.\n"
+      },
+      "date": 1693914348874
+    }
+  ]
+}
