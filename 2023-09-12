@@ -1,0 +1,1118 @@
+{
+  "title": "2023-09-12",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "60d1dd744f9ce166",
+      "text": "⇒ [[Parse Wiki-Style Links]] and Render Them as Anchors ⇒ [[Context]] ⇒ [[MiniLatex]]: a Parser-Renderer for … ⇐ [[Render Wiki Link]] ⇐ [[Render Story]]"
+    },
+    {
+      "type": "markdown",
+      "id": "3b601aa8e8e57806",
+      "text": "* [[Page Context]]\n* [[Resolution Context]]\n* [[Writing Context]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "311f93fc1897010f",
+      "text": "See [[Origin]] for where we intend writing to be found."
+    },
+    {
+      "type": "paragraph",
+      "id": "819046f5de1471bb",
+      "text": "See [[Neighborhood]] for how browsing influences context."
+    },
+    {
+      "type": "paragraph",
+      "id": "9c2b576ebcade58c",
+      "text": "See [[Future]] for how unresolved links interact with neighbors."
+    },
+    {
+      "type": "reference",
+      "id": "6cbcf21da7b4b242",
+      "site": "glossary.asia.wiki.org",
+      "slug": "future",
+      "title": "Future",
+      "text": "A Future item describes how a missing page can be found or created. Unresolved [[Internal Link]]s add a ghost page with a future to the lineup."
+    },
+    {
+      "type": "paragraph",
+      "id": "3866b80c0d532b2c",
+      "text": "One can choose to create a new empty page."
+    },
+    {
+      "type": "paragraph",
+      "id": "3dfca7e331d30bcd",
+      "text": "One can choose to create from an available [[Template]]."
+    },
+    {
+      "type": "paragraph",
+      "id": "9dbe380ec16002f3",
+      "text": "One can choose to view [[Twins]] from the [[Neighborhood]]."
+    },
+    {
+      "type": "pagefold",
+      "id": "2998153e58715f86",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "f3a041532d492322",
+      "text": "Wikilinks (internal links) [https://en.wikipedia.org/wiki/Help:Link wikipedia]"
+    },
+    {
+      "type": "markdown",
+      "id": "1e8288469f9516c3",
+      "text": "> Links are enclosed in doubled square brackets:"
+    },
+    {
+      "type": "code",
+      "id": "60cf185bf272e012",
+      "text": "[[1234]]"
+    },
+    {
+      "type": "markdown",
+      "id": "0f76c2289d96dfd5",
+      "text": "is seen as [[1234]] and \"1234\" in text and links to (the top of) page \"1234\" [https://en.wikipedia.org/wiki/1234 wikipedia]."
+    },
+    {
+      "type": "paragraph",
+      "id": "4b1ae19da093a263",
+      "text": "⇒ [[Render Wiki Link]]. [https://github.com/dreyeck/blog/commit/5ebb6a0bd639a40abd516645281a4e39982ef630 commit]"
+    },
+    {
+      "type": "pagefold",
+      "id": "aee4ba5728a651b8",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "e7d883f999e07c1a",
+      "text": "⇒ [[MiniLatex]]: a Parser-Renderer for a Subset of LaTeX [https://jxxcarlson.github.io/pdf/minilatex-acm.pdf pdf]"
+    },
+    {
+      "type": "markdown",
+      "id": "e2472b1dac446259",
+      "text": "> [[James Carlson]]. 2666. MiniLatex: a Parser-Renderer for a Subset of LaTeX. ACM Trans. Web 0, 0, Article 0\n(January 2666), 10 pages."
+    },
+    {
+      "type": "pagefold",
+      "id": "90d4bba6df7631a5",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "d6ce95f6f0fa76bb",
+      "text": "http://css-spikes.dbbs.co/hello.fed.wiki/"
+    },
+    {
+      "type": "code",
+      "id": "77ae793db5b156b0",
+      "text": "<html>\n  <head>\n    <link href=\"style.css\" rel=\"stylesheet\">\n    <meta charset=utf-8>\n    <meta name=viewport content=\"width=device-width, initial-scale=1\">\n    <link rel=\"manifest\" href=\"manifest.json\" />\n  </head>\n  <body>\n    <section class=main id=lineup></section>\n    <footer id=footer>\n      Try old <a href=\"http://hello.fed.wiki/view/welcome-visitors\">Welcome Visitors</a> site.\n      Completed checks show <span class=pass>pass</span> or <span class=fail>fail</span>\n    </footer>\n    <script type=module>\n\n      const asSlug = text => text.replace(/\\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()\n      const delay = time => new Promise(res => setTimeout(res,time))\n\n      const lineup = [] // {page,id}...\n      let pages = [] // {site,slug,page}...\n\n      const params = new URLSearchParams(location.search)\n      const origin = params.get('site') || 'hello.fed.wiki'\n\n      { // launch the app with one page, typically welcome-visitors\n        const slug = params.get('slug') || 'welcome-visitors'\n        const view = r => `${r.site==origin?'view':r.site}/${asSlug(r.page.title)}`\n        const legacy = () => window.open(`http://${origin}/${lineup.map(view).join('/')}`,'_blank')\n        pages = await fetch('./pages.json').then(res => res.json())\n        await render(await resolve([origin],slug))\n        window.lineup.addEventListener('click',async event => {\n          const target = event.target\n          if (target.tagName == 'A' && target.getAttribute('href') == '#') {\n            event.preventDefault()\n            const title = target.innerText\n            const here = target.closest('.page').id\n            link(title,here,event.shiftKey)\n          }\n        })\n        window.lineup.addEventListener('focusout', async event => {\n          const target = event.target\n          edit(target.id, target.innerHTML)\n        })\n        window.addEventListener(\"dragstart\", event => event.preventDefault())\n        window.addEventListener(\"dragover\", event => event.preventDefault())\n        window.addEventListener(\"drop\", event => {\n          event.preventDefault()\n          drop(event.dataTransfer.getData(\"url\"))})\n        window.debug = {origin,lineup,pages,legacy}\n      }\n\n      async function resolve(context,slug) {\n        // retrieve page json following all the collaborative rules\n        const site = context.shift()\n        const index = pages.findIndex(cache => cache.site==site && cache.slug==slug)\n        if (index != -1) return {site,page:pages[index].page}\n        return await fetch(`//${site}/${slug}.json`)\n            .then(async res => res.ok && res.status==200 ?\n              {site, page:(await res.json())} :\n              resolve(context,slug))\n      }\n\n      async function post(site,slug,page) {\n        const index = pages.findIndex(cache => cache.site==site && cache.slug==slug)\n        if(index == -1)\n          pages.push({site,slug,page})\n        else\n          pages[index].page = page\n      }\n\n      async function render(panel) {\n        // add a new content to the dom\n        const escape = text => text.replace(/&/g,'&amp;').replace(/</g,'&lt;')\n        const linked = text => text\n          .replace(/\\[\\[(.*?)\\]\\]/g, (_,title) => `<a href=\"#\">${title}</a>`)\n          .replace(/\\[(https?:.*?) (.*?)\\]/g, (_,url,word) => `<a href=\"${url}\">${word}</a>`)\n        panel.id = (Math.floor(Math.random()*2**32)).toString(16)\n        lineup.push(panel)\n        const body = panel.page.story\n          .filter(item => item.type == 'paragraph')\n          .map(item => `<p id=\"${panel.id}.${item.id}\" contenteditable=\"true\">${linked(escape(item.text))}</p>`)\n          .join(\"\\n\")\n        window.lineup.innerHTML += `\n          <div class=page id=${panel.id}>\n            <div class=paper>\n              <div class=twins></div>\n              <div class=header>\n                <h1 title=${panel.site}>\n                  <span>\n                    <img src=//${panel.site}/favicon.png height=32px>\n                    ${panel.page.title}\n                  </span>\n                </h1>\n              </div>\n              ${body}\n            </div>\n          </div>`\n        await test(panel)\n      }\n\n      async function link(title,here,shiftKey) {\n        // handle internal link\n        const last = array => array[array.length-1]\n        const uniq = (value, index, self) => self.indexOf(value) === index\n        if(!shiftKey) {\n          // make space in the lineup for new content\n          while(last(lineup).id != here) {\n            document.getElementById(last(lineup).id).remove()\n            lineup.pop()\n          }\n        }\n        const panel = lineup.find(panel => panel.id == here)\n        const more = (panel.page.journal||[]).slice().reverse()\n          .map(action => action.site)\n          .filter(site => site)\n        const context = ([origin, panel.site, ...more]).filter(uniq)\n        const slug = asSlug(title)\n        await render(await resolve(context,slug))\n        window.lineup\n          .querySelector('.page:last-of-type')\n          .scrollIntoView({behavior:'smooth', block:'center'})\n      }\n\n      async function edit(id,html) {\n        const tuple = id.split('.')\n        const text = html\n          .replace(/<\\/?(b|i|u)>/g,'')\n          .replace(/<a href=\"(https?:.+?)\">(.+?)<\\/a>/g,(_,url,word) => `[${url} ${word}]`)\n          .replace(/<a href=\"#\">(.+?)<\\/a>/g,(_,title) => `[[${title}]]`)\n          .replace(/<\\/?\\w.*?>/g,'')\n          .replace(/&amp;/g,'&').replace(/&lt;/g,'<')\n          .replace(/&nbsp;/g,' ')\n        const panel = lineup.find(panel => panel.id == id.split('.')[0])\n        const item = panel.page.story.find(item => item.id == id.split('.')[1])\n        const changed = item.text != text\n        if(changed) {\n          const type = 'edit'\n          const id = item.id\n          const date = Date.now()\n          item.text = text\n          const action = {type,id,date,item}\n          panel.page.journal.push(action)\n          post(panel.site, asSlug(panel.page.title), panel.page)\n        }\n      }\n\n      async function drop(url) {\n        // handle drag and drop from remote page flag\n        const m = url.match(/^(https?:)?\\/\\/(.+?)\\/.*\\/([a-z-]+)$/)\n        if (!m) return\n        await render(await resolve([m[2]],m[3]))\n        window.lineup\n          .querySelector('.page:last-of-type')\n          .scrollIntoView({behavior:'smooth', block:'center'})\n      }\n\n      async function recall(panel,date,shiftKey) {\n        const last = array => array[array.length-1]\n        const here = panel.id\n        if(!shiftKey) {\n          // make space in the lineup for new content\n          while(last(lineup).id != here) {\n            document.getElementById(last(lineup).id).remove()\n            lineup.pop()\n          }\n        }\n        const page = {\n          title:panel.page.title,\n          story:[],\n          journal:[]\n        }\n        const order = () => (panel.page.story||[]).map(item => item.id)\n        const add = (after, item) => {\n          const index = order().indexOf(after) + 1\n          page.story.splice(index, 0, item)\n        }\n        for(const action of panel.page.journal) {\n          switch (action.type) {\n            case 'create':\n              break\n            case 'add':\n              add(action.after, action.item)\n              break\n            case 'edit':\n              const index = order().indexOf(action.id)\n              if (index != -1)\n                page.story.splice(index,1,action.item)\n              else\n                page.story.push(action.item)\n              break\n          }\n          page.journal.push(action)\n          if(action.date == date) {\n            await render({site:panel.site,page})\n            return\n          }\n        }\n      }\n\n      async function test(panel) {\n        await delay(200)\n        panel.ok = true\n        const child = () => lineup[lineup.findIndex(each => each.id == panel.id)+1]\n        const pragmas = panel.page.story\n          .filter(item => item.type == 'paragraph' && item.text.startsWith('► '))\n        for (const item of pragmas) {\n          const ok = bool => {\n            console.log(bool?'%cpass':'%cfail',bool?'color:green':'color:red')\n            document.getElementById(`${panel.id}.${item.id}`).classList.add(bool?'pass':'fail')\n            if(!bool) panel.ok = false\n          }\n          let m\n          console.log(item.text)\n          if(lineup.length > 10)\n            {ok(false); break}\n          if(m = item.text.match(/click \\[\\[(.+?)\\]\\]/))\n            {await link(m[1],panel.id,false); ok(child()?.ok); await delay(400)}\n          if(m = item.text.match(/click action (\\d+)/))\n            {await recall(panel,+m[1],false)}\n          if(m = item.text.match(/drop ([^ ]+)/))\n            {await drop(m[1]); await delay(400)}\n          if(m = item.text.match(/check site ([\\w\\.-]+)/))\n            {ok(lineup[lineup.length-1].site.includes(m[1]))}\n          if(m = item.text.match(/check slug ([a-z-]+)/))\n            {ok(asSlug(lineup[lineup.length-1].page.title).includes(m[1]))}\n          if(m = item.text.match(/check text ([^ ]+)/))\n            {ok(lineup[lineup.length-1].page.story.find(item => item.text.includes(m[1])))}\n        }\n      }\n\n    </script>\n  </body>\n</html>\n"
+    },
+    {
+      "type": "graphviz",
+      "id": "c674a9b0f886e6be",
+      "text": "DOT FROM lambda-browsing"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "2023-09-12",
+        "story": []
+      },
+      "date": 1694510209662
+    },
+    {
+      "id": "60d1dd744f9ce166",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "60d1dd744f9ce166",
+        "text": "⇒ [[Parse Wiki-Style Links]] and Render Them as Anchors"
+      },
+      "attribution": {
+        "page": "2023-09-11",
+        "site": "wiki.ralfbarkow.ch"
+      },
+      "date": 1694510212376
+    },
+    {
+      "type": "edit",
+      "id": "60d1dd744f9ce166",
+      "item": {
+        "type": "paragraph",
+        "id": "60d1dd744f9ce166",
+        "text": "⇒ [[Parse Wiki-Style Links]] and Render Them as Anchors ⇒ [[Context]]"
+      },
+      "date": 1694510228858
+    },
+    {
+      "id": "f3e001fd0f0be309",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "f3e001fd0f0be309",
+        "text": "If we say page context then we are referring to the sites that travel with a wiki page as it is copied through the federation."
+      },
+      "after": "60d1dd744f9ce166",
+      "attribution": {
+        "page": "Context",
+        "site": "ward.bay.wiki.org"
+      },
+      "date": 1694510282643
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3b601aa8e8e57806"
+      },
+      "id": "3b601aa8e8e57806",
+      "type": "add",
+      "after": "f3e001fd0f0be309",
+      "date": 1694510296291
+    },
+    {
+      "type": "edit",
+      "id": "3b601aa8e8e57806",
+      "item": {
+        "type": "paragraph",
+        "id": "3b601aa8e8e57806",
+        "text": "[[Page Context]]"
+      },
+      "date": 1694510300704
+    },
+    {
+      "id": "f3e001fd0f0be309",
+      "type": "remove",
+      "removedTo": {
+        "page": "Page Context"
+      },
+      "date": 1694510307612
+    },
+    {
+      "id": "7aa5675c5155f6b8",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "7aa5675c5155f6b8",
+        "text": "If we say resolution context then we are referring to the page context plus our origin and the remote site from which the page has been fetched."
+      },
+      "after": "3b601aa8e8e57806",
+      "attribution": {
+        "page": "Context"
+      },
+      "date": 1694510344932
+    },
+    {
+      "type": "edit",
+      "id": "3b601aa8e8e57806",
+      "item": {
+        "type": "paragraph",
+        "id": "3b601aa8e8e57806",
+        "text": "* [[Page Context]]"
+      },
+      "date": 1694510352158
+    },
+    {
+      "type": "edit",
+      "id": "3b601aa8e8e57806",
+      "item": {
+        "type": "markdown",
+        "id": "3b601aa8e8e57806",
+        "text": "* [[Page Context]]"
+      },
+      "date": 1694510353713
+    },
+    {
+      "type": "edit",
+      "id": "3b601aa8e8e57806",
+      "item": {
+        "type": "markdown",
+        "id": "3b601aa8e8e57806",
+        "text": "* [[Page Context]]\n* [[Resolution Context]]"
+      },
+      "date": 1694510415709
+    },
+    {
+      "id": "7aa5675c5155f6b8",
+      "type": "remove",
+      "removedTo": {
+        "page": "Resolution Context"
+      },
+      "date": 1694510420736
+    },
+    {
+      "id": "60449ab9540b0a94",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "60449ab9540b0a94",
+        "text": "If we say writing context then we are referring to the context within which we expect to be read. This includes likely neighbors and any other constructed community such as students in a class."
+      },
+      "after": "3b601aa8e8e57806",
+      "attribution": {
+        "page": "Context",
+        "site": "ward.bay.wiki.org"
+      },
+      "date": 1694510441681
+    },
+    {
+      "type": "edit",
+      "id": "3b601aa8e8e57806",
+      "item": {
+        "type": "markdown",
+        "id": "3b601aa8e8e57806",
+        "text": "* [[Page Context]]\n* [[Resolution Context]]\n* [[Writing Context]]"
+      },
+      "date": 1694510457478
+    },
+    {
+      "id": "60449ab9540b0a94",
+      "type": "remove",
+      "removedTo": {
+        "page": "Writing Context"
+      },
+      "date": 1694510463681
+    },
+    {
+      "id": "311f93fc1897010f",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "311f93fc1897010f",
+        "text": "See [[Origin]] for where we intend writing to be found."
+      },
+      "after": "3b601aa8e8e57806",
+      "attribution": {
+        "page": "Context",
+        "site": "ward.bay.wiki.org"
+      },
+      "date": 1694510516074
+    },
+    {
+      "id": "819046f5de1471bb",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "819046f5de1471bb",
+        "text": "See [[Neighborhood]] for how browsing influences context."
+      },
+      "after": "311f93fc1897010f",
+      "attribution": {
+        "page": "Context",
+        "site": "ward.bay.wiki.org"
+      },
+      "date": 1694510518984
+    },
+    {
+      "id": "9c2b576ebcade58c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "9c2b576ebcade58c",
+        "text": "See [[Future]] for how unresolved links interact with neighbors."
+      },
+      "after": "819046f5de1471bb",
+      "attribution": {
+        "page": "Context",
+        "site": "ward.bay.wiki.org"
+      },
+      "date": 1694510521872
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6cbcf21da7b4b242"
+      },
+      "id": "6cbcf21da7b4b242",
+      "type": "add",
+      "after": "9c2b576ebcade58c",
+      "date": 1694510539820
+    },
+    {
+      "type": "edit",
+      "id": "6cbcf21da7b4b242",
+      "item": {
+        "type": "reference",
+        "id": "6cbcf21da7b4b242",
+        "site": "glossary.asia.wiki.org",
+        "slug": "future",
+        "title": "Future",
+        "text": "A Future item describes how a missing page can be found or created. Unresolved internal links add a ghost page with a future to the lineup."
+      },
+      "date": 1694510546146
+    },
+    {
+      "id": "3866b80c0d532b2c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "3866b80c0d532b2c",
+        "text": "One can choose to create a new empty page."
+      },
+      "after": "6cbcf21da7b4b242",
+      "attribution": {
+        "page": "Future",
+        "site": "glossary.asia.wiki.org"
+      },
+      "date": 1694510569331
+    },
+    {
+      "id": "3dfca7e331d30bcd",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "3dfca7e331d30bcd",
+        "text": "One can choose to create from an available [[Template]]."
+      },
+      "after": "3866b80c0d532b2c",
+      "attribution": {
+        "page": "Future",
+        "site": "glossary.asia.wiki.org"
+      },
+      "date": 1694510573927
+    },
+    {
+      "id": "9dbe380ec16002f3",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "9dbe380ec16002f3",
+        "text": "One can choose to view [[Twins]] from the [[Neighborhood]]."
+      },
+      "after": "3dfca7e331d30bcd",
+      "attribution": {
+        "page": "Future",
+        "site": "glossary.asia.wiki.org"
+      },
+      "date": 1694510578616
+    },
+    {
+      "type": "edit",
+      "id": "6cbcf21da7b4b242",
+      "item": {
+        "type": "reference",
+        "id": "6cbcf21da7b4b242",
+        "site": "glossary.asia.wiki.org",
+        "slug": "future",
+        "title": "Future",
+        "text": "A Future item describes how a missing page can be found or created. Unresolved [[Internal Link]]s add a ghost page with a future to the lineup."
+      },
+      "date": 1694510601564
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "aee4ba5728a651b8"
+      },
+      "id": "aee4ba5728a651b8",
+      "type": "add",
+      "after": "9dbe380ec16002f3",
+      "date": 1694510756028
+    },
+    {
+      "type": "edit",
+      "id": "aee4ba5728a651b8",
+      "item": {
+        "type": "pagefold",
+        "id": "aee4ba5728a651b8",
+        "text": "~"
+      },
+      "date": 1694510760046
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e7d883f999e07c1a"
+      },
+      "id": "e7d883f999e07c1a",
+      "type": "add",
+      "after": "aee4ba5728a651b8",
+      "date": 1694510761302
+    },
+    {
+      "type": "edit",
+      "id": "e7d883f999e07c1a",
+      "item": {
+        "type": "paragraph",
+        "id": "e7d883f999e07c1a",
+        "text": "MiniLatex: a Parser-Renderer for a Subset of LaTeX"
+      },
+      "date": 1694510764183
+    },
+    {
+      "type": "edit",
+      "id": "e7d883f999e07c1a",
+      "item": {
+        "type": "paragraph",
+        "id": "e7d883f999e07c1a",
+        "text": "MiniLatex: a Parser-Renderer for a Subset of LaTeX [https://jxxcarlson.github.io/pdf/minilatex-acm.pdf pdf]"
+      },
+      "date": 1694510776991
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e2472b1dac446259"
+      },
+      "id": "e2472b1dac446259",
+      "type": "add",
+      "after": "e7d883f999e07c1a",
+      "date": 1694510880916
+    },
+    {
+      "type": "edit",
+      "id": "e2472b1dac446259",
+      "item": {
+        "type": "paragraph",
+        "id": "e2472b1dac446259",
+        "text": "[[James Carlson]]. 2666. MiniLatex: a Parser-Renderer for a Subset of LaTeX. ACM Trans. Web 0, 0, Article 0\n(January 2666), 10 pages."
+      },
+      "date": 1694510889265
+    },
+    {
+      "type": "edit",
+      "id": "e2472b1dac446259",
+      "item": {
+        "type": "paragraph",
+        "id": "e2472b1dac446259",
+        "text": "> [[James Carlson]]. 2666. MiniLatex: a Parser-Renderer for a Subset of LaTeX. ACM Trans. Web 0, 0, Article 0\n(January 2666), 10 pages."
+      },
+      "date": 1694510912723
+    },
+    {
+      "type": "edit",
+      "id": "e2472b1dac446259",
+      "item": {
+        "type": "markdown",
+        "id": "e2472b1dac446259",
+        "text": "> [[James Carlson]]. 2666. MiniLatex: a Parser-Renderer for a Subset of LaTeX. ACM Trans. Web 0, 0, Article 0\n(January 2666), 10 pages."
+      },
+      "date": 1694510913925
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e7f5cb1baaf0fc41"
+      },
+      "id": "e7f5cb1baaf0fc41",
+      "type": "add",
+      "after": "e2472b1dac446259",
+      "date": 1694510952446
+    },
+    {
+      "type": "edit",
+      "id": "e7f5cb1baaf0fc41",
+      "item": {
+        "type": "paragraph",
+        "id": "e7f5cb1baaf0fc41",
+        "text": "Thanks to the pioneering work of Donald Knuth [ 10] in creating TeX, the subsequent development\nof LaTeX by Leslie Lamport [11], and the continued contributions of an active community of\ndevelopers, those who rely on LaTeX to publish in print or as PDF have superb document creation\ntools. For publishing documents with mathematical content on the web, there are a number of\noptions. Most widely used is MathJax [ 6], which provides high-quality rendering of math-mode\nTeX-LaTeX for HTML pages. There are also a number of command-line tools, e.g., Pandoc [13],\nfor converting LaTeX documents to HTML using embedded images for the mathematical text. Of\nparticular note is Daan Leijen’s Madoko [ 12], which is perhaps closest in spirit to this project.\nMadoko uses Koka, a typed functional language to parse and render a markdown-like language that\nhandles mathematical formulas written in LaTeX and which can export documents to LaTeX. The\ngap that MiniLatex aims to fill is to provide a tool for live-rendering both text-mode and math-mode\nLaTeX."
+      },
+      "date": 1694510954015
+    },
+    {
+      "type": "edit",
+      "id": "e7f5cb1baaf0fc41",
+      "item": {
+        "type": "paragraph",
+        "id": "e7f5cb1baaf0fc41",
+        "text": "Thanks to the pioneering work of Donald Knuth in creating TeX, the subsequent development\nof LaTeX by Leslie Lamport, and the continued contributions of an active community of\ndevelopers, those who rely on LaTeX to publish in print or as PDF have superb document creation\ntools. For publishing documents with mathematical content on the web, there are a number of\noptions. Most widely used is MathJax, which provides high-quality rendering of math-mode\nTeX-LaTeX for HTML pages. There are also a number of command-line tools, e.g., [[Pandoc]],\nfor converting LaTeX documents to HTML using embedded images for the mathematical text. Of\nparticular note is Daan Leijen’s Madoko [ 12], which is perhaps closest in spirit to this project.\nMadoko uses Koka, a typed functional language to parse and render a markdown-like language that\nhandles mathematical formulas written in LaTeX and which can export documents to LaTeX. The\ngap that MiniLatex aims to fill is to provide a tool for live-rendering both text-mode and math-mode\nLaTeX."
+      },
+      "date": 1694511004370
+    },
+    {
+      "type": "edit",
+      "id": "e7f5cb1baaf0fc41",
+      "item": {
+        "type": "paragraph",
+        "id": "e7f5cb1baaf0fc41",
+        "text": "Thanks to the pioneering work of Donald Knuth in creating TeX, the subsequent development\nof LaTeX by Leslie Lamport, and the continued contributions of an active community of\ndevelopers, those who rely on LaTeX to publish in print or as PDF have superb document creation\ntools. For publishing documents with mathematical content on the web, there are a number of\noptions. Most widely used is MathJax, which provides high-quality rendering of math-mode\nTeX-LaTeX for HTML pages. There are also a number of command-line tools, e.g., [[Pandoc]],\nfor converting LaTeX documents to HTML using embedded images for the mathematical text. Of\nparticular note is Daan Leijen’s Madoko, which is perhaps closest in spirit to this project.\nMadoko uses Koka, a typed functional language to parse and render a markdown-like language that\nhandles mathematical formulas written in LaTeX and which can export documents to LaTeX. The\ngap that MiniLatex aims to fill is to provide a tool for live-rendering both text-mode and math-mode\nLaTeX."
+      },
+      "date": 1694511037405
+    },
+    {
+      "type": "edit",
+      "id": "e7f5cb1baaf0fc41",
+      "item": {
+        "type": "paragraph",
+        "id": "e7f5cb1baaf0fc41",
+        "text": "Thanks to the pioneering work of [[Donald Knuth]] in creating [[TeX]], the subsequent development\nof [[LaTeX]] by [[Leslie Lamport]], and the continued contributions of an active community of\ndevelopers, those who rely on LaTeX to publish in print or as PDF have superb document creation\ntools. For publishing documents with mathematical content on the web, there are a number of\noptions. Most widely used is MathJax, which provides high-quality rendering of math-mode\nTeX-LaTeX for HTML pages. There are also a number of command-line tools, e.g., [[Pandoc]],\nfor converting LaTeX documents to HTML using embedded images for the mathematical text. Of\nparticular note is Daan Leijen’s Madoko, which is perhaps closest in spirit to this project.\nMadoko uses Koka, a typed functional language to parse and render a markdown-like language that\nhandles mathematical formulas written in LaTeX and which can export documents to LaTeX. The\ngap that MiniLatex aims to fill is to provide a tool for live-rendering both text-mode and math-mode\nLaTeX."
+      },
+      "date": 1694511096891
+    },
+    {
+      "type": "edit",
+      "id": "e7f5cb1baaf0fc41",
+      "item": {
+        "type": "paragraph",
+        "id": "e7f5cb1baaf0fc41",
+        "text": "Thanks to the pioneering work of [[Donald Knuth]] in creating [[TeX]], the subsequent development\nof [[LaTeX]] by [[Leslie Lamport]], and the continued contributions of an active community of\ndevelopers, those who rely on LaTeX to publish in print or as PDF have superb document creation\ntools."
+      },
+      "date": 1694511177024
+    },
+    {
+      "type": "add",
+      "id": "7a9058c1f3e1b971",
+      "item": {
+        "type": "paragraph",
+        "id": "7a9058c1f3e1b971",
+        "text": "For publishing documents with mathematical content on the web, there are a number of options. Most widely used is [[MathJax]], which provides high-quality rendering of math-mode TeX-LaTeX for HTML pages. There are also a number of command-line tools, e.g., [[Pandoc]], for converting LaTeX documents to HTML using embedded images for the mathematical text. Of\nparticular note is Daan Leijen’s Madoko, which is perhaps closest in spirit to this project.\nMadoko uses Koka, a typed functional language to parse and render a markdown-like language that\nhandles mathematical formulas written in LaTeX and which can export documents to LaTeX. The\ngap that MiniLatex aims to fill is to provide a tool for live-rendering both text-mode and math-mode\nLaTeX."
+      },
+      "after": "e7f5cb1baaf0fc41",
+      "date": 1694511199537
+    },
+    {
+      "type": "edit",
+      "id": "7a9058c1f3e1b971",
+      "item": {
+        "type": "paragraph",
+        "id": "7a9058c1f3e1b971",
+        "text": "For publishing documents with mathematical content on the web, there are a number of options. Most widely used is [[MathJax]], which provides high-quality rendering of math-mode TeX-LaTeX for HTML pages. There are also a number of command-line tools, e.g., [[Pandoc]], for converting LaTeX documents to HTML using embedded images for the mathematical text."
+      },
+      "date": 1694511222481
+    },
+    {
+      "type": "add",
+      "id": "e3e68cdce1545516",
+      "item": {
+        "type": "paragraph",
+        "id": "e3e68cdce1545516",
+        "text": "Of particular note is [[Daan Leijen]]’s [[Madoko]], which is perhaps closest in spirit to this project.\nMadoko uses Koka, a typed functional language to parse and render a markdown-like language that\nhandles mathematical formulas written in LaTeX and which can export documents to LaTeX. The\ngap that MiniLatex aims to fill is to provide a tool for live-rendering both text-mode and math-mode\nLaTeX."
+      },
+      "after": "7a9058c1f3e1b971",
+      "date": 1694511237830
+    },
+    {
+      "type": "edit",
+      "id": "e3e68cdce1545516",
+      "item": {
+        "type": "paragraph",
+        "id": "e3e68cdce1545516",
+        "text": "Of particular note is [[Daan Leijen]]’s [[Madoko]], which is perhaps closest in spirit to this project.\nMadoko uses Koka, a typed functional language to parse and render a markdown-like language that\nhandles mathematical formulas written in LaTeX and which can export documents to LaTeX."
+      },
+      "date": 1694511267733
+    },
+    {
+      "type": "add",
+      "id": "8252ed0889dcf8a4",
+      "item": {
+        "type": "paragraph",
+        "id": "8252ed0889dcf8a4",
+        "text": "The gap that [[MiniLatex]] aims to fill is to provide a tool for live-rendering both text-mode and math-mode\nLaTeX."
+      },
+      "after": "e3e68cdce1545516",
+      "date": 1694511277075
+    },
+    {
+      "type": "edit",
+      "id": "e7d883f999e07c1a",
+      "item": {
+        "type": "paragraph",
+        "id": "e7d883f999e07c1a",
+        "text": "⇒ [[MiniLatex]]: a Parser-Renderer for a Subset of LaTeX [https://jxxcarlson.github.io/pdf/minilatex-acm.pdf pdf]"
+      },
+      "date": 1694511306993
+    },
+    {
+      "id": "e7f5cb1baaf0fc41",
+      "type": "remove",
+      "removedTo": {
+        "page": "MiniLatex"
+      },
+      "date": 1694511345533
+    },
+    {
+      "id": "7a9058c1f3e1b971",
+      "type": "remove",
+      "removedTo": {
+        "page": "MiniLatex"
+      },
+      "date": 1694511347801
+    },
+    {
+      "id": "e3e68cdce1545516",
+      "type": "remove",
+      "removedTo": {
+        "page": "MiniLatex"
+      },
+      "date": 1694511349885
+    },
+    {
+      "id": "8252ed0889dcf8a4",
+      "type": "remove",
+      "removedTo": {
+        "page": "MiniLatex"
+      },
+      "date": 1694511352933
+    },
+    {
+      "type": "add",
+      "id": "f3a041532d492322",
+      "item": {
+        "type": "paragraph",
+        "id": "f3a041532d492322",
+        "text": "Wikilinks (internal links)"
+      },
+      "after": "9dbe380ec16002f3",
+      "date": 1694512874443
+    },
+    {
+      "type": "edit",
+      "id": "f3a041532d492322",
+      "item": {
+        "type": "paragraph",
+        "id": "f3a041532d492322",
+        "text": "Wikilinks (internal links) [https://en.wikipedia.org/wiki/Help:Link wikipedia]"
+      },
+      "date": 1694512889333
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1e8288469f9516c3"
+      },
+      "id": "1e8288469f9516c3",
+      "type": "add",
+      "after": "e2472b1dac446259",
+      "date": 1694512999895
+    },
+    {
+      "id": "1e8288469f9516c3",
+      "type": "move",
+      "order": [
+        "60d1dd744f9ce166",
+        "3b601aa8e8e57806",
+        "311f93fc1897010f",
+        "819046f5de1471bb",
+        "9c2b576ebcade58c",
+        "6cbcf21da7b4b242",
+        "3866b80c0d532b2c",
+        "3dfca7e331d30bcd",
+        "9dbe380ec16002f3",
+        "f3a041532d492322",
+        "1e8288469f9516c3",
+        "aee4ba5728a651b8",
+        "e7d883f999e07c1a",
+        "e2472b1dac446259"
+      ],
+      "date": 1694513002938
+    },
+    {
+      "type": "edit",
+      "id": "1e8288469f9516c3",
+      "item": {
+        "type": "markdown",
+        "id": "1e8288469f9516c3",
+        "text": "Links are enclosed in doubled square brackets:\n\n    [[1234]] is seen as \"1234\" in text and links to (the top of) page \"1234\"."
+      },
+      "date": 1694513005277
+    },
+    {
+      "type": "edit",
+      "id": "1e8288469f9516c3",
+      "item": {
+        "type": "markdown",
+        "id": "1e8288469f9516c3",
+        "text": "> Links are enclosed in doubled square brackets:\n\n    [[1234]] is seen as \"1234\" in text and links to (the top of) page \"1234\"."
+      },
+      "date": 1694513010135
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "60cf185bf272e012"
+      },
+      "id": "60cf185bf272e012",
+      "type": "add",
+      "after": "e2472b1dac446259",
+      "date": 1694513025041
+    },
+    {
+      "id": "60cf185bf272e012",
+      "type": "move",
+      "order": [
+        "60d1dd744f9ce166",
+        "3b601aa8e8e57806",
+        "311f93fc1897010f",
+        "819046f5de1471bb",
+        "9c2b576ebcade58c",
+        "6cbcf21da7b4b242",
+        "3866b80c0d532b2c",
+        "3dfca7e331d30bcd",
+        "9dbe380ec16002f3",
+        "f3a041532d492322",
+        "1e8288469f9516c3",
+        "60cf185bf272e012",
+        "aee4ba5728a651b8",
+        "e7d883f999e07c1a",
+        "e2472b1dac446259"
+      ],
+      "date": 1694513027526
+    },
+    {
+      "type": "edit",
+      "id": "60cf185bf272e012",
+      "item": {
+        "type": "code",
+        "id": "60cf185bf272e012",
+        "text": "[[1234]]"
+      },
+      "date": 1694513029645
+    },
+    {
+      "type": "edit",
+      "id": "1e8288469f9516c3",
+      "item": {
+        "type": "markdown",
+        "id": "1e8288469f9516c3",
+        "text": "> Links are enclosed in doubled square brackets:\n\n    "
+      },
+      "date": 1694513047932
+    },
+    {
+      "type": "edit",
+      "id": "1e8288469f9516c3",
+      "item": {
+        "type": "markdown",
+        "id": "1e8288469f9516c3",
+        "text": "> Links are enclosed in doubled square brackets:"
+      },
+      "date": 1694513052850
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0f76c2289d96dfd5"
+      },
+      "id": "0f76c2289d96dfd5",
+      "type": "add",
+      "after": "e2472b1dac446259",
+      "date": 1694513054529
+    },
+    {
+      "id": "0f76c2289d96dfd5",
+      "type": "move",
+      "order": [
+        "60d1dd744f9ce166",
+        "3b601aa8e8e57806",
+        "311f93fc1897010f",
+        "819046f5de1471bb",
+        "9c2b576ebcade58c",
+        "6cbcf21da7b4b242",
+        "3866b80c0d532b2c",
+        "3dfca7e331d30bcd",
+        "9dbe380ec16002f3",
+        "f3a041532d492322",
+        "1e8288469f9516c3",
+        "60cf185bf272e012",
+        "0f76c2289d96dfd5",
+        "aee4ba5728a651b8",
+        "e7d883f999e07c1a",
+        "e2472b1dac446259"
+      ],
+      "date": 1694513057134
+    },
+    {
+      "type": "edit",
+      "id": "0f76c2289d96dfd5",
+      "item": {
+        "type": "markdown",
+        "id": "0f76c2289d96dfd5",
+        "text": "[[1234]] is seen as \"1234\" in text and links to (the top of) page \"1234\"."
+      },
+      "date": 1694513060198
+    },
+    {
+      "type": "edit",
+      "id": "0f76c2289d96dfd5",
+      "item": {
+        "type": "markdown",
+        "id": "0f76c2289d96dfd5",
+        "text": "is seen as [[1234]] and \"1234\" in text and links to (the top of) page \"1234\"."
+      },
+      "date": 1694513099407
+    },
+    {
+      "type": "edit",
+      "id": "0f76c2289d96dfd5",
+      "item": {
+        "type": "markdown",
+        "id": "0f76c2289d96dfd5",
+        "text": "is seen as [[1234]] and \"1234\" in text and links to (the top of) page \"1234\" [https://en.wikipedia.org/wiki/1234 wikipedia]."
+      },
+      "date": 1694513150237
+    },
+    {
+      "type": "edit",
+      "id": "60d1dd744f9ce166",
+      "item": {
+        "type": "paragraph",
+        "id": "60d1dd744f9ce166",
+        "text": "⇒ [[Parse Wiki-Style Links]] and Render Them as Anchors ⇒ [[Context]] ⇒ [[MiniLatex]]:"
+      },
+      "date": 1694513213452
+    },
+    {
+      "type": "edit",
+      "id": "60d1dd744f9ce166",
+      "item": {
+        "type": "paragraph",
+        "id": "60d1dd744f9ce166",
+        "text": "⇒ [[Parse Wiki-Style Links]] and Render Them as Anchors ⇒ [[Context]] ⇒ [[MiniLatex]]"
+      },
+      "date": 1694513216762
+    },
+    {
+      "type": "edit",
+      "id": "60d1dd744f9ce166",
+      "item": {
+        "type": "paragraph",
+        "id": "60d1dd744f9ce166",
+        "text": "⇒ [[Parse Wiki-Style Links]] and Render Them as Anchors ⇒ [[Context]] ⇒ [[MiniLatex]]: a Parser-Renderer for a …"
+      },
+      "date": 1694513242170
+    },
+    {
+      "type": "edit",
+      "id": "60d1dd744f9ce166",
+      "item": {
+        "type": "paragraph",
+        "id": "60d1dd744f9ce166",
+        "text": "⇒ [[Parse Wiki-Style Links]] and Render Them as Anchors ⇒ [[Context]] ⇒ [[MiniLatex]]: a Parser-Renderer for …"
+      },
+      "date": 1694513263382
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2998153e58715f86"
+      },
+      "id": "2998153e58715f86",
+      "type": "add",
+      "after": "e2472b1dac446259",
+      "date": 1694513912633
+    },
+    {
+      "id": "2998153e58715f86",
+      "type": "move",
+      "order": [
+        "60d1dd744f9ce166",
+        "3b601aa8e8e57806",
+        "311f93fc1897010f",
+        "819046f5de1471bb",
+        "9c2b576ebcade58c",
+        "6cbcf21da7b4b242",
+        "3866b80c0d532b2c",
+        "3dfca7e331d30bcd",
+        "9dbe380ec16002f3",
+        "2998153e58715f86",
+        "f3a041532d492322",
+        "1e8288469f9516c3",
+        "60cf185bf272e012",
+        "0f76c2289d96dfd5",
+        "aee4ba5728a651b8",
+        "e7d883f999e07c1a",
+        "e2472b1dac446259"
+      ],
+      "date": 1694513917242
+    },
+    {
+      "type": "edit",
+      "id": "2998153e58715f86",
+      "item": {
+        "type": "pagefold",
+        "id": "2998153e58715f86",
+        "text": "~"
+      },
+      "date": 1694513921379
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "90d4bba6df7631a5"
+      },
+      "id": "90d4bba6df7631a5",
+      "type": "add",
+      "after": "e2472b1dac446259",
+      "date": 1694514542114
+    },
+    {
+      "type": "edit",
+      "id": "90d4bba6df7631a5",
+      "item": {
+        "type": "pagefold",
+        "id": "90d4bba6df7631a5",
+        "text": "~"
+      },
+      "date": 1694514545769
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "77ae793db5b156b0"
+      },
+      "id": "77ae793db5b156b0",
+      "type": "add",
+      "after": "90d4bba6df7631a5",
+      "date": 1694514547093
+    },
+    {
+      "type": "edit",
+      "id": "77ae793db5b156b0",
+      "item": {
+        "type": "code",
+        "id": "77ae793db5b156b0",
+        "text": "<html>\n  <head>\n    <link href=\"style.css\" rel=\"stylesheet\">\n    <meta charset=utf-8>\n    <meta name=viewport content=\"width=device-width, initial-scale=1\">\n    <link rel=\"manifest\" href=\"manifest.json\" />\n  </head>\n  <body>\n    <section class=main id=lineup></section>\n    <footer id=footer>\n      Try old <a href=\"http://hello.fed.wiki/view/welcome-visitors\">Welcome Visitors</a> site.\n      Completed checks show <span class=pass>pass</span> or <span class=fail>fail</span>\n    </footer>\n    <script type=module>\n\n      const asSlug = text => text.replace(/\\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()\n      const delay = time => new Promise(res => setTimeout(res,time))\n\n      const lineup = [] // {page,id}...\n      let pages = [] // {site,slug,page}...\n\n      const params = new URLSearchParams(location.search)\n      const origin = params.get('site') || 'hello.fed.wiki'\n\n      { // launch the app with one page, typically welcome-visitors\n        const slug = params.get('slug') || 'welcome-visitors'\n        const view = r => `${r.site==origin?'view':r.site}/${asSlug(r.page.title)}`\n        const legacy = () => window.open(`http://${origin}/${lineup.map(view).join('/')}`,'_blank')\n        pages = await fetch('./pages.json').then(res => res.json())\n        await render(await resolve([origin],slug))\n        window.lineup.addEventListener('click',async event => {\n          const target = event.target\n          if (target.tagName == 'A' && target.getAttribute('href') == '#') {\n            event.preventDefault()\n            const title = target.innerText\n            const here = target.closest('.page').id\n            link(title,here,event.shiftKey)\n          }\n        })\n        window.lineup.addEventListener('focusout', async event => {\n          const target = event.target\n          edit(target.id, target.innerHTML)\n        })\n        window.addEventListener(\"dragstart\", event => event.preventDefault())\n        window.addEventListener(\"dragover\", event => event.preventDefault())\n        window.addEventListener(\"drop\", event => {\n          event.preventDefault()\n          drop(event.dataTransfer.getData(\"url\"))})\n        window.debug = {origin,lineup,pages,legacy}\n      }\n\n      async function resolve(context,slug) {\n        // retrieve page json following all the collaborative rules\n        const site = context.shift()\n        const index = pages.findIndex(cache => cache.site==site && cache.slug==slug)\n        if (index != -1) return {site,page:pages[index].page}\n        return await fetch(`//${site}/${slug}.json`)\n            .then(async res => res.ok && res.status==200 ?\n              {site, page:(await res.json())} :\n              resolve(context,slug))\n      }\n\n      async function post(site,slug,page) {\n        const index = pages.findIndex(cache => cache.site==site && cache.slug==slug)\n        if(index == -1)\n          pages.push({site,slug,page})\n        else\n          pages[index].page = page\n      }\n\n      async function render(panel) {\n        // add a new content to the dom\n        const escape = text => text.replace(/&/g,'&amp;').replace(/</g,'&lt;')\n        const linked = text => text\n          .replace(/\\[\\[(.*?)\\]\\]/g, (_,title) => `<a href=\"#\">${title}</a>`)\n          .replace(/\\[(https?:.*?) (.*?)\\]/g, (_,url,word) => `<a href=\"${url}\">${word}</a>`)\n        panel.id = (Math.floor(Math.random()*2**32)).toString(16)\n        lineup.push(panel)\n        const body = panel.page.story\n          .filter(item => item.type == 'paragraph')\n          .map(item => `<p id=\"${panel.id}.${item.id}\" contenteditable=\"true\">${linked(escape(item.text))}</p>`)\n          .join(\"\\n\")\n        window.lineup.innerHTML += `\n          <div class=page id=${panel.id}>\n            <div class=paper>\n              <div class=twins></div>\n              <div class=header>\n                <h1 title=${panel.site}>\n                  <span>\n                    <img src=//${panel.site}/favicon.png height=32px>\n                    ${panel.page.title}\n                  </span>\n                </h1>\n              </div>\n              ${body}\n            </div>\n          </div>`\n        await test(panel)\n      }\n\n      async function link(title,here,shiftKey) {\n        // handle internal link\n        const last = array => array[array.length-1]\n        const uniq = (value, index, self) => self.indexOf(value) === index\n        if(!shiftKey) {\n          // make space in the lineup for new content\n          while(last(lineup).id != here) {\n            document.getElementById(last(lineup).id).remove()\n            lineup.pop()\n          }\n        }\n        const panel = lineup.find(panel => panel.id == here)\n        const more = (panel.page.journal||[]).slice().reverse()\n          .map(action => action.site)\n          .filter(site => site)\n        const context = ([origin, panel.site, ...more]).filter(uniq)\n        const slug = asSlug(title)\n        await render(await resolve(context,slug))\n        window.lineup\n          .querySelector('.page:last-of-type')\n          .scrollIntoView({behavior:'smooth', block:'center'})\n      }\n\n      async function edit(id,html) {\n        const tuple = id.split('.')\n        const text = html\n          .replace(/<\\/?(b|i|u)>/g,'')\n          .replace(/<a href=\"(https?:.+?)\">(.+?)<\\/a>/g,(_,url,word) => `[${url} ${word}]`)\n          .replace(/<a href=\"#\">(.+?)<\\/a>/g,(_,title) => `[[${title}]]`)\n          .replace(/<\\/?\\w.*?>/g,'')\n          .replace(/&amp;/g,'&').replace(/&lt;/g,'<')\n          .replace(/&nbsp;/g,' ')\n        const panel = lineup.find(panel => panel.id == id.split('.')[0])\n        const item = panel.page.story.find(item => item.id == id.split('.')[1])\n        const changed = item.text != text\n        if(changed) {\n          const type = 'edit'\n          const id = item.id\n          const date = Date.now()\n          item.text = text\n          const action = {type,id,date,item}\n          panel.page.journal.push(action)\n          post(panel.site, asSlug(panel.page.title), panel.page)\n        }\n      }\n\n      async function drop(url) {\n        // handle drag and drop from remote page flag\n        const m = url.match(/^(https?:)?\\/\\/(.+?)\\/.*\\/([a-z-]+)$/)\n        if (!m) return\n        await render(await resolve([m[2]],m[3]))\n        window.lineup\n          .querySelector('.page:last-of-type')\n          .scrollIntoView({behavior:'smooth', block:'center'})\n      }\n\n      async function recall(panel,date,shiftKey) {\n        const last = array => array[array.length-1]\n        const here = panel.id\n        if(!shiftKey) {\n          // make space in the lineup for new content\n          while(last(lineup).id != here) {\n            document.getElementById(last(lineup).id).remove()\n            lineup.pop()\n          }\n        }\n        const page = {\n          title:panel.page.title,\n          story:[],\n          journal:[]\n        }\n        const order = () => (panel.page.story||[]).map(item => item.id)\n        const add = (after, item) => {\n          const index = order().indexOf(after) + 1\n          page.story.splice(index, 0, item)\n        }\n        for(const action of panel.page.journal) {\n          switch (action.type) {\n            case 'create':\n              break\n            case 'add':\n              add(action.after, action.item)\n              break\n            case 'edit':\n              const index = order().indexOf(action.id)\n              if (index != -1)\n                page.story.splice(index,1,action.item)\n              else\n                page.story.push(action.item)\n              break\n          }\n          page.journal.push(action)\n          if(action.date == date) {\n            await render({site:panel.site,page})\n            return\n          }\n        }\n      }\n\n      async function test(panel) {\n        await delay(200)\n        panel.ok = true\n        const child = () => lineup[lineup.findIndex(each => each.id == panel.id)+1]\n        const pragmas = panel.page.story\n          .filter(item => item.type == 'paragraph' && item.text.startsWith('► '))\n        for (const item of pragmas) {\n          const ok = bool => {\n            console.log(bool?'%cpass':'%cfail',bool?'color:green':'color:red')\n            document.getElementById(`${panel.id}.${item.id}`).classList.add(bool?'pass':'fail')\n            if(!bool) panel.ok = false\n          }\n          let m\n          console.log(item.text)\n          if(lineup.length > 10)\n            {ok(false); break}\n          if(m = item.text.match(/click \\[\\[(.+?)\\]\\]/))\n            {await link(m[1],panel.id,false); ok(child()?.ok); await delay(400)}\n          if(m = item.text.match(/click action (\\d+)/))\n            {await recall(panel,+m[1],false)}\n          if(m = item.text.match(/drop ([^ ]+)/))\n            {await drop(m[1]); await delay(400)}\n          if(m = item.text.match(/check site ([\\w\\.-]+)/))\n            {ok(lineup[lineup.length-1].site.includes(m[1]))}\n          if(m = item.text.match(/check slug ([a-z-]+)/))\n            {ok(asSlug(lineup[lineup.length-1].page.title).includes(m[1]))}\n          if(m = item.text.match(/check text ([^ ]+)/))\n            {ok(lineup[lineup.length-1].page.story.find(item => item.text.includes(m[1])))}\n        }\n      }\n\n    </script>\n  </body>\n</html>\n"
+      },
+      "date": 1694514551201
+    },
+    {
+      "type": "add",
+      "id": "d6ce95f6f0fa76bb",
+      "item": {
+        "type": "paragraph",
+        "id": "d6ce95f6f0fa76bb",
+        "text": "http://css-spikes.dbbs.co/hello.fed.wiki/"
+      },
+      "after": "e7d883f999e07c1a",
+      "date": 1694514566045
+    },
+    {
+      "id": "d6ce95f6f0fa76bb",
+      "type": "move",
+      "order": [
+        "60d1dd744f9ce166",
+        "3b601aa8e8e57806",
+        "311f93fc1897010f",
+        "819046f5de1471bb",
+        "9c2b576ebcade58c",
+        "6cbcf21da7b4b242",
+        "3866b80c0d532b2c",
+        "3dfca7e331d30bcd",
+        "9dbe380ec16002f3",
+        "2998153e58715f86",
+        "f3a041532d492322",
+        "1e8288469f9516c3",
+        "60cf185bf272e012",
+        "0f76c2289d96dfd5",
+        "aee4ba5728a651b8",
+        "e7d883f999e07c1a",
+        "e2472b1dac446259",
+        "90d4bba6df7631a5",
+        "d6ce95f6f0fa76bb",
+        "77ae793db5b156b0"
+      ],
+      "date": 1694514568791
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4b1ae19da093a263"
+      },
+      "id": "4b1ae19da093a263",
+      "type": "add",
+      "after": "77ae793db5b156b0",
+      "date": 1694515865967
+    },
+    {
+      "id": "4b1ae19da093a263",
+      "type": "move",
+      "order": [
+        "60d1dd744f9ce166",
+        "3b601aa8e8e57806",
+        "311f93fc1897010f",
+        "819046f5de1471bb",
+        "9c2b576ebcade58c",
+        "6cbcf21da7b4b242",
+        "3866b80c0d532b2c",
+        "3dfca7e331d30bcd",
+        "9dbe380ec16002f3",
+        "2998153e58715f86",
+        "f3a041532d492322",
+        "1e8288469f9516c3",
+        "60cf185bf272e012",
+        "0f76c2289d96dfd5",
+        "4b1ae19da093a263",
+        "aee4ba5728a651b8",
+        "e7d883f999e07c1a",
+        "e2472b1dac446259",
+        "90d4bba6df7631a5",
+        "d6ce95f6f0fa76bb",
+        "77ae793db5b156b0"
+      ],
+      "date": 1694515890067
+    },
+    {
+      "type": "edit",
+      "id": "4b1ae19da093a263",
+      "item": {
+        "type": "paragraph",
+        "id": "4b1ae19da093a263",
+        "text": "⇒ [[Render Wiki Link]]"
+      },
+      "date": 1694515899265
+    },
+    {
+      "type": "edit",
+      "id": "60d1dd744f9ce166",
+      "item": {
+        "type": "paragraph",
+        "id": "60d1dd744f9ce166",
+        "text": "⇒ [[Parse Wiki-Style Links]] and Render Them as Anchors ⇒ [[Context]] ⇒ [[MiniLatex]]: a Parser-Renderer for … ⇒ [[Render Wiki Link]] ⇐ [[Render Story]]"
+      },
+      "date": 1694517749810
+    },
+    {
+      "type": "edit",
+      "id": "60d1dd744f9ce166",
+      "item": {
+        "type": "paragraph",
+        "id": "60d1dd744f9ce166",
+        "text": "⇒ [[Parse Wiki-Style Links]] and Render Them as Anchors ⇒ [[Context]] ⇒ [[MiniLatex]]: a Parser-Renderer for … ⇐ [[Render Wiki Link]] ⇐ [[Render Story]]"
+      },
+      "date": 1694521661518
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c674a9b0f886e6be"
+      },
+      "id": "c674a9b0f886e6be",
+      "type": "add",
+      "after": "77ae793db5b156b0",
+      "date": 1694521762997
+    },
+    {
+      "type": "edit",
+      "id": "c674a9b0f886e6be",
+      "item": {
+        "type": "graphviz",
+        "id": "c674a9b0f886e6be",
+        "text": "DOT FROM lambda-browsing"
+      },
+      "date": 1694521770170
+    },
+    {
+      "type": "edit",
+      "id": "4b1ae19da093a263",
+      "item": {
+        "type": "paragraph",
+        "id": "4b1ae19da093a263",
+        "text": "⇒ [[Render Wiki Link]]. [https://github.com/dreyeck/blog/commit/bc40b5b51246e2b9acb06c4c896af9c4671a5c4a commit]"
+      },
+      "date": 1694522716948
+    },
+    {
+      "type": "edit",
+      "id": "4b1ae19da093a263",
+      "item": {
+        "type": "paragraph",
+        "id": "4b1ae19da093a263",
+        "text": "⇒ [[Render Wiki Link]]. [https://github.com/dreyeck/blog/commit/5ebb6a0bd639a40abd516645281a4e39982ef630 commit]"
+      },
+      "date": 1694522754041
+    }
+  ]
+}

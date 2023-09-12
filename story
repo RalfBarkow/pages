@@ -7,7 +7,7 @@
       "site": "wiki.ralfbarkow.ch",
       "slug": "story-and-life",
       "title": "Story and Life",
-      "text": "There is no [[Distinction]] between [[Story]] and [[Life]]."
+      "text": "There is no [[Distinction]] between story and [[Life]]."
     },
     {
       "type": "reference",
@@ -3355,6 +3355,19 @@
         "text": "⇒ [[Storycraft]]: Stories are about [[Choice]]s and choosing.\n"
       },
       "date": 1681484616282
+    },
+    {
+      "type": "edit",
+      "id": "638601223433c1df",
+      "item": {
+        "type": "reference",
+        "id": "638601223433c1df",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "story-and-life",
+        "title": "Story and Life",
+        "text": "There is no [[Distinction]] between story and [[Life]]."
+      },
+      "date": 1694420472369
     }
   ]
 }

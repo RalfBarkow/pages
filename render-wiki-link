@@ -1,0 +1,1673 @@
+{
+  "title": "Render Wiki Link",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "699d6c59b4d3efe7",
+      "text": "# renderWikiLink"
+    },
+    {
+      "type": "paragraph",
+      "id": "6a4d1f8615e3d6cf",
+      "text": "This function generates an HTML anchor (<a>) element for a given title. The title is provided as an argument. [https://github.com/dreyeck/blog/commit/5ebb6a0bd639a40abd516645281a4e39982ef630 commit]"
+    },
+    {
+      "type": "code",
+      "id": "c91ac14153bfe422",
+      "text": "renderWikiLink : String -> Html msg\nrenderWikiLink title =\n    {- Links are enclosed in doubled square brackets\n       Ref: Wikilinks (internal links) https://en.wikipedia.org/wiki/Help:Link\n       and http://ward.bay.wiki.org/view/internal-link\n    -}\n    let\n        target =\n            -- title asSlug\n            title |> String.toLower |> String.replace \" \" \"-\" |> (\\s -> \"/\" ++ s)\n    in\n    a [ Html.Attributes.href target ] [ text title ]\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "9ecce0e30adbeaeb",
+      "text": "Example:\nIf title is \"Federated Wiki\", renderWikiLink should generate an [[Internal Link]], an anchor tag like "
+    },
+    {
+      "type": "code",
+      "id": "8e32eb53a8b00dea",
+      "text": "<a class=\"internal\" href=\"/federated-wiki.html\" data-page-name=\"federated-wiki\" title=\"view\">Federated Wiki</a>"
+    },
+    {
+      "type": "paragraph",
+      "id": "676f099e0576938a",
+      "text": "Note: Regarding title asSlug, see source view of [http://css-spikes.dbbs.co/hello.fed.wiki/ css-spikes.dbbs.co], line 16:"
+    },
+    {
+      "type": "code",
+      "id": "c13d9674afb78d8d",
+      "text": "const asSlug = text => text.replace(/\\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()"
+    },
+    {
+      "type": "markdown",
+      "id": "6efe137f234e1f68",
+      "text": "# renderStory"
+    },
+    {
+      "type": "paragraph",
+      "id": "e46a9bcfdb169f37",
+      "text": "The [[Render Story]] function  is responsible for rendering a Story item into HTML format. Here we focus on Paragraph type items."
+    },
+    {
+      "type": "paragraph",
+      "id": "9856a1773e70f3b0",
+      "text": "For a Paragraph type, it processes the paragraph's text field."
+    },
+    {
+      "type": "paragraph",
+      "id": "0b36c39c41045fd1",
+      "text": "It applies paragraphTextAsList to paragraph.text, which converts the text into a list of strings."
+    },
+    {
+      "type": "code",
+      "id": "78a3f281e95e322a",
+      "text": "renderStory : Story -> Html msg\nrenderStory story =\n    case story of\n        Paragraph paragraph ->\n            case paragraph.type_ of\n                \"paragraph\" ->\n                    let\n                        textWithLinks =\n                            paragraph.text\n                                |> paragraphTextAsList\n                                |> List.map renderWikiLink\n                    in\n                    Html.p []\n                        textWithLinks\n\n                _ ->\n                    Html.text (\"⚠️ INFO Paragraph – Unknown story item type: \" ++ paragraph.type_)\n\n  […]"
+    },
+    {
+      "type": "paragraph",
+      "id": "610f7d7a564dc2be",
+      "text": "Then, it maps renderWikiLink over this list of strings. This means it applies renderWikiLink to each string in the list."
+    },
+    {
+      "type": "paragraph",
+      "id": "8d1b6c9c354a35b9",
+      "text": "Finally, it wraps the resulting list of anchor elements in an HTML paragraph (<p>) element."
+    },
+    {
+      "type": "paragraph",
+      "id": "e15dabd4da9bbe7d",
+      "text": "paragraphTextAsList takes an input string and wraps it in a list. This is used to convert a paragraph text into a list of strings (for rendering purposes)."
+    },
+    {
+      "type": "code",
+      "id": "d686cf64874c1be4",
+      "text": "paragraphTextAsList : String -> List String\nparagraphTextAsList input =\n    [ input ]\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "31c1bc0714c884c4",
+      "text": "Note: In particular, explain the interaction of renderStory and paragraphTextAsList with respect to my attempt to develop a parser renderer for paragraphs that displays wiki links (for example: [[Federated Wiki]]) as HTML anchors."
+    },
+    {
+      "type": "paragraph",
+      "id": "5503853107d15a9d",
+      "text": "Example:\nSuppose you have a Paragraph with text equal to \"This is a [[sample link]] in a paragraph\". The renderStory function will:"
+    },
+    {
+      "type": "paragraph",
+      "id": "a9135440580aeacf",
+      "text": "Apply paragraphTextAsList and convert the text into [\"This is a [[sample link]] in a paragraph\"]."
+    },
+    {
+      "type": "paragraph",
+      "id": "e59d103792be5e0f",
+      "text": "Apply renderWikiLink to each element in the list, generating HTML anchor elements for the link. This should result in something like [\"This is a <a href=\"/sample-link.html\">sample link</a> in a paragraph\"]."
+    },
+    {
+      "type": "paragraph",
+      "id": "29fe4541ade1b5b9",
+      "text": "Wrap this list in an HTML paragraph element, resulting in <p>This is a <a href=\"/sample-link.html\">sample link</a> in a paragraph</p>."
+    },
+    {
+      "type": "paragraph",
+      "id": "575744cbb1b75041",
+      "text": "At the moment, the whole paragraph is output as a wiki link (see figure below), not just the links enclosed in double square brackets."
+    },
+    {
+      "type": "image",
+      "id": "cf2b39084ad70223",
+      "text": "Whole paragraph asWikiLink",
+      "size": "wide",
+      "width": 430,
+      "height": 270,
+      "url": "/assets/plugins/image/6c300b5a63e76db7fbb40c7d1a204051.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "3de515f363775178",
+      "text": "For example, the false-positive \"Page about us.\" targeting http://localhost:1234/pages-about-us. – although there is no wiki link in the paragraph at all."
+    },
+    {
+      "type": "paragraph",
+      "id": "ae3824befd22c524",
+      "text": "In summary, renderStory utilizes paragraphTextAsList to convert the text of a paragraph-like item into a list of strings. It then applies renderWikiLink to each string in the list to generate HTML anchor elements for wiki links. This allows for the rendering of paragraphs with clickable wiki links."
+    },
+    {
+      "type": "paragraph",
+      "id": "a0b373ca05f9c4e8",
+      "text": "How would the code have to be changed to render only the links as anchors? Maybe with a parser renderer for wiki links?"
+    },
+    {
+      "type": "paragraph",
+      "id": "e6371bec6ef179de",
+      "text": "To render only the links enclosed in double square brackets as anchors, you'll need to implement a parser/renderer for wiki links. This parser should be able to identify the links within the text and convert them into HTML anchor elements."
+    },
+    {
+      "type": "paragraph",
+      "id": "2e91307a27b7c933",
+      "text": "Here's how you can do it:"
+    },
+    {
+      "type": "paragraph",
+      "id": "0c7cd20c1f2fee43",
+      "text": "1. Create a Parser/Renderer for Wiki Links:\nYou'll need a function that can identify and convert wiki links within a string. This function should take a string as input and return a modified string with the links converted to HTML anchor elements.\nFor example, you might create a function called parseWikiLinks:"
+    },
+    {
+      "type": "code",
+      "id": "8291647ea71c6b3b",
+      "text": "parseWikiLinks : String -> Html msg\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "b52694bb168dcb48",
+      "text": "This function would take a string and return an Html element representing the parsed content."
+    },
+    {
+      "type": "paragraph",
+      "id": "710b3145dc7153b4",
+      "text": "2. Modify renderStory:\nIn your renderStory function, when dealing with a Paragraph item, apply the parseWikiLinks function to the paragraph's text."
+    },
+    {
+      "type": "code",
+      "id": "200cf15b098cac8e",
+      "text": "renderStory : Story -> Html msg\nrenderStory story =\n    case story of\n        Paragraph paragraph ->\n            case paragraph.type_ of\n                \"paragraph\" ->\n                    let\n                        renderedText =\n                            paragraph.text\n                                |> parseWikiLinks\n                    in\n                    Html.p []\n                        [ text renderedText ]\n\n                _ ->\n                    Html.text (\"⚠️ INFO Paragraph – Unknown story item type: \" ++ paragraph.type_)\n\n        -- Handle other cases as needed...\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "03cefc93ebabb6e7",
+      "text": "The parseWikiLinks function will process the text and return a modified string with wiki links converted to HTML anchors. You'll need to define this function separately."
+    },
+    {
+      "type": "paragraph",
+      "id": "0d5134140013f650",
+      "text": "3. Define parseWikiLinks: In this function, you'll need to implement the logic for identifying and converting wiki links into HTML anchor elements. This could involve using regular expressions, string manipulation, or any other parsing technique you find suitable."
+    },
+    {
+      "type": "code",
+      "id": "35ee5148f4759e82",
+      "text": "parseWikiLinks : String -> Html msg\nparseWikiLinks input =\n    -- Implement the logic to identify and convert wiki links\n    -- Return an HTML element representing the parsed content\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "9373e8cc1df94b4f",
+      "text": "Inside this function, you'll need to iterate over the input string, identify links enclosed in double square brackets ([[...]]), and replace them with corresponding HTML anchor elements."
+    },
+    {
+      "type": "paragraph",
+      "id": "19c4ea43f54c7cfb",
+      "text": "Remember, the specific implementation of parseWikiLinks will depend on your exact requirements and how your wiki links are formatted in the input text. You may need to use regular expressions or other parsing techniques to achieve the desired result. (ChatGPT August 3 Version)"
+    },
+    {
+      "type": "paragraph",
+      "id": "e7d883f999e07c1a",
+      "text": "⇒ [[MiniLatex]]: a Parser-Renderer for a Subset of LaTeX [https://jxxcarlson.github.io/pdf/minilatex-acm.pdf pdf] ⇐ [[Do Internal Link]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Render Wiki Link",
+        "story": []
+      },
+      "date": 1694515902246
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c91ac14153bfe422"
+      },
+      "id": "c91ac14153bfe422",
+      "type": "add",
+      "date": 1694515912434
+    },
+    {
+      "type": "edit",
+      "id": "c91ac14153bfe422",
+      "item": {
+        "type": "code",
+        "id": "c91ac14153bfe422",
+        "text": "renderWikiLink : String -> Html msg\nrenderWikiLink label =\n    let\n        target =\n            label |> String.toLower |> String.replace \" \" \"-\" |> (\\s -> \"/\" ++ s)\n    in\n    a [ Html.Attributes.href target ] [ text label ]\n\n"
+      },
+      "date": 1694515914648
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6a4d1f8615e3d6cf"
+      },
+      "id": "6a4d1f8615e3d6cf",
+      "type": "add",
+      "after": "c91ac14153bfe422",
+      "date": 1694515962047
+    },
+    {
+      "type": "edit",
+      "id": "6a4d1f8615e3d6cf",
+      "item": {
+        "type": "paragraph",
+        "id": "6a4d1f8615e3d6cf",
+        "text": "cf."
+      },
+      "date": 1694515965470
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c13d9674afb78d8d"
+      },
+      "id": "c13d9674afb78d8d",
+      "type": "add",
+      "after": "6a4d1f8615e3d6cf",
+      "date": 1694515966863
+    },
+    {
+      "type": "edit",
+      "id": "c13d9674afb78d8d",
+      "item": {
+        "type": "code",
+        "id": "c13d9674afb78d8d",
+        "text": "const asSlug = text => text.replace(/\\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()"
+      },
+      "date": 1694515969146
+    },
+    {
+      "id": "d6ce95f6f0fa76bb",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "d6ce95f6f0fa76bb",
+        "text": "http://css-spikes.dbbs.co/hello.fed.wiki/"
+      },
+      "after": "6a4d1f8615e3d6cf",
+      "attribution": {
+        "page": "2023-09-12"
+      },
+      "date": 1694515977099
+    },
+    {
+      "type": "remove",
+      "id": "d6ce95f6f0fa76bb",
+      "date": 1694515980919
+    },
+    {
+      "type": "edit",
+      "id": "6a4d1f8615e3d6cf",
+      "item": {
+        "type": "paragraph",
+        "id": "6a4d1f8615e3d6cf",
+        "text": "cf. http://css-spikes.dbbs.co/hello.fed.wiki/"
+      },
+      "date": 1694515981865
+    },
+    {
+      "type": "edit",
+      "id": "c91ac14153bfe422",
+      "item": {
+        "type": "code",
+        "id": "c91ac14153bfe422",
+        "text": "renderWikiLink : String -> Html msg\nrenderWikiLink title =\n    {- Links are enclosed in doubled square brackets\n       Ref: Wikilinks (internal links) https://en.wikipedia.org/wiki/Help:Link\n       and http://ward.bay.wiki.org/view/internal-link\n    -}\n    let\n        target =\n            -- title asSlug\n            title |> String.toLower |> String.replace \" \" \"-\" |> (\\s -> \"/\" ++ s)\n    in\n    a [ Html.Attributes.href target ] [ text title ]\n\n"
+      },
+      "date": 1694516859388
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6efe137f234e1f68"
+      },
+      "id": "6efe137f234e1f68",
+      "type": "add",
+      "after": "c13d9674afb78d8d",
+      "date": 1694516947143
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "78a3f281e95e322a"
+      },
+      "id": "78a3f281e95e322a",
+      "type": "add",
+      "after": "6efe137f234e1f68",
+      "date": 1694516951492
+    },
+    {
+      "type": "edit",
+      "id": "78a3f281e95e322a",
+      "item": {
+        "type": "code",
+        "id": "78a3f281e95e322a",
+        "text": "renderStory : Story -> Html msg\nrenderStory story =\n    case story of\n        Paragraph paragraph ->\n            case paragraph.type_ of\n                \"paragraph\" ->\n                    let\n                        textWithLinks =\n                            paragraph.text\n                                |> paragraphTextAsList\n                                |> List.map renderWikiLink\n                    in\n                    Html.p []\n                        textWithLinks\n\n                _ ->\n                    Html.text (\"⚠️ INFO Paragraph – Unknown story item type: \" ++ paragraph.type_)\n\n        {- A Future item describes how a missing page can be found or created.\n           Unresolved internal links add a ghost page with a future to the lineup.\n           Ref: http://glossary.asia.wiki.org/view/welcome-visitors/view/future\n        -}\n        Future future ->\n            case future.type_ of\n                \"future\" ->\n                    Html.div [] [ Html.text (\"⚠️ INFO Future – Known story item type: \" ++ future.type_) ]\n\n                _ ->\n                    Html.div [] [ Html.text (\"⚠️ INFO Future – Unknown story item type: \" ++ future.type_) ]\n\n        Factory factory ->\n            Html.text \"⚠️ INFO – Factory\"\n\n        EmptyStory ->\n            Html.text \"⚠️ INFO – Empty Story\"\n\n"
+      },
+      "date": 1694516958331
+    },
+    {
+      "type": "edit",
+      "id": "6efe137f234e1f68",
+      "item": {
+        "type": "paragraph",
+        "id": "6efe137f234e1f68",
+        "text": "renderStory"
+      },
+      "date": 1694516959112
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "699d6c59b4d3efe7"
+      },
+      "id": "699d6c59b4d3efe7",
+      "type": "add",
+      "after": "78a3f281e95e322a",
+      "date": 1694516974201
+    },
+    {
+      "id": "699d6c59b4d3efe7",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "c91ac14153bfe422",
+        "6a4d1f8615e3d6cf",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "78a3f281e95e322a"
+      ],
+      "date": 1694516983146
+    },
+    {
+      "type": "edit",
+      "id": "699d6c59b4d3efe7",
+      "item": {
+        "type": "paragraph",
+        "id": "699d6c59b4d3efe7",
+        "text": "renderWikiLink"
+      },
+      "date": 1694516985118
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "cf2b39084ad70223"
+      },
+      "id": "cf2b39084ad70223",
+      "type": "add",
+      "after": "78a3f281e95e322a",
+      "date": 1694517034684
+    },
+    {
+      "id": "cf2b39084ad70223",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "c91ac14153bfe422",
+        "6a4d1f8615e3d6cf",
+        "c13d9674afb78d8d",
+        "cf2b39084ad70223",
+        "6efe137f234e1f68",
+        "78a3f281e95e322a"
+      ],
+      "date": 1694517041760
+    },
+    {
+      "type": "edit",
+      "id": "cf2b39084ad70223",
+      "item": {
+        "type": "image",
+        "id": "cf2b39084ad70223",
+        "text": "Whole paragraph asWikiLink",
+        "size": "wide",
+        "width": 430,
+        "height": 270,
+        "url": "/assets/plugins/image/6c300b5a63e76db7fbb40c7d1a204051.jpg"
+      },
+      "date": 1694517110186
+    },
+    {
+      "id": "6efe137f234e1f68",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "c91ac14153bfe422",
+        "6a4d1f8615e3d6cf",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "cf2b39084ad70223",
+        "78a3f281e95e322a"
+      ],
+      "date": 1694517138393
+    },
+    {
+      "type": "edit",
+      "id": "699d6c59b4d3efe7",
+      "item": {
+        "type": "paragraph",
+        "id": "699d6c59b4d3efe7",
+        "text": "# renderWikiLink"
+      },
+      "date": 1694517152813
+    },
+    {
+      "type": "edit",
+      "id": "699d6c59b4d3efe7",
+      "item": {
+        "type": "markdown",
+        "id": "699d6c59b4d3efe7",
+        "text": "# renderWikiLink"
+      },
+      "date": 1694517154009
+    },
+    {
+      "type": "edit",
+      "id": "6efe137f234e1f68",
+      "item": {
+        "type": "paragraph",
+        "id": "6efe137f234e1f68",
+        "text": "# renderStory"
+      },
+      "date": 1694517159522
+    },
+    {
+      "type": "edit",
+      "id": "6efe137f234e1f68",
+      "item": {
+        "type": "markdown",
+        "id": "6efe137f234e1f68",
+        "text": "# renderStory"
+      },
+      "date": 1694517160528
+    },
+    {
+      "type": "fork",
+      "date": 1694517275812
+    },
+    {
+      "type": "edit",
+      "id": "6a4d1f8615e3d6cf",
+      "item": {
+        "type": "paragraph",
+        "id": "6a4d1f8615e3d6cf",
+        "text": "Regarding title asSlug cf. http://css-spikes.dbbs.co/hello.fed.wiki/"
+      },
+      "date": 1694517294073
+    },
+    {
+      "type": "edit",
+      "id": "6a4d1f8615e3d6cf",
+      "item": {
+        "type": "paragraph",
+        "id": "6a4d1f8615e3d6cf",
+        "text": "Regarding title asSlug cf. [http://css-spikes.dbbs.co/hello.fed.wiki/ css-spikes.dbbs.co/hello.fed.wiki/]"
+      },
+      "date": 1694517325718
+    },
+    {
+      "type": "edit",
+      "id": "6a4d1f8615e3d6cf",
+      "item": {
+        "type": "paragraph",
+        "id": "6a4d1f8615e3d6cf",
+        "text": "Regarding title asSlug cf. [http://css-spikes.dbbs.co/hello.fed.wiki/ css-spikes.dbbs.co]"
+      },
+      "date": 1694517342325
+    },
+    {
+      "type": "edit",
+      "id": "6a4d1f8615e3d6cf",
+      "item": {
+        "type": "paragraph",
+        "id": "6a4d1f8615e3d6cf",
+        "text": "Regarding title asSlug cf. <script type=module> of [http://css-spikes.dbbs.co/hello.fed.wiki/ css-spikes.dbbs.co]"
+      },
+      "date": 1694517467605
+    },
+    {
+      "type": "edit",
+      "id": "6a4d1f8615e3d6cf",
+      "item": {
+        "type": "paragraph",
+        "id": "6a4d1f8615e3d6cf",
+        "text": "Regarding title asSlug see source. <script type=module> of [http://css-spikes.dbbs.co/hello.fed.wiki/ css-spikes.dbbs.co]"
+      },
+      "date": 1694517519414
+    },
+    {
+      "type": "edit",
+      "id": "6a4d1f8615e3d6cf",
+      "item": {
+        "type": "paragraph",
+        "id": "6a4d1f8615e3d6cf",
+        "text": "Regarding title asSlug see source view of [http://css-spikes.dbbs.co/hello.fed.wiki/ css-spikes.dbbs.co], line 16:"
+      },
+      "date": 1694517550043
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3de515f363775178"
+      },
+      "id": "3de515f363775178",
+      "type": "add",
+      "after": "78a3f281e95e322a",
+      "date": 1694517815608
+    },
+    {
+      "id": "3de515f363775178",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "c91ac14153bfe422",
+        "6a4d1f8615e3d6cf",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "cf2b39084ad70223",
+        "3de515f363775178",
+        "78a3f281e95e322a"
+      ],
+      "date": 1694517823173
+    },
+    {
+      "type": "edit",
+      "id": "3de515f363775178",
+      "item": {
+        "type": "paragraph",
+        "id": "3de515f363775178",
+        "text": "For example \"Page about us.\" with target http://localhost:1234/pages-about-us."
+      },
+      "date": 1694517845648
+    },
+    {
+      "type": "edit",
+      "id": "3de515f363775178",
+      "item": {
+        "type": "paragraph",
+        "id": "3de515f363775178",
+        "text": "For example, the false positive \"Page about us.\" with the target http://localhost:1234/pages-about-us."
+      },
+      "date": 1694517979053
+    },
+    {
+      "type": "edit",
+      "id": "3de515f363775178",
+      "item": {
+        "type": "paragraph",
+        "id": "3de515f363775178",
+        "text": "For example, the false positive \"Page about us.\" with a target http://localhost:1234/pages-about-us."
+      },
+      "date": 1694518065432
+    },
+    {
+      "type": "edit",
+      "id": "3de515f363775178",
+      "item": {
+        "type": "paragraph",
+        "id": "3de515f363775178",
+        "text": "For example, the false-positive \"Page about us.\" targeting http://localhost:1234/pages-about-us. – although there is no wiki link in the paragraph at all."
+      },
+      "date": 1694518141632
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d686cf64874c1be4"
+      },
+      "id": "d686cf64874c1be4",
+      "type": "add",
+      "after": "78a3f281e95e322a",
+      "date": 1694518185936
+    },
+    {
+      "id": "d686cf64874c1be4",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "c91ac14153bfe422",
+        "6a4d1f8615e3d6cf",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "d686cf64874c1be4",
+        "cf2b39084ad70223",
+        "3de515f363775178",
+        "78a3f281e95e322a"
+      ],
+      "date": 1694518194606
+    },
+    {
+      "type": "edit",
+      "id": "d686cf64874c1be4",
+      "item": {
+        "type": "code",
+        "id": "d686cf64874c1be4",
+        "text": "paragraphTextAsList : String -> List String\nparagraphTextAsList input =\n    [ input ]\n"
+      },
+      "date": 1694518198289
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e46a9bcfdb169f37"
+      },
+      "id": "e46a9bcfdb169f37",
+      "type": "add",
+      "after": "78a3f281e95e322a",
+      "date": 1694518202487
+    },
+    {
+      "id": "e46a9bcfdb169f37",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "c91ac14153bfe422",
+        "6a4d1f8615e3d6cf",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "e46a9bcfdb169f37",
+        "d686cf64874c1be4",
+        "cf2b39084ad70223",
+        "3de515f363775178",
+        "78a3f281e95e322a"
+      ],
+      "date": 1694518211324
+    },
+    {
+      "type": "edit",
+      "id": "e46a9bcfdb169f37",
+      "item": {
+        "type": "paragraph",
+        "id": "e46a9bcfdb169f37",
+        "text": "The [[Render Story]] function currently calls "
+      },
+      "date": 1694518229341
+    },
+    {
+      "type": "edit",
+      "id": "e46a9bcfdb169f37",
+      "item": {
+        "type": "paragraph",
+        "id": "e46a9bcfdb169f37",
+        "text": "The [[Render Story]] function currently calls the paragraphTextAsList function:"
+      },
+      "date": 1694518236915
+    },
+    {
+      "type": "edit",
+      "id": "78a3f281e95e322a",
+      "item": {
+        "type": "code",
+        "id": "78a3f281e95e322a",
+        "text": "renderStory : Story -> Html msg\nrenderStory story =\n    case story of\n        Paragraph paragraph ->\n            case paragraph.type_ of\n                \"paragraph\" ->\n                    let\n                        textWithLinks =\n                            paragraph.text\n                                |> paragraphTextAsList\n                                |> List.map renderWikiLink\n                    in\n                    Html.p []\n                        textWithLinks\n\n                _ ->\n                    Html.text (\"⚠️ INFO Paragraph – Unknown story item type: \" ++ paragraph.type_)\n\n  […]"
+      },
+      "date": 1694518284726
+    },
+    {
+      "id": "78a3f281e95e322a",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "c91ac14153bfe422",
+        "6a4d1f8615e3d6cf",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "e46a9bcfdb169f37",
+        "d686cf64874c1be4",
+        "78a3f281e95e322a",
+        "cf2b39084ad70223",
+        "3de515f363775178"
+      ],
+      "date": 1694518327602
+    },
+    {
+      "type": "add",
+      "id": "c91dd2da1361d5c1",
+      "item": {
+        "type": "paragraph",
+        "id": "c91dd2da1361d5c1",
+        "text": "In case of a story item type paragraph"
+      },
+      "after": "e46a9bcfdb169f37",
+      "date": 1694518358932
+    },
+    {
+      "id": "c91dd2da1361d5c1",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "c91ac14153bfe422",
+        "6a4d1f8615e3d6cf",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "e46a9bcfdb169f37",
+        "d686cf64874c1be4",
+        "c91dd2da1361d5c1",
+        "78a3f281e95e322a",
+        "cf2b39084ad70223",
+        "3de515f363775178"
+      ],
+      "date": 1694518361217
+    },
+    {
+      "type": "add",
+      "id": "e15dabd4da9bbe7d",
+      "item": {
+        "type": "paragraph",
+        "id": "e15dabd4da9bbe7d",
+        "text": "t takes a string and wraps it in a list. This is used to convert a paragraph text into a list of strings (probably for rendering purposes)."
+      },
+      "after": "e46a9bcfdb169f37",
+      "date": 1694518494214
+    },
+    {
+      "id": "e15dabd4da9bbe7d",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "c91ac14153bfe422",
+        "6a4d1f8615e3d6cf",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "e46a9bcfdb169f37",
+        "d686cf64874c1be4",
+        "e15dabd4da9bbe7d",
+        "c91dd2da1361d5c1",
+        "78a3f281e95e322a",
+        "cf2b39084ad70223",
+        "3de515f363775178"
+      ],
+      "date": 1694518496195
+    },
+    {
+      "type": "edit",
+      "id": "e15dabd4da9bbe7d",
+      "item": {
+        "type": "paragraph",
+        "id": "e15dabd4da9bbe7d",
+        "text": "paragraphTextAsList takes a string and wraps it in a list. This is used to convert a paragraph text into a list of strings (probably for rendering purposes)."
+      },
+      "date": 1694518513143
+    },
+    {
+      "type": "edit",
+      "id": "e15dabd4da9bbe7d",
+      "item": {
+        "type": "paragraph",
+        "id": "e15dabd4da9bbe7d",
+        "text": "paragraphTextAsList takes an input string and wraps it in a list. This is used to convert a paragraph text into a list of strings (probably for rendering purposes)."
+      },
+      "date": 1694518523772
+    },
+    {
+      "type": "edit",
+      "id": "e15dabd4da9bbe7d",
+      "item": {
+        "type": "paragraph",
+        "id": "e15dabd4da9bbe7d",
+        "text": "paragraphTextAsList takes an input string and wraps it in a list. This is used to convert a paragraph text into a list of strings (for rendering purposes)."
+      },
+      "date": 1694518546471
+    },
+    {
+      "type": "edit",
+      "id": "6a4d1f8615e3d6cf",
+      "item": {
+        "type": "paragraph",
+        "id": "6a4d1f8615e3d6cf",
+        "text": "t generates an HTML link based on the provided title."
+      },
+      "date": 1694518578276
+    },
+    {
+      "type": "add",
+      "id": "9ecce0e30adbeaeb",
+      "item": {
+        "type": "paragraph",
+        "id": "9ecce0e30adbeaeb",
+        "text": "Regarding title asSlug see source view of [http://css-spikes.dbbs.co/hello.fed.wiki/ css-spikes.dbbs.co], line 16:"
+      },
+      "after": "6a4d1f8615e3d6cf",
+      "date": 1694518579325
+    },
+    {
+      "id": "6a4d1f8615e3d6cf",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "6a4d1f8615e3d6cf",
+        "c91ac14153bfe422",
+        "9ecce0e30adbeaeb",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "e46a9bcfdb169f37",
+        "d686cf64874c1be4",
+        "e15dabd4da9bbe7d",
+        "c91dd2da1361d5c1",
+        "78a3f281e95e322a",
+        "cf2b39084ad70223",
+        "3de515f363775178"
+      ],
+      "date": 1694518582754
+    },
+    {
+      "type": "edit",
+      "id": "6a4d1f8615e3d6cf",
+      "item": {
+        "type": "paragraph",
+        "id": "6a4d1f8615e3d6cf",
+        "text": "This function generates an HTML link based on the provided title."
+      },
+      "date": 1694518594861
+    },
+    {
+      "id": "c91dd2da1361d5c1",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "6a4d1f8615e3d6cf",
+        "c91ac14153bfe422",
+        "9ecce0e30adbeaeb",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "e46a9bcfdb169f37",
+        "c91dd2da1361d5c1",
+        "d686cf64874c1be4",
+        "e15dabd4da9bbe7d",
+        "78a3f281e95e322a",
+        "cf2b39084ad70223",
+        "3de515f363775178"
+      ],
+      "date": 1694518684122
+    },
+    {
+      "type": "remove",
+      "id": "c91dd2da1361d5c1",
+      "date": 1694518690396
+    },
+    {
+      "type": "edit",
+      "id": "e46a9bcfdb169f37",
+      "item": {
+        "type": "paragraph",
+        "id": "e46a9bcfdb169f37",
+        "text": "The [[Render Story]] function currently calls the paragraphTextAsList function in case of a story item type paragraph."
+      },
+      "date": 1694518702527
+    },
+    {
+      "id": "78a3f281e95e322a",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "6a4d1f8615e3d6cf",
+        "c91ac14153bfe422",
+        "9ecce0e30adbeaeb",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "e46a9bcfdb169f37",
+        "78a3f281e95e322a",
+        "d686cf64874c1be4",
+        "e15dabd4da9bbe7d",
+        "cf2b39084ad70223",
+        "3de515f363775178"
+      ],
+      "date": 1694518707748
+    },
+    {
+      "id": "e15dabd4da9bbe7d",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "6a4d1f8615e3d6cf",
+        "c91ac14153bfe422",
+        "9ecce0e30adbeaeb",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "e46a9bcfdb169f37",
+        "78a3f281e95e322a",
+        "e15dabd4da9bbe7d",
+        "d686cf64874c1be4",
+        "cf2b39084ad70223",
+        "3de515f363775178"
+      ],
+      "date": 1694518728578
+    },
+    {
+      "type": "add",
+      "id": "31c1bc0714c884c4",
+      "item": {
+        "type": "paragraph",
+        "id": "31c1bc0714c884c4",
+        "text": "Note: "
+      },
+      "after": "e15dabd4da9bbe7d",
+      "date": 1694518932872
+    },
+    {
+      "type": "edit",
+      "id": "31c1bc0714c884c4",
+      "item": {
+        "type": "paragraph",
+        "id": "31c1bc0714c884c4",
+        "text": "Note: In particular, explain the interaction of renderStory and paragraphTextAsList with respect to my attempt to develop a parser renderer for paragraphs that displays wiki links (for example: [[Federated Wiki]]) as HTML anchors."
+      },
+      "date": 1694518935674
+    },
+    {
+      "id": "31c1bc0714c884c4",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "6a4d1f8615e3d6cf",
+        "c91ac14153bfe422",
+        "9ecce0e30adbeaeb",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "e46a9bcfdb169f37",
+        "78a3f281e95e322a",
+        "e15dabd4da9bbe7d",
+        "d686cf64874c1be4",
+        "31c1bc0714c884c4",
+        "cf2b39084ad70223",
+        "3de515f363775178"
+      ],
+      "date": 1694518937544
+    },
+    {
+      "type": "add",
+      "id": "575744cbb1b75041",
+      "item": {
+        "type": "paragraph",
+        "id": "575744cbb1b75041",
+        "text": "At the moment, the whole paragraph is output as a wiki link (see figure below), not just the links enclosed in double square brackets. How would the code have to be changed to render only the links as anchors? Maybe with a parser renderer for wiki links?"
+      },
+      "after": "31c1bc0714c884c4",
+      "date": 1694519366917
+    },
+    {
+      "type": "edit",
+      "id": "575744cbb1b75041",
+      "item": {
+        "type": "paragraph",
+        "id": "575744cbb1b75041",
+        "text": "At the moment, the whole paragraph is output as a wiki link (see figure below), not just the links enclosed in double square brackets."
+      },
+      "date": 1694519387068
+    },
+    {
+      "type": "add",
+      "id": "a0b373ca05f9c4e8",
+      "item": {
+        "type": "paragraph",
+        "id": "a0b373ca05f9c4e8",
+        "text": "How would the code have to be changed to render only the links as anchors? Maybe with a parser renderer for wiki links?"
+      },
+      "after": "575744cbb1b75041",
+      "date": 1694519387748
+    },
+    {
+      "id": "a0b373ca05f9c4e8",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "6a4d1f8615e3d6cf",
+        "c91ac14153bfe422",
+        "9ecce0e30adbeaeb",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "e46a9bcfdb169f37",
+        "78a3f281e95e322a",
+        "e15dabd4da9bbe7d",
+        "d686cf64874c1be4",
+        "31c1bc0714c884c4",
+        "575744cbb1b75041",
+        "cf2b39084ad70223",
+        "3de515f363775178",
+        "a0b373ca05f9c4e8"
+      ],
+      "date": 1694519390648
+    },
+    {
+      "type": "edit",
+      "id": "6a4d1f8615e3d6cf",
+      "item": {
+        "type": "paragraph",
+        "id": "6a4d1f8615e3d6cf",
+        "text": "This function generates an HTML anchor (<a>) element for a given title. The title is provided as an argument."
+      },
+      "date": 1694519444869
+    },
+    {
+      "type": "edit",
+      "id": "9ecce0e30adbeaeb",
+      "item": {
+        "type": "paragraph",
+        "id": "9ecce0e30adbeaeb",
+        "text": "https://blog.dreyeck.ch/federated-wiki.html"
+      },
+      "date": 1694519499334
+    },
+    {
+      "type": "add",
+      "id": "676f099e0576938a",
+      "item": {
+        "type": "paragraph",
+        "id": "676f099e0576938a",
+        "text": "Regarding title asSlug see source view of [http://css-spikes.dbbs.co/hello.fed.wiki/ css-spikes.dbbs.co], line 16:"
+      },
+      "after": "9ecce0e30adbeaeb",
+      "date": 1694519502597
+    },
+    {
+      "type": "edit",
+      "id": "9ecce0e30adbeaeb",
+      "item": {
+        "type": "paragraph",
+        "id": "9ecce0e30adbeaeb",
+        "text": "Example:\nIf title is \"Federated Wiki\", renderWikiLink will generate an anchor tag like <a href=\"/federated-wiki\">Federated Wiki</a>. https://blog.dreyeck.ch/federated-wiki.html"
+      },
+      "date": 1694519545927
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8e32eb53a8b00dea"
+      },
+      "id": "8e32eb53a8b00dea",
+      "type": "add",
+      "after": "a0b373ca05f9c4e8",
+      "date": 1694519571934
+    },
+    {
+      "id": "8e32eb53a8b00dea",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "6a4d1f8615e3d6cf",
+        "c91ac14153bfe422",
+        "9ecce0e30adbeaeb",
+        "8e32eb53a8b00dea",
+        "676f099e0576938a",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "e46a9bcfdb169f37",
+        "78a3f281e95e322a",
+        "e15dabd4da9bbe7d",
+        "d686cf64874c1be4",
+        "31c1bc0714c884c4",
+        "575744cbb1b75041",
+        "cf2b39084ad70223",
+        "3de515f363775178",
+        "a0b373ca05f9c4e8"
+      ],
+      "date": 1694519586498
+    },
+    {
+      "type": "edit",
+      "id": "8e32eb53a8b00dea",
+      "item": {
+        "type": "code",
+        "id": "8e32eb53a8b00dea",
+        "text": "<a class=\"internal\" href=\"/federated-wiki.html\" data-page-name=\"federated-wiki\" title=\"view\">Federated Wiki</a>"
+      },
+      "date": 1694519589799
+    },
+    {
+      "type": "edit",
+      "id": "9ecce0e30adbeaeb",
+      "item": {
+        "type": "paragraph",
+        "id": "9ecce0e30adbeaeb",
+        "text": "Example:\nIf title is \"Federated Wiki\", renderWikiLink should generate an anchor tag like "
+      },
+      "date": 1694519601585
+    },
+    {
+      "type": "edit",
+      "id": "676f099e0576938a",
+      "item": {
+        "type": "paragraph",
+        "id": "676f099e0576938a",
+        "text": "Note: Regarding title asSlug see source view of [http://css-spikes.dbbs.co/hello.fed.wiki/ css-spikes.dbbs.co], line 16:"
+      },
+      "date": 1694519680149
+    },
+    {
+      "type": "edit",
+      "id": "676f099e0576938a",
+      "item": {
+        "type": "paragraph",
+        "id": "676f099e0576938a",
+        "text": "Note: Regarding title asSlug, see source view of [http://css-spikes.dbbs.co/hello.fed.wiki/ css-spikes.dbbs.co], line 16:"
+      },
+      "date": 1694519718915
+    },
+    {
+      "type": "edit",
+      "id": "9ecce0e30adbeaeb",
+      "item": {
+        "type": "paragraph",
+        "id": "9ecce0e30adbeaeb",
+        "text": "Example:\nIf title is \"Federated Wiki\", renderWikiLink should generate an [[Internal Link]], an anchor tag like "
+      },
+      "date": 1694519791388
+    },
+    {
+      "type": "edit",
+      "id": "e46a9bcfdb169f37",
+      "item": {
+        "type": "paragraph",
+        "id": "e46a9bcfdb169f37",
+        "text": "The [[Render Story]] function  is responsible for rendering a Story item into HTML format. It currently calls the paragraphTextAsList function in case of a story item type paragraph."
+      },
+      "date": 1694519882923
+    },
+    {
+      "type": "edit",
+      "id": "e46a9bcfdb169f37",
+      "item": {
+        "type": "paragraph",
+        "id": "e46a9bcfdb169f37",
+        "text": "The [[Render Story]] function  is responsible for rendering a Story item into HTML format. It currently calls the paragraphTextAsList function in case of Paragraph type item"
+      },
+      "date": 1694519954908
+    },
+    {
+      "type": "edit",
+      "id": "e46a9bcfdb169f37",
+      "item": {
+        "type": "paragraph",
+        "id": "e46a9bcfdb169f37",
+        "text": "The [[Render Story]] function  is responsible for rendering a Story item into HTML format. It currently calls the paragraphTextAsList function in case of a Paragraph type item."
+      },
+      "date": 1694519978569
+    },
+    {
+      "type": "edit",
+      "id": "e46a9bcfdb169f37",
+      "item": {
+        "type": "paragraph",
+        "id": "e46a9bcfdb169f37",
+        "text": "The [[Render Story]] function  is responsible for rendering a Story item into HTML format. Here we focus on Paragraph type items. It currently calls the paragraphTextAsList function in case of a Paragraph type item."
+      },
+      "date": 1694520067916
+    },
+    {
+      "type": "edit",
+      "id": "e46a9bcfdb169f37",
+      "item": {
+        "type": "paragraph",
+        "id": "e46a9bcfdb169f37",
+        "text": "The [[Render Story]] function  is responsible for rendering a Story item into HTML format. Here we focus on Paragraph type items."
+      },
+      "date": 1694520101188
+    },
+    {
+      "type": "add",
+      "id": "9856a1773e70f3b0",
+      "item": {
+        "type": "paragraph",
+        "id": "9856a1773e70f3b0",
+        "text": "or a Paragraph type, it processes the paragraph's text field."
+      },
+      "after": "e46a9bcfdb169f37",
+      "date": 1694520101855
+    },
+    {
+      "type": "edit",
+      "id": "9856a1773e70f3b0",
+      "item": {
+        "type": "paragraph",
+        "id": "9856a1773e70f3b0",
+        "text": "For a Paragraph type, it processes the paragraph's text field."
+      },
+      "date": 1694520105270
+    },
+    {
+      "type": "add",
+      "id": "0b36c39c41045fd1",
+      "item": {
+        "type": "paragraph",
+        "id": "0b36c39c41045fd1",
+        "text": "It applies paragraphTextAsList to paragraph.text, which converts the text into a list of strings."
+      },
+      "after": "9856a1773e70f3b0",
+      "date": 1694520155379
+    },
+    {
+      "type": "add",
+      "id": "610f7d7a564dc2be",
+      "item": {
+        "type": "paragraph",
+        "id": "610f7d7a564dc2be",
+        "text": "Then, it maps renderWikiLink over this list of strings. This means it applies renderWikiLink to each string in the list."
+      },
+      "after": "0b36c39c41045fd1",
+      "date": 1694520158168
+    },
+    {
+      "type": "add",
+      "id": "8d1b6c9c354a35b9",
+      "item": {
+        "type": "paragraph",
+        "id": "8d1b6c9c354a35b9",
+        "text": "Finally, it wraps the resulting list of anchor elements in an HTML paragraph (<p>) element."
+      },
+      "after": "610f7d7a564dc2be",
+      "date": 1694520158676
+    },
+    {
+      "id": "78a3f281e95e322a",
+      "type": "move",
+      "order": [
+        "699d6c59b4d3efe7",
+        "6a4d1f8615e3d6cf",
+        "c91ac14153bfe422",
+        "9ecce0e30adbeaeb",
+        "8e32eb53a8b00dea",
+        "676f099e0576938a",
+        "c13d9674afb78d8d",
+        "6efe137f234e1f68",
+        "e46a9bcfdb169f37",
+        "9856a1773e70f3b0",
+        "0b36c39c41045fd1",
+        "78a3f281e95e322a",
+        "610f7d7a564dc2be",
+        "8d1b6c9c354a35b9",
+        "e15dabd4da9bbe7d",
+        "d686cf64874c1be4",
+        "31c1bc0714c884c4",
+        "575744cbb1b75041",
+        "cf2b39084ad70223",
+        "3de515f363775178",
+        "a0b373ca05f9c4e8"
+      ],
+      "date": 1694520186079
+    },
+    {
+      "type": "add",
+      "id": "5503853107d15a9d",
+      "item": {
+        "type": "paragraph",
+        "id": "5503853107d15a9d",
+        "text": "Example:\nSuppose you have a Paragraph with text equal to \"This is a [[sample link]] in a paragraph\". The renderStory function will:\nApply paragraphTextAsList and convert the text into [\"This is a [[sample link]] in a paragraph\"].\nApply renderWikiLink to each element in the list, generating HTML anchor elements for the link. This would result in something like [\"This is a <a href=\\\"/sample-link\\\">sample link</a> in a paragraph\"].\nWrap this list in an HTML paragraph element, resulting in <p>This is a <a href=\"/sample-link\">sample link</a> in a paragraph</p>."
+      },
+      "after": "31c1bc0714c884c4",
+      "date": 1694520261898
+    },
+    {
+      "type": "edit",
+      "id": "5503853107d15a9d",
+      "item": {
+        "type": "paragraph",
+        "id": "5503853107d15a9d",
+        "text": "Example:\nSuppose you have a Paragraph with text equal to \"This is a [[sample link]] in a paragraph\". The renderStory function will:"
+      },
+      "date": 1694520298950
+    },
+    {
+      "type": "add",
+      "id": "a9135440580aeacf",
+      "item": {
+        "type": "paragraph",
+        "id": "a9135440580aeacf",
+        "text": "Apply paragraphTextAsList and convert the text into [\"This is a [[sample link]] in a paragraph\"].\nApply renderWikiLink to each element in the list,"
+      },
+      "after": "5503853107d15a9d",
+      "date": 1694520301871
+    },
+    {
+      "type": "edit",
+      "id": "a9135440580aeacf",
+      "item": {
+        "type": "paragraph",
+        "id": "a9135440580aeacf",
+        "text": "Apply paragraphTextAsList and convert the text into [\"This is a [[sample link]] in a paragraph\"]."
+      },
+      "date": 1694520312195
+    },
+    {
+      "type": "add",
+      "id": "e59d103792be5e0f",
+      "item": {
+        "type": "paragraph",
+        "id": "e59d103792be5e0f",
+        "text": "Apply renderWikiLink to each element in the list, generating HTML anchor elements for the link. This would result in something like [\"This is a <a href=\\\"/sample-link\\\">sample link</a> in a paragraph\"]."
+      },
+      "after": "a9135440580aeacf",
+      "date": 1694520315579
+    },
+    {
+      "type": "add",
+      "id": "29fe4541ade1b5b9",
+      "item": {
+        "type": "paragraph",
+        "id": "29fe4541ade1b5b9",
+        "text": "Wrap this list in an HTML paragraph element, resulting in <p>This is a <a href=\"/sample-link\">sample link</a> in a paragraph</p>."
+      },
+      "after": "e59d103792be5e0f",
+      "date": 1694520316137
+    },
+    {
+      "type": "edit",
+      "id": "e59d103792be5e0f",
+      "item": {
+        "type": "paragraph",
+        "id": "e59d103792be5e0f",
+        "text": "Apply renderWikiLink to each element in the list, generating HTML anchor elements for the link. This should result in something like [\"This is a <a href=\"/sample-link.html\">sample link</a> in a paragraph\"]."
+      },
+      "date": 1694520479813
+    },
+    {
+      "type": "edit",
+      "id": "29fe4541ade1b5b9",
+      "item": {
+        "type": "paragraph",
+        "id": "29fe4541ade1b5b9",
+        "text": "Wrap this list in an HTML paragraph element, resulting in <p>This is a <a href=\"/sample-link.html\">sample link</a> in a paragraph</p>."
+      },
+      "date": 1694520544987
+    },
+    {
+      "type": "add",
+      "id": "ae3824befd22c524",
+      "item": {
+        "type": "paragraph",
+        "id": "ae3824befd22c524",
+        "text": "In summary, renderStory utilizes paragraphTextAsList to convert the text of a paragraph-like item into a list of strings. It then applies renderWikiLink to each string in the list to generate HTML anchor elements for wiki links. This allows for the rendering of paragraphs with clickable wiki links."
+      },
+      "after": "3de515f363775178",
+      "date": 1694520605654
+    },
+    {
+      "type": "add",
+      "id": "e6371bec6ef179de",
+      "item": {
+        "type": "paragraph",
+        "id": "e6371bec6ef179de",
+        "text": "To render only the links enclosed in double square brackets as anchors, you'll need to implement a parser/renderer for wiki links. This parser should be able to identify the links within the text and convert them into HTML anchor elements."
+      },
+      "after": "a0b373ca05f9c4e8",
+      "date": 1694520644230
+    },
+    {
+      "type": "add",
+      "id": "2e91307a27b7c933",
+      "item": {
+        "type": "paragraph",
+        "id": "2e91307a27b7c933",
+        "text": "Here's how you can do it:"
+      },
+      "after": "e6371bec6ef179de",
+      "date": 1694520662420
+    },
+    {
+      "type": "add",
+      "id": "0c7cd20c1f2fee43",
+      "item": {
+        "type": "paragraph",
+        "id": "0c7cd20c1f2fee43",
+        "text": "1. Create a Parser/Renderer for Wiki Links:\nYou'll need a function that can identify and convert wiki links within a string. This function should take a string as input and return a modified string with the links converted to HTML anchor elements.\nFor example, you might create a function called parseWikiLinks:"
+      },
+      "after": "2e91307a27b7c933",
+      "date": 1694520728154
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8291647ea71c6b3b"
+      },
+      "id": "8291647ea71c6b3b",
+      "type": "add",
+      "after": "0c7cd20c1f2fee43",
+      "date": 1694520736492
+    },
+    {
+      "type": "edit",
+      "id": "8291647ea71c6b3b",
+      "item": {
+        "type": "code",
+        "id": "8291647ea71c6b3b",
+        "text": "parseWikiLinks : String -> Html msg\n"
+      },
+      "date": 1694520738336
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b52694bb168dcb48"
+      },
+      "id": "b52694bb168dcb48",
+      "type": "add",
+      "after": "8291647ea71c6b3b",
+      "date": 1694520760519
+    },
+    {
+      "type": "edit",
+      "id": "b52694bb168dcb48",
+      "item": {
+        "type": "paragraph",
+        "id": "b52694bb168dcb48",
+        "text": "This function would take a string and return an Html element representing the parsed content.\nModify rende"
+      },
+      "date": 1694520761917
+    },
+    {
+      "type": "edit",
+      "id": "b52694bb168dcb48",
+      "item": {
+        "type": "paragraph",
+        "id": "b52694bb168dcb48",
+        "text": "This function would take a string and return an Html element representing the parsed content."
+      },
+      "date": 1694520779089
+    },
+    {
+      "type": "add",
+      "id": "710b3145dc7153b4",
+      "item": {
+        "type": "paragraph",
+        "id": "710b3145dc7153b4",
+        "text": "2. Modify renderStory:\nIn your renderStory function, when dealing with a Paragraph item, apply the parseWikiLinks function to the paragraph's text."
+      },
+      "after": "b52694bb168dcb48",
+      "date": 1694520785919
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "200cf15b098cac8e"
+      },
+      "id": "200cf15b098cac8e",
+      "type": "add",
+      "after": "710b3145dc7153b4",
+      "date": 1694520800753
+    },
+    {
+      "type": "edit",
+      "id": "200cf15b098cac8e",
+      "item": {
+        "type": "code",
+        "id": "200cf15b098cac8e",
+        "text": "renderStory : Story -> Html msg\nrenderStory story =\n    case story of\n        Paragraph paragraph ->\n            case paragraph.type_ of\n                \"paragraph\" ->\n                    let\n                        renderedText =\n                            paragraph.text\n                                |> parseWikiLinks\n                    in\n                    Html.p []\n                        [ text renderedText ]\n\n                _ ->\n                    Html.text (\"⚠️ INFO Paragraph – Unknown story item type: \" ++ paragraph.type_)\n\n        -- Handle other cases as needed...\n"
+      },
+      "date": 1694520802549
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "03cefc93ebabb6e7"
+      },
+      "id": "03cefc93ebabb6e7",
+      "type": "add",
+      "after": "200cf15b098cac8e",
+      "date": 1694520842694
+    },
+    {
+      "type": "edit",
+      "id": "03cefc93ebabb6e7",
+      "item": {
+        "type": "paragraph",
+        "id": "03cefc93ebabb6e7",
+        "text": "The parseWikiLinks function will process the text and return a modified string with wiki links converted to HTML anchors. You'll need to define this function separately.\nDefine parseWikiLinks:"
+      },
+      "date": 1694520844981
+    },
+    {
+      "type": "edit",
+      "id": "03cefc93ebabb6e7",
+      "item": {
+        "type": "paragraph",
+        "id": "03cefc93ebabb6e7",
+        "text": "The parseWikiLinks function will process the text and return a modified string with wiki links converted to HTML anchors. You'll need to define this function separately."
+      },
+      "date": 1694520858075
+    },
+    {
+      "type": "add",
+      "id": "0d5134140013f650",
+      "item": {
+        "type": "paragraph",
+        "id": "0d5134140013f650",
+        "text": "3. Define parseWikiLinks:"
+      },
+      "after": "03cefc93ebabb6e7",
+      "date": 1694520859192
+    },
+    {
+      "type": "edit",
+      "id": "0d5134140013f650",
+      "item": {
+        "type": "paragraph",
+        "id": "0d5134140013f650",
+        "text": "3. Define parseWikiLinks: In this function, you'll need to implement the logic for identifying and converting wiki links into HTML anchor elements. This could involve using regular expressions, string manipulation, or any other parsing technique you find suitable."
+      },
+      "date": 1694520867518
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "35ee5148f4759e82"
+      },
+      "id": "35ee5148f4759e82",
+      "type": "add",
+      "after": "0d5134140013f650",
+      "date": 1694520881249
+    },
+    {
+      "type": "edit",
+      "id": "35ee5148f4759e82",
+      "item": {
+        "type": "code",
+        "id": "35ee5148f4759e82",
+        "text": "parseWikiLinks : String -> Html msg\nparseWikiLinks input =\n    -- Implement the logic to identify and convert wiki links\n    -- Return an HTML element representing the parsed content\n"
+      },
+      "date": 1694520883103
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9373e8cc1df94b4f"
+      },
+      "id": "9373e8cc1df94b4f",
+      "type": "add",
+      "after": "35ee5148f4759e82",
+      "date": 1694520893118
+    },
+    {
+      "type": "edit",
+      "id": "9373e8cc1df94b4f",
+      "item": {
+        "type": "paragraph",
+        "id": "9373e8cc1df94b4f",
+        "text": "Inside this function, you'll need to iterate over the input string, identify links enclosed in double square brackets ([[...]]), and replace them with corresponding HTML anchor elements."
+      },
+      "date": 1694520894470
+    },
+    {
+      "type": "add",
+      "id": "19c4ea43f54c7cfb",
+      "item": {
+        "type": "paragraph",
+        "id": "19c4ea43f54c7cfb",
+        "text": "Remember, the specific implementation of parseWikiLinks will depend on your exact requirements and how your wiki links are formatted in the input text. You may need to use regular expressions or other parsing techniques to achieve the desired result. – "
+      },
+      "after": "9373e8cc1df94b4f",
+      "date": 1694520910547
+    },
+    {
+      "type": "edit",
+      "id": "19c4ea43f54c7cfb",
+      "item": {
+        "type": "paragraph",
+        "id": "19c4ea43f54c7cfb",
+        "text": "Remember, the specific implementation of parseWikiLinks will depend on your exact requirements and how your wiki links are formatted in the input text. You may need to use regular expressions or other parsing techniques to achieve the desired result. (ChatGPT August 3 Version)"
+      },
+      "date": 1694520926107
+    },
+    {
+      "id": "e7d883f999e07c1a",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "e7d883f999e07c1a",
+        "text": "⇒ [[MiniLatex]]: a Parser-Renderer for a Subset of LaTeX [https://jxxcarlson.github.io/pdf/minilatex-acm.pdf pdf] ⇐ [[Do Internal Link]]"
+      },
+      "after": "19c4ea43f54c7cfb",
+      "attribution": {
+        "page": "2023-09-12"
+      },
+      "date": 1694521682896
+    },
+    {
+      "type": "fork",
+      "date": 1694521686026
+    },
+    {
+      "type": "edit",
+      "id": "e7d883f999e07c1a",
+      "item": {
+        "type": "paragraph",
+        "id": "e7d883f999e07c1a",
+        "text": "⇒ [[MiniLatex]]: a Parser-Renderer for a Subset of LaTeX [https://jxxcarlson.github.io/pdf/minilatex-acm.pdf pdf] ⇐ [[Do Internal Link]]"
+      },
+      "date": 1694521938832
+    },
+    {
+      "type": "fork",
+      "date": 1694522026997
+    },
+    {
+      "id": "9f8eec9c6c71f96a",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "9f8eec9c6c71f96a",
+        "site": "ward.bay.wiki.org",
+        "slug": "context",
+        "title": "Context",
+        "text": "An internal link's Context provides a path to be searched when the link is clicked. The origin, the remote site, the reference cite and forks in the journal all contribute to the context."
+      },
+      "after": "19c4ea43f54c7cfb",
+      "attribution": {
+        "page": "Parse Wiki-Style Links"
+      },
+      "date": 1694522158633
+    },
+    {
+      "id": "9f8eec9c6c71f96a",
+      "type": "remove",
+      "removedTo": {
+        "page": "Between Content and Context"
+      },
+      "date": 1694522200807
+    },
+    {
+      "type": "fork",
+      "date": 1694522313449
+    },
+    {
+      "type": "edit",
+      "id": "6a4d1f8615e3d6cf",
+      "item": {
+        "type": "paragraph",
+        "id": "6a4d1f8615e3d6cf",
+        "text": "This function generates an HTML anchor (<a>) element for a given title. The title is provided as an argument. [https://github.com/dreyeck/blog/commit/5ebb6a0bd639a40abd516645281a4e39982ef630 commit]"
+      },
+      "date": 1694522808392
+    }
+  ]
+}

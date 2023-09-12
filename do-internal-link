@@ -1,0 +1,729 @@
+{
+  "title": "Do Internal Link",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "fd45b464b141876e",
+      "text": "The wiki global offers plugins an implementation of [[Collaborative Link]] called doInternalLink."
+    },
+    {
+      "type": "paragraph",
+      "id": "d899f844322a3b01",
+      "text": "We have noticed that Graphviz diagrams don't resolve links when rendered in a ghost page. Is this expected behavior, we inquire."
+    },
+    {
+      "type": "paragraph",
+      "id": "f0e6a81f29bfa4ca",
+      "text": "Graphviz 0.10.0 did call this function. [https://github.com/dobbs/wiki-plugin-graphviz/blob/2391fa8e40fc4b0014e283ba4f66556374d967e4/client/graphviz.js#L449 github]"
+    },
+    {
+      "type": "code",
+      "id": "949a6d15e936f942",
+      "text": "wiki.doInternalLink(title, $page)"
+    },
+    {
+      "type": "paragraph",
+      "id": "154ef23939cdffd9",
+      "text": "We will trace through this call and establish where the collaborative resolution takes place."
+    },
+    {
+      "type": "paragraph",
+      "id": "569e62447a0a8f50",
+      "text": "The wiki global initialization pulls this function from links.coffee. [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/wiki.coffee#L53 github]"
+    },
+    {
+      "type": "code",
+      "id": "9e94a7de9a936bc3",
+      "text": "wiki.doInternalLink = link.doInternalLink"
+    },
+    {
+      "type": "paragraph",
+      "id": "f4fe2057b062289d",
+      "text": "Link.coffee delegates to its own showPage and creatPage which allocates panel space in the lineup and runs the primitive refresh.cycle. [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/link.coffee#L30 github]"
+    },
+    {
+      "type": "code",
+      "id": "83b785b793566691",
+      "text": "showPage(slug, site, title)"
+    },
+    {
+      "type": "paragraph",
+      "id": "19b26fa4c89102ab",
+      "text": "Link's showPage creates the panel dom structure and guesses where the page will be found. This will be revised later in the collaborative linking process. [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/link.coffee#L19 github]"
+    },
+    {
+      "type": "code",
+      "id": "4fc15055b23fcda0",
+      "text": "class=\"favicon\" src=\"#{wiki.site(site).flag()}\""
+    },
+    {
+      "type": "paragraph",
+      "id": "2547d4a9f4a54b0e",
+      "text": "Refresh.coffee assembles a pageInfo structure and then calls pageHandler's get function with success and fail callbacks. [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/refresh.coffee#L451 github]"
+    },
+    {
+      "type": "code",
+      "id": "0c2f32fdeb2a023d",
+      "text": "pageHandler.get\n  whenGotten: whenGotten\n  whenNotGotten: whenNotGotten\n  pageInformation: pageInformation"
+    },
+    {
+      "type": "paragraph",
+      "id": "83edb18812b6f587",
+      "text": "PageHandler.coffee enters the recursive enumeration of possible sites mysteriously constructed as pageHander.context. [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/pageHandler.coffee#L89 github]"
+    },
+    {
+      "type": "pagefold",
+      "id": "261a10877f7e618b",
+      "text": "."
+    },
+    {
+      "type": "markdown",
+      "id": "74c7ca18253c2312",
+      "text": "It is worth comparing how graphviz is calling `doInternalLink()` with how it gets call in the client.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "a39c5db2b952d33a",
+      "text": "In the client, clicking on a link is handled in legacy.coffee (lines 178-184):"
+    },
+    {
+      "type": "code",
+      "id": "61a5bf58bdf4727c",
+      "text": ".delegate '.internal', 'click', (e) ->\n  $link = $(e.target)\n  title = $link.text() or $link.data 'pageName'\n  # ensure that name is a string (using string interpolation)\n  title = \"#{title}\"\n  pageHandler.context = $(e.target).attr('title').split(' => ')\n  finishClick e, title"
+    },
+    {
+      "type": "markdown",
+      "id": "cef258ea4b8d6e62",
+      "text": "with `finishClick()` making the call to `doInternalLink()`"
+    },
+    {
+      "type": "code",
+      "id": "ffc16daf1473b6c3",
+      "text": "finishClick = (e, name) ->\n  e.preventDefault()\n  page = $(e.target).parents('.page') unless e.shiftKey\n  link.doInternalLink name, page, $(e.target).data('site')\n  return false"
+    },
+    {
+      "type": "markdown",
+      "id": "47d5c5fbb31f7337",
+      "text": "This in turn calls `showPage()`, which adds a panel for the dom. Which gets picked up by refresh, and a call made to `pageHandler.get()`.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "d2f3a03673ce0db9",
+      "text": "In `pageHandler.get()`, if the context is not already set it will get set to `view`. Which is then used in the recursive enumeration of possible sites.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "cc21695b72c68356",
+      "text": "**IMPORTANT** If the context is not set before calling `doInternalLink()` it will either get set to `view` or use any value that was set by a previous call. *this explains why if the page is found in the neighbourhood, and opened. Which is why a click that previously opened a ghost page will might find one."
+    },
+    {
+      "type": "markdown",
+      "id": "cfa2b3eaf678f627",
+      "text": "Anywhere that a call to `doInternalLink()` is made without setting `pageHandler.context` first will end up using the value set elsewhere."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Do Internal Link",
+        "story": []
+      },
+      "date": 1641877097131
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fd45b464b141876e"
+      },
+      "id": "fd45b464b141876e",
+      "type": "add",
+      "date": 1641877101020
+    },
+    {
+      "type": "edit",
+      "id": "fd45b464b141876e",
+      "item": {
+        "type": "paragraph",
+        "id": "fd45b464b141876e",
+        "text": "The wiki global offers plugins an implementation of [[Collaborative Links]] called doInternalLink."
+      },
+      "date": 1641877149078
+    },
+    {
+      "type": "edit",
+      "id": "fd45b464b141876e",
+      "item": {
+        "type": "paragraph",
+        "id": "fd45b464b141876e",
+        "text": "The wiki global offers plugins an implementation of [[Collaborative Link]] called doInternalLink."
+      },
+      "date": 1641877161227
+    },
+    {
+      "type": "add",
+      "id": "d899f844322a3b01",
+      "item": {
+        "type": "paragraph",
+        "id": "d899f844322a3b01",
+        "text": "We have noticed that Graphviz diagrams don't resolve links when rendered in a ghost page. Is this expected behavior, we inquire."
+      },
+      "after": "fd45b464b141876e",
+      "date": 1641877260616
+    },
+    {
+      "type": "add",
+      "id": "f0e6a81f29bfa4ca",
+      "item": {
+        "type": "paragraph",
+        "id": "f0e6a81f29bfa4ca",
+        "text": "Graphviz 0.10.0 did call this function. [https://github.com/dobbs/wiki-plugin-graphviz/blob/2391fa8e40fc4b0014e283ba4f66556374d967e4/client/graphviz.js#L449 github]"
+      },
+      "after": "d899f844322a3b01",
+      "date": 1641877351997
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "154ef23939cdffd9"
+      },
+      "id": "154ef23939cdffd9",
+      "type": "add",
+      "after": "f0e6a81f29bfa4ca",
+      "date": 1641877378605
+    },
+    {
+      "type": "edit",
+      "id": "154ef23939cdffd9",
+      "item": {
+        "type": "paragraph",
+        "id": "154ef23939cdffd9",
+        "text": "We will trace through this call and establish where the collaborative resolution takes place."
+      },
+      "date": 1641877431919
+    },
+    {
+      "type": "add",
+      "id": "569e62447a0a8f50",
+      "item": {
+        "type": "paragraph",
+        "id": "569e62447a0a8f50",
+        "text": "The wiki global initialization pulls this function from links.coffee. [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/wiki.coffee#L53 github]"
+      },
+      "after": "154ef23939cdffd9",
+      "date": 1641877547962
+    },
+    {
+      "type": "add",
+      "id": "f4fe2057b062289d",
+      "item": {
+        "type": "paragraph",
+        "id": "f4fe2057b062289d",
+        "text": "Link.coffee delegates to its own "
+      },
+      "after": "569e62447a0a8f50",
+      "date": 1641877874875
+    },
+    {
+      "type": "edit",
+      "id": "f4fe2057b062289d",
+      "item": {
+        "type": "paragraph",
+        "id": "f4fe2057b062289d",
+        "text": "Link.coffee delegates to its own showPage and creatPage which allocates panel space in the lineup. [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/link.coffee#L30 github]"
+      },
+      "date": 1641877932972
+    },
+    {
+      "type": "edit",
+      "id": "f4fe2057b062289d",
+      "item": {
+        "type": "paragraph",
+        "id": "f4fe2057b062289d",
+        "text": "Link.coffee delegates to its own showPage and creatPage which allocates panel space in the lineup and runs the primitive refresh.cycle. [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/link.coffee#L30 github]"
+      },
+      "date": 1641878001209
+    },
+    {
+      "type": "add",
+      "id": "19b26fa4c89102ab",
+      "item": {
+        "type": "paragraph",
+        "id": "19b26fa4c89102ab",
+        "text": "Link's showPage creates the panel dom structure and guesses where the page will be found. This will be revised later in the collaborative linking process. [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/link.coffee#L19 github]"
+      },
+      "after": "f4fe2057b062289d",
+      "date": 1641878214831
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "949a6d15e936f942"
+      },
+      "id": "949a6d15e936f942",
+      "type": "add",
+      "after": "19b26fa4c89102ab",
+      "date": 1641878269431
+    },
+    {
+      "type": "edit",
+      "id": "949a6d15e936f942",
+      "item": {
+        "type": "code",
+        "id": "949a6d15e936f942",
+        "text": "wiki.doInternalLink(title, $page)"
+      },
+      "date": 1641878272679
+    },
+    {
+      "id": "949a6d15e936f942",
+      "type": "move",
+      "order": [
+        "fd45b464b141876e",
+        "d899f844322a3b01",
+        "f0e6a81f29bfa4ca",
+        "949a6d15e936f942",
+        "154ef23939cdffd9",
+        "569e62447a0a8f50",
+        "f4fe2057b062289d",
+        "19b26fa4c89102ab"
+      ],
+      "date": 1641878275705
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9e94a7de9a936bc3"
+      },
+      "id": "9e94a7de9a936bc3",
+      "type": "add",
+      "after": "19b26fa4c89102ab",
+      "date": 1641878294244
+    },
+    {
+      "type": "edit",
+      "id": "9e94a7de9a936bc3",
+      "item": {
+        "type": "code",
+        "id": "9e94a7de9a936bc3",
+        "text": "wiki.doInternalLink = link.doInternalLink"
+      },
+      "date": 1641878297490
+    },
+    {
+      "id": "9e94a7de9a936bc3",
+      "type": "move",
+      "order": [
+        "fd45b464b141876e",
+        "d899f844322a3b01",
+        "f0e6a81f29bfa4ca",
+        "949a6d15e936f942",
+        "154ef23939cdffd9",
+        "569e62447a0a8f50",
+        "9e94a7de9a936bc3",
+        "f4fe2057b062289d",
+        "19b26fa4c89102ab"
+      ],
+      "date": 1641878300582
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "83b785b793566691"
+      },
+      "id": "83b785b793566691",
+      "type": "add",
+      "after": "19b26fa4c89102ab",
+      "date": 1641878327873
+    },
+    {
+      "type": "edit",
+      "id": "83b785b793566691",
+      "item": {
+        "type": "code",
+        "id": "83b785b793566691",
+        "text": "showPage(slug, site, title)"
+      },
+      "date": 1641878333106
+    },
+    {
+      "id": "83b785b793566691",
+      "type": "move",
+      "order": [
+        "fd45b464b141876e",
+        "d899f844322a3b01",
+        "f0e6a81f29bfa4ca",
+        "949a6d15e936f942",
+        "154ef23939cdffd9",
+        "569e62447a0a8f50",
+        "9e94a7de9a936bc3",
+        "f4fe2057b062289d",
+        "83b785b793566691",
+        "19b26fa4c89102ab"
+      ],
+      "date": 1641878336940
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4fc15055b23fcda0"
+      },
+      "id": "4fc15055b23fcda0",
+      "type": "add",
+      "after": "19b26fa4c89102ab",
+      "date": 1641878377496
+    },
+    {
+      "type": "edit",
+      "id": "4fc15055b23fcda0",
+      "item": {
+        "type": "code",
+        "id": "4fc15055b23fcda0",
+        "text": "class=\"favicon\" src=\"#{wiki.site(site).flag()}\""
+      },
+      "date": 1641878384092
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2547d4a9f4a54b0e"
+      },
+      "id": "2547d4a9f4a54b0e",
+      "type": "add",
+      "after": "4fc15055b23fcda0",
+      "date": 1641878646029
+    },
+    {
+      "type": "edit",
+      "id": "2547d4a9f4a54b0e",
+      "item": {
+        "type": "paragraph",
+        "id": "2547d4a9f4a54b0e",
+        "text": "Refresh.coffee assembles a pageInfo structure and then calls its own get function with success and fail options. [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/refresh.coffee#L451 [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/refresh.coffee#L451 github]"
+      },
+      "date": 1641878788475
+    },
+    {
+      "type": "edit",
+      "id": "2547d4a9f4a54b0e",
+      "item": {
+        "type": "paragraph",
+        "id": "2547d4a9f4a54b0e",
+        "text": "Refresh.coffee assembles a pageInfo structure and then calls its own get function with success and fail options. [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/refresh.coffee#L451 github]"
+      },
+      "date": 1641878812893
+    },
+    {
+      "type": "edit",
+      "id": "2547d4a9f4a54b0e",
+      "item": {
+        "type": "paragraph",
+        "id": "2547d4a9f4a54b0e",
+        "text": "Refresh.coffee assembles a pageInfo structure and then calls pageHandler's get function with success and fail options. [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/refresh.coffee#L451 github]"
+      },
+      "date": 1641878909220
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0c2f32fdeb2a023d"
+      },
+      "id": "0c2f32fdeb2a023d",
+      "type": "add",
+      "after": "2547d4a9f4a54b0e",
+      "date": 1641878911155
+    },
+    {
+      "type": "edit",
+      "id": "0c2f32fdeb2a023d",
+      "item": {
+        "type": "code",
+        "id": "0c2f32fdeb2a023d",
+        "text": "pageHandler.get\n  whenGotten: whenGotten\n  whenNotGotten: whenNotGotten\n  pageInformation: pageInformation"
+      },
+      "date": 1641878932877
+    },
+    {
+      "type": "edit",
+      "id": "2547d4a9f4a54b0e",
+      "item": {
+        "type": "paragraph",
+        "id": "2547d4a9f4a54b0e",
+        "text": "Refresh.coffee assembles a pageInfo structure and then calls pageHandler's get function with success and fail callbacks. [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/refresh.coffee#L451 github]"
+      },
+      "date": 1641878988585
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "83edb18812b6f587"
+      },
+      "id": "83edb18812b6f587",
+      "type": "add",
+      "after": "0c2f32fdeb2a023d",
+      "date": 1641879422957
+    },
+    {
+      "type": "edit",
+      "id": "83edb18812b6f587",
+      "item": {
+        "type": "paragraph",
+        "id": "83edb18812b6f587",
+        "text": "PageHandler.coffee enters the recursive enumeration of possible sites. [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/pageHandler.coffee#L89 github]"
+      },
+      "date": 1641879515224
+    },
+    {
+      "type": "edit",
+      "id": "83edb18812b6f587",
+      "item": {
+        "type": "paragraph",
+        "id": "83edb18812b6f587",
+        "text": "PageHandler.coffee enters the recursive enumeration of possible sites mysteriously constructed as pageHander.context. [https://github.com/fedwiki/wiki-client/blob/9ab91291c067bf09f77ba3d51dd3c8e7549b4bfd/lib/pageHandler.coffee#L89 github]"
+      },
+      "date": 1641879882036
+    },
+    {
+      "type": "fork",
+      "site": "ward.asia.wiki.org"
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "261a10877f7e618b"
+      },
+      "id": "261a10877f7e618b",
+      "type": "add",
+      "after": "83edb18812b6f587",
+      "date": 1641912612426
+    },
+    {
+      "type": "edit",
+      "id": "261a10877f7e618b",
+      "item": {
+        "type": "pagefold",
+        "id": "261a10877f7e618b",
+        "text": "."
+      },
+      "date": 1641912621557
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "74c7ca18253c2312"
+      },
+      "id": "74c7ca18253c2312",
+      "type": "add",
+      "after": "261a10877f7e618b",
+      "date": 1641912632063
+    },
+    {
+      "type": "edit",
+      "id": "74c7ca18253c2312",
+      "item": {
+        "type": "factory",
+        "id": "74c7ca18253c2312",
+        "text": "It is worth comparing how graphviz is calling `doInternalLink()` with"
+      },
+      "date": 1641912748545
+    },
+    {
+      "type": "edit",
+      "id": "74c7ca18253c2312",
+      "item": {
+        "type": "markdown",
+        "id": "74c7ca18253c2312",
+        "text": "It is worth comparing how graphviz is calling `doInternalLink()` with how it gets call in the client.\n"
+      },
+      "date": 1641912766634
+    },
+    {
+      "type": "add",
+      "id": "a39c5db2b952d33a",
+      "item": {
+        "type": "markdown",
+        "id": "a39c5db2b952d33a",
+        "text": "In the client, clicking on a link is handled in legacy.coffee:"
+      },
+      "after": "74c7ca18253c2312",
+      "date": 1641912829516
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "61a5bf58bdf4727c"
+      },
+      "id": "61a5bf58bdf4727c",
+      "type": "add",
+      "after": "a39c5db2b952d33a",
+      "date": 1641912831039
+    },
+    {
+      "type": "edit",
+      "id": "61a5bf58bdf4727c",
+      "item": {
+        "type": "code",
+        "id": "61a5bf58bdf4727c",
+        "text": ".delegate '.internal', 'click', (e) ->\n  $link = $(e.target)\n  title = $link.text() or $link.data 'pageName'\n  # ensure that name is a string (using string interpolation)\n  title = \"#{title}\"\n  pageHandler.context = $(e.target).attr('title').split(' => ')\n  finishClick e, title"
+      },
+      "date": 1641912866274
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "cef258ea4b8d6e62"
+      },
+      "id": "cef258ea4b8d6e62",
+      "type": "add",
+      "after": "61a5bf58bdf4727c",
+      "date": 1641912876030
+    },
+    {
+      "type": "edit",
+      "id": "cef258ea4b8d6e62",
+      "item": {
+        "type": "paragraph",
+        "id": "cef258ea4b8d6e62",
+        "text": "with `finishClick()` making the call to `doInternalLink()`"
+      },
+      "date": 1641912930153
+    },
+    {
+      "type": "edit",
+      "id": "cef258ea4b8d6e62",
+      "item": {
+        "type": "markdown",
+        "id": "cef258ea4b8d6e62",
+        "text": "with `finishClick()` making the call to `doInternalLink()`"
+      },
+      "date": 1641912934861
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ffc16daf1473b6c3"
+      },
+      "id": "ffc16daf1473b6c3",
+      "type": "add",
+      "after": "cef258ea4b8d6e62",
+      "date": 1641912946371
+    },
+    {
+      "type": "edit",
+      "id": "ffc16daf1473b6c3",
+      "item": {
+        "type": "code",
+        "id": "ffc16daf1473b6c3",
+        "text": "finishClick = (e, name) ->\n  e.preventDefault()\n  page = $(e.target).parents('.page') unless e.shiftKey\n  link.doInternalLink name, page, $(e.target).data('site')\n  return false"
+      },
+      "date": 1641912966574
+    },
+    {
+      "type": "edit",
+      "id": "a39c5db2b952d33a",
+      "item": {
+        "type": "markdown",
+        "id": "a39c5db2b952d33a",
+        "text": "In the client, clicking on a link is handled in legacy.coffee (lines 178-184):"
+      },
+      "date": 1641913096763
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "47d5c5fbb31f7337"
+      },
+      "id": "47d5c5fbb31f7337",
+      "type": "add",
+      "after": "ffc16daf1473b6c3",
+      "date": 1641913115292
+    },
+    {
+      "type": "edit",
+      "id": "47d5c5fbb31f7337",
+      "item": {
+        "type": "markdown",
+        "id": "47d5c5fbb31f7337",
+        "text": "As above, this will eventually get handled by `pageHandler.get()`"
+      },
+      "date": 1641913281987
+    },
+    {
+      "type": "edit",
+      "id": "47d5c5fbb31f7337",
+      "item": {
+        "type": "markdown",
+        "id": "47d5c5fbb31f7337",
+        "text": "This in turn calls `showPage()`, which adds a panel for the dom. Which gets picked up by refresh, and a call made to `pageHandler.get()`.\n"
+      },
+      "date": 1641913555378
+    },
+    {
+      "type": "add",
+      "id": "d2f3a03673ce0db9",
+      "item": {
+        "type": "markdown",
+        "id": "d2f3a03673ce0db9",
+        "text": "In `pageHandler.get()`, if the context is not already set it will get set to `view`.\n"
+      },
+      "after": "47d5c5fbb31f7337",
+      "date": 1641913694216
+    },
+    {
+      "type": "add",
+      "id": "cc21695b72c68356",
+      "item": {
+        "type": "markdown",
+        "id": "cc21695b72c68356",
+        "text": "**IMPORTANT** If the context is not set before calling `doInternalLink()` it will either get set to `view` or use any value that was set by a previous call. *this explains why if the page is found in the neighbourhood, and opened. Which is why a click that previously opened a ghost page will might find one."
+      },
+      "after": "d2f3a03673ce0db9",
+      "date": 1641914490556
+    },
+    {
+      "type": "edit",
+      "id": "d2f3a03673ce0db9",
+      "item": {
+        "type": "markdown",
+        "id": "d2f3a03673ce0db9",
+        "text": "In `pageHandler.get()`, if the context is not already set it will get set to `view`. Which is then used in the recursive enumeration of possible sites.\n"
+      },
+      "date": 1641914563491
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "cfa2b3eaf678f627"
+      },
+      "id": "cfa2b3eaf678f627",
+      "type": "add",
+      "after": "cc21695b72c68356",
+      "date": 1641914715550
+    },
+    {
+      "type": "edit",
+      "id": "cfa2b3eaf678f627",
+      "item": {
+        "type": "factory",
+        "id": "cfa2b3eaf678f627",
+        "text": "Any call to "
+      },
+      "date": 1641914745416
+    },
+    {
+      "type": "edit",
+      "id": "cfa2b3eaf678f627",
+      "item": {
+        "type": "markdown",
+        "id": "cfa2b3eaf678f627",
+        "text": "Anywhere that a call to `doInternalLink()` is made without setting `pageHandler.context` first will end up using the value set elsewhere."
+      },
+      "date": 1641914914812
+    },
+    {
+      "type": "fork",
+      "site": "goals.pod.rodwell.me",
+      "date": 1694252455688
+    }
+  ]
+}
