@@ -1,0 +1,902 @@
+{
+  "title": "Enrich Kumu SVG",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "484e092159df2d01",
+      "text": "Using [[Enrich Arrows SVG]] as a starting place, here we offer a workflow to enrich the SVG export from Kumu with wiki internal links. "
+    },
+    {
+      "type": "frame",
+      "id": "6cf52409eec3988c",
+      "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/esm.html\nHEIGHT 45"
+    },
+    {
+      "type": "paragraph",
+      "id": "caa626ac93aa7d4c",
+      "text": "The form works fine if you upload the exported SVG from Kumu as a wiki asset, and use the link to that in the form."
+    },
+    {
+      "type": "pagefold",
+      "id": "2e2f995fc1c110d4",
+      "text": "."
+    },
+    {
+      "type": "paragraph",
+      "id": "af8bd0dbda74a79c",
+      "text": "We annotate the code which enriches the Kumu SVG."
+    },
+    {
+      "type": "paragraph",
+      "id": "172f54068e9f6535",
+      "text": "Import [[Frame Integration Promises]] and setup DOM helpers."
+    },
+    {
+      "type": "code",
+      "id": "93bd832d1f6a07ae",
+      "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => \n  Array.from(el.querySelectorAll(s))"
+    },
+    {
+      "type": "paragraph",
+      "id": "adb2c20f9b609000",
+      "text": "Given a Kumu SVG export URL, get the SVG DOM. We also remove the height and width attributes so browsers will scale the image to fit."
+    },
+    {
+      "type": "code",
+      "id": "cc9bd9a728534c40",
+      "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  let width = svg.getAttribute('width')\n  let height = svg.getAttribute('height')\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  svg.setAttribute(\"viewbox\", `0 0 ${width} ${height}`)\n  return svg\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "481a22c3a1b230b5",
+      "text": "Here is where we encode our understanding of the DOM structure of Kumu SVG export diagrams. We wrap specific elements in the document with annotated anchor tags that our HTML plugin interprets as internal links."
+    },
+    {
+      "type": "code",
+      "id": "e1e5da9d8b9ba061",
+      "text": "function enrich(svg) {\n  $$('text', svg)\n    .filter((item) =>\n      item.previousSibling?.tagName != 'text')\n    .forEach((item) => {\n      let text = item.textContent;\n      let curr = item\n      while (curr.nextSibling?.tagName == 'text') {\n        curr = curr.nextSibling\n        text += ' ' + curr.textContent\n      }\n      console.log(text)\n      wrapNode(item, text)\n    })\n}"
+    },
+    {
+      "type": "code",
+      "id": "b3ff0306978c0219",
+      "text": "function wrapNode(node, title) {\n  console.log(node, title)\n  let anchor = anchorFor(title)\n  let parent = node.parentNode\n  parent.insertBefore(anchor, node)\n  let curr = node\n  while (curr?.tagName == 'text') {\n    let next = curr.nextSibling\n    parent.removeChild(curr)\n    anchor.appendChild(curr)\n    curr = next\n  }\n}"
+    },
+    {
+      "type": "code",
+      "id": "bc63b8f8b6fa3a62",
+      "text": "function anchorFor(title) {\n  let anchor = document.createElementNS(\n    \"http://www.w3.org/2000/svg\", \"a\")\n  anchor.setAttribute(\"class\", \"internal\")\n  anchor.setAttribute(\"data-title\", title)\n  anchor.setAttribute(\"href\",\n    `/${asSlug(title)}.html`)\n  return anchor\n}"
+    },
+    {
+      "type": "code",
+      "id": "a4b8a9c69e908668",
+      "text": "const asSlug = title => title\n  .replace(/\\s/g, '-')\n  .replace(/[^A-Za-z0-9-]/g, '')\n  .toLowerCase()\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "7166441cbce954ee",
+      "text": "Emit the HTML form."
+    },
+    {
+      "type": "code",
+      "id": "986c06952a84c67d",
+      "text": "export async function emit(el) {\n  el.innerHTML = `\n<style>input {width: 100%; display: block;}</style>\n<input name=\"title\" type=\"text\"\n  placeholder=\"page title\">\n<input name=\"source\" type=\"text\"\n  placeholder=\"URL to svg file\">\n<button>Create</button>\n`\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "d2b365668f94c1ab",
+      "text": "Bind a click handler to the form button."
+    },
+    {
+      "type": "code",
+      "id": "5eb6b67568179aa3",
+      "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await getSvg(url)\n    enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this graph.\"},\n        {type:\"html\", text: svg.outerHTML}\n      ]\n    }, e.shiftKey)\n  }\n}"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Enrich Kumu SVG",
+        "story": [
+          {
+            "type": "paragraph",
+            "id": "484e092159df2d01",
+            "text": "Explain what this does."
+          },
+          {
+            "type": "code",
+            "id": "5eb6b67568179aa3",
+            "text": "// Code that does it.\n\nexport async function emit(el) {\n el.innerHTML = 2 + 3\n}\n\n"
+          },
+          {
+            "type": "paragraph",
+            "id": "caa626ac93aa7d4c",
+            "text": "In the frame below we can view the results."
+          },
+          {
+            "type": "frame",
+            "id": "6cf52409eec3988c",
+            "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/esm.html\nHEIGHT 400"
+          },
+          {
+            "type": "paragraph",
+            "id": "8155a586f5842b0f",
+            "text": "See also [[Static Import Snippet]]"
+          }
+        ]
+      },
+      "date": 1694684996024
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function bind(el) {\n  el.querySelector('button').onclick = async e => {\n    let title = $(\"[name=title]\").value.trim() ||\n      \"Enriched Arrows SVG\"\n    let url = $(\"input[name=source]\").value.trim()\n    let svg = await getSvg(url)\n    enrich(svg)\n    frame.open({\n      title, story: [\n        {type:\"paragraph\",\n         text: \"Describe this graph.\"},\n        {type:\"html\", text: svg.outerHTML}\n      ]\n    }, e.shiftKey)\n  }\n}"
+      },
+      "date": 1694685162959
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2e2f995fc1c110d4"
+      },
+      "id": "2e2f995fc1c110d4",
+      "type": "add",
+      "after": "8155a586f5842b0f",
+      "date": 1694685178912
+    },
+    {
+      "type": "edit",
+      "id": "2e2f995fc1c110d4",
+      "item": {
+        "type": "pagefold",
+        "id": "2e2f995fc1c110d4",
+        "text": "."
+      },
+      "date": 1694685187058
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "af8bd0dbda74a79c"
+      },
+      "id": "af8bd0dbda74a79c",
+      "type": "add",
+      "after": "2e2f995fc1c110d4",
+      "date": 1694685191746
+    },
+    {
+      "type": "edit",
+      "id": "af8bd0dbda74a79c",
+      "item": {
+        "type": "paragraph",
+        "id": "af8bd0dbda74a79c",
+        "text": "We annotate the code which enriches the Kumu SVG."
+      },
+      "date": 1694685225876
+    },
+    {
+      "type": "add",
+      "id": "172f54068e9f6535",
+      "item": {
+        "type": "paragraph",
+        "id": "172f54068e9f6535",
+        "text": "Import [[Frame Integration Promises]] and setup DOM helpers."
+      },
+      "after": "af8bd0dbda74a79c",
+      "date": 1694685264583
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "93bd832d1f6a07ae"
+      },
+      "id": "93bd832d1f6a07ae",
+      "type": "add",
+      "after": "172f54068e9f6535",
+      "date": 1694685286410
+    },
+    {
+      "type": "edit",
+      "id": "93bd832d1f6a07ae",
+      "item": {
+        "type": "code",
+        "id": "93bd832d1f6a07ae",
+        "text": "import * as frame from \"https://wiki.dbbs.co/assets/v1/frame.js\"\nconst $ = (s, el=document) => el.querySelector(s)\nconst $$ = (s, el=document) => \n  Array.from(el.querySelectorAll(s))"
+      },
+      "date": 1694685296055
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d2b365668f94c1ab"
+      },
+      "id": "d2b365668f94c1ab",
+      "type": "add",
+      "after": "93bd832d1f6a07ae",
+      "date": 1694685351232
+    },
+    {
+      "type": "edit",
+      "id": "d2b365668f94c1ab",
+      "item": {
+        "type": "paragraph",
+        "id": "d2b365668f94c1ab",
+        "text": "Bind a click handler to the form button."
+      },
+      "date": 1694685371564
+    },
+    {
+      "id": "5eb6b67568179aa3",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "caa626ac93aa7d4c",
+        "6cf52409eec3988c",
+        "8155a586f5842b0f",
+        "2e2f995fc1c110d4",
+        "af8bd0dbda74a79c",
+        "172f54068e9f6535",
+        "93bd832d1f6a07ae",
+        "d2b365668f94c1ab",
+        "5eb6b67568179aa3"
+      ],
+      "date": 1694685382165
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7166441cbce954ee"
+      },
+      "id": "7166441cbce954ee",
+      "type": "add",
+      "after": "5eb6b67568179aa3",
+      "date": 1694685390418
+    },
+    {
+      "id": "7166441cbce954ee",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "caa626ac93aa7d4c",
+        "6cf52409eec3988c",
+        "8155a586f5842b0f",
+        "2e2f995fc1c110d4",
+        "af8bd0dbda74a79c",
+        "172f54068e9f6535",
+        "93bd832d1f6a07ae",
+        "7166441cbce954ee",
+        "d2b365668f94c1ab",
+        "5eb6b67568179aa3"
+      ],
+      "date": 1694685396029
+    },
+    {
+      "type": "edit",
+      "id": "7166441cbce954ee",
+      "item": {
+        "type": "paragraph",
+        "id": "7166441cbce954ee",
+        "text": "Emit the HTML form."
+      },
+      "date": 1694685415189
+    },
+    {
+      "type": "add",
+      "id": "986c06952a84c67d",
+      "item": {
+        "type": "factory",
+        "id": "986c06952a84c67d",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<style>input {width: 100%; display: block;}</style>\n<input name=\"title\" type=\"text\"\n  placeholder=\"page title\">\n<input name=\"source\" type=\"text\"\n  placeholder=\"URL to svg file\">\n<button>Create</button>\n`\n}\n"
+      },
+      "after": "7166441cbce954ee",
+      "date": 1694685432835
+    },
+    {
+      "type": "edit",
+      "id": "986c06952a84c67d",
+      "item": {
+        "type": "code",
+        "id": "986c06952a84c67d",
+        "text": "export async function emit(el) {\n  el.innerHTML = `\n<style>input {width: 100%; display: block;}</style>\n<input name=\"title\" type=\"text\"\n  placeholder=\"page title\">\n<input name=\"source\" type=\"text\"\n  placeholder=\"URL to svg file\">\n<button>Create</button>\n`\n}"
+      },
+      "date": 1694685445521
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/esm.html\nHEIGHT 55"
+      },
+      "date": 1694685472183
+    },
+    {
+      "type": "add",
+      "id": "adb2c20f9b609000",
+      "item": {
+        "type": "paragraph",
+        "id": "adb2c20f9b609000",
+        "text": "Given a Kumu SVG export URL, get the SVG DOM. We also remove the height and width attributes so browsers will scale the image to fit."
+      },
+      "after": "93bd832d1f6a07ae",
+      "date": 1694685631219
+    },
+    {
+      "type": "add",
+      "id": "cc9bd9a728534c40",
+      "item": {
+        "type": "factory",
+        "id": "cc9bd9a728534c40",
+        "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  return svg\n}"
+      },
+      "after": "adb2c20f9b609000",
+      "date": 1694685655594
+    },
+    {
+      "type": "edit",
+      "id": "cc9bd9a728534c40",
+      "item": {
+        "type": "code",
+        "id": "cc9bd9a728534c40",
+        "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  return svg\n}\n"
+      },
+      "date": 1694685669818
+    },
+    {
+      "type": "add",
+      "id": "481a22c3a1b230b5",
+      "item": {
+        "type": "paragraph",
+        "id": "481a22c3a1b230b5",
+        "text": "Here is where we encode our understanding of the DOM structure of Kumu SVG export diagrams. We wrap specific elements in the document with annotated anchor tags that our HTML plugin interprets as internal links."
+      },
+      "after": "cc9bd9a728534c40",
+      "date": 1694685880973
+    },
+    {
+      "type": "add",
+      "id": "e1e5da9d8b9ba061",
+      "item": {
+        "type": "paragraph",
+        "id": "e1e5da9d8b9ba061",
+        "text": "function enrich(svg) {}"
+      },
+      "after": "481a22c3a1b230b5",
+      "date": 1694685904511
+    },
+    {
+      "type": "add",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "paragraph",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapLabel(text) {"
+      },
+      "after": "e1e5da9d8b9ba061",
+      "date": 1694685953542
+    },
+    {
+      "type": "add",
+      "id": "bc63b8f8b6fa3a62",
+      "item": {
+        "type": "paragraph",
+        "id": "bc63b8f8b6fa3a62",
+        "text": "function anchorFor(title) {"
+      },
+      "after": "b3ff0306978c0219",
+      "date": 1694686039777
+    },
+    {
+      "type": "add",
+      "id": "a4b8a9c69e908668",
+      "item": {
+        "type": "factory",
+        "id": "a4b8a9c69e908668",
+        "text": "function"
+      },
+      "after": "bc63b8f8b6fa3a62",
+      "date": 1694686077860
+    },
+    {
+      "type": "edit",
+      "id": "a4b8a9c69e908668",
+      "item": {
+        "type": "code",
+        "id": "a4b8a9c69e908668",
+        "text": "const asSlug = title => title\n  .replace(/\\s/g, '-')\n  .replace(/[^A-Za-z0-9-]/g, '')\n  .toLowerCase()\n"
+      },
+      "date": 1694686105246
+    },
+    {
+      "type": "edit",
+      "id": "bc63b8f8b6fa3a62",
+      "item": {
+        "type": "code",
+        "id": "bc63b8f8b6fa3a62",
+        "text": "function anchorFor(title) {\n  let anchor = document.createElementNS(\n    \"http://www.w3.org/2000/svg\", \"a\")\n  anchor.setAttribute(\"class\", \"internal\")\n  anchor.setAttribute(\"data-title\", title)\n  anchor.setAttribute(\"href\",\n    `/${asSlug(title)}.html`)\n  return anchor\n}"
+      },
+      "date": 1694686148597
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "paragraph",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapLabel(node, text) {"
+      },
+      "date": 1694686183048
+    },
+    {
+      "type": "edit",
+      "id": "e1e5da9d8b9ba061",
+      "item": {
+        "type": "code",
+        "id": "e1e5da9d8b9ba061",
+        "text": "function enrich(svg) {\n  $$('text', svg)\n    .forEach(e => {\n      tc = e.textContent;\n      e1 = e\n      while (e1.nextSibling.tagName == 'text') {\n        e1 = e1.nextSibling\n        tc += ' ' + e1.textContent\n      }\n      console.log(tc)\n})}"
+      },
+      "date": 1694686392090
+    },
+    {
+      "type": "edit",
+      "id": "e1e5da9d8b9ba061",
+      "item": {
+        "type": "code",
+        "id": "e1e5da9d8b9ba061",
+        "text": "function enrich(svg) {\n  $$('text', svg)\n    .filter((item) =>\n      item.previousSibling?.tagName != 'text')\n    .forEach((item) => {\n      text = item.textContent;\n      curr = item\n      while (curr.nextSibling.tagName == 'text') {\n        curr = curr.nextSibling\n        text += ' ' + e1.textContent\n      }\n      console.log(text)\n\n})}"
+      },
+      "date": 1694686697277
+    },
+    {
+      "type": "edit",
+      "id": "e1e5da9d8b9ba061",
+      "item": {
+        "type": "code",
+        "id": "e1e5da9d8b9ba061",
+        "text": "function enrich(svg) {\n  $$('text', svg)\n    .filter((item) =>\n      item.previousSibling?.tagName != 'text')\n    .forEach((item) => {\n      text = item.textContent;\n      curr = item\n      while (curr.nextSibling.tagName == 'text') {\n        curr = curr.nextSibling\n        text += ' ' + e1.textContent\n      }\n      console.log(text)\n      wrapLabel(item, text)\n    })}"
+      },
+      "date": 1694686787591
+    },
+    {
+      "type": "edit",
+      "id": "e1e5da9d8b9ba061",
+      "item": {
+        "type": "code",
+        "id": "e1e5da9d8b9ba061",
+        "text": "function enrich(svg) {\n  $$('text', svg)\n    .filter((item) =>\n      item.previousSibling?.tagName != 'text')\n    .forEach((item) => {\n      text = item.textContent;\n      curr = item\n      while (curr.nextSibling.tagName == 'text') {\n        curr = curr.nextSibling\n        text += ' ' + e1.textContent\n      }\n      console.log(text)\n      wrapLabel(item, text)\n    })\n  }"
+      },
+      "date": 1694686875345
+    },
+    {
+      "type": "edit",
+      "id": "e1e5da9d8b9ba061",
+      "item": {
+        "type": "code",
+        "id": "e1e5da9d8b9ba061",
+        "text": "function enrich(svg) {\n  $$('text', svg)\n    .filter((item) =>\n      item.previousSibling?.tagName != 'text')\n    .forEach((item) => {\n      text = item.textContent;\n      curr = item\n      while (curr.nextSibling.tagName == 'text') {\n        curr = curr.nextSibling\n        text += ' ' + e1.textContent\n      }\n      console.log(text)\n      wrapLabel(item, text)\n    })\n}"
+      },
+      "date": 1694686971880
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "code",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapLabel(node, text) {\n  console.log(node, text)\n}"
+      },
+      "date": 1694687030960
+    },
+    {
+      "type": "edit",
+      "id": "e1e5da9d8b9ba061",
+      "item": {
+        "type": "code",
+        "id": "e1e5da9d8b9ba061",
+        "text": "function enrich(svg) {\n  $$('text', svg)\n    .filter((item) =>\n      item.previousSibling?.tagName != 'text')\n    .forEach((item) => {\n      let text = item.textContent;\n      curr = item\n      while (curr.nextSibling.tagName == 'text') {\n        curr = curr.nextSibling\n        text += ' ' + e1.textContent\n      }\n      console.log(text)\n      wrapLabel(item, text)\n    })\n}"
+      },
+      "date": 1694687230831
+    },
+    {
+      "type": "edit",
+      "id": "e1e5da9d8b9ba061",
+      "item": {
+        "type": "code",
+        "id": "e1e5da9d8b9ba061",
+        "text": "function enrich(svg) {\n  $$('text', svg)\n    .filter((item) =>\n      item.previousSibling?.tagName != 'text')\n    .forEach((item) => {\n      let text = item.textContent;\n      let curr = item\n      while (curr.nextSibling.tagName == 'text') {\n        curr = curr.nextSibling\n        text += ' ' + e1.textContent\n      }\n      console.log(text)\n      wrapLabel(item, text)\n    })\n}"
+      },
+      "date": 1694687240775
+    },
+    {
+      "type": "edit",
+      "id": "e1e5da9d8b9ba061",
+      "item": {
+        "type": "code",
+        "id": "e1e5da9d8b9ba061",
+        "text": "function enrich(svg) {\n  $$('text', svg)\n    .filter((item) =>\n      item.previousSibling?.tagName != 'text')\n    .forEach((item) => {\n      let text = item.textContent;\n      let curr = item\n      while (curr.nextSibling.tagName == 'text') {\n        curr = curr.nextSibling\n        text += ' ' + curr.textContent\n      }\n      console.log(text)\n      wrapLabel(item, text)\n    })\n}"
+      },
+      "date": 1694687375892
+    },
+    {
+      "type": "edit",
+      "id": "e1e5da9d8b9ba061",
+      "item": {
+        "type": "code",
+        "id": "e1e5da9d8b9ba061",
+        "text": "function enrich(svg) {\n  $$('text', svg)\n    .filter((item) =>\n      item.previousSibling?.tagName != 'text')\n    .forEach((item) => {\n      let text = item.textContent;\n      let curr = item\n      while (curr.nextSibling?.tagName == 'text') {\n        curr = curr.nextSibling\n        text += ' ' + curr.textContent\n      }\n      console.log(text)\n      wrapLabel(item, text)\n    })\n}"
+      },
+      "date": 1694687409012
+    },
+    {
+      "type": "edit",
+      "id": "cc9bd9a728534c40",
+      "item": {
+        "type": "code",
+        "id": "cc9bd9a728534c40",
+        "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  return svg\n}\n"
+      },
+      "date": 1694687489155
+    },
+    {
+      "type": "edit",
+      "id": "cc9bd9a728534c40",
+      "item": {
+        "type": "code",
+        "id": "cc9bd9a728534c40",
+        "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  let width = svg.width\n  let height = svg.height\n\n  return svg\n}\n"
+      },
+      "date": 1694687989997
+    },
+    {
+      "type": "edit",
+      "id": "cc9bd9a728534c40",
+      "item": {
+        "type": "code",
+        "id": "cc9bd9a728534c40",
+        "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  let width = svg.width\n  let height = svg.height\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n\n  return svg\n}\n"
+      },
+      "date": 1694688007740
+    },
+    {
+      "type": "edit",
+      "id": "cc9bd9a728534c40",
+      "item": {
+        "type": "code",
+        "id": "cc9bd9a728534c40",
+        "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  let width = svg.width\n  let height = svg.height\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  svg.setAttribute(\"viewbox\", `0 0 ${width} ${height}`)\n  return svg\n}\n"
+      },
+      "date": 1694688086438
+    },
+    {
+      "type": "edit",
+      "id": "cc9bd9a728534c40",
+      "item": {
+        "type": "code",
+        "id": "cc9bd9a728534c40",
+        "text": "async function getSvg(url) {\n  let res = await fetch(url)\n  let string = await res.text()\n  let dom = new DOMParser()\n    .parseFromString(string, \"image/svg+xml\")\n  let svg = dom.documentElement\n  let width = svg.getAttribute('width')\n  let height = svg.getAttribute('height')\n  svg.removeAttribute(\"width\")\n  svg.removeAttribute(\"height\")\n  svg.setAttribute(\"viewbox\", `0 0 ${width} ${height}`)\n  return svg\n}\n"
+      },
+      "date": 1694688666298
+    },
+    {
+      "type": "edit",
+      "id": "e1e5da9d8b9ba061",
+      "item": {
+        "type": "code",
+        "id": "e1e5da9d8b9ba061",
+        "text": "function enrich(svg) {\n  $$('text', svg)\n    .filter((item) =>\n      item.previousSibling?.tagName != 'text')\n    .forEach((item) => {\n      let text = item.textContent;\n      let curr = item\n      while (curr.nextSibling?.tagName == 'text') {\n        curr = curr.nextSibling\n        text += ' ' + curr.textContent\n      }\n      console.log(text)\n      wrapNode(item, text)\n    })\n}"
+      },
+      "date": 1694688802273
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "code",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapNode(node, text) {\n  console.log(node, text)\n\n}"
+      },
+      "date": 1694688814585
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "code",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapNode(node, text) {\n  return if text.length = 1\n  console.log(node, text)\n}"
+      },
+      "date": 1694688929985
+    },
+    {
+      "id": "6cf52409eec3988c",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "caa626ac93aa7d4c",
+        "8155a586f5842b0f",
+        "6cf52409eec3988c",
+        "2e2f995fc1c110d4",
+        "af8bd0dbda74a79c",
+        "172f54068e9f6535",
+        "93bd832d1f6a07ae",
+        "adb2c20f9b609000",
+        "cc9bd9a728534c40",
+        "481a22c3a1b230b5",
+        "e1e5da9d8b9ba061",
+        "b3ff0306978c0219",
+        "bc63b8f8b6fa3a62",
+        "a4b8a9c69e908668",
+        "7166441cbce954ee",
+        "986c06952a84c67d",
+        "d2b365668f94c1ab",
+        "5eb6b67568179aa3"
+      ],
+      "date": 1694688933817
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "code",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapNode(node, text) {\n  return if (text.length = 1)\n  console.log(node, text)\n}"
+      },
+      "date": 1694688953632
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "code",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapNode(node, title) {\n  console.log(node, title)\n  let anchor = anchorFor(title)\n  \n}"
+      },
+      "date": 1694689325691
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "code",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapNode(node, title) {\n  console.log(node, title)\n  let anchor = anchorFor(title)\n  let parent = node.parentNode\n  let after = node.previousSibling\n  \n  node.parentNode.insertAfter\n}"
+      },
+      "date": 1694689630153
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "code",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapNode(node, title) {\n  console.log(node, title)\n  let anchor = anchorFor(title)\n  let parent = node.parentNode\n  let after = node.previousSibling\n  let curr = node\n  while (curr.tagName == 'text') {\n    \n  node.parentNode.insertAfter\n}"
+      },
+      "date": 1694690149882
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "code",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapNode(node, title) {\n  console.log(node, title)\n  let anchor = anchorFor(title)\n  let parent = node.parentNode\n  let after = node.previousSibling\n  parent.insertBefore\n  let curr = node\n  do {\n    anchor.appendChile(curr)\n    parent\n  while (curr.tagName == 'text') {\n    \n  node.parentNode.insertAfter\n}"
+      },
+      "date": 1694690298914
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "code",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapNode(node, title) {\n  console.log(node, title)\n  let anchor = anchorFor(title)\n  let parent = node.parentNode\n  let after = node.previousSibling\n  parent.insertBefore(anchor, node)\n  let curr = node\n  do {\n    anchor.appendChild(curr)\n    parent.removeChild(curr)\n  } \n  while (curr.tagName == 'text') {\n    \n  node.parentNode.insertAfter\n}"
+      },
+      "date": 1694690450979
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "code",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapNode(node, title) {\n  console.log(node, title)\n  let anchor = anchorFor(title)\n  let parent = node.parentNode\n  let after = node.previousSibling\n  parent.insertBefore(anchor, node)\n  let curr = node\n  while (curr.tagName == 'text') {\n    anchor.appendChild(curr)\n    parent.removeChild(curr)\n\n  }\n}"
+      },
+      "date": 1694690528790
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "code",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapNode(node, title) {\n  console.log(node, title)\n  let anchor = anchorFor(title)\n  let parent = node.parentNode\n  parent.insertBefore(anchor, node)\n  let curr = node\n  while (curr.tagName == 'text') {\n    anchor.appendChild(curr)\n    parent.removeChild(curr)\n    curr = curr.nextSibling\n  }\n}"
+      },
+      "date": 1694690574374
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "code",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapNode(node, title) {\n  console.log(node, title)\n  let anchor = anchorFor(title)\n  let parent = node.parentNode\n  parent.insertBefore(anchor, node)\n  let curr = node\n  while (curr.tagName == 'text') {\n    parent.removeChild(curr)\n    anchor.appendChild(curr)\n    curr = curr.nextSibling\n  }\n}"
+      },
+      "date": 1694690701132
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "code",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapNode(node, title) {\n  console.log(node, title)\n  let anchor = anchorFor(title)\n  let parent = node.parentNode\n  parent.insertBefore(anchor, node)\n  let curr = node\n  while (curr?.tagName == 'text') {\n    parent.removeChild(curr)\n    anchor.appendChild(curr)\n    curr = curr.nextSibling\n  }\n}"
+      },
+      "date": 1694690862218
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "code",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapNode(node, title) {\n  console.log(node, title)\n  let anchor = anchorFor(title)\n  let parent = node.parentNode\n  parent.insertBefore(anchor, node)\n  let curr = node\n  while (curr?.tagName == 'text') {\n\n    parent.removeChild(curr)\n    anchor.appendChild(curr)\n    curr = curr.nextSibling\n  }\n}"
+      },
+      "date": 1694690984820
+    },
+    {
+      "type": "edit",
+      "id": "b3ff0306978c0219",
+      "item": {
+        "type": "code",
+        "id": "b3ff0306978c0219",
+        "text": "function wrapNode(node, title) {\n  console.log(node, title)\n  let anchor = anchorFor(title)\n  let parent = node.parentNode\n  parent.insertBefore(anchor, node)\n  let curr = node\n  while (curr?.tagName == 'text') {\n    let next = curr.nextSibling\n    parent.removeChild(curr)\n    anchor.appendChild(curr)\n    curr = next\n  }\n}"
+      },
+      "date": 1694691017355
+    },
+    {
+      "id": "6cf52409eec3988c",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "caa626ac93aa7d4c",
+        "8155a586f5842b0f",
+        "2e2f995fc1c110d4",
+        "6cf52409eec3988c",
+        "af8bd0dbda74a79c",
+        "172f54068e9f6535",
+        "93bd832d1f6a07ae",
+        "adb2c20f9b609000",
+        "cc9bd9a728534c40",
+        "481a22c3a1b230b5",
+        "e1e5da9d8b9ba061",
+        "b3ff0306978c0219",
+        "bc63b8f8b6fa3a62",
+        "a4b8a9c69e908668",
+        "7166441cbce954ee",
+        "986c06952a84c67d",
+        "d2b365668f94c1ab",
+        "5eb6b67568179aa3"
+      ],
+      "date": 1694691021779
+    },
+    {
+      "id": "6cf52409eec3988c",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "caa626ac93aa7d4c",
+        "8155a586f5842b0f",
+        "6cf52409eec3988c",
+        "2e2f995fc1c110d4",
+        "af8bd0dbda74a79c",
+        "172f54068e9f6535",
+        "93bd832d1f6a07ae",
+        "adb2c20f9b609000",
+        "cc9bd9a728534c40",
+        "481a22c3a1b230b5",
+        "e1e5da9d8b9ba061",
+        "b3ff0306978c0219",
+        "bc63b8f8b6fa3a62",
+        "a4b8a9c69e908668",
+        "7166441cbce954ee",
+        "986c06952a84c67d",
+        "d2b365668f94c1ab",
+        "5eb6b67568179aa3"
+      ],
+      "date": 1694691037274
+    },
+    {
+      "type": "edit",
+      "id": "484e092159df2d01",
+      "item": {
+        "type": "paragraph",
+        "id": "484e092159df2d01",
+        "text": "Using [[Enrich Arrows SVG]] as a starting place, here we offer a workflow to enrich the SVG export from Kunu"
+      },
+      "date": 1694697115798
+    },
+    {
+      "type": "edit",
+      "id": "484e092159df2d01",
+      "item": {
+        "type": "paragraph",
+        "id": "484e092159df2d01",
+        "text": "Using [[Enrich Arrows SVG]] as a starting place, here we offer a workflow to enrich the SVG export from Kumu with wiki internal links. "
+      },
+      "date": 1694697146638
+    },
+    {
+      "type": "remove",
+      "id": "8155a586f5842b0f",
+      "date": 1694697181244
+    },
+    {
+      "id": "caa626ac93aa7d4c",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "6cf52409eec3988c",
+        "caa626ac93aa7d4c",
+        "2e2f995fc1c110d4",
+        "af8bd0dbda74a79c",
+        "172f54068e9f6535",
+        "93bd832d1f6a07ae",
+        "adb2c20f9b609000",
+        "cc9bd9a728534c40",
+        "481a22c3a1b230b5",
+        "e1e5da9d8b9ba061",
+        "b3ff0306978c0219",
+        "bc63b8f8b6fa3a62",
+        "a4b8a9c69e908668",
+        "7166441cbce954ee",
+        "986c06952a84c67d",
+        "d2b365668f94c1ab",
+        "5eb6b67568179aa3"
+      ],
+      "date": 1694697254461
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/esm.html\nHEIGHT 40"
+      },
+      "date": 1694697262177
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/esm.html\nHEIGHT 45"
+      },
+      "date": 1694697268141
+    },
+    {
+      "type": "edit",
+      "id": "caa626ac93aa7d4c",
+      "item": {
+        "type": "paragraph",
+        "id": "caa626ac93aa7d4c",
+        "text": "The form works fine if you upload the exported SVG from Kumu as a wiki asset, and use the link to that in the form."
+      },
+      "date": 1694697379118
+    },
+    {
+      "type": "fork",
+      "date": 1694697694246
+    },
+    {
+      "type": "fork",
+      "site": "goals.pod.rodwell.me",
+      "date": 1694699938113
+    }
+  ]
+}
