@@ -1,0 +1,1368 @@
+{
+  "title": "GetChild",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "764c29e3e290f112",
+      "text": "Finding the child – if existent at all – for a pair of Parent Handles is a multistep process in the [[OPE]] involving several buffers."
+    },
+    {
+      "type": "paragraph",
+      "id": "8b533ac061dc56ac",
+      "text": "Basically what needs to be achieved is the implementation of a 2-dimensional array – which unfortunately is very large and only sparsely populated. Each element in the array represents the Child Relation of two Parent Relations interpreted as the element ́s coordinates, e.g."
+    },
+    {
+      "type": "code",
+      "id": "9132b2da9817c53e",
+      "text": "uint[,] children = new uint[2^32, 2^32]; \nuint rHandle = children[xHandle, yHandle];"
+    },
+    {
+      "type": "paragraph",
+      "id": "b21e54c90ca43629",
+      "text": "Since this is infeasible to implement due to memory restrictions, another data structure must be used. OPE has chosen to realize the 2D array by crafting its own memory management where Handles are used as “addresses” in the “[[Pile Memory]]” in several ways."
+    },
+    {
+      "type": "paragraph",
+      "id": "ab79edd1f26180ea",
+      "text": "This “Pile memory” can be said to be “paged” [⇒ [[Tree Arranged on Pages]]], since its root again is a table containing just pointers to buffers (Figure 2). So there is no contiguous space of bytes to keep the Child Handles in. This [[Buffer Root Table]] contains 65536 elements each consisting of two pointers to buffers, i.e. it occupies 0.5 MB in total."
+    },
+    {
+      "type": "image",
+      "id": "2e0948c78f511474",
+      "text": "Figure 2: The “[[Pile Memory]]” implements a sparsely populated 2D array of Child Handles using a cascade of buffers.",
+      "size": "wide",
+      "width": 430,
+      "height": 248,
+      "url": "/assets/plugins/image/3542dd0ba9e1f0fade81c478312ba05d.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "c2be7aa63b4d3ef6",
+      "text": "Step 1: Finding a Child Relation starts with the Np Parent at the [[Buffer Root Table]] to look up the relevant “page” [⇒ [[Tree Arranged on Pages]]]. Of the Np Parent the LSB16(xHandle) are used as an index into the buffer root table. The address space has now been reduced from 64 bits to 48 bits."
+    },
+    {
+      "type": "paragraph",
+      "id": "268caaed09d3edcb",
+      "text": "Step 2: Of the remaining 48 bits 32 bits are taken to determine the address of the then remaining 16 bits (Figure 3). MSB16(xHandle) and MSB16(yHandle) are combined to form a 32 bit key which is looked-up in the key index, the first buffer pointed to by the buffer root table entry just retrieved (Figure 3)."
+    },
+    {
+      "type": "image",
+      "id": "c9c15dba3dce8f74",
+      "text": "Figure 3: Look up a 32 bit key for the Child Handle in the key index. A binary search is done on the key index buffer.",
+      "size": "wide",
+      "width": 430,
+      "height": 329,
+      "url": "/assets/plugins/image/9c11f61fe51b33d4e7bc696a824738fb.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "3c42622c73794638",
+      "text": "The look-up is done using a binary search algorithm. The keys are stored in the key index in ascending order."
+    },
+    {
+      "type": "paragraph",
+      "id": "8abdc1a91df0aa37",
+      "text": "The goal of this key look-up is to determine the index (!) of the key in the key index buffer. So the search result is a value ranging from 0 to n-1 (with n being the number of keys in the key index, not its size in bytes!). [⇒ [[Tree Arranged on Pages]]]"
+    },
+    {
+      "type": "markdown",
+      "id": "ffa883e1d08deabf",
+      "text": "> It consists of a header and N −1 nodes, the search result is a value ranging from 0 to n-1], where the nodes contain several fields: …"
+    },
+    {
+      "type": "paragraph",
+      "id": "e69b67e5ef956d27",
+      "text": "Step 3: The key’s index is then used to access the entry representing the remaining 16 bits of the 64 bits address and the Child value. It is located in the level 1 buffer pointed to by the [[Buffer Root Entry]] retrieved in step 1 (Figure 4)."
+    },
+    {
+      "type": "image",
+      "id": "faa25613aa1e1d90",
+      "text": "Figure 4: The index of the key found in the key index is used to access the corresponding entry for the remaining 16 bits of the 64 bits address plus the Child Handle in the level 1 buffer.",
+      "size": "wide",
+      "width": 430,
+      "height": 167,
+      "url": "/assets/plugins/image/f9289b0ba98476846fb08f490907cc48.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "b3006df98854899e",
+      "text": "Step 4: If the LSB16 stored in the Level1Entry equals the LSB16(yHandle) then the Child Handle of (Np, Ap) is the Handle in the Level1Entry."
+    },
+    {
+      "type": "paragraph",
+      "id": "9d98f18496668ee9",
+      "text": "Otherwise, the Level1Entry needs to be checked, if it contains a Child Handle at all – or if the 4 bytes reserved for the Child Handle contain a pointer to a level 2 buffer."
+    },
+    {
+      "type": "markdown",
+      "id": "53da5a6e08921a8e",
+      "text": "**How this is done in OPE is not entirely clear. The PGM_6_bytes structure corresponding to the Level1Entry struct in Appendix C bears no hint.**"
+    },
+    {
+      "type": "paragraph",
+      "id": "1154330e2a782ba6",
+      "text": "A Level1Entry thus serves two purposes: it either contains a Child Handle or is a pointer to a buffer of Child Handles. [⇒ [[Tree Arranged on Pages]], LTAG and RTAG]"
+    },
+    {
+      "type": "markdown",
+      "id": "b4d1d9260a0732f5",
+      "text": "> LTAG and RTAG, one-bit fields that tell whether or not LLINK and RLINK, respectively, are pointers to children or to ancestors of the node. The dotted lines in Fig. 33 correspond to pointers whose TAG bit is 1."
+    },
+    {
+      "type": "paragraph",
+      "id": "57f8a11cc70fdeac",
+      "text": "Step 5: If the Level1Entry contains a pointer to a level 2 buffer, because there are several LSB16(yHandle) values belonging to the 48 bit address (LSB(xHandle) & MSB(xHandle) & MSB(yHandle)) followed so far, then the LSB16(yHandle) is looked-up in the level 2 buffer via a binary search (Figure 5)."
+    },
+    {
+      "type": "image",
+      "id": "dba40b7116ca8e48",
+      "text": "Figure 5: If the level 1 buffer entry contains a pointer to a level 2 buffer, then search the level 2 buffer for the LSB16(yHandle) entry, which contains the Child Handle",
+      "size": "wide",
+      "width": 430,
+      "height": 267,
+      "url": "/assets/plugins/image/42cd2aaeefd7a9992be214e675fddd38.jpg"
+    },
+    {
+      "type": "markdown",
+      "id": "f750f97d8abdf1c5",
+      "text": "## Thoughts on the OPE data structures"
+    },
+    {
+      "type": "paragraph",
+      "id": "0d67f82bd52fbb96",
+      "text": "Why is the addressing of the [[Buffer Root Table]] done using the LSB16 whereas the index table for GetParents() is addressed with the MSB16?"
+    },
+    {
+      "type": "paragraph",
+      "id": "0422d9d972830827",
+      "text": "GetParents() strives for few large buffers which are easy to handle, because the information looked for can be directly accessed (using the LSB16)."
+    },
+    {
+      "type": "paragraph",
+      "id": "3137259fdb7ea963",
+      "text": "GetChild() however is looking up information using a binary search and thus needs to keep the entries in its buffers always sorted (see CreateChild()). The OPE thus favors many small buffers which can quickly be searched and easily kept sorted."
+    },
+    {
+      "type": "paragraph",
+      "id": "1261c1eb38c0e98d",
+      "text": "Why does a Level1Entry serve two purposes?"
+    },
+    {
+      "type": "paragraph",
+      "id": "d06b898481c21882",
+      "text": "As long as there is only one LSB16(yHandle) for a particular LSB(xHandle) & MSB(xHandle) & MSB(yHandle) combination, one indirection and binary search is saved."
+    },
+    {
+      "type": "paragraph",
+      "id": "18989465aa1f817e",
+      "text": "The Child Handle is found right in the Level1Entry pointed to by the MSB(xHandle) & MSB(yHandle) key ́s index."
+    },
+    {
+      "type": "paragraph",
+      "id": "a79fc6b048a2adf5",
+      "text": "However, it seems this is just a rare case. For Piles with several thousand Relations most LSB(xHandle) & MSB(xHandle) & MSB(yHandle) combinations certainly point to several LSB16(yHandle) values. Thus it seems, the added complexity of the level 1 buffer is not really necessary. Instead the key index could contain a level 2 buffer pointer which then would always be used to store LSB16(yHandle) and the Child Handle."
+    },
+    {
+      "type": "paragraph",
+      "id": "f508804dae93cf9f",
+      "text": "⇒ [[CreateChild]]"
+    },
+    {
+      "type": "pagefold",
+      "id": "3fc0cd2ccae08029",
+      "text": "🔺"
+    },
+    {
+      "type": "reference",
+      "id": "b0b28dad2b42753d",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "the-original-pile-engine-demystified",
+      "title": "The Original Pile Engine Demystified",
+      "text": "[[Ralf Westphal]]'s [https://weblogs.asp.net/ralfw/441384 post], [https://web.archive.org/web/20081119150632/http://www.pilesys.com/TheOriginalPileEngineDemystified.pdf pdf]"
+    },
+    {
+      "type": "reference",
+      "id": "0d6e3906b8c93ebe",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "relations-in-pile",
+      "title": "Relations in Pile",
+      "text": "See \"Beyond WinFS – Let associations rule! – or: An introduction to Pile for mere mortals\" [https://weblogs.asp.net/ralfw/433714 post]"
+    },
+    {
+      "type": "reference",
+      "id": "c60d5902fbe50c6d",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "patricia",
+      "title": "Patricia",
+      "text": "Practical Algorithm To Retrieve Information Coded In Alphanumeric’s basic idea is to build a binary [[Trie]], but to avoid one-way branching by including in each node the number of bits to skip over before making the next test. "
+    },
+    {
+      "type": "markdown",
+      "id": "d1867df4931a57d0",
+      "text": "> The tree that Patricia uses for searching should be contained in random-access memory, or it should be arranged on pages as suggested in Section 6.2.4. It consists of a header and N −1 nodes, where the nodes contain several fields: …"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "GetChild",
+        "story": []
+      },
+      "date": 1695051064686
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "764c29e3e290f112"
+      },
+      "id": "764c29e3e290f112",
+      "type": "add",
+      "date": 1695051066038
+    },
+    {
+      "type": "edit",
+      "id": "764c29e3e290f112",
+      "item": {
+        "type": "paragraph",
+        "id": "764c29e3e290f112",
+        "text": "[…]"
+      },
+      "date": 1695051069029
+    },
+    {
+      "id": "3fc0cd2ccae08029",
+      "type": "add",
+      "item": {
+        "type": "pagefold",
+        "id": "3fc0cd2ccae08029",
+        "text": "🔺"
+      },
+      "after": "764c29e3e290f112",
+      "attribution": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695051112890
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c9c15dba3dce8f74"
+      },
+      "id": "c9c15dba3dce8f74",
+      "type": "add",
+      "after": "3fc0cd2ccae08029",
+      "date": 1695051224674
+    },
+    {
+      "id": "c9c15dba3dce8f74",
+      "type": "move",
+      "order": [
+        "764c29e3e290f112",
+        "c9c15dba3dce8f74",
+        "3fc0cd2ccae08029"
+      ],
+      "date": 1695051231038
+    },
+    {
+      "type": "edit",
+      "id": "c9c15dba3dce8f74",
+      "item": {
+        "type": "image",
+        "id": "c9c15dba3dce8f74",
+        "text": "Figure 3: Look up a 32 bit key for the Child Handle in the key index. A binary search is done on the key index buffer.",
+        "size": "wide",
+        "width": 430,
+        "height": 329,
+        "url": "/assets/plugins/image/9c11f61fe51b33d4e7bc696a824738fb.jpg"
+      },
+      "date": 1695051257719
+    },
+    {
+      "id": "b0b28dad2b42753d",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "b0b28dad2b42753d",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "the-original-pile-engine-demystified",
+        "title": "The Original Pile Engine Demystified",
+        "text": "[[Ralf Westphal]]'s [https://weblogs.asp.net/ralfw/441384 post], [https://web.archive.org/web/20081119150632/http://www.pilesys.com/TheOriginalPileEngineDemystified.pdf pdf]"
+      },
+      "after": "3fc0cd2ccae08029",
+      "attribution": {
+        "page": "Pile"
+      },
+      "date": 1695051296554
+    },
+    {
+      "id": "0d6e3906b8c93ebe",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "0d6e3906b8c93ebe",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "relations-in-pile",
+        "title": "Relations in Pile",
+        "text": "See \"Beyond WinFS – Let associations rule! – or: An introduction to Pile for mere mortals\" [https://weblogs.asp.net/ralfw/433714 post]"
+      },
+      "after": "b0b28dad2b42753d",
+      "attribution": {
+        "page": "Pile"
+      },
+      "date": 1695051299652
+    },
+    {
+      "type": "add",
+      "id": "c2be7aa63b4d3ef6",
+      "item": {
+        "type": "paragraph",
+        "id": "c2be7aa63b4d3ef6",
+        "text": "Step 1: Finding a Child Relation starts with the Np Parent at the buffer root table to look up the relevant “page”. Of the Np Parent the LSB16(xHandle) are used as an index into the buffer root table. The address space has now been reduced from 64 bits to 48 bits."
+      },
+      "after": "764c29e3e290f112",
+      "date": 1695051334740
+    },
+    {
+      "type": "add",
+      "id": "268caaed09d3edcb",
+      "item": {
+        "type": "paragraph",
+        "id": "268caaed09d3edcb",
+        "text": "Step 2: Of the remaining 48 bits 32 bits are taken to determine the address of the then remaining 16 bits (Figure 3). MSB16(xHandle) and MSB16(yHandle) are combined to form a 32 bit key which is"
+      },
+      "after": "c2be7aa63b4d3ef6",
+      "date": 1695051368773
+    },
+    {
+      "type": "edit",
+      "id": "268caaed09d3edcb",
+      "item": {
+        "type": "paragraph",
+        "id": "268caaed09d3edcb",
+        "text": "Step 2: Of the remaining 48 bits 32 bits are taken to determine the address of the then remaining 16 bits (Figure 3). MSB16(xHandle) and MSB16(yHandle) are combined to form a 32 bit key which is looked-up in the key index, the first buffer pointed to by the buffer root table entry just retrieved (Figure 3)."
+      },
+      "date": 1695051379087
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3c42622c73794638"
+      },
+      "id": "3c42622c73794638",
+      "type": "add",
+      "after": "0d6e3906b8c93ebe",
+      "date": 1695051428836
+    },
+    {
+      "id": "3c42622c73794638",
+      "type": "move",
+      "order": [
+        "764c29e3e290f112",
+        "c2be7aa63b4d3ef6",
+        "268caaed09d3edcb",
+        "c9c15dba3dce8f74",
+        "3c42622c73794638",
+        "3fc0cd2ccae08029",
+        "b0b28dad2b42753d",
+        "0d6e3906b8c93ebe"
+      ],
+      "date": 1695051431236
+    },
+    {
+      "type": "edit",
+      "id": "3c42622c73794638",
+      "item": {
+        "type": "paragraph",
+        "id": "3c42622c73794638",
+        "text": "The look-up is done using a binary search algorithm. The keys are stored in the key index in ascending order."
+      },
+      "date": 1695051433239
+    },
+    {
+      "type": "add",
+      "id": "8abdc1a91df0aa37",
+      "item": {
+        "type": "paragraph",
+        "id": "8abdc1a91df0aa37",
+        "text": "The goal of this key look-up is to determine the index (!) of the key in the key index buffer. So the search result is a value ranging from 0 to n-1 (with n being the number of keys in the key index, not its size in bytes!)."
+      },
+      "after": "3c42622c73794638",
+      "date": 1695051445661
+    },
+    {
+      "id": "c60d5902fbe50c6d",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "c60d5902fbe50c6d",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "patricia",
+        "title": "Patricia",
+        "text": "Practical Algorithm To Retrieve Information Coded In Alphanumeric’s basic idea is to build a binary [[Trie]], but to avoid one-way branching by including in each node the number of bits to skip over before making the next test. "
+      },
+      "after": "0d6e3906b8c93ebe",
+      "attribution": {
+        "page": "2023-09-18"
+      },
+      "date": 1695051528284
+    },
+    {
+      "id": "d1867df4931a57d0",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "d1867df4931a57d0",
+        "text": "The tree that [[Patricia]] uses for searching should be contained in random-access memory, or it should be arranged on pages as suggested in Section 6.2.4. It consists of a header and N −1 nodes, where the nodes contain several fields:"
+      },
+      "after": "c60d5902fbe50c6d",
+      "attribution": {
+        "page": "2023-09-18"
+      },
+      "date": 1695051541088
+    },
+    {
+      "type": "edit",
+      "id": "d1867df4931a57d0",
+      "item": {
+        "type": "paragraph",
+        "id": "d1867df4931a57d0",
+        "text": "> The tree that Patricia uses for searching should be contained in random-access memory, or it should be arranged on pages as suggested in Section 6.2.4. It consists of a header and N −1 nodes, where the nodes contain several fields:"
+      },
+      "date": 1695051550138
+    },
+    {
+      "type": "edit",
+      "id": "d1867df4931a57d0",
+      "item": {
+        "type": "markdown",
+        "id": "d1867df4931a57d0",
+        "text": "> The tree that Patricia uses for searching should be contained in random-access memory, or it should be arranged on pages as suggested in Section 6.2.4. It consists of a header and N −1 nodes, where the nodes contain several fields:"
+      },
+      "date": 1695051551052
+    },
+    {
+      "type": "edit",
+      "id": "c2be7aa63b4d3ef6",
+      "item": {
+        "type": "paragraph",
+        "id": "c2be7aa63b4d3ef6",
+        "text": "Step 1: Finding a Child Relation starts with the Np Parent at the buffer root table to look up the relevant “page” [⇒ [[Tree Arranged on Pages]]]. Of the Np Parent the LSB16(xHandle) are used as an index into the buffer root table. The address space has now been reduced from 64 bits to 48 bits."
+      },
+      "date": 1695051616255
+    },
+    {
+      "type": "edit",
+      "id": "8abdc1a91df0aa37",
+      "item": {
+        "type": "paragraph",
+        "id": "8abdc1a91df0aa37",
+        "text": "The goal of this key look-up is to determine the index (!) of the key in the key index buffer. So the search result is a value ranging from 0 to n-1 (with n being the number of keys in the key index, not its size in bytes!). [⇒ [[Tree Arranged on Pages]]]"
+      },
+      "date": 1695052192051
+    },
+    {
+      "type": "edit",
+      "id": "764c29e3e290f112",
+      "item": {
+        "type": "paragraph",
+        "id": "764c29e3e290f112",
+        "text": "Finding the child – if existent at all – for a pair of Parent Handles is a multistep process in the OPE involving several buffers."
+      },
+      "date": 1695052314713
+    },
+    {
+      "type": "add",
+      "id": "b21e54c90ca43629",
+      "item": {
+        "type": "paragraph",
+        "id": "b21e54c90ca43629",
+        "text": "[…]"
+      },
+      "after": "764c29e3e290f112",
+      "date": 1695052315044
+    },
+    {
+      "type": "add",
+      "id": "8b533ac061dc56ac",
+      "item": {
+        "type": "paragraph",
+        "id": "8b533ac061dc56ac",
+        "text": "Basically what needs to be achieved is the implementation of a 2-dimensional array – which unfortunately is very large and only sparsely populated. Each element in the array represents the Child Relation of two Parent Relations interpreted as the element ́s coordinates, e.g."
+      },
+      "after": "764c29e3e290f112",
+      "date": 1695052333636
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9132b2da9817c53e"
+      },
+      "id": "9132b2da9817c53e",
+      "type": "add",
+      "after": "d1867df4931a57d0",
+      "date": 1695052358091
+    },
+    {
+      "id": "9132b2da9817c53e",
+      "type": "move",
+      "order": [
+        "764c29e3e290f112",
+        "8b533ac061dc56ac",
+        "9132b2da9817c53e",
+        "b21e54c90ca43629",
+        "c2be7aa63b4d3ef6",
+        "268caaed09d3edcb",
+        "c9c15dba3dce8f74",
+        "3c42622c73794638",
+        "8abdc1a91df0aa37",
+        "3fc0cd2ccae08029",
+        "b0b28dad2b42753d",
+        "0d6e3906b8c93ebe",
+        "c60d5902fbe50c6d",
+        "d1867df4931a57d0"
+      ],
+      "date": 1695052367846
+    },
+    {
+      "type": "edit",
+      "id": "9132b2da9817c53e",
+      "item": {
+        "type": "code",
+        "id": "9132b2da9817c53e",
+        "text": "uint[,] children = new uint[2^32, 2^32]; \nuint rHandle = children[xHandle, yHandle];"
+      },
+      "date": 1695052372449
+    },
+    {
+      "type": "edit",
+      "id": "b21e54c90ca43629",
+      "item": {
+        "type": "paragraph",
+        "id": "b21e54c90ca43629",
+        "text": "Since this is infeasible to implement due to memory restrictions, another data structure must be used. OPE has chosen to realize the 2D array by crafting its own memory management where Handles are used as “addresses” in the “Pile memory” in several ways."
+      },
+      "date": 1695052402843
+    },
+    {
+      "type": "add",
+      "id": "a43c27607daf94ac",
+      "item": {
+        "type": "paragraph",
+        "id": "a43c27607daf94ac",
+        "text": "[…]"
+      },
+      "after": "b21e54c90ca43629",
+      "date": 1695052403321
+    },
+    {
+      "type": "add",
+      "id": "ab79edd1f26180ea",
+      "item": {
+        "type": "paragraph",
+        "id": "ab79edd1f26180ea",
+        "text": "This “Pile memory” can be said to be “paged”, since its root again is a table containing just pointers to buffers (Figure 2). So there is no contiguous space of bytes to keep the Child Handles in. This buffer root table3 contains 65536 elements each consisting of two pointers to buffers, i.e. it occupies 0.5 MB in total."
+      },
+      "after": "b21e54c90ca43629",
+      "date": 1695052428211
+    },
+    {
+      "type": "edit",
+      "id": "ab79edd1f26180ea",
+      "item": {
+        "type": "paragraph",
+        "id": "ab79edd1f26180ea",
+        "text": "This “Pile memory” can be said to be “paged”, since its root again is a table containing just pointers to buffers (Figure 2). So there is no contiguous space of bytes to keep the Child Handles in. This buffer root table contains 65536 elements each consisting of two pointers to buffers, i.e. it occupies 0.5 MB in total."
+      },
+      "date": 1695052460370
+    },
+    {
+      "type": "edit",
+      "id": "ab79edd1f26180ea",
+      "item": {
+        "type": "paragraph",
+        "id": "ab79edd1f26180ea",
+        "text": "This “Pile memory” can be said to be “paged”, since its root again is a table containing just pointers to buffers (Figure 2). So there is no contiguous space of bytes to keep the Child Handles in. This [[Buffer Root Table]] contains 65536 elements each consisting of two pointers to buffers, i.e. it occupies 0.5 MB in total."
+      },
+      "date": 1695052492175
+    },
+    {
+      "type": "edit",
+      "id": "a43c27607daf94ac",
+      "item": {
+        "type": "paragraph",
+        "id": "a43c27607daf94ac",
+        "text": "[…] Figure 2: The “Pile memory” implements a sparsely populated 2D array of Child Handles using a cascade of buffers"
+      },
+      "date": 1695052567237
+    },
+    {
+      "type": "edit",
+      "id": "c2be7aa63b4d3ef6",
+      "item": {
+        "type": "paragraph",
+        "id": "c2be7aa63b4d3ef6",
+        "text": "Step 1: Finding a Child Relation starts with the Np Parent at the [[Buffer Root Table]] to look up the relevant “page” [⇒ [[Tree Arranged on Pages]]]. Of the Np Parent the LSB16(xHandle) are used as an index into the buffer root table. The address space has now been reduced from 64 bits to 48 bits."
+      },
+      "date": 1695052601108
+    },
+    {
+      "type": "add",
+      "id": "e69b67e5ef956d27",
+      "item": {
+        "type": "paragraph",
+        "id": "e69b67e5ef956d27",
+        "text": "Step 3: The key’s index is then used to access the entry representing the remaining 16 bits of the 64 bits address and the Child value. It is located in the level 1 buffer pointed to by the buffer root entry retrieved in step 1 (Figure 4)."
+      },
+      "after": "8abdc1a91df0aa37",
+      "date": 1695052704305
+    },
+    {
+      "type": "add",
+      "id": "76f81113fd297fba",
+      "item": {
+        "type": "paragraph",
+        "id": "76f81113fd297fba",
+        "text": "[…]"
+      },
+      "after": "e69b67e5ef956d27",
+      "date": 1695052707006
+    },
+    {
+      "type": "edit",
+      "id": "76f81113fd297fba",
+      "item": {
+        "type": "paragraph",
+        "id": "76f81113fd297fba",
+        "text": "[…] Figure 4: The index of the key found in the key index is used to access the corresponding entry for the remaining 16 bits of the 64 bits address plus the Child Handle in the level 1 buffer."
+      },
+      "date": 1695052744350
+    },
+    {
+      "type": "add",
+      "id": "b3006df98854899e",
+      "item": {
+        "type": "paragraph",
+        "id": "b3006df98854899e",
+        "text": "Step 4: If the LSB16 stored in the Level1Entry equals the LSB16(yHandle) then the Child Handle of (Np, Ap) is the Handle in the Level1Entry."
+      },
+      "after": "76f81113fd297fba",
+      "date": 1695052792565
+    },
+    {
+      "type": "add",
+      "id": "9d98f18496668ee9",
+      "item": {
+        "type": "paragraph",
+        "id": "9d98f18496668ee9",
+        "text": "Otherwise, the Level1Entry needs to be checked, if it contains a Child Handle at all – or if the 4 bytes reserved for the Child Handle contain a pointer to a level 2 buffer.4 A Level1Entry thus serves two purposes: it either contains a Child Handle or is a pointer to a buffer of Child Handles."
+      },
+      "after": "b3006df98854899e",
+      "date": 1695052803811
+    },
+    {
+      "type": "add",
+      "id": "57f8a11cc70fdeac",
+      "item": {
+        "type": "paragraph",
+        "id": "57f8a11cc70fdeac",
+        "text": "Step 5: If the Level1Entry contains a pointer to a level 2 buffer, because there are several LSB16(yHandle) values belonging to the 48 bit address (LSB(xHandle) & MSB(xHandle) & MSB(yHandle)) followed so far, then the LSB16(yHandle) is looked-up in the level 2 buffer via a binary search (Figure 5)."
+      },
+      "after": "9d98f18496668ee9",
+      "date": 1695052812611
+    },
+    {
+      "type": "add",
+      "id": "afd98b971fea6201",
+      "item": {
+        "type": "paragraph",
+        "id": "afd98b971fea6201",
+        "text": "[…] Figure 5: If the level 1 buffer entry contains a pointer to a level 2 buffer, then search the level 2 buffer for the LSB16(yHandle) entry, which contains the Child Handle"
+      },
+      "after": "57f8a11cc70fdeac",
+      "date": 1695052829155
+    },
+    {
+      "type": "edit",
+      "id": "9d98f18496668ee9",
+      "item": {
+        "type": "paragraph",
+        "id": "9d98f18496668ee9",
+        "text": "Otherwise, the Level1Entry needs to be checked, if it contains a Child Handle at all – or if the 4 bytes reserved for the Child Handle contain a pointer to a level 2 buffer.4 A Level1Entry thus serves two purposes: it either contains a Child Handle or is a pointer to a buffer of Child Handles. [⇒ [[Tree Arranged on Pages]], ]"
+      },
+      "date": 1695052907468
+    },
+    {
+      "type": "edit",
+      "id": "9d98f18496668ee9",
+      "item": {
+        "type": "paragraph",
+        "id": "9d98f18496668ee9",
+        "text": "Otherwise, the Level1Entry needs to be checked, if it contains a Child Handle at all – or if the 4 bytes reserved for the Child Handle contain a pointer to a level 2 buffer.4 A Level1Entry thus serves two purposes: it either contains a Child Handle or is a pointer to a buffer of Child Handles. [⇒ [[Tree Arranged on Pages]], LTAG and RTAG]"
+      },
+      "date": 1695052914284
+    },
+    {
+      "type": "edit",
+      "id": "9d98f18496668ee9",
+      "item": {
+        "type": "paragraph",
+        "id": "9d98f18496668ee9",
+        "text": "Otherwise, the Level1Entry needs to be checked, if it contains a Child Handle at all – or if the 4 bytes reserved for the Child Handle contain a pointer to a level 2 buffer.4"
+      },
+      "date": 1695052987055
+    },
+    {
+      "type": "add",
+      "id": "53da5a6e08921a8e",
+      "item": {
+        "type": "paragraph",
+        "id": "53da5a6e08921a8e",
+        "text": "How this is done in OPE is not entirely clear. The PGM_6_bytes structure corresponding to the Level1Entry struct in Appendix C bears no hint."
+      },
+      "after": "9d98f18496668ee9",
+      "date": 1695052989256
+    },
+    {
+      "type": "add",
+      "id": "1154330e2a782ba6",
+      "item": {
+        "type": "paragraph",
+        "id": "1154330e2a782ba6",
+        "text": "A Level1Entry thus serves two purposes: it either contains a Child Handle or is a pointer to a buffer of Child Handles. [⇒ [[Tree Arranged on Pages]], LTAG and RTAG]"
+      },
+      "after": "53da5a6e08921a8e",
+      "date": 1695052990855
+    },
+    {
+      "type": "edit",
+      "id": "9d98f18496668ee9",
+      "item": {
+        "type": "paragraph",
+        "id": "9d98f18496668ee9",
+        "text": "Otherwise, the Level1Entry needs to be checked, if it contains a Child Handle at all – or if the 4 bytes reserved for the Child Handle contain a pointer to a level 2 buffer."
+      },
+      "date": 1695052992277
+    },
+    {
+      "id": "b4d1d9260a0732f5",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "b4d1d9260a0732f5",
+        "text": "LTAG and RTAG, one-bit fields that tell whether or not LLINK and RLINK, respectively, are pointers to children or to ancestors of the node. The dotted lines in Fig. 33 correspond to pointers whose TAG bit is 1."
+      },
+      "after": "1154330e2a782ba6",
+      "attribution": {
+        "page": "Tree Arranged on Pages"
+      },
+      "date": 1695053085644
+    },
+    {
+      "type": "edit",
+      "id": "b4d1d9260a0732f5",
+      "item": {
+        "type": "paragraph",
+        "id": "b4d1d9260a0732f5",
+        "text": "> LTAG and RTAG, one-bit fields that tell whether or not LLINK and RLINK, respectively, are pointers to children or to ancestors of the node. The dotted lines in Fig. 33 correspond to pointers whose TAG bit is 1."
+      },
+      "date": 1695053089593
+    },
+    {
+      "type": "edit",
+      "id": "b4d1d9260a0732f5",
+      "item": {
+        "type": "markdown",
+        "id": "b4d1d9260a0732f5",
+        "text": "> LTAG and RTAG, one-bit fields that tell whether or not LLINK and RLINK, respectively, are pointers to children or to ancestors of the node. The dotted lines in Fig. 33 correspond to pointers whose TAG bit is 1."
+      },
+      "date": 1695053090661
+    },
+    {
+      "id": "ffa883e1d08deabf",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "ffa883e1d08deabf",
+        "text": "It consists of a header and N −1 nodes [⇐ [[GetChild]], Figure 3, the search result is a value ranging from 0 to n-1], where the nodes contain several fields:"
+      },
+      "after": "8abdc1a91df0aa37",
+      "attribution": {
+        "page": "Tree Arranged on Pages"
+      },
+      "date": 1695053126693
+    },
+    {
+      "type": "edit",
+      "id": "ffa883e1d08deabf",
+      "item": {
+        "type": "paragraph",
+        "id": "ffa883e1d08deabf",
+        "text": "> It consists of a header and N −1 nodes, the search result is a value ranging from 0 to n-1], where the nodes contain several fields:"
+      },
+      "date": 1695053137115
+    },
+    {
+      "type": "edit",
+      "id": "ffa883e1d08deabf",
+      "item": {
+        "type": "markdown",
+        "id": "ffa883e1d08deabf",
+        "text": "> It consists of a header and N −1 nodes, the search result is a value ranging from 0 to n-1], where the nodes contain several fields:"
+      },
+      "date": 1695053138145
+    },
+    {
+      "type": "edit",
+      "id": "ffa883e1d08deabf",
+      "item": {
+        "type": "markdown",
+        "id": "ffa883e1d08deabf",
+        "text": "> It consists of a header and N −1 nodes, the search result is a value ranging from 0 to n-1], where the nodes contain several fields: …"
+      },
+      "date": 1695053174814
+    },
+    {
+      "type": "edit",
+      "id": "ab79edd1f26180ea",
+      "item": {
+        "type": "paragraph",
+        "id": "ab79edd1f26180ea",
+        "text": "This “Pile memory” can be said to be “paged” [⇒ [[Tree Arranged on Pages]]], since its root again is a table containing just pointers to buffers (Figure 2). So there is no contiguous space of bytes to keep the Child Handles in. This [[Buffer Root Table]] contains 65536 elements each consisting of two pointers to buffers, i.e. it occupies 0.5 MB in total."
+      },
+      "date": 1695053227868
+    },
+    {
+      "type": "edit",
+      "id": "a43c27607daf94ac",
+      "item": {
+        "type": "paragraph",
+        "id": "a43c27607daf94ac",
+        "text": "[…] Figure 2: The “Pile memory” implements a sparsely populated 2D array of Child Handles using a cascade of buffers."
+      },
+      "date": 1695053278323
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "faa25613aa1e1d90"
+      },
+      "id": "faa25613aa1e1d90",
+      "type": "add",
+      "after": "d1867df4931a57d0",
+      "date": 1695053420422
+    },
+    {
+      "id": "faa25613aa1e1d90",
+      "type": "move",
+      "order": [
+        "764c29e3e290f112",
+        "8b533ac061dc56ac",
+        "9132b2da9817c53e",
+        "b21e54c90ca43629",
+        "ab79edd1f26180ea",
+        "a43c27607daf94ac",
+        "c2be7aa63b4d3ef6",
+        "268caaed09d3edcb",
+        "c9c15dba3dce8f74",
+        "3c42622c73794638",
+        "8abdc1a91df0aa37",
+        "ffa883e1d08deabf",
+        "e69b67e5ef956d27",
+        "faa25613aa1e1d90",
+        "76f81113fd297fba",
+        "b3006df98854899e",
+        "9d98f18496668ee9",
+        "53da5a6e08921a8e",
+        "1154330e2a782ba6",
+        "b4d1d9260a0732f5",
+        "57f8a11cc70fdeac",
+        "afd98b971fea6201",
+        "3fc0cd2ccae08029",
+        "b0b28dad2b42753d",
+        "0d6e3906b8c93ebe",
+        "c60d5902fbe50c6d",
+        "d1867df4931a57d0"
+      ],
+      "date": 1695053434325
+    },
+    {
+      "type": "edit",
+      "id": "faa25613aa1e1d90",
+      "item": {
+        "type": "image",
+        "id": "faa25613aa1e1d90",
+        "text": "Uploaded image",
+        "size": "wide",
+        "width": 430,
+        "height": 167,
+        "url": "/assets/plugins/image/f9289b0ba98476846fb08f490907cc48.jpg"
+      },
+      "date": 1695053446255
+    },
+    {
+      "type": "remove",
+      "id": "76f81113fd297fba",
+      "date": 1695053449743
+    },
+    {
+      "type": "edit",
+      "id": "faa25613aa1e1d90",
+      "item": {
+        "type": "image",
+        "id": "faa25613aa1e1d90",
+        "text": "Figure 4: The index of the key found in the key index is used to access the corresponding entry for the remaining 16 bits of the 64 bits address plus the Child Handle in the level 1 buffer.",
+        "size": "wide",
+        "width": 430,
+        "height": 167,
+        "url": "/assets/plugins/image/f9289b0ba98476846fb08f490907cc48.jpg"
+      },
+      "date": 1695053453483
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dba40b7116ca8e48"
+      },
+      "id": "dba40b7116ca8e48",
+      "type": "add",
+      "after": "d1867df4931a57d0",
+      "date": 1695053621952
+    },
+    {
+      "id": "dba40b7116ca8e48",
+      "type": "move",
+      "order": [
+        "764c29e3e290f112",
+        "8b533ac061dc56ac",
+        "9132b2da9817c53e",
+        "b21e54c90ca43629",
+        "ab79edd1f26180ea",
+        "a43c27607daf94ac",
+        "c2be7aa63b4d3ef6",
+        "268caaed09d3edcb",
+        "c9c15dba3dce8f74",
+        "3c42622c73794638",
+        "8abdc1a91df0aa37",
+        "ffa883e1d08deabf",
+        "e69b67e5ef956d27",
+        "faa25613aa1e1d90",
+        "b3006df98854899e",
+        "9d98f18496668ee9",
+        "53da5a6e08921a8e",
+        "1154330e2a782ba6",
+        "b4d1d9260a0732f5",
+        "57f8a11cc70fdeac",
+        "dba40b7116ca8e48",
+        "afd98b971fea6201",
+        "3fc0cd2ccae08029",
+        "b0b28dad2b42753d",
+        "0d6e3906b8c93ebe",
+        "c60d5902fbe50c6d",
+        "d1867df4931a57d0"
+      ],
+      "date": 1695053624338
+    },
+    {
+      "type": "edit",
+      "id": "dba40b7116ca8e48",
+      "item": {
+        "type": "image",
+        "id": "dba40b7116ca8e48",
+        "text": "Uploaded image",
+        "size": "wide",
+        "width": 430,
+        "height": 267,
+        "url": "/assets/plugins/image/42cd2aaeefd7a9992be214e675fddd38.jpg"
+      },
+      "date": 1695053634886
+    },
+    {
+      "type": "remove",
+      "id": "afd98b971fea6201",
+      "date": 1695053638290
+    },
+    {
+      "type": "edit",
+      "id": "dba40b7116ca8e48",
+      "item": {
+        "type": "image",
+        "id": "dba40b7116ca8e48",
+        "text": "Figure 5: If the level 1 buffer entry contains a pointer to a level 2 buffer, then search the level 2 buffer for the LSB16(yHandle) entry, which contains the Child Handle",
+        "size": "wide",
+        "width": 430,
+        "height": 267,
+        "url": "/assets/plugins/image/42cd2aaeefd7a9992be214e675fddd38.jpg"
+      },
+      "date": 1695053642374
+    },
+    {
+      "type": "edit",
+      "id": "764c29e3e290f112",
+      "item": {
+        "type": "paragraph",
+        "id": "764c29e3e290f112",
+        "text": "Finding the child – if existent at all – for a pair of Parent Handles is a multistep process in the [[OPE]] involving several buffers."
+      },
+      "date": 1695053732704
+    },
+    {
+      "type": "edit",
+      "id": "d1867df4931a57d0",
+      "item": {
+        "type": "markdown",
+        "id": "d1867df4931a57d0",
+        "text": "> The tree that Patricia uses for searching should be contained in random-access memory, or it should be arranged on pages as suggested in Section 6.2.4. It consists of a header and N −1 nodes, where the nodes contain several fields: …"
+      },
+      "date": 1695053769445
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f750f97d8abdf1c5"
+      },
+      "id": "f750f97d8abdf1c5",
+      "type": "add",
+      "after": "d1867df4931a57d0",
+      "date": 1695053830751
+    },
+    {
+      "id": "f750f97d8abdf1c5",
+      "type": "move",
+      "order": [
+        "764c29e3e290f112",
+        "8b533ac061dc56ac",
+        "9132b2da9817c53e",
+        "b21e54c90ca43629",
+        "ab79edd1f26180ea",
+        "a43c27607daf94ac",
+        "c2be7aa63b4d3ef6",
+        "268caaed09d3edcb",
+        "c9c15dba3dce8f74",
+        "3c42622c73794638",
+        "8abdc1a91df0aa37",
+        "ffa883e1d08deabf",
+        "e69b67e5ef956d27",
+        "faa25613aa1e1d90",
+        "b3006df98854899e",
+        "9d98f18496668ee9",
+        "53da5a6e08921a8e",
+        "1154330e2a782ba6",
+        "b4d1d9260a0732f5",
+        "57f8a11cc70fdeac",
+        "dba40b7116ca8e48",
+        "f750f97d8abdf1c5",
+        "3fc0cd2ccae08029",
+        "b0b28dad2b42753d",
+        "0d6e3906b8c93ebe",
+        "c60d5902fbe50c6d",
+        "d1867df4931a57d0"
+      ],
+      "date": 1695053836384
+    },
+    {
+      "type": "edit",
+      "id": "f750f97d8abdf1c5",
+      "item": {
+        "type": "paragraph",
+        "id": "f750f97d8abdf1c5",
+        "text": "## Thoughts on the OPE data structures"
+      },
+      "date": 1695053845161
+    },
+    {
+      "type": "add",
+      "id": "0d67f82bd52fbb96",
+      "item": {
+        "type": "paragraph",
+        "id": "0d67f82bd52fbb96",
+        "text": "Why is the addressing of the buffer root table done using the LSB16 whereas the index table for GetParents() is addressed with the MSB16? GetParents() strives for few large buffers which are easy to handle, because the information looked for can be directly accessed (using the LSB16). etChild() however is looking up information using a binary search and thus needs to keep the entries in its buffers always sorted (see CreateChild()). The OPE thus favors many small buffers which can quickly be searched and easily kept sorted."
+      },
+      "after": "f750f97d8abdf1c5",
+      "date": 1695053853905
+    },
+    {
+      "type": "edit",
+      "id": "f750f97d8abdf1c5",
+      "item": {
+        "type": "markdown",
+        "id": "f750f97d8abdf1c5",
+        "text": "## Thoughts on the OPE data structures"
+      },
+      "date": 1695053855133
+    },
+    {
+      "type": "edit",
+      "id": "0d67f82bd52fbb96",
+      "item": {
+        "type": "paragraph",
+        "id": "0d67f82bd52fbb96",
+        "text": "Why is the addressing of the [[Buffer Root Table]] done using the LSB16 whereas the index table for GetParents() is addressed with the MSB16? GetParents() strives for few large buffers which are easy to handle, because the information looked for can be directly accessed (using the LSB16). etChild() however is looking up information using a binary search and thus needs to keep the entries in its buffers always sorted (see CreateChild()). The OPE thus favors many small buffers which can quickly be searched and easily kept sorted."
+      },
+      "date": 1695053870671
+    },
+    {
+      "type": "edit",
+      "id": "0d67f82bd52fbb96",
+      "item": {
+        "type": "paragraph",
+        "id": "0d67f82bd52fbb96",
+        "text": "Why is the addressing of the [[Buffer Root Table]] done using the LSB16 whereas the index table for GetParents() is addressed with the MSB16? GetParents() strives for few large buffers which are easy to handle, because the information looked for can be directly accessed (using the LSB16)."
+      },
+      "date": 1695053912419
+    },
+    {
+      "type": "add",
+      "id": "3137259fdb7ea963",
+      "item": {
+        "type": "paragraph",
+        "id": "3137259fdb7ea963",
+        "text": "GetChild() however is looking up information using a binary search and thus needs to keep the entries in its buffers always sorted (see CreateChild()). The OPE thus favors many small buffers which can quickly be searched and easily kept sorted."
+      },
+      "after": "0d67f82bd52fbb96",
+      "date": 1695053913037
+    },
+    {
+      "type": "add",
+      "id": "1261c1eb38c0e98d",
+      "item": {
+        "type": "paragraph",
+        "id": "1261c1eb38c0e98d",
+        "text": "Why does a Level1Entry serve two purposes? As long as there is only one LSB16(yHandle) for a particular LSB(xHandle) & MSB(xHandle) & MSB(yHandle) combination, one indirection and binary search is saved. The Child Handle is found right in the Level1Entry pointed to by the MSB(xHandle) & MSB(yHandle) key ́s index."
+      },
+      "after": "3137259fdb7ea963",
+      "date": 1695053939755
+    },
+    {
+      "type": "edit",
+      "id": "1261c1eb38c0e98d",
+      "item": {
+        "type": "paragraph",
+        "id": "1261c1eb38c0e98d",
+        "text": "Why does a Level1Entry serve two purposes? As long as there is only one LSB16(yHandle) for a particular LSB(xHandle) & MSB(xHandle) & MSB(yHandle) combination, one indirection and binary search is saved."
+      },
+      "date": 1695053968891
+    },
+    {
+      "type": "add",
+      "id": "18989465aa1f817e",
+      "item": {
+        "type": "paragraph",
+        "id": "18989465aa1f817e",
+        "text": "The Child Handle is found right in the Level1Entry pointed to by the MSB(xHandle) & MSB(yHandle) key ́s index."
+      },
+      "after": "1261c1eb38c0e98d",
+      "date": 1695053969421
+    },
+    {
+      "type": "add",
+      "id": "a79fc6b048a2adf5",
+      "item": {
+        "type": "paragraph",
+        "id": "a79fc6b048a2adf5",
+        "text": "However, it seems this is just a rare case. For Piles with several thousand Relations most LSB(xHandle) & MSB(xHandle) & MSB(yHandle) combinations certainly point to several LSB16(yHandle) values. Thus it seems, the added complexity of the level 1 buffer is not really necessary. Instead the key index could contain a level 2 buffer pointer which then would always be used to store LSB16(yHandle) and the Child Handle."
+      },
+      "after": "18989465aa1f817e",
+      "date": 1695053980298
+    },
+    {
+      "type": "add",
+      "id": "f508804dae93cf9f",
+      "item": {
+        "type": "paragraph",
+        "id": "f508804dae93cf9f",
+        "text": "⇒ [[CreateChild]]"
+      },
+      "after": "a79fc6b048a2adf5",
+      "date": 1695054027636
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2e0948c78f511474"
+      },
+      "id": "2e0948c78f511474",
+      "type": "add",
+      "after": "d1867df4931a57d0",
+      "date": 1695054212698
+    },
+    {
+      "id": "2e0948c78f511474",
+      "type": "move",
+      "order": [
+        "764c29e3e290f112",
+        "8b533ac061dc56ac",
+        "9132b2da9817c53e",
+        "b21e54c90ca43629",
+        "ab79edd1f26180ea",
+        "2e0948c78f511474",
+        "a43c27607daf94ac",
+        "c2be7aa63b4d3ef6",
+        "268caaed09d3edcb",
+        "c9c15dba3dce8f74",
+        "3c42622c73794638",
+        "8abdc1a91df0aa37",
+        "ffa883e1d08deabf",
+        "e69b67e5ef956d27",
+        "faa25613aa1e1d90",
+        "b3006df98854899e",
+        "9d98f18496668ee9",
+        "53da5a6e08921a8e",
+        "1154330e2a782ba6",
+        "b4d1d9260a0732f5",
+        "57f8a11cc70fdeac",
+        "dba40b7116ca8e48",
+        "f750f97d8abdf1c5",
+        "0d67f82bd52fbb96",
+        "3137259fdb7ea963",
+        "1261c1eb38c0e98d",
+        "18989465aa1f817e",
+        "a79fc6b048a2adf5",
+        "f508804dae93cf9f",
+        "3fc0cd2ccae08029",
+        "b0b28dad2b42753d",
+        "0d6e3906b8c93ebe",
+        "c60d5902fbe50c6d",
+        "d1867df4931a57d0"
+      ],
+      "date": 1695054240877
+    },
+    {
+      "type": "remove",
+      "id": "a43c27607daf94ac",
+      "date": 1695054253310
+    },
+    {
+      "type": "edit",
+      "id": "2e0948c78f511474",
+      "item": {
+        "type": "image",
+        "id": "2e0948c78f511474",
+        "text": "Uploaded image",
+        "size": "wide",
+        "width": 430,
+        "height": 248,
+        "url": "/assets/plugins/image/3542dd0ba9e1f0fade81c478312ba05d.jpg"
+      },
+      "date": 1695054254009
+    },
+    {
+      "type": "edit",
+      "id": "2e0948c78f511474",
+      "item": {
+        "type": "image",
+        "id": "2e0948c78f511474",
+        "text": "Figure 2: The “Pile memory” implements a sparsely populated 2D array of Child Handles using a cascade of buffers.",
+        "size": "wide",
+        "width": 430,
+        "height": 248,
+        "url": "/assets/plugins/image/3542dd0ba9e1f0fade81c478312ba05d.jpg"
+      },
+      "date": 1695054258881
+    },
+    {
+      "type": "fork",
+      "date": 1695054429131
+    },
+    {
+      "type": "edit",
+      "id": "e69b67e5ef956d27",
+      "item": {
+        "type": "paragraph",
+        "id": "e69b67e5ef956d27",
+        "text": "Step 3: The key’s index is then used to access the entry representing the remaining 16 bits of the 64 bits address and the Child value. It is located in the level 1 buffer pointed to by the [[Buffer Root Entry]] retrieved in step 1 (Figure 4)."
+      },
+      "date": 1695054700899
+    },
+    {
+      "type": "edit",
+      "id": "53da5a6e08921a8e",
+      "item": {
+        "type": "paragraph",
+        "id": "53da5a6e08921a8e",
+        "text": "**How this is done in OPE is not entirely clear. The PGM_6_bytes structure corresponding to the Level1Entry struct in Appendix C bears no hint.**"
+      },
+      "date": 1695054988049
+    },
+    {
+      "type": "edit",
+      "id": "53da5a6e08921a8e",
+      "item": {
+        "type": "markdown",
+        "id": "53da5a6e08921a8e",
+        "text": "**How this is done in OPE is not entirely clear. The PGM_6_bytes structure corresponding to the Level1Entry struct in Appendix C bears no hint.**"
+      },
+      "date": 1695054989291
+    },
+    {
+      "type": "edit",
+      "id": "0d67f82bd52fbb96",
+      "item": {
+        "type": "paragraph",
+        "id": "0d67f82bd52fbb96",
+        "text": "Why is the addressing of the [[Buffer Root Table]] done using the LSB16 whereas the index table for GetParents() is addressed with the MSB16?"
+      },
+      "date": 1695055153743
+    },
+    {
+      "type": "add",
+      "id": "0422d9d972830827",
+      "item": {
+        "type": "paragraph",
+        "id": "0422d9d972830827",
+        "text": "GetParents() strives for few large buffers which are easy to handle, because the information looked for can be directly accessed (using the LSB16)."
+      },
+      "after": "0d67f82bd52fbb96",
+      "date": 1695055154495
+    },
+    {
+      "type": "edit",
+      "id": "1261c1eb38c0e98d",
+      "item": {
+        "type": "paragraph",
+        "id": "1261c1eb38c0e98d",
+        "text": "Why does a Level1Entry serve two purposes?"
+      },
+      "date": 1695055229798
+    },
+    {
+      "type": "add",
+      "id": "d06b898481c21882",
+      "item": {
+        "type": "paragraph",
+        "id": "d06b898481c21882",
+        "text": "As long as there is only one LSB16(yHandle) for a particular LSB(xHandle) & MSB(xHandle) & MSB(yHandle) combination, one indirection and binary search is saved."
+      },
+      "after": "1261c1eb38c0e98d",
+      "date": 1695055234923
+    },
+    {
+      "type": "edit",
+      "id": "b21e54c90ca43629",
+      "item": {
+        "type": "paragraph",
+        "id": "b21e54c90ca43629",
+        "text": "Since this is infeasible to implement due to memory restrictions, another data structure must be used. OPE has chosen to realize the 2D array by crafting its own memory management where Handles are used as “addresses” in the “[[Pile Memory]]” in several ways."
+      },
+      "date": 1695055375601
+    },
+    {
+      "type": "edit",
+      "id": "2e0948c78f511474",
+      "item": {
+        "type": "image",
+        "id": "2e0948c78f511474",
+        "text": "Figure 2: The “[[Pile Memory]]” implements a sparsely populated 2D array of Child Handles using a cascade of buffers.",
+        "size": "wide",
+        "width": 430,
+        "height": 248,
+        "url": "/assets/plugins/image/3542dd0ba9e1f0fade81c478312ba05d.jpg"
+      },
+      "date": 1695055579183
+    },
+    {
+      "type": "fork",
+      "date": 1695055719642
+    }
+  ]
+}

@@ -1,0 +1,1112 @@
+{
+  "title": "The Original Pile Engine Demystified",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "3edb2adf89e6de38",
+      "text": "[[Ralf Westphal]]'s [https://weblogs.asp.net/ralfw/441384 post], [https://web.archive.org/web/20081119150632/http://www.pilesys.com/TheOriginalPileEngineDemystified.pdf pdf]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3b91b9aa2e464c60",
+      "text": "The Original [[Pile Engine]] (OPE) as implemented by [[Erez Elul]] and [[Miriam Bedoni]] has boggled the\nminds of the Pile community for quite some time. Several attempts have been undertaken to\nunderstand its implementation – unfortunately without really succeeding. Recently [[Dirk Reuter]] with\nthe help of Miriam has taken a stab at it again and written up a document trying to explain the\nalgorithms and data structures used in the OPE (see his posting on Jan 16 2006 to the pileworks\nmailing list). Although this explanation is somewhat easier to understand than earlier writings it\nalmost fully remains in the peculiar pileworks terminology."
+    },
+    {
+      "type": "paragraph",
+      "id": "024a73db34f61036",
+      "text": "To make [[Pile]] and its first implementation easier to understand and to pave the way for future\nimplementations the following explanation will undertake a translation of the OPE algorithms and\ndata structures to more usual software development terminology."
+    },
+    {
+      "type": "markdown",
+      "id": "4bc27597316df328",
+      "text": "# What this Paper is about – and what not"
+    },
+    {
+      "type": "paragraph",
+      "id": "e4aba87bf4868cec",
+      "text": "This paper is about implementation and not about concept. It tries to explain a certain software design which realizes the Pile idea. It thus does not make any statement about the quality or feasibility of Pile concepts. Rather it wants to help make future discussions about Pile concepts easier, by getting implementational details out of the way."
+    },
+    {
+      "type": "paragraph",
+      "id": "a27d47c1521ada60",
+      "text": "Pile as a whole is like a coin with two faces: One is the conceptual side of Pile, the other the implementational."
+    },
+    {
+      "type": "paragraph",
+      "id": "f9bbf08bc8208eed",
+      "text": "Conceptually Pile for sure is very interesting and worthy to invest research into. Where can a Pile view on the world of information processing make a difference? That ́s an important question to answer. Erez Elul ́s “three equations” are part of the Pile concept. The very notion of relation as opposed to data is part of the Pile concept."
+    },
+    {
+      "type": "paragraph",
+      "id": "e61ba31545e55b81",
+      "text": "But the concept must not be confused with its implementation. Because if implementational details creep into a discussion about the concept, the concept might look less attractive or infeasible. So whether a relation is implemented as an integer or whether relations are managed in buffers or trees in a Pile Engine should be of no concern to whoever is interested in the Pile concept."
+    },
+    {
+      "type": "paragraph",
+      "id": "56d704653016ccfc",
+      "text": "So far, though, many discussions about the Pile concept sooner or later referred to Erez ́ OPE, attributing it some capabilities without which Pile as a concept would not work. Thus since this implementation was so hard to understand, Pile ́s success so far was limited by it."
+    },
+    {
+      "type": "paragraph",
+      "id": "401d1c8908c24060",
+      "text": "Now, by demystifying the OPE ́s inner workings this paper is trying to make the valuable Pile concept independent of any implementation. Of course, in the end Pile needs to be implemented somehow. But there can and should be more than one implementation with different qualities."
+    },
+    {
+      "type": "paragraph",
+      "id": "5f86d48694508201",
+      "text": "Pile implementations can differ in speed or memory consumption, but as is shown in this paper, they do not need to rely on some “magical algorithm” or the like in order to be called Pile Engines. Certainly it ́s a challenge to find the right data structures and algorithms for an implementation be fast and have small memory footprint. But that ́s primarily matters for software developers."
+    },
+    {
+      "type": "paragraph",
+      "id": "fede3e03cd0d9978",
+      "text": "“Pile theorists” on the other hand should not be concerned too much about how a Pile Engine looks inside. As this paper will show, they can rest assured there is nothing in the OPE (or any other implementation so far) that needs to be understood first."
+    },
+    {
+      "type": "paragraph",
+      "id": "a94aafaee072acee",
+      "text": "Pile theory is about a relational space with certain basic operations to build it and navigate through it. But whether this relational space is spanned by the OPE or another implementation, whether internally relations are integer values, or whether they are arranged in a sparsely populated 2D coordinate system, is not important for the Pile theory."
+    },
+    {
+      "type": "paragraph",
+      "id": "67de8c74992d045e",
+      "text": "To make clear the distinction between concept and implementation of Pile, to direct research towards applications of Pile (Pile Agent) instead of implementation (Pile Engine), and to make the Pile idea independent of any particular realization in programming code: that ́s the purpose of this paper."
+    },
+    {
+      "type": "paragraph",
+      "id": "5cf7226007861f99",
+      "text": "⇒ [[Basic Pile Concepts]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "The Original Pile Engine Demystified",
+        "story": []
+      },
+      "date": 1695048936791
+    },
+    {
+      "id": "3edb2adf89e6de38",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "3edb2adf89e6de38",
+        "text": "See \"[[The Original Pile Engine Demystified]]\" [https://weblogs.asp.net/ralfw/441384 post]"
+      },
+      "attribution": {
+        "page": "2023-09-18"
+      },
+      "date": 1695048940716
+    },
+    {
+      "type": "edit",
+      "id": "3edb2adf89e6de38",
+      "item": {
+        "type": "paragraph",
+        "id": "3edb2adf89e6de38",
+        "text": "[https://weblogs.asp.net/ralfw/441384 post]"
+      },
+      "date": 1695048949662
+    },
+    {
+      "type": "edit",
+      "id": "3edb2adf89e6de38",
+      "item": {
+        "type": "paragraph",
+        "id": "3edb2adf89e6de38",
+        "text": "Ralf's [https://weblogs.asp.net/ralfw/441384 post]"
+      },
+      "date": 1695049014639
+    },
+    {
+      "type": "edit",
+      "id": "3edb2adf89e6de38",
+      "item": {
+        "type": "paragraph",
+        "id": "3edb2adf89e6de38",
+        "text": "Ralf Westphal's [https://weblogs.asp.net/ralfw/441384 post]"
+      },
+      "date": 1695049112386
+    },
+    {
+      "type": "edit",
+      "id": "3edb2adf89e6de38",
+      "item": {
+        "type": "paragraph",
+        "id": "3edb2adf89e6de38",
+        "text": "[[Ralf Westphal]]'s [https://weblogs.asp.net/ralfw/441384 post], [pdf]"
+      },
+      "date": 1695049141936
+    },
+    {
+      "type": "edit",
+      "id": "3edb2adf89e6de38",
+      "item": {
+        "type": "paragraph",
+        "id": "3edb2adf89e6de38",
+        "text": "[[Ralf Westphal]]'s [https://weblogs.asp.net/ralfw/441384 post], [https://web.archive.org/web/20081119150632/http://www.pilesys.com/TheOriginalPileEngineDemystified.pdf pdf]"
+      },
+      "date": 1695049147238
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3b91b9aa2e464c60"
+      },
+      "id": "3b91b9aa2e464c60",
+      "type": "add",
+      "after": "3edb2adf89e6de38",
+      "date": 1695049232871
+    },
+    {
+      "type": "edit",
+      "id": "3b91b9aa2e464c60",
+      "item": {
+        "type": "paragraph",
+        "id": "3b91b9aa2e464c60",
+        "text": "The Original Pile Engine (OPE) as implemented by Erez Elul and Miriam Bedoni has boggled the\nminds of the Pile community for quite some time. Several attempts have been undertaken to\nunderstand its implementation – unfortunately without really succeeding. Recently Dirk Reuter with\nthe help of Miriam has taken a stab at it again and written up a document trying to explain the\nalgorithms and data structures used in the OPE (see his posting on Jan 16 2006 to the pileworks\nmailing list). Although this explanation is somewhat easier to understand than earlier writings it\nalmost fully remains in the peculiar pileworks terminology."
+      },
+      "date": 1695049234421
+    },
+    {
+      "type": "edit",
+      "id": "3b91b9aa2e464c60",
+      "item": {
+        "type": "paragraph",
+        "id": "3b91b9aa2e464c60",
+        "text": "The Original Pile Engine (OPE) as implemented by [[Erez Elul]] and [[Miriam Bedoni]] has boggled the\nminds of the Pile community for quite some time. Several attempts have been undertaken to\nunderstand its implementation – unfortunately without really succeeding. Recently Dirk Reuter with\nthe help of Miriam has taken a stab at it again and written up a document trying to explain the\nalgorithms and data structures used in the OPE (see his posting on Jan 16 2006 to the pileworks\nmailing list). Although this explanation is somewhat easier to understand than earlier writings it\nalmost fully remains in the peculiar pileworks terminology."
+      },
+      "date": 1695049258564
+    },
+    {
+      "type": "edit",
+      "id": "3b91b9aa2e464c60",
+      "item": {
+        "type": "paragraph",
+        "id": "3b91b9aa2e464c60",
+        "text": "The Original Pile Engine (OPE) as implemented by [[Erez Elul]] and [[Miriam Bedoni]] has boggled the\nminds of the Pile community for quite some time. Several attempts have been undertaken to\nunderstand its implementation – unfortunately without really succeeding. Recently [[Dirk Reuter]] with\nthe help of Miriam has taken a stab at it again and written up a document trying to explain the\nalgorithms and data structures used in the OPE (see his posting on Jan 16 2006 to the pileworks\nmailing list). Although this explanation is somewhat easier to understand than earlier writings it\nalmost fully remains in the peculiar pileworks terminology."
+      },
+      "date": 1695049283452
+    },
+    {
+      "type": "add",
+      "id": "024a73db34f61036",
+      "item": {
+        "type": "paragraph",
+        "id": "024a73db34f61036",
+        "text": "To make Pile and its first implementation easier to understand and to pave the way for future\nimplementations the following explanation will undertake a translation of the OPE algorithms and\ndata structures to more usual software development terminology."
+      },
+      "after": "3b91b9aa2e464c60",
+      "date": 1695049321193
+    },
+    {
+      "type": "edit",
+      "id": "3b91b9aa2e464c60",
+      "item": {
+        "type": "paragraph",
+        "id": "3b91b9aa2e464c60",
+        "text": "The Original [[Pile Engine]] (OPE) as implemented by [[Erez Elul]] and [[Miriam Bedoni]] has boggled the\nminds of the Pile community for quite some time. Several attempts have been undertaken to\nunderstand its implementation – unfortunately without really succeeding. Recently [[Dirk Reuter]] with\nthe help of Miriam has taken a stab at it again and written up a document trying to explain the\nalgorithms and data structures used in the OPE (see his posting on Jan 16 2006 to the pileworks\nmailing list). Although this explanation is somewhat easier to understand than earlier writings it\nalmost fully remains in the peculiar pileworks terminology."
+      },
+      "date": 1695049391407
+    },
+    {
+      "type": "edit",
+      "id": "024a73db34f61036",
+      "item": {
+        "type": "paragraph",
+        "id": "024a73db34f61036",
+        "text": "To make [[Pile]] and its first implementation easier to understand and to pave the way for future\nimplementations the following explanation will undertake a translation of the OPE algorithms and\ndata structures to more usual software development terminology."
+      },
+      "date": 1695049441074
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4bc27597316df328"
+      },
+      "id": "4bc27597316df328",
+      "type": "add",
+      "after": "024a73db34f61036",
+      "date": 1695049498002
+    },
+    {
+      "type": "edit",
+      "id": "4bc27597316df328",
+      "item": {
+        "type": "paragraph",
+        "id": "4bc27597316df328",
+        "text": "# What this Paper is about – and what not"
+      },
+      "date": 1695049500871
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e4aba87bf4868cec"
+      },
+      "id": "e4aba87bf4868cec",
+      "type": "add",
+      "after": "4bc27597316df328",
+      "date": 1695049517549
+    },
+    {
+      "type": "edit",
+      "id": "e4aba87bf4868cec",
+      "item": {
+        "type": "paragraph",
+        "id": "e4aba87bf4868cec",
+        "text": "This paper is about implementation and not about concept. It tries to explain a certain software design which realizes the Pile idea. It thus does not make any statement about the quality or feasibility of Pile concepts. Rather it wants to help make future discussions about Pile concepts easier, by getting implementational details out of the way. Pile as a whole is like a coin with two faces: One is the conceptual side of Pile, the other the implementational. Conceptually Pile for sure is very interesting and worthy to invest research into. Where can a Pile view on the world of information processing make a difference? That ́s an important question to answer. Erez Elul ́s “three equations” are part of the Pile concept. The very notion of relation as opposed to data is part of the Pile concept. But the concept must not be confused with its implementation. Because if implementational details creep into a discussion about the concept, the concept might look less attractive or infeasible. So whether a relation is implemented as an integer or whether relations are managed in buffers or trees in a Pile Engine should be of no concern to whoever is interested in the Pile concept. So far, though, many discussions about the Pile concept sooner or later referred to Erez ́ OPE, attributing it some capabilities without which Pile as a concept would not work. Thus since this implementation was so hard to understand, Pile ́s success so far was limited by it. Now, by demystifying the OPE ́s inner workings this paper is trying to make the valuable Pile concept independent of any implementation. Of course, in the end Pile needs to be implemented somehow. But there can and should be more than one implementation with different qualities. Pile implementations can differ in speed or memory consumption, but as is shown in this paper, they do not need to rely on some “magical algorithm” or the like in order to be called Pile Engines. Certainly it ́s a challenge to find the right data structures and algorithms for an implementation be fast and have small memory footprint. But that ́s primarily matters for software developers. “Pile theorists” on the other hand should not be concerned too much about how a Pile Engine looks inside.As this paper will show, they can rest assured there is nothing in the OPE (or any other implementation so far) that needs to be understood first. Pile theory is about a relational space with certain basic operations to build it and navigate through it. But whether this relational space is spanned by the OPE or another implementation, whether internally relations are integer values, or whether they are arranged in a sparsely populated 2D coordinate system, is not important for the Pile theory. To make clear the distinction between concept and implementation of Pile, to direct research towards applications of Pile (Pile Agent) instead of implementation (Pile Engine), and to make the Pile idea independent of any particular realization in programming code: that ́s the purpose of this paper."
+      },
+      "date": 1695049519013
+    },
+    {
+      "type": "edit",
+      "id": "4bc27597316df328",
+      "item": {
+        "type": "markdown",
+        "id": "4bc27597316df328",
+        "text": "# What this Paper is about – and what not"
+      },
+      "date": 1695049524167
+    },
+    {
+      "type": "edit",
+      "id": "e4aba87bf4868cec",
+      "item": {
+        "type": "paragraph",
+        "id": "e4aba87bf4868cec",
+        "text": "This paper is about implementation and not about concept. It tries to explain a certain software design which realizes the Pile idea. It thus does not make any statement about the quality or feasibility of Pile concepts. Rather it wants to help make future discussions about Pile concepts easier, by getting implementational details out of the way."
+      },
+      "date": 1695049541774
+    },
+    {
+      "type": "add",
+      "id": "a27d47c1521ada60",
+      "item": {
+        "type": "paragraph",
+        "id": "a27d47c1521ada60",
+        "text": "Pile as a whole is like a coin with two faces: One is the conceptual side of Pile, the other the implementational. Conceptually Pile for sure is very interesting and worthy to invest research into. Where can a Pile view on the world of information processing make a difference? That ́s an important question to answer. Erez Elul ́s “three equations” are part of the Pile concept. The very notion of relation as opposed to data is part of the Pile concept. But the concept must not be confused with its implementation. Because if implementational details creep into a discussion about the concept, the concept might look less attractive or infeasible. So whether a relation is implemented as an integer or whether relations are managed in buffers or trees in a Pile Engine should be of no concern to whoever is interested in the Pile concept. So far, though, many discussions about the Pile concept sooner or later referred to Erez ́ OPE, attributing it some capabilities without which Pile as a concept would not work. Thus since this implementation was so hard to understand, Pile ́s success so far was limited by it. Now, by demystifying the OPE ́s inner workings this paper is trying to make the valuable Pile concept independent of any implementation. Of course, in the end Pile needs to be implemented somehow. But there can and should be more than one implementation with different qualities. Pile implementations can differ in speed or memory consumption, but as is shown in this paper, they do not need to rely on some “magical algorithm” or the like in order to be called Pile Engines. Certainly it ́s a challenge to find the right data structures and algorithms for an implementation be fast and have small memory footprint. But that ́s primarily matters for software developers. “Pile theorists” on the other hand should not be concerned too much about how a Pile Engine looks inside.As this paper will show, they can rest assured there is nothing in the OPE (or any other implementation so far) that needs to be understood first. Pile theory is about a relational space with certain basic operations to build it and navigate through it. But whether this relational space is spanned by the OPE or another implementation, whether internally relations are integer values, or whether they are arranged in a sparsely populated 2D coordinate system, is not important for the Pile theory. To make clear the distinction between concept and implementation of Pile, to direct research towards applications of Pile (Pile Agent) instead of implementation (Pile Engine), and to make the Pile idea independent of any particular realization in programming code: that ́s the purpose of this paper."
+      },
+      "after": "e4aba87bf4868cec",
+      "date": 1695049542754
+    },
+    {
+      "type": "edit",
+      "id": "a27d47c1521ada60",
+      "item": {
+        "type": "paragraph",
+        "id": "a27d47c1521ada60",
+        "text": "Pile as a whole is like a coin with two faces: One is the conceptual side of Pile, the other the implementational."
+      },
+      "date": 1695049555602
+    },
+    {
+      "type": "add",
+      "id": "f9bbf08bc8208eed",
+      "item": {
+        "type": "paragraph",
+        "id": "f9bbf08bc8208eed",
+        "text": "Conceptually Pile for sure is very interesting and worthy to invest research into. Where can a Pile view on the world of information processing make a difference? That ́s an important question to answer. Erez Elul ́s “three equations” are part of the Pile concept. The very notion of relation as opposed to data is part of the Pile concept. But the concept must not be confused with its implementation. Because if implementational details creep into a discussion about the concept, the concept might look less attractive or infeasible. So whether a relation is implemented as an integer or whether relations are managed in buffers or trees in a Pile Engine should be of no concern to whoever is interested in the Pile concept. So far, though, many discussions about the Pile concept sooner or later referred to Erez ́ OPE, attributing it some capabilities without which Pile as a concept would not work. Thus since this implementation was so hard to understand, Pile ́s success so far was limited by it. Now, by demystifying the OPE ́s inner workings this paper is trying to make the valuable Pile concept independent of any implementation. Of course, in the end Pile needs to be implemented somehow. But there can and should be more than one implementation with different qualities. Pile implementations can differ in speed or memory consumption, but as is shown in this paper, they do not need to rely on some “magical algorithm” or the like in order to be called Pile Engines. Certainly it ́s a challenge to find the right data structures and algorithms for an implementation be fast and have small memory footprint. But that ́s primarily matters for software developers. “Pile theorists” on the other hand should not be concerned too much about how a Pile Engine looks inside.As this paper will show, they can rest assured there is nothing in the OPE (or any other implementation so far) that needs to be understood first. Pile theory is about a relational space with certain basic operations to build it and navigate through it. But whether this relational space is spanned by the OPE or another implementation, whether internally relations are integer values, or whether they are arranged in a sparsely populated 2D coordinate system, is not important for the Pile theory. To make clear the distinction between concept and implementation of Pile, to direct research towards applications of Pile (Pile Agent) instead of implementation (Pile Engine), and to make the Pile idea independent of any particular realization in programming code: that ́s the purpose of this paper."
+      },
+      "after": "a27d47c1521ada60",
+      "date": 1695049556047
+    },
+    {
+      "type": "edit",
+      "id": "f9bbf08bc8208eed",
+      "item": {
+        "type": "paragraph",
+        "id": "f9bbf08bc8208eed",
+        "text": "Conceptually Pile for sure is very interesting and worthy to invest research into. Where can a Pile view on the world of information processing make a difference? That ́s an important question to answer. Erez Elul ́s “three equations” are part of the Pile concept. The very notion of relation as opposed to data is part of the Pile concept."
+      },
+      "date": 1695049608286
+    },
+    {
+      "type": "add",
+      "id": "e61ba31545e55b81",
+      "item": {
+        "type": "paragraph",
+        "id": "e61ba31545e55b81",
+        "text": "But the concept must not be confused with its implementation. Because if implementational details creep into a discussion about the concept, the concept might look less attractive or infeasible. So whether a relation is implemented as an integer or whether relations are managed in buffers or trees in a Pile Engine should be of no concern to whoever is interested in the Pile concept. So far, though, many discussions about the Pile concept sooner or later referred to Erez ́ OPE, attributing it some capabilities without which Pile as a concept would not work. Thus since this implementation was so hard to understand, Pile ́s success so far was limited by it. Now, by demystifying the OPE ́s inner workings this paper is trying to make the valuable Pile concept independent of any implementation. Of course, in the end Pile needs to be implemented somehow. But there can and should be more than one implementation with different qualities. Pile implementations can differ in speed or memory consumption, but as is shown in this paper, they do not need to rely on some “magical algorithm” or the like in order to be called Pile Engines. Certainly it ́s a challenge to find the right data structures and algorithms for an implementation be fast and have small memory footprint. But that ́s primarily matters for software developers. “Pile theorists” on the other hand should not be concerned too much about how a Pile Engine looks inside.As this paper will show, they can rest assured there is nothing in the OPE (or any other implementation so far) that needs to be understood first. Pile theory is about a relational space with certain basic operations to build it and navigate through it. But whether this relational space is spanned by the OPE or another implementation, whether internally relations are integer values, or whether they are arranged in a sparsely populated 2D coordinate system, is not important for the Pile theory. To make clear the distinction between concept and implementation of Pile, to direct research towards applications of Pile (Pile Agent) instead of implementation (Pile Engine), and to make the Pile idea independent of any particular realization in programming code: that ́s the purpose of this paper."
+      },
+      "after": "f9bbf08bc8208eed",
+      "date": 1695049608630
+    },
+    {
+      "type": "edit",
+      "id": "e61ba31545e55b81",
+      "item": {
+        "type": "paragraph",
+        "id": "e61ba31545e55b81",
+        "text": "But the concept must not be confused with its implementation. Because if implementational details creep into a discussion about the concept, the concept might look less attractive or infeasible. So whether a relation is implemented as an integer or whether relations are managed in buffers or trees in a Pile Engine should be of no concern to whoever is interested in the Pile concept."
+      },
+      "date": 1695049619690
+    },
+    {
+      "type": "add",
+      "id": "56d704653016ccfc",
+      "item": {
+        "type": "paragraph",
+        "id": "56d704653016ccfc",
+        "text": "So far, though, many discussions about the Pile concept sooner or later referred to Erez ́ OPE, attributing it some capabilities without which Pile as a concept would not work. Thus since this implementation was so hard to understand, Pile ́s success so far was limited by it. Now, by demystifying the OPE ́s inner workings this paper is trying to make the valuable Pile concept independent of any implementation. Of course, in the end Pile needs to be implemented somehow. But there can and should be more than one implementation with different qualities. Pile implementations can differ in speed or memory consumption, but as is shown in this paper, they do not need to rely on some “magical algorithm” or the like in order to be called Pile Engines. Certainly it ́s a challenge to find the right data structures and algorithms for an implementation be fast and have small memory footprint. But that ́s primarily matters for software developers. “Pile theorists” on the other hand should not be concerned too much about how a Pile Engine looks inside.As this paper will show, they can rest assured there is nothing in the OPE (or any other implementation so far) that needs to be understood first. Pile theory is about a relational space with certain basic operations to build it and navigate through it. But whether this relational space is spanned by the OPE or another implementation, whether internally relations are integer values, or whether they are arranged in a sparsely populated 2D coordinate system, is not important for the Pile theory. To make clear the distinction between concept and implementation of Pile, to direct research towards applications of Pile (Pile Agent) instead of implementation (Pile Engine), and to make the Pile idea independent of any particular realization in programming code: that ́s the purpose of this paper."
+      },
+      "after": "e61ba31545e55b81",
+      "date": 1695049620041
+    },
+    {
+      "type": "edit",
+      "id": "56d704653016ccfc",
+      "item": {
+        "type": "paragraph",
+        "id": "56d704653016ccfc",
+        "text": "So far, though, many discussions about the Pile concept sooner or later referred to Erez ́ OPE, attributing it some capabilities without which Pile as a concept would not work. Thus since this implementation was so hard to understand, Pile ́s success so far was limited by it."
+      },
+      "date": 1695049649382
+    },
+    {
+      "type": "add",
+      "id": "401d1c8908c24060",
+      "item": {
+        "type": "paragraph",
+        "id": "401d1c8908c24060",
+        "text": "Now, by demystifying the OPE ́s inner workings this paper is trying to make the valuable Pile concept independent of any implementation. Of course, in the end Pile needs to be implemented somehow. But there can and should be more than one implementation with different qualities. Pile implementations can differ in speed or memory consumption, but as is shown in this paper, they do not need to rely on some “magical algorithm” or the like in order to be called Pile Engines. Certainly it ́s a challenge to find the right data structures and algorithms for an implementation be fast and have small memory footprint. But that ́s primarily matters for software developers. “Pile theorists” on the other hand should not be concerned too much about how a Pile Engine looks inside.As this paper will show, they can rest assured there is nothing in the OPE (or any other implementation so far) that needs to be understood first. Pile theory is about a relational space with certain basic operations to build it and navigate through it. But whether this relational space is spanned by the OPE or another implementation, whether internally relations are integer values, or whether they are arranged in a sparsely populated 2D coordinate system, is not important for the Pile theory. To make clear the distinction between concept and implementation of Pile, to direct research towards applications of Pile (Pile Agent) instead of implementation (Pile Engine), and to make the Pile idea independent of any particular realization in programming code: that ́s the purpose of this paper."
+      },
+      "after": "56d704653016ccfc",
+      "date": 1695049656962
+    },
+    {
+      "type": "edit",
+      "id": "401d1c8908c24060",
+      "item": {
+        "type": "paragraph",
+        "id": "401d1c8908c24060",
+        "text": "Now, by demystifying the OPE ́s inner workings this paper is trying to make the valuable Pile concept independent of any implementation. Of course, in the end Pile needs to be implemented somehow. But there can and should be more than one implementation with different qualities."
+      },
+      "date": 1695049675169
+    },
+    {
+      "type": "add",
+      "id": "5f86d48694508201",
+      "item": {
+        "type": "paragraph",
+        "id": "5f86d48694508201",
+        "text": "Pile implementations can differ in speed or memory consumption, but as is shown in this paper, they do not need to rely on some “magical algorithm” or the like in order to be called Pile Engines. Certainly it ́s a challenge to find the right data structures and algorithms for an implementation be fast and have small memory footprint. But that ́s primarily matters for software developers. “Pile theorists” on the other hand should not be concerned too much about how a Pile Engine looks inside.As this paper will show, they can rest assured there is nothing in the OPE (or any other implementation so far) that needs to be understood first. Pile theory is about a relational space with certain basic operations to build it and navigate through it. But whether this relational space is spanned by the OPE or another implementation, whether internally relations are integer values, or whether they are arranged in a sparsely populated 2D coordinate system, is not important for the Pile theory. To make clear the distinction between concept and implementation of Pile, to direct research towards applications of Pile (Pile Agent) instead of implementation (Pile Engine), and to make the Pile idea independent of any particular realization in programming code: that ́s the purpose of this paper."
+      },
+      "after": "401d1c8908c24060",
+      "date": 1695049675640
+    },
+    {
+      "type": "edit",
+      "id": "5f86d48694508201",
+      "item": {
+        "type": "paragraph",
+        "id": "5f86d48694508201",
+        "text": "Pile implementations can differ in speed or memory consumption, but as is shown in this paper, they do not need to rely on some “magical algorithm” or the like in order to be called Pile Engines. Certainly it ́s a challenge to find the right data structures and algorithms for an implementation be fast and have small memory footprint. But that ́s primarily matters for software developers."
+      },
+      "date": 1695049708354
+    },
+    {
+      "type": "add",
+      "id": "fede3e03cd0d9978",
+      "item": {
+        "type": "paragraph",
+        "id": "fede3e03cd0d9978",
+        "text": "“Pile theorists” on the other hand should not be concerned too much about how a Pile Engine looks inside.As this paper will show, they can rest assured there is nothing in the OPE (or any other implementation so far) that needs to be understood first. Pile theory is about a relational space with certain basic operations to build it and navigate through it. But whether this relational space is spanned by the OPE or another implementation, whether internally relations are integer values, or whether they are arranged in a sparsely populated 2D coordinate system, is not important for the Pile theory. To make clear the distinction between concept and implementation of Pile, to direct research towards applications of Pile (Pile Agent) instead of implementation (Pile Engine), and to make the Pile idea independent of any particular realization in programming code: that ́s the purpose of this paper."
+      },
+      "after": "5f86d48694508201",
+      "date": 1695049708830
+    },
+    {
+      "type": "edit",
+      "id": "fede3e03cd0d9978",
+      "item": {
+        "type": "paragraph",
+        "id": "fede3e03cd0d9978",
+        "text": "“Pile theorists” on the other hand should not be concerned too much about how a Pile Engine looks inside. As this paper will show, they can rest assured there is nothing in the OPE (or any other implementation so far) that needs to be understood first. Pile theory is about a relational space with certain basic operations to build it and navigate through it. But whether this relational space is spanned by the OPE or another implementation, whether internally relations are integer values, or whether they are arranged in a sparsely populated 2D coordinate system, is not important for the Pile theory. To make clear the distinction between concept and implementation of Pile, to direct research towards applications of Pile (Pile Agent) instead of implementation (Pile Engine), and to make the Pile idea independent of any particular realization in programming code: that ́s the purpose of this paper."
+      },
+      "date": 1695049719464
+    },
+    {
+      "type": "edit",
+      "id": "fede3e03cd0d9978",
+      "item": {
+        "type": "paragraph",
+        "id": "fede3e03cd0d9978",
+        "text": "“Pile theorists” on the other hand should not be concerned too much about how a Pile Engine looks inside. As this paper will show, they can rest assured there is nothing in the OPE (or any other implementation so far) that needs to be understood first."
+      },
+      "date": 1695049741041
+    },
+    {
+      "type": "add",
+      "id": "a94aafaee072acee",
+      "item": {
+        "type": "paragraph",
+        "id": "a94aafaee072acee",
+        "text": "Pile theory is about a relational space with certain basic operations to build it and navigate through it. But whether this relational space is spanned by the OPE or another implementation, whether internally relations are integer values, or whether they are arranged in a sparsely populated 2D coordinate system, is not important for the Pile theory. To make clear the distinction between concept and implementation of Pile, to direct research towards applications of Pile (Pile Agent) instead of implementation (Pile Engine), and to make the Pile idea independent of any particular realization in programming code: that ́s the purpose of this paper."
+      },
+      "after": "fede3e03cd0d9978",
+      "date": 1695049741684
+    },
+    {
+      "type": "edit",
+      "id": "a94aafaee072acee",
+      "item": {
+        "type": "paragraph",
+        "id": "a94aafaee072acee",
+        "text": "Pile theory is about a relational space with certain basic operations to build it and navigate through it. But whether this relational space is spanned by the OPE or another implementation, whether internally relations are integer values, or whether they are arranged in a sparsely populated 2D coordinate system, is not important for the Pile theory."
+      },
+      "date": 1695049786509
+    },
+    {
+      "type": "add",
+      "id": "67de8c74992d045e",
+      "item": {
+        "type": "paragraph",
+        "id": "67de8c74992d045e",
+        "text": "To make clear the distinction between concept and implementation of Pile, to direct research towards applications of Pile (Pile Agent) instead of implementation (Pile Engine), and to make the Pile idea independent of any particular realization in programming code: that ́s the purpose of this paper."
+      },
+      "after": "a94aafaee072acee",
+      "date": 1695049787115
+    },
+    {
+      "type": "add",
+      "id": "1d185cc3c0fe175a",
+      "item": {
+        "type": "paragraph",
+        "id": "1d185cc3c0fe175a",
+        "text": "# Basic Pile Concepts"
+      },
+      "after": "67de8c74992d045e",
+      "date": 1695049815988
+    },
+    {
+      "type": "add",
+      "id": "b472f00d7f73c5c8",
+      "item": {
+        "type": "paragraph",
+        "id": "b472f00d7f73c5c8",
+        "text": "A Pile consists of a large amount of Relations (or Associations). Each Relation has a unique value, called a Handle. The OPE implements a Handle as a 32 bit value."
+      },
+      "after": "1d185cc3c0fe175a",
+      "date": 1695049824941
+    },
+    {
+      "type": "add",
+      "id": "22ae8549724a7569",
+      "item": {
+        "type": "paragraph",
+        "id": "22ae8549724a7569",
+        "text": "[…]"
+      },
+      "after": "b472f00d7f73c5c8",
+      "date": 1695049826928
+    },
+    {
+      "type": "edit",
+      "id": "1d185cc3c0fe175a",
+      "item": {
+        "type": "markdown",
+        "id": "1d185cc3c0fe175a",
+        "text": "# Basic Pile Concepts"
+      },
+      "date": 1695049828000
+    },
+    {
+      "type": "add",
+      "id": "ca9fc0addcb7ec6f",
+      "item": {
+        "type": "paragraph",
+        "id": "ca9fc0addcb7ec6f",
+        "text": "Also each Relation is uniquely identified by its Parent Relations (or Parents for short):"
+      },
+      "after": "b472f00d7f73c5c8",
+      "date": 1695049970569
+    },
+    {
+      "type": "edit",
+      "id": "b472f00d7f73c5c8",
+      "item": {
+        "type": "paragraph",
+        "id": "b472f00d7f73c5c8",
+        "text": "A [[Pile]] consists of a large amount of Relations (or Associations). Each Relation has a unique value, called a Handle. The OPE implements a Handle as a 32 bit value."
+      },
+      "date": 1695050079732
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7fad406df36fad97"
+      },
+      "id": "7fad406df36fad97",
+      "type": "add",
+      "after": "22ae8549724a7569",
+      "date": 1695050093384
+    },
+    {
+      "id": "7fad406df36fad97",
+      "type": "move",
+      "order": [
+        "3edb2adf89e6de38",
+        "3b91b9aa2e464c60",
+        "024a73db34f61036",
+        "4bc27597316df328",
+        "e4aba87bf4868cec",
+        "a27d47c1521ada60",
+        "f9bbf08bc8208eed",
+        "e61ba31545e55b81",
+        "56d704653016ccfc",
+        "401d1c8908c24060",
+        "5f86d48694508201",
+        "fede3e03cd0d9978",
+        "a94aafaee072acee",
+        "67de8c74992d045e",
+        "1d185cc3c0fe175a",
+        "b472f00d7f73c5c8",
+        "ca9fc0addcb7ec6f",
+        "7fad406df36fad97",
+        "22ae8549724a7569"
+      ],
+      "date": 1695050095400
+    },
+    {
+      "type": "edit",
+      "id": "7fad406df36fad97",
+      "item": {
+        "type": "code",
+        "id": "7fad406df36fad97",
+        "text": "R=(X, Y)"
+      },
+      "date": 1695050097116
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e9f18169c6ae5760"
+      },
+      "id": "e9f18169c6ae5760",
+      "type": "add",
+      "after": "22ae8549724a7569",
+      "date": 1695050103997
+    },
+    {
+      "id": "e9f18169c6ae5760",
+      "type": "move",
+      "order": [
+        "3edb2adf89e6de38",
+        "3b91b9aa2e464c60",
+        "024a73db34f61036",
+        "4bc27597316df328",
+        "e4aba87bf4868cec",
+        "a27d47c1521ada60",
+        "f9bbf08bc8208eed",
+        "e61ba31545e55b81",
+        "56d704653016ccfc",
+        "401d1c8908c24060",
+        "5f86d48694508201",
+        "fede3e03cd0d9978",
+        "a94aafaee072acee",
+        "67de8c74992d045e",
+        "1d185cc3c0fe175a",
+        "b472f00d7f73c5c8",
+        "ca9fc0addcb7ec6f",
+        "7fad406df36fad97",
+        "e9f18169c6ae5760",
+        "22ae8549724a7569"
+      ],
+      "date": 1695050105864
+    },
+    {
+      "type": "edit",
+      "id": "e9f18169c6ae5760",
+      "item": {
+        "type": "paragraph",
+        "id": "e9f18169c6ae5760",
+        "text": "R is the Relation defined by its Parents X and Y. R, X, Y each have their own values, e.g. R=23, X=99, Y=17. The value of a Child Relation, e.g. R, cannot be “calculated” from the values of its Parents."
+      },
+      "date": 1695050106969
+    },
+    {
+      "type": "add",
+      "id": "a9c42d381d22de58",
+      "item": {
+        "type": "paragraph",
+        "id": "a9c42d381d22de58",
+        "text": "The left Parent is called the Normative Parent (or Np), the right Parent is called the Associative Parent (or Ap). Normative or Associative are called the Manner of a Relation."
+      },
+      "after": "e9f18169c6ae5760",
+      "date": 1695050134887
+    },
+    {
+      "type": "add",
+      "id": "763503f844f0c833",
+      "item": {
+        "type": "paragraph",
+        "id": "763503f844f0c833",
+        "text": "R is the Child of its Parent Relations and can be called more specifically the Normative Child (Nc) or Associative Child (Ac) depending on the Parent taken into focus (Nc of Np, Ac of Ap)."
+      },
+      "after": "a9c42d381d22de58",
+      "date": 1695050146896
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "74f1ace10d8088ab"
+      },
+      "id": "74f1ace10d8088ab",
+      "type": "add",
+      "after": "22ae8549724a7569",
+      "date": 1695050170931
+    },
+    {
+      "id": "74f1ace10d8088ab",
+      "type": "move",
+      "order": [
+        "3edb2adf89e6de38",
+        "3b91b9aa2e464c60",
+        "024a73db34f61036",
+        "4bc27597316df328",
+        "e4aba87bf4868cec",
+        "a27d47c1521ada60",
+        "f9bbf08bc8208eed",
+        "e61ba31545e55b81",
+        "56d704653016ccfc",
+        "401d1c8908c24060",
+        "5f86d48694508201",
+        "fede3e03cd0d9978",
+        "a94aafaee072acee",
+        "67de8c74992d045e",
+        "1d185cc3c0fe175a",
+        "b472f00d7f73c5c8",
+        "ca9fc0addcb7ec6f",
+        "7fad406df36fad97",
+        "e9f18169c6ae5760",
+        "a9c42d381d22de58",
+        "763503f844f0c833",
+        "74f1ace10d8088ab",
+        "22ae8549724a7569"
+      ],
+      "date": 1695050172581
+    },
+    {
+      "type": "edit",
+      "id": "74f1ace10d8088ab",
+      "item": {
+        "type": "paragraph",
+        "id": "74f1ace10d8088ab",
+        "text": "Each Relation also is attributed with a Quality (Q) which is encoded in the upper n bits of its value. The OPE uses n=8 bits for Q. To define a Child to be of a certain Quality it can be defined like this:"
+      },
+      "date": 1695050174344
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2da43ef9b860e0e3"
+      },
+      "id": "2da43ef9b860e0e3",
+      "type": "add",
+      "after": "22ae8549724a7569",
+      "date": 1695050180466
+    },
+    {
+      "id": "2da43ef9b860e0e3",
+      "type": "move",
+      "order": [
+        "3edb2adf89e6de38",
+        "3b91b9aa2e464c60",
+        "024a73db34f61036",
+        "4bc27597316df328",
+        "e4aba87bf4868cec",
+        "a27d47c1521ada60",
+        "f9bbf08bc8208eed",
+        "e61ba31545e55b81",
+        "56d704653016ccfc",
+        "401d1c8908c24060",
+        "5f86d48694508201",
+        "fede3e03cd0d9978",
+        "a94aafaee072acee",
+        "67de8c74992d045e",
+        "1d185cc3c0fe175a",
+        "b472f00d7f73c5c8",
+        "ca9fc0addcb7ec6f",
+        "7fad406df36fad97",
+        "e9f18169c6ae5760",
+        "a9c42d381d22de58",
+        "763503f844f0c833",
+        "74f1ace10d8088ab",
+        "2da43ef9b860e0e3",
+        "22ae8549724a7569"
+      ],
+      "date": 1695050182583
+    },
+    {
+      "type": "edit",
+      "id": "2da43ef9b860e0e3",
+      "item": {
+        "type": "code",
+        "id": "2da43ef9b860e0e3",
+        "text": "R=(X [Q] Y)"
+      },
+      "date": 1695050184368
+    },
+    {
+      "type": "edit",
+      "id": "22ae8549724a7569",
+      "item": {
+        "type": "paragraph",
+        "id": "22ae8549724a7569",
+        "text": "Each Relation can be Parent (either Np or Ap) to any number of Child relations, e.g."
+      },
+      "date": 1695050205990
+    },
+    {
+      "type": "add",
+      "id": "98eb5211194ec577",
+      "item": {
+        "type": "paragraph",
+        "id": "98eb5211194ec577",
+        "text": "[…]"
+      },
+      "after": "22ae8549724a7569",
+      "date": 1695050206451
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "801d9785f1a359b1"
+      },
+      "id": "801d9785f1a359b1",
+      "type": "add",
+      "after": "98eb5211194ec577",
+      "date": 1695050216963
+    },
+    {
+      "id": "801d9785f1a359b1",
+      "type": "move",
+      "order": [
+        "3edb2adf89e6de38",
+        "3b91b9aa2e464c60",
+        "024a73db34f61036",
+        "4bc27597316df328",
+        "e4aba87bf4868cec",
+        "a27d47c1521ada60",
+        "f9bbf08bc8208eed",
+        "e61ba31545e55b81",
+        "56d704653016ccfc",
+        "401d1c8908c24060",
+        "5f86d48694508201",
+        "fede3e03cd0d9978",
+        "a94aafaee072acee",
+        "67de8c74992d045e",
+        "1d185cc3c0fe175a",
+        "b472f00d7f73c5c8",
+        "ca9fc0addcb7ec6f",
+        "7fad406df36fad97",
+        "e9f18169c6ae5760",
+        "a9c42d381d22de58",
+        "763503f844f0c833",
+        "74f1ace10d8088ab",
+        "2da43ef9b860e0e3",
+        "22ae8549724a7569",
+        "801d9785f1a359b1",
+        "98eb5211194ec577"
+      ],
+      "date": 1695050219430
+    },
+    {
+      "type": "edit",
+      "id": "801d9785f1a359b1",
+      "item": {
+        "type": "code",
+        "id": "801d9785f1a359b1",
+        "text": "R=(X, Y) S=(X, Z) T=(Z, Y)"
+      },
+      "date": 1695050221198
+    },
+    {
+      "type": "edit",
+      "id": "801d9785f1a359b1",
+      "item": {
+        "type": "code",
+        "id": "801d9785f1a359b1",
+        "text": "R=(X, Y)\nS=(X, Z) \nT=(Z, Y)"
+      },
+      "date": 1695050231531
+    },
+    {
+      "type": "edit",
+      "id": "98eb5211194ec577",
+      "item": {
+        "type": "paragraph",
+        "id": "98eb5211194ec577",
+        "text": "In turn this means, each Relation can be Child (either Nc or Ac) to any number of Parents."
+      },
+      "date": 1695050258821
+    },
+    {
+      "type": "add",
+      "id": "c321bfc6c302ac35",
+      "item": {
+        "type": "paragraph",
+        "id": "c321bfc6c302ac35",
+        "text": "[…]"
+      },
+      "after": "98eb5211194ec577",
+      "date": 1695050259334
+    },
+    {
+      "type": "add",
+      "id": "d5ff9710da648bf2",
+      "item": {
+        "type": "paragraph",
+        "id": "d5ff9710da648bf2",
+        "text": "Only so called Top Relations (Tops for short) which represent entities outside a Pile do not have Parents; but of course they too are identified by a Handle."
+      },
+      "after": "98eb5211194ec577",
+      "date": 1695050267876
+    },
+    {
+      "type": "edit",
+      "id": "c321bfc6c302ac35",
+      "item": {
+        "type": "paragraph",
+        "id": "c321bfc6c302ac35",
+        "text": "# Basic Pile Engine Functions"
+      },
+      "date": 1695050277525
+    },
+    {
+      "type": "add",
+      "id": "d328d82cd7ab51dd",
+      "item": {
+        "type": "paragraph",
+        "id": "d328d82cd7ab51dd",
+        "text": "[…]"
+      },
+      "after": "c321bfc6c302ac35",
+      "date": 1695050278334
+    },
+    {
+      "type": "edit",
+      "id": "c321bfc6c302ac35",
+      "item": {
+        "type": "markdown",
+        "id": "c321bfc6c302ac35",
+        "text": "# Basic Pile Engine Functions"
+      },
+      "date": 1695050279662
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b5e203eae6ba9903"
+      },
+      "id": "b5e203eae6ba9903",
+      "type": "add",
+      "after": "d328d82cd7ab51dd",
+      "date": 1695050294330
+    },
+    {
+      "id": "b5e203eae6ba9903",
+      "type": "move",
+      "order": [
+        "3edb2adf89e6de38",
+        "3b91b9aa2e464c60",
+        "024a73db34f61036",
+        "4bc27597316df328",
+        "e4aba87bf4868cec",
+        "a27d47c1521ada60",
+        "f9bbf08bc8208eed",
+        "e61ba31545e55b81",
+        "56d704653016ccfc",
+        "401d1c8908c24060",
+        "5f86d48694508201",
+        "fede3e03cd0d9978",
+        "a94aafaee072acee",
+        "67de8c74992d045e",
+        "1d185cc3c0fe175a",
+        "b472f00d7f73c5c8",
+        "ca9fc0addcb7ec6f",
+        "7fad406df36fad97",
+        "e9f18169c6ae5760",
+        "a9c42d381d22de58",
+        "763503f844f0c833",
+        "74f1ace10d8088ab",
+        "2da43ef9b860e0e3",
+        "22ae8549724a7569",
+        "801d9785f1a359b1",
+        "98eb5211194ec577",
+        "d5ff9710da648bf2",
+        "c321bfc6c302ac35",
+        "b5e203eae6ba9903",
+        "d328d82cd7ab51dd"
+      ],
+      "date": 1695050296515
+    },
+    {
+      "type": "edit",
+      "id": "b5e203eae6ba9903",
+      "item": {
+        "type": "paragraph",
+        "id": "b5e203eae6ba9903",
+        "text": "To navigate the relational mesh of a Pile four basic functions are necessary:"
+      },
+      "date": 1695050297830
+    },
+    {
+      "type": "edit",
+      "id": "1d185cc3c0fe175a",
+      "item": {
+        "type": "markdown",
+        "id": "1d185cc3c0fe175a",
+        "text": "⇒ [[Basic Pile Concepts]]"
+      },
+      "date": 1695050536740
+    },
+    {
+      "id": "b472f00d7f73c5c8",
+      "type": "remove",
+      "removedTo": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695050542544
+    },
+    {
+      "id": "ca9fc0addcb7ec6f",
+      "type": "remove",
+      "removedTo": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695050545411
+    },
+    {
+      "id": "7fad406df36fad97",
+      "type": "remove",
+      "removedTo": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695050549278
+    },
+    {
+      "id": "e9f18169c6ae5760",
+      "type": "remove",
+      "removedTo": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695050551478
+    },
+    {
+      "id": "a9c42d381d22de58",
+      "type": "remove",
+      "removedTo": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695050555094
+    },
+    {
+      "id": "763503f844f0c833",
+      "type": "remove",
+      "removedTo": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695050557648
+    },
+    {
+      "id": "74f1ace10d8088ab",
+      "type": "remove",
+      "removedTo": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695050560927
+    },
+    {
+      "id": "2da43ef9b860e0e3",
+      "type": "remove",
+      "removedTo": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695050563732
+    },
+    {
+      "id": "22ae8549724a7569",
+      "type": "remove",
+      "removedTo": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695050567078
+    },
+    {
+      "id": "801d9785f1a359b1",
+      "type": "remove",
+      "removedTo": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695050570260
+    },
+    {
+      "id": "98eb5211194ec577",
+      "type": "remove",
+      "removedTo": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695050574644
+    },
+    {
+      "id": "d5ff9710da648bf2",
+      "type": "remove",
+      "removedTo": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695050576894
+    },
+    {
+      "id": "c321bfc6c302ac35",
+      "type": "remove",
+      "removedTo": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695050579377
+    },
+    {
+      "id": "b5e203eae6ba9903",
+      "type": "remove",
+      "removedTo": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695050582026
+    },
+    {
+      "id": "d328d82cd7ab51dd",
+      "type": "remove",
+      "removedTo": {
+        "page": "Basic Pile Concepts"
+      },
+      "date": 1695050585014
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5cf7226007861f99"
+      },
+      "id": "5cf7226007861f99",
+      "type": "add",
+      "after": "1d185cc3c0fe175a",
+      "date": 1695050586277
+    },
+    {
+      "type": "remove",
+      "id": "1d185cc3c0fe175a",
+      "date": 1695050589482
+    },
+    {
+      "type": "edit",
+      "id": "5cf7226007861f99",
+      "item": {
+        "type": "paragraph",
+        "id": "5cf7226007861f99",
+        "text": "⇒ [[Basic Pile Concepts]]"
+      },
+      "date": 1695050591264
+    }
+  ]
+}
