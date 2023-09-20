@@ -4,7 +4,12 @@
     {
       "type": "paragraph",
       "id": "8e5b94a4c40c8069",
-      "text": "is a pure functional programming language created in 2012 by [[Evan Czaplicki]]. Elm compiles to JavaScript and is excellent for websites and web apps. It has a strong emphasis on simplicity and quality tooling. This language has many interesting properties, some of which we’ll have a brief look at. [https://nais.io/blog/posts/elm/ post]"
+      "text": "is a pure [[Functional Programming Language]] created in 2012 by [[Evan Czaplicki]]."
+    },
+    {
+      "type": "paragraph",
+      "id": "5f5f1d88c72043cd",
+      "text": "Elm compiles to [[JavaScript]] and is excellent for websites and web apps. It has a strong emphasis on simplicity and quality tooling. This language has many interesting properties, some of which we’ll have a brief look at. [https://nais.io/blog/posts/elm/ post]"
     },
     {
       "type": "paragraph",
@@ -529,6 +534,47 @@
         "text": "[[Lindsay Wardell]] joins the Elm Radio Hosts [[Dillon Kearns]] and [[Jeroen Engels]] to talk about [[Vite]] and how to set it up for your Elm project. [https://elm-radio.com/episode/vite/ page]"
       },
       "date": 1689573548805
+    },
+    {
+      "type": "edit",
+      "id": "8e5b94a4c40c8069",
+      "item": {
+        "type": "paragraph",
+        "id": "8e5b94a4c40c8069",
+        "text": "is a pure [[Functional Programming Language]] created in 2012 by [[Evan Czaplicki]]. Elm compiles to JavaScript and is excellent for websites and web apps. It has a strong emphasis on simplicity and quality tooling. This language has many interesting properties, some of which we’ll have a brief look at. [https://nais.io/blog/posts/elm/ post]"
+      },
+      "date": 1695201350210
+    },
+    {
+      "type": "edit",
+      "id": "8e5b94a4c40c8069",
+      "item": {
+        "type": "paragraph",
+        "id": "8e5b94a4c40c8069",
+        "text": "is a pure [[Functional Programming Language]] created in 2012 by [[Evan Czaplicki]]."
+      },
+      "date": 1695201375560
+    },
+    {
+      "type": "add",
+      "id": "5f5f1d88c72043cd",
+      "item": {
+        "type": "paragraph",
+        "id": "5f5f1d88c72043cd",
+        "text": "Elm compiles to JavaScript and is excellent for websites and web apps. It has a strong emphasis on simplicity and quality tooling. This language has many interesting properties, some of which we’ll have a brief look at. [https://nais.io/blog/posts/elm/ post]"
+      },
+      "after": "8e5b94a4c40c8069",
+      "date": 1695201376800
+    },
+    {
+      "type": "edit",
+      "id": "5f5f1d88c72043cd",
+      "item": {
+        "type": "paragraph",
+        "id": "5f5f1d88c72043cd",
+        "text": "Elm compiles to [[JavaScript]] and is excellent for websites and web apps. It has a strong emphasis on simplicity and quality tooling. This language has many interesting properties, some of which we’ll have a brief look at. [https://nais.io/blog/posts/elm/ post]"
+      },
+      "date": 1695201386584
     }
   ]
 }
