@@ -1,0 +1,1254 @@
+{
+  "title": "2023-09-30",
+  "story": [
+    {
+      "type": "reference",
+      "id": "f8a78a5bb72a6d12",
+      "site": "goals.pod.rodwell.me",
+      "slug": "wiki-update---september-2023",
+      "title": "Wiki Update - September 2023",
+      "text": "Two small updates this month."
+    },
+    {
+      "type": "paragraph",
+      "id": "b911326e984c57af",
+      "text": "For working with LLMs, the Transformers library has established itself as a standard [1]."
+    },
+    {
+      "type": "paragraph",
+      "id": "6c54e2bc6cf19a86",
+      "text": "[1] Carsten Schnober; Hugging Face – Zentrale für KI-Modelle; iX Special 2023 – Künstliche Intelligenz, S. 86"
+    },
+    {
+      "type": "paragraph",
+      "id": "db469d57b14a1a51",
+      "text": "Tokenizer"
+    },
+    {
+      "type": "paragraph",
+      "id": "d766e9ca9479a935",
+      "text": "⇒ [[Parenthesis]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6b5071150c4d33e9",
+      "text": "[[Rémi Lefèvre]] [https://github.com/rlefevre github]"
+    },
+    {
+      "type": "paragraph",
+      "id": "316f301e49178888",
+      "text": "Pratt / Top-Down Operator Precedence parsing for elm/parser [https://package.elm-lang.org/packages/dmy/elm-pratt-parser/2.0.0/ package], [https://github.com/dmy/elm-pratt-parser/tree/2.0.0 github]"
+    },
+    {
+      "type": "paragraph",
+      "id": "31abb1b277a9e9ad",
+      "text": "Introducing elm-pratt-parser, a flexible parser for expressions with precedence and associativity rules [https://discourse.elm-lang.org/t/introducing-elm-pratt-parser-a-flexible-parser-for-expressions-with-precedence-and-associativity-rules/3297 page], [https://ellie-app.com/4Xt4jdgtnZ2a1 ellie]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3fcf5ab7791f4081",
+      "text": "Top-Down Operator Precedence Parsing\n\nFace complex precedence and associativity rules without fear using elm/parser."
+    },
+    {
+      "type": "paragraph",
+      "id": "096108985341ae9c",
+      "text": "elm install elm/parser"
+    },
+    {
+      "type": "code",
+      "id": "47fe066e7472cced",
+      "text": "elm install dmy/elm-pratt-parser"
+    },
+    {
+      "type": "paragraph",
+      "id": "df5b56c236a140e7",
+      "text": "Overview\n\nWriting parsers using elm/parser is usually simple and fun, but handling complex operators precedence and associativity rules in an expression parser can be tricky, or even hard and frustrating for more complex cases.\n\nThis library goal is to fix this by adding a single expression parser to elm/parser:"
+    },
+    {
+      "type": "code",
+      "id": "53d80bdbd0962db6",
+      "text": "expression :\n    { oneOf : List (Config expr -> Parser expr)\n    , andThenOneOf : List (Config expr -> ( Int, expr -> Parser expr ))\n    , spaces : Parser ()\n    }\n    -> Parser expr\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "f8ee88143481db81",
+      "text": "This functions is configured with smaller standard parsers, precedence values and associativity rules, thanks to a minimalist flexible API, and handles the whole expression parsing complexity using a simple but powerful algorithm inherited from the one described by Vaughan Pratt in his 1973 paper \"[[Top Down Operator Precedence]]\" [1]."
+    },
+    {
+      "type": "paragraph",
+      "id": "b968471896fae602",
+      "text": "Helpers are provided for literals, constants, prefix, infix and postfix expressions but custom ones can be defined when needed.\n\nThe library is small, has a test suite, benefits from tail-call elimination for left-associative operations, and allows to produce excellent error messages, as usual with elm/parser, using Parser.Advanced if wanted."
+    },
+    {
+      "type": "paragraph",
+      "id": "90665e9b364fd6a0",
+      "text": "Note: The Right-associative expressions minimum levels test [https://github.com/dmy/elm-pratt-parser/blob/34348b0334167b28d464aef24079a0d388c580f1/tests/Tests.elm#L211-L218 code] failed because it threw an exception: \"RangeError: Maximum call stack size exceeded\". This test only works for node.js default stack size or bigger."
+    },
+    {
+      "type": "paragraph",
+      "id": "547ca189e0e08fb9",
+      "text": "Getting Started"
+    },
+    {
+      "type": "paragraph",
+      "id": "cdcdaf5c006606e2",
+      "text": "Calculator Example"
+    },
+    {
+      "type": "paragraph",
+      "id": "1f10b4d64e1642fa",
+      "text": "Here is a quite complete calculator.\n\nIt evaluates the result during parsing, without generating an explicit intermediate abstract syntax tree (AST), so it directly uses Float as the expr type."
+    },
+    {
+      "type": "paragraph",
+      "id": "a70b172794994fbd",
+      "text": "parenthesizedExpression [https://github.com/dmy/elm-pratt-parser/blob/34348b0334167b28d464aef24079a0d388c580f1/examples/Calc.elm#L41-L47 code]"
+    },
+    {
+      "type": "code",
+      "id": "ca2e834d7dc99b0a",
+      "text": "parenthesizedExpression : Pratt.Config Float -> Parser Float\nparenthesizedExpression config =\n    Parser.succeed identity\n        |. symbol \"(\"\n        |= Pratt.subExpression 0 config\n        |. symbol \")\""
+    },
+    {
+      "type": "paragraph",
+      "id": "53bfd293f08fcb67",
+      "text": "First we configure the parsers used at the start of an expression or after an operator. The expression parser cannot work without at least one of these parsers succeeding as it would not be able to parse an expr value. These parsers include among others: literals, constants, prefix expressions or sub-expressions parsers."
+    },
+    {
+      "type": "paragraph",
+      "id": "fac1911d7e252756",
+      "text": "All parsers last parameter is a Config expr, passed automatically by the expression parser, that allows to call recursively subExpression with a custom precedence."
+    },
+    {
+      "type": "paragraph",
+      "id": "793e66c2160c9f3f",
+      "text": "Note that expression is equivalent to subExpression 0, so the expression parser starts parsing the expression with the lowest precedence."
+    },
+    {
+      "type": "paragraph",
+      "id": "e92b60a23d8fe110",
+      "text": "See subExpression documentation to better understand the algorithm."
+    },
+    {
+      "type": "code",
+      "id": "b5e3d908afaaa64a",
+      "text": "subExpression : Int -> Config expr -> Parser expr"
+    },
+    {
+      "type": "paragraph",
+      "id": "b4ea8af38109d63e",
+      "text": "A parser for sub-expressions between parentheses like this:"
+    },
+    {
+      "type": "code",
+      "id": "faabe7103a98ff5d",
+      "text": "parenthesizedExpression : Config Expr -> Parser Expr\nparenthesizedExpression config =\n    succeed identity\n        |. symbol \"(\"\n        |= subExpression 0 config\n        |. symbol \")\"\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "9b417e6ea3906502",
+      "text": "Algorithm:\n\nsubExpression uses the following algorithm:\n\n    Use the Int precedence argument as the current precedence.\n    Run the spaces parser.\n    Try configured oneOf parsers successively in order using Parser.oneOf until one is chosen (i.e. until one of them starts chomping characters). This parser may call subExpression recursively with different precedence values. If no parser succeeds, the whole parser fails, else the expression parsed is used as the left expression in the next steps.\n    Loop\n        Run the configured spaces parser.\n        Filter andThenOneOf parsers, keeping only those that have a precedence above the current one, then try them successively using Parser.oneOf with the left expression argument until one is chosen. This parser may also call subExpression recursively with different precedence values.\n        If no parser succeeds, return the left expression. Else, loop from 4. using the expression just parsed as the new left expression.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "d6a0215b19c68d5d",
+      "text": "Design and Implementation Considerations [https://package.elm-lang.org/packages/dmy/elm-pratt-parser/2.0.0/ page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3efac38a0f40f750",
+      "text": "[…] There is therefore no actual token anymore and it is not necessary to tokenize the expression before parsing it."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "2023-09-30",
+        "story": []
+      },
+      "date": 1696061603693
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f8a78a5bb72a6d12"
+      },
+      "id": "f8a78a5bb72a6d12",
+      "type": "add",
+      "date": 1696061606891
+    },
+    {
+      "type": "edit",
+      "id": "f8a78a5bb72a6d12",
+      "item": {
+        "type": "reference",
+        "id": "f8a78a5bb72a6d12",
+        "site": "goals.pod.rodwell.me",
+        "slug": "wiki-update---september-2023",
+        "title": "Wiki Update - September 2023",
+        "text": "Two small updates this month."
+      },
+      "date": 1696061612115
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b911326e984c57af"
+      },
+      "id": "b911326e984c57af",
+      "type": "add",
+      "after": "f8a78a5bb72a6d12",
+      "date": 1696061756037
+    },
+    {
+      "type": "edit",
+      "id": "b911326e984c57af",
+      "item": {
+        "type": "paragraph",
+        "id": "b911326e984c57af",
+        "text": "For working with LLMs, the Transformers library has established itself as a standard"
+      },
+      "date": 1696061758445
+    },
+    {
+      "type": "edit",
+      "id": "b911326e984c57af",
+      "item": {
+        "type": "paragraph",
+        "id": "b911326e984c57af",
+        "text": "For working with LLMs, the Transformers library has established itself as a standard [1]."
+      },
+      "date": 1696061831517
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6c54e2bc6cf19a86"
+      },
+      "id": "6c54e2bc6cf19a86",
+      "type": "add",
+      "after": "b911326e984c57af",
+      "date": 1696061850180
+    },
+    {
+      "type": "edit",
+      "id": "6c54e2bc6cf19a86",
+      "item": {
+        "type": "paragraph",
+        "id": "6c54e2bc6cf19a86",
+        "text": "Carsten Schnober; Hugging Face – Zentrale für KI-Modelle; iX Special 2023 – Künstliche Intelligenz, S. 86"
+      },
+      "date": 1696061851697
+    },
+    {
+      "type": "edit",
+      "id": "6c54e2bc6cf19a86",
+      "item": {
+        "type": "paragraph",
+        "id": "6c54e2bc6cf19a86",
+        "text": "[1] Carsten Schnober; Hugging Face – Zentrale für KI-Modelle; iX Special 2023 – Künstliche Intelligenz, S. 86"
+      },
+      "date": 1696061866783
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "db469d57b14a1a51"
+      },
+      "id": "db469d57b14a1a51",
+      "type": "add",
+      "after": "6c54e2bc6cf19a86",
+      "date": 1696071652422
+    },
+    {
+      "type": "edit",
+      "id": "db469d57b14a1a51",
+      "item": {
+        "type": "paragraph",
+        "id": "db469d57b14a1a51",
+        "text": "Tokenizer"
+      },
+      "date": 1696071657406
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0653300347fe3978"
+      },
+      "id": "0653300347fe3978",
+      "type": "add",
+      "after": "db469d57b14a1a51",
+      "date": 1696072108564
+    },
+    {
+      "type": "remove",
+      "id": "0653300347fe3978",
+      "date": 1696072114664
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "316f301e49178888"
+      },
+      "id": "316f301e49178888",
+      "type": "add",
+      "after": "db469d57b14a1a51",
+      "date": 1696072118613
+    },
+    {
+      "type": "edit",
+      "id": "316f301e49178888",
+      "item": {
+        "type": "paragraph",
+        "id": "316f301e49178888",
+        "text": "Pratt / Top-Down Operator Precedence parsing for elm/parser "
+      },
+      "date": 1696072121881
+    },
+    {
+      "type": "edit",
+      "id": "316f301e49178888",
+      "item": {
+        "type": "paragraph",
+        "id": "316f301e49178888",
+        "text": "Pratt / Top-Down Operator Precedence parsing for elm/parser [https://package.elm-lang.org/packages/dmy/elm-pratt-parser/2.0.0/ package]"
+      },
+      "date": 1696072192175
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "31abb1b277a9e9ad"
+      },
+      "id": "31abb1b277a9e9ad",
+      "type": "add",
+      "after": "316f301e49178888",
+      "date": 1696072619489
+    },
+    {
+      "type": "edit",
+      "id": "31abb1b277a9e9ad",
+      "item": {
+        "type": "paragraph",
+        "id": "31abb1b277a9e9ad",
+        "text": "Introducing elm-pratt-parser, a flexible parser for expressions with precedence and associativity rules"
+      },
+      "date": 1696072622640
+    },
+    {
+      "type": "edit",
+      "id": "31abb1b277a9e9ad",
+      "item": {
+        "type": "paragraph",
+        "id": "31abb1b277a9e9ad",
+        "text": "Introducing elm-pratt-parser, a flexible parser for expressions with precedence and associativity rules [https://discourse.elm-lang.org/t/introducing-elm-pratt-parser-a-flexible-parser-for-expressions-with-precedence-and-associativity-rules/3297 page]"
+      },
+      "date": 1696072631909
+    },
+    {
+      "type": "edit",
+      "id": "31abb1b277a9e9ad",
+      "item": {
+        "type": "paragraph",
+        "id": "31abb1b277a9e9ad",
+        "text": "Introducing elm-pratt-parser, a flexible parser for expressions with precedence and associativity rules [https://discourse.elm-lang.org/t/introducing-elm-pratt-parser-a-flexible-parser-for-expressions-with-precedence-and-associativity-rules/3297 page], [https://ellie-app.com/4Xt4jdgtnZ2a1 ellie]"
+      },
+      "date": 1696072666697
+    },
+    {
+      "type": "edit",
+      "id": "316f301e49178888",
+      "item": {
+        "type": "paragraph",
+        "id": "316f301e49178888",
+        "text": "Pratt / Top-Down Operator Precedence parsing for elm/parser [https://package.elm-lang.org/packages/dmy/elm-pratt-parser/2.0.0/ package], [https://github.com/dmy/elm-pratt-parser/tree/2.0.0 github]"
+      },
+      "date": 1696073193128
+    },
+    {
+      "id": "d766e9ca9479a935",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "d766e9ca9479a935",
+        "text": "⇒ [[Gutenberg Parenthesis]] ⇐ [[Parenthesis]]"
+      },
+      "after": "db469d57b14a1a51",
+      "attribution": {
+        "page": "2023-09-24"
+      },
+      "date": 1696074008134
+    },
+    {
+      "type": "edit",
+      "id": "d766e9ca9479a935",
+      "item": {
+        "type": "paragraph",
+        "id": "d766e9ca9479a935",
+        "text": "⇒ [[Parenthesis]]"
+      },
+      "date": 1696074013812
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a70b172794994fbd"
+      },
+      "id": "a70b172794994fbd",
+      "type": "add",
+      "after": "31abb1b277a9e9ad",
+      "date": 1696074030340
+    },
+    {
+      "type": "edit",
+      "id": "a70b172794994fbd",
+      "item": {
+        "type": "paragraph",
+        "id": "a70b172794994fbd",
+        "text": "parenthesizedExpression"
+      },
+      "date": 1696074031716
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ca2e834d7dc99b0a"
+      },
+      "id": "ca2e834d7dc99b0a",
+      "type": "add",
+      "after": "a70b172794994fbd",
+      "date": 1696074042249
+    },
+    {
+      "type": "edit",
+      "id": "ca2e834d7dc99b0a",
+      "item": {
+        "type": "code",
+        "id": "ca2e834d7dc99b0a",
+        "text": "parenthesizedExpression : Pratt.Config Float -> Parser Float\nparenthesizedExpression config =\n    Parser.succeed identity\n        |. symbol \"(\"\n        |= Pratt.subExpression 0 config\n        |. symbol \")\""
+      },
+      "date": 1696074044532
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "53bfd293f08fcb67"
+      },
+      "id": "53bfd293f08fcb67",
+      "type": "add",
+      "after": "ca2e834d7dc99b0a",
+      "date": 1696074073273
+    },
+    {
+      "type": "edit",
+      "id": "53bfd293f08fcb67",
+      "item": {
+        "type": "paragraph",
+        "id": "53bfd293f08fcb67",
+        "text": "All parsers last parameter is a Config expr, passed automatically by the expression parser, that allows to call recursively subExpression with a custom precedence."
+      },
+      "date": 1696074074642
+    },
+    {
+      "type": "edit",
+      "id": "53bfd293f08fcb67",
+      "item": {
+        "type": "paragraph",
+        "id": "53bfd293f08fcb67",
+        "text": "First we configure the parsers used at the start of an expression or after an operator. The expression parser cannot work without at least one of these parsers succeeding as it would not be able to parse an expr value. These parsers include among others: literals, constants, prefix expressions or sub-expressions parsers."
+      },
+      "date": 1696074130060
+    },
+    {
+      "type": "add",
+      "id": "fac1911d7e252756",
+      "item": {
+        "type": "paragraph",
+        "id": "fac1911d7e252756",
+        "text": "All parsers last parameter is a Config expr, passed automatically by the expression parser, that allows to call recursively subExpression with a custom precedence."
+      },
+      "after": "53bfd293f08fcb67",
+      "date": 1696074130726
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "793e66c2160c9f3f"
+      },
+      "id": "793e66c2160c9f3f",
+      "type": "add",
+      "after": "fac1911d7e252756",
+      "date": 1696074186160
+    },
+    {
+      "type": "edit",
+      "id": "793e66c2160c9f3f",
+      "item": {
+        "type": "paragraph",
+        "id": "793e66c2160c9f3f",
+        "text": "Note that expression is equivalent to subExpression 0, so the expression parser starts parsing the expression with the lowest precedence."
+      },
+      "date": 1696074187450
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e92b60a23d8fe110"
+      },
+      "id": "e92b60a23d8fe110",
+      "type": "add",
+      "after": "793e66c2160c9f3f",
+      "date": 1696074220931
+    },
+    {
+      "type": "edit",
+      "id": "e92b60a23d8fe110",
+      "item": {
+        "type": "paragraph",
+        "id": "e92b60a23d8fe110",
+        "text": "See subExpression documentation to better understand the algorithm."
+      },
+      "date": 1696074222165
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b5e3d908afaaa64a"
+      },
+      "id": "b5e3d908afaaa64a",
+      "type": "add",
+      "after": "e92b60a23d8fe110",
+      "date": 1696074256610
+    },
+    {
+      "type": "edit",
+      "id": "b5e3d908afaaa64a",
+      "item": {
+        "type": "code",
+        "id": "b5e3d908afaaa64a",
+        "text": "Pratt\n\n    Expression parser: expression\n    Configuration helpers: subExpression\n        oneOf helpers: literal constant prefix\n        andThenOneOf helpers: infixLeft infixRight postfix\n\nExpression parser\ntype alias Config expr =\n    Config Never Problem expr\n\nAn opaque type based on Pratt.Advanced.Config holding the parser configuration.\nexpression :\n    { oneOf : List (Config expr -> Parser expr)\n    , andThenOneOf : List (Config expr -> ( Int, expr -> Parser expr ))\n    , spaces : Parser ()\n    }\n    -> Parser expr\n\nBuild a parser based on the given configuration that can be combined with other elm/parser parsers.\n\nThe top level expression is parsed with a precedence of 0, see subExpression.\n\noneOf:\n\n    A list of parsers used at the start of an expression (or sub-expression), or after an operator. They will be tried successively by the parser using Parser.oneOf with the current parser Config passed as their argument.\n\n    Examples: parsers for literals, constants, prefix expressions or a sub-expression between parentheses.\n\n    At least one of them is required and one must succeed, else the whole expression parser would not be able to parse an expr.\n\nandThenOneOf:\n\n    A list of parsers using the result of a previous parser. They need to provide their Int precedence as only the ones that have a precedence above the current one (0 by default) will be tried by the parser using Parser.oneOf, with the parser Config and the current left expression (the expression returned by the previous parser) arguments.\n\n    Examples: parsers for prefix and postfix expressions.\n\nspaces:\n\n    A parser called before and after each previously configured parser, typically used to consume whitespaces.\n\n    If a more specific behavior is needed, this parser can be ignored by using succeed () and a custom behavior added inside oneOf and andThenOneOf parsers.\n\nNotes:\n\n    All configured parsers except the spaces one are parameterized by a Config to be able to call subExpression, which is the main building block for configuration helpers. This Config will be automatically passed by the parser.\n    The parser will not use Parser.backtrackable, so it is up to you to correctly setup your parsers to avoid having failed parsers consuming characters.\n\nFor example, a basic calculator could be configured like this:\n\nimport Parser exposing ((|.), (|=), Parser, end, float, keyword, run, succeed, symbol)\nimport Pratt exposing (infixLeft, infixRight, literal, prefix)\n\nmathExpression : Parser Float\nmathExpression =\n    Pratt.expression\n        { oneOf =\n            [ literal float\n            , prefix 3 (symbol \"-\") negate\n            , parenthesizedExpression\n            ]\n        , andThenOneOf =\n            [ infixLeft 1 (symbol \"+\") (+)\n            , infixLeft 1 (symbol \"-\") (-)\n            , infixLeft 2 (symbol \"*\") (*)\n            , infixLeft 2 (symbol \"/\") (/)\n            , infixRight 4 (symbol \"^\") (^)\n            ]\n        , spaces = Parser.spaces\n        }\n\nparenthesizedExpression : Config Float -> Parser Float\nparenthesizedExpression config =\n    succeed identity\n        |. symbol \"(\"\n        |= subExpression 0 config\n        |. symbol \")\"\n\nparser : Parser Float\nparser =\n    succeed identity\n        |= mathExpression\n        |. end\n\n\nrun parser \"-1*3--5+4/2^2\" --> Ok ((-1*3)-(-5)+(4/(2^2)))\nrun parser \"-1*3--5+4/2^2\" --> Ok 3\nrun parser \"((-1*3) - (-5) + (4 / (2^2)))\" --> Ok 3\n\nConfiguration helpers\nsubExpression : Int -> Config expr -> Parser expr"
+      },
+      "date": 1696074258602
+    },
+    {
+      "type": "edit",
+      "id": "b5e3d908afaaa64a",
+      "item": {
+        "type": "code",
+        "id": "b5e3d908afaaa64a",
+        "text": "subExpression : Int -> Config expr -> Parser expr"
+      },
+      "date": 1696074272257
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b4ea8af38109d63e"
+      },
+      "id": "b4ea8af38109d63e",
+      "type": "add",
+      "after": "b5e3d908afaaa64a",
+      "date": 1696074317266
+    },
+    {
+      "type": "edit",
+      "id": "b4ea8af38109d63e",
+      "item": {
+        "type": "paragraph",
+        "id": "b4ea8af38109d63e",
+        "text": "A parser for sub-expressions between parentheses like this:"
+      },
+      "date": 1696074318689
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "faabe7103a98ff5d"
+      },
+      "id": "faabe7103a98ff5d",
+      "type": "add",
+      "after": "b4ea8af38109d63e",
+      "date": 1696074325615
+    },
+    {
+      "type": "edit",
+      "id": "faabe7103a98ff5d",
+      "item": {
+        "type": "code",
+        "id": "faabe7103a98ff5d",
+        "text": "parenthesizedExpression : Config Expr -> Parser Expr\nparenthesizedExpression config =\n    succeed identity\n        |. symbol \"(\"\n        |= subExpression 0 config\n        |. symbol \")\"\n"
+      },
+      "date": 1696074327243
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9b417e6ea3906502"
+      },
+      "id": "9b417e6ea3906502",
+      "type": "add",
+      "after": "faabe7103a98ff5d",
+      "date": 1696074342024
+    },
+    {
+      "type": "fork",
+      "date": 1696074358863
+    },
+    {
+      "type": "edit",
+      "id": "9b417e6ea3906502",
+      "item": {
+        "type": "paragraph",
+        "id": "9b417e6ea3906502",
+        "text": "Algorithm:\n\nsubExpression uses the following algorithm:\n\n    Use the Int precedence argument as the current precedence.\n    Run the spaces parser.\n    Try configured oneOf parsers successively in order using Parser.oneOf until one is chosen (i.e. until one of them starts chomping characters). This parser may call subExpression recursively with different precedence values. If no parser succeeds, the whole parser fails, else the expression parsed is used as the left expression in the next steps.\n    Loop\n        Run the configured spaces parser.\n        Filter andThenOneOf parsers, keeping only those that have a precedence above the current one, then try them successively using Parser.oneOf with the left expression argument until one is chosen. This parser may also call subExpression recursively with different precedence values.\n        If no parser succeeds, return the left expression. Else, loop from 4. using the expression just parsed as the new left expression.\n"
+      },
+      "date": 1696074360997
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d6a0215b19c68d5d"
+      },
+      "id": "d6a0215b19c68d5d",
+      "type": "add",
+      "after": "9b417e6ea3906502",
+      "date": 1696074590033
+    },
+    {
+      "type": "edit",
+      "id": "d6a0215b19c68d5d",
+      "item": {
+        "type": "paragraph",
+        "id": "d6a0215b19c68d5d",
+        "text": "Design and Implementation Considerations"
+      },
+      "date": 1696074593474
+    },
+    {
+      "type": "edit",
+      "id": "d6a0215b19c68d5d",
+      "item": {
+        "type": "paragraph",
+        "id": "d6a0215b19c68d5d",
+        "text": "Design and Implementation Considerations [https://package.elm-lang.org/packages/dmy/elm-pratt-parser/2.0.0/ page]"
+      },
+      "date": 1696074612081
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3efac38a0f40f750"
+      },
+      "id": "3efac38a0f40f750",
+      "type": "add",
+      "after": "d6a0215b19c68d5d",
+      "date": 1696074631024
+    },
+    {
+      "type": "edit",
+      "id": "3efac38a0f40f750",
+      "item": {
+        "type": "paragraph",
+        "id": "3efac38a0f40f750",
+        "text": "[…] There is therefore no actual token anymore and it is not necessary to tokenize the expression before parsing it."
+      },
+      "date": 1696074634013
+    },
+    {
+      "type": "edit",
+      "id": "2c1bb8303ffb6ef6",
+      "item": {
+        "type": "paragraph",
+        "id": "2c1bb8303ffb6ef6",
+        "text": "Right-associative expressions minimum levels\n\n    This test failed because it threw an exception: \"RangeError: Maximum call stack size exceeded\""
+      },
+      "date": 1696083793863
+    },
+    {
+      "type": "edit",
+      "id": "2c1bb8303ffb6ef6",
+      "item": {
+        "type": "paragraph",
+        "id": "2c1bb8303ffb6ef6",
+        "text": "Right-associative expressions minimum levels test failed because it threw an exception: \"RangeError: Maximum call stack size exceeded\""
+      },
+      "date": 1696083806656
+    },
+    {
+      "type": "fork",
+      "date": 1696087351480
+    },
+    {
+      "type": "add",
+      "id": "547ca189e0e08fb9",
+      "item": {
+        "type": "paragraph",
+        "id": "547ca189e0e08fb9",
+        "text": "Getting Started"
+      },
+      "after": "31abb1b277a9e9ad",
+      "date": 1696089628751
+    },
+    {
+      "type": "add",
+      "id": "cdcdaf5c006606e2",
+      "item": {
+        "type": "paragraph",
+        "id": "cdcdaf5c006606e2",
+        "text": "Calculator Example"
+      },
+      "after": "547ca189e0e08fb9",
+      "date": 1696089638228
+    },
+    {
+      "type": "add",
+      "id": "3fcf5ab7791f4081",
+      "item": {
+        "type": "paragraph",
+        "id": "3fcf5ab7791f4081",
+        "text": "elm-pratt-parser Elm package Build Status\n\nTop-Down Operator Precedence Parsing\n\nFace complex precedence and associativity rules without fear using elm/parser.\n\n    elm install elm/parser\n    elm install dmy/elm-pratt-parser\n\nOverview\n\nWriting parsers using elm/parser is usually simple and fun, but handling complex operators precedence and associativity rules in an expression parser can be tricky, or even hard and frustrating for more complex cases.\n\nThis library goal is to fix this by adding a single expression parser to elm/parser:\n\nexpression :\n    { oneOf : List (Config expr -> Parser expr)\n    , andThenOneOf : List (Config expr -> ( Int, expr -> Parser expr ))\n    , spaces : Parser ()\n    }\n    -> Parser expr\n\nThis functions is configured with smaller standard parsers, precedence values and associativity rules, thanks to a minimalist flexible API, and handles the whole expression parsing complexity using a simple but powerful algorithm inherited from the one described by Vaughan Pratt in his 1973 paper \"Top Down Operator Precedence\" [1].\n\nHelpers are provided for literals, constants, prefix, infix and postfix expressions but custom ones can be defined when needed.\n\nThe library is small, has a test suite, benefits from tail-call elimination for left-associative operations, and allows to produce excellent error messages, as usual with elm/parser, using Parser.Advanced if wanted.\nGetting Started\nCalculator Example\n\nHere is a quite complete calculator.\n\nIt evaluates the result during parsing, without generating an explicit intermediate abstract syntax tree (AST), so it directly uses Float as the expr type."
+      },
+      "after": "cdcdaf5c006606e2",
+      "date": 1696089718612
+    },
+    {
+      "type": "edit",
+      "id": "a70b172794994fbd",
+      "item": {
+        "type": "paragraph",
+        "id": "a70b172794994fbd",
+        "text": "parenthesizedExpression [https://github.com/dmy/elm-pratt-parser/blob/34348b0334167b28d464aef24079a0d388c580f1/examples/Calc.elm#L41-L47 code]"
+      },
+      "date": 1696089921676
+    },
+    {
+      "id": "547ca189e0e08fb9",
+      "type": "move",
+      "order": [
+        "f8a78a5bb72a6d12",
+        "b911326e984c57af",
+        "6c54e2bc6cf19a86",
+        "db469d57b14a1a51",
+        "d766e9ca9479a935",
+        "316f301e49178888",
+        "31abb1b277a9e9ad",
+        "cdcdaf5c006606e2",
+        "3fcf5ab7791f4081",
+        "547ca189e0e08fb9",
+        "a70b172794994fbd",
+        "ca2e834d7dc99b0a",
+        "53bfd293f08fcb67",
+        "fac1911d7e252756",
+        "793e66c2160c9f3f",
+        "e92b60a23d8fe110",
+        "b5e3d908afaaa64a",
+        "b4ea8af38109d63e",
+        "faabe7103a98ff5d",
+        "9b417e6ea3906502",
+        "d6a0215b19c68d5d",
+        "3efac38a0f40f750",
+        "2c1bb8303ffb6ef6"
+      ],
+      "date": 1696089961447
+    },
+    {
+      "type": "edit",
+      "id": "3fcf5ab7791f4081",
+      "item": {
+        "type": "paragraph",
+        "id": "3fcf5ab7791f4081",
+        "text": "elm-pratt-parser Elm package Build Status\n\nTop-Down Operator Precedence Parsing\n\nFace complex precedence and associativity rules without fear using elm/parser.\n\n    elm install elm/parser\n    elm install dmy/elm-pratt-parser\n\nOverview\n\nWriting parsers using elm/parser is usually simple and fun, but handling complex operators precedence and associativity rules in an expression parser can be tricky, or even hard and frustrating for more complex cases.\n\nThis library goal is to fix this by adding a single expression parser to elm/parser:\n\nexpression :\n    { oneOf : List (Config expr -> Parser expr)\n    , andThenOneOf : List (Config expr -> ( Int, expr -> Parser expr ))\n    , spaces : Parser ()\n    }\n    -> Parser expr\n\nThis functions is configured with smaller standard parsers, precedence values and associativity rules, thanks to a minimalist flexible API, and handles the whole expression parsing complexity using a simple but powerful algorithm inherited from the one described by Vaughan Pratt in his 1973 paper \"Top Down Operator Precedence\" [1].\n\nHelpers are provided for literals, constants, prefix, infix and postfix expressions but custom ones can be defined when needed.\n\nThe library is small, has a test suite, benefits from tail-call elimination for left-associative operations, and allows to produce excellent error messages, as usual with elm/parser, using Parser.Advanced if wanted."
+      },
+      "date": 1696089975834
+    },
+    {
+      "type": "add",
+      "id": "1f10b4d64e1642fa",
+      "item": {
+        "type": "paragraph",
+        "id": "1f10b4d64e1642fa",
+        "text": "Getting Started\nCalculator Example\n\nHere is a quite complete calculator.\n\nIt evaluates the result during parsing, without generating an explicit intermediate abstract syntax tree (AST), so it directly uses Float as the expr type."
+      },
+      "after": "3fcf5ab7791f4081",
+      "date": 1696089983617
+    },
+    {
+      "id": "547ca189e0e08fb9",
+      "type": "move",
+      "order": [
+        "f8a78a5bb72a6d12",
+        "b911326e984c57af",
+        "6c54e2bc6cf19a86",
+        "db469d57b14a1a51",
+        "d766e9ca9479a935",
+        "316f301e49178888",
+        "31abb1b277a9e9ad",
+        "cdcdaf5c006606e2",
+        "3fcf5ab7791f4081",
+        "547ca189e0e08fb9",
+        "1f10b4d64e1642fa",
+        "a70b172794994fbd",
+        "ca2e834d7dc99b0a",
+        "53bfd293f08fcb67",
+        "fac1911d7e252756",
+        "793e66c2160c9f3f",
+        "e92b60a23d8fe110",
+        "b5e3d908afaaa64a",
+        "b4ea8af38109d63e",
+        "faabe7103a98ff5d",
+        "9b417e6ea3906502",
+        "d6a0215b19c68d5d",
+        "3efac38a0f40f750",
+        "2c1bb8303ffb6ef6"
+      ],
+      "date": 1696089986620
+    },
+    {
+      "id": "cdcdaf5c006606e2",
+      "type": "move",
+      "order": [
+        "f8a78a5bb72a6d12",
+        "b911326e984c57af",
+        "6c54e2bc6cf19a86",
+        "db469d57b14a1a51",
+        "d766e9ca9479a935",
+        "316f301e49178888",
+        "31abb1b277a9e9ad",
+        "3fcf5ab7791f4081",
+        "547ca189e0e08fb9",
+        "cdcdaf5c006606e2",
+        "1f10b4d64e1642fa",
+        "a70b172794994fbd",
+        "ca2e834d7dc99b0a",
+        "53bfd293f08fcb67",
+        "fac1911d7e252756",
+        "793e66c2160c9f3f",
+        "e92b60a23d8fe110",
+        "b5e3d908afaaa64a",
+        "b4ea8af38109d63e",
+        "faabe7103a98ff5d",
+        "9b417e6ea3906502",
+        "d6a0215b19c68d5d",
+        "3efac38a0f40f750",
+        "2c1bb8303ffb6ef6"
+      ],
+      "date": 1696089993490
+    },
+    {
+      "type": "edit",
+      "id": "1f10b4d64e1642fa",
+      "item": {
+        "type": "paragraph",
+        "id": "1f10b4d64e1642fa",
+        "text": "Here is a quite complete calculator.\n\nIt evaluates the result during parsing, without generating an explicit intermediate abstract syntax tree (AST), so it directly uses Float as the expr type."
+      },
+      "date": 1696089999780
+    },
+    {
+      "type": "edit",
+      "id": "3fcf5ab7791f4081",
+      "item": {
+        "type": "paragraph",
+        "id": "3fcf5ab7791f4081",
+        "text": "elm-pratt-parser Elm package Build Status\n\nTop-Down Operator Precedence Parsing\n\nFace complex precedence and associativity rules without fear using elm/parser.\n\n    elm install elm/parser\n    elm install dmy/elm-pratt-parser\n\nOverview\n\nWriting parsers using elm/parser is usually simple and fun, but handling complex operators precedence and associativity rules in an expression parser can be tricky, or even hard and frustrating for more complex cases.\n\nThis library goal is to fix this by adding a single expression parser to elm/parser:"
+      },
+      "date": 1696090018706
+    },
+    {
+      "type": "add",
+      "id": "f8ee88143481db81",
+      "item": {
+        "type": "paragraph",
+        "id": "f8ee88143481db81",
+        "text": "expression :\n    { oneOf : List (Config expr -> Parser expr)\n    , andThenOneOf : List (Config expr -> ( Int, expr -> Parser expr ))\n    , spaces : Parser ()\n    }\n    -> Parser expr\n\nThis functions is configured with smaller standard parsers, precedence values and associativity rules, thanks to a minimalist flexible API, and handles the whole expression parsing complexity using a simple but powerful algorithm inherited from the one described by Vaughan Pratt in his 1973 paper \"Top Down Operator Precedence\" [1].\n\nHelpers are provided for literals, constants, prefix, infix and postfix expressions but custom ones can be defined when needed.\n\nThe library is small, has a test suite, benefits from tail-call elimination for left-associative operations, and allows to produce excellent error messages, as usual with elm/parser, using Parser.Advanced if wanted."
+      },
+      "after": "3fcf5ab7791f4081",
+      "date": 1696090021028
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e82dc3a63bac3ca7"
+      },
+      "id": "e82dc3a63bac3ca7",
+      "type": "add",
+      "after": "2c1bb8303ffb6ef6",
+      "date": 1696090025046
+    },
+    {
+      "id": "e82dc3a63bac3ca7",
+      "type": "move",
+      "order": [
+        "f8a78a5bb72a6d12",
+        "b911326e984c57af",
+        "6c54e2bc6cf19a86",
+        "db469d57b14a1a51",
+        "d766e9ca9479a935",
+        "316f301e49178888",
+        "31abb1b277a9e9ad",
+        "3fcf5ab7791f4081",
+        "e82dc3a63bac3ca7",
+        "f8ee88143481db81",
+        "547ca189e0e08fb9",
+        "cdcdaf5c006606e2",
+        "1f10b4d64e1642fa",
+        "a70b172794994fbd",
+        "ca2e834d7dc99b0a",
+        "53bfd293f08fcb67",
+        "fac1911d7e252756",
+        "793e66c2160c9f3f",
+        "e92b60a23d8fe110",
+        "b5e3d908afaaa64a",
+        "b4ea8af38109d63e",
+        "faabe7103a98ff5d",
+        "9b417e6ea3906502",
+        "d6a0215b19c68d5d",
+        "3efac38a0f40f750",
+        "2c1bb8303ffb6ef6"
+      ],
+      "date": 1696090042990
+    },
+    {
+      "type": "edit",
+      "id": "f8ee88143481db81",
+      "item": {
+        "type": "paragraph",
+        "id": "f8ee88143481db81",
+        "text": "\nThis functions is configured with smaller standard parsers, precedence values and associativity rules, thanks to a minimalist flexible API, and handles the whole expression parsing complexity using a simple but powerful algorithm inherited from the one described by Vaughan Pratt in his 1973 paper \"Top Down Operator Precedence\" [1].\n\nHelpers are provided for literals, constants, prefix, infix and postfix expressions but custom ones can be defined when needed.\n\nThe library is small, has a test suite, benefits from tail-call elimination for left-associative operations, and allows to produce excellent error messages, as usual with elm/parser, using Parser.Advanced if wanted."
+      },
+      "date": 1696090053283
+    },
+    {
+      "type": "remove",
+      "id": "e82dc3a63bac3ca7",
+      "date": 1696090055352
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "53d80bdbd0962db6"
+      },
+      "id": "53d80bdbd0962db6",
+      "type": "add",
+      "after": "2c1bb8303ffb6ef6",
+      "date": 1696090060463
+    },
+    {
+      "type": "edit",
+      "id": "53d80bdbd0962db6",
+      "item": {
+        "type": "code",
+        "id": "53d80bdbd0962db6",
+        "text": "expression :\n    { oneOf : List (Config expr -> Parser expr)\n    , andThenOneOf : List (Config expr -> ( Int, expr -> Parser expr ))\n    , spaces : Parser ()\n    }\n    -> Parser expr\n"
+      },
+      "date": 1696090062511
+    },
+    {
+      "id": "53d80bdbd0962db6",
+      "type": "move",
+      "order": [
+        "f8a78a5bb72a6d12",
+        "b911326e984c57af",
+        "6c54e2bc6cf19a86",
+        "db469d57b14a1a51",
+        "d766e9ca9479a935",
+        "316f301e49178888",
+        "31abb1b277a9e9ad",
+        "3fcf5ab7791f4081",
+        "53d80bdbd0962db6",
+        "f8ee88143481db81",
+        "547ca189e0e08fb9",
+        "cdcdaf5c006606e2",
+        "1f10b4d64e1642fa",
+        "a70b172794994fbd",
+        "ca2e834d7dc99b0a",
+        "53bfd293f08fcb67",
+        "fac1911d7e252756",
+        "793e66c2160c9f3f",
+        "e92b60a23d8fe110",
+        "b5e3d908afaaa64a",
+        "b4ea8af38109d63e",
+        "faabe7103a98ff5d",
+        "9b417e6ea3906502",
+        "d6a0215b19c68d5d",
+        "3efac38a0f40f750",
+        "2c1bb8303ffb6ef6"
+      ],
+      "date": 1696090079920
+    },
+    {
+      "type": "add",
+      "id": "6b5071150c4d33e9",
+      "item": {
+        "type": "paragraph",
+        "id": "6b5071150c4d33e9",
+        "text": "[[Rémi Lefèvre]]"
+      },
+      "after": "d766e9ca9479a935",
+      "date": 1696090228707
+    },
+    {
+      "type": "edit",
+      "id": "6b5071150c4d33e9",
+      "item": {
+        "type": "paragraph",
+        "id": "6b5071150c4d33e9",
+        "text": "[[Rémi Lefèvre]] [https://github.com/rlefevre github]"
+      },
+      "date": 1696090273265
+    },
+    {
+      "type": "edit",
+      "id": "3fcf5ab7791f4081",
+      "item": {
+        "type": "paragraph",
+        "id": "3fcf5ab7791f4081",
+        "text": "Top-Down Operator Precedence Parsing\n\nFace complex precedence and associativity rules without fear using elm/parser.\n\n    elm install elm/parser\n    elm install dmy/elm-pratt-parser\n\nOverview\n\nWriting parsers using elm/parser is usually simple and fun, but handling complex operators precedence and associativity rules in an expression parser can be tricky, or even hard and frustrating for more complex cases.\n\nThis library goal is to fix this by adding a single expression parser to elm/parser:"
+      },
+      "date": 1696090524703
+    },
+    {
+      "type": "edit",
+      "id": "3fcf5ab7791f4081",
+      "item": {
+        "type": "paragraph",
+        "id": "3fcf5ab7791f4081",
+        "text": "Top-Down Operator Precedence Parsing\n\nFace complex precedence and associativity rules without fear using elm/parser."
+      },
+      "date": 1696090549393
+    },
+    {
+      "type": "add",
+      "id": "096108985341ae9c",
+      "item": {
+        "type": "paragraph",
+        "id": "096108985341ae9c",
+        "text": "elm install elm/parser"
+      },
+      "after": "3fcf5ab7791f4081",
+      "date": 1696090553703
+    },
+    {
+      "type": "add",
+      "id": "f875641b66a97cfa",
+      "item": {
+        "type": "paragraph",
+        "id": "f875641b66a97cfa",
+        "text": "elm install dmy/elm-pratt-parser"
+      },
+      "after": "096108985341ae9c",
+      "date": 1696090557220
+    },
+    {
+      "type": "add",
+      "id": "df5b56c236a140e7",
+      "item": {
+        "type": "paragraph",
+        "id": "df5b56c236a140e7",
+        "text": "Overview\n\nWriting parsers using elm/parser is usually simple and fun, but handling complex operators precedence and associativity rules in an expression parser can be tricky, or even hard and frustrating for more complex cases.\n\nThis library goal is to fix this by adding a single expression parser to elm/parser:"
+      },
+      "after": "f875641b66a97cfa",
+      "date": 1696090557825
+    },
+    {
+      "type": "edit",
+      "id": "f8ee88143481db81",
+      "item": {
+        "type": "paragraph",
+        "id": "f8ee88143481db81",
+        "text": "This functions is configured with smaller standard parsers, precedence values and associativity rules, thanks to a minimalist flexible API, and handles the whole expression parsing complexity using a simple but powerful algorithm inherited from the one described by Vaughan Pratt in his 1973 paper \"Top Down Operator Precedence\" [1].\n\nHelpers are provided for literals, constants, prefix, infix and postfix expressions but custom ones can be defined when needed.\n\nThe library is small, has a test suite, benefits from tail-call elimination for left-associative operations, and allows to produce excellent error messages, as usual with elm/parser, using Parser.Advanced if wanted."
+      },
+      "date": 1696145150464
+    },
+    {
+      "type": "add",
+      "id": "90665e9b364fd6a0",
+      "item": {
+        "type": "paragraph",
+        "id": "90665e9b364fd6a0",
+        "text": "Note: "
+      },
+      "after": "f8ee88143481db81",
+      "date": 1696145153737
+    },
+    {
+      "id": "2c1bb8303ffb6ef6",
+      "type": "move",
+      "order": [
+        "f8a78a5bb72a6d12",
+        "b911326e984c57af",
+        "6c54e2bc6cf19a86",
+        "db469d57b14a1a51",
+        "d766e9ca9479a935",
+        "6b5071150c4d33e9",
+        "316f301e49178888",
+        "31abb1b277a9e9ad",
+        "3fcf5ab7791f4081",
+        "096108985341ae9c",
+        "f875641b66a97cfa",
+        "df5b56c236a140e7",
+        "53d80bdbd0962db6",
+        "f8ee88143481db81",
+        "90665e9b364fd6a0",
+        "2c1bb8303ffb6ef6",
+        "547ca189e0e08fb9",
+        "cdcdaf5c006606e2",
+        "1f10b4d64e1642fa",
+        "a70b172794994fbd",
+        "ca2e834d7dc99b0a",
+        "53bfd293f08fcb67",
+        "fac1911d7e252756",
+        "793e66c2160c9f3f",
+        "e92b60a23d8fe110",
+        "b5e3d908afaaa64a",
+        "b4ea8af38109d63e",
+        "faabe7103a98ff5d",
+        "9b417e6ea3906502",
+        "d6a0215b19c68d5d",
+        "3efac38a0f40f750"
+      ],
+      "date": 1696145166234
+    },
+    {
+      "type": "remove",
+      "id": "2c1bb8303ffb6ef6",
+      "date": 1696145169590
+    },
+    {
+      "type": "edit",
+      "id": "90665e9b364fd6a0",
+      "item": {
+        "type": "paragraph",
+        "id": "90665e9b364fd6a0",
+        "text": "Note: Right-associative expressions minimum levels test failed because it threw an exception: \"RangeError: Maximum call stack size exceeded\""
+      },
+      "date": 1696145174297
+    },
+    {
+      "type": "edit",
+      "id": "90665e9b364fd6a0",
+      "item": {
+        "type": "paragraph",
+        "id": "90665e9b364fd6a0",
+        "text": "Note: Right-associative expressions minimum levels test [https://github.com/dmy/elm-pratt-parser/blob/34348b0334167b28d464aef24079a0d388c580f1/tests/Tests.elm#L211-L218 code] failed because it threw an exception: \"RangeError: Maximum call stack size exceeded\""
+      },
+      "date": 1696145286810
+    },
+    {
+      "type": "edit",
+      "id": "90665e9b364fd6a0",
+      "item": {
+        "type": "paragraph",
+        "id": "90665e9b364fd6a0",
+        "text": "Note: Right-associative expressions minimum levels test [https://github.com/dmy/elm-pratt-parser/blob/34348b0334167b28d464aef24079a0d388c580f1/tests/Tests.elm#L211-L218 code] failed because it threw an exception: \"RangeError: Maximum call stack size exceeded\". This test only works for node.js default stack size or bigger."
+      },
+      "date": 1696145343558
+    },
+    {
+      "type": "edit",
+      "id": "f8ee88143481db81",
+      "item": {
+        "type": "paragraph",
+        "id": "f8ee88143481db81",
+        "text": "This functions is configured with smaller standard parsers, precedence values and associativity rules, thanks to a minimalist flexible API, and handles the whole expression parsing complexity using a simple but powerful algorithm inherited from the one described by Vaughan Pratt in his 1973 paper \"Top Down Operator Precedence\" [1]."
+      },
+      "date": 1696236633270
+    },
+    {
+      "type": "add",
+      "id": "b968471896fae602",
+      "item": {
+        "type": "paragraph",
+        "id": "b968471896fae602",
+        "text": "Helpers are provided for literals, constants, prefix, infix and postfix expressions but custom ones can be defined when needed.\n\nThe library is small, has a test suite, benefits from tail-call elimination for left-associative operations, and allows to produce excellent error messages, as usual with elm/parser, using Parser.Advanced if wanted."
+      },
+      "after": "f8ee88143481db81",
+      "date": 1696236636130
+    },
+    {
+      "type": "edit",
+      "id": "f8ee88143481db81",
+      "item": {
+        "type": "paragraph",
+        "id": "f8ee88143481db81",
+        "text": "This functions is configured with smaller standard parsers, precedence values and associativity rules, thanks to a minimalist flexible API, and handles the whole expression parsing complexity using a simple but powerful algorithm inherited from the one described by Vaughan Pratt in his 1973 paper \"[[Top Down Operator Precedence]]\" [1]."
+      },
+      "date": 1696236646402
+    },
+    {
+      "type": "edit",
+      "id": "90665e9b364fd6a0",
+      "item": {
+        "type": "paragraph",
+        "id": "90665e9b364fd6a0",
+        "text": "Note: The Right-associative expressions minimum levels test [https://github.com/dmy/elm-pratt-parser/blob/34348b0334167b28d464aef24079a0d388c580f1/tests/Tests.elm#L211-L218 code] failed because it threw an exception: \"RangeError: Maximum call stack size exceeded\". This test only works for node.js default stack size or bigger."
+      },
+      "date": 1696236930312
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "47fe066e7472cced"
+      },
+      "id": "47fe066e7472cced",
+      "type": "add",
+      "after": "3efac38a0f40f750",
+      "date": 1696247712322
+    },
+    {
+      "type": "edit",
+      "id": "47fe066e7472cced",
+      "item": {
+        "type": "code",
+        "id": "47fe066e7472cced",
+        "text": "elm install dmy/elm-pratt-parser"
+      },
+      "date": 1696247714335
+    },
+    {
+      "id": "47fe066e7472cced",
+      "type": "move",
+      "order": [
+        "f8a78a5bb72a6d12",
+        "b911326e984c57af",
+        "6c54e2bc6cf19a86",
+        "db469d57b14a1a51",
+        "d766e9ca9479a935",
+        "6b5071150c4d33e9",
+        "316f301e49178888",
+        "31abb1b277a9e9ad",
+        "3fcf5ab7791f4081",
+        "096108985341ae9c",
+        "47fe066e7472cced",
+        "f875641b66a97cfa",
+        "df5b56c236a140e7",
+        "53d80bdbd0962db6",
+        "f8ee88143481db81",
+        "b968471896fae602",
+        "90665e9b364fd6a0",
+        "547ca189e0e08fb9",
+        "cdcdaf5c006606e2",
+        "1f10b4d64e1642fa",
+        "a70b172794994fbd",
+        "ca2e834d7dc99b0a",
+        "53bfd293f08fcb67",
+        "fac1911d7e252756",
+        "793e66c2160c9f3f",
+        "e92b60a23d8fe110",
+        "b5e3d908afaaa64a",
+        "b4ea8af38109d63e",
+        "faabe7103a98ff5d",
+        "9b417e6ea3906502",
+        "d6a0215b19c68d5d",
+        "3efac38a0f40f750"
+      ],
+      "date": 1696247722563
+    },
+    {
+      "type": "remove",
+      "id": "f875641b66a97cfa",
+      "date": 1696247724589
+    }
+  ]
+}
