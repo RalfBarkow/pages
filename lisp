@@ -8,11 +8,6 @@
       "slug": "on-lisp",
       "title": "On Lisp",
       "text": "https://www.paulgraham.com/progbot.html"
-    },
-    {
-      "type": "paragraph",
-      "id": "cc5411b6980e2170",
-      "text": "⇒ [[Lambdatalk]] ⇒ [[Lambda Browsing]]"
     }
   ],
   "journal": [
@@ -99,6 +94,14 @@
         "text": "⇒ [[Lambdatalk]] ⇒ [[Lambda Browsing]]"
       },
       "date": 1675260679152
+    },
+    {
+      "id": "cc5411b6980e2170",
+      "type": "remove",
+      "removedTo": {
+        "page": "2023-10-04"
+      },
+      "date": 1696396368284
     }
   ]
 }
