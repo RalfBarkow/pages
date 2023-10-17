@@ -1,0 +1,486 @@
+{
+  "title": "Volume Insert Filtering",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "b01aec79309fb5da",
+      "text": "Large customers labeled many thousands of continuously reported metrics and desired an ability to search for specific quantities with partially remembered names. We set up an Elastic Search cluster but found we had to condition the inbound traffic to mold our traffic to this database's expectations."
+    },
+    {
+      "type": "paragraph",
+      "id": "8bc59ceff04eb5a0",
+      "text": "We wanted new names to appear within a minute of its first occurrence in the data stream."
+    },
+    {
+      "type": "paragraph",
+      "id": "ecaf30b2ed5669de",
+      "text": "We choose Bloom Filter for storage efficiency. We could tolerate false positives at some rate but not false negatives."
+    },
+    {
+      "type": "paragraph",
+      "id": "f50ee07ef2b64d50",
+      "text": "We deployed our own work in a cluster and devised a mechanism for repartitioning the filter. This also supported warm start on recovery."
+    },
+    {
+      "type": "markdown",
+      "id": "a21285a95869b0ac",
+      "text": "# Architecture"
+    },
+    {
+      "type": "paragraph",
+      "id": "c03e00a66a78beaa",
+      "text": "A founding engineer worked out the microservice architecture and provided the first implementation in Java. I found it hard to see all of the features of this from the source code. Once familiar with the threads and objects I asked for a whiteboard explanation and asked a lot of \"why\" questions. The mechanisms by which back-pressure propagated was typical of subtle design."
+    },
+    {
+      "type": "paragraph",
+      "id": "8cf87752cd7f4614",
+      "text": "My last question was \"how did you get to know all of this?\" It wasn't his first service, he said. He had learned by hard experience."
+    },
+    {
+      "type": "markdown",
+      "id": "4a64ab7e5a902451",
+      "text": "# Modeling"
+    },
+    {
+      "type": "paragraph",
+      "id": "5ba44dbbec86a400",
+      "text": "We had enough measurement to know there were scaling issues. I can't remember how Bloom came to our attention but the analysis quoted online made it look promising. We set out to confirm this before proceeding. [https://en.wikipedia.org/wiki/Bloom_filter wikipedia]"
+    },
+    {
+      "type": "paragraph",
+      "id": "5bfc6df1c1d229e1",
+      "text": "I selected an implementation and ran artificial data against it. We varied the workload statics and became familiar with response times by feeding our modeled measurements into our own product, same as we would soon monitoring this work in production."
+    },
+    {
+      "type": "markdown",
+      "id": "d149f1a9f9a4560b",
+      "text": "# Deployment"
+    },
+    {
+      "type": "paragraph",
+      "id": "e7afb02876b2b204",
+      "text": "We were working during a period where any production modification had to be approved and scheduled. For us this was about once a day."
+    },
+    {
+      "type": "paragraph",
+      "id": "08c7d3a313240763",
+      "text": "We tapped production data flows and directed a variable share of this through our filter and into a newly provisioned Elastic Search cluster. We would prove this worked reliably before offering client query capability. Each day we designed a new overnight test. We often checked in from home to be sure what we saw was matching our model."
+    },
+    {
+      "type": "paragraph",
+      "id": "24a9a3ebec186a14",
+      "text": "At full load we were unable to rediscover the cache content fast enough to meet our desired latency rates. Instead we periodically merged and wrote the cache in the Bloom format. We demonstrated we could redistribute this between new nodes to rebalancing."
+    },
+    {
+      "type": "markdown",
+      "id": "7d91d9ecdd0020af",
+      "text": "# Epilog"
+    },
+    {
+      "type": "paragraph",
+      "id": "1fb6291e57289e26",
+      "text": "My colleague, Jason, was later tapped to lead similar technology in the next generation product. I drifted to higher level architectural modeling as a service to other architects."
+    },
+    {
+      "type": "paragraph",
+      "id": "7e769d91ade3f275",
+      "text": "This work, now in production, was successfully transferred to the product group that would rightfully own it. Following their \"data driven\" commitment they ran their own performance tests and found our work wholly satisfactory."
+    },
+    {
+      "type": "paragraph",
+      "id": "3f3b8362f90cde06",
+      "text": "This began a period of microservice conversion and a corresponding growth in the architecture team. I remember a conversation where one engineer that felt the architects didn't have the real experience to justify their role. Then he asks, \"what have you written that runs at our production volume?\" Fortunately I had this story to tell and knew enough details to satisfy."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Volume Insert Filtering",
+        "story": []
+      },
+      "date": 1697398119092
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b01aec79309fb5da"
+      },
+      "id": "b01aec79309fb5da",
+      "type": "add",
+      "date": 1697398156604
+    },
+    {
+      "type": "edit",
+      "id": "b01aec79309fb5da",
+      "item": {
+        "type": "paragraph",
+        "id": "b01aec79309fb5da",
+        "text": "Large customers labeled many thousands of continuously reported metrics and desired an ability to search for specific quantities with partially remembered names. We set up an Elastic Search cluster but found we had to condition the inbound traffic to mold our traffic to this database's expectations."
+      },
+      "date": 1697398398259
+    },
+    {
+      "type": "add",
+      "id": "8bc59ceff04eb5a0",
+      "item": {
+        "type": "paragraph",
+        "id": "8bc59ceff04eb5a0",
+        "text": "We wanted new names to appear within a minute of its first occurrence in the data stream."
+      },
+      "after": "b01aec79309fb5da",
+      "date": 1697398608957
+    },
+    {
+      "type": "add",
+      "id": "ecaf30b2ed5669de",
+      "item": {
+        "type": "paragraph",
+        "id": "ecaf30b2ed5669de",
+        "text": "We choose Bloom Filter for storage efficiency. We could tolerate false positives at some rate but not false negatives."
+      },
+      "after": "8bc59ceff04eb5a0",
+      "date": 1697398773967
+    },
+    {
+      "type": "add",
+      "id": "f50ee07ef2b64d50",
+      "item": {
+        "type": "paragraph",
+        "id": "f50ee07ef2b64d50",
+        "text": "We deployed our own work in a cluster and devised a mechanism for repartitioning the filter. This also supported warm start on recovery."
+      },
+      "after": "ecaf30b2ed5669de",
+      "date": 1697398875823
+    },
+    {
+      "type": "add",
+      "id": "c03e00a66a78beaa",
+      "item": {
+        "type": "paragraph",
+        "id": "c03e00a66a78beaa",
+        "text": "More."
+      },
+      "after": "f50ee07ef2b64d50",
+      "date": 1697398884943
+    },
+    {
+      "type": "edit",
+      "id": "c03e00a66a78beaa",
+      "item": {
+        "type": "paragraph",
+        "id": "c03e00a66a78beaa",
+        "text": "A founding engineer worked out the microservice architecture and provided the first implementation in Java. I found it hard to see all of the features of this from the source code. Once familiar with the threads and objects I asked for a whiteboard explanation and asked a lot of \"why\" questions."
+      },
+      "date": 1697400907654
+    },
+    {
+      "type": "add",
+      "id": "8cf87752cd7f4614",
+      "item": {
+        "type": "paragraph",
+        "id": "8cf87752cd7f4614",
+        "text": "My last question was \"how did you get to know all of this?\" It wasn't his first service. He had learned by hard experience."
+      },
+      "after": "c03e00a66a78beaa",
+      "date": 1697400909638
+    },
+    {
+      "type": "edit",
+      "id": "c03e00a66a78beaa",
+      "item": {
+        "type": "paragraph",
+        "id": "c03e00a66a78beaa",
+        "text": "A founding engineer worked out the microservice architecture and provided the first implementation in Java. I found it hard to see all of the features of this from the source code. Once familiar with the threads and objects I asked for a whiteboard explanation and asked a lot of \"why\" questions. The mechanisms by which back-pressure propagated was typical of subtle engineering."
+      },
+      "date": 1697400963486
+    },
+    {
+      "type": "edit",
+      "id": "c03e00a66a78beaa",
+      "item": {
+        "type": "paragraph",
+        "id": "c03e00a66a78beaa",
+        "text": "A founding engineer worked out the microservice architecture and provided the first implementation in Java. I found it hard to see all of the features of this from the source code. Once familiar with the threads and objects I asked for a whiteboard explanation and asked a lot of \"why\" questions. The mechanisms by which back-pressure propagated was typical of subtle design know-how."
+      },
+      "date": 1697400992874
+    },
+    {
+      "type": "edit",
+      "id": "c03e00a66a78beaa",
+      "item": {
+        "type": "paragraph",
+        "id": "c03e00a66a78beaa",
+        "text": "A founding engineer worked out the microservice architecture and provided the first implementation in Java. I found it hard to see all of the features of this from the source code. Once familiar with the threads and objects I asked for a whiteboard explanation and asked a lot of \"why\" questions. The mechanisms by which back-pressure propagated was typical of subtle design."
+      },
+      "date": 1697401000724
+    },
+    {
+      "type": "edit",
+      "id": "8cf87752cd7f4614",
+      "item": {
+        "type": "paragraph",
+        "id": "8cf87752cd7f4614",
+        "text": "My last question was \"how did you get to know all of this?\" It wasn't his first service, he said. He had learned by hard experience."
+      },
+      "date": 1697401019390
+    },
+    {
+      "type": "add",
+      "id": "a21285a95869b0ac",
+      "item": {
+        "type": "paragraph",
+        "id": "a21285a95869b0ac",
+        "text": "# Architecture"
+      },
+      "after": "f50ee07ef2b64d50",
+      "date": 1697401070670
+    },
+    {
+      "type": "edit",
+      "id": "a21285a95869b0ac",
+      "item": {
+        "type": "markdown",
+        "id": "a21285a95869b0ac",
+        "text": "# Architecture"
+      },
+      "date": 1697401073178
+    },
+    {
+      "type": "add",
+      "id": "4a64ab7e5a902451",
+      "item": {
+        "type": "paragraph",
+        "id": "4a64ab7e5a902451",
+        "text": "# Modeling"
+      },
+      "after": "8cf87752cd7f4614",
+      "date": 1697401163556
+    },
+    {
+      "type": "add",
+      "id": "5ba44dbbec86a400",
+      "item": {
+        "type": "paragraph",
+        "id": "5ba44dbbec86a400",
+        "text": "We had enough measurement to know there were scaling issues. I can't remember how Bloom came to our attention but the analysis quoted by Wikipedia made it look promising."
+      },
+      "after": "4a64ab7e5a902451",
+      "date": 1697401337625
+    },
+    {
+      "type": "edit",
+      "id": "5ba44dbbec86a400",
+      "item": {
+        "type": "paragraph",
+        "id": "5ba44dbbec86a400",
+        "text": "We had enough measurement to know there were scaling issues. I can't remember how Bloom came to our attention but the analysis quoted online made it look promising. [https://en.wikipedia.org/wiki/Bloom_filter wikipedia]"
+      },
+      "date": 1697401367522
+    },
+    {
+      "type": "edit",
+      "id": "5ba44dbbec86a400",
+      "item": {
+        "type": "paragraph",
+        "id": "5ba44dbbec86a400",
+        "text": "We had enough measurement to know there were scaling issues. I can't remember how Bloom came to our attention but the analysis quoted online made it look promising. We set out to confirm this with our data before w proceed. [https://en.wikipedia.org/wiki/Bloom_filter wikipedia]"
+      },
+      "date": 1697401430339
+    },
+    {
+      "type": "edit",
+      "id": "5ba44dbbec86a400",
+      "item": {
+        "type": "paragraph",
+        "id": "5ba44dbbec86a400",
+        "text": "We had enough measurement to know there were scaling issues. I can't remember how Bloom came to our attention but the analysis quoted online made it look promising. We set out to confirm this before proceeding. [https://en.wikipedia.org/wiki/Bloom_filter wikipedia]"
+      },
+      "date": 1697401474050
+    },
+    {
+      "type": "edit",
+      "id": "4a64ab7e5a902451",
+      "item": {
+        "type": "markdown",
+        "id": "4a64ab7e5a902451",
+        "text": "# Modeling"
+      },
+      "date": 1697401479493
+    },
+    {
+      "type": "add",
+      "id": "5bfc6df1c1d229e1",
+      "item": {
+        "type": "paragraph",
+        "id": "5bfc6df1c1d229e1",
+        "text": "I selected an implementation and ran artificial data against it. We varied the workload statics and became familiar with response times by feeding our modeled measurements into our own product, same as we would be soon monitoring in production. "
+      },
+      "after": "5ba44dbbec86a400",
+      "date": 1697401768486
+    },
+    {
+      "type": "edit",
+      "id": "5bfc6df1c1d229e1",
+      "item": {
+        "type": "paragraph",
+        "id": "5bfc6df1c1d229e1",
+        "text": "I selected an implementation and ran artificial data against it. We varied the workload statics and became familiar with response times by feeding our modeled measurements into our own product, same as we would soon monitoring this work in production. "
+      },
+      "date": 1697401846023
+    },
+    {
+      "type": "edit",
+      "id": "5bfc6df1c1d229e1",
+      "item": {
+        "type": "paragraph",
+        "id": "5bfc6df1c1d229e1",
+        "text": "I selected an implementation and ran artificial data against it. We varied the workload statics and became familiar with response times by feeding our modeled measurements into our own product, same as we would soon monitoring this work in production."
+      },
+      "date": 1697401893058
+    },
+    {
+      "type": "add",
+      "id": "d149f1a9f9a4560b",
+      "item": {
+        "type": "paragraph",
+        "id": "d149f1a9f9a4560b",
+        "text": "# Deployment"
+      },
+      "after": "5bfc6df1c1d229e1",
+      "date": 1697401900875
+    },
+    {
+      "type": "add",
+      "id": "e7afb02876b2b204",
+      "item": {
+        "type": "paragraph",
+        "id": "e7afb02876b2b204",
+        "text": "We were working during a period where any production modification had to be approved and scheduled. For us this was about once a day."
+      },
+      "after": "d149f1a9f9a4560b",
+      "date": 1697402101385
+    },
+    {
+      "type": "edit",
+      "id": "d149f1a9f9a4560b",
+      "item": {
+        "type": "markdown",
+        "id": "d149f1a9f9a4560b",
+        "text": "# Deployment"
+      },
+      "date": 1697402104040
+    },
+    {
+      "type": "add",
+      "id": "08c7d3a313240763",
+      "item": {
+        "type": "paragraph",
+        "id": "08c7d3a313240763",
+        "text": "We tapped production data flows and directed a variable share of this through our filter and into a newly provisioned Elastic Search cluster. We would prove this worked reliably before offering client query capability. Each day we designed a new overnight test. We often checked in from home to be sure what we saw was matching our model."
+      },
+      "after": "e7afb02876b2b204",
+      "date": 1697402454027
+    },
+    {
+      "type": "add",
+      "id": "24a9a3ebec186a14",
+      "item": {
+        "type": "paragraph",
+        "id": "24a9a3ebec186a14",
+        "text": "At full load we were unable to rediscover the cache content fast enough to meet our desired latency rates. Instead we periodically merged and wrote the cache in the Bloom format. We demonstrated we could redistribute this between new nodes to rebalancing. "
+      },
+      "after": "08c7d3a313240763",
+      "date": 1697402706808
+    },
+    {
+      "type": "edit",
+      "id": "24a9a3ebec186a14",
+      "item": {
+        "type": "paragraph",
+        "id": "24a9a3ebec186a14",
+        "text": "At full load we were unable to rediscover the cache content fast enough to meet our desired latency rates. Instead we periodically merged and wrote the cache in the Bloom format. We demonstrated we could redistribute this between new nodes to rebalancing."
+      },
+      "date": 1697402738884
+    },
+    {
+      "type": "add",
+      "id": "7d91d9ecdd0020af",
+      "item": {
+        "type": "paragraph",
+        "id": "7d91d9ecdd0020af",
+        "text": "# Epilog"
+      },
+      "after": "24a9a3ebec186a14",
+      "date": 1697402833814
+    },
+    {
+      "type": "add",
+      "id": "1fb6291e57289e26",
+      "item": {
+        "type": "paragraph",
+        "id": "1fb6291e57289e26",
+        "text": "My colleague Jason was later tapped to lead similar technology in the next generation product. I drifted to higher level architectural modeling as a service to other architects. This work, now in production, was successfully transferred to the product group that would rightfully own it. Following their \"data driven\" commitment they ran their own performance tests and found our work wholly satisfactory."
+      },
+      "after": "7d91d9ecdd0020af",
+      "date": 1697403124072
+    },
+    {
+      "type": "edit",
+      "id": "1fb6291e57289e26",
+      "item": {
+        "type": "paragraph",
+        "id": "1fb6291e57289e26",
+        "text": "My colleague Jason was later tapped to lead similar technology in the next generation product. I drifted to higher level architectural modeling as a service to other architects."
+      },
+      "date": 1697403134753
+    },
+    {
+      "type": "add",
+      "id": "7e769d91ade3f275",
+      "item": {
+        "type": "paragraph",
+        "id": "7e769d91ade3f275",
+        "text": "This work, now in production, was successfully transferred to the product group that would rightfully own it. Following their \"data driven\" commitment they ran their own performance tests and found our work wholly satisfactory."
+      },
+      "after": "1fb6291e57289e26",
+      "date": 1697403136077
+    },
+    {
+      "type": "edit",
+      "id": "7d91d9ecdd0020af",
+      "item": {
+        "type": "markdown",
+        "id": "7d91d9ecdd0020af",
+        "text": "# Epilog"
+      },
+      "date": 1697403139471
+    },
+    {
+      "type": "add",
+      "id": "3f3b8362f90cde06",
+      "item": {
+        "type": "paragraph",
+        "id": "3f3b8362f90cde06",
+        "text": "This began a period of microservice conversion and a corresponding growth in the architecture team. I remember a conversation where one engineer that felt the architects didn't have the real experience to justify their role. Then he asks, \"what have you written that runs at our production volume?\" Fortunately I had this story to tell and knew enough details to satisfy."
+      },
+      "after": "7e769d91ade3f275",
+      "date": 1697404396891
+    },
+    {
+      "type": "edit",
+      "id": "1fb6291e57289e26",
+      "item": {
+        "type": "paragraph",
+        "id": "1fb6291e57289e26",
+        "text": "My colleague, Jason, was later tapped to lead similar technology in the next generation product. I drifted to higher level architectural modeling as a service to other architects."
+      },
+      "date": 1697404441109
+    },
+    {
+      "type": "fork",
+      "site": "code.fed.wiki.org",
+      "date": 1697435470958
+    }
+  ]
+}

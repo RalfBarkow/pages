@@ -1,0 +1,667 @@
+{
+  "title": "Deconstructing the Mastodon Client",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "9642bf319a1b1711",
+      "text": "Ever since I ([[Konrad Hinsen]]) joined Twitter in 2011, and then moved to Mastodon in 2022, I have been unhappy with the timeline view proposed by both of these communication platforms as their main interface. Now I have finally done something about it: I wrote my own Mastodon client. Or perhaps rather a non-client, because the concept of “the client” is a big part of what I disliked. [https://blog.khinsen.net/posts/2023/10/09/deconstructing-the-mastodon-client/ post]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e393120e18665eeb",
+      "text": "[…]  As a long-time [[Emacs]] user, I also tried [[mastodon.el]], which is nice but, like Emacs, it is desktop only, and thus doesn’t help with my multi-device issues."
+    },
+    {
+      "type": "reference",
+      "id": "30ea189b8932faa8",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "mastodonel",
+      "title": "mastodon.el",
+      "text": "is an Emacs client for the AcitivityPub social networks that implement the Mastodon API. [https://codeberg.org/martianh/mastodon.el#headline-1 codeberg]"
+    },
+    {
+      "type": "paragraph",
+      "id": "c15e7c4ca464c808",
+      "text": "At some point I realized that what I wanted is not a better Mastodon client, but a better Mastodon [[Workflow]]. What I care about is a data structure, a stream of toots, that is accessible via an HTTP API. I want to split this stream into several streams according to various criteria. For some substreams, I want to make sure I don’t miss any message. For others, I need an interface to scan all messages when I feel like it, or search for specific keywords when I don’t have time for scanning everything."
+    },
+    {
+      "type": "paragraph",
+      "id": "8844fddbd6d22377",
+      "text": "[…] There are also good infrastructure tools in this space, in particular for e-mail. [[isync]], for example, takes care of IMAP(S), letting me work with local files (Maildir) and not worry about networks, certificates, and their various modes of failure."
+    },
+    {
+      "type": "reference",
+      "id": "e702df509df7cd64",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "isync",
+      "title": "isync",
+      "text": "free IMAP and MailDir mailbox synchronizer [https://isync.sourceforge.io/ site]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e67cbf446381f56a",
+      "text": "It actually takes surprisingly little software to transform Mastodon streams into e-mail and RSS feeds, if you can resist temptations of overengineering. A toot is a snippet of HTML with optional attachments (images, video, audio). That’s also what a MIME message happens to be. A near-perfect match. RSS items are HTML snippets as well. No attachments, but you can include the same preview images that Mastodon clients display with toots. If you can find support libraries for mail, RSS, and the Mastodon API in a programming language that you know well enough, this becomes a very manageable side project."
+    },
+    {
+      "type": "paragraph",
+      "id": "dbab36ecc9df6365",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3479b366b9eefc6b",
+      "text": "The hopefully generalizable lesson from this project is that it is possible to improve one’s personal computing environment with reasonable effort, under the condition of accepting an initial learning curve for some technologies. The important question then is how to identify technologies that are worth learning, which I interpret as technologies that are likely to be useful again for other software personalization efforts. A first draft of a list of criteria:"
+    },
+    {
+      "type": "paragraph",
+      "id": "3f235b0faa35ff59",
+      "text": "1. Choose [[Boring Technology]]. You want well-known, well-documented, and stable infrastructure to build on. No surprises, no tech churn. Your learning effort should be a good investment."
+    },
+    {
+      "type": "paragraph",
+      "id": "e2e762ca033c3885",
+      "text": "2. Choose small-scale rather than enterprise-grade technology. Your problems and challenges are very different from Microsoft’s. Prefer small software stacks."
+    },
+    {
+      "type": "paragraph",
+      "id": "6ed0dfcd6b7866ae",
+      "text": "3. Corollary 1: choose carefully who you turn to for advice. Most conference talks, blog posts, StackOverflow discussions, etc. come from software professionals. Better listen to people like yourself (but no, I have no advice on where to find them, nor how to judge their competence)."
+    },
+    {
+      "type": "paragraph",
+      "id": "3918c930da2dbf24",
+      "text": "4. Corollary 2: consider old technology. Most modern software development tools are designed for software professionals. Tools for small-scale development were common in the 1980s and 1990s, before computers became commodities. Technology from that era that’s still supported today may well be your best bet. I am a happy user of [[Emacs]], Smalltalk (more precisely [[Pharo]] with [[Glamorous Toolkit]] as my preferred user interface), and Common Lisp (more precisely [[SBCL]]). Python is from the 1990s as well, but since it was widely adopted by software professionals in the 2000s, its ecosystem suffers too much from tech churn for my taste."
+    },
+    {
+      "type": "paragraph",
+      "id": "b9af7b47cbbfc237",
+      "text": "5. Build on general protocols and file formats rather than specialized ones. Hierarchical filesystems rather than the Dropbox API. E-mail rather than Matrix. HTML, XML, and JSON files rather than JavaScript libraries or Web APIs."
+    },
+    {
+      "type": "paragraph",
+      "id": "277fbb9a9c42c3ee",
+      "text": "6.     Consider debuggability. Delegate hard-to-debug stuff (e.g. networking, in particular with encryption) to other software. Choose tools that support debuggability. Debugging is a lot easier if you can build your own problem-specific debugging tools, which in turn is best supported by development tools that are extensible and focus on rapid feedback. Smalltalk systems are best in class in this respect, and Glamorous Toolkit even turned this into a design principle, called “[[Moldable Development]]”."
+    },
+    {
+      "type": "paragraph",
+      "id": "c47e87baa91cd1ef",
+      "text": "Unfortunately, there is one more aspect to making good choices that is hard to generalize: you need some expertise in figuring out which problems you can solve yourself with reasonable effort and which are so hard that your efforts are better spent on delegating or circumventing them. Data synchronization is in this second category, but like most people I learned this the hard way (years ago), while trying to do it myself and losing both time and data in the process."
+    },
+    {
+      "type": "paragraph",
+      "id": "6a3164a7b507aa33",
+      "text": "After a few weeks of using my setup, I am fully satisfied with it. I also note that my original ideas about defining my personal algorithmic feeds have evolved substantially with practical experience. Once I have taken care of conversations (they go to e-mail) and the small set of accounts I follow closely (a low-volume RSS feed), I ended up splitting the remaining toots (i.e. most of my timeline) by topics in the crudest imaginable way: substring search. It’s not perfect but definitely good enough. There’s always room for improvement. My main failure so far is in removing all the cat-related toots from my feeds. That may actually require AI-based image recognition. Some problems are hard!"
+    },
+    {
+      "type": "paragraph",
+      "id": "afb99cdae5f36c4d",
+      "text": "I’d love to hear about similar projects in this space (tell me on Mastodon! [https://scholar.social/@khinsen page]). The only one I am aware of is [[Jon Udell]]’s Steampipe-based client [https://steampipe.io/blog/mastodon post]. [[Steampipe]] provides an SQL/database view on many Web services, which is perfect for doing non-trivial queries. That’s something my own setup doesn’t address at all. It’s not something I feel a need for right now, but I may well add Jon’s client to my toolbox one day."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Deconstructing the Mastodon Client",
+        "story": []
+      },
+      "date": 1697021446553
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9642bf319a1b1711"
+      },
+      "id": "9642bf319a1b1711",
+      "type": "add",
+      "date": 1697021447917
+    },
+    {
+      "type": "edit",
+      "id": "9642bf319a1b1711",
+      "item": {
+        "type": "paragraph",
+        "id": "9642bf319a1b1711",
+        "text": "Ever since I ([[Konrad Hinsen]]) joined Twitter in 2011, and then moved to Mastodon in 2022, I have been unhappy with the timeline view proposed by both of these communication platforms as their main interface. Now I have finally done something about it: I wrote my own Mastodon client. Or perhaps rather a non-client, because the concept of “the client” is a big part of what I disliked."
+      },
+      "date": 1697021462100
+    },
+    {
+      "type": "edit",
+      "id": "9642bf319a1b1711",
+      "item": {
+        "type": "paragraph",
+        "id": "9642bf319a1b1711",
+        "text": "Ever since I ([[Konrad Hinsen]]) joined Twitter in 2011, and then moved to Mastodon in 2022, I have been unhappy with the timeline view proposed by both of these communication platforms as their main interface. Now I have finally done something about it: I wrote my own Mastodon client. Or perhaps rather a non-client, because the concept of “the client” is a big part of what I disliked. "
+      },
+      "date": 1697021484490
+    },
+    {
+      "type": "edit",
+      "id": "9642bf319a1b1711",
+      "item": {
+        "type": "paragraph",
+        "id": "9642bf319a1b1711",
+        "text": "Ever since I ([[Konrad Hinsen]]) joined Twitter in 2011, and then moved to Mastodon in 2022, I have been unhappy with the timeline view proposed by both of these communication platforms as their main interface. Now I have finally done something about it: I wrote my own Mastodon client. Or perhaps rather a non-client, because the concept of “the client” is a big part of what I disliked. [https://blog.khinsen.net/posts/2023/10/09/deconstructing-the-mastodon-client/ post]"
+      },
+      "date": 1697021498085
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "30ea189b8932faa8"
+      },
+      "id": "30ea189b8932faa8",
+      "type": "add",
+      "after": "9642bf319a1b1711",
+      "date": 1697021681845
+    },
+    {
+      "type": "edit",
+      "id": "30ea189b8932faa8",
+      "item": {
+        "type": "reference",
+        "id": "30ea189b8932faa8",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "mastodonel",
+        "title": "mastodon.el",
+        "text": "is an Emacs client for the AcitivityPub social networks that implement the Mastodon API. [https://codeberg.org/martianh/mastodon.el#headline-1 codeberg]"
+      },
+      "date": 1697021684371
+    },
+    {
+      "type": "add",
+      "id": "e393120e18665eeb",
+      "item": {
+        "type": "paragraph",
+        "id": "e393120e18665eeb",
+        "text": "[…]  As a long-time Emacs user, I also tried mastodon.el, which is nice but, like Emacs, it is desktop only, and thus doesn’t help with my multi-device issues."
+      },
+      "after": "9642bf319a1b1711",
+      "date": 1697021762367
+    },
+    {
+      "type": "edit",
+      "id": "e393120e18665eeb",
+      "item": {
+        "type": "paragraph",
+        "id": "e393120e18665eeb",
+        "text": "[…]  As a long-time Emacs user, I also tried [[mastodon.el]], which is nice but, like Emacs, it is desktop only, and thus doesn’t help with my multi-device issues."
+      },
+      "date": 1697021771675
+    },
+    {
+      "type": "edit",
+      "id": "e393120e18665eeb",
+      "item": {
+        "type": "paragraph",
+        "id": "e393120e18665eeb",
+        "text": "[…]  As a long-time [[Emacs]] user, I also tried [[mastodon.el]], which is nice but, like Emacs, it is desktop only, and thus doesn’t help with my multi-device issues."
+      },
+      "date": 1697021789478
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c15e7c4ca464c808"
+      },
+      "id": "c15e7c4ca464c808",
+      "type": "add",
+      "after": "30ea189b8932faa8",
+      "date": 1697021852003
+    },
+    {
+      "type": "edit",
+      "id": "c15e7c4ca464c808",
+      "item": {
+        "type": "paragraph",
+        "id": "c15e7c4ca464c808",
+        "text": "At some point I realized that what I wanted is not a better Mastodon client, but a better Mastodon workflow. What I care about is a data structure, a stream of toots, that is accessible via an HTTP API. I want to split this stream into several streams according to various criteria. For some substreams, I want to make sure I don’t miss any message. For others, I need an interface to scan all messages when I feel like it, or search for specific keywords when I don’t have time for scanning everything."
+      },
+      "date": 1697021853354
+    },
+    {
+      "type": "edit",
+      "id": "c15e7c4ca464c808",
+      "item": {
+        "type": "paragraph",
+        "id": "c15e7c4ca464c808",
+        "text": "At some point I realized that what I wanted is not a better Mastodon client, but a better Mastodon [[Workflow]]. What I care about is a data structure, a stream of toots, that is accessible via an HTTP API. I want to split this stream into several streams according to various criteria. For some substreams, I want to make sure I don’t miss any message. For others, I need an interface to scan all messages when I feel like it, or search for specific keywords when I don’t have time for scanning everything."
+      },
+      "date": 1697021870511
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "545bb28c949a7c8e"
+      },
+      "id": "545bb28c949a7c8e",
+      "type": "add",
+      "after": "c15e7c4ca464c808",
+      "date": 1697021905818
+    },
+    {
+      "type": "edit",
+      "id": "545bb28c949a7c8e",
+      "item": {
+        "type": "paragraph",
+        "id": "545bb28c949a7c8e",
+        "text": "isync: free IMAP and MailDir mailbox synchronizer"
+      },
+      "date": 1697021910139
+    },
+    {
+      "type": "edit",
+      "id": "545bb28c949a7c8e",
+      "item": {
+        "type": "paragraph",
+        "id": "545bb28c949a7c8e",
+        "text": "isync: free IMAP and MailDir mailbox synchronizer [https://isync.sourceforge.io/ site]"
+      },
+      "date": 1697021919493
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8844fddbd6d22377"
+      },
+      "id": "8844fddbd6d22377",
+      "type": "add",
+      "after": "545bb28c949a7c8e",
+      "date": 1697021952476
+    },
+    {
+      "id": "8844fddbd6d22377",
+      "type": "move",
+      "order": [
+        "9642bf319a1b1711",
+        "e393120e18665eeb",
+        "30ea189b8932faa8",
+        "c15e7c4ca464c808",
+        "8844fddbd6d22377",
+        "545bb28c949a7c8e"
+      ],
+      "date": 1697021954253
+    },
+    {
+      "type": "edit",
+      "id": "8844fddbd6d22377",
+      "item": {
+        "type": "paragraph",
+        "id": "8844fddbd6d22377",
+        "text": "[…] There are also good infrastructure tools in this space, in particular for e-mail. isync, for example, takes care of IMAP(S), letting me work with local files (Maildir) and not worry about networks, certificates, and their various modes of failure."
+      },
+      "date": 1697021958298
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e67cbf446381f56a"
+      },
+      "id": "e67cbf446381f56a",
+      "type": "add",
+      "after": "545bb28c949a7c8e",
+      "date": 1697021983239
+    },
+    {
+      "type": "edit",
+      "id": "e67cbf446381f56a",
+      "item": {
+        "type": "paragraph",
+        "id": "e67cbf446381f56a",
+        "text": "It actually takes surprisingly little software to transform Mastodon streams into e-mail and RSS feeds, if you can resist temptations of overengineering. A toot is a snippet of HTML with optional attachments (images, video, audio). That’s also what a MIME message happens to be. A near-perfect match. RSS items are HTML snippets as well. No attachments, but you can include the same preview images that Mastodon clients display with toots. If you can find support libraries for mail, RSS, and the Mastodon API in a programming language that you know well enough, this becomes a very manageable side project."
+      },
+      "date": 1697021986428
+    },
+    {
+      "type": "edit",
+      "id": "8844fddbd6d22377",
+      "item": {
+        "type": "paragraph",
+        "id": "8844fddbd6d22377",
+        "text": "[…] There are also good infrastructure tools in this space, in particular for e-mail. [[isync]], for example, takes care of IMAP(S), letting me work with local files (Maildir) and not worry about networks, certificates, and their various modes of failure."
+      },
+      "date": 1697021992460
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e702df509df7cd64"
+      },
+      "id": "e702df509df7cd64",
+      "type": "add",
+      "after": "e67cbf446381f56a",
+      "date": 1697022016833
+    },
+    {
+      "type": "edit",
+      "id": "e702df509df7cd64",
+      "item": {
+        "type": "reference",
+        "id": "e702df509df7cd64",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "isync",
+        "title": "isync",
+        "text": "free IMAP and MailDir mailbox synchronizer [https://isync.sourceforge.io/ site]"
+      },
+      "date": 1697022018728
+    },
+    {
+      "id": "e702df509df7cd64",
+      "type": "move",
+      "order": [
+        "9642bf319a1b1711",
+        "e393120e18665eeb",
+        "30ea189b8932faa8",
+        "c15e7c4ca464c808",
+        "8844fddbd6d22377",
+        "e702df509df7cd64",
+        "545bb28c949a7c8e",
+        "e67cbf446381f56a"
+      ],
+      "date": 1697022020603
+    },
+    {
+      "type": "remove",
+      "id": "545bb28c949a7c8e",
+      "date": 1697022022433
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dbab36ecc9df6365"
+      },
+      "id": "dbab36ecc9df6365",
+      "type": "add",
+      "after": "e67cbf446381f56a",
+      "date": 1697022166988
+    },
+    {
+      "type": "edit",
+      "id": "dbab36ecc9df6365",
+      "item": {
+        "type": "paragraph",
+        "id": "dbab36ecc9df6365",
+        "text": "[…]"
+      },
+      "date": 1697022170183
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "07ae7349b53355f1"
+      },
+      "id": "07ae7349b53355f1",
+      "type": "add",
+      "after": "dbab36ecc9df6365",
+      "date": 1697022175338
+    },
+    {
+      "type": "remove",
+      "id": "07ae7349b53355f1",
+      "date": 1697022176699
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3479b366b9eefc6b"
+      },
+      "id": "3479b366b9eefc6b",
+      "type": "add",
+      "after": "dbab36ecc9df6365",
+      "date": 1697022178788
+    },
+    {
+      "type": "edit",
+      "id": "3479b366b9eefc6b",
+      "item": {
+        "type": "paragraph",
+        "id": "3479b366b9eefc6b",
+        "text": "The hopefully generalizable lesson from this project is that it is possible to improve one’s personal computing environment with reasonable effort, under the condition of accepting an initial learning curve for some technologies. The important question then is how to identify technologies that are worth learning, which I interpret as technologies that are likely to be useful again for other software personalization efforts. A first draft of a list of criteria:"
+      },
+      "date": 1697022180438
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3f235b0faa35ff59"
+      },
+      "id": "3f235b0faa35ff59",
+      "type": "add",
+      "after": "3479b366b9eefc6b",
+      "date": 1697022220430
+    },
+    {
+      "type": "edit",
+      "id": "3f235b0faa35ff59",
+      "item": {
+        "type": "paragraph",
+        "id": "3f235b0faa35ff59",
+        "text": "1. Choose [[Boring Technology]]. You want well-known, well-documented, and stable infrastructure to build on. No surprises, no tech churn. Your learning effort should be a good investment."
+      },
+      "date": 1697022238155
+    },
+    {
+      "type": "add",
+      "id": "e2e762ca033c3885",
+      "item": {
+        "type": "paragraph",
+        "id": "e2e762ca033c3885",
+        "text": "2. Choose small-scale rather than enterprise-grade technology. Your problems and challenges are very different from Microsoft’s. Prefer small software stacks."
+      },
+      "after": "3f235b0faa35ff59",
+      "date": 1697022485080
+    },
+    {
+      "type": "add",
+      "id": "6ed0dfcd6b7866ae",
+      "item": {
+        "type": "paragraph",
+        "id": "6ed0dfcd6b7866ae",
+        "text": "3. Corollary 1: choose carefully who you turn to for advice. Most conference talks, blog posts, StackOverflow discussions, etc. come from software professionals. Better listen to people like yourself (but no, I have no advice on where to find them, nor how to judge their competence)."
+      },
+      "after": "e2e762ca033c3885",
+      "date": 1697022501944
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3918c930da2dbf24"
+      },
+      "id": "3918c930da2dbf24",
+      "type": "add",
+      "after": "6ed0dfcd6b7866ae",
+      "date": 1697022508004
+    },
+    {
+      "type": "edit",
+      "id": "3918c930da2dbf24",
+      "item": {
+        "type": "paragraph",
+        "id": "3918c930da2dbf24",
+        "text": "4. Corollary 2: consider old technology. Most modern software development tools are designed for software professionals. Tools for small-scale development were common in the 1980s and 1990s, before computers became commodities. Technology from that era that’s still supported today may well be your best bet. I am a happy user of Emacs, Smalltalk (more precisely Pharo with Glamorous Toolkit as my preferred user interface), and Common Lisp (more precisely SBCL). Python is from the 1990s as well, but since it was widely adopted by software professionals in the 2000s, its ecosystem suffers too much from tech churn for my taste."
+      },
+      "date": 1697022511362
+    },
+    {
+      "type": "edit",
+      "id": "3918c930da2dbf24",
+      "item": {
+        "type": "paragraph",
+        "id": "3918c930da2dbf24",
+        "text": "4. Corollary 2: consider old technology. Most modern software development tools are designed for software professionals. Tools for small-scale development were common in the 1980s and 1990s, before computers became commodities. Technology from that era that’s still supported today may well be your best bet. I am a happy user of Emacs, Smalltalk (more precisely Pharo with [[Glamorous Toolkit]] as my preferred user interface), and Common Lisp (more precisely SBCL). Python is from the 1990s as well, but since it was widely adopted by software professionals in the 2000s, its ecosystem suffers too much from tech churn for my taste."
+      },
+      "date": 1697022525691
+    },
+    {
+      "type": "edit",
+      "id": "3918c930da2dbf24",
+      "item": {
+        "type": "paragraph",
+        "id": "3918c930da2dbf24",
+        "text": "4. Corollary 2: consider old technology. Most modern software development tools are designed for software professionals. Tools for small-scale development were common in the 1980s and 1990s, before computers became commodities. Technology from that era that’s still supported today may well be your best bet. I am a happy user of [[Emacs]], Smalltalk (more precisely [[Pharo]] with [[Glamorous Toolkit]] as my preferred user interface), and Common Lisp (more precisely SBCL). Python is from the 1990s as well, but since it was widely adopted by software professionals in the 2000s, its ecosystem suffers too much from tech churn for my taste."
+      },
+      "date": 1697022560969
+    },
+    {
+      "type": "edit",
+      "id": "3918c930da2dbf24",
+      "item": {
+        "type": "paragraph",
+        "id": "3918c930da2dbf24",
+        "text": "4. Corollary 2: consider old technology. Most modern software development tools are designed for software professionals. Tools for small-scale development were common in the 1980s and 1990s, before computers became commodities. Technology from that era that’s still supported today may well be your best bet. I am a happy user of [[Emacs]], Smalltalk (more precisely [[Pharo]] with [[Glamorous Toolkit]] as my preferred user interface), and Common Lisp (more precisely [[SBCL]]). Python is from the 1990s as well, but since it was widely adopted by software professionals in the 2000s, its ecosystem suffers too much from tech churn for my taste."
+      },
+      "date": 1697022588036
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b9af7b47cbbfc237"
+      },
+      "id": "b9af7b47cbbfc237",
+      "type": "add",
+      "after": "3918c930da2dbf24",
+      "date": 1697022648139
+    },
+    {
+      "type": "edit",
+      "id": "b9af7b47cbbfc237",
+      "item": {
+        "type": "paragraph",
+        "id": "b9af7b47cbbfc237",
+        "text": "5."
+      },
+      "date": 1697022652169
+    },
+    {
+      "type": "edit",
+      "id": "b9af7b47cbbfc237",
+      "item": {
+        "type": "paragraph",
+        "id": "b9af7b47cbbfc237",
+        "text": "5. Build on general protocols and file formats rather than specialized ones. Hierarchical filesystems rather than the Dropbox API. E-mail rather than Matrix. HTML, XML, and JSON files rather than JavaScript libraries or Web APIs."
+      },
+      "date": 1697022663235
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "277fbb9a9c42c3ee"
+      },
+      "id": "277fbb9a9c42c3ee",
+      "type": "add",
+      "after": "b9af7b47cbbfc237",
+      "date": 1697022685284
+    },
+    {
+      "type": "edit",
+      "id": "277fbb9a9c42c3ee",
+      "item": {
+        "type": "paragraph",
+        "id": "277fbb9a9c42c3ee",
+        "text": "6.     Consider debuggability. Delegate hard-to-debug stuff (e.g. networking, in particular with encryption) to other software. Choose tools that support debuggability. Debugging is a lot easier if you can build your own problem-specific debugging tools, which in turn is best supported by development tools that are extensible and focus on rapid feedback. Smalltalk systems are best in class in this respect, and Glamorous Toolkit even turned this into a design principle, called “[[Moldable Development]]”."
+      },
+      "date": 1697022696966
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c47e87baa91cd1ef"
+      },
+      "id": "c47e87baa91cd1ef",
+      "type": "add",
+      "after": "277fbb9a9c42c3ee",
+      "date": 1697022739195
+    },
+    {
+      "type": "edit",
+      "id": "c47e87baa91cd1ef",
+      "item": {
+        "type": "paragraph",
+        "id": "c47e87baa91cd1ef",
+        "text": "Unfortunately, there is one more aspect to making good choices that is hard to generalize: you need some expertise in figuring out which problems you can solve yourself with reasonable effort and which are so hard that your efforts are better spent on delegating or circumventing them. Data synchronization is in this second category, but like most people I learned this the hard way (years ago), while trying to do it myself and losing both time and data in the process."
+      },
+      "date": 1697022740709
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6a3164a7b507aa33"
+      },
+      "id": "6a3164a7b507aa33",
+      "type": "add",
+      "after": "c47e87baa91cd1ef",
+      "date": 1697022771221
+    },
+    {
+      "type": "edit",
+      "id": "6a3164a7b507aa33",
+      "item": {
+        "type": "paragraph",
+        "id": "6a3164a7b507aa33",
+        "text": "After a few weeks of using my setup, I am fully satisfied with it. I also note that my original ideas about defining my personal algorithmic feeds have evolved substantially with practical experience. Once I have taken care of conversations (they go to e-mail) and the small set of accounts I follow closely (a low-volume RSS feed), I ended up splitting the remaining toots (i.e. most of my timeline) by topics in the crudest imaginable way: substring search. It’s not perfect but definitely good enough. There’s always room for improvement. My main failure so far is in removing all the cat-related toots from my feeds. That may actually require AI-based image recognition. Some problems are hard!"
+      },
+      "date": 1697022772927
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "afb99cdae5f36c4d"
+      },
+      "id": "afb99cdae5f36c4d",
+      "type": "add",
+      "after": "6a3164a7b507aa33",
+      "date": 1697022812096
+    },
+    {
+      "type": "edit",
+      "id": "afb99cdae5f36c4d",
+      "item": {
+        "type": "paragraph",
+        "id": "afb99cdae5f36c4d",
+        "text": "I’d love to hear about similar projects in this space (tell me on Mastodon!). The only one I am aware of is Jon Udell’s Steampipe-based client. Steampipe provides an SQL/database view on many Web services, which is perfect for doing non-trivial queries. That’s something my own setup doesn’t address at all. It’s not something I feel a need for right now, but I may well add Jon’s client to my toolbox one day."
+      },
+      "date": 1697022813699
+    },
+    {
+      "type": "edit",
+      "id": "afb99cdae5f36c4d",
+      "item": {
+        "type": "paragraph",
+        "id": "afb99cdae5f36c4d",
+        "text": "I’d love to hear about similar projects in this space (tell me on Mastodon! [https://scholar.social/@khinsen page]). The only one I am aware of is Jon Udell’s Steampipe-based client. Steampipe provides an SQL/database view on many Web services, which is perfect for doing non-trivial queries. That’s something my own setup doesn’t address at all. It’s not something I feel a need for right now, but I may well add Jon’s client to my toolbox one day."
+      },
+      "date": 1697022842542
+    },
+    {
+      "type": "edit",
+      "id": "afb99cdae5f36c4d",
+      "item": {
+        "type": "paragraph",
+        "id": "afb99cdae5f36c4d",
+        "text": "I’d love to hear about similar projects in this space (tell me on Mastodon! [https://scholar.social/@khinsen page]). The only one I am aware of is [[Jon Udell]]’s Steampipe-based client []. Steampipe provides an SQL/database view on many Web services, which is perfect for doing non-trivial queries. That’s something my own setup doesn’t address at all. It’s not something I feel a need for right now, but I may well add Jon’s client to my toolbox one day."
+      },
+      "date": 1697022883349
+    },
+    {
+      "type": "edit",
+      "id": "afb99cdae5f36c4d",
+      "item": {
+        "type": "paragraph",
+        "id": "afb99cdae5f36c4d",
+        "text": "I’d love to hear about similar projects in this space (tell me on Mastodon! [https://scholar.social/@khinsen page]). The only one I am aware of is [[Jon Udell]]’s Steampipe-based client [https://steampipe.io/blog/mastodon post]. Steampipe provides an SQL/database view on many Web services, which is perfect for doing non-trivial queries. That’s something my own setup doesn’t address at all. It’s not something I feel a need for right now, but I may well add Jon’s client to my toolbox one day."
+      },
+      "date": 1697022891914
+    },
+    {
+      "type": "edit",
+      "id": "afb99cdae5f36c4d",
+      "item": {
+        "type": "paragraph",
+        "id": "afb99cdae5f36c4d",
+        "text": "I’d love to hear about similar projects in this space (tell me on Mastodon! [https://scholar.social/@khinsen page]). The only one I am aware of is [[Jon Udell]]’s Steampipe-based client [https://steampipe.io/blog/mastodon post]. [[Steampipe]] provides an SQL/database view on many Web services, which is perfect for doing non-trivial queries. That’s something my own setup doesn’t address at all. It’s not something I feel a need for right now, but I may well add Jon’s client to my toolbox one day."
+      },
+      "date": 1697022987133
+    }
+  ]
+}
