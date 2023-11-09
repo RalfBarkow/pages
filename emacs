@@ -13,6 +13,14 @@
       "slug": "moldable-emacs",
       "title": "Moldable Emacs",
       "text": "We could learn about things better. Mountains of knowledge hide in places we cannot access or use. The more we write down, the more it takes to find and understand things we find useful."
+    },
+    {
+      "type": "reference",
+      "id": "63eafef5c68603bf",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "emacsingt",
+      "title": "EmacsInGT",
+      "text": "<html lang=\"en\">"
     }
   ],
   "journal": [
@@ -84,6 +92,29 @@
         "text": "is a text editor that was created by Richard Stallman in the 1970s as part of the GNU project."
       },
       "date": 1674809986101
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "63eafef5c68603bf"
+      },
+      "id": "63eafef5c68603bf",
+      "type": "add",
+      "after": "771ea9bb3ea16628",
+      "date": 1699454864605
+    },
+    {
+      "type": "edit",
+      "id": "63eafef5c68603bf",
+      "item": {
+        "type": "reference",
+        "id": "63eafef5c68603bf",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "emacsingt",
+        "title": "EmacsInGT",
+        "text": "<html lang=\"en\">"
+      },
+      "date": 1699454867389
     }
   ]
 }

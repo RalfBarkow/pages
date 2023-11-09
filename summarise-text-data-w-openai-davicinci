@@ -1,0 +1,392 @@
+{
+  "title": "Summarise text data w/ OpenAI davicinci",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "f116f6382b1119a7",
+      "text": "When using [https://platform.openai.com/docs/models/ Open AI's Models], you must ensure that the text provided in the prompt does not exceed a max allowable number of tokens."
+    },
+    {
+      "type": "paragraph",
+      "id": "4da4f757474f55cf",
+      "text": "Therefore, in processing text data, there is required a small amount of pre-processing to determine where in a large chunk of text to split the data."
+    },
+    {
+      "type": "paragraph",
+      "id": "2381280f3e2cdeda",
+      "text": "Fortunately, when transcribing audio with [https://platform.openai.com/docs/models/whisper Open AI's Whisper Model] (audio to text), the result is formatted into \"segments.\" You can count how many tokens there are in each segment, and use this information to ensure the prompt passed to the summarising model (e.g. [https://platform.openai.com/docs/models/gpt-3-5 gpt-3.5-turbo]) does not exceed the max allowable number of tokens. "
+    },
+    {
+      "type": "paragraph",
+      "id": "1e74479f7b17c3cb",
+      "text": "Below is an example of how to do this in Python."
+    },
+    {
+      "type": "markdown",
+      "id": "afd16f1adfe105aa",
+      "text": "# Python Example"
+    },
+    {
+      "type": "paragraph",
+      "id": "48a9d662c7f84e43",
+      "text": "Function for generating the cumulative sum of tokens per segment:"
+    },
+    {
+      "type": "code",
+      "id": "27e070d9d37f8a79",
+      "text": "def getTokensCumSum(segments: dict) -> np.ndarray:\n  \"\"\"\n  Take transcript segments data, containing count of tokens per segment, and\n  make a dataframe containing columns for [segment (text) | num_tokens | cum_sum_num_tokens]\n  where cum_sum_num_tokens is a cumulative sum of tokens for all the segments.\n  :param segments:\n  :return:\n  \"\"\"\n  tokens = np.array([len(s['tokens']) for s in segments], dtype=int)\n  return np.cumsum(tokens).flatten()"
+    },
+    {
+      "type": "paragraph",
+      "id": "654c29ae7bbdeeb4",
+      "text": "Which can be used to determine where to break the data, so that each chunk does not exceed the max allowable number of tokens, and each chunk has a roughly similar number of tokens."
+    },
+    {
+      "type": "paragraph",
+      "id": "164720191d8ac315",
+      "text": "The last part of the previous paragraph is important because in the first trial of use, the data had 6096 tokens. Splitting with a threshold of 3000 would have resulted in the third chunk of data having just the closing remarks of e.g. an [[Onboarding interview]]. This would generate a summary that elaborated on people mumbling and giving thanks to one another, which, because there are three summaries which would get combined, would make a disproportionate contribution to the overall summary of the interview."
+    },
+    {
+      "type": "paragraph",
+      "id": "73e5f833978b5370",
+      "text": "So, here's a function for finding appropriate breakpoints in the data:"
+    },
+    {
+      "type": "code",
+      "id": "a4d6194b9942bdb3",
+      "text": "def getMaxTokensBreakpoints(cum_sum: np.ndarray, max_tokens=3000) -> list:\n  \"\"\"\n  Take cumulative sum of tokens and find points at which to break data.\n  :param cum_sum:\n  :param max_tokens:\n  :return:\n  \"\"\"\n  # Get the minimum number of required divisions of the data, to ensure each chunk has less\n  # than the max allowed number of tokens\n  min_required_chunks = (cum_sum[-1] + max_tokens - 1) // max_tokens\n\n  # Generate an even split for the total number of token in the text\n  mean_token_count = cum_sum[-1] / min_required_chunks\n\n  # Return the indices at which to split the data where each chunk has less than the max_tokens allowance\n  # and all chunks have relatively similar amounts of tokens in them.\n  return [np.argmin(cum_sum < mean_token_count * i) for i in range(1, min_required_chunks+1)]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Summarise text data w/ OpenAI davicinci",
+        "story": []
+      },
+      "date": 1699136377027
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4753f6ecfca52d99"
+      },
+      "id": "4753f6ecfca52d99",
+      "type": "add",
+      "date": 1699136394035
+    },
+    {
+      "type": "remove",
+      "id": "4753f6ecfca52d99",
+      "date": 1699136453345
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2a70ed78395e729b"
+      },
+      "id": "2a70ed78395e729b",
+      "type": "add",
+      "date": 1699352622812
+    },
+    {
+      "type": "remove",
+      "id": "2a70ed78395e729b",
+      "date": 1699352625815
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "66bdd85434f17704"
+      },
+      "id": "66bdd85434f17704",
+      "type": "add",
+      "date": 1699352682706
+    },
+    {
+      "type": "edit",
+      "id": "66bdd85434f17704",
+      "item": {
+        "type": "code",
+        "id": "66bdd85434f17704",
+        "text": "import pathlib\nimport re\n\nimport whisper\nimport sys\nfrom pathlib import Path\nimport json\nimport datetime\n\nimport os\nimport openai\n\n# Define the regular expression pattern\nPATTERN_TRANSCRIPTION = re.compile(r'^transcribe_.*\\.json$')\nPATTERN_SUMMARY = re.compile(r'^summary_.*\\.json$')\n\ndef findTranscriptions(d):\n  transcriptions = []\n\n  # Recursively iterate through all files and sub-directories\n  for file_path in d.glob('**/*'):\n    if file_path.is_file() and PATTERN_TRANSCRIPTION.match(file_path.name):\n      transcriptions.append(file_path)\n\n  return transcriptions\n\ndef estimateTokens(segments):\n  return 0\n\ndef summaryExists(transcript):\n  for file in transcript.parent.glob('./*'):\n    if file.is_file() and PATTERN_SUMMARY.match(file.name):\n      return True\n    else:\n      return False\n\nif __name__ == '__main__':\n  api_key = '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'\n  openai.api_key = api_key\n\n  cwd = pathlib.Path(os.getcwd())\n\n  for transcript in findTranscriptions(cwd):\n    if not summaryExists(transcript):\n      with open(transcript) as json_file:\n        data_transcript = json.load(json_file)\n    else:\n      continue\n\n    segment_summaries = []\n\n    noTokens = estimateTokens(data_transcript['segments'])\n    input(f\"Estimating {noTokens} tokens in the text data being processed.\")\n\n    # Summarise each segment\n    for segment in data_transcript['segments']:\n      summary = openai.Completion.create(\n        model=\"text-davinci-003\",\n        prompt=segment['text'] + \"nnSummarise the text.\",\n        max_tokens=200,\n        temperature=0\n      )\n      segment_summaries.append(summary)\n\n    summary_all = \" \".join(segment_summaries)\n\n    summary_summary = openai.Completion.create(\n      model=\"text-davinci-003\",\n      prompt=summary_all + \"nnTl;dr\",\n      max_tokens=200,\n      temperature=0\n    )\n\n    print(summary_summary)\n\n    with open(transcript.parent / \"summary.json\", 'w') as json_file:\n      json.dump(\n        {'text': summary_all},\n        json_file\n      )\n\n    with open(transcript.parent / \"summary_summary.json\", 'w') as json_file:\n      json.dump(\n        {'text': summary_summary},\n        json_file\n      )\n\n  input()\n"
+      },
+      "date": 1699352685024
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f116f6382b1119a7"
+      },
+      "id": "f116f6382b1119a7",
+      "type": "add",
+      "after": "66bdd85434f17704",
+      "date": 1699352700344
+    },
+    {
+      "id": "f116f6382b1119a7",
+      "type": "move",
+      "order": [
+        "f116f6382b1119a7",
+        "66bdd85434f17704"
+      ],
+      "date": 1699352707907
+    },
+    {
+      "type": "edit",
+      "id": "f116f6382b1119a7",
+      "item": {
+        "type": "paragraph",
+        "id": "f116f6382b1119a7",
+        "text": "whisper_summarise.py"
+      },
+      "date": 1699352716487
+    },
+    {
+      "type": "remove",
+      "id": "66bdd85434f17704",
+      "date": 1699394809595
+    },
+    {
+      "type": "edit",
+      "id": "f116f6382b1119a7",
+      "item": {
+        "type": "paragraph",
+        "id": "f116f6382b1119a7",
+        "text": "When using open AI's models, you must ensure that the text provided in the prompt does not exceed a max allowable number of tokens."
+      },
+      "date": 1699394896559
+    },
+    {
+      "type": "add",
+      "id": "4da4f757474f55cf",
+      "item": {
+        "type": "paragraph",
+        "id": "4da4f757474f55cf",
+        "text": "Therefore, in processing text data, there is required a small amount of pre-processing to determine where in a large chunk of text to split the data."
+      },
+      "after": "f116f6382b1119a7",
+      "date": 1699394935563
+    },
+    {
+      "type": "add",
+      "id": "2381280f3e2cdeda",
+      "item": {
+        "type": "paragraph",
+        "id": "2381280f3e2cdeda",
+        "text": "Fortunately, when transcribing audio with open AI's whisper model (audio to text), the result is formatted into \"segments.\" You can count how many tokens there are in each segment, and use this information to ensure the summarising model (e.g. gpt-3.5-turbo)"
+      },
+      "after": "4da4f757474f55cf",
+      "date": 1699395027271
+    },
+    {
+      "type": "edit",
+      "id": "2381280f3e2cdeda",
+      "item": {
+        "type": "paragraph",
+        "id": "2381280f3e2cdeda",
+        "text": "Fortunately, when transcribing audio with open AI's [https://platform.openai.com/docs/models/whisper whisper] model (audio to text), the result is formatted into \"segments.\" You can count how many tokens there are in each segment, and use this information to ensure the summarising model (e.g. gpt-3.5-turbo)"
+      },
+      "date": 1699395056074
+    },
+    {
+      "type": "edit",
+      "id": "2381280f3e2cdeda",
+      "item": {
+        "type": "paragraph",
+        "id": "2381280f3e2cdeda",
+        "text": "Fortunately, when transcribing audio with open AI's [https://platform.openai.com/docs/models/whisper whisper] model (audio to text), the result is formatted into \"segments.\" You can count how many tokens there are in each segment, and use this information to ensure the summarising model (e.g. [https://platform.openai.com/docs/models/gpt-3-5 gpt-3.5-turbo])"
+      },
+      "date": 1699395084237
+    },
+    {
+      "type": "edit",
+      "id": "2381280f3e2cdeda",
+      "item": {
+        "type": "paragraph",
+        "id": "2381280f3e2cdeda",
+        "text": "Fortunately, when transcribing audio with open AI's [https://platform.openai.com/docs/models/whisper whisper] model (audio to text), the result is formatted into \"segments.\" You can count how many tokens there are in each segment, and use this information to ensure the prompt passed to the summarising model (e.g. [https://platform.openai.com/docs/models/gpt-3-5 gpt-3.5-turbo]) does not exceed the max allowable number of tokens. "
+      },
+      "date": 1699395116905
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1e74479f7b17c3cb"
+      },
+      "id": "1e74479f7b17c3cb",
+      "type": "add",
+      "after": "2381280f3e2cdeda",
+      "date": 1699395119970
+    },
+    {
+      "type": "edit",
+      "id": "1e74479f7b17c3cb",
+      "item": {
+        "type": "paragraph",
+        "id": "1e74479f7b17c3cb",
+        "text": "This has been done in code with the following functions:"
+      },
+      "date": 1699395132039
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "27e070d9d37f8a79"
+      },
+      "id": "27e070d9d37f8a79",
+      "type": "add",
+      "after": "1e74479f7b17c3cb",
+      "date": 1699395141038
+    },
+    {
+      "type": "edit",
+      "id": "27e070d9d37f8a79",
+      "item": {
+        "type": "code",
+        "id": "27e070d9d37f8a79",
+        "text": "def getTokensCumSum(segments: dict) -> np.ndarray:\n  \"\"\"\n  Take transcript segments data, containing count of tokens per segment, and\n  make a dataframe containing columns for [segment (text) | num_tokens | cum_sum_num_tokens]\n  where cum_sum_num_tokens is a cumulative sum of tokens for all the segments.\n  :param segments:\n  :return:\n  \"\"\"\n  tokens = np.array([len(s['tokens']) for s in segments], dtype=int)\n  return np.cumsum(tokens).flatten()"
+      },
+      "date": 1699395143374
+    },
+    {
+      "type": "edit",
+      "id": "1e74479f7b17c3cb",
+      "item": {
+        "type": "paragraph",
+        "id": "1e74479f7b17c3cb",
+        "text": "Below is"
+      },
+      "date": 1699395166809
+    },
+    {
+      "type": "edit",
+      "id": "1e74479f7b17c3cb",
+      "item": {
+        "type": "paragraph",
+        "id": "1e74479f7b17c3cb",
+        "text": "Below is an example of how to do this in Python."
+      },
+      "date": 1699395170858
+    },
+    {
+      "type": "add",
+      "id": "afd16f1adfe105aa",
+      "item": {
+        "type": "paragraph",
+        "id": "afd16f1adfe105aa",
+        "text": "# Python Example"
+      },
+      "after": "1e74479f7b17c3cb",
+      "date": 1699395175331
+    },
+    {
+      "type": "edit",
+      "id": "afd16f1adfe105aa",
+      "item": {
+        "type": "markdown",
+        "id": "afd16f1adfe105aa",
+        "text": "# Python Example"
+      },
+      "date": 1699395177151
+    },
+    {
+      "type": "add",
+      "id": "48a9d662c7f84e43",
+      "item": {
+        "type": "paragraph",
+        "id": "48a9d662c7f84e43",
+        "text": "Function for generating the cumulative sum of tokens per segment:"
+      },
+      "after": "afd16f1adfe105aa",
+      "date": 1699395200787
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "654c29ae7bbdeeb4"
+      },
+      "id": "654c29ae7bbdeeb4",
+      "type": "add",
+      "after": "27e070d9d37f8a79",
+      "date": 1699395206127
+    },
+    {
+      "type": "edit",
+      "id": "654c29ae7bbdeeb4",
+      "item": {
+        "type": "paragraph",
+        "id": "654c29ae7bbdeeb4",
+        "text": "Which can be used to determine where to break the data, so that each chunk does not exceed the max allowable number of tokens, and each chunk has a roughly similar number of tokens."
+      },
+      "date": 1699395269026
+    },
+    {
+      "type": "add",
+      "id": "164720191d8ac315",
+      "item": {
+        "type": "paragraph",
+        "id": "164720191d8ac315",
+        "text": "The last part of the previous paragraph is important because in the first trial of use, the data had 6096 tokens. Splitting with a threshold of 3000 would have resulted in the third chunk of data having just the closing remarks of e.g. an [[Onboarding interview]]. This would generate a summary that elaborated on people mumbling and giving thanks to one another, which, because there are three summaries which would get combined, would make a disproportionate contribution to the overall summary of the interview."
+      },
+      "after": "654c29ae7bbdeeb4",
+      "date": 1699395392266
+    },
+    {
+      "type": "add",
+      "id": "73e5f833978b5370",
+      "item": {
+        "type": "paragraph",
+        "id": "73e5f833978b5370",
+        "text": "So, here's a function for finding appropriate breakpoints in the data:"
+      },
+      "after": "164720191d8ac315",
+      "date": 1699395410104
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a4d6194b9942bdb3"
+      },
+      "id": "a4d6194b9942bdb3",
+      "type": "add",
+      "after": "73e5f833978b5370",
+      "date": 1699395413202
+    },
+    {
+      "type": "edit",
+      "id": "a4d6194b9942bdb3",
+      "item": {
+        "type": "code",
+        "id": "a4d6194b9942bdb3",
+        "text": "def getMaxTokensBreakpoints(cum_sum: np.ndarray, max_tokens=3000) -> list:\n  \"\"\"\n  Take cumulative sum of tokens and find points at which to break data.\n  :param cum_sum:\n  :param max_tokens:\n  :return:\n  \"\"\"\n  # Get the minimum number of required divisions of the data, to ensure each chunk has less\n  # than the max allowed number of tokens\n  min_required_chunks = (cum_sum[-1] + max_tokens - 1) // max_tokens\n\n  # Generate an even split for the total number of token in the text\n  mean_token_count = cum_sum[-1] / min_required_chunks\n\n  # Return the indices at which to split the data where each chunk has less than the max_tokens allowance\n  # and all chunks have relatively similar amounts of tokens in them.\n  return [np.argmin(cum_sum < mean_token_count * i) for i in range(1, min_required_chunks+1)]"
+      },
+      "date": 1699395417934
+    },
+    {
+      "type": "edit",
+      "id": "f116f6382b1119a7",
+      "item": {
+        "type": "paragraph",
+        "id": "f116f6382b1119a7",
+        "text": "When using [https://platform.openai.com/docs/models/ Open AI's Models], you must ensure that the text provided in the prompt does not exceed a max allowable number of tokens."
+      },
+      "date": 1699395557987
+    },
+    {
+      "type": "edit",
+      "id": "2381280f3e2cdeda",
+      "item": {
+        "type": "paragraph",
+        "id": "2381280f3e2cdeda",
+        "text": "Fortunately, when transcribing audio with [https://platform.openai.com/docs/models/whisper Open AI's Whisper Model] (audio to text), the result is formatted into \"segments.\" You can count how many tokens there are in each segment, and use this information to ensure the prompt passed to the summarising model (e.g. [https://platform.openai.com/docs/models/gpt-3-5 gpt-3.5-turbo]) does not exceed the max allowable number of tokens. "
+      },
+      "date": 1699395625531
+    },
+    {
+      "type": "fork",
+      "site": "tobias.david.ward.dojo.fed.wiki",
+      "date": 1699456262739
+    }
+  ]
+}
