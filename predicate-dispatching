@@ -1,0 +1,632 @@
+{
+  "title": "Predicate Dispatching",
+  "story": [
+    {
+      "type": "html",
+      "text": "[[Predicate Dispatching]] is a model of function application that includes [[Single Dispatch]], [[Multi Methods]], [[Pattern Matching]], and [[Predicate Classes]].  Instead of tying dispatching to types, methods can be dispatched upon through any arbitrary predicate.  Regular dispatching falls out as a special case when the predicate is IS-A.",
+      "id": "f90f17d5406f82c70c1cbf73e94b20be"
+    },
+    {
+      "type": "html",
+      "text": "\nAs modeled in the papers, [[Predicate Dispatching]] has a syntax like this:",
+      "id": "50b93ef1a5c04b298214de753b8d7ae1"
+    },
+    {
+      "type": "code",
+      "text": "  gf this-is-a-generic-function (param 1, param2)\n  when param1@Som''''''eClass { ... method 1 ... }        // Class test\n  when param1@Som''''''eClass and param2@SomeO''''''therClass { ... method 2 ... } // Conjunction\n  when param1@Som''''''eClass and param1.component@Part { ... method 3 ... } // Destructuring\n  when param1@Ordered and test param1 < param2 { ... method 4 ... }  // Arbitrary predicate\n  when param1@!Exclude''''''dClass { ... method 5 ... }      // Negation\n  when param1@Ordered or param2@!Forbidden { ... method 6 ... }  // Disjunction\n  when innerPart <- param1.x \n    and test predicateHolds(innerPart) { ...method 7 ... }    // Binding",
+      "id": "282b51c94fb2a192a00fd803c23d75e2"
+    },
+    {
+      "type": "html",
+      "text": "Methods may be defined at separate points in the program; the compiler coalesces them together into a single generic function.  ",
+      "id": "9df04a718a0933b85f4ab8326faa1e61"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Single Dispatch]] falls out as a special case when the first parameter is tested for class membership:",
+      "id": "5578afb5dd9e7a71ec79d2c6c7719eeb"
+    },
+    {
+      "type": "code",
+      "text": "  method singleDispatch (param1, param2) when param1@Bas''''''eClass",
+      "id": "56ca456e52fa574321c28a9a1196d540"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Multi Methods]] fall out when each parameter is tested for class membership.  Note that [[Predicate Dispatching]] models multimethods where the order of arguments is insignificant, as in [[Cecil Language]] or [[Dylan Language]].  CLOS-style multimethods, with left-to-right precedence, are not supported.",
+      "id": "0b8f0074d19d7832b1d1dc0c36fec693"
+    },
+    {
+      "type": "code",
+      "text": "  method multiDispatch (param1, param2) when param1@Firs''''''tClass and param2@Secon''''''dClass",
+      "id": "7688f08252fc8e1be747a69497d731d6"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Pattern Matching]] falls out when subcomponents are tested and the results are bound to variables:",
+      "id": "07415fe44087d5c5e6c90c767c5699d1"
+    },
+    {
+      "type": "code",
+      "text": "  method patternMatch (fn, consCell) when\n  fn@Function and\n  consCell@Cons and not test consCell = nil and \n  head <- consCell.car and\n  tail <- consCell.cdr",
+      "id": "effe72f404791e7b40a275bd490519ed"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Predicate Classes]] fall out when you test for the base class and then add additional 'test' predicates for conditions:",
+      "id": "bb7d89a2806b27eefdb5d271d357ac1b"
+    },
+    {
+      "type": "code",
+      "text": "  method predicateClass (var) when\n  var@BaseClass and\n  test firstCondition(var) and\n  test otherCondition(var)",
+      "id": "c3a4bb7249fce2d45b02406485c06537"
+    },
+    {
+      "type": "html",
+      "text": "\nImplementation strategies usually convert the predicates into disjunctive normal form, and then build a dispatch DAG to select methods for given conditions.  Each 'or' leads to a given (potentially shared) method.  Bound parameters have their variables eliminated through sharing the expression tree.  'test' predicates are evaluated before the DAG is entered, and then are class-tested for True and False.  Class tests use a mixture of linear search ([[Polymorphic Inline Caches]]), [[Binary Search]], and array lookups, as guided by dynamic profile information.",
+      "id": "05addf30aee003868ee67ead574db3c2"
+    },
+    {
+      "type": "html",
+      "text": "\nA Lisp implementation is explained in ftp://publications.ai.mit.edu/ai-publications/2001/AITR-2001-006.pdf.  A Javaish one is at [http://www.cs.ucla.edu/%7Etodd/jpred/ www.cs.ucla.edu].  It's also available in a toy Java interpreter; see [http://www.cs.washington.edu/research/projects/cecil/www/Papers/gud.html www.cs.washington.edu].\t[[Cecil Language]] has a similar feature ([[Predicate Classes]]) that could be viewed as a special case.",
+      "id": "134519f9ca493ad2f394f8b5a7870450"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Pattern Matching Views]] is functionally equivalent to [[Predicate Dispatching]], and you can easily implement one in terms of the other.",
+      "id": "0ed761b52a11d46cc36f2b4a6dd14960"
+    },
+    {
+      "type": "html",
+      "text": "\nAvailable papers include:",
+      "id": "e2a5efb5084d44a2ea2c7ed41b23465d"
+    },
+    {
+      "type": "code",
+      "text": " ftp://ftp.cs.washington.edu/homes/chambers/gud-ecoop98.ps.gz\n ftp://ftp.cs.washington.edu/homes/chambers/dispatching.ps.gz",
+      "id": "4a2a58ea29f26cab12c8ea1a72656cf7"
+    },
+    {
+      "type": "html",
+      "text": "\nThere is also a practical Python implementation of the Chambers and Chen predicate dispatch algorithm, included as part of the current CVS version of [[Py Protocols]]; see:",
+      "id": "a671bee5a0a13fc0ca69e89dda0e7c43"
+    },
+    {
+      "type": "html",
+      "text": " [http://dirtsimple.org/2004/11/retroactive-abstraction.html dirtsimple.org]",
+      "id": "d1c4c7f3ef11dbe1a4f661e399a4b68c"
+    },
+    {
+      "type": "html",
+      "text": " [http://dirtsimple.org/2004/11/generic-functions-have-landed.html dirtsimple.org]",
+      "id": "93e9064df9ea7e086d10409145af5e6f"
+    },
+    {
+      "type": "html",
+      "text": " [http://peak.telecommunity.com/doc/src/dispatch/__init__.html peak.telecommunity.com] ",
+      "id": "6c9b400d958b2a0ae8be2b61947fe1d0"
+    },
+    {
+      "type": "html",
+      "text": " [http://peak.telecommunity.com/PyProtocols.html peak.telecommunity.com]",
+      "id": "c83355eeb287c2a5278e84f79eb9675e"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "19ac78a08b896a4ee17abb73d1717d34"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Predicate Dispatching]] is a generalization of [[Multiple Dispatch]].",
+      "id": "08624b678f47f01dca87531d7247edd5"
+    },
+    {
+      "type": "html",
+      "text": "\nBasically, instead of basing the dispatch on an \"is_a\" check, you check whether a general predicate is valid on the argument.\nSo, in imaginary syntax instead of writing:",
+      "id": "c06d757ab0acc165d4650d565e082bed"
+    },
+    {
+      "type": "code",
+      "text": " int foo( int a, int b):\n  if a > 0 \n  return a\n  else\n  return b-a",
+      "id": "8e9bfbf922d432ee20f4c111e08b0e51"
+    },
+    {
+      "type": "html",
+      "text": "\nyou'd write:",
+      "id": "1123a8bf8697b84da9fceae72266854a"
+    },
+    {
+      "type": "html",
+      "text": "int foo ( gt_zero? a, int b):<br>return a",
+      "id": "87c975d346d9e81e275f5aef9665b000"
+    },
+    {
+      "type": "html",
+      "text": "int foo ( int a, int b):<br>return b",
+      "id": "2f09d2a9ab18786dcf70debfad10e014"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "19ac78a08b896a4ee17abb73d1717d34"
+    },
+    {
+      "type": "html",
+      "text": "Contributors: [[Jonathan Tang]], Anonymous Donor(s)",
+      "id": "fe77fe0587870234de3e6b173d91acaf"
+    },
+    {
+      "type": "html",
+      "text": "\nNice work Jonathan, good stuff, but I did lose interest when I read \"No production or academic language currently implements the full predicate dispatching model\".  Cool stuff always seems to work like that!",
+      "id": "e00fd4dcc197ab3f06ccda3a9094a990"
+    },
+    {
+      "type": "html",
+      "text": "<i>[[Ocaml Language]] and [[Haskell Language]] have \"guard predicates\", while [[Prolog Language]] is done entirely with predicate dispatching (with quite a bit of restriction on the forms of the predicates).  [[Mercury Language]] has even more flexible predicate dispatching.  Strikes me that perhaps the paper's quite a bit old if it made that claim, or perhaps the author didn't really do much research to see how those languages' models maps onto the described one.</i>",
+      "id": "b1ee5990a6b10ddfc22e85e64d214a09"
+    },
+    {
+      "type": "html",
+      "text": "\nIn some time, [[Clojure Language]] will probably get a predicate dispatch via it's core.match module: [http://github.com/clojure/core.match github.com]",
+      "id": "b10192e3f9bd9ae4fae34d5411c7ea0c"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "19ac78a08b896a4ee17abb73d1717d34"
+    },
+    {
+      "type": "html",
+      "text": "\nWhy not switch to [[Table Oriented Programming]] if you want this? SQL is the closest thing in common use.",
+      "id": "64030ff7af07be09f3118f1067f5b623"
+    },
+    {
+      "type": "html",
+      "text": "<i>Because [[Table Oriented Programming]] provides nothing even remotely similar.</i>",
+      "id": "a705ad61456b6e908cffb3f2692b8671"
+    },
+    {
+      "type": "html",
+      "text": "Hmm... I think I caused this, so I should attempt to clarify this.  I believe top is coming from a remark I made on [[Relational Alternative To Xml]], that the use of 'validation rules' is similar to predicate typing.  What hasn't been done as of yet is a full mapping, such that the routine called at runtime is dependant on the validation rules (predicates) satisfied at that time.",
+      "id": "97ea692db8f46ecc4d6d41afe88699d2"
+    },
+    {
+      "type": "html",
+      "text": "[[Table Oriented Programming]] could be used to implement predicate dispatching (at a higher level than [[Turing Complete]]ness);  it does not provide it out of the box.  You can implement [[Aspect Oriented Programming]] using java;  that doesn't mean it's trivial.",
+      "id": "8194306edbdde9b553e519af0605d0d1"
+    },
+    {
+      "type": "html",
+      "text": "--[[William Underwood]]",
+      "id": "ec2790c1a7e32bb0e107793d5ecf6a8e"
+    },
+    {
+      "type": "html",
+      "text": "<i>Isn't that what [[Control Table]]s are used for? Filter rows by a predicate (WHERE clause), and then run the functions or snippets contained in the matching row(s). There is an example under [[Double Dispatch Example]]. For a shortcut, imagine something such as \"RUN snippetColumn FROM controlTable WHERE <condition>\" --top</i>",
+      "id": "f7ff7ee7e9d16ef772ec84653c7f0301"
+    },
+    {
+      "type": "html",
+      "text": "Yes, it's close.  But we don't want to repeat it every time we <i>call</i> a routine.  Your snippet would  be close to what I'd want for <i>defining</i> the routine (which might be what you meant);  calling it should simply be a matter of specifying the routine name (aka the control table name) and the parameters (e.g., a row, string, etc), with the routine's boilerplate determining which 'snippetColumn' should actually be invoked.  --cwillu",
+      "id": "c8630f7ecacef12b67fc06edc882a31a"
+    },
+    {
+      "type": "html",
+      "text": "<i>Then your compiler is really acting like an interpreter in a way.</i>",
+      "id": "3ddd1ec3b5e93fe72e4b01de14c2d647"
+    },
+    {
+      "type": "html",
+      "text": "If I understood the above correctly, then you'd actually have to store a predicate in the table along with their corresponding function, and you'd have to somehow execute each predicate, giving it access to the arguments of the call, in order to select the right function. Or each row would have one predicate per argument, perhaps. Then you would define new methods by inserting a new row. -- [[Dan Muller]]",
+      "id": "07c5df6690fc3af3b329c411a0cf0c77"
+    },
+    {
+      "type": "html",
+      "text": "Sort of but not quite.  The nice thing about [[Predicate Dispatching]] is that the compiler automatically detects when one predicate logically implies another (up to a point; arbitrary functions need to be identical in their ASTs, otherwise you run into undecidability problems) and select the most specific applicable method.  Kind've like how Lisp multiple inheritance works, but with arbitrary predicates and not just classes.  There's no easy way to do this in tables, short of building the dispatch DAGs that Cecil compilers use and storing them as edge representations.  I'd rather not think of the running time of that.  ",
+      "id": "1e69d0012af5dc86bdd4f96afae0b8b9"
+    },
+    {
+      "type": "html",
+      "text": "Actually, thinking of Top's comments again, I think there're problems even without inheritance.  In a [[Control Table]], you're given a condition and want to find the code snippets that match that condition.  In [[Predicate Dispatching]], you're given arguments and want to find the most specific condition that matches those arguments.  The problem is reversed, and considerably harder.  -- [[Jonathan Tang]]",
+      "id": "620ea900d95a1d0b18e632e0f0def223"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "19ac78a08b896a4ee17abb73d1717d34"
+    },
+    {
+      "type": "html",
+      "text": "\nThe problem with predicate dispatching is that in practice the implementations are not one-to-one with the various combinations of parameters (predicates). The implementations tend to interweave and are assymetrical such that one activity may involve many combinations and others only one. It is kind of difficult to describe. [[Variations Tend Toward Cartesian Product]] also tries to describe this lumpy interweaving, although doesn't quite capture the spirit. I have yet to find a good way to articulate this problem. ",
+      "id": "ece99109552eca8345e129da16c7bb9d"
+    },
+    {
+      "type": "html",
+      "text": "\nSaying \"this block of code goes with combination A and this block goes with combi B\" is not good enough.  The granularity needed is still smaller than that. IF statements are still the best for that kind of thing in my opinion because you can have 10 or 1 per block, sub-block, sub-sub-block, etc. Sure, you could divide the code into micro-blocks, but it's a cure worse than the desease. Often the real world just does not offer nice chunk-able abstractions. IF statements deal with the slop fairly well.",
+      "id": "30c31b2236952c4eae3b49e2ed2ed51c"
+    },
+    {
+      "type": "html",
+      "text": "\nPerhaps some of it could be said like this: The space of all possible combinations forms a sparse hyper-array. IF statements generally filter out the \"nulls\" so that one is only looking at the non-null \"cells\". They also filter out some of the duplication in what would be the \"parameters\" of the predicates. Note that I am not claiming that IF statements are always the best solution, but rather they are often the least evil for semi-complex dispatching. Related: [[Business Rules Metabase]].",
+      "id": "5fc8ba32e47b76d029b0422b8d8e5ae3"
+    },
+    {
+      "type": "html",
+      "text": "\nNote that I am not saying there should necessarily be a single routine with a bunch of conditionals/switch-case clauses. Often it's best to divide up using a combination of techniques, including [[Functional Programming]], sub-classing, [[Stepwise Refinement]], and conditionals, depending on the situation.",
+      "id": "9520450bac805e50a903e9dc66a0aeea"
+    },
+    {
+      "type": "code",
+      "text": " --top",
+      "id": "59fd35af84b2573fdd6908fbcb32eea0"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "19ac78a08b896a4ee17abb73d1717d34"
+    },
+    {
+      "type": "html",
+      "text": "It looks like moving asserts and guard clauses into the parameter area, which would make for some serious horizontal scrolling and not save any coding. It may however help the compiler in creating new errors and warnings (passing an nullable variable into ![[Is Null]]() method could warn you). But a sufficiently smart compiler should be able to parse guard clauses directly without language support.",
+      "id": "f45986684f2d77f116db1b4ae9d82ce2"
+    },
+    {
+      "type": "html",
+      "text": "--BrianG",
+      "id": "1709616c1fdea96372f566e0f52a08b4"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "19ac78a08b896a4ee17abb73d1717d34"
+    },
+    {
+      "type": "html",
+      "text": "It's not neccessary to put parameter area in one line",
+      "id": "3c079b3f5604b0ebde977b59f6004aaa"
+    },
+    {
+      "type": "html",
+      "text": "--Lumj",
+      "id": "1233e6f2d03468032387635e63e9e90e"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "19ac78a08b896a4ee17abb73d1717d34"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Category Language Feature]], [[Category Conditionals And Dispatching]], [[Business Rules Metabase]]",
+      "id": "26579a690c7a81cae58c02a42db6fc95"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?PredicateDispatching c2.com]",
+      "id": "39d504301717968661d0c671d8ba0e4e"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1404885061000,
+      "id": "de205967fee96f38c4358e1ce74a9d6e",
+      "type": "create",
+      "item": {
+        "title": "Predicate Dispatching",
+        "story": [
+          {
+            "type": "html",
+            "text": "[[Predicate Dispatching]] is a model of function application that includes [[Single Dispatch]], [[Multi Methods]], [[Pattern Matching]], and [[Predicate Classes]].  Instead of tying dispatching to types, methods can be dispatched upon through any arbitrary predicate.  Regular dispatching falls out as a special case when the predicate is IS-A.",
+            "id": "f90f17d5406f82c70c1cbf73e94b20be"
+          },
+          {
+            "type": "html",
+            "text": "\nAs modeled in the papers, [[Predicate Dispatching]] has a syntax like this:",
+            "id": "50b93ef1a5c04b298214de753b8d7ae1"
+          },
+          {
+            "type": "code",
+            "text": "  gf this-is-a-generic-function (param 1, param2)\n  when param1@Som''''''eClass { ... method 1 ... }        // Class test\n  when param1@Som''''''eClass and param2@SomeO''''''therClass { ... method 2 ... } // Conjunction\n  when param1@Som''''''eClass and param1.component@Part { ... method 3 ... } // Destructuring\n  when param1@Ordered and test param1 < param2 { ... method 4 ... }  // Arbitrary predicate\n  when param1@!Exclude''''''dClass { ... method 5 ... }      // Negation\n  when param1@Ordered or param2@!Forbidden { ... method 6 ... }  // Disjunction\n  when innerPart <- param1.x \n    and test predicateHolds(innerPart) { ...method 7 ... }    // Binding",
+            "id": "282b51c94fb2a192a00fd803c23d75e2"
+          },
+          {
+            "type": "html",
+            "text": "Methods may be defined at separate points in the program; the compiler coalesces them together into a single generic function.  ",
+            "id": "9df04a718a0933b85f4ab8326faa1e61"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Single Dispatch]] falls out as a special case when the first parameter is tested for class membership:",
+            "id": "5578afb5dd9e7a71ec79d2c6c7719eeb"
+          },
+          {
+            "type": "code",
+            "text": "  method singleDispatch (param1, param2) when param1@Bas''''''eClass",
+            "id": "56ca456e52fa574321c28a9a1196d540"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Multi Methods]] fall out when each parameter is tested for class membership.  Note that [[Predicate Dispatching]] models multimethods where the order of arguments is insignificant, as in [[Cecil Language]] or [[Dylan Language]].  CLOS-style multimethods, with left-to-right precedence, are not supported.",
+            "id": "0b8f0074d19d7832b1d1dc0c36fec693"
+          },
+          {
+            "type": "code",
+            "text": "  method multiDispatch (param1, param2) when param1@Firs''''''tClass and param2@Secon''''''dClass",
+            "id": "7688f08252fc8e1be747a69497d731d6"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Pattern Matching]] falls out when subcomponents are tested and the results are bound to variables:",
+            "id": "07415fe44087d5c5e6c90c767c5699d1"
+          },
+          {
+            "type": "code",
+            "text": "  method patternMatch (fn, consCell) when\n  fn@Function and\n  consCell@Cons and not test consCell = nil and \n  head <- consCell.car and\n  tail <- consCell.cdr",
+            "id": "effe72f404791e7b40a275bd490519ed"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Predicate Classes]] fall out when you test for the base class and then add additional 'test' predicates for conditions:",
+            "id": "bb7d89a2806b27eefdb5d271d357ac1b"
+          },
+          {
+            "type": "code",
+            "text": "  method predicateClass (var) when\n  var@BaseClass and\n  test firstCondition(var) and\n  test otherCondition(var)",
+            "id": "c3a4bb7249fce2d45b02406485c06537"
+          },
+          {
+            "type": "html",
+            "text": "\nImplementation strategies usually convert the predicates into disjunctive normal form, and then build a dispatch DAG to select methods for given conditions.  Each 'or' leads to a given (potentially shared) method.  Bound parameters have their variables eliminated through sharing the expression tree.  'test' predicates are evaluated before the DAG is entered, and then are class-tested for True and False.  Class tests use a mixture of linear search ([[Polymorphic Inline Caches]]), [[Binary Search]], and array lookups, as guided by dynamic profile information.",
+            "id": "05addf30aee003868ee67ead574db3c2"
+          },
+          {
+            "type": "html",
+            "text": "\nA Lisp implementation is explained in ftp://publications.ai.mit.edu/ai-publications/2001/AITR-2001-006.pdf.  A Javaish one is at [http://www.cs.ucla.edu/%7Etodd/jpred/ www.cs.ucla.edu].  It's also available in a toy Java interpreter; see [http://www.cs.washington.edu/research/projects/cecil/www/Papers/gud.html www.cs.washington.edu].\t[[Cecil Language]] has a similar feature ([[Predicate Classes]]) that could be viewed as a special case.",
+            "id": "134519f9ca493ad2f394f8b5a7870450"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Pattern Matching Views]] is functionally equivalent to [[Predicate Dispatching]], and you can easily implement one in terms of the other.",
+            "id": "0ed761b52a11d46cc36f2b4a6dd14960"
+          },
+          {
+            "type": "html",
+            "text": "\nAvailable papers include:",
+            "id": "e2a5efb5084d44a2ea2c7ed41b23465d"
+          },
+          {
+            "type": "code",
+            "text": " ftp://ftp.cs.washington.edu/homes/chambers/gud-ecoop98.ps.gz\n ftp://ftp.cs.washington.edu/homes/chambers/dispatching.ps.gz",
+            "id": "4a2a58ea29f26cab12c8ea1a72656cf7"
+          },
+          {
+            "type": "html",
+            "text": "\nThere is also a practical Python implementation of the Chambers and Chen predicate dispatch algorithm, included as part of the current CVS version of [[Py Protocols]]; see:",
+            "id": "a671bee5a0a13fc0ca69e89dda0e7c43"
+          },
+          {
+            "type": "html",
+            "text": " [http://dirtsimple.org/2004/11/retroactive-abstraction.html dirtsimple.org]",
+            "id": "d1c4c7f3ef11dbe1a4f661e399a4b68c"
+          },
+          {
+            "type": "html",
+            "text": " [http://dirtsimple.org/2004/11/generic-functions-have-landed.html dirtsimple.org]",
+            "id": "93e9064df9ea7e086d10409145af5e6f"
+          },
+          {
+            "type": "html",
+            "text": " [http://peak.telecommunity.com/doc/src/dispatch/__init__.html peak.telecommunity.com] ",
+            "id": "6c9b400d958b2a0ae8be2b61947fe1d0"
+          },
+          {
+            "type": "html",
+            "text": " [http://peak.telecommunity.com/PyProtocols.html peak.telecommunity.com]",
+            "id": "c83355eeb287c2a5278e84f79eb9675e"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "19ac78a08b896a4ee17abb73d1717d34"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Predicate Dispatching]] is a generalization of [[Multiple Dispatch]].",
+            "id": "08624b678f47f01dca87531d7247edd5"
+          },
+          {
+            "type": "html",
+            "text": "\nBasically, instead of basing the dispatch on an \"is_a\" check, you check whether a general predicate is valid on the argument.\nSo, in imaginary syntax instead of writing:",
+            "id": "c06d757ab0acc165d4650d565e082bed"
+          },
+          {
+            "type": "code",
+            "text": " int foo( int a, int b):\n  if a > 0 \n  return a\n  else\n  return b-a",
+            "id": "8e9bfbf922d432ee20f4c111e08b0e51"
+          },
+          {
+            "type": "html",
+            "text": "\nyou'd write:",
+            "id": "1123a8bf8697b84da9fceae72266854a"
+          },
+          {
+            "type": "html",
+            "text": "int foo ( gt_zero? a, int b):<br>return a",
+            "id": "87c975d346d9e81e275f5aef9665b000"
+          },
+          {
+            "type": "html",
+            "text": "int foo ( int a, int b):<br>return b",
+            "id": "2f09d2a9ab18786dcf70debfad10e014"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "19ac78a08b896a4ee17abb73d1717d34"
+          },
+          {
+            "type": "html",
+            "text": "Contributors: [[Jonathan Tang]], Anonymous Donor(s)",
+            "id": "fe77fe0587870234de3e6b173d91acaf"
+          },
+          {
+            "type": "html",
+            "text": "\nNice work Jonathan, good stuff, but I did lose interest when I read \"No production or academic language currently implements the full predicate dispatching model\".  Cool stuff always seems to work like that!",
+            "id": "e00fd4dcc197ab3f06ccda3a9094a990"
+          },
+          {
+            "type": "html",
+            "text": "<i>[[Ocaml Language]] and [[Haskell Language]] have \"guard predicates\", while [[Prolog Language]] is done entirely with predicate dispatching (with quite a bit of restriction on the forms of the predicates).  [[Mercury Language]] has even more flexible predicate dispatching.  Strikes me that perhaps the paper's quite a bit old if it made that claim, or perhaps the author didn't really do much research to see how those languages' models maps onto the described one.</i>",
+            "id": "b1ee5990a6b10ddfc22e85e64d214a09"
+          },
+          {
+            "type": "html",
+            "text": "\nIn some time, [[Clojure Language]] will probably get a predicate dispatch via it's core.match module: [http://github.com/clojure/core.match github.com]",
+            "id": "b10192e3f9bd9ae4fae34d5411c7ea0c"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "19ac78a08b896a4ee17abb73d1717d34"
+          },
+          {
+            "type": "html",
+            "text": "\nWhy not switch to [[Table Oriented Programming]] if you want this? SQL is the closest thing in common use.",
+            "id": "64030ff7af07be09f3118f1067f5b623"
+          },
+          {
+            "type": "html",
+            "text": "<i>Because [[Table Oriented Programming]] provides nothing even remotely similar.</i>",
+            "id": "a705ad61456b6e908cffb3f2692b8671"
+          },
+          {
+            "type": "html",
+            "text": "Hmm... I think I caused this, so I should attempt to clarify this.  I believe top is coming from a remark I made on [[Relational Alternative To Xml]], that the use of 'validation rules' is similar to predicate typing.  What hasn't been done as of yet is a full mapping, such that the routine called at runtime is dependant on the validation rules (predicates) satisfied at that time.",
+            "id": "97ea692db8f46ecc4d6d41afe88699d2"
+          },
+          {
+            "type": "html",
+            "text": "[[Table Oriented Programming]] could be used to implement predicate dispatching (at a higher level than [[Turing Complete]]ness);  it does not provide it out of the box.  You can implement [[Aspect Oriented Programming]] using java;  that doesn't mean it's trivial.",
+            "id": "8194306edbdde9b553e519af0605d0d1"
+          },
+          {
+            "type": "html",
+            "text": "--[[William Underwood]]",
+            "id": "ec2790c1a7e32bb0e107793d5ecf6a8e"
+          },
+          {
+            "type": "html",
+            "text": "<i>Isn't that what [[Control Table]]s are used for? Filter rows by a predicate (WHERE clause), and then run the functions or snippets contained in the matching row(s). There is an example under [[Double Dispatch Example]]. For a shortcut, imagine something such as \"RUN snippetColumn FROM controlTable WHERE <condition>\" --top</i>",
+            "id": "f7ff7ee7e9d16ef772ec84653c7f0301"
+          },
+          {
+            "type": "html",
+            "text": "Yes, it's close.  But we don't want to repeat it every time we <i>call</i> a routine.  Your snippet would  be close to what I'd want for <i>defining</i> the routine (which might be what you meant);  calling it should simply be a matter of specifying the routine name (aka the control table name) and the parameters (e.g., a row, string, etc), with the routine's boilerplate determining which 'snippetColumn' should actually be invoked.  --cwillu",
+            "id": "c8630f7ecacef12b67fc06edc882a31a"
+          },
+          {
+            "type": "html",
+            "text": "<i>Then your compiler is really acting like an interpreter in a way.</i>",
+            "id": "3ddd1ec3b5e93fe72e4b01de14c2d647"
+          },
+          {
+            "type": "html",
+            "text": "If I understood the above correctly, then you'd actually have to store a predicate in the table along with their corresponding function, and you'd have to somehow execute each predicate, giving it access to the arguments of the call, in order to select the right function. Or each row would have one predicate per argument, perhaps. Then you would define new methods by inserting a new row. -- [[Dan Muller]]",
+            "id": "07c5df6690fc3af3b329c411a0cf0c77"
+          },
+          {
+            "type": "html",
+            "text": "Sort of but not quite.  The nice thing about [[Predicate Dispatching]] is that the compiler automatically detects when one predicate logically implies another (up to a point; arbitrary functions need to be identical in their ASTs, otherwise you run into undecidability problems) and select the most specific applicable method.  Kind've like how Lisp multiple inheritance works, but with arbitrary predicates and not just classes.  There's no easy way to do this in tables, short of building the dispatch DAGs that Cecil compilers use and storing them as edge representations.  I'd rather not think of the running time of that.  ",
+            "id": "1e69d0012af5dc86bdd4f96afae0b8b9"
+          },
+          {
+            "type": "html",
+            "text": "Actually, thinking of Top's comments again, I think there're problems even without inheritance.  In a [[Control Table]], you're given a condition and want to find the code snippets that match that condition.  In [[Predicate Dispatching]], you're given arguments and want to find the most specific condition that matches those arguments.  The problem is reversed, and considerably harder.  -- [[Jonathan Tang]]",
+            "id": "620ea900d95a1d0b18e632e0f0def223"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "19ac78a08b896a4ee17abb73d1717d34"
+          },
+          {
+            "type": "html",
+            "text": "\nThe problem with predicate dispatching is that in practice the implementations are not one-to-one with the various combinations of parameters (predicates). The implementations tend to interweave and are assymetrical such that one activity may involve many combinations and others only one. It is kind of difficult to describe. [[Variations Tend Toward Cartesian Product]] also tries to describe this lumpy interweaving, although doesn't quite capture the spirit. I have yet to find a good way to articulate this problem. ",
+            "id": "ece99109552eca8345e129da16c7bb9d"
+          },
+          {
+            "type": "html",
+            "text": "\nSaying \"this block of code goes with combination A and this block goes with combi B\" is not good enough.  The granularity needed is still smaller than that. IF statements are still the best for that kind of thing in my opinion because you can have 10 or 1 per block, sub-block, sub-sub-block, etc. Sure, you could divide the code into micro-blocks, but it's a cure worse than the desease. Often the real world just does not offer nice chunk-able abstractions. IF statements deal with the slop fairly well.",
+            "id": "30c31b2236952c4eae3b49e2ed2ed51c"
+          },
+          {
+            "type": "html",
+            "text": "\nPerhaps some of it could be said like this: The space of all possible combinations forms a sparse hyper-array. IF statements generally filter out the \"nulls\" so that one is only looking at the non-null \"cells\". They also filter out some of the duplication in what would be the \"parameters\" of the predicates. Note that I am not claiming that IF statements are always the best solution, but rather they are often the least evil for semi-complex dispatching. Related: [[Business Rules Metabase]].",
+            "id": "5fc8ba32e47b76d029b0422b8d8e5ae3"
+          },
+          {
+            "type": "html",
+            "text": "\nNote that I am not saying there should necessarily be a single routine with a bunch of conditionals/switch-case clauses. Often it's best to divide up using a combination of techniques, including [[Functional Programming]], sub-classing, [[Stepwise Refinement]], and conditionals, depending on the situation.",
+            "id": "9520450bac805e50a903e9dc66a0aeea"
+          },
+          {
+            "type": "code",
+            "text": " --top",
+            "id": "59fd35af84b2573fdd6908fbcb32eea0"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "19ac78a08b896a4ee17abb73d1717d34"
+          },
+          {
+            "type": "html",
+            "text": "It looks like moving asserts and guard clauses into the parameter area, which would make for some serious horizontal scrolling and not save any coding. It may however help the compiler in creating new errors and warnings (passing an nullable variable into ![[Is Null]]() method could warn you). But a sufficiently smart compiler should be able to parse guard clauses directly without language support.",
+            "id": "f45986684f2d77f116db1b4ae9d82ce2"
+          },
+          {
+            "type": "html",
+            "text": "--BrianG",
+            "id": "1709616c1fdea96372f566e0f52a08b4"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "19ac78a08b896a4ee17abb73d1717d34"
+          },
+          {
+            "type": "html",
+            "text": "It's not neccessary to put parameter area in one line",
+            "id": "3c079b3f5604b0ebde977b59f6004aaa"
+          },
+          {
+            "type": "html",
+            "text": "--Lumj",
+            "id": "1233e6f2d03468032387635e63e9e90e"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "19ac78a08b896a4ee17abb73d1717d34"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Category Language Feature]], [[Category Conditionals And Dispatching]], [[Business Rules Metabase]]",
+            "id": "26579a690c7a81cae58c02a42db6fc95"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?PredicateDispatching c2.com]",
+            "id": "39d504301717968661d0c671d8ba0e4e"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1699944398397
+    }
+  ]
+}

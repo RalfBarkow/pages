@@ -1,0 +1,502 @@
+{
+  "title": "Implementing Multiple Dispatch",
+  "story": [
+    {
+      "type": "html",
+      "text": "Does anyone know of an efficient implementation of [[Multiple Dispatch]], comparable to Smalltalk's [[Inline Caching]] of messages or C++'s vtbl mechanism? What is the best one can do for the common or average case?",
+      "id": "779b3f4e049a5ab19ffd6b0cbb1b229b"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "ee910be938669fad2d804e4223011f27"
+    },
+    {
+      "type": "html",
+      "text": "The naive implementation is to have a list of class-method pairs to be searched. The same caching strategy as in Smalltalk can be used: store the class(es) of the last dispatch and the selected method next to the call site, and compare these with the classes of the arguments the next time this particular form is called. If they are equal, use the cached method.",
+      "id": "167c9e673e89bd399b8d0e4494531a4c"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "ee910be938669fad2d804e4223011f27"
+    },
+    {
+      "type": "html",
+      "text": "If you only need [[Double Dispatch]] you can implement it using the [[Gang Of Four]] [[Visitor Pattern]].",
+      "id": "e556204ed80a0bb19bec3665b66bdfbe"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "ee910be938669fad2d804e4223011f27"
+    },
+    {
+      "type": "html",
+      "text": "[[Andrei Alexandrescu]]'s book on [[Modern Cee Plus Plus Design]] contains a chapter titled \"Multimethods\" that discusses several schemes to implement [[Double Dispatch]] in standard [[Cee Plus Plus]].",
+      "id": "b8d17e4978fb1239570f07394ac380b2"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "ee910be938669fad2d804e4223011f27"
+    },
+    {
+      "type": "html",
+      "text": "Several years ago, I did the multimethod implementation for a constraint language called Kaleidescope. The strategy we used was to create a [[Finite State Machine]] for each method name. The arcs contained the possible function parameters, and we used the parameter list from the method we were trying to call as input for walking through the fsm. So, for example, let's say you have defined the following methods:",
+      "id": "ace00e29b8226bcb5273d7088ece70ad"
+    },
+    {
+      "type": "code",
+      "text": " f(x), f(x, y), f(x, x, y) and f(z)",
+      "id": "f625e316de1c49b35ed2e15997041293"
+    },
+    {
+      "type": "html",
+      "text": "\nwhere x, y and z are types of arguments, then the fsm looks like this:",
+      "id": "d129fe8857d50bfe7b2120244ac559b2"
+    },
+    {
+      "type": "code",
+      "text": " initial state:\n  on x goto 1\n  on z return f(z)\n  on end-of-input or anything else return error",
+      "id": "d40c9fb833bdfacc89b8e49676222c21"
+    },
+    {
+      "type": "code",
+      "text": " state 1:\n  on end-of-input return f(x)\n  on x goto 2\n  on y return f(x, y)\n  on anything else return error",
+      "id": "b9d6ac84ca415df4574f7d31977f4ab3"
+    },
+    {
+      "type": "code",
+      "text": " state 2:\n  on y return f(x, x, y)\n  on end-of-input or anything else return error",
+      "id": "0dc99a36797ed929ebe2187d93381dc1"
+    },
+    {
+      "type": "html",
+      "text": "\nSo suppose you are trying to resolve a call to f(x, y). You start in the initial state and read an x (the first parameter to the function call). The FSM tells you to go to state 1. In state 1, you read a y. The FSM tells you that the function you want is f(x, y), and it actually returns the compiled method to you. Tada!",
+      "id": "3295f1628bd6feffe0ca08b619f25412"
+    },
+    {
+      "type": "html",
+      "text": "\nIt's not too efficient compared with, say, Smalltalk method dispatch, but then again it's not too bad either. The analysis we did showed that there was in practice not too much variation amongst the methods, so we could get some compression on the FSMs. Also, the most heavily overloaded methods tended to be the arithmetic ones (eg +, -, *, **), and they only had two arguments, which means that this isn't much traversal to begin with. -- [[Anthony Lander]]",
+      "id": "b36bc732a093afb64c5765e9aafb2d90"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "ee910be938669fad2d804e4223011f27"
+    },
+    {
+      "type": "html",
+      "text": "\nDoes the FSM technique work if actual method arguments can be subtypes of declared method arguments? I'm not convinced.",
+      "id": "6dc8a99376b56eefa6684967198d70fd"
+    },
+    {
+      "type": "html",
+      "text": "<i>Sure. Put all of the subtypes into the fsm.</i>",
+      "id": "590420b59dd3ca2ad25dbfb4d78b4623"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "ee910be938669fad2d804e4223011f27"
+    },
+    {
+      "type": "html",
+      "text": "\nIn the case of single inheritance, there's a simple implementation technique that will allow you to compute the IS-A predicate in constant time. (I.e. it allows you, in constant time, to check if an object is an instance of a class or one of its subclasses.)",
+      "id": "82898c96e3f0f9798e23eb26280d8f1a"
+    },
+    {
+      "type": "html",
+      "text": "\nTo do this, we associate a unique identifier with every class. Now suppose\nwe have a root class P with subclasses C1 and C2, while C2 itself has a subclass G. In every instance, instead of storing a pointer to a method table, we store\na pointer to an array of class identifiers.",
+      "id": "8bd64f7ad48fddde7290ccbec639180b"
+    },
+    {
+      "type": "html",
+      "text": "\nFor an instance of P, this array has one element:",
+      "id": "024eefdec4a31a8098e1ceb18781c260"
+    },
+    {
+      "type": "code",
+      "text": "  +--+\n  |P |\n  +--+",
+      "id": "fd225473c941f2c5f6b8481fe7acdaf3"
+    },
+    {
+      "type": "html",
+      "text": "\nFor an instance of C1, this array has two elements:",
+      "id": "cd43116c210221fd799cb9457fd694b7"
+    },
+    {
+      "type": "code",
+      "text": "  +--+--+\n  |P |C1|\n  +--+--+",
+      "id": "0e6adef3e6aa68304a831eef7a71ff63"
+    },
+    {
+      "type": "html",
+      "text": "\nFor an instance of G, this array has three elements:",
+      "id": "141b1f04f659efe44bd79a31a5dede7d"
+    },
+    {
+      "type": "code",
+      "text": "  +--+--+--+\n  |P |C2|G |\n  +--+--+--+",
+      "id": "039990228ea97e52fa868cd5f0a45b1d"
+    },
+    {
+      "type": "html",
+      "text": "\nNow to check if an object is an instance of, say, C2, do the following:",
+      "id": "38d116f7d0f8656f5ef6b45a5ea7545f"
+    },
+    {
+      "type": "html",
+      "text": " Check if the array has at least 2 elements.",
+      "id": "74d86925ce22dcfc3ef167e945869fbc"
+    },
+    {
+      "type": "html",
+      "text": " Check if the second element is C2.",
+      "id": "27292e35df9fea6a60e73004c48a5b39"
+    },
+    {
+      "type": "html",
+      "text": "Obviously, this takes only constant time.",
+      "id": "a89b83aff4992febfaacae0f16ea30b3"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Stephan Houben]]",
+      "id": "537b98e62bc6019263722d107f5ebb58"
+    },
+    {
+      "type": "html",
+      "text": "<i>I use a similar technique in [[Tree In Sql]]. It is time-optimal for lookups. -- [[Richard Henderson]]</i>",
+      "id": "3bd11691e9544624c82e955efff81870"
+    },
+    {
+      "type": "html",
+      "text": "<i>This technique uses up to quadratic space (if the class hierarchy is deep.) You can get by with linear space by assigning preorder and postorder numbers to the classes in the hierarchy. Class A is a superclass of class B iff pre(A) is less than pre(B) and post(A) is greater than post(B). -- [[Paul Dietz]]</i>",
+      "id": "f26bcccd3ddc4f180bace178e1fdf8f7"
+    },
+    {
+      "type": "html",
+      "text": "[However, the preorder/postorder trick has one flaw--it assumes a closed system of classes (in other words, all classes are known at a particular time).  In systems where modules are combined at runtime--especially under the control of the program itself rather than under the control of a language runtime--this constraint is violated.",
+      "id": "04399e418db80685ee7c24dd85342d8d"
+    },
+    {
+      "type": "html",
+      "text": "\nAnd of course, it also doesn't work in the case of [[Multiple Inheritance]]]",
+      "id": "877be1ee21de033bad4911f911ae363b"
+    },
+    {
+      "type": "html",
+      "text": "<i>I believe the alleged flaw of the preorder/postorder trick isn't a flaw, and the alleged fixed class hierarchy constraint isn't a constraint. [[Paul Dietz]] turns out to be one author of a paper giving an algorithm to maintain an order as new elements are inserted arbitrarily. As I understand it (not having read the original paper yet) that paper uses this trick as an example of what the order algorithm is good for. The paper is behind the ACM wall, but see Bender et al., Two Simplified Algorithms for Maintaining Order in a List, [http://citeseer.ist.psu.edu/bender02two.html citeseer.ist.psu.edu], for a more recent treatment. (Their Final Thought:</i>",
+      "id": "f99e9f614c9bef50d5ef832cd4e2551d"
+    },
+    {
+      "type": "code",
+      "text": " Dietz and Sleator is quite influential\n with its tags and its proofs by potential\n  but to teach it in class\n  is a pain in the emdash\n so our new result is preferential.",
+      "id": "2f24f090a7d947cb3c5313420d5fdb8f"
+    },
+    {
+      "type": "html",
+      "text": "<i>) -- [[William Newman]]</i>",
+      "id": "ecdd032e72ec11b76e1102bfe20bcd0e"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "ee910be938669fad2d804e4223011f27"
+    },
+    {
+      "type": "html",
+      "text": "The best implementation paper I know of is from the Cecil/Vortex project (see [[Cecil Language]]) at [http://www.cs.washington.edu/research/projects/cecil/www/Papers/dispatching.html www.cs.washington.edu]. It is effectively an FSM, with the transitions between states done by an array look-up, linear search or binary search; it aims for a near-optimal combination.",
+      "id": "83d591f52fe70b924be0b4cf7638455c"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "ee910be938669fad2d804e4223011f27"
+    },
+    {
+      "type": "html",
+      "text": "Also check out this paper:\n[http://citeseer.nj.nec.com/dujardin96fast.html citeseer.nj.nec.com]",
+      "id": "43a4a8a4b6c8fde1f4f69363d57365b6"
+    },
+    {
+      "type": "html",
+      "text": "\nIt provides an algorithm using compressed dispatch tables that dispatches in constant time.  The tables themselves are created in O(n^2) time, but I believe that's a compile-time cost only.",
+      "id": "e6e06a7d2caac95424115ca943e1d611"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "ee910be938669fad2d804e4223011f27"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Polymorphism]]",
+      "id": "52526f92bc35473a39bf69e40ed6867f"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?ImplementingMultipleDispatch c2.com]",
+      "id": "e52f2a68bc561d46dfa18032b60cb6b6"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1107283267000,
+      "id": "2b2c19e3c170f04c52b3cd35dadce27d",
+      "type": "create",
+      "item": {
+        "title": "Implementing Multiple Dispatch",
+        "story": [
+          {
+            "type": "html",
+            "text": "Does anyone know of an efficient implementation of [[Multiple Dispatch]], comparable to Smalltalk's [[Inline Caching]] of messages or C++'s vtbl mechanism? What is the best one can do for the common or average case?",
+            "id": "779b3f4e049a5ab19ffd6b0cbb1b229b"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "ee910be938669fad2d804e4223011f27"
+          },
+          {
+            "type": "html",
+            "text": "The naive implementation is to have a list of class-method pairs to be searched. The same caching strategy as in Smalltalk can be used: store the class(es) of the last dispatch and the selected method next to the call site, and compare these with the classes of the arguments the next time this particular form is called. If they are equal, use the cached method.",
+            "id": "167c9e673e89bd399b8d0e4494531a4c"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "ee910be938669fad2d804e4223011f27"
+          },
+          {
+            "type": "html",
+            "text": "If you only need [[Double Dispatch]] you can implement it using the [[Gang Of Four]] [[Visitor Pattern]].",
+            "id": "e556204ed80a0bb19bec3665b66bdfbe"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "ee910be938669fad2d804e4223011f27"
+          },
+          {
+            "type": "html",
+            "text": "[[Andrei Alexandrescu]]'s book on [[Modern Cee Plus Plus Design]] contains a chapter titled \"Multimethods\" that discusses several schemes to implement [[Double Dispatch]] in standard [[Cee Plus Plus]].",
+            "id": "b8d17e4978fb1239570f07394ac380b2"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "ee910be938669fad2d804e4223011f27"
+          },
+          {
+            "type": "html",
+            "text": "Several years ago, I did the multimethod implementation for a constraint language called Kaleidescope. The strategy we used was to create a [[Finite State Machine]] for each method name. The arcs contained the possible function parameters, and we used the parameter list from the method we were trying to call as input for walking through the fsm. So, for example, let's say you have defined the following methods:",
+            "id": "ace00e29b8226bcb5273d7088ece70ad"
+          },
+          {
+            "type": "code",
+            "text": " f(x), f(x, y), f(x, x, y) and f(z)",
+            "id": "f625e316de1c49b35ed2e15997041293"
+          },
+          {
+            "type": "html",
+            "text": "\nwhere x, y and z are types of arguments, then the fsm looks like this:",
+            "id": "d129fe8857d50bfe7b2120244ac559b2"
+          },
+          {
+            "type": "code",
+            "text": " initial state:\n  on x goto 1\n  on z return f(z)\n  on end-of-input or anything else return error",
+            "id": "d40c9fb833bdfacc89b8e49676222c21"
+          },
+          {
+            "type": "code",
+            "text": " state 1:\n  on end-of-input return f(x)\n  on x goto 2\n  on y return f(x, y)\n  on anything else return error",
+            "id": "b9d6ac84ca415df4574f7d31977f4ab3"
+          },
+          {
+            "type": "code",
+            "text": " state 2:\n  on y return f(x, x, y)\n  on end-of-input or anything else return error",
+            "id": "0dc99a36797ed929ebe2187d93381dc1"
+          },
+          {
+            "type": "html",
+            "text": "\nSo suppose you are trying to resolve a call to f(x, y). You start in the initial state and read an x (the first parameter to the function call). The FSM tells you to go to state 1. In state 1, you read a y. The FSM tells you that the function you want is f(x, y), and it actually returns the compiled method to you. Tada!",
+            "id": "3295f1628bd6feffe0ca08b619f25412"
+          },
+          {
+            "type": "html",
+            "text": "\nIt's not too efficient compared with, say, Smalltalk method dispatch, but then again it's not too bad either. The analysis we did showed that there was in practice not too much variation amongst the methods, so we could get some compression on the FSMs. Also, the most heavily overloaded methods tended to be the arithmetic ones (eg +, -, *, **), and they only had two arguments, which means that this isn't much traversal to begin with. -- [[Anthony Lander]]",
+            "id": "b36bc732a093afb64c5765e9aafb2d90"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "ee910be938669fad2d804e4223011f27"
+          },
+          {
+            "type": "html",
+            "text": "\nDoes the FSM technique work if actual method arguments can be subtypes of declared method arguments? I'm not convinced.",
+            "id": "6dc8a99376b56eefa6684967198d70fd"
+          },
+          {
+            "type": "html",
+            "text": "<i>Sure. Put all of the subtypes into the fsm.</i>",
+            "id": "590420b59dd3ca2ad25dbfb4d78b4623"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "ee910be938669fad2d804e4223011f27"
+          },
+          {
+            "type": "html",
+            "text": "\nIn the case of single inheritance, there's a simple implementation technique that will allow you to compute the IS-A predicate in constant time. (I.e. it allows you, in constant time, to check if an object is an instance of a class or one of its subclasses.)",
+            "id": "82898c96e3f0f9798e23eb26280d8f1a"
+          },
+          {
+            "type": "html",
+            "text": "\nTo do this, we associate a unique identifier with every class. Now suppose\nwe have a root class P with subclasses C1 and C2, while C2 itself has a subclass G. In every instance, instead of storing a pointer to a method table, we store\na pointer to an array of class identifiers.",
+            "id": "8bd64f7ad48fddde7290ccbec639180b"
+          },
+          {
+            "type": "html",
+            "text": "\nFor an instance of P, this array has one element:",
+            "id": "024eefdec4a31a8098e1ceb18781c260"
+          },
+          {
+            "type": "code",
+            "text": "  +--+\n  |P |\n  +--+",
+            "id": "fd225473c941f2c5f6b8481fe7acdaf3"
+          },
+          {
+            "type": "html",
+            "text": "\nFor an instance of C1, this array has two elements:",
+            "id": "cd43116c210221fd799cb9457fd694b7"
+          },
+          {
+            "type": "code",
+            "text": "  +--+--+\n  |P |C1|\n  +--+--+",
+            "id": "0e6adef3e6aa68304a831eef7a71ff63"
+          },
+          {
+            "type": "html",
+            "text": "\nFor an instance of G, this array has three elements:",
+            "id": "141b1f04f659efe44bd79a31a5dede7d"
+          },
+          {
+            "type": "code",
+            "text": "  +--+--+--+\n  |P |C2|G |\n  +--+--+--+",
+            "id": "039990228ea97e52fa868cd5f0a45b1d"
+          },
+          {
+            "type": "html",
+            "text": "\nNow to check if an object is an instance of, say, C2, do the following:",
+            "id": "38d116f7d0f8656f5ef6b45a5ea7545f"
+          },
+          {
+            "type": "html",
+            "text": " Check if the array has at least 2 elements.",
+            "id": "74d86925ce22dcfc3ef167e945869fbc"
+          },
+          {
+            "type": "html",
+            "text": " Check if the second element is C2.",
+            "id": "27292e35df9fea6a60e73004c48a5b39"
+          },
+          {
+            "type": "html",
+            "text": "Obviously, this takes only constant time.",
+            "id": "a89b83aff4992febfaacae0f16ea30b3"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Stephan Houben]]",
+            "id": "537b98e62bc6019263722d107f5ebb58"
+          },
+          {
+            "type": "html",
+            "text": "<i>I use a similar technique in [[Tree In Sql]]. It is time-optimal for lookups. -- [[Richard Henderson]]</i>",
+            "id": "3bd11691e9544624c82e955efff81870"
+          },
+          {
+            "type": "html",
+            "text": "<i>This technique uses up to quadratic space (if the class hierarchy is deep.) You can get by with linear space by assigning preorder and postorder numbers to the classes in the hierarchy. Class A is a superclass of class B iff pre(A) is less than pre(B) and post(A) is greater than post(B). -- [[Paul Dietz]]</i>",
+            "id": "f26bcccd3ddc4f180bace178e1fdf8f7"
+          },
+          {
+            "type": "html",
+            "text": "[However, the preorder/postorder trick has one flaw--it assumes a closed system of classes (in other words, all classes are known at a particular time).  In systems where modules are combined at runtime--especially under the control of the program itself rather than under the control of a language runtime--this constraint is violated.",
+            "id": "04399e418db80685ee7c24dd85342d8d"
+          },
+          {
+            "type": "html",
+            "text": "\nAnd of course, it also doesn't work in the case of [[Multiple Inheritance]]]",
+            "id": "877be1ee21de033bad4911f911ae363b"
+          },
+          {
+            "type": "html",
+            "text": "<i>I believe the alleged flaw of the preorder/postorder trick isn't a flaw, and the alleged fixed class hierarchy constraint isn't a constraint. [[Paul Dietz]] turns out to be one author of a paper giving an algorithm to maintain an order as new elements are inserted arbitrarily. As I understand it (not having read the original paper yet) that paper uses this trick as an example of what the order algorithm is good for. The paper is behind the ACM wall, but see Bender et al., Two Simplified Algorithms for Maintaining Order in a List, [http://citeseer.ist.psu.edu/bender02two.html citeseer.ist.psu.edu], for a more recent treatment. (Their Final Thought:</i>",
+            "id": "f99e9f614c9bef50d5ef832cd4e2551d"
+          },
+          {
+            "type": "code",
+            "text": " Dietz and Sleator is quite influential\n with its tags and its proofs by potential\n  but to teach it in class\n  is a pain in the emdash\n so our new result is preferential.",
+            "id": "2f24f090a7d947cb3c5313420d5fdb8f"
+          },
+          {
+            "type": "html",
+            "text": "<i>) -- [[William Newman]]</i>",
+            "id": "ecdd032e72ec11b76e1102bfe20bcd0e"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "ee910be938669fad2d804e4223011f27"
+          },
+          {
+            "type": "html",
+            "text": "The best implementation paper I know of is from the Cecil/Vortex project (see [[Cecil Language]]) at [http://www.cs.washington.edu/research/projects/cecil/www/Papers/dispatching.html www.cs.washington.edu]. It is effectively an FSM, with the transitions between states done by an array look-up, linear search or binary search; it aims for a near-optimal combination.",
+            "id": "83d591f52fe70b924be0b4cf7638455c"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "ee910be938669fad2d804e4223011f27"
+          },
+          {
+            "type": "html",
+            "text": "Also check out this paper:\n[http://citeseer.nj.nec.com/dujardin96fast.html citeseer.nj.nec.com]",
+            "id": "43a4a8a4b6c8fde1f4f69363d57365b6"
+          },
+          {
+            "type": "html",
+            "text": "\nIt provides an algorithm using compressed dispatch tables that dispatches in constant time.  The tables themselves are created in O(n^2) time, but I believe that's a compile-time cost only.",
+            "id": "e6e06a7d2caac95424115ca943e1d611"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "ee910be938669fad2d804e4223011f27"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Polymorphism]]",
+            "id": "52526f92bc35473a39bf69e40ed6867f"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?ImplementingMultipleDispatch c2.com]",
+            "id": "e52f2a68bc561d46dfa18032b60cb6b6"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1699944343113
+    }
+  ]
+}

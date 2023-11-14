@@ -1,0 +1,1212 @@
+{
+  "title": "Switch Statement",
+  "story": [
+    {
+      "type": "html",
+      "text": "A [[Switch Statement]] is a more structured way (than multiple if...else statements) to express conditional logic in C-like languages. Usually looks something like this: ",
+      "id": "cfd5e05cde1a086fc94c0a509218b6db"
+    },
+    {
+      "type": "code",
+      "text": " switch(expression) {\n   case a:\n     Do''''Something();\n     break;\n   case b:\n     Do''''''Something''''''Else();\n     break;\n   default:\n     Handle''''''General''''''Case();\n     break;\n }",
+      "id": "2189a0c209af9cf69f36b5bebb239c8c"
+    },
+    {
+      "type": "html",
+      "text": "Other non-C-like languages have similar constructs, often with the keywords \"case\" or \"select\", often without the need for an explicit \"break\".",
+      "id": "3fd84f068fe83a49631728ac9838345a"
+    },
+    {
+      "type": "html",
+      "text": "\nA switch can be invaluable in parsing, or as part of an interface between [[Object Oriented]] code and [[Procedural Code]]. A switch is easier to read than a long if-then-else stack, and almost always faster as well. ",
+      "id": "b5c1421c1d568724a82f51daa7334e61"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e347dd0742994224984145019822d6fb"
+    },
+    {
+      "type": "html",
+      "text": "<b>Discussion on speed and Optimization</b>",
+      "id": "a28b0b01ab33826e107940a0a8382d46"
+    },
+    {
+      "type": "html",
+      "text": "\"...almost always...\"",
+      "id": "d1b99d0217d144193c68cd03496e733b"
+    },
+    {
+      "type": "html",
+      "text": "<i>Can you substantiate this? Does it apply to all languages with switch statements?</i>",
+      "id": "fcdd6fb1faafc6f43ef32f64d27979f6"
+    },
+    {
+      "type": "html",
+      "text": "[It is optimized by the compiler as a whole into typically one of three different machine code approaches, which is made possible by the fact that the case expressions are constants. If the case expressions form a dense range, then the whole thing is turned into an indirect jump through a table, for instance. Basically it is optimized to be as fast as it possibly could be. A series of if-then-else statements almost always has to be simply implemented as it was coded, therefore e.g. a sequence of 50 if-then-elses will be as much as 50 times slower than a switch. This is all well-known in the compiler world; it is not something controversial.]",
+      "id": "5e3ad3cbc80cd33954614a4b4bb6e898"
+    },
+    {
+      "type": "html",
+      "text": "[Some languages do not require the case expressions to be constants, e.g. Lisp (cond), in which case it is just syntactic sugar on top of if-then-elses and not a true [[Switch Statement]] as invented in Pascal and C. <i>COND is not a switch! A switch is spelled CASE in Lisp (see below).</i>]",
+      "id": "0467c03ee63c6175d9937e7c7065e4ec"
+    },
+    {
+      "type": "html",
+      "text": "\nWith optimizing compilers and so many different languages to consider, it is dangerous to generalize, but the basic speedup that a switch exploits is that <i>expression</i> is evaluated only once, then compared against each case until one matches. Also, since switch statements are so common, they tend not to be just syntactic sugar, but directly supported right down to the hardware.",
+      "id": "91a53fb4ead6f2c469b02f8ac1635f53"
+    },
+    {
+      "type": "html",
+      "text": "The big advantage is that most computers, in assembly language, support computed indirect jumps. In other words, I can make an array of target addresses, and then in order to switch off on a value X, I just use X as an index into this array, fetch the address of a piece of code, and jump to it. This is faster than if... else if... else if... in the same way that an array is faster than a linked list.",
+      "id": "2dff94b35aa56fa044769d175c9ac068"
+    },
+    {
+      "type": "html",
+      "text": "\nActually, a <b>single</b> conditional jump is often faster than a <b>single</b> computed jump, mostly\nbecause of pipelining issues, but of course there is a trade-off point at which\nthe computed jump is faster than the corresponding conditional jump cascade.",
+      "id": "688198f003fefb42f2f3420b19479c3f"
+    },
+    {
+      "type": "html",
+      "text": "\nThe advantage of a [[Switch Statement]] is that you can have the compiler decide\nthe trade-off point; i.e. if the [[Switch Statement]] has only a few clauses,\nthe compiler will probably produce a conditional jump cascade, but for many\nclauses, it will switch (sic) to a jump table approach. (Or one of several other approaches, depending on the data.)",
+      "id": "cc588e2965810c0697f25b95432db563"
+    },
+    {
+      "type": "html",
+      "text": "\nAnd [[Switch Statement]]s almost always have many clauses, in the wild.",
+      "id": "fa8563ca9ec9f39106c4fedbc4a2b2e8"
+    },
+    {
+      "type": "html",
+      "text": "<i>I did this for the ARM compiler 14 years ago. I'm sure it's commonplace now, but I was proud of it at the time :-) See this 6 year old posting [http://groups.google.com/groups?hl=en&lr=&ie=UTF-8&safe=off&selm=96-07-159%40comp.compilers groups.google.com]</i>",
+      "id": "71932090c828f33f0ea91309ca1811d2"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e347dd0742994224984145019822d6fb"
+    },
+    {
+      "type": "html",
+      "text": "<b>Fall Through</b>",
+      "id": "46a1c3867f7a677c303682c3406f61af"
+    },
+    {
+      "type": "html",
+      "text": "\nA feature (or some would say <i>mis</i>feature) of C's switch construct is that control flow can \"fall through\" from one case to another.  For example:",
+      "id": "6f14568a1fa924893a68c9663a286d0e"
+    },
+    {
+      "type": "code",
+      "text": "  switch (command) {\n    case CMD_SHOW_HELP_AND_EXIT:\n      do_show_help();\n      /* Fall thru */\n    case CMD_EXIT:\n      do_exit();\n      break;\n    case CMD_OTHER:\n      do_other();\n      break;\n    /* ... etc. ... */\n  }",
+      "id": "88bcb945cda931cb8062bea0b3cbc48a"
+    },
+    {
+      "type": "html",
+      "text": "Because the <i>do_show_help();</i> line is not followed by a <i>break</i>, the <i>do_exit()</i> call will be executed after <i>do_show_help()</i> when CMD_SHOW_HELP_AND_EXIT is the command.  It is traditional to use a comment such as /* Fall thru */ in the example to indicate to readers that a <i>break</i> was not left out unintentionally (a common mistake).",
+      "id": "9dd4355c8a5eacc2f407ee2e3660baa8"
+    },
+    {
+      "type": "html",
+      "text": "\nProponents say that this technique leads to more efficient control dispatching when multiple cases share code.  \nCritics say that using this technique leads to unstructured hard-to-maintain code, and is little better than using gotos.",
+      "id": "335f3c92179713f6b9701c6a4faf66c2"
+    },
+    {
+      "type": "html",
+      "text": "<i>Many optimizing C compilers will emit the same object code for the above code as for the below -- they merge the common trailing portions of case blocks.</i>",
+      "id": "f096a2e04d4d7819a089e0c9b5a28a3f"
+    },
+    {
+      "type": "code",
+      "text": "  switch (command) {\n    case CMD_SHOW_HELP_AND_EXIT:\n      do_show_help();\n      do_exit();\n      break;\n    case CMD_EXIT:\n      do_exit();\n      break;\n    case CMD_OTHER:\n      do_other();\n      break;\n    /* ... etc. ... */\n  }",
+      "id": "11f3f80283716913e27730cb9a5bbc4d"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e347dd0742994224984145019822d6fb"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Cee Language]] switch</b> ([[Duffs Device]])",
+      "id": "dcb249417aed5c54efcc0851aeaa6457"
+    },
+    {
+      "type": "code",
+      "text": "    int q = (n+7)/8;\n    switch (n%8) {\n    case 0:    do {  foo();    // Great C hack, Tom,\n    case 7:      foo();    // but it's not valid here.\n    case 6:      foo();\n    case 5:      foo();\n    case 4:      foo();\n    case 3:      foo();\n    case 2:      foo();\n    case 1:      foo();\n               } while (--q > 0);\n    }",
+      "id": "c3bb6f7269753459b88343d301febcfc"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e347dd0742994224984145019822d6fb"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Forth Language]]</b> (jump table from a chess program)",
+      "id": "77b777bb8425a711f771a09e8ccf0ee6"
+    },
+    {
+      "type": "html",
+      "text": " CONSTANT Pawn  ( ... )  6 CONSTANT King",
+      "id": "3f3bd05af228a2c6e6bd5d3dab51fcf1"
+    },
+    {
+      "type": "code",
+      "text": " CREATE genVector  \\ each word is ( sq -- sq )\n   ' NOOP , ' genPawn , ' genKnight , ' genBishop ,\n   ' genRook , ' genQueen , ' genKing , ' genError ,",
+      "id": "ebfa13c0e6b3a1453d852db6419aa399"
+    },
+    {
+      "type": "html",
+      "text": "genSquare ( sq -- sq )",
+      "id": "f6bea0d4b3a306c4a700058543a4ab81"
+    },
+    {
+      "type": "code",
+      "text": "   DUP piece@ CELLS genVector + @ EXECUTE ;\n : genMoves\n   ['] genSquare forEachSq ;",
+      "id": "5537744a4b9024a21083460f6469cfae"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Forth Language]]</b> (ANS Forth Core Extension wordset)",
+      "id": "4836dec61bade8f3ba38ff70523cb6e1"
+    },
+    {
+      "type": "html",
+      "text": "X ( n -- )",
+      "id": "a008ca995be71def18db8510faabad0c"
+    },
+    {
+      "type": "code",
+      "text": "       CASE\n       test1 OF ( -- ) ... ENDOF\n       testn OF ( -- ) ... ENDOF\n       ( n -- ) ... ( default )\n       ENDCASE ...\n   ;",
+      "id": "cec5cfe38b70f6e734a9a68cde718287"
+    },
+    {
+      "type": "html",
+      "text": "which is semantically equivalent to cascading IF statements:",
+      "id": "327e46d6df053eb4ae8c53166980d52e"
+    },
+    {
+      "type": "html",
+      "text": "Y ( n -- )",
+      "id": "c9719cd6b180a4ec83638b5178965a98"
+    },
+    {
+      "type": "code",
+      "text": "     test1 OVER = IF DROP ... ELSE\n     testn OVER = IF DROP ... ELSE\n     ( n -- ) ... THEN THEN  ( big list of THENs to match the IFs)\n   ;",
+      "id": "87bc71bb05950136a1550419e312a7e1"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e347dd0742994224984145019822d6fb"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Common Lisp]] switch</b>",
+      "id": "c0cbd272990162fe3d331b7a8472ce4d"
+    },
+    {
+      "type": "code",
+      "text": "       (case k ((1 2) 'clause1)\n               (3 'clause2)\n               (nil 'no-keys-so-never-seen)\n               ((nil) 'nilslot)\n               ((:four #\\v) 'clause4)\n               ((t) 'tslot)\n               (otherwise 'others)))",
+      "id": "bc2767ec1cb147a996e1d9b0e60c87bd"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Haskell Language]] switch</b>",
+      "id": "bd1be623fc3c4af5a98aeb37dc072265"
+    },
+    {
+      "type": "html",
+      "text": "\nUsing explicit matching:",
+      "id": "e935ab2e921ef98f299e3fff2e857400"
+    },
+    {
+      "type": "code",
+      "text": " take m ys               = case (m,ys) of\n                            (0,_)       ->  []\n                            (_,[])      ->  []\n                            (n,x:xs)    ->  x : take (n-1) xs",
+      "id": "e6084e74d0a75b524370378cc0ed5f98"
+    },
+    {
+      "type": "html",
+      "text": "\nUsing implicit matching:",
+      "id": "44e707eef97ae0c898f629856154593e"
+    },
+    {
+      "type": "code",
+      "text": " take 0 _      = []\n take _ []     = []\n take n (x:xs) = x : take (n - 1) xs",
+      "id": "f399190ca5e5548ca69e5cee55f7225d"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Java Language]] switch</b>",
+      "id": "47c1b88d624fddcd40a3b67750dc3018"
+    },
+    {
+      "type": "code",
+      "text": "       switch (k) {\n       case 1:\n       case 2:\n          return \"clause1\";\n       case 3:\n          return \"clause2\";\n       case 0:\n          return \"nilslot\";\n       case '4':\n       case 'v':\n          return \"clause4\";\n       case 't':\n          return \"tslot\";\n       default:\n          return \"others\";\n       }",
+      "id": "297c13d8755fc308b55b41f9d4769435"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Perl Language]] switch</b> (this is Perl 6: Perl 5 doesn't have explicit switches, although the language implementation documentation claims that the compiler will always optimize if-else into switch whenever possible; see e.g. \"Programming Perl\" by Larry Wall et al)",
+      "id": "fc74dde8c59c5b1fc279783c666b5234"
+    },
+    {
+      "type": "code",
+      "text": "    given $number {\n        when &is_prime   { warn \"$_ is prime\\n\"; continue; }\n        when /[13579]$/  { warn \"$_ is odd\"; }\n        when /[02468]$/  { warn \"$_ is even\"; }\n    }",
+      "id": "d416a6ce9ceb2afde2a92b06c171a3a1"
+    },
+    {
+      "type": "html",
+      "text": "<i>In Perl 5, you can use something like this (adapted slightly from a common idiom of mine):</i>",
+      "id": "cbe05f1b951a0690243ab1a89375a8b9"
+    },
+    {
+      "type": "code",
+      "text": "    &{{\n        \"foo\" => sub { bar(); baz(); },\n        \"quux\" => sub { wibble(); spam(); }\n    }->{ $selector }};",
+      "id": "bde963ea7abd98dc8470b018b8079364"
+    },
+    {
+      "type": "html",
+      "text": "<i>If you have a dense set of integer cases, you could use an array instead of a hash. No good idea about implementing fall-through, though :)</i>",
+      "id": "ad870e6ca8b3b9e4d8cc7604eb3e9288"
+    },
+    {
+      "type": "code",
+      "text": "    &{[\n        handle_0,\n        handle_1,\n        complain_about_other_digits\n    ]->[$digit]};",
+      "id": "47ac0a94e30e85f5cd55cc4a08df0989"
+    },
+    {
+      "type": "html",
+      "text": "<i>(Usually I use this setup to just pick a scalar value based on the input. Here I adjust that slightly by using code references for the values, and then invoking the relevant code.)</i>",
+      "id": "929abbd281275778ebe21a42dcb1eb51"
+    },
+    {
+      "type": "html",
+      "text": "<i>[Please note that this idiom (in Perl 5) -- using a scalar as an offset into an array or hash of function addresses -- is the basic paradigm of [[Cee Language]] \"object-oriented\" method dispatch, as in [[Cee Plus Plus]], [[Objective Cee]], and various homebrews. Switch statements are generally viewed as a [[Code Smell]] in object-oriented environments because they pessimize message dispatch, which a good OO environment makes faster than the corresponding switch. Also see the discussion under \"<b>[[Smalltalk Language]] switch</b>\", below.]</i>",
+      "id": "ba884c0bfb6b288b65717090df53c65c"
+    },
+    {
+      "type": "html",
+      "text": "\nThere is a working example of this mechanism in the interpreters for [[Snusp Language]].",
+      "id": "02ba32eebf31ab01cafb958bdb0ee198"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Pl Sql]] switch</b>",
+      "id": "ae6bcff15aa7437a2c089902adface38"
+    },
+    {
+      "type": "code",
+      "text": " CASE grade\n   WHEN 'A' THEN dbms_output.put_line('Excellent');\n   WHEN 'B' THEN dbms_output.put_line('Very Good');\n   WHEN 'C' THEN dbms_output.put_line('Good');\n   WHEN 'D' THEN dbms_output.put_line('Fair');\n   WHEN 'F' THEN dbms_output.put_line('Poor');\n   ELSE dbms_output.put_line('No such grade');\n END CASE;",
+      "id": "c2ebb1c09108e758ce2f758b80467798"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Ruby Language]] switch</b>",
+      "id": "1cbfadfba7459b615664ee28929b6382"
+    },
+    {
+      "type": "code",
+      "text": "  case $age\n  when 0 .. 2\n    \"baby\"\n  when 3 .. 6\n    \"little child\"\n  when 7 .. 12\n    \"child\"\n  when 12 .. 18\n    # Note: 12 already matched by \"child\"\n    \"youth\"\n  else\n    \"adult\"\n  end",
+      "id": "0e6813c7235096fd3dd1a948c6555a4b"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Scheme Language]] switch</b>",
+      "id": "78a512caf2b8e11a8b2820e214d8d111"
+    },
+    {
+      "type": "code",
+      "text": " (case (car '(c d))\n   ((a e i o u) 'vowel)\n   ((w y) 'semivowel)\n   (else 'consonant))                    ===>  consonant",
+      "id": "88dc7f94139b38fba4dfe7ec1625c91c"
+    },
+    {
+      "type": "html",
+      "text": "<b>VHDL switch</b> (combinational)",
+      "id": "643a4e3f81f41c2a68deda607b808321"
+    },
+    {
+      "type": "code",
+      "text": " library ieee;\n use ieee.std_logic_1164.all;",
+      "id": "5f49e512c9a9d5e9f23861e6ac5222f7"
+    },
+    {
+      "type": "code",
+      "text": " entity CombinationalSwitch is port\n (  A: in std_logic_vector (2 downto 0);\n    B: in std_logic_vector (7 downto 0);\n    F: out std_logic  );\n end CombinationalSwitch;",
+      "id": "bd2def6fbe6cf9488faa2d6a0e029852"
+    },
+    {
+      "type": "code",
+      "text": " architecture RTL of CombinationalSwitch is begin\n    with A select\n       F <= B(0) when \"000\",\n            B(1) when \"001\",\n            B(2) when \"010\",\n            B(3) when \"011\",\n            B(4) when \"100\",\n            B(5) when \"101\",\n            B(6) when \"110\",\n            B(7) when \"111\",\n            0 when others;\n end RTL;",
+      "id": "42855bb1cdc6758ec7a0a27e64efcee1"
+    },
+    {
+      "type": "html",
+      "text": "<b>VHDL switch</b> (sequential)",
+      "id": "f020be1f27a1ac1d8e0cb2d289793c90"
+    },
+    {
+      "type": "code",
+      "text": " library ieee;\n use ieee.std_logic_1164.all;",
+      "id": "5f49e512c9a9d5e9f23861e6ac5222f7"
+    },
+    {
+      "type": "code",
+      "text": " entity SequentialSwitch is port\n (  A: in std_logic_vector (2 downto 0);\n    B: in std_logic_vector (7 downto 0);\n    F: out std_logic  );\n end CombinationalSwitch; ",
+      "id": "1e462235b9be68f24d3068aa4deba79b"
+    },
+    {
+      "type": "code",
+      "text": " architecture RTL of SequentialSwitch is begin\n    process (A, B) begin\n       case A is\n          when \"000\" => F <= B(0);\n          when \"001\" => F <= B(1);\n          when \"010\" => F <= B(2);\n          when \"011\" => F <= B(3);\n          when \"100\" => F <= B(4);\n          when \"101\" => F <= B(5);\n          when \"110\" => F <= B(6);\n          when \"111\" => F <= B(7);\n          when others => F <= 'Z';\n       end case;\n    end process;\n end RTL;",
+      "id": "ad79cb34930056d0634be6fb8bf1b476"
+    },
+    {
+      "type": "html",
+      "text": "<i>Notice that, since VHDL describes hardware, the Switch statement here is basically a multiplexer. In this case, this is an 8-to-1 multiplexer.</i>",
+      "id": "aa6469e9b41f2defa7756c45280c29db"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Visual Basic]] switch</b>",
+      "id": "c7cfd000644d902ae4d1eb9bd710595a"
+    },
+    {
+      "type": "code",
+      "text": " Dim Number\n Number = 8\n Select Case Number\n Case 1 To 5\n    Debug.Print \"Between 1 and 5\"\n Case 6, 7, 8\n    Debug.Print \"Between 6 and 8\"\n Case 9 To 10\n    Debug.Print \"Greater than 8\"\n Case Else\n    Debug.Print \"Not between 1 and 10\"\n End Select",
+      "id": "304e0c0c0eb6f27974a2e7a7bc0beb28"
+    },
+    {
+      "type": "html",
+      "text": "<b>Hebrew</b> (Ivrit)",
+      "id": "d45c03ac1d496b35fa73eabf4cffc703"
+    },
+    {
+      "type": "code",
+      "text": "    בדוק משתנה\n    אם משתנה = 1 אזי\n    שלום\n    אם משתנה = 2 אזי\n    להתראות\n    אחרת\n    לך-יא-מניאאק\n    סיים",
+      "id": "fee97d1f3cf54a0f88cbf9447a1807d1"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Delphi Language]] switch</b>\nnote uses sets, can work with characters and enumerated types instead of integers",
+      "id": "eefc1baab9185a56adfa34d8080b7f2b"
+    },
+    {
+      "type": "code",
+      "text": " case I of\n   1..5      : Caption := 'Low';\n   6..9      : Caption := 'High';\n   0, 10..99 : Caption := 'Out of range';\n else\n   Caption := '';\n end;",
+      "id": "582a46e3cb763b8e6fc3f15830295ca8"
+    },
+    {
+      "type": "code",
+      "text": " case Letter of\n   Vowels      : Caption := 'Vowel';\n   Consonants  : Caption := 'Consonant';\n end;",
+      "id": "5302c731c9f1fcdb27f756d33a407525"
+    },
+    {
+      "type": "html",
+      "text": "where Letter is a char and Vowels and Consonants are Sets.",
+      "id": "b13fb62ddd3dd85ebf0b111533a7259c"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Smalltalk Language]] switch</b>",
+      "id": "8cc20255def4fd8f48174a35b4fff640"
+    },
+    {
+      "type": "code",
+      "text": " anObject aMessage",
+      "id": "a29e491e0dea918ca22ae18f63c7f839"
+    },
+    {
+      "type": "html",
+      "text": "\nwhere aMessage is a method defined on the class of anObject.",
+      "id": "ff6f0aa6b28cac9e5cfccb7d16da2c07"
+    },
+    {
+      "type": "html",
+      "text": "(One can also define syntax for a [[Smalltalk Case Statement]] within the language.)",
+      "id": "f2a02e7e6788f6245a61bb48fb20f81d"
+    },
+    {
+      "type": "html",
+      "text": "<i>How does that work when you're switching on 1..5, 6..10, and \"other\"?</i>",
+      "id": "8b32059cab413073596a3292c2bcb603"
+    },
+    {
+      "type": "html",
+      "text": "\nA Smalltalk program implementing such a dispatch (and they are exceedingly rare, because the object/message paradigm so richly moots most situations that provoke a Switch) typically looks up a method name in an Array or Dictionary which they then perform: -- the equivalent of the C expression (*action[selector])().",
+      "id": "c03ba526f3deae0b71552d4bcc7325fa"
+    },
+    {
+      "type": "html",
+      "text": "\nIn the interest of advancing the discussion, I built a test harness and measured the results. I simplified your example to dispatch on a number between 1 and 16 -- this gets at the most important aspects of your question. I defined a new class, Switch<b></b>Test, with sixteen methods with selectors #m01, #m02, ... , #m16. For the sake of testing, these methods were no-ops. I then built and measured the performance of three dispatch approaches:",
+      "id": "37a6806574fa44d5e918fe69d8d75557"
+    },
+    {
+      "type": "html",
+      "text": " \"Array Dispatch\": I constructed a \"dispatchArray\" of size 16, where the contents of index N is the integer offset of method m<N> in the methodsArray of Switch<b></b>Test. I then constructed a test method that counts an index from 1 to 16, looks up the corresponding offset in dispatchArray, then loads and evaluates the Compiled<b></b>Method at that offset.",
+      "id": "c464d0b729dcb108ee00d061a2d11ccc"
+    },
+    {
+      "type": "html",
+      "text": "(aMethodsArray at:<br>(dispatchArray at: anIndex)) executeWithReceiver: self andArguments: #()",
+      "id": "c0405d2d6a80cb0c9214df360a3e26f5"
+    },
+    {
+      "type": "html",
+      "text": " \"Perform\": I constructed a dispatchArray of size 16, containing 16 symbols, which were #m01, m02, ..., #m16, such that the symbol at index N was #m<N>. I then constructed a test method that counts an index from 1 to 16, looks up the symbol corresponding to the index in dispatchArray, then performs that symbol in the receiver.",
+      "id": "5270827a2733c65483a3638e7f835c08"
+    },
+    {
+      "type": "html",
+      "text": "self perform:<br>(dispatchArray at: anIndex)",
+      "id": "bc94d6c819256445c7f9f9fce17354a5"
+    },
+    {
+      "type": "html",
+      "text": " \"Message send\": I open coded the sixteen message sends -- this corresponds to the most common idiom in Smalltalk.",
+      "id": "cda449dd8bb711d1196ea4a9745683b9"
+    },
+    {
+      "type": "code",
+      "text": "   self\n     m01;\n    m02;\n    \"...\"\n    m16.",
+      "id": "3fc349dab7d9423fe555f8d1ee13c54b"
+    },
+    {
+      "type": "html",
+      "text": "The above is a load of bull. This is hardcoding the evaluation of m01, etc. when in reality the values for switch statements are variable. Add the fact that objects must be coaxed into selectors before they can be sent to objects.",
+      "id": "a2dff2138cadf753b8c866db04ded85a"
+    },
+    {
+      "type": "html",
+      "text": "\nSmalltalk needs a switch statement, because nested ifTrue/ifFalse's are ripe with design smell.",
+      "id": "afb817a80d6418035cd1e9aae3cc74bf"
+    },
+    {
+      "type": "html",
+      "text": "\nI then used Time>>millisecondsToRun: to measure the time required to execute 1000000 repetitions of each of the above three cases (on a 3Ghz Pentium with 1G RAM running IBM Smalltalk). Here are the times I measured:",
+      "id": "51ec5bd9c64a3d79a6f371ff33de9b3a"
+    },
+    {
+      "type": "html",
+      "text": " Array Dispatch Test: 637.5",
+      "id": "db9e51185a429ec3573521cd80b8267e"
+    },
+    {
+      "type": "html",
+      "text": " Perform Test: 284.4",
+      "id": "f214688de041bc2f59c2b727336f0148"
+    },
+    {
+      "type": "html",
+      "text": " Message Send Test: 189.1\nMy interpretation: using the \"switch statement\" approach (perform) introduced about a factor of two in dispatch overhead, in comparison to a \"regular\" message send. It might be worth comparing that to the other languages and environments here.",
+      "id": "6fa823c52d4cb86847f5138e7bad6487"
+    },
+    {
+      "type": "html",
+      "text": "\nEven [[Cee Language]] imposes <i>some</i> overhead to setup the switch statement, and it might be interesting measure that overhead in comparison to a  straight procedure call on each of the resulting branches. (But of course a C switch/case statement is faster than a series of if-elses.)",
+      "id": "33b2fe4d184f385c5f43ebbf6af28e7a"
+    },
+    {
+      "type": "html",
+      "text": "\nMy point in putting up the example is to put some quantitative bounds (in this case a factor of two) on the switch statement dispatch overhead imposed by the language. If I was parsing something and cared about the performance, I would probably write and debug the parser in Smalltalk and then recode the lexer into C, calling the lexer through the external function API ([[Alternate Hard And Soft Layers]]).",
+      "id": "30754cf58ef1099e48bfdcb894f3fadc"
+    },
+    {
+      "type": "html",
+      "text": "\nThe interesting thing is the relative overhead of a switch-like mechanism in Smalltalk, <i>as compared to its natural behavior</i> (<b>not</b> to C). My point is that 99% of what one does with switch/case in a procedural language is mooted by a good polymorphic language (like Smalltalk). Switch/case is needed in C because you don't have polymorphic message sends (unless you want to roll your own tables of function pointers).",
+      "id": "223c3924edd683b05696ed699cd81240"
+    },
+    {
+      "type": "html",
+      "text": "\nThe C-style switch isn't needed in Smalltalk (as a separate language construct) because its function is implicit in the method dispatching behavior. If, in the pathological Smalltalk case where you DO need switch, I showed that it's about twice as slow as a \"straight\" message send (in Smalltalk). The performance arguments don't make sense until you look at <b>much</b> larger grain sizes, where the industry has learned (particularly help from [[Alternate Hard And Soft Layers]]) that C's fine-grained performance advantages do not, in general, translate to corresponding application performance differences.",
+      "id": "1d56d6f9528d1d0e992039375c280d10"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e347dd0742994224984145019822d6fb"
+    },
+    {
+      "type": "html",
+      "text": "<b>[[Cobol Language]] evaluate-when</b>  (COBOL 85)",
+      "id": "53fb3e68d59b7c9af4ae224dcd4982ab"
+    },
+    {
+      "type": "code",
+      "text": " evaluate policy-holder-age also policy-holder-sex also smoking-flag\n   when   20 thru 40        also \"F\"               also ANY           perform young-female-policy\n   when   65 thru 999       also \"M\"               also \"Y\"           perform old-smokey\n   when other                                                         perform all-other-cases\n end-evaluate",
+      "id": "8d621fcc53c6bc55f9cc510814015541"
+    },
+    {
+      "type": "html",
+      "text": "It's amazing; you can do anything. (I'm not claiming it can do anything well, just that it has an amazing array of expressive options. ;-)",
+      "id": "9d746263005c2e4e2af066bc9e41ae93"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e347dd0742994224984145019822d6fb"
+    },
+    {
+      "type": "html",
+      "text": "<i>Let's standardize on one particular form. A simple substitution process can then generate the correct syntax for your chosen language.</i>",
+      "id": "4e456fbc4809de8905191fb77b2cd629"
+    },
+    {
+      "type": "html",
+      "text": "\nUm... not true, since different languages switching capabilities are different. No one generic form can be translated to each language.",
+      "id": "44dfc527909be321299f35fdf8b1ec0c"
+    },
+    {
+      "type": "html",
+      "text": "\nLong ago, when memory was very limited, there wasn't room for either a jump list or a series of tests in a particular program, so I <i>calculated</i> the required address as a linear function of the switch expression (using a shift instruction for the multiplication), and then made a jump to the calculated address. Those were the days. ;-)",
+      "id": "a5205b19c497d8ac18668ce77f610df6"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e347dd0742994224984145019822d6fb"
+    },
+    {
+      "type": "html",
+      "text": "See [[Switch Statements Smell]], [[Case Statements Considered Harmful]] (summary: use OO/generic dispatch on the type ([[Internal Polymorphism]]) in preference to switch on the type (\"[[Type Case]]\", \"[[External Polymorphism]]\"); when looking at things other than the type, if Polymorphism is impossible or introduces too much extra machinery, then use switch in preference to if-else whenever possible. Contrary to some Purists, in some languages it is not possible to replace every switch statement with polymorphism, and in other languages it is not always desirable. Classic example: switch on char value in a lexical analyzer. But switch-on-type should indeed always be replaced.)",
+      "id": "19c21be16267a802365448b4e73020aa"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e347dd0742994224984145019822d6fb"
+    },
+    {
+      "type": "html",
+      "text": "See also: [[Is Break Statement Archaic]]",
+      "id": "8231c6d71e0f579335ea666da1d5216d"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "e347dd0742994224984145019822d6fb"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Conditionals And Dispatching]]",
+      "id": "6302e730a8e57a74baba702054486aba"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?SwitchStatement c2.com]",
+      "id": "67a0de26c249034632a022841820551d"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1371889896000,
+      "id": "6f90984b3760755a3071b0689a257558",
+      "type": "create",
+      "item": {
+        "title": "Switch Statement",
+        "story": [
+          {
+            "type": "html",
+            "text": "A [[Switch Statement]] is a more structured way (than multiple if...else statements) to express conditional logic in C-like languages. Usually looks something like this: ",
+            "id": "cfd5e05cde1a086fc94c0a509218b6db"
+          },
+          {
+            "type": "code",
+            "text": " switch(expression) {\n   case a:\n     Do''''Something();\n     break;\n   case b:\n     Do''''''Something''''''Else();\n     break;\n   default:\n     Handle''''''General''''''Case();\n     break;\n }",
+            "id": "2189a0c209af9cf69f36b5bebb239c8c"
+          },
+          {
+            "type": "html",
+            "text": "Other non-C-like languages have similar constructs, often with the keywords \"case\" or \"select\", often without the need for an explicit \"break\".",
+            "id": "3fd84f068fe83a49631728ac9838345a"
+          },
+          {
+            "type": "html",
+            "text": "\nA switch can be invaluable in parsing, or as part of an interface between [[Object Oriented]] code and [[Procedural Code]]. A switch is easier to read than a long if-then-else stack, and almost always faster as well. ",
+            "id": "b5c1421c1d568724a82f51daa7334e61"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e347dd0742994224984145019822d6fb"
+          },
+          {
+            "type": "html",
+            "text": "<b>Discussion on speed and Optimization</b>",
+            "id": "a28b0b01ab33826e107940a0a8382d46"
+          },
+          {
+            "type": "html",
+            "text": "\"...almost always...\"",
+            "id": "d1b99d0217d144193c68cd03496e733b"
+          },
+          {
+            "type": "html",
+            "text": "<i>Can you substantiate this? Does it apply to all languages with switch statements?</i>",
+            "id": "fcdd6fb1faafc6f43ef32f64d27979f6"
+          },
+          {
+            "type": "html",
+            "text": "[It is optimized by the compiler as a whole into typically one of three different machine code approaches, which is made possible by the fact that the case expressions are constants. If the case expressions form a dense range, then the whole thing is turned into an indirect jump through a table, for instance. Basically it is optimized to be as fast as it possibly could be. A series of if-then-else statements almost always has to be simply implemented as it was coded, therefore e.g. a sequence of 50 if-then-elses will be as much as 50 times slower than a switch. This is all well-known in the compiler world; it is not something controversial.]",
+            "id": "5e3ad3cbc80cd33954614a4b4bb6e898"
+          },
+          {
+            "type": "html",
+            "text": "[Some languages do not require the case expressions to be constants, e.g. Lisp (cond), in which case it is just syntactic sugar on top of if-then-elses and not a true [[Switch Statement]] as invented in Pascal and C. <i>COND is not a switch! A switch is spelled CASE in Lisp (see below).</i>]",
+            "id": "0467c03ee63c6175d9937e7c7065e4ec"
+          },
+          {
+            "type": "html",
+            "text": "\nWith optimizing compilers and so many different languages to consider, it is dangerous to generalize, but the basic speedup that a switch exploits is that <i>expression</i> is evaluated only once, then compared against each case until one matches. Also, since switch statements are so common, they tend not to be just syntactic sugar, but directly supported right down to the hardware.",
+            "id": "91a53fb4ead6f2c469b02f8ac1635f53"
+          },
+          {
+            "type": "html",
+            "text": "The big advantage is that most computers, in assembly language, support computed indirect jumps. In other words, I can make an array of target addresses, and then in order to switch off on a value X, I just use X as an index into this array, fetch the address of a piece of code, and jump to it. This is faster than if... else if... else if... in the same way that an array is faster than a linked list.",
+            "id": "2dff94b35aa56fa044769d175c9ac068"
+          },
+          {
+            "type": "html",
+            "text": "\nActually, a <b>single</b> conditional jump is often faster than a <b>single</b> computed jump, mostly\nbecause of pipelining issues, but of course there is a trade-off point at which\nthe computed jump is faster than the corresponding conditional jump cascade.",
+            "id": "688198f003fefb42f2f3420b19479c3f"
+          },
+          {
+            "type": "html",
+            "text": "\nThe advantage of a [[Switch Statement]] is that you can have the compiler decide\nthe trade-off point; i.e. if the [[Switch Statement]] has only a few clauses,\nthe compiler will probably produce a conditional jump cascade, but for many\nclauses, it will switch (sic) to a jump table approach. (Or one of several other approaches, depending on the data.)",
+            "id": "cc588e2965810c0697f25b95432db563"
+          },
+          {
+            "type": "html",
+            "text": "\nAnd [[Switch Statement]]s almost always have many clauses, in the wild.",
+            "id": "fa8563ca9ec9f39106c4fedbc4a2b2e8"
+          },
+          {
+            "type": "html",
+            "text": "<i>I did this for the ARM compiler 14 years ago. I'm sure it's commonplace now, but I was proud of it at the time :-) See this 6 year old posting [http://groups.google.com/groups?hl=en&lr=&ie=UTF-8&safe=off&selm=96-07-159%40comp.compilers groups.google.com]</i>",
+            "id": "71932090c828f33f0ea91309ca1811d2"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e347dd0742994224984145019822d6fb"
+          },
+          {
+            "type": "html",
+            "text": "<b>Fall Through</b>",
+            "id": "46a1c3867f7a677c303682c3406f61af"
+          },
+          {
+            "type": "html",
+            "text": "\nA feature (or some would say <i>mis</i>feature) of C's switch construct is that control flow can \"fall through\" from one case to another.  For example:",
+            "id": "6f14568a1fa924893a68c9663a286d0e"
+          },
+          {
+            "type": "code",
+            "text": "  switch (command) {\n    case CMD_SHOW_HELP_AND_EXIT:\n      do_show_help();\n      /* Fall thru */\n    case CMD_EXIT:\n      do_exit();\n      break;\n    case CMD_OTHER:\n      do_other();\n      break;\n    /* ... etc. ... */\n  }",
+            "id": "88bcb945cda931cb8062bea0b3cbc48a"
+          },
+          {
+            "type": "html",
+            "text": "Because the <i>do_show_help();</i> line is not followed by a <i>break</i>, the <i>do_exit()</i> call will be executed after <i>do_show_help()</i> when CMD_SHOW_HELP_AND_EXIT is the command.  It is traditional to use a comment such as /* Fall thru */ in the example to indicate to readers that a <i>break</i> was not left out unintentionally (a common mistake).",
+            "id": "9dd4355c8a5eacc2f407ee2e3660baa8"
+          },
+          {
+            "type": "html",
+            "text": "\nProponents say that this technique leads to more efficient control dispatching when multiple cases share code.  \nCritics say that using this technique leads to unstructured hard-to-maintain code, and is little better than using gotos.",
+            "id": "335f3c92179713f6b9701c6a4faf66c2"
+          },
+          {
+            "type": "html",
+            "text": "<i>Many optimizing C compilers will emit the same object code for the above code as for the below -- they merge the common trailing portions of case blocks.</i>",
+            "id": "f096a2e04d4d7819a089e0c9b5a28a3f"
+          },
+          {
+            "type": "code",
+            "text": "  switch (command) {\n    case CMD_SHOW_HELP_AND_EXIT:\n      do_show_help();\n      do_exit();\n      break;\n    case CMD_EXIT:\n      do_exit();\n      break;\n    case CMD_OTHER:\n      do_other();\n      break;\n    /* ... etc. ... */\n  }",
+            "id": "11f3f80283716913e27730cb9a5bbc4d"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e347dd0742994224984145019822d6fb"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Cee Language]] switch</b> ([[Duffs Device]])",
+            "id": "dcb249417aed5c54efcc0851aeaa6457"
+          },
+          {
+            "type": "code",
+            "text": "    int q = (n+7)/8;\n    switch (n%8) {\n    case 0:    do {  foo();    // Great C hack, Tom,\n    case 7:      foo();    // but it's not valid here.\n    case 6:      foo();\n    case 5:      foo();\n    case 4:      foo();\n    case 3:      foo();\n    case 2:      foo();\n    case 1:      foo();\n               } while (--q > 0);\n    }",
+            "id": "c3bb6f7269753459b88343d301febcfc"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e347dd0742994224984145019822d6fb"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Forth Language]]</b> (jump table from a chess program)",
+            "id": "77b777bb8425a711f771a09e8ccf0ee6"
+          },
+          {
+            "type": "html",
+            "text": " CONSTANT Pawn  ( ... )  6 CONSTANT King",
+            "id": "3f3bd05af228a2c6e6bd5d3dab51fcf1"
+          },
+          {
+            "type": "code",
+            "text": " CREATE genVector  \\ each word is ( sq -- sq )\n   ' NOOP , ' genPawn , ' genKnight , ' genBishop ,\n   ' genRook , ' genQueen , ' genKing , ' genError ,",
+            "id": "ebfa13c0e6b3a1453d852db6419aa399"
+          },
+          {
+            "type": "html",
+            "text": "genSquare ( sq -- sq )",
+            "id": "f6bea0d4b3a306c4a700058543a4ab81"
+          },
+          {
+            "type": "code",
+            "text": "   DUP piece@ CELLS genVector + @ EXECUTE ;\n : genMoves\n   ['] genSquare forEachSq ;",
+            "id": "5537744a4b9024a21083460f6469cfae"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Forth Language]]</b> (ANS Forth Core Extension wordset)",
+            "id": "4836dec61bade8f3ba38ff70523cb6e1"
+          },
+          {
+            "type": "html",
+            "text": "X ( n -- )",
+            "id": "a008ca995be71def18db8510faabad0c"
+          },
+          {
+            "type": "code",
+            "text": "       CASE\n       test1 OF ( -- ) ... ENDOF\n       testn OF ( -- ) ... ENDOF\n       ( n -- ) ... ( default )\n       ENDCASE ...\n   ;",
+            "id": "cec5cfe38b70f6e734a9a68cde718287"
+          },
+          {
+            "type": "html",
+            "text": "which is semantically equivalent to cascading IF statements:",
+            "id": "327e46d6df053eb4ae8c53166980d52e"
+          },
+          {
+            "type": "html",
+            "text": "Y ( n -- )",
+            "id": "c9719cd6b180a4ec83638b5178965a98"
+          },
+          {
+            "type": "code",
+            "text": "     test1 OVER = IF DROP ... ELSE\n     testn OVER = IF DROP ... ELSE\n     ( n -- ) ... THEN THEN  ( big list of THENs to match the IFs)\n   ;",
+            "id": "87bc71bb05950136a1550419e312a7e1"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e347dd0742994224984145019822d6fb"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Common Lisp]] switch</b>",
+            "id": "c0cbd272990162fe3d331b7a8472ce4d"
+          },
+          {
+            "type": "code",
+            "text": "       (case k ((1 2) 'clause1)\n               (3 'clause2)\n               (nil 'no-keys-so-never-seen)\n               ((nil) 'nilslot)\n               ((:four #\\v) 'clause4)\n               ((t) 'tslot)\n               (otherwise 'others)))",
+            "id": "bc2767ec1cb147a996e1d9b0e60c87bd"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Haskell Language]] switch</b>",
+            "id": "bd1be623fc3c4af5a98aeb37dc072265"
+          },
+          {
+            "type": "html",
+            "text": "\nUsing explicit matching:",
+            "id": "e935ab2e921ef98f299e3fff2e857400"
+          },
+          {
+            "type": "code",
+            "text": " take m ys               = case (m,ys) of\n                            (0,_)       ->  []\n                            (_,[])      ->  []\n                            (n,x:xs)    ->  x : take (n-1) xs",
+            "id": "e6084e74d0a75b524370378cc0ed5f98"
+          },
+          {
+            "type": "html",
+            "text": "\nUsing implicit matching:",
+            "id": "44e707eef97ae0c898f629856154593e"
+          },
+          {
+            "type": "code",
+            "text": " take 0 _      = []\n take _ []     = []\n take n (x:xs) = x : take (n - 1) xs",
+            "id": "f399190ca5e5548ca69e5cee55f7225d"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Java Language]] switch</b>",
+            "id": "47c1b88d624fddcd40a3b67750dc3018"
+          },
+          {
+            "type": "code",
+            "text": "       switch (k) {\n       case 1:\n       case 2:\n          return \"clause1\";\n       case 3:\n          return \"clause2\";\n       case 0:\n          return \"nilslot\";\n       case '4':\n       case 'v':\n          return \"clause4\";\n       case 't':\n          return \"tslot\";\n       default:\n          return \"others\";\n       }",
+            "id": "297c13d8755fc308b55b41f9d4769435"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Perl Language]] switch</b> (this is Perl 6: Perl 5 doesn't have explicit switches, although the language implementation documentation claims that the compiler will always optimize if-else into switch whenever possible; see e.g. \"Programming Perl\" by Larry Wall et al)",
+            "id": "fc74dde8c59c5b1fc279783c666b5234"
+          },
+          {
+            "type": "code",
+            "text": "    given $number {\n        when &is_prime   { warn \"$_ is prime\\n\"; continue; }\n        when /[13579]$/  { warn \"$_ is odd\"; }\n        when /[02468]$/  { warn \"$_ is even\"; }\n    }",
+            "id": "d416a6ce9ceb2afde2a92b06c171a3a1"
+          },
+          {
+            "type": "html",
+            "text": "<i>In Perl 5, you can use something like this (adapted slightly from a common idiom of mine):</i>",
+            "id": "cbe05f1b951a0690243ab1a89375a8b9"
+          },
+          {
+            "type": "code",
+            "text": "    &{{\n        \"foo\" => sub { bar(); baz(); },\n        \"quux\" => sub { wibble(); spam(); }\n    }->{ $selector }};",
+            "id": "bde963ea7abd98dc8470b018b8079364"
+          },
+          {
+            "type": "html",
+            "text": "<i>If you have a dense set of integer cases, you could use an array instead of a hash. No good idea about implementing fall-through, though :)</i>",
+            "id": "ad870e6ca8b3b9e4d8cc7604eb3e9288"
+          },
+          {
+            "type": "code",
+            "text": "    &{[\n        handle_0,\n        handle_1,\n        complain_about_other_digits\n    ]->[$digit]};",
+            "id": "47ac0a94e30e85f5cd55cc4a08df0989"
+          },
+          {
+            "type": "html",
+            "text": "<i>(Usually I use this setup to just pick a scalar value based on the input. Here I adjust that slightly by using code references for the values, and then invoking the relevant code.)</i>",
+            "id": "929abbd281275778ebe21a42dcb1eb51"
+          },
+          {
+            "type": "html",
+            "text": "<i>[Please note that this idiom (in Perl 5) -- using a scalar as an offset into an array or hash of function addresses -- is the basic paradigm of [[Cee Language]] \"object-oriented\" method dispatch, as in [[Cee Plus Plus]], [[Objective Cee]], and various homebrews. Switch statements are generally viewed as a [[Code Smell]] in object-oriented environments because they pessimize message dispatch, which a good OO environment makes faster than the corresponding switch. Also see the discussion under \"<b>[[Smalltalk Language]] switch</b>\", below.]</i>",
+            "id": "ba884c0bfb6b288b65717090df53c65c"
+          },
+          {
+            "type": "html",
+            "text": "\nThere is a working example of this mechanism in the interpreters for [[Snusp Language]].",
+            "id": "02ba32eebf31ab01cafb958bdb0ee198"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Pl Sql]] switch</b>",
+            "id": "ae6bcff15aa7437a2c089902adface38"
+          },
+          {
+            "type": "code",
+            "text": " CASE grade\n   WHEN 'A' THEN dbms_output.put_line('Excellent');\n   WHEN 'B' THEN dbms_output.put_line('Very Good');\n   WHEN 'C' THEN dbms_output.put_line('Good');\n   WHEN 'D' THEN dbms_output.put_line('Fair');\n   WHEN 'F' THEN dbms_output.put_line('Poor');\n   ELSE dbms_output.put_line('No such grade');\n END CASE;",
+            "id": "c2ebb1c09108e758ce2f758b80467798"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Ruby Language]] switch</b>",
+            "id": "1cbfadfba7459b615664ee28929b6382"
+          },
+          {
+            "type": "code",
+            "text": "  case $age\n  when 0 .. 2\n    \"baby\"\n  when 3 .. 6\n    \"little child\"\n  when 7 .. 12\n    \"child\"\n  when 12 .. 18\n    # Note: 12 already matched by \"child\"\n    \"youth\"\n  else\n    \"adult\"\n  end",
+            "id": "0e6813c7235096fd3dd1a948c6555a4b"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Scheme Language]] switch</b>",
+            "id": "78a512caf2b8e11a8b2820e214d8d111"
+          },
+          {
+            "type": "code",
+            "text": " (case (car '(c d))\n   ((a e i o u) 'vowel)\n   ((w y) 'semivowel)\n   (else 'consonant))                    ===>  consonant",
+            "id": "88dc7f94139b38fba4dfe7ec1625c91c"
+          },
+          {
+            "type": "html",
+            "text": "<b>VHDL switch</b> (combinational)",
+            "id": "643a4e3f81f41c2a68deda607b808321"
+          },
+          {
+            "type": "code",
+            "text": " library ieee;\n use ieee.std_logic_1164.all;",
+            "id": "5f49e512c9a9d5e9f23861e6ac5222f7"
+          },
+          {
+            "type": "code",
+            "text": " entity CombinationalSwitch is port\n (  A: in std_logic_vector (2 downto 0);\n    B: in std_logic_vector (7 downto 0);\n    F: out std_logic  );\n end CombinationalSwitch;",
+            "id": "bd2def6fbe6cf9488faa2d6a0e029852"
+          },
+          {
+            "type": "code",
+            "text": " architecture RTL of CombinationalSwitch is begin\n    with A select\n       F <= B(0) when \"000\",\n            B(1) when \"001\",\n            B(2) when \"010\",\n            B(3) when \"011\",\n            B(4) when \"100\",\n            B(5) when \"101\",\n            B(6) when \"110\",\n            B(7) when \"111\",\n            0 when others;\n end RTL;",
+            "id": "42855bb1cdc6758ec7a0a27e64efcee1"
+          },
+          {
+            "type": "html",
+            "text": "<b>VHDL switch</b> (sequential)",
+            "id": "f020be1f27a1ac1d8e0cb2d289793c90"
+          },
+          {
+            "type": "code",
+            "text": " library ieee;\n use ieee.std_logic_1164.all;",
+            "id": "5f49e512c9a9d5e9f23861e6ac5222f7"
+          },
+          {
+            "type": "code",
+            "text": " entity SequentialSwitch is port\n (  A: in std_logic_vector (2 downto 0);\n    B: in std_logic_vector (7 downto 0);\n    F: out std_logic  );\n end CombinationalSwitch; ",
+            "id": "1e462235b9be68f24d3068aa4deba79b"
+          },
+          {
+            "type": "code",
+            "text": " architecture RTL of SequentialSwitch is begin\n    process (A, B) begin\n       case A is\n          when \"000\" => F <= B(0);\n          when \"001\" => F <= B(1);\n          when \"010\" => F <= B(2);\n          when \"011\" => F <= B(3);\n          when \"100\" => F <= B(4);\n          when \"101\" => F <= B(5);\n          when \"110\" => F <= B(6);\n          when \"111\" => F <= B(7);\n          when others => F <= 'Z';\n       end case;\n    end process;\n end RTL;",
+            "id": "ad79cb34930056d0634be6fb8bf1b476"
+          },
+          {
+            "type": "html",
+            "text": "<i>Notice that, since VHDL describes hardware, the Switch statement here is basically a multiplexer. In this case, this is an 8-to-1 multiplexer.</i>",
+            "id": "aa6469e9b41f2defa7756c45280c29db"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Visual Basic]] switch</b>",
+            "id": "c7cfd000644d902ae4d1eb9bd710595a"
+          },
+          {
+            "type": "code",
+            "text": " Dim Number\n Number = 8\n Select Case Number\n Case 1 To 5\n    Debug.Print \"Between 1 and 5\"\n Case 6, 7, 8\n    Debug.Print \"Between 6 and 8\"\n Case 9 To 10\n    Debug.Print \"Greater than 8\"\n Case Else\n    Debug.Print \"Not between 1 and 10\"\n End Select",
+            "id": "304e0c0c0eb6f27974a2e7a7bc0beb28"
+          },
+          {
+            "type": "html",
+            "text": "<b>Hebrew</b> (Ivrit)",
+            "id": "d45c03ac1d496b35fa73eabf4cffc703"
+          },
+          {
+            "type": "code",
+            "text": "    בדוק משתנה\n    אם משתנה = 1 אזי\n    שלום\n    אם משתנה = 2 אזי\n    להתראות\n    אחרת\n    לך-יא-מניאאק\n    סיים",
+            "id": "fee97d1f3cf54a0f88cbf9447a1807d1"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Delphi Language]] switch</b>\nnote uses sets, can work with characters and enumerated types instead of integers",
+            "id": "eefc1baab9185a56adfa34d8080b7f2b"
+          },
+          {
+            "type": "code",
+            "text": " case I of\n   1..5      : Caption := 'Low';\n   6..9      : Caption := 'High';\n   0, 10..99 : Caption := 'Out of range';\n else\n   Caption := '';\n end;",
+            "id": "582a46e3cb763b8e6fc3f15830295ca8"
+          },
+          {
+            "type": "code",
+            "text": " case Letter of\n   Vowels      : Caption := 'Vowel';\n   Consonants  : Caption := 'Consonant';\n end;",
+            "id": "5302c731c9f1fcdb27f756d33a407525"
+          },
+          {
+            "type": "html",
+            "text": "where Letter is a char and Vowels and Consonants are Sets.",
+            "id": "b13fb62ddd3dd85ebf0b111533a7259c"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Smalltalk Language]] switch</b>",
+            "id": "8cc20255def4fd8f48174a35b4fff640"
+          },
+          {
+            "type": "code",
+            "text": " anObject aMessage",
+            "id": "a29e491e0dea918ca22ae18f63c7f839"
+          },
+          {
+            "type": "html",
+            "text": "\nwhere aMessage is a method defined on the class of anObject.",
+            "id": "ff6f0aa6b28cac9e5cfccb7d16da2c07"
+          },
+          {
+            "type": "html",
+            "text": "(One can also define syntax for a [[Smalltalk Case Statement]] within the language.)",
+            "id": "f2a02e7e6788f6245a61bb48fb20f81d"
+          },
+          {
+            "type": "html",
+            "text": "<i>How does that work when you're switching on 1..5, 6..10, and \"other\"?</i>",
+            "id": "8b32059cab413073596a3292c2bcb603"
+          },
+          {
+            "type": "html",
+            "text": "\nA Smalltalk program implementing such a dispatch (and they are exceedingly rare, because the object/message paradigm so richly moots most situations that provoke a Switch) typically looks up a method name in an Array or Dictionary which they then perform: -- the equivalent of the C expression (*action[selector])().",
+            "id": "c03ba526f3deae0b71552d4bcc7325fa"
+          },
+          {
+            "type": "html",
+            "text": "\nIn the interest of advancing the discussion, I built a test harness and measured the results. I simplified your example to dispatch on a number between 1 and 16 -- this gets at the most important aspects of your question. I defined a new class, Switch<b></b>Test, with sixteen methods with selectors #m01, #m02, ... , #m16. For the sake of testing, these methods were no-ops. I then built and measured the performance of three dispatch approaches:",
+            "id": "37a6806574fa44d5e918fe69d8d75557"
+          },
+          {
+            "type": "html",
+            "text": " \"Array Dispatch\": I constructed a \"dispatchArray\" of size 16, where the contents of index N is the integer offset of method m<N> in the methodsArray of Switch<b></b>Test. I then constructed a test method that counts an index from 1 to 16, looks up the corresponding offset in dispatchArray, then loads and evaluates the Compiled<b></b>Method at that offset.",
+            "id": "c464d0b729dcb108ee00d061a2d11ccc"
+          },
+          {
+            "type": "html",
+            "text": "(aMethodsArray at:<br>(dispatchArray at: anIndex)) executeWithReceiver: self andArguments: #()",
+            "id": "c0405d2d6a80cb0c9214df360a3e26f5"
+          },
+          {
+            "type": "html",
+            "text": " \"Perform\": I constructed a dispatchArray of size 16, containing 16 symbols, which were #m01, m02, ..., #m16, such that the symbol at index N was #m<N>. I then constructed a test method that counts an index from 1 to 16, looks up the symbol corresponding to the index in dispatchArray, then performs that symbol in the receiver.",
+            "id": "5270827a2733c65483a3638e7f835c08"
+          },
+          {
+            "type": "html",
+            "text": "self perform:<br>(dispatchArray at: anIndex)",
+            "id": "bc94d6c819256445c7f9f9fce17354a5"
+          },
+          {
+            "type": "html",
+            "text": " \"Message send\": I open coded the sixteen message sends -- this corresponds to the most common idiom in Smalltalk.",
+            "id": "cda449dd8bb711d1196ea4a9745683b9"
+          },
+          {
+            "type": "code",
+            "text": "   self\n     m01;\n    m02;\n    \"...\"\n    m16.",
+            "id": "3fc349dab7d9423fe555f8d1ee13c54b"
+          },
+          {
+            "type": "html",
+            "text": "The above is a load of bull. This is hardcoding the evaluation of m01, etc. when in reality the values for switch statements are variable. Add the fact that objects must be coaxed into selectors before they can be sent to objects.",
+            "id": "a2dff2138cadf753b8c866db04ded85a"
+          },
+          {
+            "type": "html",
+            "text": "\nSmalltalk needs a switch statement, because nested ifTrue/ifFalse's are ripe with design smell.",
+            "id": "afb817a80d6418035cd1e9aae3cc74bf"
+          },
+          {
+            "type": "html",
+            "text": "\nI then used Time>>millisecondsToRun: to measure the time required to execute 1000000 repetitions of each of the above three cases (on a 3Ghz Pentium with 1G RAM running IBM Smalltalk). Here are the times I measured:",
+            "id": "51ec5bd9c64a3d79a6f371ff33de9b3a"
+          },
+          {
+            "type": "html",
+            "text": " Array Dispatch Test: 637.5",
+            "id": "db9e51185a429ec3573521cd80b8267e"
+          },
+          {
+            "type": "html",
+            "text": " Perform Test: 284.4",
+            "id": "f214688de041bc2f59c2b727336f0148"
+          },
+          {
+            "type": "html",
+            "text": " Message Send Test: 189.1\nMy interpretation: using the \"switch statement\" approach (perform) introduced about a factor of two in dispatch overhead, in comparison to a \"regular\" message send. It might be worth comparing that to the other languages and environments here.",
+            "id": "6fa823c52d4cb86847f5138e7bad6487"
+          },
+          {
+            "type": "html",
+            "text": "\nEven [[Cee Language]] imposes <i>some</i> overhead to setup the switch statement, and it might be interesting measure that overhead in comparison to a  straight procedure call on each of the resulting branches. (But of course a C switch/case statement is faster than a series of if-elses.)",
+            "id": "33b2fe4d184f385c5f43ebbf6af28e7a"
+          },
+          {
+            "type": "html",
+            "text": "\nMy point in putting up the example is to put some quantitative bounds (in this case a factor of two) on the switch statement dispatch overhead imposed by the language. If I was parsing something and cared about the performance, I would probably write and debug the parser in Smalltalk and then recode the lexer into C, calling the lexer through the external function API ([[Alternate Hard And Soft Layers]]).",
+            "id": "30754cf58ef1099e48bfdcb894f3fadc"
+          },
+          {
+            "type": "html",
+            "text": "\nThe interesting thing is the relative overhead of a switch-like mechanism in Smalltalk, <i>as compared to its natural behavior</i> (<b>not</b> to C). My point is that 99% of what one does with switch/case in a procedural language is mooted by a good polymorphic language (like Smalltalk). Switch/case is needed in C because you don't have polymorphic message sends (unless you want to roll your own tables of function pointers).",
+            "id": "223c3924edd683b05696ed699cd81240"
+          },
+          {
+            "type": "html",
+            "text": "\nThe C-style switch isn't needed in Smalltalk (as a separate language construct) because its function is implicit in the method dispatching behavior. If, in the pathological Smalltalk case where you DO need switch, I showed that it's about twice as slow as a \"straight\" message send (in Smalltalk). The performance arguments don't make sense until you look at <b>much</b> larger grain sizes, where the industry has learned (particularly help from [[Alternate Hard And Soft Layers]]) that C's fine-grained performance advantages do not, in general, translate to corresponding application performance differences.",
+            "id": "1d56d6f9528d1d0e992039375c280d10"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e347dd0742994224984145019822d6fb"
+          },
+          {
+            "type": "html",
+            "text": "<b>[[Cobol Language]] evaluate-when</b>  (COBOL 85)",
+            "id": "53fb3e68d59b7c9af4ae224dcd4982ab"
+          },
+          {
+            "type": "code",
+            "text": " evaluate policy-holder-age also policy-holder-sex also smoking-flag\n   when   20 thru 40        also \"F\"               also ANY           perform young-female-policy\n   when   65 thru 999       also \"M\"               also \"Y\"           perform old-smokey\n   when other                                                         perform all-other-cases\n end-evaluate",
+            "id": "8d621fcc53c6bc55f9cc510814015541"
+          },
+          {
+            "type": "html",
+            "text": "It's amazing; you can do anything. (I'm not claiming it can do anything well, just that it has an amazing array of expressive options. ;-)",
+            "id": "9d746263005c2e4e2af066bc9e41ae93"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e347dd0742994224984145019822d6fb"
+          },
+          {
+            "type": "html",
+            "text": "<i>Let's standardize on one particular form. A simple substitution process can then generate the correct syntax for your chosen language.</i>",
+            "id": "4e456fbc4809de8905191fb77b2cd629"
+          },
+          {
+            "type": "html",
+            "text": "\nUm... not true, since different languages switching capabilities are different. No one generic form can be translated to each language.",
+            "id": "44dfc527909be321299f35fdf8b1ec0c"
+          },
+          {
+            "type": "html",
+            "text": "\nLong ago, when memory was very limited, there wasn't room for either a jump list or a series of tests in a particular program, so I <i>calculated</i> the required address as a linear function of the switch expression (using a shift instruction for the multiplication), and then made a jump to the calculated address. Those were the days. ;-)",
+            "id": "a5205b19c497d8ac18668ce77f610df6"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e347dd0742994224984145019822d6fb"
+          },
+          {
+            "type": "html",
+            "text": "See [[Switch Statements Smell]], [[Case Statements Considered Harmful]] (summary: use OO/generic dispatch on the type ([[Internal Polymorphism]]) in preference to switch on the type (\"[[Type Case]]\", \"[[External Polymorphism]]\"); when looking at things other than the type, if Polymorphism is impossible or introduces too much extra machinery, then use switch in preference to if-else whenever possible. Contrary to some Purists, in some languages it is not possible to replace every switch statement with polymorphism, and in other languages it is not always desirable. Classic example: switch on char value in a lexical analyzer. But switch-on-type should indeed always be replaced.)",
+            "id": "19c21be16267a802365448b4e73020aa"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e347dd0742994224984145019822d6fb"
+          },
+          {
+            "type": "html",
+            "text": "See also: [[Is Break Statement Archaic]]",
+            "id": "8231c6d71e0f579335ea666da1d5216d"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "e347dd0742994224984145019822d6fb"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Conditionals And Dispatching]]",
+            "id": "6302e730a8e57a74baba702054486aba"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?SwitchStatement c2.com]",
+            "id": "67a0de26c249034632a022841820551d"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1699944146874
+    }
+  ]
+}

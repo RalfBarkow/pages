@@ -1,0 +1,332 @@
+{
+  "title": "Java Dynamic Dispatch And Constructors",
+  "story": [
+    {
+      "type": "html",
+      "text": "[[[Java Problems]]]",
+      "id": "6d7788eadfb8a1f844b7075202aeda41"
+    },
+    {
+      "type": "html",
+      "text": "\nJava method calls are polymorphic - they always invoke the method defined by the most derived class.  This even happens in constructors.  If a base class constructor calls a method, the implementation defined by the most derived class  is called even though the derived class state has not yet been constructed!",
+      "id": "b8391b632e0401475c36048566003f29"
+    },
+    {
+      "type": "html",
+      "text": "\nSolutions?  You can [[Test Whether In Construction Phase]] or [[Encapsulate Multi Stage Construction]].",
+      "id": "695e63c54f88753a6543edf8988ec769"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "8abcf740ad375f1a314f06f1bc49ae04"
+    },
+    {
+      "type": "html",
+      "text": "\nIt depends what you think ought to happen in a constructor. One point of view is that construction should just set up the instance to be valid (e.g. creating collection objects for fields) and that anything exotic should be in another method. This is why the [[Modula Three]] designers chose not to support constructors. Their solution was to have good field initialisation and establish a convention that such initialisation is done in an init() method that returns the instance. This gives you:",
+      "id": "4024ce4c22c476b4c3db7ec30823bad2"
+    },
+    {
+      "type": "html",
+      "text": "\nVAR Thing thing = NEW Thing.init();",
+      "id": "c38c5321d62335eaf83c7466ceee957b"
+    },
+    {
+      "type": "html",
+      "text": "(or something like that, I can't remember the syntax). If it's complicated, most likely you wrap the whole thing up in a factory method.",
+      "id": "bf7a419a9c0506aca0d17837b94070a2"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Steve Freeman]]",
+      "id": "5e6e63aa5baecf874973111253c92c56"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "8abcf740ad375f1a314f06f1bc49ae04"
+    },
+    {
+      "type": "html",
+      "text": "The introduction says that <i>if a base class constructor calls a method, the implementation defined by the most derived class is called even though the derived class state has not yet been constructed</i> with the implication that this is a bad thing.  However, this can also be a feature -- in particular, when some of the derived class construction is done by a method called by the base class constructor, rather than in the derived class's constructor.",
+      "id": "732c79a0a4d4898f46009cc3ffe08531"
+    },
+    {
+      "type": "html",
+      "text": "\nFor example, consider classes that are composed of properties rather than simple instance variables.  For example, a class that needed an \"int\" instance variable would actually have a reference to an \"int property\" object.  This scheme can provide most of the advantages of reflection but it also provides a way to handle property change notification (properties and/or property containing classes can be subscribed to for change notification).",
+      "id": "11f29e7e54a0f3fe7d2ac3a7ed7c9eff"
+    },
+    {
+      "type": "html",
+      "text": "\nWe used a scheme like this in Microsoft Liquid Motion 1.0 which was used to implement the undo system among other things.  However, it was both a hassle and error prone to manage the properties in a class.  In order to simplify things, I set things up so that subclasses of the base property container class just had to add a single method that \"registered\" each property in the class.  Here's a simplified example of how it worked:",
+      "id": "c64d9c4b9779501d9d9cf53d4db9d373"
+    },
+    {
+      "type": "html",
+      "text": "\nclass Foo extends [[Property Container]]",
+      "id": "ebdb9c58ca15d81ef75d37c2f378bc42"
+    },
+    {
+      "type": "html",
+      "text": "{",
+      "id": "b42a91c1a9debda97e5745ea2e643cf8"
+    },
+    {
+      "type": "code",
+      "text": "    public Property propX;\n    public Property propY;",
+      "id": "f3f5ee5e3eaac05b290f4e3358d756e5"
+    },
+    {
+      "type": "code",
+      "text": "    protected void registerProperties( int code )\n    {\n       super.registerProperties( code );\n       propX = registerProperty( code, \"propX\", TYPE_INT );\n       propY = registerProperty( code, \"propY\", TYPE_INT );\n    }",
+      "id": "81e4d02dad086c95747c908cfd7c8014"
+    },
+    {
+      "type": "html",
+      "text": "}",
+      "id": "c8aa7f4a29a0a9c8f48b0d2a1c9ca2a4"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Property Container]]'s constructor would call the registerProperties() method with one code, and its clone method would call it with another code.  The registerProperty() method could tell by the code whether it needed to construct a new property, or clone an existing one.",
+      "id": "8569b4788f3dcdd1c43ef172776f258c"
+    },
+    {
+      "type": "html",
+      "text": "\nIn a simple case like the one above, a [[Property Container]] subclass didn't need to declare a constructor or a clone method -- it just needed a registerProperties() method.  ([[Property Container]] was also capable of detecting when a registerProperties() method failed to super).",
+      "id": "13e61e9b3ac7d5c822dfd01a81a17d25"
+    },
+    {
+      "type": "html",
+      "text": "\nThis whole scheme was only possible <i>because</i> Java calls the most derived method from a constructor.",
+      "id": "ebd31be97fb8a9db65499e08b028f143"
+    },
+    {
+      "type": "html",
+      "text": "--[[Curtis Bartley]]",
+      "id": "67e13b9820ee931def122006b07bac10"
+    },
+    {
+      "type": "html",
+      "text": "\nI have since seen the idiom of calling methods in the derived class from the base class constructor used in the Swing library.  The JFrame class has a protected createContentPane method that is used to create the panel that contains the contents of the window.  Derived classes can override the method to create panels that are different from the default type.",
+      "id": "7e77e181e746f026a38ab2f59af34eda"
+    },
+    {
+      "type": "html",
+      "text": "\nThe semantics of Java constructors are really only a problem for those of us who are used to C++ or are converting code from C++ to Java. --[[Nat Pryce]]",
+      "id": "632fe29beaa175b0fd6191f08d9e4783"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "8abcf740ad375f1a314f06f1bc49ae04"
+    },
+    {
+      "type": "html",
+      "text": "No, the original comment was right - it's bad! That you can write code which relies on a language quirk does not make the quirk good.",
+      "id": "df585d31f8e127ff6ea72e07d2225fb8"
+    },
+    {
+      "type": "html",
+      "text": "\nThe purpose of a constructor is to set up the class invariant. Methods other than the constructor should be able to rely on the class invariant being true if they want to. It's harder to reason about code if you can't trust that. -- [[Dave Harris]]",
+      "id": "65612195d997c4d923170c58a1a20537"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "8abcf740ad375f1a314f06f1bc49ae04"
+    },
+    {
+      "type": "html",
+      "text": "I disagree that this qualifies as a language quirk.  The way Java handles polymorphic method calls in constructors is no more weird than the way C++ does it, and in my opinion it's less so.  Then the statement that methods other than the constructor should be able to rely on the class invariant seems overly dogmatic to me.  In particular this precludes having <i>any</i> method whose purpose is to aid in object construction!  -- [[Curtis Bartley]]",
+      "id": "e3fc93c8bf0795838ddf17d894c240c4"
+    },
+    {
+      "type": "html",
+      "text": "\nI weakened my comment by adding \"if they want to\". Does that help?",
+      "id": "11f4194f97a26c613b0d2fefabfd0724"
+    },
+    {
+      "type": "html",
+      "text": "\nIf not... there's a difference between allowing for a relaxed invariant for a specific method, and a mechanism which allows <i>any</i> of your methods to be called before you're ready. It's especially insiduous where the base class gets changed after the derived class was written, so that the author of the derived class wasn't expecting the call. -- [[Dave Harris]]",
+      "id": "943a49b91ed0fafae41ff3fd92ace1df"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?JavaDynamicDispatchAndConstructors c2.com]",
+      "id": "cc3e9b2b29e49f81d01d0b42af5ff3cb"
+    }
+  ],
+  "journal": [
+    {
+      "date": 916621298000,
+      "id": "a58a368c5ed38b9e9e7035c61456cba9",
+      "type": "create",
+      "item": {
+        "title": "Java Dynamic Dispatch And Constructors",
+        "story": [
+          {
+            "type": "html",
+            "text": "[[[Java Problems]]]",
+            "id": "6d7788eadfb8a1f844b7075202aeda41"
+          },
+          {
+            "type": "html",
+            "text": "\nJava method calls are polymorphic - they always invoke the method defined by the most derived class.  This even happens in constructors.  If a base class constructor calls a method, the implementation defined by the most derived class  is called even though the derived class state has not yet been constructed!",
+            "id": "b8391b632e0401475c36048566003f29"
+          },
+          {
+            "type": "html",
+            "text": "\nSolutions?  You can [[Test Whether In Construction Phase]] or [[Encapsulate Multi Stage Construction]].",
+            "id": "695e63c54f88753a6543edf8988ec769"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "8abcf740ad375f1a314f06f1bc49ae04"
+          },
+          {
+            "type": "html",
+            "text": "\nIt depends what you think ought to happen in a constructor. One point of view is that construction should just set up the instance to be valid (e.g. creating collection objects for fields) and that anything exotic should be in another method. This is why the [[Modula Three]] designers chose not to support constructors. Their solution was to have good field initialisation and establish a convention that such initialisation is done in an init() method that returns the instance. This gives you:",
+            "id": "4024ce4c22c476b4c3db7ec30823bad2"
+          },
+          {
+            "type": "html",
+            "text": "\nVAR Thing thing = NEW Thing.init();",
+            "id": "c38c5321d62335eaf83c7466ceee957b"
+          },
+          {
+            "type": "html",
+            "text": "(or something like that, I can't remember the syntax). If it's complicated, most likely you wrap the whole thing up in a factory method.",
+            "id": "bf7a419a9c0506aca0d17837b94070a2"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Steve Freeman]]",
+            "id": "5e6e63aa5baecf874973111253c92c56"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "8abcf740ad375f1a314f06f1bc49ae04"
+          },
+          {
+            "type": "html",
+            "text": "The introduction says that <i>if a base class constructor calls a method, the implementation defined by the most derived class is called even though the derived class state has not yet been constructed</i> with the implication that this is a bad thing.  However, this can also be a feature -- in particular, when some of the derived class construction is done by a method called by the base class constructor, rather than in the derived class's constructor.",
+            "id": "732c79a0a4d4898f46009cc3ffe08531"
+          },
+          {
+            "type": "html",
+            "text": "\nFor example, consider classes that are composed of properties rather than simple instance variables.  For example, a class that needed an \"int\" instance variable would actually have a reference to an \"int property\" object.  This scheme can provide most of the advantages of reflection but it also provides a way to handle property change notification (properties and/or property containing classes can be subscribed to for change notification).",
+            "id": "11f29e7e54a0f3fe7d2ac3a7ed7c9eff"
+          },
+          {
+            "type": "html",
+            "text": "\nWe used a scheme like this in Microsoft Liquid Motion 1.0 which was used to implement the undo system among other things.  However, it was both a hassle and error prone to manage the properties in a class.  In order to simplify things, I set things up so that subclasses of the base property container class just had to add a single method that \"registered\" each property in the class.  Here's a simplified example of how it worked:",
+            "id": "c64d9c4b9779501d9d9cf53d4db9d373"
+          },
+          {
+            "type": "html",
+            "text": "\nclass Foo extends [[Property Container]]",
+            "id": "ebdb9c58ca15d81ef75d37c2f378bc42"
+          },
+          {
+            "type": "html",
+            "text": "{",
+            "id": "b42a91c1a9debda97e5745ea2e643cf8"
+          },
+          {
+            "type": "code",
+            "text": "    public Property propX;\n    public Property propY;",
+            "id": "f3f5ee5e3eaac05b290f4e3358d756e5"
+          },
+          {
+            "type": "code",
+            "text": "    protected void registerProperties( int code )\n    {\n       super.registerProperties( code );\n       propX = registerProperty( code, \"propX\", TYPE_INT );\n       propY = registerProperty( code, \"propY\", TYPE_INT );\n    }",
+            "id": "81e4d02dad086c95747c908cfd7c8014"
+          },
+          {
+            "type": "html",
+            "text": "}",
+            "id": "c8aa7f4a29a0a9c8f48b0d2a1c9ca2a4"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Property Container]]'s constructor would call the registerProperties() method with one code, and its clone method would call it with another code.  The registerProperty() method could tell by the code whether it needed to construct a new property, or clone an existing one.",
+            "id": "8569b4788f3dcdd1c43ef172776f258c"
+          },
+          {
+            "type": "html",
+            "text": "\nIn a simple case like the one above, a [[Property Container]] subclass didn't need to declare a constructor or a clone method -- it just needed a registerProperties() method.  ([[Property Container]] was also capable of detecting when a registerProperties() method failed to super).",
+            "id": "13e61e9b3ac7d5c822dfd01a81a17d25"
+          },
+          {
+            "type": "html",
+            "text": "\nThis whole scheme was only possible <i>because</i> Java calls the most derived method from a constructor.",
+            "id": "ebd31be97fb8a9db65499e08b028f143"
+          },
+          {
+            "type": "html",
+            "text": "--[[Curtis Bartley]]",
+            "id": "67e13b9820ee931def122006b07bac10"
+          },
+          {
+            "type": "html",
+            "text": "\nI have since seen the idiom of calling methods in the derived class from the base class constructor used in the Swing library.  The JFrame class has a protected createContentPane method that is used to create the panel that contains the contents of the window.  Derived classes can override the method to create panels that are different from the default type.",
+            "id": "7e77e181e746f026a38ab2f59af34eda"
+          },
+          {
+            "type": "html",
+            "text": "\nThe semantics of Java constructors are really only a problem for those of us who are used to C++ or are converting code from C++ to Java. --[[Nat Pryce]]",
+            "id": "632fe29beaa175b0fd6191f08d9e4783"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "8abcf740ad375f1a314f06f1bc49ae04"
+          },
+          {
+            "type": "html",
+            "text": "No, the original comment was right - it's bad! That you can write code which relies on a language quirk does not make the quirk good.",
+            "id": "df585d31f8e127ff6ea72e07d2225fb8"
+          },
+          {
+            "type": "html",
+            "text": "\nThe purpose of a constructor is to set up the class invariant. Methods other than the constructor should be able to rely on the class invariant being true if they want to. It's harder to reason about code if you can't trust that. -- [[Dave Harris]]",
+            "id": "65612195d997c4d923170c58a1a20537"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "8abcf740ad375f1a314f06f1bc49ae04"
+          },
+          {
+            "type": "html",
+            "text": "I disagree that this qualifies as a language quirk.  The way Java handles polymorphic method calls in constructors is no more weird than the way C++ does it, and in my opinion it's less so.  Then the statement that methods other than the constructor should be able to rely on the class invariant seems overly dogmatic to me.  In particular this precludes having <i>any</i> method whose purpose is to aid in object construction!  -- [[Curtis Bartley]]",
+            "id": "e3fc93c8bf0795838ddf17d894c240c4"
+          },
+          {
+            "type": "html",
+            "text": "\nI weakened my comment by adding \"if they want to\". Does that help?",
+            "id": "11f4194f97a26c613b0d2fefabfd0724"
+          },
+          {
+            "type": "html",
+            "text": "\nIf not... there's a difference between allowing for a relaxed invariant for a specific method, and a mechanism which allows <i>any</i> of your methods to be called before you're ready. It's especially insiduous where the base class gets changed after the derived class was written, so that the author of the derived class wasn't expecting the call. -- [[Dave Harris]]",
+            "id": "943a49b91ed0fafae41ff3fd92ace1df"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?JavaDynamicDispatchAndConstructors c2.com]",
+            "id": "cc3e9b2b29e49f81d01d0b42af5ff3cb"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1699944351514
+    }
+  ]
+}
