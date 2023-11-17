@@ -1,0 +1,891 @@
+{
+  "title": "Server-Side Plugins Listening",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "c1b5600595e9bc8b",
+      "text": "Changes in resource management that will enable much larger wiki farms also calls into question the launch protocol for server-side plugins that communicate through websockets to the story items that use them. [https://github.com/fedwiki/wiki-node-server/pull/79 github]"
+    },
+    {
+      "type": "pagefold",
+      "id": "c2f5457290c9cb29",
+      "text": "commit comment"
+    },
+    {
+      "type": "paragraph",
+      "id": "ad1a00bd9f9a0c8c",
+      "text": "Our protocol here for launching server-side components depends on having a running server that the component can use to handle websocket requests."
+    },
+    {
+      "type": "paragraph",
+      "id": "de0f245f14cbd42e",
+      "text": "Up to now we've been careless as to what is semantically desirable in a farm situation. The few known examples were coded as if they were a server resource, not a virtual site resource. However, the launch protocol passes in a server from which connections can be made, not a connection that has been established by the (now) single real server. "
+    },
+    {
+      "type": "paragraph",
+      "id": "46efc1051046ac15",
+      "text": "We've chosen to not launch server-side plugins in farm mode until this launch-protocol can be adjusted and all server-side plugins revised."
+    },
+    {
+      "type": "pagefold",
+      "id": "4ba6d5058fa6bec6",
+      "text": "."
+    },
+    {
+      "type": "paragraph",
+      "id": "16c03655685e28f2",
+      "text": "The ultimate question here is what sort of responsibilities are assumed by the author of a server-side plugin with regards to meeting the needs of many clients with the resources available on a given server?"
+    },
+    {
+      "type": "paragraph",
+      "id": "44bc0e51e0ed6794",
+      "text": "We could attempt to 'sandbox' instances of the server-side plugin corresponding specific sites or even specific client-side instances on those sites."
+    },
+    {
+      "type": "paragraph",
+      "id": "498fb35f5a65870c",
+      "text": "We could allow instances to have access to the full resources of the farm server and expect it to manage those resources with appropriate respect."
+    },
+    {
+      "type": "paragraph",
+      "id": "df92e846d7787009",
+      "text": "A site operator that installs a fully privileged server-side plugin is trusting that plugin author to the same degree that he trusts the wiki server authors themselves. In response the plugin author can manage shared resources to the advantage of all clients. "
+    },
+    {
+      "type": "paragraph",
+      "id": "4434689db908d83e",
+      "text": "The plugin author can hear and respond to all events."
+    },
+    {
+      "type": "paragraph",
+      "id": "eac429c80d896490",
+      "text": "The plugin author can read or write all persistent stores."
+    },
+    {
+      "type": "paragraph",
+      "id": "d0cb716928e4e2ab",
+      "text": "The plugin author can coordinate use of shared hardware."
+    },
+    {
+      "type": "paragraph",
+      "id": "42f5c442b342b96f",
+      "text": "The Txtzyme plugin provides the best example of a fully privileged plugin accepting server class responsibilities."
+    },
+    {
+      "type": "paragraph",
+      "id": "f0bae3d79d38681d",
+      "text": "The Txtzyme plugin manages a single usb connection to hardware by interleaving atomic packets going to the hardware and universally distributing packets returned."
+    },
+    {
+      "type": "paragraph",
+      "id": "3b0acb56651e5768",
+      "text": "The Txtzyme plugin could overlay on device-bound packets a notion of session and return session-labeled output to the single client requesting it."
+    },
+    {
+      "type": "paragraph",
+      "id": "7d2b46c5dfcc8f5b",
+      "text": "See [[About Txtzyme Plugin]]"
+    },
+    {
+      "type": "html",
+      "id": "5710aa218bdacc8d",
+      "text": "<h3> Proposal"
+    },
+    {
+      "type": "paragraph",
+      "id": "33f0d4292cecf0a8",
+      "text": "I suggest that the core server take responsibility for completing websocket connections on behalf of all virtual servers in a farm."
+    },
+    {
+      "type": "paragraph",
+      "id": "19b578b80c3996c0",
+      "text": "The core server could dispatch these to single instances of the server-side plugins passing the connection and virtual server information necessary to manage further dispatching."
+    },
+    {
+      "type": "paragraph",
+      "id": "d0b365f1f358c2ed",
+      "text": "The core server would have launched the plugin-instances when it launched and established an EventListener for further plugin specific communication."
+    },
+    {
+      "type": "paragraph",
+      "id": "d86b332255484b1d",
+      "text": "A plugin could fail to launch if it didn't find necessary resources. For example, no Txtzyme device attached."
+    },
+    {
+      "type": "paragraph",
+      "id": "937fe99f06fb489e",
+      "text": "Question: doesn't this have the core server asserting some websocket conventions and even package selection on the plugins? How does this gracefully evolve?"
+    },
+    {
+      "type": "paragraph",
+      "id": "249d61cc183a25f9",
+      "text": "Question: shouldn't the core server distribute RESTful requests to server-side plugins also? How much site, session, lineup, page and item identity would need to be managed to make this equally effective?"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Server-Side Plugins Listening",
+        "story": [
+          {
+            "type": "paragraph",
+            "id": "c1b5600595e9bc8b",
+            "text": "Changes in resource management that will enable much larger wiki farms also calls into question the launch protocol for server-side plugins that communicate through websockets to the story items that use them. [https://github.com/fedwiki/wiki-node-server/pull/79 github]"
+          },
+          {
+            "type": "pagefold",
+            "id": "c2f5457290c9cb29",
+            "text": "commit comment"
+          },
+          {
+            "type": "paragraph",
+            "id": "ad1a00bd9f9a0c8c",
+            "text": "Our protocol here for launching server-side components depends on having a running server that the component can use to handle websocket requests."
+          },
+          {
+            "type": "paragraph",
+            "id": "de0f245f14cbd42e",
+            "text": "Up to now we've been careless as to what is semantically desirable in a farm situation. The few known examples were coded as if they were a server resource, not a virtual site resource. However, the launch protocol passes in a server from which connections can be made, not a connection that has been established by the (now) single real server. "
+          },
+          {
+            "type": "paragraph",
+            "id": "46efc1051046ac15",
+            "text": "We've chosen to not launch server-side plugins in farm mode until this launch-protocol can be adjusted and all server-side plugins revised."
+          },
+          {
+            "type": "pagefold",
+            "id": "4ba6d5058fa6bec6",
+            "text": "."
+          },
+          {
+            "type": "paragraph",
+            "id": "16c03655685e28f2",
+            "text": "The ultimate question here is what sort of responsibilities are assumed by the author of a server-side plugin with regards to meeting the needs of many clients with the resources available on a given server?"
+          },
+          {
+            "type": "paragraph",
+            "id": "44bc0e51e0ed6794",
+            "text": "We could attempt to 'sandbox' instances of the server-side plugin corresponding specific sites or even specific client-side instances on those sites."
+          },
+          {
+            "type": "paragraph",
+            "id": "498fb35f5a65870c",
+            "text": "We could allow instances to have access to the full resources of the farm server and expect it to manage those resources with appropriate respect."
+          },
+          {
+            "type": "paragraph",
+            "id": "df92e846d7787009",
+            "text": "A site operator that installs a fully privileged server-side plugin is trusting that plugin author to the same degree that he trusts the wiki server authors themselves. In response the plugin author can manage shared resources to the advantage of all clients. "
+          },
+          {
+            "type": "paragraph",
+            "id": "4434689db908d83e",
+            "text": "The plugin author can hear and respond to all events."
+          },
+          {
+            "type": "paragraph",
+            "id": "eac429c80d896490",
+            "text": "The plugin author can read or write all persistent stores."
+          },
+          {
+            "type": "paragraph",
+            "id": "d0cb716928e4e2ab",
+            "text": "The plugin author can coordinate use of shared hardware."
+          },
+          {
+            "type": "paragraph",
+            "id": "f0bae3d79d38681d",
+            "text": ""
+          }
+        ]
+      },
+      "date": 1416763931097
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "c1b5600595e9bc8b",
+        "text": "Changes in resource management that will enable much larger wiki farms also calls into question the launch protocol for server-side plugins that communicate through websockets to the story items that use them. [https://github.com/fedwiki/wiki-node-server/pull/79 github]"
+      },
+      "id": "c1b5600595e9bc8b",
+      "type": "add",
+      "date": 1416763933219
+    },
+    {
+      "type": "edit",
+      "id": "c1b5600595e9bc8b",
+      "item": {
+        "type": "paragraph",
+        "id": "c1b5600595e9bc8b",
+        "text": "Changes in resource management that will enable much larger wiki farms also calls into question the launch protocol for server-side plugins that communicate through websockets to the story items that use them. [https://github.com/fedwiki/wiki-node-server/pull/79 github]"
+      },
+      "date": 1416764078700
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "01251bb1a403fa06",
+        "text": ""
+      },
+      "id": "01251bb1a403fa06",
+      "type": "add",
+      "after": "c1b5600595e9bc8b",
+      "date": 1416764078710
+    },
+    {
+      "type": "remove",
+      "id": "01251bb1a403fa06",
+      "date": 1416764090221
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "ad1a00bd9f9a0c8c",
+        "text": "Our protocol here for launching server-side components depends on having a running server that the component can use to handle websocket requests."
+      },
+      "id": "ad1a00bd9f9a0c8c",
+      "type": "add",
+      "after": "c1b5600595e9bc8b",
+      "date": 1416764098481
+    },
+    {
+      "type": "edit",
+      "id": "ad1a00bd9f9a0c8c",
+      "item": {
+        "type": "paragraph",
+        "id": "ad1a00bd9f9a0c8c",
+        "text": "Our protocol here for launching server-side components depends on having a running server that the component can use to handle websocket requests."
+      },
+      "date": 1416764102993
+    },
+    {
+      "item": {
+        "type": "pagefold",
+        "id": "c2f5457290c9cb29",
+        "text": "commit comment"
+      },
+      "id": "c2f5457290c9cb29",
+      "type": "add",
+      "after": "ad1a00bd9f9a0c8c",
+      "date": 1416764107230
+    },
+    {
+      "type": "edit",
+      "id": "c2f5457290c9cb29",
+      "item": {
+        "type": "pagefold",
+        "id": "c2f5457290c9cb29",
+        "text": "commit comment"
+      },
+      "date": 1416764132722
+    },
+    {
+      "type": "move",
+      "order": [
+        "c1b5600595e9bc8b",
+        "c2f5457290c9cb29",
+        "ad1a00bd9f9a0c8c"
+      ],
+      "id": "c2f5457290c9cb29",
+      "date": 1416764136763
+    },
+    {
+      "type": "edit",
+      "id": "c1b5600595e9bc8b",
+      "item": {
+        "type": "paragraph",
+        "id": "c1b5600595e9bc8b",
+        "text": "Changes in resource management that will enable much larger wiki farms also calls into question the launch protocol for server-side plugins that communicate through websockets to the story items that use them. [https://github.com/fedwiki/wiki-node-server/pull/79 github]"
+      },
+      "date": 1416764181505
+    },
+    {
+      "item": {
+        "type": "pagefold",
+        "id": "4ba6d5058fa6bec6",
+        "text": "."
+      },
+      "id": "4ba6d5058fa6bec6",
+      "type": "add",
+      "after": "ad1a00bd9f9a0c8c",
+      "date": 1416764190066
+    },
+    {
+      "type": "edit",
+      "id": "4ba6d5058fa6bec6",
+      "item": {
+        "type": "pagefold",
+        "id": "4ba6d5058fa6bec6",
+        "text": "."
+      },
+      "date": 1416764197886
+    },
+    {
+      "type": "edit",
+      "id": "ad1a00bd9f9a0c8c",
+      "item": {
+        "type": "paragraph",
+        "id": "ad1a00bd9f9a0c8c",
+        "text": "Our protocol here for launching server-side components depends on having a running server that the component can use to handle websocket requests."
+      },
+      "date": 1416764211986
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "de0f245f14cbd42e",
+        "text": "Up to now we've been careless as to what is semantically desirable in a farm situation. The few known examples were coded as if they were a server resource, not a virtual site resource. However, the launch protocol passes in a server from which connections can be made, not a connection that has been established by the (now) single real server. "
+      },
+      "id": "de0f245f14cbd42e",
+      "type": "add",
+      "after": "ad1a00bd9f9a0c8c",
+      "date": 1416764211996
+    },
+    {
+      "type": "edit",
+      "id": "de0f245f14cbd42e",
+      "item": {
+        "type": "paragraph",
+        "id": "de0f245f14cbd42e",
+        "text": "Up to now we've been careless as to what is semantically desirable in a farm situation. The few known examples were coded as if they were a server resource, not a virtual site resource. However, the launch protocol passes in a server from which connections can be made, not a connection that has been established by the (now) single real server. "
+      },
+      "date": 1416764220550
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "46efc1051046ac15",
+        "text": "We've chosen to not launch server-side plugins in farm mode until this launch-protocol can be adjusted and all server-side plugins revised."
+      },
+      "id": "46efc1051046ac15",
+      "type": "add",
+      "after": "de0f245f14cbd42e",
+      "date": 1416764220560
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "16c03655685e28f2",
+        "text": "The ultimate question here is what sort of responsibilities are assumed by the author of a server-side plugin with regards to meeting the needs of many clients with the resources available on a given server?"
+      },
+      "id": "16c03655685e28f2",
+      "type": "add",
+      "after": "4ba6d5058fa6bec6",
+      "date": 1416764362825
+    },
+    {
+      "type": "edit",
+      "id": "16c03655685e28f2",
+      "item": {
+        "type": "paragraph",
+        "id": "16c03655685e28f2",
+        "text": "The ultimate question here is what sort of responsibilities are assumed by the author of a server-side plugin with regards to meeting the needs of many clients with the resources available on a given server?"
+      },
+      "date": 1416764547543
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "b98617a3dad8c7a2",
+        "text": ""
+      },
+      "id": "b98617a3dad8c7a2",
+      "type": "add",
+      "after": "16c03655685e28f2",
+      "date": 1416764547554
+    },
+    {
+      "type": "remove",
+      "id": "b98617a3dad8c7a2",
+      "date": 1416764550860
+    },
+    {
+      "type": "edit",
+      "id": "16c03655685e28f2",
+      "item": {
+        "type": "paragraph",
+        "id": "16c03655685e28f2",
+        "text": "The ultimate question here is what sort of responsibilities are assumed by the author of a server-side plugin with regards to meeting the needs of many clients with the resources available on a given server?"
+      },
+      "date": 1416764680521
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "44bc0e51e0ed6794",
+        "text": "We could attempt to 'sandbox' instances of the server-side plugin corresponding specific sites or even specific client-side instances on those sites."
+      },
+      "id": "44bc0e51e0ed6794",
+      "type": "add",
+      "after": "16c03655685e28f2",
+      "date": 1416764686545
+    },
+    {
+      "type": "edit",
+      "id": "44bc0e51e0ed6794",
+      "item": {
+        "type": "paragraph",
+        "id": "44bc0e51e0ed6794",
+        "text": "We could attempt to 'sandbox' instances of the server-side plugin corresponding specific sites or even specific client-side instances on those sites."
+      },
+      "date": 1416764928756
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "498fb35f5a65870c",
+        "text": "We could allow instances to have access to the full resources of the farm server and expect it to manage those resources with appropriate respect."
+      },
+      "id": "498fb35f5a65870c",
+      "type": "add",
+      "after": "44bc0e51e0ed6794",
+      "date": 1416764928764
+    },
+    {
+      "type": "edit",
+      "id": "498fb35f5a65870c",
+      "item": {
+        "type": "paragraph",
+        "id": "498fb35f5a65870c",
+        "text": "We could allow instances to have access to the full resources of the farm server and expect it to manage those resources with appropriate respect."
+      },
+      "date": 1416764992835
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "df92e846d7787009",
+        "text": "A site operator that installs a fully privileged server-side plugin is trusting that plugin author to the same degree that he trusts the wiki server authors themselves. In response the plugin author can manage shared resources to the advantage of all clients. "
+      },
+      "id": "df92e846d7787009",
+      "type": "add",
+      "after": "498fb35f5a65870c",
+      "date": 1416764992842
+    },
+    {
+      "type": "edit",
+      "id": "df92e846d7787009",
+      "item": {
+        "type": "paragraph",
+        "id": "df92e846d7787009",
+        "text": "A site operator that installs a fully privileged server-side plugin is trusting that plugin author to the same degree that he trusts the wiki server authors themselves. In response the plugin author can manage shared resources to the advantage of all clients. "
+      },
+      "date": 1416765373864
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "4434689db908d83e",
+        "text": "The plugin author can hear and respond to all events."
+      },
+      "id": "4434689db908d83e",
+      "type": "add",
+      "after": "df92e846d7787009",
+      "date": 1416765380914
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "eac429c80d896490",
+        "text": "The plugin author can read or write all persistent stores."
+      },
+      "id": "eac429c80d896490",
+      "type": "add",
+      "after": "4434689db908d83e",
+      "date": 1416765419854
+    },
+    {
+      "type": "edit",
+      "id": "4434689db908d83e",
+      "item": {
+        "type": "paragraph",
+        "id": "4434689db908d83e",
+        "text": "The plugin author can hear and respond to all events."
+      },
+      "date": 1416765419847
+    },
+    {
+      "type": "edit",
+      "id": "eac429c80d896490",
+      "item": {
+        "type": "paragraph",
+        "id": "eac429c80d896490",
+        "text": "The plugin author can read or write all persistent stores."
+      },
+      "date": 1416765441261
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "d0cb716928e4e2ab",
+        "text": "The plugin author can coordinate use of shared hardware."
+      },
+      "id": "d0cb716928e4e2ab",
+      "type": "add",
+      "after": "eac429c80d896490",
+      "date": 1416765441268
+    },
+    {
+      "type": "edit",
+      "id": "d0cb716928e4e2ab",
+      "item": {
+        "type": "paragraph",
+        "id": "d0cb716928e4e2ab",
+        "text": "The plugin author can coordinate use of shared hardware."
+      },
+      "date": 1416765479287
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "3c8fda72734b2016",
+        "text": ""
+      },
+      "id": "3c8fda72734b2016",
+      "type": "add",
+      "after": "d0cb716928e4e2ab",
+      "date": 1416765479297
+    },
+    {
+      "type": "remove",
+      "id": "3c8fda72734b2016",
+      "date": 1416765481611
+    },
+    {
+      "type": "edit",
+      "id": "d0cb716928e4e2ab",
+      "item": {
+        "type": "paragraph",
+        "id": "d0cb716928e4e2ab",
+        "text": "The plugin author can coordinate use of shared hardware."
+      },
+      "date": 1416765507748
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "8f671a5d5717a079",
+        "text": ""
+      },
+      "id": "8f671a5d5717a079",
+      "type": "add",
+      "after": "d0cb716928e4e2ab",
+      "date": 1416765507756
+    },
+    {
+      "type": "remove",
+      "id": "8f671a5d5717a079",
+      "date": 1416765509647
+    },
+    {
+      "type": "edit",
+      "id": "d0cb716928e4e2ab",
+      "item": {
+        "type": "paragraph",
+        "id": "d0cb716928e4e2ab",
+        "text": "The plugin author can coordinate use of shared hardware."
+      },
+      "date": 1416765526173
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "f0bae3d79d38681d",
+        "text": ""
+      },
+      "id": "f0bae3d79d38681d",
+      "type": "add",
+      "after": "d0cb716928e4e2ab",
+      "date": 1416765526181,
+      "error": {
+        "type": "error",
+        "msg": "Internal Server Error"
+      }
+    },
+    {
+      "type": "fork",
+      "date": 1416765530592
+    },
+    {
+      "type": "edit",
+      "id": "f0bae3d79d38681d",
+      "item": {
+        "type": "paragraph",
+        "id": "f0bae3d79d38681d",
+        "text": "The Txtzyme plugin manages a single usb connection to hardware by interleaving atomic packets going to the hardware and universally distributing packets received from it."
+      },
+      "date": 1416766024643
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "3b0acb56651e5768",
+        "text": "It could overlay on these packets a notion of session and return output to the sin"
+      },
+      "id": "3b0acb56651e5768",
+      "type": "add",
+      "after": "f0bae3d79d38681d",
+      "date": 1416766024656
+    },
+    {
+      "type": "edit",
+      "id": "3b0acb56651e5768",
+      "item": {
+        "type": "paragraph",
+        "id": "3b0acb56651e5768",
+        "text": "Aside: The Txtzyme plugin could overlay on device-bound packets a notion of session and return session-labeled output to the single client requesting it."
+      },
+      "date": 1416766090192
+    },
+    {
+      "type": "edit",
+      "id": "f0bae3d79d38681d",
+      "item": {
+        "type": "paragraph",
+        "id": "f0bae3d79d38681d",
+        "text": "The Txtzyme plugin manages a single usb connection to hardware by interleaving atomic packets going to the hardware and universally distributing packets returned."
+      },
+      "date": 1416766118346
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "7d2b46c5dfcc8f5b",
+        "text": ""
+      },
+      "id": "7d2b46c5dfcc8f5b",
+      "type": "add",
+      "after": "3b0acb56651e5768",
+      "date": 1416766184774
+    },
+    {
+      "type": "edit",
+      "id": "7d2b46c5dfcc8f5b",
+      "item": {
+        "type": "paragraph",
+        "id": "7d2b46c5dfcc8f5b",
+        "text": "See [[About Txtzyme Plugin]]"
+      },
+      "date": 1416766194834
+    },
+    {
+      "type": "edit",
+      "id": "3b0acb56651e5768",
+      "item": {
+        "type": "paragraph",
+        "id": "3b0acb56651e5768",
+        "text": "The Txtzyme plugin could overlay on device-bound packets a notion of session and return session-labeled output to the single client requesting it."
+      },
+      "date": 1416766353859
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "beed7f726dc91fa0",
+        "text": ""
+      },
+      "id": "beed7f726dc91fa0",
+      "type": "add",
+      "after": "3b0acb56651e5768",
+      "date": 1416766358272
+    },
+    {
+      "type": "remove",
+      "id": "beed7f726dc91fa0",
+      "date": 1416766408317
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "42f5c442b342b96f",
+        "text": ""
+      },
+      "id": "42f5c442b342b96f",
+      "type": "add",
+      "after": "d0cb716928e4e2ab",
+      "date": 1416766440377
+    },
+    {
+      "type": "edit",
+      "id": "42f5c442b342b96f",
+      "item": {
+        "type": "paragraph",
+        "id": "42f5c442b342b96f",
+        "text": "The Txtzyme plugin provides the best example of a fully privileged plugin accepting server class responsibilities."
+      },
+      "date": 1416766527966
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5710aa218bdacc8d"
+      },
+      "id": "5710aa218bdacc8d",
+      "type": "add",
+      "after": "7d2b46c5dfcc8f5b",
+      "date": 1416766856718
+    },
+    {
+      "type": "edit",
+      "id": "5710aa218bdacc8d",
+      "item": {
+        "type": "paragraph",
+        "id": "5710aa218bdacc8d",
+        "text": "<h3> Proposal"
+      },
+      "date": 1416766868130
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "33f0d4292cecf0a8",
+        "text": ""
+      },
+      "id": "33f0d4292cecf0a8",
+      "type": "add",
+      "after": "5710aa218bdacc8d",
+      "date": 1416766868140
+    },
+    {
+      "type": "edit",
+      "id": "33f0d4292cecf0a8",
+      "item": {
+        "type": "paragraph",
+        "id": "33f0d4292cecf0a8",
+        "text": "I suggest that the core server take responsibility for completing websocket connections on behalf of all virtual servers in a farm."
+      },
+      "date": 1416767027891
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "19b578b80c3996c0",
+        "text": ""
+      },
+      "id": "19b578b80c3996c0",
+      "type": "add",
+      "after": "33f0d4292cecf0a8",
+      "date": 1416767027902
+    },
+    {
+      "type": "edit",
+      "id": "19b578b80c3996c0",
+      "item": {
+        "type": "paragraph",
+        "id": "19b578b80c3996c0",
+        "text": "The core server could dispatch these to single instances of the server-side plugins passing the connection and virtual server information necessary to manage further dispatching."
+      },
+      "date": 1416767379192
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "d0b365f1f358c2ed",
+        "text": ""
+      },
+      "id": "d0b365f1f358c2ed",
+      "type": "add",
+      "after": "19b578b80c3996c0",
+      "date": 1416767379208
+    },
+    {
+      "type": "edit",
+      "id": "d0b365f1f358c2ed",
+      "item": {
+        "type": "paragraph",
+        "id": "d0b365f1f358c2ed",
+        "text": "The core server would have launched the plugin-instances when it launched and established an EventListener for further plugin specific communication."
+      },
+      "date": 1416767522278
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "d86b332255484b1d",
+        "text": ""
+      },
+      "id": "d86b332255484b1d",
+      "type": "add",
+      "after": "d0b365f1f358c2ed",
+      "date": 1416767565761
+    },
+    {
+      "type": "edit",
+      "id": "d86b332255484b1d",
+      "item": {
+        "type": "paragraph",
+        "id": "d86b332255484b1d",
+        "text": "A plugin could fail to launch if it didn't find necessary resources. Consider, no Txtzyme device attached."
+      },
+      "date": 1416767663595
+    },
+    {
+      "type": "edit",
+      "id": "d86b332255484b1d",
+      "item": {
+        "type": "paragraph",
+        "id": "d86b332255484b1d",
+        "text": "A plugin could fail to launch if it didn't find necessary resources. For example, no Txtzyme device attached."
+      },
+      "date": 1416767680427
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "937fe99f06fb489e",
+        "text": ""
+      },
+      "id": "937fe99f06fb489e",
+      "type": "add",
+      "after": "d86b332255484b1d",
+      "date": 1416767774894
+    },
+    {
+      "type": "edit",
+      "id": "937fe99f06fb489e",
+      "item": {
+        "type": "paragraph",
+        "id": "937fe99f06fb489e",
+        "text": "Question: doesn't this have the core server asserting some websocket conventions and even package selection on the plugins? How does this gracefully evolve?"
+      },
+      "date": 1416767867932
+    },
+    {
+      "item": {
+        "type": "paragraph",
+        "id": "249d61cc183a25f9",
+        "text": ""
+      },
+      "id": "249d61cc183a25f9",
+      "type": "add",
+      "after": "937fe99f06fb489e",
+      "date": 1416768635471
+    },
+    {
+      "type": "edit",
+      "id": "249d61cc183a25f9",
+      "item": {
+        "type": "paragraph",
+        "id": "249d61cc183a25f9",
+        "text": "Question: shouldn't the core server distribute RESTful requests to server-side plugins also? How much site, session, lineup, page and item identity would need to be managed to make this equally effective?"
+      },
+      "date": 1416768907824
+    },
+    {
+      "type": "edit",
+      "id": "5710aa218bdacc8d",
+      "item": {
+        "type": "html",
+        "id": "5710aa218bdacc8d",
+        "text": "<h3> Proposal"
+      },
+      "date": 1418314207705
+    },
+    {
+      "type": "fork",
+      "site": "forage.ward.fed.wiki.org",
+      "date": 1700204586825
+    }
+  ]
+}
