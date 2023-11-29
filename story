@@ -11,19 +11,11 @@
     },
     {
       "type": "reference",
-      "id": "c29f77bd472dedd2",
-      "site": "thompson.reimage.fed.wiki",
+      "id": "bb56db4ddfaed319",
+      "site": "tree.tries.fed.wiki",
       "slug": "story",
       "title": "Story",
-      "text": "Into this space we are walking, listening, and waiting for the story to emerge. A story that illuminates new meaning for us and for others."
-    },
-    {
-      "type": "reference",
-      "id": "5159f0dfaa6770ad",
-      "site": "marc.tries.fed.wiki",
-      "slug": "story",
-      "title": "Story",
-      "text": "Our understandings, misunderstandings and lack of understandings."
+      "text": "Stories, metaphors, and myths convey complex ideas, context, meaning and nuance that simple data cannot. By telling personal stories we build trust and connection, encourage imagination, and express the essence of who we are. By telling cultural stories we connect ourselves to others’ experience and interact with whole systems."
     },
     {
       "type": "paragraph",
@@ -3368,6 +3360,50 @@
         "text": "There is no [[Distinction]] between story and [[Life]]."
       },
       "date": 1694420472369
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bb56db4ddfaed319"
+      },
+      "id": "bb56db4ddfaed319",
+      "type": "add",
+      "after": "032a1b35e94407d5",
+      "date": 1701280808625
+    },
+    {
+      "type": "edit",
+      "id": "bb56db4ddfaed319",
+      "item": {
+        "type": "reference",
+        "id": "bb56db4ddfaed319",
+        "site": "tree.tries.fed.wiki",
+        "slug": "story",
+        "title": "Story",
+        "text": "Stories, metaphors, and myths convey complex ideas, context, meaning and nuance that simple data cannot. By telling personal stories we build trust and connection, encourage imagination, and express the essence of who we are. By telling cultural stories we connect ourselves to others’ experience and interact with whole systems."
+      },
+      "date": 1701280812615
+    },
+    {
+      "type": "remove",
+      "id": "5159f0dfaa6770ad",
+      "date": 1701280823175
+    },
+    {
+      "id": "bb56db4ddfaed319",
+      "type": "move",
+      "order": [
+        "638601223433c1df",
+        "bb56db4ddfaed319",
+        "c29f77bd472dedd2",
+        "032a1b35e94407d5"
+      ],
+      "date": 1701280828508
+    },
+    {
+      "type": "remove",
+      "id": "c29f77bd472dedd2",
+      "date": 1701280835860
     }
   ]
 }
