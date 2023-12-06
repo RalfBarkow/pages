@@ -1,0 +1,1002 @@
+{
+  "title": "Bytecode Instrumentation",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "452bbe097a6cc9b5",
+      "text": "BINDER, Walter, MORET, Philippe, TANTER, Éric and ANSALONI, Danilo, 2016. Polymorphic bytecode instrumentation. Software: Practice and Experience. October 2016. Vol. 46, no. 10, p. 1351–1380. DOI 10.1002/spe.2385. [Accessed 6 December 2023]."
+    },
+    {
+      "type": "markdown",
+      "id": "7247de6e42c1ba15",
+      "text": "**Summary** Bytecode instrumentation is a widely used technique to implement aspect weaving and dynamic analyses in virtual machines such as the Java virtual machine. Aspect weavers and other instrumentations are usually developed independently and combining them often requires significant engineering effort, if at all possible."
+    },
+    {
+      "type": "markdown",
+      "id": "efe5731e64790837",
+      "text": "In this article, we present polymorphic bytecode instrumentation (PBI), a simple but effective technique that allows dynamic dispatch amongst several, possibly independent instrumentations. PBI enables complete bytecode coverage, that is, any method with a bytecode representation can be instrumented."
+    },
+    {
+      "type": "markdown",
+      "id": "5cc9a46b3b30b2e3",
+      "text": "We illustrate further benefits of PBI with three case studies."
+    },
+    {
+      "type": "markdown",
+      "id": "83c7824b09e44cad",
+      "text": "First, we describe how PBI can be used to implement a comprehensive profiler of inter‐procedural and intra‐procedural control flow."
+    },
+    {
+      "type": "markdown",
+      "id": "df222401abbfa7e3",
+      "text": "Second, we provide an implementation of execution levels for AspectJ, which avoids infinite regression and unwanted interference between aspects."
+    },
+    {
+      "type": "markdown",
+      "id": "5eadf0683c2c2d8f",
+      "text": "Third, we present a framework for adaptive dynamic analysis, where the analysis to be performed can be changed at runtime by the user."
+    },
+    {
+      "type": "markdown",
+      "id": "8f2d29d2f38b3c10",
+      "text": "We assess the overhead introduced by PBI and provide thorough performance evaluations of PBI in all three case studies. We show that pure Java profilers like JP2 can, thanks to PBI, produce accurate execution profiles by covering all code, including the core Java libraries."
+    },
+    {
+      "type": "markdown",
+      "id": "f583452a0dcd584e",
+      "text": "We then demonstrate that PBI‐based execution levels are much faster than control flow pointcuts to avoid interference between aspects and that their efficient integration in a practical aspect language is possible."
+    },
+    {
+      "type": "markdown",
+      "id": "998fb400d320e3cf",
+      "text": "Finally, we report that PBI enables adaptive dynamic analysis tools that are more reactive to user inputs than existing tools that rely on dynamic aspect‐oriented programming with runtime weaving. These experiments position PBI as a widely applicable and practical approach for combining bytecode instrumentations."
+    },
+    {
+      "type": "markdown",
+      "id": "ed0b553291991dc1",
+      "text": "© 2015 The Authors. Software: Practice and Experience Published by John Wiley & Sons Ltd."
+    },
+    {
+      "type": "pagefold",
+      "id": "8b918d2d00636d9e",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "84a234fc0359e802",
+      "text": "As a special case, aspect weavers implemented with PBI are capable of weaving aspects with complete coverage; this is in contrast with mainstream weavers, such as the standard AspectJ weaver and abc [11]."
+    },
+    {
+      "type": "paragraph",
+      "id": "26b50517847a0281",
+      "text": "[…] We thoroughly evaluate our PBI implementation for Java (Section 8). First, we explore the overhead introduced by PBI dispatch logic and code bloat. Afterwards, we evaluate PBI in the three case studies. We report on the performance of JP2 and its ability to cover execution of the core Java libraries. Our evaluation then shows that PBI-based execution levels are much more efficient than equivalent control flow pointcuts to avoid interference between aspects and are generally as efficient as the standard AspectJ weaver when applying analysis aspects on the DaCapo benchmark suite. Finally, we demonstrate that PBI enables adaptive dynamic analysis tools that react more quickly to user inputs than existing tools that rely on dynamic AOP with runtime weaving."
+    },
+    {
+      "type": "paragraph",
+      "id": "22c0af556cf9243c",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "f9df56b371a591a0",
+      "text": "In order to ensure that a bytecode instrumentation properly implements the aforementioned code pattern, the instrumentation may either be manually adapted, or some automated tool may be applied to detect inserted code and to enclose it with the operations that update the control flow information. For example, our aspect weavers MAJOR [18] and HotWave [19] generate the code pattern on code previously woven with the standard AspectJ weaver in a fully automated way."
+    },
+    {
+      "type": "paragraph",
+      "id": "6de5c89f8069d9c5",
+      "text": "[…] For example, the standard AspectJ weaver inserts static fields and initializes them to hold instances of type JoinPoint.StaticPart, holding reflective information of join points [4]."
+    },
+    {
+      "type": "paragraph",
+      "id": "dfb45e4166f38fb7",
+      "text": "[…] As an alternative, postinstrumentation transformations can be performed: for instance, in the case of the AspectJ weaver (Section 6), we apply post-weaving bytecode transformations to move the initialization code for inserted static fields of type JoinPoint.StaticPart from the woven static initializer into the pbi_initClass() method."
+    },
+    {
+      "type": "paragraph",
+      "id": "94fe554888da6728",
+      "text": "[…]"
+    },
+    {
+      "type": "markdown",
+      "id": "507a8e326b538704",
+      "text": "## Execution levels for AspectJ using PBI"
+    },
+    {
+      "type": "paragraph",
+      "id": "00d2b939958221e3",
+      "text": "Execution levels have been formulated and prototyped in aspect languages with dynamic weaving [12]. In recent work, we have designed an extension of AspectJ with execution levels, tailored to take into account the specificities of AspectJ, like static aspect weaving with partial evaluation of pointcuts [4, 26]. The detailed motivation, design, and applications of this extension are presented elsewhere [15]. Our previous implementation of level switching is carried out in an ad hoc manner; here, we describe how PBI can be used for that sake. Section 8 also provides a much more detailed performance evaluation of the implementation."
+    },
+    {
+      "type": "paragraph",
+      "id": "7749ddcb8967d65b",
+      "text": "Semantically, the execution of a method produces join points. These join points may be seen by pointcuts that may match them; if so, the corresponding pieces of advice are triggered. In aspect languages that perform weaving statically, join point production is partially evaluated [26]: based on the static properties of code, it is determined whether or not a given expression can produce a join point that will be matched at runtime [4]. If so, such a join point shadow is transformed so as to invoke advice appropriately. If it can be statically determined that the pointcut however never matches join points corresponding to the shadow, then no transformation happens. The matching of the pointcut may also depend on runtime information not available at compile time; in that case, the shadow is woven together with a residue, that is, a conditional expression that guards the invocation of the advice."
+    },
+    {
+      "type": "image",
+      "id": "62fcbb32e4b806b8",
+      "text": "ExecutionLevel",
+      "size": "wide",
+      "width": 430,
+      "height": 438,
+      "url": "/assets/plugins/image/64edd25d7dd5b9135134cd50eec1fc71.jpg"
+    },
+    {
+      "type": "image",
+      "id": "38b40c24d54befaa",
+      "text": "Shifting up",
+      "size": "wide",
+      "width": 430,
+      "height": 398,
+      "url": "/assets/plugins/image/f886193241c46040dbc1ce3e6e2c1d11.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "0481862890103fd3",
+      "text": "With execution levels, the join points produced by the execution of a method vary. If base program code, running at level 0, invokes a method, it produces join points at level 1, that may be matched by aspects deployed at that level. If an aspect deployed at level n calls this same method, then it produces join points at level n C 1, visible only for aspects deployed at level n C 1.We use PBI to check the execution level upon method entry and dispatch appropriately to a particular code version. More precisely, there is one code version per execution level, and each code version corresponds to the code with the instrumented shadows of the aspects deployed at the level directly above it. For instance, execution at level 0 uses code version 0, which is the result of weaving aspects deployed at level 1. Execution at level N (the highest level in the configuration) uses code version N , which is set to be the original, non-instrumented code version. A code version is obtained by invoking the standard AspectJ weaver with the aspects deployed at a given level."
+    },
+    {
+      "type": "paragraph",
+      "id": "7eef008ebd1fdc1c",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "f2e1abfe66920746",
+      "text": "Our PBI-based aspect weaver, MAJOR2, uses the unmodified standard AspectJ weaver and postprocesses its output to automatically insert the above pattern in each advice method and in each method corresponding to compiled if pointcuts."
+    },
+    {
+      "type": "paragraph",
+      "id": "ad25504ca87ffe6f",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "a52f803f4e6e5687",
+      "text": "Runtime instrumentation and class redefinition can be very expensive, in particular if many classes are to be instrumented and if the instrumentation is specified in a high-level programming model, such as AOP, which requires more complex tool support (e.g., in the case of AOP, an aspect weaver is used). For example, with the dynamic AOP framework HotWave [19], which relies on runtime aspect weaving and on class redefinition, weaving an aspect into all modifiable classes at runtime may take up to 60 s on a recent machine (Section 8.5)."
+    },
+    {
+      "type": "markdown",
+      "id": "6a009ce1b583efca",
+      "text": "## Execution levels"
+    },
+    {
+      "type": "paragraph",
+      "id": "4ad597b792d43ac4",
+      "text": "In the following evaluation, we consider the performance impact of execution levels in AOP. First, we describe the aspects used in our evaluation and the deployment scenarios in Section 8.4.1. Second, we explore the overhead of execution levels in comparison with the standard AspectJ load-time weaver in Section 8.4.2. Third, we investigate the overhead when weaving with complete bytecode coverage in two different deployment scenarios in Section 8.4.3."
+    },
+    {
+      "type": "paragraph",
+      "id": "8ef1b38212723f6a",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "9b650e9f33dccfb2",
+      "text": "We weave the ProfAllocs and ProfCalls aspects in the DaCapo benchmarks that serve as base programs. We use our new PBI-based re-implementation of MAJOR2 [15] that relies on CodeMerger, which provides support for execution levels and complete bytecode coverage. Aspects are woven with AspectJ 1.6.5 (MAJOR2 is also based on AspectJ)."
+    },
+    {
+      "type": "markdown",
+      "id": "904c1953d1c0c19d",
+      "text": "### Comparison with AspectJ"
+    },
+    {
+      "type": "paragraph",
+      "id": "74ee20e2277c2746",
+      "text": "Our first evaluation compares the performance of code woven with AspectJ’s load-time weaver (henceforth called ajc-ltw) versus MAJOR2. As explained in Section 6, MAJOR2 relies on PBI to implement control flow-based dispatch based on a thread-local field. […]"
+    },
+    {
+      "type": "paragraph",
+      "id": "7f1f6b5876d040a0",
+      "text": "[…]"
+    },
+    {
+      "type": "paragraph",
+      "id": "09a51b2ed0466d24",
+      "text": "We exclude bloat because it fails with ajc-ltw (in contrast to MAJOR2). We exclude eclipse because ajc-ltw fails to weave a large number of classes because of dependencies (ajc-ltw depends on classes that are also used by the eclipse benchmark); such a problem does not exist with MAJOR2, which makes proper use of class-loader namespaces."
+    },
+    {
+      "type": "paragraph",
+      "id": "9c7612f0a83b6aa0",
+      "text": "[…]"
+    },
+    {
+      "type": "markdown",
+      "id": "a2c20d9de35317cd",
+      "text": "## Related work"
+    },
+    {
+      "type": "paragraph",
+      "id": "3b620e868feca4e8",
+      "text": "To the best of our knowledge, there is not much work that is directly related to this proposal of PBI. Altering program semantics through bytecode transformations is a widely used technique and has been explored and put in practice in many different flavors in Java, from low-level tools like BIT [35], BCEL [6], and ASM [36], to higher-level frameworks like Javassist [8], Jinline [37], or Soot [38]. Similar toolkits have also been proposed for other languages based on virtual machines that run intermediate bytecodes, like [[Squeak Smalltalk]] [9] and .NET. PBI is a general-purpose technique that allows to combine instrumentations possibly written with any of these tools. Thus, it stands at a higher-level than specific instrumentation tools and cannot be directly compared. The most recent version of CodeMerger, our PBI implementation for Java, is implemented using ASM, although other frameworks could be used as well."
+    },
+    {
+      "type": "paragraph",
+      "id": "30265d39a243681f",
+      "text": "On the other hand, there is a huge body of language-level proposals for advanced dispatch, like mixin layers [39], dynamic layer activation [40, 41], aspects [4], and predicate dispatch [42]. Each of these has been realized using particular implementation techniques, specific to the targeted semantics and the implementation trade-offs that their authors were willing to make. Here again, PBI does not stand at the same level as these proposals: PBI is not a language-level mechanism but rather an implementation technique to combine various bytecode instrumentations with the possibility to flexibly dispatch among them at runtime. It can be used to implement language-level constructs like mixin layers [13] provided a tool is available to generate the different code versions, or to extend aspect weaving with execution levels (Section 6), again relying on another tool for the specific details of the implementation (in that case, the standard AspectJ weaver)."
+    },
+    {
+      "type": "paragraph",
+      "id": "50283c8ebc46c792",
+      "text": "Shrike [43] is a bytecode instrumentation library that is part of the T.J. Watson Libraries for Analysis [44]. Shrike supports composition of multiple instrumentations by preventing an instrumentation tool from observing the code inserted by the other tools. Similar functionality can be achieved by using execution levels on top of PBI. As described in Section 6, analyses deployed at the same execution level cannot observe each other’s join points, exactly as it happens with Shrike. However, execution levels also support the deployment of analyses at different levels (e.g., to profile the execution of another dynamic analysis tool), which is not directly supported by Shrike."
+    },
+    {
+      "type": "paragraph",
+      "id": "ec0913fcc929bee8",
+      "text": "RoadRunner [45] is a framework for composing small and simple analyses for concurrent programs. Each dynamic analysis is essentially a filter over event streams, and filters can be chained. However, it is not possible to combine arbitrary analyses. For example, two analyses that filter (e.g., suppress) events in an incompatible way cannot be combined."
+    },
+    {
+      "type": "paragraph",
+      "id": "db7a8959519a2950",
+      "text": "The hyperspace approach [46] allows class fragments to be composed in a coherent whole, using a set of composition operators [47]. The approach is therefore different from PBI because each class version in PBI is a complete class, not a fragment of it; dynamic dispatch selects the version that is active at a given point in time, according to any criteria. In that sense, PBI is closer to subject-oriented programming [48] where different views of a single class can coexist; implementing subject-oriented programming with PBI is an interesting perspective."
+    },
+    {
+      "type": "paragraph",
+      "id": "74f71384460b5b58",
+      "text": "Several researchers discuss the advantages of allowing data passing between different analyses [19, 49, 50]. While PBI does not provide any support for inter-analysis communication (as only a single class version is active at a time), programmers may compose several analyses into a single class version, as it happens with analyses deployed at the same execution level (Section 6). Such composed analyses may communicate with each other through shared data structures."
+    },
+    {
+      "type": "paragraph",
+      "id": "135d369a1b1c6d2b",
+      "text": "Regarding instrumentation of shared libraries, the Twin Class Hierarchy [51] replicates the full hierarchy of instrumented classes into a separate package that coexists with the original one. However, in [52], the authors show that class replication limits the applicability of bytecode instrumentation in the presence of native code. Because native code is not modified, calls back into bytecode will target methods in the unmodified class. Thus, this approach does not allow transparent instrumentation of the complete Java class library. In contrast, PBI does not duplicate any class, but relies on code replication within method bodies."
+    },
+    {
+      "type": "paragraph",
+      "id": "adc7e72d9e2d30d0",
+      "text": "The Arnold–Ryder profiling framework presented in [53] uses code duplication combined with compiler-inserted, counter-based sampling. A second version of the code is introduced, which contains all computationally expensive instrumentation. The original code is minimally instrumented to allow control to transfer in and out of the duplicated code in a fine-grained manner, based on instruction counting. This approach achieves low overhead, as most of the time the slightly instrumented code is executed. Similarly to PBI, this approach merges two different instrumentations. While PBI is a general-purpose, high-level framework that can merge any number of independent bytecode instrumentations, the Arnold–Ryder framework is specialized for sampling profiling and implemented directly within the Jikes RVM. Whereas in PBI, the dispatch logic that determines the code version is customizable and executed only upon method entry, the dispatch logic in the Arnold–Ryder framework is hard coded and enables switching within method bodies depending on the number of executed instructions."
+    },
+    {
+      "type": "paragraph",
+      "id": "cb0dbf38ca74dd07",
+      "text": "Several approaches have been proposed to perform dynamic program analysis at the level of the virtual machine [54, 55]. While these approaches usually benefit from lower runtime overhead and can access VM-internal information, they require modifications to the VM that may complicate deployment and impair portability. As confirmed in our evaluation presented in Section 8, PBI is compatible with unmodified, production-quality JVMs, which will ease the adoption of PBI by developers of industrial-strength program analysis tools and frameworks."
+    },
+    {
+      "type": "paragraph",
+      "id": "7ab3a07f7f558a0f",
+      "text": "10. CONCLUSIONS"
+    },
+    {
+      "type": "paragraph",
+      "id": "cb1a4f3bb1a2db80",
+      "text": "[…]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Bytecode Instrumentation",
+        "story": []
+      },
+      "date": 1701866621803
+    },
+    {
+      "id": "452bbe097a6cc9b5",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "452bbe097a6cc9b5",
+        "text": "BINDER, Walter, MORET, Philippe, TANTER, Éric and ANSALONI, Danilo, 2016. Polymorphic bytecode instrumentation. Software: Practice and Experience. Online. October 2016. Vol. 46, no. 10, p. 1351–1380. DOI 10.1002/spe.2385. [Accessed 6 December 2023]. \n**Summary** Bytecode instrumentation is a widely used technique to implement aspect weaving and dynamic analyses in virtual machines such as the Java virtual machine. Aspect weavers and other instrumentations are usually developed independently and combining them often requires significant engineering effort, if at all possible. In this article, we present polymorphic bytecode instrumentation (PBI), a simple but effective technique that allows dynamic dispatch amongst several, possibly independent instrumentations. PBI enables complete bytecode coverage, that is, any method with a bytecode representation can be instrumented. We illustrate further benefits of PBI with three case studies. First, we describe how PBI can be used to implement a comprehensive profiler of inter‐procedural and intra‐procedural control flow. Second, we provide an implementation of execution levels for AspectJ, which avoids infinite regression and unwanted interference between aspects. Third, we present a framework for adaptive dynamic analysis, where the analysis to be performed can be changed at runtime by the user. We assess the overhead introduced by PBI and provide thorough performance evaluations of PBI in all three case studies. We show that pure Java profilers like JP2 can, thanks to PBI, produce accurate execution profiles by covering all code, including the core Java libraries. We then demonstrate that PBI‐based execution levels are much faster than control flow pointcuts to avoid interference between aspects and that their efficient integration in a practical aspect language is possible. Finally, we report that PBI enables adaptive dynamic analysis tools that are more reactive to user inputs than existing tools that rely on dynamic aspect‐oriented programming with runtime weaving. These experiments position PBI as a widely applicable and practical approach for combining bytecode instrumentations. © 2015 The Authors. Software: Practice and Experience Published by John Wiley & Sons Ltd."
+      },
+      "attribution": {
+        "page": "Polymorphic Bytecode Instrumentation"
+      },
+      "date": 1701866624948
+    },
+    {
+      "type": "edit",
+      "id": "452bbe097a6cc9b5",
+      "item": {
+        "type": "markdown",
+        "id": "452bbe097a6cc9b5",
+        "text": "BINDER, Walter, MORET, Philippe, TANTER, Éric and ANSALONI, Danilo, 2016. Polymorphic bytecode instrumentation. Software: Practice and Experience. Online. October 2016. Vol. 46, no. 10, p. 1351–1380. DOI 10.1002/spe.2385. [Accessed 6 December 2023]."
+      },
+      "date": 1701866703554
+    },
+    {
+      "type": "add",
+      "id": "7247de6e42c1ba15",
+      "item": {
+        "type": "markdown",
+        "id": "7247de6e42c1ba15",
+        "text": "**Summary** Bytecode instrumentation is a widely used technique to implement aspect weaving and dynamic analyses in virtual machines such as the Java virtual machine. Aspect weavers and other instrumentations are usually developed independently and combining them often requires significant engineering effort, if at all possible. In this article, we present polymorphic bytecode instrumentation (PBI), a simple but effective technique that allows dynamic dispatch amongst several, possibly independent instrumentations. PBI enables complete bytecode coverage, that is, any method with a bytecode representation can be instrumented. We illustrate further benefits of PBI with three case studies. First, we describe how PBI can be used to implement a comprehensive profiler of inter‐procedural and intra‐procedural control flow. Second, we provide an implementation of execution levels for AspectJ, which avoids infinite regression and unwanted interference between aspects. Third, we present a framework for adaptive dynamic analysis, where the analysis to be performed can be changed at runtime by the user. We assess the overhead introduced by PBI and provide thorough performance evaluations of PBI in all three case studies. We show that pure Java profilers like JP2 can, thanks to PBI, produce accurate execution profiles by covering all code, including the core Java libraries. We then demonstrate that PBI‐based execution levels are much faster than control flow pointcuts to avoid interference between aspects and that their efficient integration in a practical aspect language is possible. Finally, we report that PBI enables adaptive dynamic analysis tools that are more reactive to user inputs than existing tools that rely on dynamic aspect‐oriented programming with runtime weaving. These experiments position PBI as a widely applicable and practical approach for combining bytecode instrumentations. © 2015 The Authors. Software: Practice and Experience Published by John Wiley & Sons Ltd."
+      },
+      "after": "452bbe097a6cc9b5",
+      "date": 1701866704714
+    },
+    {
+      "type": "edit",
+      "id": "452bbe097a6cc9b5",
+      "item": {
+        "type": "markdown",
+        "id": "452bbe097a6cc9b5",
+        "text": "BINDER, Walter, MORET, Philippe, TANTER, Éric and ANSALONI, Danilo, 2016. Polymorphic bytecode instrumentation. Software: Practice and Experience. October 2016. Vol. 46, no. 10, p. 1351–1380. DOI 10.1002/spe.2385. [Accessed 6 December 2023]."
+      },
+      "date": 1701866742259
+    },
+    {
+      "type": "edit",
+      "id": "7247de6e42c1ba15",
+      "item": {
+        "type": "markdown",
+        "id": "7247de6e42c1ba15",
+        "text": "**Summary** Bytecode instrumentation is a widely used technique to implement aspect weaving and dynamic analyses in virtual machines such as the Java virtual machine. Aspect weavers and other instrumentations are usually developed independently and combining them often requires significant engineering effort, if at all possible."
+      },
+      "date": 1701866774667
+    },
+    {
+      "type": "add",
+      "id": "efe5731e64790837",
+      "item": {
+        "type": "markdown",
+        "id": "efe5731e64790837",
+        "text": "In this article, we present polymorphic bytecode instrumentation (PBI), a simple but effective technique that allows dynamic dispatch amongst several, possibly independent instrumentations. PBI enables complete bytecode coverage, that is, any method with a bytecode representation can be instrumented. We illustrate further benefits of PBI with three case studies. First, we describe how PBI can be used to implement a comprehensive profiler of inter‐procedural and intra‐procedural control flow. Second, we provide an implementation of execution levels for AspectJ, which avoids infinite regression and unwanted interference between aspects. Third, we present a framework for adaptive dynamic analysis, where the analysis to be performed can be changed at runtime by the user. We assess the overhead introduced by PBI and provide thorough performance evaluations of PBI in all three case studies. We show that pure Java profilers like JP2 can, thanks to PBI, produce accurate execution profiles by covering all code, including the core Java libraries. We then demonstrate that PBI‐based execution levels are much faster than control flow pointcuts to avoid interference between aspects and that their efficient integration in a practical aspect language is possible. Finally, we report that PBI enables adaptive dynamic analysis tools that are more reactive to user inputs than existing tools that rely on dynamic aspect‐oriented programming with runtime weaving. These experiments position PBI as a widely applicable and practical approach for combining bytecode instrumentations. © 2015 The Authors. Software: Practice and Experience Published by John Wiley & Sons Ltd."
+      },
+      "after": "7247de6e42c1ba15",
+      "date": 1701866775708
+    },
+    {
+      "type": "edit",
+      "id": "efe5731e64790837",
+      "item": {
+        "type": "markdown",
+        "id": "efe5731e64790837",
+        "text": "In this article, we present polymorphic bytecode instrumentation (PBI), a simple but effective technique that allows dynamic dispatch amongst several, possibly independent instrumentations. PBI enables complete bytecode coverage, that is, any method with a bytecode representation can be instrumented."
+      },
+      "date": 1701866827422
+    },
+    {
+      "type": "add",
+      "id": "5cc9a46b3b30b2e3",
+      "item": {
+        "type": "markdown",
+        "id": "5cc9a46b3b30b2e3",
+        "text": "We illustrate further benefits of PBI with three case studies."
+      },
+      "after": "efe5731e64790837",
+      "date": 1701866835843
+    },
+    {
+      "type": "add",
+      "id": "83c7824b09e44cad",
+      "item": {
+        "type": "markdown",
+        "id": "83c7824b09e44cad",
+        "text": "First, we describe how PBI can be used to implement a comprehensive profiler of inter‐procedural and intra‐procedural control flow."
+      },
+      "after": "5cc9a46b3b30b2e3",
+      "date": 1701866839741
+    },
+    {
+      "type": "add",
+      "id": "df222401abbfa7e3",
+      "item": {
+        "type": "markdown",
+        "id": "df222401abbfa7e3",
+        "text": "Second, we provide an implementation of execution levels for AspectJ, which avoids infinite regression and unwanted interference between aspects."
+      },
+      "after": "83c7824b09e44cad",
+      "date": 1701866843665
+    },
+    {
+      "type": "add",
+      "id": "5eadf0683c2c2d8f",
+      "item": {
+        "type": "markdown",
+        "id": "5eadf0683c2c2d8f",
+        "text": "Third, we present a framework for adaptive dynamic analysis, where the analysis to be performed can be changed at runtime by the user."
+      },
+      "after": "df222401abbfa7e3",
+      "date": 1701866865193
+    },
+    {
+      "type": "add",
+      "id": "8f2d29d2f38b3c10",
+      "item": {
+        "type": "markdown",
+        "id": "8f2d29d2f38b3c10",
+        "text": "We assess the overhead introduced by PBI and provide thorough performance evaluations of PBI in all three case studies. We show that pure Java profilers like JP2 can, thanks to PBI, produce accurate execution profiles by covering all code, including the core Java libraries."
+      },
+      "after": "5eadf0683c2c2d8f",
+      "date": 1701866881898
+    },
+    {
+      "type": "add",
+      "id": "f583452a0dcd584e",
+      "item": {
+        "type": "markdown",
+        "id": "f583452a0dcd584e",
+        "text": "We then demonstrate that PBI‐based execution levels are much faster than control flow pointcuts to avoid interference between aspects and that their efficient integration in a practical aspect language is possible."
+      },
+      "after": "8f2d29d2f38b3c10",
+      "date": 1701866898567
+    },
+    {
+      "type": "add",
+      "id": "998fb400d320e3cf",
+      "item": {
+        "type": "markdown",
+        "id": "998fb400d320e3cf",
+        "text": "Finally, we report that PBI enables adaptive dynamic analysis tools that are more reactive to user inputs than existing tools that rely on dynamic aspect‐oriented programming with runtime weaving. These experiments position PBI as a widely applicable and practical approach for combining bytecode instrumentations."
+      },
+      "after": "f583452a0dcd584e",
+      "date": 1701866914404
+    },
+    {
+      "type": "add",
+      "id": "ed0b553291991dc1",
+      "item": {
+        "type": "markdown",
+        "id": "ed0b553291991dc1",
+        "text": "© 2015 The Authors. Software: Practice and Experience Published by John Wiley & Sons Ltd."
+      },
+      "after": "998fb400d320e3cf",
+      "date": 1701866926854
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1701867022208
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8b918d2d00636d9e"
+      },
+      "id": "8b918d2d00636d9e",
+      "type": "add",
+      "after": "ed0b553291991dc1",
+      "date": 1701867119379
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "84a234fc0359e802"
+      },
+      "id": "84a234fc0359e802",
+      "type": "add",
+      "after": "8b918d2d00636d9e",
+      "date": 1701867124775
+    },
+    {
+      "type": "edit",
+      "id": "84a234fc0359e802",
+      "item": {
+        "type": "paragraph",
+        "id": "84a234fc0359e802",
+        "text": "As a special case, aspect weavers implemented with PBI are capable of weaving aspects with complete coverage; this is in contrast with mainstream weavers, such as the standard AspectJ weaver and abc [11]."
+      },
+      "date": 1701867126748
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "26b50517847a0281"
+      },
+      "id": "26b50517847a0281",
+      "type": "add",
+      "after": "84a234fc0359e802",
+      "date": 1701867157500
+    },
+    {
+      "type": "edit",
+      "id": "26b50517847a0281",
+      "item": {
+        "type": "paragraph",
+        "id": "26b50517847a0281",
+        "text": "[…] We thoroughly evaluate our PBI implementation for Java (Section 8). First, we explore the overhead introduced by PBI dispatch logic and code bloat. Afterwards, we evaluate PBI in the three case studies. We report on the performance of JP2 and its ability to cover execution of the core Java libraries. Our evaluation then shows that PBI-based execution levels are much more efficient than equivalent control flow pointcuts to avoid interference between aspects and are generally as efficient as the standard AspectJ weaver when applying analysis aspects on the DaCapo benchmark suite. Finally, we demonstrate that PBI enables adaptive dynamic analysis tools that react more quickly to user inputs than existing tools that rely on dynamic AOP with runtime weaving."
+      },
+      "date": 1701867160863
+    },
+    {
+      "type": "add",
+      "id": "22c0af556cf9243c",
+      "item": {
+        "type": "paragraph",
+        "id": "22c0af556cf9243c",
+        "text": "[…]"
+      },
+      "after": "26b50517847a0281",
+      "date": 1701867233596
+    },
+    {
+      "type": "add",
+      "id": "f9df56b371a591a0",
+      "item": {
+        "type": "paragraph",
+        "id": "f9df56b371a591a0",
+        "text": "In order to ensure that a bytecode instrumentation properly implements the aforementioned code pattern, the instrumentation may either be manually adapted, or some automated tool may be applied to detect inserted code and to enclose it with the operations that update the control flow information. For example, our aspect weavers MAJOR [18] and HotWave [19] generate the code pattern on code previously woven with the standard AspectJ weaver in a fully automated way."
+      },
+      "after": "22c0af556cf9243c",
+      "date": 1701867235244
+    },
+    {
+      "type": "add",
+      "id": "6de5c89f8069d9c5",
+      "item": {
+        "type": "paragraph",
+        "id": "6de5c89f8069d9c5",
+        "text": "[…] For example, the standard AspectJ weaver inserts static fields and initializes them to hold instances of type JoinPoint.StaticPart, holding reflective information of join points [4]."
+      },
+      "after": "f9df56b371a591a0",
+      "date": 1701867282169
+    },
+    {
+      "type": "add",
+      "id": "dfb45e4166f38fb7",
+      "item": {
+        "type": "paragraph",
+        "id": "dfb45e4166f38fb7",
+        "text": "[…] As an alternative, postinstrumentation transformations can be performed: for instance, in the case of the AspectJ weaver (Section 6), we apply post-weaving bytecode transformations to move the initialization code for inserted static fields of type JoinPoint.StaticPart from the woven static initializer into the pbi_initClass() method."
+      },
+      "after": "6de5c89f8069d9c5",
+      "date": 1701867307561
+    },
+    {
+      "type": "add",
+      "id": "94fe554888da6728",
+      "item": {
+        "type": "paragraph",
+        "id": "94fe554888da6728",
+        "text": "[…]"
+      },
+      "after": "dfb45e4166f38fb7",
+      "date": 1701867356425
+    },
+    {
+      "type": "add",
+      "id": "507a8e326b538704",
+      "item": {
+        "type": "paragraph",
+        "id": "507a8e326b538704",
+        "text": "## Execution levels for AspectJ using PBI"
+      },
+      "after": "94fe554888da6728",
+      "date": 1701867360159
+    },
+    {
+      "type": "add",
+      "id": "00d2b939958221e3",
+      "item": {
+        "type": "paragraph",
+        "id": "00d2b939958221e3",
+        "text": "Execution levels have been formulated and prototyped in aspect languages with dynamic weaving [12]. In recent work, we have designed an extension of AspectJ with execution levels, tailored to take into account the specificities of AspectJ, like static aspect weaving with partial evaluation of pointcuts [4, 26]. The detailed motivation, design, and applications of this extension are presented elsewhere [15]. Our previous implementation of level switching is carried out in an ad hoc manner; here, we describe how PBI can be used for that sake. Section 8 also provides a much more detailed performance evaluation of the implementation."
+      },
+      "after": "507a8e326b538704",
+      "date": 1701867391946
+    },
+    {
+      "type": "edit",
+      "id": "507a8e326b538704",
+      "item": {
+        "type": "markdown",
+        "id": "507a8e326b538704",
+        "text": "## Execution levels for AspectJ using PBI"
+      },
+      "date": 1701867393460
+    },
+    {
+      "type": "add",
+      "id": "7749ddcb8967d65b",
+      "item": {
+        "type": "paragraph",
+        "id": "7749ddcb8967d65b",
+        "text": "Semantically, the execution of a method produces join points. These join points may be seen by pointcuts that may match them; if so, the corresponding pieces of advice are triggered. In aspect languages that perform weaving statically, join point production is partially evaluated [26]: based on the static properties of code, it is determined whether or not a given expression can produce a join point that will be matched at runtime [4]. If so, such a join point shadow is transformed so as to invoke advice appropriately. If it can be statically determined that the pointcut however never matches join points corresponding to the shadow, then no transformation happens. The matching of the pointcut may also depend on runtime information not available at compile time; in that case, the shadow is woven together with a residue, that is, a conditional expression that guards the invocation of the advice."
+      },
+      "after": "00d2b939958221e3",
+      "date": 1701867438051
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "62fcbb32e4b806b8"
+      },
+      "id": "62fcbb32e4b806b8",
+      "type": "add",
+      "after": "7749ddcb8967d65b",
+      "date": 1701867586020
+    },
+    {
+      "type": "edit",
+      "id": "62fcbb32e4b806b8",
+      "item": {
+        "type": "image",
+        "id": "62fcbb32e4b806b8",
+        "text": "ExecutionLevel",
+        "size": "wide",
+        "width": 430,
+        "height": 438,
+        "url": "/assets/plugins/image/64edd25d7dd5b9135134cd50eec1fc71.jpg"
+      },
+      "date": 1701867618278
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "38b40c24d54befaa"
+      },
+      "id": "38b40c24d54befaa",
+      "type": "add",
+      "after": "62fcbb32e4b806b8",
+      "date": 1701867765215
+    },
+    {
+      "type": "edit",
+      "id": "38b40c24d54befaa",
+      "item": {
+        "type": "image",
+        "id": "38b40c24d54befaa",
+        "text": "Shifting up",
+        "size": "wide",
+        "width": 430,
+        "height": 398,
+        "url": "/assets/plugins/image/f886193241c46040dbc1ce3e6e2c1d11.jpg"
+      },
+      "date": 1701867812569
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0481862890103fd3"
+      },
+      "id": "0481862890103fd3",
+      "type": "add",
+      "after": "38b40c24d54befaa",
+      "date": 1701867859702
+    },
+    {
+      "type": "edit",
+      "id": "0481862890103fd3",
+      "item": {
+        "type": "paragraph",
+        "id": "0481862890103fd3",
+        "text": "With execution levels, the join points produced by the execution of a method vary. If base program code, running at level 0, invokes a method, it produces join points at level 1, that may be matched by aspects deployed at that level. If an aspect deployed at level n calls this same method, then it produces join points at level n C 1, visible only for aspects deployed at level n C 1.We use PBI to check the execution level upon method entry and dispatch appropriately to a particular code version. More precisely, there is one code version per execution level, and each code version corresponds to the code with the instrumented shadows of the aspects deployed at the level directly above it. For instance, execution at level 0 uses code version 0, which is the result of weaving aspects deployed at level 1. Execution at level N (the highest level in the configuration) uses code version N , which is set to be the original, non-instrumented code version. A code version is obtained by invoking the standard AspectJ weaver with the aspects deployed at a given level."
+      },
+      "date": 1701867862626
+    },
+    {
+      "type": "add",
+      "id": "7eef008ebd1fdc1c",
+      "item": {
+        "type": "paragraph",
+        "id": "7eef008ebd1fdc1c",
+        "text": "[…]"
+      },
+      "after": "0481862890103fd3",
+      "date": 1701867926305
+    },
+    {
+      "type": "add",
+      "id": "f2e1abfe66920746",
+      "item": {
+        "type": "paragraph",
+        "id": "f2e1abfe66920746",
+        "text": "Our PBI-based aspect weaver, MAJOR2, uses the unmodified standard AspectJ weaver and postprocesses its output to automatically insert the above pattern in each advice method and in each method corresponding to compiled if pointcuts."
+      },
+      "after": "7eef008ebd1fdc1c",
+      "date": 1701867959383
+    },
+    {
+      "type": "add",
+      "id": "ad25504ca87ffe6f",
+      "item": {
+        "type": "paragraph",
+        "id": "ad25504ca87ffe6f",
+        "text": "[…]"
+      },
+      "after": "f2e1abfe66920746",
+      "date": 1701867989504
+    },
+    {
+      "type": "add",
+      "id": "a52f803f4e6e5687",
+      "item": {
+        "type": "paragraph",
+        "id": "a52f803f4e6e5687",
+        "text": "Runtime instrumentation and class redefinition can be very expensive, in particular if many classes are to be instrumented and if the instrumentation is specified in a high-level programming model, such as AOP, which requires more complex tool support (e.g., in the case of AOP, an aspect weaver is used). For example, with the dynamic AOP framework HotWave [19], which relies on runtime aspect weaving and on class redefinition, weaving an aspect into all modifiable classes at runtime may take up to 60 s on a recent machine (Section 8.5)."
+      },
+      "after": "ad25504ca87ffe6f",
+      "date": 1701867990598
+    },
+    {
+      "type": "add",
+      "id": "6a009ce1b583efca",
+      "item": {
+        "type": "paragraph",
+        "id": "6a009ce1b583efca",
+        "text": "## Execution levels"
+      },
+      "after": "a52f803f4e6e5687",
+      "date": 1701868049071
+    },
+    {
+      "type": "add",
+      "id": "4ad597b792d43ac4",
+      "item": {
+        "type": "paragraph",
+        "id": "4ad597b792d43ac4",
+        "text": "In the following evaluation, we consider the performance impact of execution levels in AOP. First, we describe the aspects used in our evaluation and the deployment scenarios in Section 8.4.1. Second, we explore the overhead of execution levels in comparison with the standard AspectJ load-time weaver in Section 8.4.2. Third, we investigate the overhead when weaving with complete bytecode coverage in two different deployment scenarios in Section 8.4.3."
+      },
+      "after": "6a009ce1b583efca",
+      "date": 1701868079362
+    },
+    {
+      "type": "edit",
+      "id": "6a009ce1b583efca",
+      "item": {
+        "type": "markdown",
+        "id": "6a009ce1b583efca",
+        "text": "## Execution levels"
+      },
+      "date": 1701868080644
+    },
+    {
+      "type": "add",
+      "id": "8ef1b38212723f6a",
+      "item": {
+        "type": "paragraph",
+        "id": "8ef1b38212723f6a",
+        "text": "[…]"
+      },
+      "after": "4ad597b792d43ac4",
+      "date": 1701868122297
+    },
+    {
+      "type": "add",
+      "id": "9b650e9f33dccfb2",
+      "item": {
+        "type": "paragraph",
+        "id": "9b650e9f33dccfb2",
+        "text": "We weave the ProfAllocs and ProfCalls aspects in the DaCapo benchmarks that serve as base programs. We use our new PBI-based re-implementation of MAJOR2 [15] that relies on CodeMerger, which provides support for execution levels and complete bytecode coverage. Aspects are woven with AspectJ 1.6.5 (MAJOR2 is also based on AspectJ)."
+      },
+      "after": "8ef1b38212723f6a",
+      "date": 1701868123245
+    },
+    {
+      "type": "add",
+      "id": "904c1953d1c0c19d",
+      "item": {
+        "type": "paragraph",
+        "id": "904c1953d1c0c19d",
+        "text": "### Comparison with AspectJ"
+      },
+      "after": "9b650e9f33dccfb2",
+      "date": 1701868209797
+    },
+    {
+      "type": "add",
+      "id": "74ee20e2277c2746",
+      "item": {
+        "type": "paragraph",
+        "id": "74ee20e2277c2746",
+        "text": "Our first evaluation compares the performance of code woven with AspectJ’s load-time weaver (henceforth called ajc-ltw) versus MAJOR2. As explained in Section 6, MAJOR2 relies on PBI to implement control flow-based dispatch based on a thread-local field."
+      },
+      "after": "904c1953d1c0c19d",
+      "date": 1701868238057
+    },
+    {
+      "type": "edit",
+      "id": "904c1953d1c0c19d",
+      "item": {
+        "type": "markdown",
+        "id": "904c1953d1c0c19d",
+        "text": "### Comparison with AspectJ"
+      },
+      "date": 1701868239490
+    },
+    {
+      "type": "edit",
+      "id": "74ee20e2277c2746",
+      "item": {
+        "type": "paragraph",
+        "id": "74ee20e2277c2746",
+        "text": "Our first evaluation compares the performance of code woven with AspectJ’s load-time weaver (henceforth called ajc-ltw) versus MAJOR2. As explained in Section 6, MAJOR2 relies on PBI to implement control flow-based dispatch based on a thread-local field. […]"
+      },
+      "date": 1701868263618
+    },
+    {
+      "type": "add",
+      "id": "7f1f6b5876d040a0",
+      "item": {
+        "type": "paragraph",
+        "id": "7f1f6b5876d040a0",
+        "text": "[…]"
+      },
+      "after": "74ee20e2277c2746",
+      "date": 1701868292608
+    },
+    {
+      "type": "add",
+      "id": "09a51b2ed0466d24",
+      "item": {
+        "type": "paragraph",
+        "id": "09a51b2ed0466d24",
+        "text": "We exclude bloat because it fails with ajc-ltw (in contrast to MAJOR2). We exclude eclipse because ajc-ltw fails to weave a large number of classes because of dependencies (ajc-ltw depends on classes that are also used by the eclipse benchmark); such a problem does not exist with MAJOR2, which makes proper use of class-loader namespaces."
+      },
+      "after": "7f1f6b5876d040a0",
+      "date": 1701868293797
+    },
+    {
+      "type": "add",
+      "id": "9c7612f0a83b6aa0",
+      "item": {
+        "type": "paragraph",
+        "id": "9c7612f0a83b6aa0",
+        "text": "[…]"
+      },
+      "after": "09a51b2ed0466d24",
+      "date": 1701868352130
+    },
+    {
+      "type": "add",
+      "id": "a2c20d9de35317cd",
+      "item": {
+        "type": "paragraph",
+        "id": "a2c20d9de35317cd",
+        "text": "## Related work"
+      },
+      "after": "9c7612f0a83b6aa0",
+      "date": 1701868412205
+    },
+    {
+      "type": "add",
+      "id": "3b620e868feca4e8",
+      "item": {
+        "type": "paragraph",
+        "id": "3b620e868feca4e8",
+        "text": "To the best of our knowledge, there is not much work that is directly related to this proposal of PBI. Altering program semantics through bytecode transformations is a widely used technique and has been explored and put in practice in many different flavors in Java, from low-level tools like BIT [35], BCEL [6], and ASM [36], to higher-level frameworks like Javassist [8], Jinline [37], or Soot [38]. Similar toolkits have also been proposed for other languages based on virtual machines that run intermediate bytecodes, like Squeak Smalltalk [9] and .NET. PBI is a general-purpose technique that allows to combine instrumentations possibly written with any of these tools. Thus, it stands at a higher-level than specific instrumentation tools and cannot be directly compared. The most recent version of CodeMerger, our PBI implementation for Java, is implemented using ASM, although other frameworks could be used as well."
+      },
+      "after": "a2c20d9de35317cd",
+      "date": 1701868428110
+    },
+    {
+      "type": "edit",
+      "id": "a2c20d9de35317cd",
+      "item": {
+        "type": "markdown",
+        "id": "a2c20d9de35317cd",
+        "text": "## Related work"
+      },
+      "date": 1701868429271
+    },
+    {
+      "type": "add",
+      "id": "30265d39a243681f",
+      "item": {
+        "type": "paragraph",
+        "id": "30265d39a243681f",
+        "text": "On the other hand, there is a huge body of language-level proposals for advanced dispatch, like mixin layers [39], dynamic layer activation [40, 41], aspects [4], and predicate dispatch [42]. Each of these has been realized using particular implementation techniques, specific to the targeted semantics and the implementation trade-offs that their authors were willing to make. Here again, PBI does not stand at the same level as these proposals: PBI is not a language-level mechanism but rather"
+      },
+      "after": "3b620e868feca4e8",
+      "date": 1701868478628
+    },
+    {
+      "type": "edit",
+      "id": "30265d39a243681f",
+      "item": {
+        "type": "paragraph",
+        "id": "30265d39a243681f",
+        "text": "On the other hand, there is a huge body of language-level proposals for advanced dispatch, like mixin layers [39], dynamic layer activation [40, 41], aspects [4], and predicate dispatch [42]. Each of these has been realized using particular implementation techniques, specific to the targeted semantics and the implementation trade-offs that their authors were willing to make. Here again, PBI does not stand at the same level as these proposals: PBI is not a language-level mechanism but rather an implementation technique to combine various bytecode instrumentations with the possibility to flexibly dispatch among them at runtime. It can be used to implement language-level constructs like mixin layers [13] provided a tool is available to generate the different code versions, or to extend aspect weaving with execution levels (Section 6), again relying on another tool for the specific details of the implementation (in that case, the standard AspectJ weaver)."
+      },
+      "date": 1701868492463
+    },
+    {
+      "type": "edit",
+      "id": "8b918d2d00636d9e",
+      "item": {
+        "type": "pagefold",
+        "id": "8b918d2d00636d9e",
+        "text": "~"
+      },
+      "date": 1701868566634
+    },
+    {
+      "type": "edit",
+      "id": "3b620e868feca4e8",
+      "item": {
+        "type": "paragraph",
+        "id": "3b620e868feca4e8",
+        "text": "To the best of our knowledge, there is not much work that is directly related to this proposal of PBI. Altering program semantics through bytecode transformations is a widely used technique and has been explored and put in practice in many different flavors in Java, from low-level tools like BIT [35], BCEL [6], and ASM [36], to higher-level frameworks like Javassist [8], Jinline [37], or Soot [38]. Similar toolkits have also been proposed for other languages based on virtual machines that run intermediate bytecodes, like [[Squeak Smalltalk]] [9] and .NET. PBI is a general-purpose technique that allows to combine instrumentations possibly written with any of these tools. Thus, it stands at a higher-level than specific instrumentation tools and cannot be directly compared. The most recent version of CodeMerger, our PBI implementation for Java, is implemented using ASM, although other frameworks could be used as well."
+      },
+      "date": 1701868610944
+    },
+    {
+      "type": "add",
+      "id": "50283c8ebc46c792",
+      "item": {
+        "type": "paragraph",
+        "id": "50283c8ebc46c792",
+        "text": "Shrike [43] is a bytecode instrumentation library that is part of the T.J. Watson Libraries for Analysis [44]. Shrike supports composition of multiple instrumentations by preventing an instrumentation tool from observing the code inserted by the other tools. Similar functionality can be achieved by using execution levels on top of PBI. As described in Section 6, analyses deployed at the same execution level cannot observe each other’s join points, exactly as it happens with Shrike. However, execution levels also support the deployment of analyses at different levels (e.g., to profile the execution of another dynamic analysis tool), which is not directly supported by Shrike."
+      },
+      "after": "30265d39a243681f",
+      "date": 1701868671774
+    },
+    {
+      "type": "add",
+      "id": "ec0913fcc929bee8",
+      "item": {
+        "type": "paragraph",
+        "id": "ec0913fcc929bee8",
+        "text": "RoadRunner [45] is a framework for composing small and simple analyses for concurrent programs. Each dynamic analysis is essentially a filter over event streams, and filters can be chained. However, it is not possible to combine arbitrary analyses. For example, two analyses that filter (e.g., suppress) events in an incompatible way cannot be combined."
+      },
+      "after": "50283c8ebc46c792",
+      "date": 1701868731047
+    },
+    {
+      "type": "add",
+      "id": "db7a8959519a2950",
+      "item": {
+        "type": "paragraph",
+        "id": "db7a8959519a2950",
+        "text": "The hyperspace approach [46] allows class fragments to be composed in a coherent whole, using a set of composition operators [47]. The approach is therefore different from PBI because each class version in PBI is a complete class, not a fragment of it; dynamic dispatch selects the version that is active at a given point in time, according to any criteria. In that sense, PBI is closer to subject-oriented programming [48] where different views of a single class can coexist; implementing subject-oriented programming with PBI is an interesting perspective."
+      },
+      "after": "ec0913fcc929bee8",
+      "date": 1701868743514
+    },
+    {
+      "type": "add",
+      "id": "74f71384460b5b58",
+      "item": {
+        "type": "paragraph",
+        "id": "74f71384460b5b58",
+        "text": "Several researchers discuss the advantages of allowing data passing between different analyses [19, 49, 50]. While PBI does not provide any support for inter-analysis communication (as only a single class version is active at a time), programmers may compose several analyses into a single class version, as it happens with analyses deployed at the same execution level (Section 6). Such composed analyses may communicate with each other through shared data structures."
+      },
+      "after": "db7a8959519a2950",
+      "date": 1701868787104
+    },
+    {
+      "type": "add",
+      "id": "135d369a1b1c6d2b",
+      "item": {
+        "type": "paragraph",
+        "id": "135d369a1b1c6d2b",
+        "text": "Regarding instrumentation of shared libraries, the Twin Class Hierarchy [51] replicates the full hierarchy of instrumented classes into a separate package that coexists with the original one. However, in [52], the authors show that class replication limits the applicability of bytecode instrumentation in the presence of native code. Because native code is not modified, calls back into bytecode will target methods in the unmodified class. Thus, this approach does not allow transparent instrumentation of the complete Java class library. In contrast, PBI does not duplicate any class, but relies on code replication within method bodies."
+      },
+      "after": "74f71384460b5b58",
+      "date": 1701868800059
+    },
+    {
+      "type": "add",
+      "id": "adc7e72d9e2d30d0",
+      "item": {
+        "type": "paragraph",
+        "id": "adc7e72d9e2d30d0",
+        "text": "The Arnold–Ryder profiling framework presented in [53] uses code duplication combined with compiler-inserted, counter-based sampling. A second version of the code is introduced, which contains all computationally expensive instrumentation. The original code is minimally instrumented to allow control to transfer in and out of the duplicated code in a fine-grained manner, based on instruction counting. This approach achieves low overhead, as most of the time the slightly instrumented code is executed. Similarly to PBI, this approach merges two different instrumentations. While PBI is a general-purpose, high-level framework that can merge any number of independent bytecode instrumentations, the Arnold–Ryder framework is specialized for sampling profiling and implemented directly within the Jikes RVM. Whereas in PBI, the dispatch logic that determines the code version is customizable and executed only upon method entry, the dispatch logic in the Arnold–Ryder framework is hard coded and enables switching within method bodies depending on the number of executed instructions."
+      },
+      "after": "135d369a1b1c6d2b",
+      "date": 1701868892211
+    },
+    {
+      "type": "add",
+      "id": "cb0dbf38ca74dd07",
+      "item": {
+        "type": "paragraph",
+        "id": "cb0dbf38ca74dd07",
+        "text": "Several approaches have been proposed to perform dynamic program analysis at the level of the virtual machine [54, 55]. While these approaches usually benefit from lower runtime overhead and can access VM-internal information, they require modifications to the VM that may complicate deployment and impair portability. As confirmed in our evaluation presented in Section 8, PBI is compatible with unmodified, production-quality JVMs, which will ease the adoption of PBI by developers of industrial-strength program analysis tools and frameworks."
+      },
+      "after": "adc7e72d9e2d30d0",
+      "date": 1701868908042
+    },
+    {
+      "type": "add",
+      "id": "7ab3a07f7f558a0f",
+      "item": {
+        "type": "paragraph",
+        "id": "7ab3a07f7f558a0f",
+        "text": "10. CONCLUSIONS"
+      },
+      "after": "cb0dbf38ca74dd07",
+      "date": 1701868922790
+    },
+    {
+      "type": "add",
+      "id": "cb1a4f3bb1a2db80",
+      "item": {
+        "type": "paragraph",
+        "id": "cb1a4f3bb1a2db80",
+        "text": "[…]"
+      },
+      "after": "7ab3a07f7f558a0f",
+      "date": 1701868924790
+    }
+  ]
+}
