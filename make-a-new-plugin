@@ -9,7 +9,7 @@
     {
       "type": "markdown",
       "id": "93e63ff0dc7a857e",
-      "text": "We'd like to share apparatus diagrams via wiki.\n"
+      "text": "We'd like to share other web sites via wiki.  HTML offers the <iframe> tag for this purpose.  We'll build a Frame Plugin.\n"
     },
     {
       "type": "markdown",
@@ -19,7 +19,7 @@
     {
       "type": "markdown",
       "id": "02ff867d81648bab",
-      "text": "**Make up a name** for the plugin. Names will become complicated someday. Now they are simple. We'll call ours Apparatus. We check that this is not abusing the term. [http://dictionary.reference.com/browse/apparatus dictionary]"
+      "text": "**Make up a name** for the plugin. Names will become complicated someday. Now they are simple. We'll call ours Frame."
     },
     {
       "type": "markdown",
@@ -27,14 +27,34 @@
       "text": "Try the [[Make Plugin Script]]\n"
     },
     {
+      "type": "code",
+      "id": "78227e52c4d8ee44",
+      "text": "# local directory tree\n\nwiki-tls\nfedwiki\n└── wiki-plugin-frame\n    ├── client\n    ├── pages\n    ├── server\n    ├── status\n    └── test\n\n"
+    },
+    {
       "type": "markdown",
       "id": "ecd918ff4a58e4be",
-      "text": "**Configure** the local farm to include our experimental plugin."
+      "text": "**Configure** the local farm to include our experimental plugin.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "81599a7ff6608eb8",
+      "text": "Include a local directory (`fedwiki`) into our containerized farm where we can develop one or many plugins.\n"
     },
     {
       "type": "code",
       "id": "8c605700a2b71b0b",
-      "text": "# docker-compose.override.yml\n\nservices:\n  farm:\n    volumes:\n      - ../wiki-plugin-apparatus:/home/app/lib/node_modules/wiki/node_modules/wiki-plugin-apparatus\n"
+      "text": "# docker-compose.override.yml\n\nservices:\n  farm:\n    volumes:\n      - ../fedwiki:/home/app/fedwiki\n"
+    },
+    {
+      "type": "markdown",
+      "id": "ff015678e9963532",
+      "text": "Inside our running containerized farm, we `npm link` the development plugin.\n"
+    },
+    {
+      "type": "code",
+      "id": "a670fa1fb5a0a314",
+      "text": "cd wiki-tls\n# start wiki and supporting services\ndocker-compose up -d\ndocker-compose exec farm bash\n# now inside the farm's container\ncd lib/node_modules/wiki\nexport NPM_CONFIG_PREFIX=$HOME\nnpm link ../../../fedwiki/wiki-plugin-frame\nexit"
     },
     {
       "type": "markdown",
@@ -44,7 +64,12 @@
     {
       "type": "code",
       "id": "546d257dc2ab03f3",
-      "text": "cd ../wiki-plugin-apparatus\ndocker run --rm -it \\\n  -v $PWD:/wiki-plugin-apparatus \\\n  -w /wiki-plugin-apparatus \\\n  dobbs/farm:0.13.0 \\\n  bash\n# now inside the container...\nnpm install\nnode_modules/grunt/bin/grunt build\nnode_modules/grunt/bin/grunt watch"
+      "text": "cd fedwiki/wiki-plugin-frame\ndocker run --rm -it \\\n  -v $PWD:/$(basename $PWD) \\\n  -w /$(basename $PWD) \\\n  dobbs/farm:0.50.0 \\\n  bash\n# now inside the container...\nnpm install\nnode_modules/grunt/bin/grunt build\nnode_modules/grunt/bin/grunt watch"
+    },
+    {
+      "type": "paragraph",
+      "id": "ecad092581afee99",
+      "text": "With this container running, grunt will detect changes as we edit the coffeescript files and automatically compile them into javascript for use by the browser."
     },
     {
       "type": "markdown",
@@ -54,12 +79,17 @@
     {
       "type": "code",
       "id": "bd09eb4d62cb7c3f",
-      "text": "docker-compose up -d --force-recreate farm\n"
+      "text": "docker-compose restart farm\n"
     },
     {
       "type": "markdown",
       "id": "350e568a987e3e60",
-      "text": "**Create an item** of this type.  Create a new page.  Add a simple item.  You should see `Apparatus` among the options in the Factory.  (the Make Plugin Script added a `factory.json` file to our plugin directory and recreating the `farm` service will have reloaded all the plugins."
+      "text": "This will load our newly linked, experimental plugin with wiki.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "113711b14fa2e702",
+      "text": "**Create an item** of this type.  Create a new page.  Add a simple item.  You should see `Frame` among the options in the Factory.  (the Make Plugin Script added a `factory.json` file to our plugin directory and recreating the `farm` service will have reloaded all the plugins."
     },
     {
       "type": "markdown",
@@ -77,24 +107,14 @@
       "text": "Tip: place your utility functions above the `emit` and `bind` functions."
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "9615c9ddd59bfd15",
       "text": "Tip: use `wiki.textEditor` to provide a user-editable text field to your item."
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "068cb5f343e2ab03",
-      "text": "Tip: report errors by emitting `p.error` tags. "
-    },
-    {
-      "type": "paragraph",
-      "id": "75b92f0449dde075",
-      "text": ""
-    },
-    {
-      "type": "paragraph",
-      "id": "2e4f8d3f3bf8e1e3",
-      "text": ""
+      "text": "Tip: report errors by emitting `p.error` tags."
     },
     {
       "type": "html",
@@ -114,7 +134,7 @@
     {
       "type": "code",
       "id": "26390c9666f85820",
-      "text": "window.plugins.apparatus = {emit, bind} if window?\nmodule.exports = {parse, expand} if module?\n"
+      "text": "window.plugins.frame = {emit, bind} if window?\nmodule.exports = {parse, expand} if module?\n"
     },
     {
       "type": "markdown",
@@ -122,9 +142,9 @@
       "text": "**Write Tests** that pass in the simplest way.  Follow examples from other plugins like `wiki-plugin-report/test/test.coffee` or `wiki-plugin-calendar/test/test.coffee`"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "5ab7c819ebaa7c87",
-      "text": "Tip: use `guard watch` to notice changes in your code and automatically run the tests. "
+      "text": "Tip: use `guard watch` to notice changes in your code and automatically run the tests."
     },
     {
       "type": "html",
@@ -182,9 +202,9 @@
       "text": "<h3> Finish Up"
     },
     {
-      "type": "html",
+      "type": "markdown",
       "id": "550a0fef1f59360b",
-      "text": "**Update Menu** that the Factory plugin offers as alternatives to `paragraphs`.  The [[Make Plugin Script]] created a `factory.json` file to describe your plugin.  The server rolls these up into `factories.json` fetched by the Factory plugin. See [[Factory Plugin Menu]]"
+      "text": "**Update Menu** that the Factory plugin offers as alternatives to `paragraphs`.  The [[Make Plugin Script]] created a `factory.json` file to describe your plugin.  The server rolls these up into `factories.json` fetched by the Factory plugin. See [[Factory Plugin Menu]]."
     },
     {
       "type": "html",
@@ -197,19 +217,24 @@
       "text": "<b>Share Your Source</b> as a community project with a public repository. We prefer GitHub where we save our plugins as projects named wiki-plugin-{name}. [https://github.com/fedwiki?query=wiki-plugin github]"
     },
     {
-      "type": "html",
+      "type": "markdown",
       "id": "3ad9bf6759f51bec",
-      "text": "<b>Publish on npmjs.org</b> which allows your plugin to be included in other servers by name using the node package manager. [https://www.npmjs.org/search?q=wiki-plugin npm]"
+      "text": "**Publish on npmjs.org** which allows your plugin to be included in other servers by name using the node package manager or the Plugmatic plugin.  See [[About Plugmatic Plugin]]. [https://www.npmjs.org/search?q=wiki-plugin npm]"
+    },
+    {
+      "type": "code",
+      "id": "e216f4ce2bd517a3",
+      "text": "cd fedwiki/wiki-plugin-frame\ndocker run --rm -it \\\n  -v $HOME/.npmrc:/$(basename $PWD)/.npmrc \\\n  -v $HOME/.gitconfig:/$(basename $PWD)/.gitconfig \\\n  -v $PWD:/$(basename $PWD) \\\n  -w /$(basename $PWD) \\\n  node:10 \\\n  bash\n# now inside the container...\nnpm whoami # double-check npm login\n# update authors\nnode_modules/grunt/bin/grunt update-authors \nnode_modules/grunt/bin/grunt update-contributors \n# git commit the changes to authors\nnpm version patch\nnpm publish"
     },
     {
       "type": "markdown",
       "id": "604ac8e859bbf5b5",
-      "text": "**Host the new plugin on your own server**.  `npm` can install the plugin from your github page.  We suggest committing the built javascript files to a specific branch and installing that _branch_:\n"
+      "text": "**Host the new plugin on your own server**.  `npm` can install the plugin from your github page, if you are not ready to publish on npmjs.org.  We suggest committing the built javascript files to a specific branch and installing that _branch_:\n"
     },
     {
       "type": "code",
       "id": "db5db3aa1b0d238e",
-      "text": "npm install git+https://github.com/dobbs/wiki-plugin-apparatus#viewer"
+      "text": "npm install git+https://github.com/dobbs/wiki-plugin-frame#include-js"
     },
     {
       "type": "paragraph",
@@ -3608,7 +3633,983 @@
     {
       "type": "fork",
       "site": "found.ward.bay.wiki.org",
-      "date": 1678870999034
+      "date": 1513746686552
+    },
+    {
+      "type": "edit",
+      "id": "550a0fef1f59360b",
+      "item": {
+        "type": "markdown",
+        "id": "550a0fef1f59360b",
+        "text": "**Update Menu** that the Factory plugin offers as alternatives to `paragraphs`.  The [[Make Plugin Script]] created a `factory.json` file to describe your plugin.  The server rolls these up into `factories.json` fetched by the Factory plugin. See [[Factory Plugin Menu]]."
+      },
+      "date": 1513746723676
+    },
+    {
+      "type": "edit",
+      "id": "ecd918ff4a58e4be",
+      "item": {
+        "type": "markdown",
+        "id": "ecd918ff4a58e4be",
+        "text": "**Configure** the local farm to include our experimental plugin.\n"
+      },
+      "date": 1515965211782
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "78227e52c4d8ee44"
+      },
+      "id": "78227e52c4d8ee44",
+      "type": "add",
+      "after": "21b90f96d0bc2a4c",
+      "date": 1515965238594
+    },
+    {
+      "type": "move",
+      "order": [
+        "9442703addd92f54",
+        "93e63ff0dc7a857e",
+        "6bf91e95b8f94de5",
+        "02ff867d81648bab",
+        "d2a8276e764540fc",
+        "ecd918ff4a58e4be",
+        "78227e52c4d8ee44",
+        "8c605700a2b71b0b",
+        "e6375e89e695bf40",
+        "546d257dc2ab03f3",
+        "ec44b60dbac16ed4",
+        "bd09eb4d62cb7c3f",
+        "350e568a987e3e60",
+        "1a38589266394548",
+        "ac90f9ebc2ca41dc",
+        "cf52ef840a5e4675",
+        "9615c9ddd59bfd15",
+        "068cb5f343e2ab03",
+        "61a494684abce731",
+        "98ead6d8c3a6b20b",
+        "3888ea132a89c4f3",
+        "26390c9666f85820",
+        "2a3511b1bdb8a5bf",
+        "5ab7c819ebaa7c87",
+        "d0e65a2ce089a403",
+        "f46e92da9e6b1e57",
+        "118c8ee938d533aa",
+        "84806958ca69f209",
+        "f3f008528e2e620d",
+        "303356126d20776a",
+        "ec20e3f089fd6c64",
+        "910ef7f4d539ea33",
+        "96b65bf5b2076b42",
+        "4d11d052fe112faa",
+        "3e83e4391984218d",
+        "550a0fef1f59360b",
+        "01c6e7339e7809f9",
+        "f9781a09458647e4",
+        "3ad9bf6759f51bec",
+        "604ac8e859bbf5b5",
+        "db5db3aa1b0d238e",
+        "21b90f96d0bc2a4c"
+      ],
+      "id": "78227e52c4d8ee44",
+      "date": 1515965256286
+    },
+    {
+      "type": "edit",
+      "id": "ecd918ff4a58e4be",
+      "item": {
+        "type": "markdown",
+        "id": "ecd918ff4a58e4be",
+        "text": "**Configure** the local farm to include our experimental plugin."
+      },
+      "date": 1515965262616
+    },
+    {
+      "type": "edit",
+      "id": "78227e52c4d8ee44",
+      "item": {
+        "type": "code",
+        "id": "78227e52c4d8ee44",
+        "text": "# local directory tree\n"
+      },
+      "date": 1515965299275
+    },
+    {
+      "type": "edit",
+      "id": "78227e52c4d8ee44",
+      "item": {
+        "type": "code",
+        "id": "78227e52c4d8ee44",
+        "text": "# local directory tree\n\nwiki-example-tls-friends\nfedwiki\n└── wiki-plugin-apparatus\n    ├── client\n    ├── pages\n    ├── server\n    ├── status\n    └── test\n\n"
+      },
+      "date": 1515966374880
+    },
+    {
+      "type": "edit",
+      "id": "8c605700a2b71b0b",
+      "item": {
+        "type": "code",
+        "id": "8c605700a2b71b0b",
+        "text": "# docker-compose.override.yml\n\nservices:\n  farm:\n    volumes:\n      - ../fedwiki:/home/app/lib/fedwiki\n"
+      },
+      "date": 1515966412396
+    },
+    {
+      "type": "edit",
+      "id": "546d257dc2ab03f3",
+      "item": {
+        "type": "code",
+        "id": "546d257dc2ab03f3",
+        "text": "cd fedwiki/wiki-plugin-apparatus\ndocker run --rm -it \\\n  -v $PWD:/wiki-plugin-apparatus \\\n  -w /wiki-plugin-apparatus \\\n  dobbs/farm:0.13.0 \\\n  bash\n# now inside the container...\nnpm install\nnode_modules/grunt/bin/grunt build\nnode_modules/grunt/bin/grunt watch"
+      },
+      "date": 1515966466351
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ecad092581afee99"
+      },
+      "id": "ecad092581afee99",
+      "type": "add",
+      "after": "21b90f96d0bc2a4c",
+      "date": 1515966515971
+    },
+    {
+      "type": "move",
+      "order": [
+        "9442703addd92f54",
+        "93e63ff0dc7a857e",
+        "6bf91e95b8f94de5",
+        "02ff867d81648bab",
+        "d2a8276e764540fc",
+        "ecd918ff4a58e4be",
+        "78227e52c4d8ee44",
+        "8c605700a2b71b0b",
+        "e6375e89e695bf40",
+        "546d257dc2ab03f3",
+        "ecad092581afee99",
+        "ec44b60dbac16ed4",
+        "bd09eb4d62cb7c3f",
+        "350e568a987e3e60",
+        "1a38589266394548",
+        "ac90f9ebc2ca41dc",
+        "cf52ef840a5e4675",
+        "9615c9ddd59bfd15",
+        "068cb5f343e2ab03",
+        "61a494684abce731",
+        "98ead6d8c3a6b20b",
+        "3888ea132a89c4f3",
+        "26390c9666f85820",
+        "2a3511b1bdb8a5bf",
+        "5ab7c819ebaa7c87",
+        "d0e65a2ce089a403",
+        "f46e92da9e6b1e57",
+        "118c8ee938d533aa",
+        "84806958ca69f209",
+        "f3f008528e2e620d",
+        "303356126d20776a",
+        "ec20e3f089fd6c64",
+        "910ef7f4d539ea33",
+        "96b65bf5b2076b42",
+        "4d11d052fe112faa",
+        "3e83e4391984218d",
+        "550a0fef1f59360b",
+        "01c6e7339e7809f9",
+        "f9781a09458647e4",
+        "3ad9bf6759f51bec",
+        "604ac8e859bbf5b5",
+        "db5db3aa1b0d238e",
+        "21b90f96d0bc2a4c"
+      ],
+      "id": "ecad092581afee99",
+      "date": 1515966553441
+    },
+    {
+      "type": "move",
+      "order": [
+        "9442703addd92f54",
+        "93e63ff0dc7a857e",
+        "6bf91e95b8f94de5",
+        "02ff867d81648bab",
+        "d2a8276e764540fc",
+        "78227e52c4d8ee44",
+        "ecd918ff4a58e4be",
+        "8c605700a2b71b0b",
+        "e6375e89e695bf40",
+        "546d257dc2ab03f3",
+        "ecad092581afee99",
+        "ec44b60dbac16ed4",
+        "bd09eb4d62cb7c3f",
+        "350e568a987e3e60",
+        "1a38589266394548",
+        "ac90f9ebc2ca41dc",
+        "cf52ef840a5e4675",
+        "9615c9ddd59bfd15",
+        "068cb5f343e2ab03",
+        "61a494684abce731",
+        "98ead6d8c3a6b20b",
+        "3888ea132a89c4f3",
+        "26390c9666f85820",
+        "2a3511b1bdb8a5bf",
+        "5ab7c819ebaa7c87",
+        "d0e65a2ce089a403",
+        "f46e92da9e6b1e57",
+        "118c8ee938d533aa",
+        "84806958ca69f209",
+        "f3f008528e2e620d",
+        "303356126d20776a",
+        "ec20e3f089fd6c64",
+        "910ef7f4d539ea33",
+        "96b65bf5b2076b42",
+        "4d11d052fe112faa",
+        "3e83e4391984218d",
+        "550a0fef1f59360b",
+        "01c6e7339e7809f9",
+        "f9781a09458647e4",
+        "3ad9bf6759f51bec",
+        "604ac8e859bbf5b5",
+        "db5db3aa1b0d238e",
+        "21b90f96d0bc2a4c"
+      ],
+      "id": "78227e52c4d8ee44",
+      "date": 1515966664053
+    },
+    {
+      "type": "edit",
+      "id": "ecad092581afee99",
+      "item": {
+        "type": "paragraph",
+        "id": "ecad092581afee99",
+        "text": "With this container running, grunt will detect changes as we edit the coffeescript files and automatically compile them into javascript for use by the browser."
+      },
+      "date": 1515966687460
+    },
+    {
+      "type": "edit",
+      "id": "ecd918ff4a58e4be",
+      "item": {
+        "type": "markdown",
+        "id": "ecd918ff4a58e4be",
+        "text": "**Configure** the local farm to include our experimental plugin.\n"
+      },
+      "date": 1515966693506
+    },
+    {
+      "type": "add",
+      "id": "81599a7ff6608eb8",
+      "item": {
+        "type": "markdown",
+        "id": "81599a7ff6608eb8",
+        "text": "We start by including a local dev directory into our containerized farm:\n"
+      },
+      "after": "ecd918ff4a58e4be",
+      "date": 1515966783450
+    },
+    {
+      "type": "add",
+      "id": "ff015678e9963532",
+      "item": {
+        "type": "markdown",
+        "id": "ff015678e9963532",
+        "text": "Inside our running containerized farm, we `npm link` the development plugin."
+      },
+      "after": "81599a7ff6608eb8",
+      "date": 1515966879825
+    },
+    {
+      "type": "edit",
+      "id": "81599a7ff6608eb8",
+      "item": {
+        "type": "markdown",
+        "id": "81599a7ff6608eb8",
+        "text": "Include a local directory (`fedwiki`) into our containerized farm where we can develop one or many plugins.\n"
+      },
+      "date": 1515967075912
+    },
+    {
+      "type": "move",
+      "order": [
+        "9442703addd92f54",
+        "93e63ff0dc7a857e",
+        "6bf91e95b8f94de5",
+        "02ff867d81648bab",
+        "d2a8276e764540fc",
+        "78227e52c4d8ee44",
+        "ecd918ff4a58e4be",
+        "81599a7ff6608eb8",
+        "8c605700a2b71b0b",
+        "ff015678e9963532",
+        "e6375e89e695bf40",
+        "546d257dc2ab03f3",
+        "ecad092581afee99",
+        "ec44b60dbac16ed4",
+        "bd09eb4d62cb7c3f",
+        "350e568a987e3e60",
+        "1a38589266394548",
+        "ac90f9ebc2ca41dc",
+        "cf52ef840a5e4675",
+        "9615c9ddd59bfd15",
+        "068cb5f343e2ab03",
+        "61a494684abce731",
+        "98ead6d8c3a6b20b",
+        "3888ea132a89c4f3",
+        "26390c9666f85820",
+        "2a3511b1bdb8a5bf",
+        "5ab7c819ebaa7c87",
+        "d0e65a2ce089a403",
+        "f46e92da9e6b1e57",
+        "118c8ee938d533aa",
+        "84806958ca69f209",
+        "f3f008528e2e620d",
+        "303356126d20776a",
+        "ec20e3f089fd6c64",
+        "910ef7f4d539ea33",
+        "96b65bf5b2076b42",
+        "4d11d052fe112faa",
+        "3e83e4391984218d",
+        "550a0fef1f59360b",
+        "01c6e7339e7809f9",
+        "f9781a09458647e4",
+        "3ad9bf6759f51bec",
+        "604ac8e859bbf5b5",
+        "db5db3aa1b0d238e",
+        "21b90f96d0bc2a4c"
+      ],
+      "id": "8c605700a2b71b0b",
+      "date": 1515967079813
+    },
+    {
+      "type": "move",
+      "order": [
+        "9442703addd92f54",
+        "93e63ff0dc7a857e",
+        "6bf91e95b8f94de5",
+        "02ff867d81648bab",
+        "d2a8276e764540fc",
+        "78227e52c4d8ee44",
+        "ecd918ff4a58e4be",
+        "81599a7ff6608eb8",
+        "ff015678e9963532",
+        "8c605700a2b71b0b",
+        "e6375e89e695bf40",
+        "546d257dc2ab03f3",
+        "ecad092581afee99",
+        "ec44b60dbac16ed4",
+        "bd09eb4d62cb7c3f",
+        "350e568a987e3e60",
+        "1a38589266394548",
+        "ac90f9ebc2ca41dc",
+        "cf52ef840a5e4675",
+        "9615c9ddd59bfd15",
+        "068cb5f343e2ab03",
+        "61a494684abce731",
+        "98ead6d8c3a6b20b",
+        "3888ea132a89c4f3",
+        "26390c9666f85820",
+        "2a3511b1bdb8a5bf",
+        "5ab7c819ebaa7c87",
+        "d0e65a2ce089a403",
+        "f46e92da9e6b1e57",
+        "118c8ee938d533aa",
+        "84806958ca69f209",
+        "f3f008528e2e620d",
+        "303356126d20776a",
+        "ec20e3f089fd6c64",
+        "910ef7f4d539ea33",
+        "96b65bf5b2076b42",
+        "4d11d052fe112faa",
+        "3e83e4391984218d",
+        "550a0fef1f59360b",
+        "01c6e7339e7809f9",
+        "f9781a09458647e4",
+        "3ad9bf6759f51bec",
+        "604ac8e859bbf5b5",
+        "db5db3aa1b0d238e",
+        "21b90f96d0bc2a4c"
+      ],
+      "id": "8c605700a2b71b0b",
+      "date": 1515967095719
+    },
+    {
+      "type": "move",
+      "order": [
+        "9442703addd92f54",
+        "93e63ff0dc7a857e",
+        "6bf91e95b8f94de5",
+        "02ff867d81648bab",
+        "d2a8276e764540fc",
+        "78227e52c4d8ee44",
+        "ecd918ff4a58e4be",
+        "81599a7ff6608eb8",
+        "8c605700a2b71b0b",
+        "ff015678e9963532",
+        "e6375e89e695bf40",
+        "546d257dc2ab03f3",
+        "ecad092581afee99",
+        "ec44b60dbac16ed4",
+        "bd09eb4d62cb7c3f",
+        "350e568a987e3e60",
+        "1a38589266394548",
+        "ac90f9ebc2ca41dc",
+        "cf52ef840a5e4675",
+        "9615c9ddd59bfd15",
+        "068cb5f343e2ab03",
+        "61a494684abce731",
+        "98ead6d8c3a6b20b",
+        "3888ea132a89c4f3",
+        "26390c9666f85820",
+        "2a3511b1bdb8a5bf",
+        "5ab7c819ebaa7c87",
+        "d0e65a2ce089a403",
+        "f46e92da9e6b1e57",
+        "118c8ee938d533aa",
+        "84806958ca69f209",
+        "f3f008528e2e620d",
+        "303356126d20776a",
+        "ec20e3f089fd6c64",
+        "910ef7f4d539ea33",
+        "96b65bf5b2076b42",
+        "4d11d052fe112faa",
+        "3e83e4391984218d",
+        "550a0fef1f59360b",
+        "01c6e7339e7809f9",
+        "f9781a09458647e4",
+        "3ad9bf6759f51bec",
+        "604ac8e859bbf5b5",
+        "db5db3aa1b0d238e",
+        "21b90f96d0bc2a4c"
+      ],
+      "id": "8c605700a2b71b0b",
+      "date": 1515967122290
+    },
+    {
+      "type": "edit",
+      "id": "ff015678e9963532",
+      "item": {
+        "type": "markdown",
+        "id": "ff015678e9963532",
+        "text": "Inside our running containerized farm, we `npm link` the development plugin.\n"
+      },
+      "date": 1515967129867
+    },
+    {
+      "type": "add",
+      "id": "a670fa1fb5a0a314",
+      "item": {
+        "type": "markdown",
+        "id": "a670fa1fb5a0a314",
+        "text": "cd wiki-example-tls-friends\n# start wiki and supporting services\ndocker-compose up -d\ndocker-comp"
+      },
+      "after": "ff015678e9963532",
+      "date": 1515967245136
+    },
+    {
+      "type": "edit",
+      "id": "a670fa1fb5a0a314",
+      "item": {
+        "type": "code",
+        "id": "a670fa1fb5a0a314",
+        "text": "cd wiki-example-tls-friends\n# start wiki and supporting services\ndocker-compose up -d\ndocker-compose exec farm bash\n"
+      },
+      "date": 1515967270675
+    },
+    {
+      "type": "edit",
+      "id": "a670fa1fb5a0a314",
+      "item": {
+        "type": "code",
+        "id": "a670fa1fb5a0a314",
+        "text": "cd wiki-example-tls-friends\n# start wiki and supporting services\ndocker-compose up -d\ndocker-compose exec farm bash\n# now inside the farm's container\ncd lib/node_modules/wiki\nnpm link --prefix . ../../fedwiki/wiki-plugin-apparatus"
+      },
+      "date": 1515967348751
+    },
+    {
+      "type": "edit",
+      "id": "a670fa1fb5a0a314",
+      "item": {
+        "type": "code",
+        "id": "a670fa1fb5a0a314",
+        "text": "cd wiki-example-tls-friends\n# start wiki and supporting services\ndocker-compose up -d\ndocker-compose exec farm bash\n# now inside the farm's container\ncd lib/node_modules/wiki\nnpm link --prefix . ../../fedwiki/wiki-plugin-apparatus\nexit"
+      },
+      "date": 1515967391994
+    },
+    {
+      "type": "edit",
+      "id": "a670fa1fb5a0a314",
+      "item": {
+        "type": "code",
+        "id": "a670fa1fb5a0a314",
+        "text": "cd wiki-example-tls-friends\n# start wiki and supporting services\ndocker-compose up -d\ndocker-compose exec farm bash\n# now inside the farm's container\ncd lib/node_modules/wiki\nnpm link \\\n  --prefix . \\\n  ../../fedwiki/wiki-plugin-apparatus\nexit"
+      },
+      "date": 1515967417385
+    },
+    {
+      "type": "edit",
+      "id": "bd09eb4d62cb7c3f",
+      "item": {
+        "type": "code",
+        "id": "bd09eb4d62cb7c3f",
+        "text": "docker-compose restart farm\n"
+      },
+      "date": 1515967462430
+    },
+    {
+      "type": "edit",
+      "id": "350e568a987e3e60",
+      "item": {
+        "type": "markdown",
+        "id": "350e568a987e3e60",
+        "text": "This will load our newly linked, experimental plugin with wiki\n"
+      },
+      "date": 1515967537358
+    },
+    {
+      "type": "add",
+      "id": "113711b14fa2e702",
+      "item": {
+        "type": "markdown",
+        "id": "113711b14fa2e702",
+        "text": "**Create an item** of this type.  Create a new page.  Add a simple item.  You should see `Apparatus` among the options in the Factory.  (the Make Plugin Script added a `factory.json` file to our plugin directory and recreating the `farm` service will have reloaded all the plugins."
+      },
+      "after": "350e568a987e3e60",
+      "date": 1515967538657
+    },
+    {
+      "type": "edit",
+      "id": "350e568a987e3e60",
+      "item": {
+        "type": "markdown",
+        "id": "350e568a987e3e60",
+        "text": "This will load our newly linked, experimental plugin with wiki.\n"
+      },
+      "date": 1515967547900
+    },
+    {
+      "type": "edit",
+      "id": "a670fa1fb5a0a314",
+      "item": {
+        "type": "code",
+        "id": "a670fa1fb5a0a314",
+        "text": "cd wiki-example-tls-friends\n# start wiki and supporting services\ndocker-compose up -d\ndocker-compose exec farm bash\n# now inside the farm's container\ncd lib/node_modules/wiki\nnpm link \\\n  --prefix ~ \\\n  ../../fedwiki/wiki-plugin-apparatus\nexit"
+      },
+      "date": 1517375254098
+    },
+    {
+      "type": "edit",
+      "id": "546d257dc2ab03f3",
+      "item": {
+        "type": "code",
+        "id": "546d257dc2ab03f3",
+        "text": "cd fedwiki/wiki-plugin-apparatus\ndocker run --rm -it \\\n  -v $PWD:/$(basename $PWD) \\\n  -w /$(basename $PWD) \\\n  dobbs/farm:0.13.0 \\\n  bash\n# now inside the container...\nnpm install\nnode_modules/grunt/bin/grunt build\nnode_modules/grunt/bin/grunt watch"
+      },
+      "date": 1517375368932
+    },
+    {
+      "type": "fork",
+      "site": "wiki.dbbs.co",
+      "date": 1517375622296
+    },
+    {
+      "type": "edit",
+      "id": "a670fa1fb5a0a314",
+      "item": {
+        "type": "code",
+        "id": "a670fa1fb5a0a314",
+        "text": "cd wiki-example-tls-friends\n# start wiki and supporting services\ndocker-compose up -d\ndocker-compose exec farm bash\n# now inside the farm's container\ncd lib/node_modules/wiki\nnpm link \\\n  --prefix . \\\n  ../../fedwiki/wiki-plugin-apparatus\nexit"
+      },
+      "date": 1517376378377
+    },
+    {
+      "type": "edit",
+      "id": "78227e52c4d8ee44",
+      "item": {
+        "type": "code",
+        "id": "78227e52c4d8ee44",
+        "text": "# local directory tree\n\nwiki-tls\nfedwiki\n└── wiki-plugin-apparatus\n    ├── client\n    ├── pages\n    ├── server\n    ├── status\n    └── test\n\n"
+      },
+      "date": 1519574918796
+    },
+    {
+      "type": "edit",
+      "id": "a670fa1fb5a0a314",
+      "item": {
+        "type": "code",
+        "id": "a670fa1fb5a0a314",
+        "text": "cd wiki-tls\n# start wiki and supporting services\ndocker-compose up -d\ndocker-compose exec farm bash\n# now inside the farm's container\ncd lib/node_modules/wiki\nnpm link \\\n  --prefix . \\\n  ../../fedwiki/wiki-plugin-apparatus\nexit"
+      },
+      "date": 1519574946736
+    },
+    {
+      "type": "edit",
+      "id": "546d257dc2ab03f3",
+      "item": {
+        "type": "code",
+        "id": "546d257dc2ab03f3",
+        "text": "cd fedwiki/wiki-plugin-apparatus\ndocker run --rm -it \\\n  -v $PWD:/$(basename $PWD) \\\n  -w /$(basename $PWD) \\\n  dobbs/farm:0.14.0 \\\n  bash\n# now inside the container...\nnpm install\nnode_modules/grunt/bin/grunt build\nnode_modules/grunt/bin/grunt watch"
+      },
+      "date": 1521480459256
+    },
+    {
+      "type": "edit",
+      "id": "8c605700a2b71b0b",
+      "item": {
+        "type": "code",
+        "id": "8c605700a2b71b0b",
+        "text": "# docker-compose.override.yml\n\nservices:\n  farm:\n    volumes:\n      - ../fedwiki:/home/app/fedwiki\n"
+      },
+      "date": 1521480479318
+    },
+    {
+      "type": "edit",
+      "id": "a670fa1fb5a0a314",
+      "item": {
+        "type": "code",
+        "id": "a670fa1fb5a0a314",
+        "text": "cd wiki-tls\n# start wiki and supporting services\ndocker-compose up -d\ndocker-compose exec farm bash\n# now inside the farm's container\ncd lib/node_modules/wiki\nnpm link \\\n  --prefix . \\\n  ../../../fedwiki/wiki-plugin-apparatus\nexit"
+      },
+      "date": 1521480495612
+    },
+    {
+      "type": "edit",
+      "id": "93e63ff0dc7a857e",
+      "item": {
+        "type": "markdown",
+        "id": "93e63ff0dc7a857e",
+        "text": "We'd like to share other web sites via wiki.  HTML offers the <iframe> tag for this purpose.  We'll build a Frame Plugin.\n"
+      },
+      "date": 1521480618990
+    },
+    {
+      "type": "edit",
+      "id": "02ff867d81648bab",
+      "item": {
+        "type": "markdown",
+        "id": "02ff867d81648bab",
+        "text": "**Make up a name** for the plugin. Names will become complicated someday. Now they are simple. We'll call ours Frame."
+      },
+      "date": 1521480649596
+    },
+    {
+      "type": "edit",
+      "id": "78227e52c4d8ee44",
+      "item": {
+        "type": "code",
+        "id": "78227e52c4d8ee44",
+        "text": "# local directory tree\n\nwiki-tls\nfedwiki\n└── wiki-plugin-frame\n    ├── client\n    ├── pages\n    ├── server\n    ├── status\n    └── test\n\n"
+      },
+      "date": 1521480659734
+    },
+    {
+      "type": "edit",
+      "id": "a670fa1fb5a0a314",
+      "item": {
+        "type": "code",
+        "id": "a670fa1fb5a0a314",
+        "text": "cd wiki-tls\n# start wiki and supporting services\ndocker-compose up -d\ndocker-compose exec farm bash\n# now inside the farm's container\ncd lib/node_modules/wiki\nnpm link \\\n  --prefix . \\\n  ../../../fedwiki/wiki-plugin-frame\nexit"
+      },
+      "date": 1521480684956
+    },
+    {
+      "type": "edit",
+      "id": "546d257dc2ab03f3",
+      "item": {
+        "type": "code",
+        "id": "546d257dc2ab03f3",
+        "text": "cd fedwiki/wiki-plugin-frame\ndocker run --rm -it \\\n  -v $PWD:/$(basename $PWD) \\\n  -w /$(basename $PWD) \\\n  dobbs/farm:0.14.0 \\\n  bash\n# now inside the container...\nnpm install\nnode_modules/grunt/bin/grunt build\nnode_modules/grunt/bin/grunt watch"
+      },
+      "date": 1521480694638
+    },
+    {
+      "type": "edit",
+      "id": "113711b14fa2e702",
+      "item": {
+        "type": "markdown",
+        "id": "113711b14fa2e702",
+        "text": "**Create an item** of this type.  Create a new page.  Add a simple item.  You should see `Frame` among the options in the Factory.  (the Make Plugin Script added a `factory.json` file to our plugin directory and recreating the `farm` service will have reloaded all the plugins."
+      },
+      "date": 1521480728384
+    },
+    {
+      "type": "edit",
+      "id": "9615c9ddd59bfd15",
+      "item": {
+        "type": "factory",
+        "id": "9615c9ddd59bfd15",
+        "text": "Tip: use `wiki.textEditor` to provide a user-editable text field to your item"
+      },
+      "date": 1521480757678
+    },
+    {
+      "type": "edit",
+      "id": "9615c9ddd59bfd15",
+      "item": {
+        "type": "markdown",
+        "id": "9615c9ddd59bfd15",
+        "text": "Tip: use `wiki.textEditor` to provide a user-editable text field to your item."
+      },
+      "date": 1521480764930
+    },
+    {
+      "type": "edit",
+      "id": "068cb5f343e2ab03",
+      "item": {
+        "type": "factory",
+        "id": "068cb5f343e2ab03",
+        "text": "Tip: report errors by emitting `p.error` tags"
+      },
+      "date": 1521480775578
+    },
+    {
+      "type": "edit",
+      "id": "068cb5f343e2ab03",
+      "item": {
+        "type": "markdown",
+        "id": "068cb5f343e2ab03",
+        "text": "Tip: report errors by emitting `p.error` tags."
+      },
+      "date": 1521480781902
+    },
+    {
+      "type": "edit",
+      "id": "26390c9666f85820",
+      "item": {
+        "type": "code",
+        "id": "26390c9666f85820",
+        "text": "window.plugins.frame = {emit, bind} if window?\nmodule.exports = {parse, expand} if module?\n"
+      },
+      "date": 1521480793088
+    },
+    {
+      "type": "edit",
+      "id": "5ab7c819ebaa7c87",
+      "item": {
+        "type": "factory",
+        "id": "5ab7c819ebaa7c87",
+        "text": "Tip: use `guard watch` to notice changes in your code and automatically run the tests."
+      },
+      "date": 1521480820408
+    },
+    {
+      "type": "edit",
+      "id": "db5db3aa1b0d238e",
+      "item": {
+        "type": "code",
+        "id": "db5db3aa1b0d238e",
+        "text": "npm install git+https://github.com/dobbs/wiki-plugin-frame#security"
+      },
+      "date": 1521481004072
+    },
+    {
+      "type": "edit",
+      "id": "604ac8e859bbf5b5",
+      "item": {
+        "type": "markdown",
+        "id": "604ac8e859bbf5b5",
+        "text": "**Host the new plugin on your own server**.  `npm` can install the plugin from your github page, if you are not ready to publish on npmjs.org.  We suggest committing the built javascript files to a specific branch and installing that _branch_:\n"
+      },
+      "date": 1521481052104
+    },
+    {
+      "type": "edit",
+      "id": "3ad9bf6759f51bec",
+      "item": {
+        "type": "factory",
+        "id": "3ad9bf6759f51bec",
+        "text": "**Publish on npmjs.org** which allows your plugin to be included in other servers by name using the node package manager. [https://www.npmjs.org/search?q=wiki-plugin npm]"
+      },
+      "date": 1521481119792
+    },
+    {
+      "type": "edit",
+      "id": "3ad9bf6759f51bec",
+      "item": {
+        "type": "markdown",
+        "id": "3ad9bf6759f51bec",
+        "text": "**Publish on npmjs.org** which allows your plugin to be included in other servers by name using the node package manager. [https://www.npmjs.org/search?q=wiki-plugin npm]\n"
+      },
+      "date": 1521481132614
+    },
+    {
+      "type": "add",
+      "id": "2cb74a45be02be54",
+      "item": {
+        "type": "markdown",
+        "id": "2cb74a45be02be54",
+        "text": "Published node packages can also be installed using the Plugmatic plugin.  See [[About Plugmatic Plugin]]"
+      },
+      "after": "3ad9bf6759f51bec",
+      "date": 1521481186866
+    },
+    {
+      "type": "edit",
+      "id": "2cb74a45be02be54",
+      "item": {
+        "type": "markdown",
+        "id": "2cb74a45be02be54",
+        "text": "Published node packages can also be installed by server administrators using the Plugmatic plugin.  See [[About Plugmatic Plugin]]"
+      },
+      "date": 1521481213086
+    },
+    {
+      "type": "edit",
+      "id": "db5db3aa1b0d238e",
+      "item": {
+        "type": "code",
+        "id": "db5db3aa1b0d238e",
+        "text": "npm install git+https://github.com/dobbs/wiki-plugin-frame#include-js"
+      },
+      "date": 1521481255312
+    },
+    {
+      "type": "edit",
+      "id": "5ab7c819ebaa7c87",
+      "item": {
+        "type": "markdown",
+        "id": "5ab7c819ebaa7c87",
+        "text": "**Tip:** use `guard watch` to notice changes in your code and automatically run the tests."
+      },
+      "date": 1521481371530
+    },
+    {
+      "type": "edit",
+      "id": "5ab7c819ebaa7c87",
+      "item": {
+        "type": "markdown",
+        "id": "5ab7c819ebaa7c87",
+        "text": "Tip: use `guard watch` to notice changes in your code and automatically run the tests."
+      },
+      "date": 1521481385910
+    },
+    {
+      "type": "edit",
+      "id": "a670fa1fb5a0a314",
+      "item": {
+        "type": "code",
+        "id": "a670fa1fb5a0a314",
+        "text": "cd wiki-tls\n# start wiki and supporting services\ndocker-compose up -d\ndocker-compose exec farm bash\n# now inside the farm's container\ncd lib/node_modules/wiki\nexport NPM_CONFIG_PREFIX=$HOME\nnpm link ../../../fedwiki/wiki-plugin-frame\nexit"
+      },
+      "date": 1521489523602
+    },
+    {
+      "type": "edit",
+      "id": "2cb74a45be02be54",
+      "item": {
+        "type": "markdown",
+        "id": "2cb74a45be02be54",
+        "text": "Published node packages can also be installed by server administrators using the Plugmatic plugin.  See [[About Plugmatic Plugin]]\n"
+      },
+      "date": 1521649633426
+    },
+    {
+      "type": "add",
+      "id": "e216f4ce2bd517a3",
+      "item": {
+        "type": "factory",
+        "id": "e216f4ce2bd517a3",
+        "text": "cd fedwiki/wiki-plugin-frame\ndocker run --rm -it \\\n  -v $HOME/.npmrc:/home/app/.npmrc \\\n  -v $PWD:/$(basename $PWD) \\\n  -w /$(basename $PWD) \\\n  dobbs/farm:0.14.0 \\\n  bash\n# now inside the container...\nnpm install\nnode_modules/grunt/bin/grunt build\nnode_modules/grunt/bin/grunt watch"
+      },
+      "after": "2cb74a45be02be54",
+      "date": 1521649696136
+    },
+    {
+      "type": "edit",
+      "id": "e216f4ce2bd517a3",
+      "item": {
+        "type": "code",
+        "id": "e216f4ce2bd517a3",
+        "text": "cd fedwiki/wiki-plugin-frame\ndocker run --rm -it \\\n  -v $HOME/.npmrc:/home/app/.npmrc \\\n  -v $PWD:/$(basename $PWD) \\\n  -w /$(basename $PWD) \\\n  dobbs/farm:0.14.0 \\\n  bash\n# now inside the container...\nnpm whoami"
+      },
+      "date": 1521649709432
+    },
+    {
+      "type": "edit",
+      "id": "e216f4ce2bd517a3",
+      "item": {
+        "type": "code",
+        "id": "e216f4ce2bd517a3",
+        "text": "cd fedwiki/wiki-plugin-frame\ndocker run --rm -it \\\n  -v $HOME/.npmrc:/home/app/.npmrc \\\n  -v $HOME/.gitconfig:/home/app/.gitconfig \\\n  -v $PWD:/$(basename $PWD) \\\n  -w /$(basename $PWD) \\\n  dobbs/farm:0.14.0 \\\n  bash\n# now inside the container...\nnpm whoami\nnpm version patch -m \"Bump version to %s\"\nnpm publish"
+      },
+      "date": 1521650505376
+    },
+    {
+      "type": "remove",
+      "id": "2cb74a45be02be54",
+      "date": 1521650567262
+    },
+    {
+      "type": "edit",
+      "id": "3ad9bf6759f51bec",
+      "item": {
+        "type": "markdown",
+        "id": "3ad9bf6759f51bec",
+        "text": "**Publish on npmjs.org** which allows your plugin to be included in other servers by name using the node package manager or the Plugmatic plugin.  See [[About Plugmatic Plugin]]. [https://www.npmjs.org/search?q=wiki-plugin npm]"
+      },
+      "date": 1521650599994
+    },
+    {
+      "type": "fork",
+      "site": "local-farm.wiki.dbbs.co",
+      "date": 1521650760296
+    },
+    {
+      "type": "edit",
+      "id": "546d257dc2ab03f3",
+      "item": {
+        "type": "code",
+        "id": "546d257dc2ab03f3",
+        "text": "cd fedwiki/wiki-plugin-frame\ndocker run --rm -it \\\n  -v $PWD:/$(basename $PWD) \\\n  -w /$(basename $PWD) \\\n  dobbs/farm:0.50.0 \\\n  bash\n# now inside the container...\nnpm install\nnode_modules/grunt/bin/grunt build\nnode_modules/grunt/bin/grunt watch"
+      },
+      "date": 1546878112838
+    },
+    {
+      "type": "edit",
+      "id": "e216f4ce2bd517a3",
+      "item": {
+        "type": "code",
+        "id": "e216f4ce2bd517a3",
+        "text": "cd fedwiki/wiki-plugin-frame\ndocker run --rm -it \\\n  -v $HOME/.npmrc:/home/app/.npmrc \\\n  -v $HOME/.gitconfig:/home/app/.gitconfig \\\n  -v $PWD:/$(basename $PWD) \\\n  -w /$(basename $PWD) \\\n  dobbs/farm:0.50.0 \\\n  bash\n# now inside the container...\nnpm whoami\nnpm version patch -m \"Bump version to %s\"\nnpm publish"
+      },
+      "date": 1546878116776
+    },
+    {
+      "type": "edit",
+      "id": "e216f4ce2bd517a3",
+      "item": {
+        "type": "code",
+        "id": "e216f4ce2bd517a3",
+        "text": "cd fedwiki/wiki-plugin-frame\ndocker run --rm -it \\\n  -v $HOME/.npmrc:/$(basename $PWD)/.npmrc \\\n  -v $HOME/.gitconfig:/$(basename $PWD/.gitconfig \\\n  -v $PWD:/$(basename $PWD) \\\n  -w /$(basename $PWD) \\\n  node:10 \\\n  bash\n# now inside the container...\nnpm whoami # double-check npm login\ngrunt \nnpm version patch -m \"Bump version to %s\"\nnpm publish"
+      },
+      "date": 1551105113198
+    },
+    {
+      "type": "edit",
+      "id": "e216f4ce2bd517a3",
+      "item": {
+        "type": "code",
+        "id": "e216f4ce2bd517a3",
+        "text": "cd fedwiki/wiki-plugin-frame\ndocker run --rm -it \\\n  -v $HOME/.npmrc:/$(basename $PWD)/.npmrc \\\n  -v $HOME/.gitconfig:/$(basename $PWD/.gitconfig \\\n  -v $PWD:/$(basename $PWD) \\\n  -w /$(basename $PWD) \\\n  node:10 \\\n  bash\n# now inside the container...\nnpm whoami # double-check npm login\n# update authors\nnode_modules/grunt/bin/grunt update-authors \nnode_modules/grunt/bin/grunt update-contributors \n# git commit the changes to authors\nnpm version patch\nnpm publish"
+      },
+      "date": 1551105221225
+    },
+    {
+      "type": "fork",
+      "site": "wiki.dbbs.co",
+      "date": 1551578026992
+    },
+    {
+      "type": "edit",
+      "id": "e216f4ce2bd517a3",
+      "item": {
+        "type": "code",
+        "id": "e216f4ce2bd517a3",
+        "text": "cd fedwiki/wiki-plugin-frame\ndocker run --rm -it \\\n  -v $HOME/.npmrc:/$(basename $PWD)/.npmrc \\\n  -v $HOME/.gitconfig:/$(basename $PWD)/.gitconfig \\\n  -v $PWD:/$(basename $PWD) \\\n  -w /$(basename $PWD) \\\n  node:10 \\\n  bash\n# now inside the container...\nnpm whoami # double-check npm login\n# update authors\nnode_modules/grunt/bin/grunt update-authors \nnode_modules/grunt/bin/grunt update-contributors \n# git commit the changes to authors\nnpm version patch\nnpm publish"
+      },
+      "date": 1551923167783
+    },
+    {
+      "type": "fork",
+      "site": "local-farm.wiki.dbbs.co",
+      "date": 1701932291388
     }
   ]
 }
