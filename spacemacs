@@ -171,6 +171,11 @@
         "text": "A practical guide to Spacemacs, a community driven Emacs configuration that provides all the power of [[Emacs]] and [[Vim]]. The guide contains a section on Clojure development, the majority of the book is applicable to any language."
       },
       "date": 1701411052240
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1701412349826
     }
   ]
 }
