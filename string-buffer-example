@@ -1,0 +1,312 @@
+{
+  "title": "String Buffer Example",
+  "story": [
+    {
+      "type": "html",
+      "text": "The page [[String Buffer]] talks about explicit use of [[String Buffer]]s for concatenating Java Strings, as opposed to the + operator. There's a suggestion that \".. if you're optimizing for performance, I'm told that the ugly version is much faster. Haven't tested it myself though.\" Quite an [[Alarm Bell Phrase]]!",
+      "id": "9ce9a735615ec7f383224213d162ee1b"
+    },
+    {
+      "type": "html",
+      "text": "\nInfact of the examples on that page, the \"neat\" version is infact _much_ faster, since the compiler can turn the expression into a single string literal (and iirc is required to by the language spec). To get the proper comparison, we really want to use variables rather than constants. For example:",
+      "id": "7b43ff49853eef13d6ca91b4d7272d8a"
+    },
+    {
+      "type": "code",
+      "text": "   public static String ugly(String foo, String bar) {\n     StringBuffer buffer = new StringBuffer();\n     buffer.append (foo);\n     buffer.append (\" \");\n     buffer.append (bar);\n     return buffer.toString();\n   }\n   public static String neat(String foo, String bar) {\n     return foo + \" \" + bar;\n   }",
+      "id": "5319f7229bb6b7d6e7736d387eb24ae1"
+    },
+    {
+      "type": "html",
+      "text": "\nLooks like a fair comparison. Let's look at the code that gets generated for this by javac, starting with the \"neat\" version:",
+      "id": "47d8286db621947399310159f058f087"
+    },
+    {
+      "type": "code",
+      "text": " .method public static neat(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;\n   .limit locals 2\n   .limit stack 3",
+      "id": "418adc84870a47bf7f43f0194bd273ae"
+    },
+    {
+      "type": "code",
+      "text": "   new              java/lang/StringBuffer\n   dup\n   aload_0\n   invokestatic     java/lang/String.valueOf(Ljava/lang/Object;)Ljava/lang/String;\n   invokenonvirtual java/lang/StringBuffer.<init>(Ljava/lang/String;)V\n   ldc              \" \"\n   invokevirtual    java/lang/StringBuffer.append(Ljava/lang/String;)Ljava/lang/StringBuffer;\n   aload_1\n   invokevirtual    java/lang/StringBuffer.append(Ljava/lang/String;)Ljava/lang/StringBuffer;\n   invokevirtual    java/lang/StringBuffer.toString()Ljava/lang/String;\n   areturn\n .end method",
+      "id": "601d2a09badd5ddab2a5f23953d76220"
+    },
+    {
+      "type": "html",
+      "text": "\nPretty straight forward. Create a [[String Buffer]] with the <i>foo</i> String as an argument to its constructor (with an unnecessary String.valueOf call on <i>foo</i>), then append() <i>bar</i> and return the toString(). The only obvious problem is the valueOf(). Javap reveals that this method is 31 bytes long.",
+      "id": "971776414e2aaacf7167747d713b4225"
+    },
+    {
+      "type": "html",
+      "text": "\nNow the \"ugly\" one:",
+      "id": "195ea3c0d19862a4faf4d9bd3fd029d8"
+    },
+    {
+      "type": "code",
+      "text": " .method public static ugly(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;\n   .limit locals 3\n   .limit stack 2",
+      "id": "43a6efb1671be754ce88367299efb487"
+    },
+    {
+      "type": "code",
+      "text": "   new              java/lang/StringBuffer\n   dup\n   invokenonvirtual java/lang/StringBuffer.<init>()V\n   astore_2\n   aload_2\n   aload_0\n   invokevirtual    java/lang/StringBuffer.append(Ljava/lang/String;)Ljava/lang/StringBuffer;\n   pop\n   aload_2\n   ldc              \" \"\n   invokevirtual    java/lang/StringBuffer.append(Ljava/lang/String;)Ljava/lang/StringBuffer;\n   pop\n   aload_2\n   aload_1\n   invokevirtual    java/lang/StringBuffer.append(Ljava/lang/String;)Ljava/lang/StringBuffer;\n   pop\n   aload_2\n   invokevirtual    java/lang/StringBuffer.toString()Ljava/lang/String;\n   areturn\n .end method",
+      "id": "8b8b900b6d6468d66ba6fcffb60d8f45"
+    },
+    {
+      "type": "html",
+      "text": "\nLonger code (41 bytes), the [[String Buffer]] is created with a no-args constructor and then append()ed both strings adding an invocation, and there's more work being done mucking with local variables. But of course we don't mind this if it's going to be <i>much</i> faster.",
+      "id": "68a38b02039954464dae70ea2b50ed38"
+    },
+    {
+      "type": "html",
+      "text": "\nBefore we benchmark, let's make it interesting by throwing in a \"hand-hacked\" version, which simply removes the valueOf call in the \"neat\" version. Here are the results on my copy of JDK 1.2.",
+      "id": "db0be9aedbda4728f70d06d327cca76f"
+    },
+    {
+      "type": "html",
+      "text": "\nTime to make a million invocations of each took:",
+      "id": "ae1f0dff45b83f48e7de2792fad737e9"
+    },
+    {
+      "type": "code",
+      "text": " $ java string\n neat        took 11668ms\n ugly        took 11129ms\n hand_hacked took 10900ms",
+      "id": "fab2af263e9dd56b8a2a18b911e08e30"
+    },
+    {
+      "type": "html",
+      "text": "\nRather a small difference in all cases! The biggest difference being 758ms over 1000000 invocations. Of course if we were actually printing the strings then the I/O would make this already small difference completely irrelevant.",
+      "id": "5543431e0d4d8b50ce6765356797675a"
+    },
+    {
+      "type": "html",
+      "text": "\nSo, next time someone gives you a tip about an \"ugly way that's much faster\", be careful!",
+      "id": "030542f72065b8db2cf3f132a85ff2af"
+    },
+    {
+      "type": "html",
+      "text": "<i>Indeed you do need to be careful. I had an application in which strings that were dynamically generated (dates and other bits and bobs) needed to be concatenated. My bench mark showed that the ugly way was an order of magnitude faster than the neat way. --[[Channing Walton]] </i>",
+      "id": "bee9baa7680cda707bbd6d46bc3f045f"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4a3dfac45d13d469aa4d69f597c2adc4"
+    },
+    {
+      "type": "html",
+      "text": "You're not taking into account the effects of garbage collecting the intermediate (but never specifically named) Strings.  In your little benchmark the memory situation is a non-issue, but in a real application, say using Swing and many objects, gc becomes significant.  That's the thing about benchmarks -- they only show how long it takes to run the benchmark.",
+      "id": "68d13828546f308993e51b4a5fd097fd"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Steven Newton]]",
+      "id": "d8155d7586db2539a75251a8f23f1895"
+    },
+    {
+      "type": "html",
+      "text": "\nTime taken for GC is proportional to the number of <i>live</i> objects, not dead ones.  The difference in speed between code that appends strings with the \"+\" operator and code that uses a [[String Buffer]] is caused by data copying.  A [[String Buffer]] copies data by doubling the size of the buffer each time it fills up, so the complexity of the concatenation is O(n log n).  The \"+\" operator creates a new string and copies both arguments into the new string's internal buffer, so the complexity is O(n^2).",
+      "id": "b3e698570bb9e054e4238b50bcf77cff"
+    },
+    {
+      "type": "html",
+      "text": "<i>These are good points, but they don't actually apply to this example: the disassembled code shows that each method uses exactly one new/temporary object (a [[String Buffer]]). The important thing about this example is that the compiler generates very similar bytecodes for both cases, and the assumption that it will create a new String for each use of the + operator is wrong.</i>",
+      "id": "5c3cc85d4d4b7e71fb268b0d92686a9b"
+    },
+    {
+      "type": "html",
+      "text": "\nPut another way, with javac \"s1 + s2 + ... + sN\" runs in O(N) time and with O(1) temporary garbage, just like the [[String Buffer]] version. At least if you take [[String Buffer]] operations as O(1), which they aren't :-).",
+      "id": "f496d5a930af93b27d00c33d2186368c"
+    },
+    {
+      "type": "html",
+      "text": "\nAs in Channing's example, if your program isn't simple enough for javac to optimise, you will end up running in O(N^2) time with + vs. O(N) with [[String Buffer]], for N string appends, which is a big difference.",
+      "id": "ab39b6269cb5fedb9afdfbbe66a8b62c"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4a3dfac45d13d469aa4d69f597c2adc4"
+    },
+    {
+      "type": "html",
+      "text": "\nThere's one more thing: [[String Buffer]] is synchronized... meaning that each call to append() is wrapped up in a mutex.\nOne system I've visites just replaces all of their [[String Buffer]] instances with [[String Builder]] ones (Same API, non-synchronized), and that alone made things \"much faster\". --[[Aviv Eyal]]",
+      "id": "6c54ca02b889927513e8ead1a23113e9"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4a3dfac45d13d469aa4d69f597c2adc4"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Java]]",
+      "id": "07a503fee45e8c1a9c1cacb0ab0633ab"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?StringBufferExample c2.com]",
+      "id": "b9c57159ccfb7bac996b169b64e87991"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1210260520000,
+      "id": "dbd44b605842277c3855324f02d94ee0",
+      "type": "create",
+      "item": {
+        "title": "String Buffer Example",
+        "story": [
+          {
+            "type": "html",
+            "text": "The page [[String Buffer]] talks about explicit use of [[String Buffer]]s for concatenating Java Strings, as opposed to the + operator. There's a suggestion that \".. if you're optimizing for performance, I'm told that the ugly version is much faster. Haven't tested it myself though.\" Quite an [[Alarm Bell Phrase]]!",
+            "id": "9ce9a735615ec7f383224213d162ee1b"
+          },
+          {
+            "type": "html",
+            "text": "\nInfact of the examples on that page, the \"neat\" version is infact _much_ faster, since the compiler can turn the expression into a single string literal (and iirc is required to by the language spec). To get the proper comparison, we really want to use variables rather than constants. For example:",
+            "id": "7b43ff49853eef13d6ca91b4d7272d8a"
+          },
+          {
+            "type": "code",
+            "text": "   public static String ugly(String foo, String bar) {\n     StringBuffer buffer = new StringBuffer();\n     buffer.append (foo);\n     buffer.append (\" \");\n     buffer.append (bar);\n     return buffer.toString();\n   }\n   public static String neat(String foo, String bar) {\n     return foo + \" \" + bar;\n   }",
+            "id": "5319f7229bb6b7d6e7736d387eb24ae1"
+          },
+          {
+            "type": "html",
+            "text": "\nLooks like a fair comparison. Let's look at the code that gets generated for this by javac, starting with the \"neat\" version:",
+            "id": "47d8286db621947399310159f058f087"
+          },
+          {
+            "type": "code",
+            "text": " .method public static neat(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;\n   .limit locals 2\n   .limit stack 3",
+            "id": "418adc84870a47bf7f43f0194bd273ae"
+          },
+          {
+            "type": "code",
+            "text": "   new              java/lang/StringBuffer\n   dup\n   aload_0\n   invokestatic     java/lang/String.valueOf(Ljava/lang/Object;)Ljava/lang/String;\n   invokenonvirtual java/lang/StringBuffer.<init>(Ljava/lang/String;)V\n   ldc              \" \"\n   invokevirtual    java/lang/StringBuffer.append(Ljava/lang/String;)Ljava/lang/StringBuffer;\n   aload_1\n   invokevirtual    java/lang/StringBuffer.append(Ljava/lang/String;)Ljava/lang/StringBuffer;\n   invokevirtual    java/lang/StringBuffer.toString()Ljava/lang/String;\n   areturn\n .end method",
+            "id": "601d2a09badd5ddab2a5f23953d76220"
+          },
+          {
+            "type": "html",
+            "text": "\nPretty straight forward. Create a [[String Buffer]] with the <i>foo</i> String as an argument to its constructor (with an unnecessary String.valueOf call on <i>foo</i>), then append() <i>bar</i> and return the toString(). The only obvious problem is the valueOf(). Javap reveals that this method is 31 bytes long.",
+            "id": "971776414e2aaacf7167747d713b4225"
+          },
+          {
+            "type": "html",
+            "text": "\nNow the \"ugly\" one:",
+            "id": "195ea3c0d19862a4faf4d9bd3fd029d8"
+          },
+          {
+            "type": "code",
+            "text": " .method public static ugly(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;\n   .limit locals 3\n   .limit stack 2",
+            "id": "43a6efb1671be754ce88367299efb487"
+          },
+          {
+            "type": "code",
+            "text": "   new              java/lang/StringBuffer\n   dup\n   invokenonvirtual java/lang/StringBuffer.<init>()V\n   astore_2\n   aload_2\n   aload_0\n   invokevirtual    java/lang/StringBuffer.append(Ljava/lang/String;)Ljava/lang/StringBuffer;\n   pop\n   aload_2\n   ldc              \" \"\n   invokevirtual    java/lang/StringBuffer.append(Ljava/lang/String;)Ljava/lang/StringBuffer;\n   pop\n   aload_2\n   aload_1\n   invokevirtual    java/lang/StringBuffer.append(Ljava/lang/String;)Ljava/lang/StringBuffer;\n   pop\n   aload_2\n   invokevirtual    java/lang/StringBuffer.toString()Ljava/lang/String;\n   areturn\n .end method",
+            "id": "8b8b900b6d6468d66ba6fcffb60d8f45"
+          },
+          {
+            "type": "html",
+            "text": "\nLonger code (41 bytes), the [[String Buffer]] is created with a no-args constructor and then append()ed both strings adding an invocation, and there's more work being done mucking with local variables. But of course we don't mind this if it's going to be <i>much</i> faster.",
+            "id": "68a38b02039954464dae70ea2b50ed38"
+          },
+          {
+            "type": "html",
+            "text": "\nBefore we benchmark, let's make it interesting by throwing in a \"hand-hacked\" version, which simply removes the valueOf call in the \"neat\" version. Here are the results on my copy of JDK 1.2.",
+            "id": "db0be9aedbda4728f70d06d327cca76f"
+          },
+          {
+            "type": "html",
+            "text": "\nTime to make a million invocations of each took:",
+            "id": "ae1f0dff45b83f48e7de2792fad737e9"
+          },
+          {
+            "type": "code",
+            "text": " $ java string\n neat        took 11668ms\n ugly        took 11129ms\n hand_hacked took 10900ms",
+            "id": "fab2af263e9dd56b8a2a18b911e08e30"
+          },
+          {
+            "type": "html",
+            "text": "\nRather a small difference in all cases! The biggest difference being 758ms over 1000000 invocations. Of course if we were actually printing the strings then the I/O would make this already small difference completely irrelevant.",
+            "id": "5543431e0d4d8b50ce6765356797675a"
+          },
+          {
+            "type": "html",
+            "text": "\nSo, next time someone gives you a tip about an \"ugly way that's much faster\", be careful!",
+            "id": "030542f72065b8db2cf3f132a85ff2af"
+          },
+          {
+            "type": "html",
+            "text": "<i>Indeed you do need to be careful. I had an application in which strings that were dynamically generated (dates and other bits and bobs) needed to be concatenated. My bench mark showed that the ugly way was an order of magnitude faster than the neat way. --[[Channing Walton]] </i>",
+            "id": "bee9baa7680cda707bbd6d46bc3f045f"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4a3dfac45d13d469aa4d69f597c2adc4"
+          },
+          {
+            "type": "html",
+            "text": "You're not taking into account the effects of garbage collecting the intermediate (but never specifically named) Strings.  In your little benchmark the memory situation is a non-issue, but in a real application, say using Swing and many objects, gc becomes significant.  That's the thing about benchmarks -- they only show how long it takes to run the benchmark.",
+            "id": "68d13828546f308993e51b4a5fd097fd"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Steven Newton]]",
+            "id": "d8155d7586db2539a75251a8f23f1895"
+          },
+          {
+            "type": "html",
+            "text": "\nTime taken for GC is proportional to the number of <i>live</i> objects, not dead ones.  The difference in speed between code that appends strings with the \"+\" operator and code that uses a [[String Buffer]] is caused by data copying.  A [[String Buffer]] copies data by doubling the size of the buffer each time it fills up, so the complexity of the concatenation is O(n log n).  The \"+\" operator creates a new string and copies both arguments into the new string's internal buffer, so the complexity is O(n^2).",
+            "id": "b3e698570bb9e054e4238b50bcf77cff"
+          },
+          {
+            "type": "html",
+            "text": "<i>These are good points, but they don't actually apply to this example: the disassembled code shows that each method uses exactly one new/temporary object (a [[String Buffer]]). The important thing about this example is that the compiler generates very similar bytecodes for both cases, and the assumption that it will create a new String for each use of the + operator is wrong.</i>",
+            "id": "5c3cc85d4d4b7e71fb268b0d92686a9b"
+          },
+          {
+            "type": "html",
+            "text": "\nPut another way, with javac \"s1 + s2 + ... + sN\" runs in O(N) time and with O(1) temporary garbage, just like the [[String Buffer]] version. At least if you take [[String Buffer]] operations as O(1), which they aren't :-).",
+            "id": "f496d5a930af93b27d00c33d2186368c"
+          },
+          {
+            "type": "html",
+            "text": "\nAs in Channing's example, if your program isn't simple enough for javac to optimise, you will end up running in O(N^2) time with + vs. O(N) with [[String Buffer]], for N string appends, which is a big difference.",
+            "id": "ab39b6269cb5fedb9afdfbbe66a8b62c"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4a3dfac45d13d469aa4d69f597c2adc4"
+          },
+          {
+            "type": "html",
+            "text": "\nThere's one more thing: [[String Buffer]] is synchronized... meaning that each call to append() is wrapped up in a mutex.\nOne system I've visites just replaces all of their [[String Buffer]] instances with [[String Builder]] ones (Same API, non-synchronized), and that alone made things \"much faster\". --[[Aviv Eyal]]",
+            "id": "6c54ca02b889927513e8ead1a23113e9"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4a3dfac45d13d469aa4d69f597c2adc4"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Java]]",
+            "id": "07a503fee45e8c1a9c1cacb0ab0633ab"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?StringBufferExample c2.com]",
+            "id": "b9c57159ccfb7bac996b169b64e87991"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1702055205069
+    }
+  ]
+}
