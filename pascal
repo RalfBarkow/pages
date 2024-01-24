@@ -4,12 +4,12 @@
     {
       "type": "paragraph",
       "id": "b6f508aaa74a79ad",
-      "text": "I came to know Pascal in college after I had learned how to write a compiler. I read the source for Wirth's self-hosted CDC 6000 compiler early on and was struck by its simplicity and expert use of language features to express a full-featured software tool."
+      "text": "I (Ward) came to know Pascal in college after I had learned how to write a compiler. I read the source for Wirth's self-hosted CDC 6000 compiler early on and was struck by its simplicity and expert use of language features to express a full-featured software tool."
     },
     {
       "type": "paragraph",
       "id": "193af9d464502e54",
-      "text": "Purdue's home-brew operating system was enough different from Wirth's that the post-mortem variable dumps wouldn't print. I fixed that. I especially liked that only live variables would print, there wouldn't be many, and they would be formatted based on available type information."
+      "text": "Purdue's home-brew operating system was enough different from Wirth's that the post-mortem variable dumps wouldn't print. I fixed that. I especially liked that only live variables would print, there wouldn't be many, and they would be formatted based on available type information. See [[Pascal Traceback Dump]]"
     },
     {
       "type": "paragraph",
@@ -23,13 +23,18 @@
     },
     {
       "type": "paragraph",
+      "id": "e8740bd67e169502",
+      "text": "Mike DeMoney and I wrote a compiler for a subset of Pascal after writing the parser generator that would compile the compiler. [[Pascal Compiler]]"
+    },
+    {
+      "type": "paragraph",
       "id": "39e3f334faea34f6",
       "text": "I wrote a translator for an integrated circuit description language with scope rules (inconveniently) inspired by Pascal. The CAD group at Tektronix was having trouble writing a yacc grammar for the language. I was asked to consult. I fixed the grammar and wrote a runtime in C that modeled the same use of trees that had become my norm in Pascal. The translation inverted the relationship of nodes to elements which meant the whole structured description had to be memory resident. I defined a struct that was essentially a cons cell and ran the whole translation without freeing any dynamic allocation."
     },
     {
       "type": "paragraph",
       "id": "a023e99ec2aed270",
-      "text": "My first home computer with a disk drive ran the UCSD p-code implementation of Pascal. I developed a style of coding with deeply nested definitions such that all function bodies would show cleanly on the machine's 24 x 80 character display. I wrote a grading calculator/database for my wife who was teaching undergraduate computer science at the time."
+      "text": "My first home computer with a disk drive ran the UCSD p-code implementation of Pascal. I developed a style of coding with deeply nested definitions such that all function bodies would show cleanly on the machine's 24 x 80 character display. I wrote a grading calculator/database for my wife who was teaching undergraduate computer science at the time. See [[Grades]]"
     }
   ],
   "journal": [
@@ -151,7 +156,63 @@
     {
       "type": "fork",
       "site": "code.fed.wiki.org",
-      "date": 1627475084726
+      "date": 1704594163333
+    },
+    {
+      "type": "edit",
+      "id": "193af9d464502e54",
+      "item": {
+        "type": "paragraph",
+        "id": "193af9d464502e54",
+        "text": "Purdue's home-brew operating system was enough different from Wirth's that the post-mortem variable dumps wouldn't print. I fixed that. I especially liked that only live variables would print, there wouldn't be many, and they would be formatted based on available type information. See [[Pascal Traceback Dump]]"
+      },
+      "date": 1704594185417
+    },
+    {
+      "type": "edit",
+      "id": "a023e99ec2aed270",
+      "item": {
+        "type": "paragraph",
+        "id": "a023e99ec2aed270",
+        "text": "My first home computer with a disk drive ran the UCSD p-code implementation of Pascal. I developed a style of coding with deeply nested definitions such that all function bodies would show cleanly on the machine's 24 x 80 character display. I wrote a grading calculator/database for my wife who was teaching undergraduate computer science at the time. See [[Grades]]"
+      },
+      "date": 1704594276679
+    },
+    {
+      "type": "add",
+      "id": "e8740bd67e169502",
+      "item": {
+        "type": "paragraph",
+        "id": "e8740bd67e169502",
+        "text": "Mike DeMoney and I wrote a compiler for a subset of Pascal after writing the parser generator that would compile the compiler."
+      },
+      "after": "64d18ef86d2427cb",
+      "date": 1704594342285
+    },
+    {
+      "type": "edit",
+      "id": "e8740bd67e169502",
+      "item": {
+        "type": "paragraph",
+        "id": "e8740bd67e169502",
+        "text": "Mike DeMoney and I wrote a compiler for a subset of Pascal after writing the parser generator that would compile the compiler. [[Pascal Compiler]]"
+      },
+      "date": 1704594364712
+    },
+    {
+      "type": "fork",
+      "site": "found.ward.fed.wiki",
+      "date": 1705009609991
+    },
+    {
+      "type": "edit",
+      "id": "b6f508aaa74a79ad",
+      "item": {
+        "type": "paragraph",
+        "id": "b6f508aaa74a79ad",
+        "text": "I (Ward) came to know Pascal in college after I had learned how to write a compiler. I read the source for Wirth's self-hosted CDC 6000 compiler early on and was struck by its simplicity and expert use of language features to express a full-featured software tool."
+      },
+      "date": 1705009665540
     }
   ]
 }
