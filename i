@@ -16,6 +16,16 @@
     },
     {
       "type": "paragraph",
+      "id": "a7a2ad238da3b5a3",
+      "text": "[[Indexing the Unknown]] (within [[Federation Search Explained]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "8cfa51bac5b6fca5",
+      "text": "[[Indexing the Invisible]] (within [[Federation Search Explained]])"
+    },
+    {
+      "type": "paragraph",
       "id": "69e84435da6d2a85",
       "text": "[[Information]] (within [[Digital Garden]])"
     },
@@ -37,7 +47,22 @@
     {
       "type": "paragraph",
       "id": "97064d8d2af32ff7",
-      "text": "[[KWIC Index]] "
+      "text": "[[KWIC Index]], idea of [[Keyword-in-Context]] (KWIC) indexing  "
+    },
+    {
+      "type": "paragraph",
+      "id": "7be0dccee30ce740",
+      "text": "[[Inheritance]] (within [[Composable Units of Behaviour]]). See [[Family Tree]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "a1b0add945518273",
+      "text": "[[Information]] (within [[r.Data.Homan.Kovacs]])"
+    },
+    {
+      "type": "markdown",
+      "id": "634006b4b7ed768e",
+      "text": "- (within [[Flip Operation]]). See [[Copy Operation]]\n- defined as an [[Event]] that selects the states of a [[System]] "
     }
   ],
   "journal": [
@@ -289,6 +314,231 @@
       },
       "after": "fb4991842170bba4",
       "date": 1706103044416
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706116442061
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7be0dccee30ce740"
+      },
+      "id": "7be0dccee30ce740",
+      "type": "add",
+      "after": "97064d8d2af32ff7",
+      "date": 1706116452165
+    },
+    {
+      "type": "edit",
+      "id": "7be0dccee30ce740",
+      "item": {
+        "type": "paragraph",
+        "id": "7be0dccee30ce740",
+        "text": "[[Inheritance]] "
+      },
+      "date": 1706116454462
+    },
+    {
+      "type": "edit",
+      "id": "7be0dccee30ce740",
+      "item": {
+        "type": "paragraph",
+        "id": "7be0dccee30ce740",
+        "text": "[[Inheritance]] See [[Family Tree]]."
+      },
+      "date": 1706116474686
+    },
+    {
+      "type": "edit",
+      "id": "7be0dccee30ce740",
+      "item": {
+        "type": "paragraph",
+        "id": "7be0dccee30ce740",
+        "text": "[[Inheritance]] (within Composable Units of Behaviou) See [[Family Tree]]."
+      },
+      "date": 1706116488173
+    },
+    {
+      "type": "edit",
+      "id": "7be0dccee30ce740",
+      "item": {
+        "type": "paragraph",
+        "id": "7be0dccee30ce740",
+        "text": "[[Inheritance]] (within Composable Units of Behaviou) – See [[Family Tree]]."
+      },
+      "date": 1706116494235
+    },
+    {
+      "type": "edit",
+      "id": "7be0dccee30ce740",
+      "item": {
+        "type": "paragraph",
+        "id": "7be0dccee30ce740",
+        "text": "[[Inheritance]] (within [[Composable Units of Behaviour]]) – See [[Family Tree]]."
+      },
+      "date": 1706116505792
+    },
+    {
+      "type": "fork",
+      "site": "mold.dreyeck.ch",
+      "date": 1706136272230
+    },
+    {
+      "id": "8cfa51bac5b6fca5",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "8cfa51bac5b6fca5",
+        "text": "[[Indexing the Invisible]] (within [[Federation Search Explained]])"
+      },
+      "after": "a7a2ad238da3b5a3",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1706168955542
+    },
+    {
+      "id": "8cfa51bac5b6fca5",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "e24ee68ad6bdc819",
+        "8cfa51bac5b6fca5",
+        "69e84435da6d2a85",
+        "05a6c5aec7a6f32e",
+        "373cd966807a3e06",
+        "fb4991842170bba4",
+        "97064d8d2af32ff7",
+        "7be0dccee30ce740"
+      ],
+      "date": 1706169078035
+    },
+    {
+      "id": "a7a2ad238da3b5a3",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "a7a2ad238da3b5a3",
+        "text": "[[Indexing the Unknown]] (within [[Federation Search Explained]])"
+      },
+      "after": "e24ee68ad6bdc819",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1706169109002
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706169227408
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a1b0add945518273"
+      },
+      "id": "a1b0add945518273",
+      "type": "add",
+      "after": "7be0dccee30ce740",
+      "date": 1706169258673
+    },
+    {
+      "type": "edit",
+      "id": "a1b0add945518273",
+      "item": {
+        "type": "paragraph",
+        "id": "a1b0add945518273",
+        "text": "[[Information]] (within )"
+      },
+      "date": 1706169273108
+    },
+    {
+      "type": "edit",
+      "id": "a1b0add945518273",
+      "item": {
+        "type": "paragraph",
+        "id": "a1b0add945518273",
+        "text": "[[Information]] (within [[r.Data.Homan.Kovacs]])"
+      },
+      "date": 1706169285800
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706169504153
+    },
+    {
+      "type": "add",
+      "id": "634006b4b7ed768e",
+      "item": {
+        "type": "paragraph",
+        "id": "634006b4b7ed768e",
+        "text": "- (within [[[[Flip Operation]])"
+      },
+      "after": "a1b0add945518273",
+      "date": 1706182196446
+    },
+    {
+      "type": "edit",
+      "id": "634006b4b7ed768e",
+      "item": {
+        "type": "markdown",
+        "id": "634006b4b7ed768e",
+        "text": "- (within [[[[Flip Operation]])"
+      },
+      "date": 1706182199787
+    },
+    {
+      "type": "edit",
+      "id": "634006b4b7ed768e",
+      "item": {
+        "type": "markdown",
+        "id": "634006b4b7ed768e",
+        "text": "- (within [[Flip Operation]])"
+      },
+      "date": 1706182205337
+    },
+    {
+      "type": "edit",
+      "id": "634006b4b7ed768e",
+      "item": {
+        "type": "markdown",
+        "id": "634006b4b7ed768e",
+        "text": "- (within [[Flip Operation]]). See [[Copy Operation]] "
+      },
+      "date": 1706182261635
+    },
+    {
+      "type": "edit",
+      "id": "7be0dccee30ce740",
+      "item": {
+        "type": "paragraph",
+        "id": "7be0dccee30ce740",
+        "text": "[[Inheritance]] (within [[Composable Units of Behaviour]]). See [[Family Tree]]"
+      },
+      "date": 1706182341358
+    },
+    {
+      "type": "edit",
+      "id": "97064d8d2af32ff7",
+      "item": {
+        "type": "paragraph",
+        "id": "97064d8d2af32ff7",
+        "text": "[[KWIC Index]], idea of [[Keyword-in-Context]] (KWIC) indexing  "
+      },
+      "date": 1706182752615
+    },
+    {
+      "type": "edit",
+      "id": "634006b4b7ed768e",
+      "item": {
+        "type": "markdown",
+        "id": "634006b4b7ed768e",
+        "text": "- (within [[Flip Operation]]). See [[Copy Operation]]\n- defined as an [[Event]] that selects the states of a [[System]] "
+      },
+      "date": 1706182850766
     }
   ]
 }

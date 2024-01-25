@@ -15,6 +15,11 @@
       "type": "paragraph",
       "id": "7feb9d9a4a25005e",
       "text": "[[Watch Everything]] "
+    },
+    {
+      "type": "paragraph",
+      "id": "d902d97a83adf346",
+      "text": "[[within]] (within [[Similarity]])"
     }
   ],
   "journal": [
@@ -97,6 +102,36 @@
       "type": "fork",
       "site": "localhost:3000",
       "date": 1706088512574
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706180210871
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d902d97a83adf346"
+      },
+      "id": "d902d97a83adf346",
+      "type": "add",
+      "after": "7feb9d9a4a25005e",
+      "date": 1706180222114
+    },
+    {
+      "type": "edit",
+      "id": "d902d97a83adf346",
+      "item": {
+        "type": "paragraph",
+        "id": "d902d97a83adf346",
+        "text": "[[within]] (within [[Similarity]])"
+      },
+      "date": 1706180275147
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706181027929
     }
   ]
 }

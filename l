@@ -37,6 +37,11 @@
       "text": "[[label]] 🏷️ ⇐ [[Tag]]"
     },
     {
+      "type": "markdown",
+      "id": "ad9245b841ca7361",
+      "text": "* See [[distinguish]] (((within [[Trifference]]) within [[Shell-Bracket Notation]]) within [[Substituon]])"
+    },
+    {
       "type": "paragraph",
       "id": "6935c5a5bfa51151",
       "text": "[[List of Problem Statements]] (within [[EuroPLoP Project Diary]])"
@@ -50,6 +55,11 @@
       "type": "paragraph",
       "id": "fb4991842170bba4",
       "text": "[[locate]] conversations based on [[Information]] extracted into [[Index]]es of various kinds. [⇒ [[Conversation as Search]] (within [[Typescript Locator]])] ⇒ [[index]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d751a55508a2e466",
+      "text": "[[Living Economy]] ⇐ [[Formacion]] ⇐ [[‘Dense’ Address]]  "
     }
   ],
   "journal": [
@@ -332,6 +342,74 @@
       "type": "fork",
       "site": "localhost:3000",
       "date": 1706104699213
+    },
+    {
+      "id": "d751a55508a2e466",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "d751a55508a2e466",
+        "text": "[[‘Dense’ Address]] ⇒ [[Formacion]] ⇒ [[Living Economy]]"
+      },
+      "after": "fb4991842170bba4",
+      "attribution": {
+        "page": "D"
+      },
+      "date": 1706105324785
+    },
+    {
+      "type": "edit",
+      "id": "d751a55508a2e466",
+      "item": {
+        "type": "paragraph",
+        "id": "d751a55508a2e466",
+        "text": "[[Living Economy]] ⇐ [[Formacion]] ⇐ [[‘Dense’ Address]]  "
+      },
+      "date": 1706105396744
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706127885847
+    },
+    {
+      "id": "ad9245b841ca7361",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "ad9245b841ca7361",
+        "text": "[[distinguish]] (((within [[Trifference]]) within [[Shell-Bracket Notation]]) within [[Substituon]])"
+      },
+      "after": "e13718571274e208",
+      "attribution": {
+        "page": "D"
+      },
+      "date": 1706163688923
+    },
+    {
+      "type": "edit",
+      "id": "ad9245b841ca7361",
+      "item": {
+        "type": "paragraph",
+        "id": "ad9245b841ca7361",
+        "text": "* See [[distinguish]] (((within [[Trifference]]) within [[Shell-Bracket Notation]]) within [[Substituon]])"
+      },
+      "date": 1706163709734
+    },
+    {
+      "type": "edit",
+      "id": "ad9245b841ca7361",
+      "item": {
+        "type": "markdown",
+        "id": "ad9245b841ca7361",
+        "text": "* See [[distinguish]] (((within [[Trifference]]) within [[Shell-Bracket Notation]]) within [[Substituon]])"
+      },
+      "date": 1706163711252
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706188421081
     }
   ]
 }

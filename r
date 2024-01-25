@@ -18,6 +18,11 @@
       "type": "paragraph",
       "id": "4673ae54d214a77e",
       "text": "[[reuse]] → [[r.Kühne.Pattern]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "74e6feb907ea2abb",
+      "text": "[[Representation]] (within [[Thing One]])"
     }
   ],
   "journal": [
@@ -147,6 +152,36 @@
       "type": "fork",
       "site": "localhost:3000",
       "date": 1706104750935
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706127407572
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "74e6feb907ea2abb"
+      },
+      "id": "74e6feb907ea2abb",
+      "type": "add",
+      "after": "4673ae54d214a77e",
+      "date": 1706185650856
+    },
+    {
+      "type": "edit",
+      "id": "74e6feb907ea2abb",
+      "item": {
+        "type": "paragraph",
+        "id": "74e6feb907ea2abb",
+        "text": "[[Representation]] (within [[Thing One]])"
+      },
+      "date": 1706185667651
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706188493078
     }
   ]
 }

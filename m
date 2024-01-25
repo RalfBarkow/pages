@@ -41,6 +41,11 @@
       "text": "[[Moldable Development]] ⇌ [[~/mdp/0]]"
     },
     {
+      "type": "markdown",
+      "id": "b4fa8103ea13329c",
+      "text": "- (within [[Shape]])"
+    },
+    {
       "type": "paragraph",
       "id": "4d8a2961b2861295",
       "text": "[[Model]] ⇌ [[~/mdp/0c1]]"
@@ -806,6 +811,27 @@
       "type": "fork",
       "site": "localhost:3000",
       "date": 1706104727983
+    },
+    {
+      "type": "add",
+      "id": "b4fa8103ea13329c",
+      "item": {
+        "type": "paragraph",
+        "id": "b4fa8103ea13329c",
+        "text": "- (within [[Shape]])"
+      },
+      "after": "5061e7797926c5c9",
+      "date": 1706132683729
+    },
+    {
+      "type": "edit",
+      "id": "b4fa8103ea13329c",
+      "item": {
+        "type": "markdown",
+        "id": "b4fa8103ea13329c",
+        "text": "- (within [[Shape]])"
+      },
+      "date": 1706132685510
     }
   ]
 }

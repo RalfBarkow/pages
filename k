@@ -25,6 +25,11 @@
       "type": "paragraph",
       "id": "415e7900837d35ec",
       "text": "[[KWIC Index]] (within [[Typescript Locator]]) ⇒ [[Index]] "
+    },
+    {
+      "type": "paragraph",
+      "id": "54176dced8c8f953",
+      "text": "[[Key–Value Pair]] (within [[Associative Array]])"
     }
   ],
   "journal": [
@@ -193,6 +198,36 @@
         "text": "[[KWIC Index]] (within [[Typescript Locator]]) ⇒ [[Index]] "
       },
       "date": 1706103127341
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "54176dced8c8f953"
+      },
+      "id": "54176dced8c8f953",
+      "type": "add",
+      "after": "415e7900837d35ec",
+      "date": 1706105668940
+    },
+    {
+      "type": "edit",
+      "id": "54176dced8c8f953",
+      "item": {
+        "type": "paragraph",
+        "id": "54176dced8c8f953",
+        "text": "key-value pairs (within [[Associative Array]])"
+      },
+      "date": 1706105681677
+    },
+    {
+      "type": "edit",
+      "id": "54176dced8c8f953",
+      "item": {
+        "type": "paragraph",
+        "id": "54176dced8c8f953",
+        "text": "[[Key–Value Pair]] (within [[Associative Array]])"
+      },
+      "date": 1706105808984
     }
   ]
 }

@@ -55,6 +55,46 @@
       "type": "paragraph",
       "id": "610ab2978e31b61f",
       "text": "[[Typescript Locator]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "55242fffc0a4b12a",
+      "text": "[[Traits]] (within [[Composable Units of Behaviour]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "65c1eaceae7bae7b",
+      "text": "[[Text and Video Chats]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e4c294c771af3fdd",
+      "text": "[[Turn a Face to the Other]] (within [[Slot]]) ⇒ [[Half Object Plus Protocol]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6a9509da769e57ca",
+      "text": "2 two-sided forms 'are' the [[HOPP]] pattern. ⇒ [[Evidencing New Psych Forms]], Figure 4 ⇒ [[Dyad]] ⇒ [[Model Monopoly]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "245ac79aeddfd201",
+      "text": "[[Two Concepts Of The Symbolic]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "c579b3729134746f",
+      "text": "[[tristinguishing]] (within [[Trifference]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "33ee898d78d63ab3",
+      "text": "[[Timestamped Summary]] (within \"The Origins of GREP\" [https://eightify.app/summary/technology-history/the-origins-of-grep-unveiling-the-unix-command page])"
+    },
+    {
+      "type": "paragraph",
+      "id": "384b8be4a8a594d4",
+      "text": "[[Thing One]] (within [[Offloaded Brain]])"
     }
   ],
   "journal": [
@@ -365,6 +405,218 @@
       },
       "after": "1d14eb9ac7f41624",
       "date": 1706102678935
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706116551509
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "55242fffc0a4b12a"
+      },
+      "id": "55242fffc0a4b12a",
+      "type": "add",
+      "after": "610ab2978e31b61f",
+      "date": 1706116551510
+    },
+    {
+      "type": "edit",
+      "id": "55242fffc0a4b12a",
+      "item": {
+        "type": "paragraph",
+        "id": "55242fffc0a4b12a",
+        "text": "[[Traits]] (within [[Composable Units of Behaviour]])"
+      },
+      "date": 1706116559997
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "65c1eaceae7bae7b"
+      },
+      "id": "65c1eaceae7bae7b",
+      "type": "add",
+      "after": "55242fffc0a4b12a",
+      "date": 1706120942695
+    },
+    {
+      "type": "edit",
+      "id": "65c1eaceae7bae7b",
+      "item": {
+        "type": "paragraph",
+        "id": "65c1eaceae7bae7b",
+        "text": "[[Text and Video Chats]]"
+      },
+      "date": 1706120947113
+    },
+    {
+      "id": "e4c294c771af3fdd",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "e4c294c771af3fdd",
+        "text": "[[Turn a Face to the Other]] (within [[Slot]]) ⇒ [[Half Object Plus Protocol]]"
+      },
+      "after": "65c1eaceae7bae7b",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1706138019914
+    },
+    {
+      "id": "6a9509da769e57ca",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "6a9509da769e57ca",
+        "text": "2 two-sided forms 'are' the [[HOPP]] pattern. ⇒ [[Evidencing New Psych Forms]], Figure 4 ⇒ [[Dyad]] ⇒ [[Model Monopoly]]"
+      },
+      "after": "e4c294c771af3fdd",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1706138028083
+    },
+    {
+      "id": "245ac79aeddfd201",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "245ac79aeddfd201",
+        "text": "[[Two Concepts Of The Symbolic]]"
+      },
+      "after": "6a9509da769e57ca",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1706138037382
+    },
+    {
+      "type": "fork",
+      "site": "mold.dreyeck.ch",
+      "date": 1706138075407
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706170610473
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c579b3729134746f"
+      },
+      "id": "c579b3729134746f",
+      "type": "add",
+      "after": "245ac79aeddfd201",
+      "date": 1706170654146
+    },
+    {
+      "type": "edit",
+      "id": "c579b3729134746f",
+      "item": {
+        "type": "paragraph",
+        "id": "c579b3729134746f",
+        "text": "[[tristinguishing]] (within [[Trifference]])"
+      },
+      "date": 1706170679218
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "33ee898d78d63ab3"
+      },
+      "id": "33ee898d78d63ab3",
+      "type": "add",
+      "after": "c579b3729134746f",
+      "date": 1706179049360
+    },
+    {
+      "type": "edit",
+      "id": "33ee898d78d63ab3",
+      "item": {
+        "type": "paragraph",
+        "id": "33ee898d78d63ab3",
+        "text": "[[Timestamped Summary]] (within )"
+      },
+      "date": 1706179063988
+    },
+    {
+      "type": "edit",
+      "id": "33ee898d78d63ab3",
+      "item": {
+        "type": "paragraph",
+        "id": "33ee898d78d63ab3",
+        "text": "[[Timestamped Summary]] (within [page])"
+      },
+      "date": 1706179076379
+    },
+    {
+      "type": "edit",
+      "id": "33ee898d78d63ab3",
+      "item": {
+        "type": "paragraph",
+        "id": "33ee898d78d63ab3",
+        "text": "[[Timestamped Summary]] (within The Origins of GREP [page])"
+      },
+      "date": 1706179095899
+    },
+    {
+      "type": "edit",
+      "id": "33ee898d78d63ab3",
+      "item": {
+        "type": "paragraph",
+        "id": "33ee898d78d63ab3",
+        "text": "[[Timestamped Summary]] (within The Origins of GREP [https://eightify.app/summary/technology-history/the-origins-of-grep-unveiling-the-unix-command page])"
+      },
+      "date": 1706179103912
+    },
+    {
+      "type": "edit",
+      "id": "33ee898d78d63ab3",
+      "item": {
+        "type": "paragraph",
+        "id": "33ee898d78d63ab3",
+        "text": "[[Timestamped Summary]] (within \"The Origins of GREP\" [https://eightify.app/summary/technology-history/the-origins-of-grep-unveiling-the-unix-command page])"
+      },
+      "date": 1706179118014
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "384b8be4a8a594d4"
+      },
+      "id": "384b8be4a8a594d4",
+      "type": "add",
+      "after": "33ee898d78d63ab3",
+      "date": 1706183613874
+    },
+    {
+      "type": "edit",
+      "id": "384b8be4a8a594d4",
+      "item": {
+        "type": "paragraph",
+        "id": "384b8be4a8a594d4",
+        "text": "[[Thing One]]"
+      },
+      "date": 1706183619584
+    },
+    {
+      "type": "edit",
+      "id": "384b8be4a8a594d4",
+      "item": {
+        "type": "paragraph",
+        "id": "384b8be4a8a594d4",
+        "text": "[[Thing One]] (within [[Offloaded Brain]])"
+      },
+      "date": 1706183727894
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706188622419
     }
   ]
 }

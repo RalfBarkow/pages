@@ -25,6 +25,16 @@
       "type": "paragraph",
       "id": "b50af34236cc284c",
       "text": "[[Boundary]] ⇒ [[Distribution Boundary]] (within [[Half Object Plus Protocol]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "06db26f2400da9b9",
+      "text": "[[Behavior in Smalltalk]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "1fbd6a17a2fb22bf",
+      "text": "[[Biological Plausibility]] (within [[Thing One]])"
     }
   ],
   "journal": [
@@ -201,6 +211,50 @@
       "type": "fork",
       "site": "localhost:3000",
       "date": 1706103762647
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706169769383
+    },
+    {
+      "type": "edit",
+      "id": "06db26f2400da9b9",
+      "item": {
+        "type": "paragraph",
+        "id": "06db26f2400da9b9",
+        "text": "[[Behavior in Smalltalk]]"
+      },
+      "date": 1706169776739
+    },
+    {
+      "type": "fork",
+      "date": 1706169866044
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1fbd6a17a2fb22bf"
+      },
+      "id": "1fbd6a17a2fb22bf",
+      "type": "add",
+      "after": "06db26f2400da9b9",
+      "date": 1706184452400
+    },
+    {
+      "type": "edit",
+      "id": "1fbd6a17a2fb22bf",
+      "item": {
+        "type": "paragraph",
+        "id": "1fbd6a17a2fb22bf",
+        "text": "[[Biological Plausibility]] (within [[Thing One]])"
+      },
+      "date": 1706184478087
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706188275741
     }
   ]
 }

@@ -14,12 +14,12 @@
     {
       "type": "paragraph",
       "id": "b12be9c7adad391a",
-      "text": "[[How to Delete Structure]]"
+      "text": "[[How to Delete Structure]] ⇒ [[Structure]] ⇒ [[Pattern-Matching]] ⇒ [[Remove Enclosing Brackets]] ⇒ [[Dots as Brackets]] ⇒ [[General Bracketing Theory]]"
     },
     {
       "type": "paragraph",
       "id": "0bde071e01f7a00c",
-      "text": "[[Half Object Plus Protocol]] (HOPP) → r.HOPP.Meszaros"
+      "text": "[[Half Object Plus Protocol]] (HOPP) → [[r.HOPP.Meszaros]]"
     }
   ],
   "journal": [
@@ -176,6 +176,26 @@
       "type": "fork",
       "site": "localhost:3000",
       "date": 1706092031019
+    },
+    {
+      "type": "edit",
+      "id": "0bde071e01f7a00c",
+      "item": {
+        "type": "paragraph",
+        "id": "0bde071e01f7a00c",
+        "text": "[[Half Object Plus Protocol]] (HOPP) → [[r.HOPP.Meszaros]]"
+      },
+      "date": 1706135834075
+    },
+    {
+      "type": "edit",
+      "id": "b12be9c7adad391a",
+      "item": {
+        "type": "paragraph",
+        "id": "b12be9c7adad391a",
+        "text": "[[How to Delete Structure]] ⇒ [[Structure]] ⇒ [[Pattern-Matching]] ⇒ [[Remove Enclosing Brackets]] ⇒ [[Dots as Brackets]] ⇒ [[General Bracketing Theory]]"
+      },
+      "date": 1706136040888
     }
   ]
 }

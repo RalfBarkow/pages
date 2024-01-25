@@ -8,6 +8,11 @@
     },
     {
       "type": "paragraph",
+      "id": "5dc914febade2960",
+      "text": "[[The Ethical Imperative]]"
+    },
+    {
+      "type": "paragraph",
       "id": "dad6e898ff0f1f94",
       "text": "[[ExRef]]"
     },
@@ -55,6 +60,21 @@
       "type": "paragraph",
       "id": "d4c1124360d82485",
       "text": "[[Experiencing Emergence]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3aaf09bf2fd2b58b",
+      "text": "[[Educator Vitality Potential]] (within the author wiki for [[Kavita Tanna]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "c4e52350f1f2792d",
+      "text": "[[Edge-Colorings in Graphs]] (within [[Distinguish N Objects]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "04d9342035d0a625",
+      "text": "[[Environment]] (within [[Thing One]]) See “[[Domain]]” or “[[Business Domain]]” and \"[[Umwelt]]\""
     }
   ],
   "journal": [
@@ -279,6 +299,115 @@
         "text": "[[Emergence]] – See [[Representations After the Fact]]"
       },
       "date": 1706100631202
+    },
+    {
+      "id": "5dc914febade2960",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "5dc914febade2960",
+        "text": "[[The Ethical Imperative]]"
+      },
+      "after": "1dbcb05a56540609",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1706164126835
+    },
+    {
+      "id": "3aaf09bf2fd2b58b",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "3aaf09bf2fd2b58b",
+        "text": "[[Educator Vitality Potential]] (within the author wiki for [[Kavita Tanna]])"
+      },
+      "after": "d4c1124360d82485",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1706164133527
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706164196999
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c4e52350f1f2792d"
+      },
+      "id": "c4e52350f1f2792d",
+      "type": "add",
+      "after": "3aaf09bf2fd2b58b",
+      "date": 1706164232638
+    },
+    {
+      "type": "edit",
+      "id": "c4e52350f1f2792d",
+      "item": {
+        "type": "paragraph",
+        "id": "c4e52350f1f2792d",
+        "text": "[Edge-Colorings in Graphs]] (within )"
+      },
+      "date": 1706164244131
+    },
+    {
+      "type": "edit",
+      "id": "c4e52350f1f2792d",
+      "item": {
+        "type": "paragraph",
+        "id": "c4e52350f1f2792d",
+        "text": "[[Edge-Colorings in Graphs]] (within [[Distinguish N Objects]])"
+      },
+      "date": 1706164264959
+    },
+    {
+      "type": "add",
+      "id": "04d9342035d0a625",
+      "item": {
+        "type": "paragraph",
+        "id": "04d9342035d0a625",
+        "text": "[[Environment]] (within [[Thing One]])"
+      },
+      "after": "c4e52350f1f2792d",
+      "date": 1706185426068
+    },
+    {
+      "type": "edit",
+      "id": "04d9342035d0a625",
+      "item": {
+        "type": "paragraph",
+        "id": "04d9342035d0a625",
+        "text": "[[Environment]] (within [[Thing One]]) See [[Domain]], "
+      },
+      "date": 1706185454918
+    },
+    {
+      "type": "edit",
+      "id": "04d9342035d0a625",
+      "item": {
+        "type": "paragraph",
+        "id": "04d9342035d0a625",
+        "text": "[[Environment]] (within [[Thing One]]) See “[[Domain]]” or “[[Business Domain]]”"
+      },
+      "date": 1706185488694
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706188314974
+    },
+    {
+      "type": "edit",
+      "id": "04d9342035d0a625",
+      "item": {
+        "type": "paragraph",
+        "id": "04d9342035d0a625",
+        "text": "[[Environment]] (within [[Thing One]]) See “[[Domain]]” or “[[Business Domain]]” and \"[[Umwelt]]\""
+      },
+      "date": 1706188332736
     }
   ]
 }

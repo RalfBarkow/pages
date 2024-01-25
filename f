@@ -60,6 +60,26 @@
       "type": "markdown",
       "id": "84f1abdd48ed2caa",
       "text": "[[Federated Lepiter]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d751a55508a2e466",
+      "text": "[[Formacion]] ⇒ [[Living Economy]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "9cec41b8a69e088c",
+      "text": "[[Form]] (within [[Shape]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "f45ac44f018a53b1",
+      "text": "[[Fact]] (within [[r.Culkin.McLuhan]])"
+    },
+    {
+      "type": "markdown",
+      "id": "c7041daf82ee35e9",
+      "text": "- [[empty]] [[Container]]"
     }
   ],
   "journal": [
@@ -374,6 +394,134 @@
         "text": "Federated [[List Indexcards]] ⇐ [[federated]]"
       },
       "date": 1706103522223
+    },
+    {
+      "id": "d751a55508a2e466",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "d751a55508a2e466",
+        "text": "[[‘Dense’ Address]] ⇒ [[Formacion]] ⇒ [[Living Economy]]"
+      },
+      "after": "84f1abdd48ed2caa",
+      "attribution": {
+        "page": "D"
+      },
+      "date": 1706105301115
+    },
+    {
+      "type": "edit",
+      "id": "d751a55508a2e466",
+      "item": {
+        "type": "paragraph",
+        "id": "d751a55508a2e466",
+        "text": "[[Formacion]] ⇒ [[Living Economy]]"
+      },
+      "date": 1706105306038
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9cec41b8a69e088c"
+      },
+      "id": "9cec41b8a69e088c",
+      "type": "add",
+      "after": "d751a55508a2e466",
+      "date": 1706132740633
+    },
+    {
+      "type": "edit",
+      "id": "9cec41b8a69e088c",
+      "item": {
+        "type": "paragraph",
+        "id": "9cec41b8a69e088c",
+        "text": "[[Form]] (within [[Shape]])"
+      },
+      "date": 1706132755888
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f45ac44f018a53b1"
+      },
+      "id": "f45ac44f018a53b1",
+      "type": "add",
+      "after": "9cec41b8a69e088c",
+      "date": 1706133784975
+    },
+    {
+      "type": "edit",
+      "id": "f45ac44f018a53b1",
+      "item": {
+        "type": "paragraph",
+        "id": "f45ac44f018a53b1",
+        "text": "[Fact]] (within [[r.Culkin.McLuhan]])"
+      },
+      "date": 1706133802625
+    },
+    {
+      "type": "edit",
+      "id": "f45ac44f018a53b1",
+      "item": {
+        "type": "paragraph",
+        "id": "f45ac44f018a53b1",
+        "text": "[[Fact]] (within [[r.Culkin.McLuhan]])"
+      },
+      "date": 1706133807441
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706134147546
+    },
+    {
+      "id": "c7041daf82ee35e9",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "c7041daf82ee35e9",
+        "text": "We are [[represent]]ing [[physical]] [[Container]]s by [[delimit]]ing [[Boundaries]] and basic facts by [[empty]] [[Container]]s. "
+      },
+      "after": "f45ac44f018a53b1",
+      "attribution": {
+        "page": "Fact"
+      },
+      "date": 1706134181974
+    },
+    {
+      "type": "edit",
+      "id": "c7041daf82ee35e9",
+      "item": {
+        "type": "paragraph",
+        "id": "c7041daf82ee35e9",
+        "text": "- [[empty]] [[Container]]s. "
+      },
+      "date": 1706134207187
+    },
+    {
+      "type": "edit",
+      "id": "c7041daf82ee35e9",
+      "item": {
+        "type": "markdown",
+        "id": "c7041daf82ee35e9",
+        "text": "- [[empty]] [[Container]]s. "
+      },
+      "date": 1706134210237
+    },
+    {
+      "type": "edit",
+      "id": "c7041daf82ee35e9",
+      "item": {
+        "type": "markdown",
+        "id": "c7041daf82ee35e9",
+        "text": "- [[empty]] [[Container]]"
+      },
+      "date": 1706134215260
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706136225999
     }
   ]
 }
