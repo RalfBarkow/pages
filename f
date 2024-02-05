@@ -19,7 +19,7 @@
     {
       "type": "paragraph",
       "id": "a141a047d260d847",
-      "text": "[[Federation Search Explained]]"
+      "text": "[[Federation Search Explained]] ⇐ [[Federation Search]]"
     },
     {
       "type": "paragraph",
@@ -63,6 +63,16 @@
     },
     {
       "type": "paragraph",
+      "id": "d48f6c803ffd4ae0",
+      "text": "⇒ [[federate]]"
+    },
+    {
+      "type": "markdown",
+      "id": "26332be736252099",
+      "text": "* f**W** ([[federate]]d [[Double You]]) [[Zettelkasten]]"
+    },
+    {
+      "type": "paragraph",
       "id": "d751a55508a2e466",
       "text": "[[Formacion]] ⇒ [[Living Economy]]"
     },
@@ -80,6 +90,36 @@
       "type": "markdown",
       "id": "c7041daf82ee35e9",
       "text": "- [[empty]] [[Container]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "c265a4be4b2b3a91",
+      "text": "[[Fold]] (within [[Evidencing New Psych Forms]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "b7c4f062a79dd8d5",
+      "text": "[[flip]] (within [[Evidencing New Psych Forms]]) ⇒ [[Flip Operation]] ⇒ [[Memory Game]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "c244b47a9d3b3607",
+      "text": "[[Forward and Backward Association]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "9ceea77cef6257f7",
+      "text": "[[Fourth Point]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d05f561551462e9c",
+      "text": "[[Frenemies]] (within [[r.Jenseits.Janser]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "199c9feeb96f7ff8",
+      "text": "[[Finding Communities]] (within [[Goal]])"
     }
   ],
   "journal": [
@@ -522,6 +562,255 @@
       "type": "fork",
       "site": "localhost:3000",
       "date": 1706136225999
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c265a4be4b2b3a91"
+      },
+      "id": "c265a4be4b2b3a91",
+      "type": "add",
+      "after": "c7041daf82ee35e9",
+      "date": 1706190394565
+    },
+    {
+      "type": "edit",
+      "id": "c265a4be4b2b3a91",
+      "item": {
+        "type": "paragraph",
+        "id": "c265a4be4b2b3a91",
+        "text": "[[flip]] (within [[ ]])"
+      },
+      "date": 1706190408545
+    },
+    {
+      "type": "edit",
+      "id": "c265a4be4b2b3a91",
+      "item": {
+        "type": "paragraph",
+        "id": "c265a4be4b2b3a91",
+        "text": "[[flip]] (within [[Evidencing New Psych Forms]])"
+      },
+      "date": 1706190435924
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b7c4f062a79dd8d5"
+      },
+      "id": "b7c4f062a79dd8d5",
+      "type": "add",
+      "after": "c265a4be4b2b3a91",
+      "date": 1706190441695
+    },
+    {
+      "type": "edit",
+      "id": "b7c4f062a79dd8d5",
+      "item": {
+        "type": "paragraph",
+        "id": "b7c4f062a79dd8d5",
+        "text": "[[flip]] (within [[Evidencing New Psych Forms]])"
+      },
+      "date": 1706190451042
+    },
+    {
+      "type": "edit",
+      "id": "c265a4be4b2b3a91",
+      "item": {
+        "type": "paragraph",
+        "id": "c265a4be4b2b3a91",
+        "text": "[[Fold]] (within [[Evidencing New Psych Forms]])"
+      },
+      "date": 1706190458131
+    },
+    {
+      "id": "4016ee66844f248e",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "4016ee66844f248e",
+        "text": "⇒ [[Flip Operation]] ⇒ [[Memory Game]]"
+      },
+      "after": "b7c4f062a79dd8d5",
+      "attribution": {
+        "page": "flip"
+      },
+      "date": 1706190482838
+    },
+    {
+      "type": "edit",
+      "id": "b7c4f062a79dd8d5",
+      "item": {
+        "type": "paragraph",
+        "id": "b7c4f062a79dd8d5",
+        "text": "[[flip]] (within [[Evidencing New Psych Forms]]) ⇒ [[Flip Operation]] ⇒ [[Memory Game]]"
+      },
+      "date": 1706190487615
+    },
+    {
+      "type": "edit",
+      "id": "a141a047d260d847",
+      "item": {
+        "type": "paragraph",
+        "id": "a141a047d260d847",
+        "text": "[[Federation Search Explained]] ⇐ [[Federation Search]]"
+      },
+      "date": 1706246125683
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c244b47a9d3b3607"
+      },
+      "id": "c244b47a9d3b3607",
+      "type": "add",
+      "after": "4016ee66844f248e",
+      "date": 1706246330393
+    },
+    {
+      "type": "edit",
+      "id": "c244b47a9d3b3607",
+      "item": {
+        "type": "paragraph",
+        "id": "c244b47a9d3b3607",
+        "text": "[[Forward and Backward Association]]"
+      },
+      "date": 1706246334293
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706263127000
+    },
+    {
+      "type": "remove",
+      "id": "4016ee66844f248e",
+      "date": 1706263130805
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9ceea77cef6257f7"
+      },
+      "id": "9ceea77cef6257f7",
+      "type": "add",
+      "after": "c244b47a9d3b3607",
+      "date": 1706263727280
+    },
+    {
+      "type": "edit",
+      "id": "9ceea77cef6257f7",
+      "item": {
+        "type": "paragraph",
+        "id": "9ceea77cef6257f7",
+        "text": "[[Fourth Point]]"
+      },
+      "date": 1706263733513
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706271572884
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706285421436
+    },
+    {
+      "type": "add",
+      "id": "d05f561551462e9c",
+      "item": {
+        "type": "paragraph",
+        "id": "d05f561551462e9c",
+        "text": "[[Frenemies]]"
+      },
+      "after": "9ceea77cef6257f7",
+      "date": 1706285435892
+    },
+    {
+      "type": "edit",
+      "id": "d05f561551462e9c",
+      "item": {
+        "type": "paragraph",
+        "id": "d05f561551462e9c",
+        "text": "[[Frenemies]] (within [[r.Jenseits.Janser]])"
+      },
+      "date": 1706285448123
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706285569478
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706715682573
+    },
+    {
+      "type": "add",
+      "id": "199c9feeb96f7ff8",
+      "item": {
+        "type": "paragraph",
+        "id": "199c9feeb96f7ff8",
+        "text": "[[Finding Communities]] (within [[Goal]])"
+      },
+      "after": "d05f561551462e9c",
+      "date": 1706715701207
+    },
+    {
+      "id": "d48f6c803ffd4ae0",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "d48f6c803ffd4ae0",
+        "text": "⇒ [[federate]]"
+      },
+      "after": "84f1abdd48ed2caa",
+      "attribution": {
+        "page": "2024-02-05"
+      },
+      "date": 1707116581572
+    },
+    {
+      "id": "26332be736252099",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "26332be736252099",
+        "text": " f**W** ([[federate]]d double you) [[Zettelkasten]]"
+      },
+      "after": "d48f6c803ffd4ae0",
+      "attribution": {
+        "page": "2024-02-05"
+      },
+      "date": 1707116585071
+    },
+    {
+      "type": "edit",
+      "id": "26332be736252099",
+      "item": {
+        "type": "markdown",
+        "id": "26332be736252099",
+        "text": "* f**W** ([[federate]]d double you) [[Zettelkasten]]"
+      },
+      "date": 1707116593858
+    },
+    {
+      "type": "edit",
+      "id": "26332be736252099",
+      "item": {
+        "type": "markdown",
+        "id": "26332be736252099",
+        "text": "* f**W** ([[federate]]d [[Double You]]) [[Zettelkasten]]"
+      },
+      "date": 1707116695960
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1707118574138
     }
   ]
 }

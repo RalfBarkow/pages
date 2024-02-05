@@ -104,6 +104,56 @@
       "type": "paragraph",
       "id": "0ce89d4770e2ba24",
       "text": "[[Malleable Systems Collective]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6313ed559b81fa54",
+      "text": "[[Milton Mamani Torres]] (within [https://github.com/akevalion github] [https://github.com/feenkcom/gtoolkit/issues/3579 issue])"
+    },
+    {
+      "type": "paragraph",
+      "id": "72b23e446a6ffc0b",
+      "text": "The Theory of [[Model Power]] and of [[Model Monopoly]] by [[Stein Bråten]] (within [[~/mdp/0c1]]) [https://stein-braten.com/model_power.htm page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e65a9a7504cb94ac",
+      "text": "[[Mystery]] (within [[r.Vergessen.Esposito]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "a92a816bddcd6c6c",
+      "text": "Mangel an Wissen (within [[r.Vergessen.Esposito]]) See: [[Lack of Knowledge]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "9d91af6aaf145b14",
+      "text": "[[Make Decisions]] ([[Entscheidung]]en) (within [[r.Vergessen.Esposito]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "6a152716db7fbabe",
+      "text": "[[Matterhorn University]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6c428ce738238cfd",
+      "text": "[[malleable]] See: [[Symmathesy in Programming]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "bbf8e51803507285",
+      "text": "[[match]] (within [[Value]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "67d9b92ea78d32ae",
+      "text": "[[Measurement]] (within [[Simple View]]) See: The goal question metric approach, mechanism for creating a corporate [[Memory]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "4c30e39fb3001327",
+      "text": "[[Mysticism]] (within [[Inadequate World Hypotheses]]) See: [[Holographic New Age Mysticism]]"
     }
   ],
   "journal": [
@@ -832,6 +882,442 @@
         "text": "- (within [[Shape]])"
       },
       "date": 1706132685510
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706251485758
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6313ed559b81fa54"
+      },
+      "id": "6313ed559b81fa54",
+      "type": "add",
+      "after": "0ce89d4770e2ba24",
+      "date": 1706251531496
+    },
+    {
+      "type": "edit",
+      "id": "6313ed559b81fa54",
+      "item": {
+        "type": "paragraph",
+        "id": "6313ed559b81fa54",
+        "text": "[[Milton Mamani Torres]]"
+      },
+      "date": 1706251541928
+    },
+    {
+      "type": "edit",
+      "id": "6313ed559b81fa54",
+      "item": {
+        "type": "paragraph",
+        "id": "6313ed559b81fa54",
+        "text": "[[Milton Mamani Torres]] (within [https://github.com/akevalion github]"
+      },
+      "date": 1706251555268
+    },
+    {
+      "type": "edit",
+      "id": "6313ed559b81fa54",
+      "item": {
+        "type": "paragraph",
+        "id": "6313ed559b81fa54",
+        "text": "[[Milton Mamani Torres]] (within [https://github.com/akevalion github])"
+      },
+      "date": 1706251560736
+    },
+    {
+      "type": "edit",
+      "id": "6313ed559b81fa54",
+      "item": {
+        "type": "paragraph",
+        "id": "6313ed559b81fa54",
+        "text": "[[Milton Mamani Torres]] (within [https://github.com/akevalion github] [https://github.com/feenkcom/gtoolkit/issues/3579 issue])"
+      },
+      "date": 1706251588225
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706286127523
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "72b23e446a6ffc0b"
+      },
+      "id": "72b23e446a6ffc0b",
+      "type": "add",
+      "after": "6313ed559b81fa54",
+      "date": 1706291583079
+    },
+    {
+      "type": "edit",
+      "id": "72b23e446a6ffc0b",
+      "item": {
+        "type": "paragraph",
+        "id": "72b23e446a6ffc0b",
+        "text": "The Theory of [[Model Power]] and of [[Model Monopoly]] by Stein Braten"
+      },
+      "date": 1706291602026
+    },
+    {
+      "type": "edit",
+      "id": "72b23e446a6ffc0b",
+      "item": {
+        "type": "paragraph",
+        "id": "72b23e446a6ffc0b",
+        "text": "The Theory of [[Model Power]] and of [[Model Monopoly]] by [[Stein Braten]]"
+      },
+      "date": 1706291645243
+    },
+    {
+      "type": "edit",
+      "id": "72b23e446a6ffc0b",
+      "item": {
+        "type": "paragraph",
+        "id": "72b23e446a6ffc0b",
+        "text": "The Theory of [[Model Power]] and of [[Model Monopoly]] by [[Stein Braten]] (within [[~/mdp/0c1]])"
+      },
+      "date": 1706291682249
+    },
+    {
+      "type": "edit",
+      "id": "72b23e446a6ffc0b",
+      "item": {
+        "type": "paragraph",
+        "id": "72b23e446a6ffc0b",
+        "text": "The Theory of [[Model Power]] and of [[Model Monopoly]] by [[Stein Bråten]] (within [[~/mdp/0c1]])"
+      },
+      "date": 1706291727621
+    },
+    {
+      "type": "edit",
+      "id": "72b23e446a6ffc0b",
+      "item": {
+        "type": "paragraph",
+        "id": "72b23e446a6ffc0b",
+        "text": "The Theory of [[Model Power]] and of [[Model Monopoly]] by [[Stein Bråten]] (within [[~/mdp/0c1]]) [https://stein-braten.com/model_power.htm page]"
+      },
+      "date": 1706291864202
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706471007374
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e65a9a7504cb94ac"
+      },
+      "id": "e65a9a7504cb94ac",
+      "type": "add",
+      "after": "72b23e446a6ffc0b",
+      "date": 1706471010872
+    },
+    {
+      "type": "edit",
+      "id": "e65a9a7504cb94ac",
+      "item": {
+        "type": "paragraph",
+        "id": "e65a9a7504cb94ac",
+        "text": "[[Mystery]] (within [[r.Vergessen.Esposito]])"
+      },
+      "date": 1706471024754
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a92a816bddcd6c6c"
+      },
+      "id": "a92a816bddcd6c6c",
+      "type": "add",
+      "after": "e65a9a7504cb94ac",
+      "date": 1706471079813
+    },
+    {
+      "type": "edit",
+      "id": "a92a816bddcd6c6c",
+      "item": {
+        "type": "paragraph",
+        "id": "a92a816bddcd6c6c",
+        "text": "Mangel an Wissen "
+      },
+      "date": 1706471088343
+    },
+    {
+      "type": "edit",
+      "id": "a92a816bddcd6c6c",
+      "item": {
+        "type": "paragraph",
+        "id": "a92a816bddcd6c6c",
+        "text": "Mangel an Wissen (within [[r.Vergessen.Esposito]])"
+      },
+      "date": 1706471096100
+    },
+    {
+      "type": "edit",
+      "id": "a92a816bddcd6c6c",
+      "item": {
+        "type": "paragraph",
+        "id": "a92a816bddcd6c6c",
+        "text": "Mangel an Wissen (within [[r.Vergessen.Esposito]]) See: "
+      },
+      "date": 1706471115615
+    },
+    {
+      "type": "edit",
+      "id": "a92a816bddcd6c6c",
+      "item": {
+        "type": "paragraph",
+        "id": "a92a816bddcd6c6c",
+        "text": "Mangel an Wissen (within [[r.Vergessen.Esposito]]) See: [[Lack of Knowledge]]"
+      },
+      "date": 1706471146394
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9d91af6aaf145b14"
+      },
+      "id": "9d91af6aaf145b14",
+      "type": "add",
+      "after": "a92a816bddcd6c6c",
+      "date": 1706473191194
+    },
+    {
+      "type": "edit",
+      "id": "9d91af6aaf145b14",
+      "item": {
+        "type": "paragraph",
+        "id": "9d91af6aaf145b14",
+        "text": "making decisions ([[Entscheidung]]en)"
+      },
+      "date": 1706473193745
+    },
+    {
+      "type": "edit",
+      "id": "9d91af6aaf145b14",
+      "item": {
+        "type": "paragraph",
+        "id": "9d91af6aaf145b14",
+        "text": "making decisions ([[Entscheidung]]en) (within [[r.Vergessen.Esposito)"
+      },
+      "date": 1706473207208
+    },
+    {
+      "type": "edit",
+      "id": "9d91af6aaf145b14",
+      "item": {
+        "type": "paragraph",
+        "id": "9d91af6aaf145b14",
+        "text": "making decisions ([[Entscheidung]]en) (within [[r.Vergessen.Esposito]])"
+      },
+      "date": 1706473211843
+    },
+    {
+      "type": "edit",
+      "id": "9d91af6aaf145b14",
+      "item": {
+        "type": "paragraph",
+        "id": "9d91af6aaf145b14",
+        "text": "[[Make Decisions]] ([[Entscheidung]]en) (within [[r.Vergessen.Esposito]])"
+      },
+      "date": 1706473415998
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6a152716db7fbabe"
+      },
+      "id": "6a152716db7fbabe",
+      "type": "add",
+      "after": "9d91af6aaf145b14",
+      "date": 1706529245503
+    },
+    {
+      "type": "edit",
+      "id": "6a152716db7fbabe",
+      "item": {
+        "type": "paragraph",
+        "id": "6a152716db7fbabe",
+        "text": "[[Matterhorn University]]"
+      },
+      "date": 1706529247347
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706529270782
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6c428ce738238cfd"
+      },
+      "id": "6c428ce738238cfd",
+      "type": "add",
+      "after": "6a152716db7fbabe",
+      "date": 1706590368415
+    },
+    {
+      "type": "edit",
+      "id": "6c428ce738238cfd",
+      "item": {
+        "type": "paragraph",
+        "id": "6c428ce738238cfd",
+        "text": "[[malleable]] See: [[Symmathesy in Programming]]"
+      },
+      "date": 1706590391415
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706623587854
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bbf8e51803507285"
+      },
+      "id": "bbf8e51803507285",
+      "type": "add",
+      "after": "6c428ce738238cfd",
+      "date": 1706623589167
+    },
+    {
+      "type": "edit",
+      "id": "bbf8e51803507285",
+      "item": {
+        "type": "paragraph",
+        "id": "bbf8e51803507285",
+        "text": "[[match]] (within [[Value]])"
+      },
+      "date": 1706623600484
+    },
+    {
+      "type": "fork",
+      "site": "mold.dreyeck.ch",
+      "date": 1706629682027
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "67d9b92ea78d32ae"
+      },
+      "id": "67d9b92ea78d32ae",
+      "type": "add",
+      "after": "bbf8e51803507285",
+      "date": 1706629685577
+    },
+    {
+      "type": "edit",
+      "id": "67d9b92ea78d32ae",
+      "item": {
+        "type": "paragraph",
+        "id": "67d9b92ea78d32ae",
+        "text": "[1] Victor R Basili, Gianluigi Caldiera, and H. Dieter Rombach. 1994. The goal question\nmetric approach. In Encyclopedia of software engineering, John J. Marciniak (Ed.).\nJohn Wiley & Sons Inc., 528–532."
+      },
+      "date": 1706629691708
+    },
+    {
+      "type": "edit",
+      "id": "67d9b92ea78d32ae",
+      "item": {
+        "type": "paragraph",
+        "id": "67d9b92ea78d32ae",
+        "text": "[[Measurement]] (within [[Simple View]]) See:"
+      },
+      "date": 1706629725325
+    },
+    {
+      "type": "add",
+      "id": "3c470edcd3525154",
+      "item": {
+        "type": "paragraph",
+        "id": "3c470edcd3525154",
+        "text": "The goal question\nmetric approach. In Encyclopedia of software engineering, John J. Marciniak (Ed.).\nJohn Wiley & Sons Inc., 528–532."
+      },
+      "after": "67d9b92ea78d32ae",
+      "date": 1706629731649
+    },
+    {
+      "type": "remove",
+      "id": "3c470edcd3525154",
+      "date": 1706629745005
+    },
+    {
+      "type": "edit",
+      "id": "67d9b92ea78d32ae",
+      "item": {
+        "type": "paragraph",
+        "id": "67d9b92ea78d32ae",
+        "text": "[[Measurement]] (within [[Simple View]]) See: The goal question metric approach. "
+      },
+      "date": 1706629750126
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706630003943
+    },
+    {
+      "type": "fork",
+      "site": "mold.dreyeck.ch",
+      "date": 1706701778817
+    },
+    {
+      "type": "edit",
+      "id": "67d9b92ea78d32ae",
+      "item": {
+        "type": "paragraph",
+        "id": "67d9b92ea78d32ae",
+        "text": "[[Measurement]] (within [[Simple View]]) See: The goal question metric approach, mechanism for creating a corporate [[Memory]]"
+      },
+      "date": 1706701814574
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4c30e39fb3001327"
+      },
+      "id": "4c30e39fb3001327",
+      "type": "add",
+      "after": "67d9b92ea78d32ae",
+      "date": 1706718828685
+    },
+    {
+      "type": "edit",
+      "id": "4c30e39fb3001327",
+      "item": {
+        "type": "paragraph",
+        "id": "4c30e39fb3001327",
+        "text": "[[Mysticism]] (within)"
+      },
+      "date": 1706718847014
+    },
+    {
+      "type": "edit",
+      "id": "4c30e39fb3001327",
+      "item": {
+        "type": "paragraph",
+        "id": "4c30e39fb3001327",
+        "text": "[[Mysticism]] (within [[Inadequate World Hypotheses]]) See: "
+      },
+      "date": 1706718870623
+    },
+    {
+      "type": "edit",
+      "id": "4c30e39fb3001327",
+      "item": {
+        "type": "paragraph",
+        "id": "4c30e39fb3001327",
+        "text": "[[Mysticism]] (within [[Inadequate World Hypotheses]]) See: [[Holographic New Age Mysticism]]"
+      },
+      "date": 1706718886431
     }
   ]
 }

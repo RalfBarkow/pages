@@ -52,12 +52,12 @@
     {
       "type": "markdown",
       "id": "7632ef5529566b44",
-      "text": "> A [[Container]] is an [[Object]] from the [[Outside]] and a process from the [[Inside]]. (Bricken, [[Iconic Arithmetic]] Volume I, p. 137)"
+      "text": "> A [[Container]] is an [[Object]] from the [[Outside]] and a process from the [[Inside]]. (Bricken, [[Iconic Arithmetic]] Volume I, p. 137)\n- (within [[Containers for knowledges?]])"
     },
     {
       "type": "paragraph",
       "id": "0de225d2550c9e65",
-      "text": "[[Cartes-Guides]] Alphabétiques → Leitkarten ⇒ [[Guide Cards]]"
+      "text": "[[Cartes-Guides]] Alphabétiques → Leitkarten ⇒ [[Guide Cards]] See: [[Crc Card]]"
     },
     {
       "type": "paragraph",
@@ -73,6 +73,86 @@
       "type": "markdown",
       "id": "9bb87aeced97be24",
       "text": "- [[Arrangement]]\n- [[Frame]], [[put]] into separate frames, carry [[Frame Type]] along, i.e. [[Item-id]]. See [[Allele]]\n- [[Alternating Contexts]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "ca59b4b63c24f4c5",
+      "text": "[[Cause and Effect]] ((within [[Worldview]]) within  [[Systemic Thinking]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "e2fa77a2e744bc87",
+      "text": "[[Computer]] (within [[Smalltalk Is the Car]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "ae13488d22a2f182",
+      "text": "Clichés (within [[Complex and Multifaceted Pages]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "683b05236b0df42c",
+      "text": "[[Discovering CAST Imaging]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "22e906d9ff11ff88",
+      "text": "[[Crc Card]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "f9d237f83f2afdd5",
+      "text": "[[coax]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "cbd8848d9a104a13",
+      "text": "[[Convert HTML Script to Graph]] (within js.ward.asia.wiki.org)"
+    },
+    {
+      "type": "roster",
+      "id": "c21ff43a12c8585f",
+      "text": "Convert\njs.ward.asia.wiki.org"
+    },
+    {
+      "type": "paragraph",
+      "id": "9d6bc58cc5cf469f",
+      "text": "[[CSV]] (within [[Exports from OPM]]) See: Source of Whole In Parts Conversation Set"
+    },
+    {
+      "type": "paragraph",
+      "id": "e0ca33b3ddc19f53",
+      "text": "[[control]] systems through such models ⇒ [[LLM]]s See: [[The Phenomenon of Control]], [[Model Power]], [[Model Monopoly]] → \"[[~/mdp/0c1]]\""
+    },
+    {
+      "type": "paragraph",
+      "id": "08db8e56070faaff",
+      "text": "[[Capture the Learning]] (within [[Decision Making]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "77e1b688bd562b03",
+      "text": "[[Contribute in Radical Shifts]] (within [[Decision Making]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "59ed434949ba5d22",
+      "text": "[[Choice]] (within [[Unsicherheitsabsorption]]) (Uncertainty absorption)"
+    },
+    {
+      "type": "paragraph",
+      "id": "f127c931da50b792",
+      "text": "[[CHECKS]] (within [[Tips For Writing Pattern Languages]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "57fee224b956e7e1",
+      "text": "[[Coevolution]] (within [[SOTCAC]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "4d42756cdc206a39",
+      "text": "[[Catalyst]] (within [[r.Coevolution.Cluskey]]) See: [[facilitate]], [[Humans and AI]]"
     }
   ],
   "journal": [
@@ -656,6 +736,581 @@
         "text": "- [[Arrangement]]\n- [[Frame]], [[put]] into separate frames, carry [[Frame Type]] along, i.e. [[Item-id]]. See [[Allele]]\n- [[Alternating Contexts]]"
       },
       "date": 1706181796148
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706243370937
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ca59b4b63c24f4c5"
+      },
+      "id": "ca59b4b63c24f4c5",
+      "type": "add",
+      "after": "9bb87aeced97be24",
+      "date": 1706243379339
+    },
+    {
+      "type": "edit",
+      "id": "ca59b4b63c24f4c5",
+      "item": {
+        "type": "paragraph",
+        "id": "ca59b4b63c24f4c5",
+        "text": "[[Cause and Effect]]"
+      },
+      "date": 1706243450502
+    },
+    {
+      "type": "edit",
+      "id": "ca59b4b63c24f4c5",
+      "item": {
+        "type": "paragraph",
+        "id": "ca59b4b63c24f4c5",
+        "text": "[[Cause and Effect]] (within [[Worldview]])"
+      },
+      "date": 1706243523392
+    },
+    {
+      "type": "edit",
+      "id": "ca59b4b63c24f4c5",
+      "item": {
+        "type": "paragraph",
+        "id": "ca59b4b63c24f4c5",
+        "text": "[[Cause and Effect]] ((within [[Worldview]]) within  [[Systemic Thinking]])"
+      },
+      "date": 1706243604468
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706245433643
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706262623942
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e2fa77a2e744bc87"
+      },
+      "id": "e2fa77a2e744bc87",
+      "type": "add",
+      "after": "ca59b4b63c24f4c5",
+      "date": 1706262626052
+    },
+    {
+      "type": "edit",
+      "id": "e2fa77a2e744bc87",
+      "item": {
+        "type": "paragraph",
+        "id": "e2fa77a2e744bc87",
+        "text": "[[Computer]] (within [[Smalltalk Is the Car]])"
+      },
+      "date": 1706262627570
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ae13488d22a2f182"
+      },
+      "id": "ae13488d22a2f182",
+      "type": "add",
+      "after": "e2fa77a2e744bc87",
+      "date": 1706520540030
+    },
+    {
+      "type": "edit",
+      "id": "ae13488d22a2f182",
+      "item": {
+        "type": "paragraph",
+        "id": "ae13488d22a2f182",
+        "text": "Clichés"
+      },
+      "date": 1706520549631
+    },
+    {
+      "type": "edit",
+      "id": "ae13488d22a2f182",
+      "item": {
+        "type": "paragraph",
+        "id": "ae13488d22a2f182",
+        "text": "Clichés (within [[Complex and Multifaceted Pages]])"
+      },
+      "date": 1706520593273
+    },
+    {
+      "type": "edit",
+      "id": "7632ef5529566b44",
+      "item": {
+        "type": "markdown",
+        "id": "7632ef5529566b44",
+        "text": "> A [[Container]] is an [[Object]] from the [[Outside]] and a process from the [[Inside]]. (Bricken, [[Iconic Arithmetic]] Volume I, p. 137)\n- (within )"
+      },
+      "date": 1706541560753
+    },
+    {
+      "type": "edit",
+      "id": "7632ef5529566b44",
+      "item": {
+        "type": "markdown",
+        "id": "7632ef5529566b44",
+        "text": "> A [[Container]] is an [[Object]] from the [[Outside]] and a process from the [[Inside]]. (Bricken, [[Iconic Arithmetic]] Volume I, p. 137)\n- (within Containers for knowledges?)"
+      },
+      "date": 1706541567130
+    },
+    {
+      "type": "edit",
+      "id": "7632ef5529566b44",
+      "item": {
+        "type": "markdown",
+        "id": "7632ef5529566b44",
+        "text": "> A [[Container]] is an [[Object]] from the [[Outside]] and a process from the [[Inside]]. (Bricken, [[Iconic Arithmetic]] Volume I, p. 137)\n- (within [[Containers for knowledges?]])"
+      },
+      "date": 1706541579365
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706546058481
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "683b05236b0df42c"
+      },
+      "id": "683b05236b0df42c",
+      "type": "add",
+      "after": "ae13488d22a2f182",
+      "date": 1706546140446
+    },
+    {
+      "type": "edit",
+      "id": "683b05236b0df42c",
+      "item": {
+        "type": "paragraph",
+        "id": "683b05236b0df42c",
+        "text": "[[Discovering CAST Imaging]]"
+      },
+      "date": 1706546142666
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706585387877
+    },
+    {
+      "id": "22e906d9ff11ff88",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "22e906d9ff11ff88",
+        "text": "[[Crc Card]]"
+      },
+      "after": "683b05236b0df42c",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1706585395157
+    },
+    {
+      "type": "edit",
+      "id": "0de225d2550c9e65",
+      "item": {
+        "type": "paragraph",
+        "id": "0de225d2550c9e65",
+        "text": "[[Cartes-Guides]] Alphabétiques → Leitkarten ⇒ [[Guide Cards]] See: [[Crc Card]]"
+      },
+      "date": 1706585405801
+    },
+    {
+      "type": "add",
+      "id": "f9d237f83f2afdd5",
+      "item": {
+        "type": "paragraph",
+        "id": "f9d237f83f2afdd5",
+        "text": "[[coax]]"
+      },
+      "after": "22e906d9ff11ff88",
+      "date": 1706585438673
+    },
+    {
+      "type": "add",
+      "id": "cbd8848d9a104a13",
+      "item": {
+        "type": "paragraph",
+        "id": "cbd8848d9a104a13",
+        "text": "[[Convert HTML Script to Graph]]"
+      },
+      "after": "f9d237f83f2afdd5",
+      "date": 1706604383267
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c21ff43a12c8585f"
+      },
+      "id": "c21ff43a12c8585f",
+      "type": "add",
+      "after": "cbd8848d9a104a13",
+      "date": 1706604405566
+    },
+    {
+      "type": "edit",
+      "id": "c21ff43a12c8585f",
+      "item": {
+        "type": "roster",
+        "id": "c21ff43a12c8585f",
+        "text": "Convert\njs.ward.asia.wiki.org"
+      },
+      "date": 1706604415897
+    },
+    {
+      "type": "edit",
+      "id": "cbd8848d9a104a13",
+      "item": {
+        "type": "paragraph",
+        "id": "cbd8848d9a104a13",
+        "text": "[[Convert HTML Script to Graph]] (within js.ward.asia.wiki.org)"
+      },
+      "date": 1706604503831
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9d6bc58cc5cf469f"
+      },
+      "id": "9d6bc58cc5cf469f",
+      "type": "add",
+      "after": "c21ff43a12c8585f",
+      "date": 1706605639217
+    },
+    {
+      "type": "edit",
+      "id": "9d6bc58cc5cf469f",
+      "item": {
+        "type": "paragraph",
+        "id": "9d6bc58cc5cf469f",
+        "text": "[[CSV]]"
+      },
+      "date": 1706605645749
+    },
+    {
+      "type": "edit",
+      "id": "9d6bc58cc5cf469f",
+      "item": {
+        "type": "paragraph",
+        "id": "9d6bc58cc5cf469f",
+        "text": "[[CSV]] (within [[Exports from OPM]])"
+      },
+      "date": 1706605676700
+    },
+    {
+      "type": "edit",
+      "id": "9d6bc58cc5cf469f",
+      "item": {
+        "type": "paragraph",
+        "id": "9d6bc58cc5cf469f",
+        "text": "[[CSV]] (within [[Exports from OPM]]) See: Source of Whole In Parts Conversation Set"
+      },
+      "date": 1706605744872
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706605917385
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e0ca33b3ddc19f53"
+      },
+      "id": "e0ca33b3ddc19f53",
+      "type": "add",
+      "after": "9d6bc58cc5cf469f",
+      "date": 1706607223794
+    },
+    {
+      "type": "edit",
+      "id": "e0ca33b3ddc19f53",
+      "item": {
+        "type": "paragraph",
+        "id": "e0ca33b3ddc19f53",
+        "text": "[[control]] systems through such models ⇒ LLMs"
+      },
+      "date": 1706607244602
+    },
+    {
+      "type": "edit",
+      "id": "e0ca33b3ddc19f53",
+      "item": {
+        "type": "paragraph",
+        "id": "e0ca33b3ddc19f53",
+        "text": "[[control]] systems through such models ⇒ LLMs See: [[The Phenomenon of Control]]"
+      },
+      "date": 1706607309898
+    },
+    {
+      "type": "edit",
+      "id": "e0ca33b3ddc19f53",
+      "item": {
+        "type": "paragraph",
+        "id": "e0ca33b3ddc19f53",
+        "text": "[[control]] systems through such models ⇒ [[LLM]]s See: [[The Phenomenon of Control]]"
+      },
+      "date": 1706607338872
+    },
+    {
+      "type": "edit",
+      "id": "e0ca33b3ddc19f53",
+      "item": {
+        "type": "paragraph",
+        "id": "e0ca33b3ddc19f53",
+        "text": "[[control]] systems through such models ⇒ [[LLM]]s See: [[The Phenomenon of Control]], [[Model Power]]"
+      },
+      "date": 1706607350704
+    },
+    {
+      "type": "edit",
+      "id": "e0ca33b3ddc19f53",
+      "item": {
+        "type": "paragraph",
+        "id": "e0ca33b3ddc19f53",
+        "text": "[[control]] systems through such models ⇒ [[LLM]]s See: [[The Phenomenon of Control]], [[Model Power]], [[Model Theory]]"
+      },
+      "date": 1706607367969
+    },
+    {
+      "type": "edit",
+      "id": "e0ca33b3ddc19f53",
+      "item": {
+        "type": "paragraph",
+        "id": "e0ca33b3ddc19f53",
+        "text": "[[control]] systems through such models ⇒ [[LLM]]s See: [[The Phenomenon of Control]], [[Model Power]], [[Model Theory]] → "
+      },
+      "date": 1706607405633
+    },
+    {
+      "type": "edit",
+      "id": "e0ca33b3ddc19f53",
+      "item": {
+        "type": "paragraph",
+        "id": "e0ca33b3ddc19f53",
+        "text": "[[control]] systems through such models ⇒ [[LLM]]s See: [[The Phenomenon of Control]], [[Model Power]], [[Model Theory]] → \"[[~/mdp/0c1]]\""
+      },
+      "date": 1706607421964
+    },
+    {
+      "type": "edit",
+      "id": "e0ca33b3ddc19f53",
+      "item": {
+        "type": "paragraph",
+        "id": "e0ca33b3ddc19f53",
+        "text": "[[control]] systems through such models ⇒ [[LLM]]s See: [[The Phenomenon of Control]], [[Model Power]], [[Model Monopoly]] → \"[[~/mdp/0c1]]\""
+      },
+      "date": 1706607447764
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706694181821
+    },
+    {
+      "id": "08db8e56070faaff",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "08db8e56070faaff",
+        "text": "[[Capture the Learning]]"
+      },
+      "after": "e0ca33b3ddc19f53",
+      "attribution": {
+        "page": "2024-01-31"
+      },
+      "date": 1706694247653
+    },
+    {
+      "type": "edit",
+      "id": "08db8e56070faaff",
+      "item": {
+        "type": "paragraph",
+        "id": "08db8e56070faaff",
+        "text": "[[Capture the Learning]] (within [[Decision Making]])"
+      },
+      "date": 1706694283069
+    },
+    {
+      "id": "77e1b688bd562b03",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "77e1b688bd562b03",
+        "text": "[[Contribute in Radical Shifts]] that society have to make quickly vs. ballance"
+      },
+      "after": "08db8e56070faaff",
+      "attribution": {
+        "page": "2024-01-31"
+      },
+      "date": 1706695800143
+    },
+    {
+      "type": "edit",
+      "id": "77e1b688bd562b03",
+      "item": {
+        "type": "paragraph",
+        "id": "77e1b688bd562b03",
+        "text": "[[Contribute in Radical Shifts]] (within [[Decision Making]])"
+      },
+      "date": 1706695809595
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706698153368
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "59ed434949ba5d22"
+      },
+      "id": "59ed434949ba5d22",
+      "type": "add",
+      "after": "77e1b688bd562b03",
+      "date": 1706885654357
+    },
+    {
+      "type": "edit",
+      "id": "59ed434949ba5d22",
+      "item": {
+        "type": "paragraph",
+        "id": "59ed434949ba5d22",
+        "text": "[[Choice]] (within [[Unsicherheitsabsorption]])"
+      },
+      "date": 1706885682676
+    },
+    {
+      "type": "edit",
+      "id": "59ed434949ba5d22",
+      "item": {
+        "type": "paragraph",
+        "id": "59ed434949ba5d22",
+        "text": "[[Choice]] (within [[Unsicherheitsabsorption]]) (Uncertainty absorption)"
+      },
+      "date": 1706885702659
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706909493462
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f127c931da50b792"
+      },
+      "id": "f127c931da50b792",
+      "type": "add",
+      "after": "59ed434949ba5d22",
+      "date": 1707042271728
+    },
+    {
+      "type": "edit",
+      "id": "f127c931da50b792",
+      "item": {
+        "type": "paragraph",
+        "id": "f127c931da50b792",
+        "text": "[[CHECKS]]"
+      },
+      "date": 1707042280993
+    },
+    {
+      "type": "edit",
+      "id": "f127c931da50b792",
+      "item": {
+        "type": "paragraph",
+        "id": "f127c931da50b792",
+        "text": "[[CHECKS]] (within [[Tips For Writing Pattern Languages]])"
+      },
+      "date": 1707042300149
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1707042318075
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "57fee224b956e7e1"
+      },
+      "id": "57fee224b956e7e1",
+      "type": "add",
+      "after": "f127c931da50b792",
+      "date": 1707142801468
+    },
+    {
+      "type": "edit",
+      "id": "57fee224b956e7e1",
+      "item": {
+        "type": "paragraph",
+        "id": "57fee224b956e7e1",
+        "text": "[[Coevolution]]"
+      },
+      "date": 1707142804509
+    },
+    {
+      "type": "edit",
+      "id": "57fee224b956e7e1",
+      "item": {
+        "type": "paragraph",
+        "id": "57fee224b956e7e1",
+        "text": "[[Coevolution]] (within [[SOTCAC]])"
+      },
+      "date": 1707142836866
+    },
+    {
+      "type": "add",
+      "id": "4d42756cdc206a39",
+      "item": {
+        "type": "paragraph",
+        "id": "4d42756cdc206a39",
+        "text": "[[Catalyst]]"
+      },
+      "after": "57fee224b956e7e1",
+      "date": 1707147472294
+    },
+    {
+      "type": "edit",
+      "id": "4d42756cdc206a39",
+      "item": {
+        "type": "paragraph",
+        "id": "4d42756cdc206a39",
+        "text": "[[Catalyst]] (within [[r.Coevolution.Cluskey]])"
+      },
+      "date": 1707147512175
+    },
+    {
+      "type": "edit",
+      "id": "4d42756cdc206a39",
+      "item": {
+        "type": "paragraph",
+        "id": "4d42756cdc206a39",
+        "text": "[[Catalyst]] (within [[r.Coevolution.Cluskey]]) See: [[facilitate]]"
+      },
+      "date": 1707147769324
+    },
+    {
+      "type": "edit",
+      "id": "4d42756cdc206a39",
+      "item": {
+        "type": "paragraph",
+        "id": "4d42756cdc206a39",
+        "text": "[[Catalyst]] (within [[r.Coevolution.Cluskey]]) See: [[facilitate]], [[Humans and AI]]"
+      },
+      "date": 1707147879431
     }
   ]
 }

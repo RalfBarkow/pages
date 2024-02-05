@@ -35,6 +35,31 @@
       "type": "paragraph",
       "id": "1fbd6a17a2fb22bf",
       "text": "[[Biological Plausibility]] (within [[Thing One]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "b61e5bb51bb2e8d2",
+      "text": "[[Beauty, Good, Truth, and Economy]] (within  [[Systemic Thinking]]) See [[Fourth Point]] ⇒ [[Viewpoint]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "443c401c95062512",
+      "text": "[[Betweenness]] (within [[Tetrahedral System]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "85ee7b5d048d49b2",
+      "text": "[[Blind Spot]] (within [[Moldable Development Patterns]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "ba543a9cbce80d92",
+      "text": "[[Bring Back from the Future]] (within [[Holographic New Age Mysticism]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "47441a2115d4c7cb",
+      "text": "[[Beatshifting]] (within [[Croquet]] replication service)"
     }
   ],
   "journal": [
@@ -252,9 +277,201 @@
       "date": 1706184478087
     },
     {
+      "item": {
+        "type": "factory",
+        "id": "b61e5bb51bb2e8d2"
+      },
+      "id": "b61e5bb51bb2e8d2",
+      "type": "add",
+      "after": "1fbd6a17a2fb22bf",
+      "date": 1706243637082
+    },
+    {
+      "type": "edit",
+      "id": "b61e5bb51bb2e8d2",
+      "item": {
+        "type": "paragraph",
+        "id": "b61e5bb51bb2e8d2",
+        "text": "[[Beauty, Good, Truth, and Economy]] "
+      },
+      "date": 1706243643978
+    },
+    {
+      "type": "edit",
+      "id": "b61e5bb51bb2e8d2",
+      "item": {
+        "type": "paragraph",
+        "id": "b61e5bb51bb2e8d2",
+        "text": "[[Beauty, Good, Truth, and Economy]] (within  [[Systemic Thinking]])"
+      },
+      "date": 1706243662675
+    },
+    {
+      "type": "edit",
+      "id": "b61e5bb51bb2e8d2",
+      "item": {
+        "type": "paragraph",
+        "id": "b61e5bb51bb2e8d2",
+        "text": "[[Beauty, Good, Truth, and Economy]] (within  [[Systemic Thinking]]) See [[Fourth Point]] ⇒ [[Viewpoint]]"
+      },
+      "date": 1706243706876
+    },
+    {
       "type": "fork",
       "site": "localhost:3000",
-      "date": 1706188275741
+      "date": 1706245419455
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706263669795
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "443c401c95062512"
+      },
+      "id": "443c401c95062512",
+      "type": "add",
+      "after": "b61e5bb51bb2e8d2",
+      "date": 1706263872338
+    },
+    {
+      "type": "edit",
+      "id": "443c401c95062512",
+      "item": {
+        "type": "paragraph",
+        "id": "443c401c95062512",
+        "text": "[[Betweenness]] (within)"
+      },
+      "date": 1706263886460
+    },
+    {
+      "type": "edit",
+      "id": "443c401c95062512",
+      "item": {
+        "type": "paragraph",
+        "id": "443c401c95062512",
+        "text": "[[Betweenness]] (within [[Tetrahedral System]])"
+      },
+      "date": 1706263898223
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706263917512
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "85ee7b5d048d49b2"
+      },
+      "id": "85ee7b5d048d49b2",
+      "type": "add",
+      "after": "443c401c95062512",
+      "date": 1706622635066
+    },
+    {
+      "type": "edit",
+      "id": "85ee7b5d048d49b2",
+      "item": {
+        "type": "paragraph",
+        "id": "85ee7b5d048d49b2",
+        "text": "[[Blind Spot]]"
+      },
+      "date": 1706622643141
+    },
+    {
+      "type": "edit",
+      "id": "85ee7b5d048d49b2",
+      "item": {
+        "type": "paragraph",
+        "id": "85ee7b5d048d49b2",
+        "text": "[[Blind Spot]] (within [Moldable Development Patterns]])"
+      },
+      "date": 1706622662641
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706719101645
+    },
+    {
+      "type": "edit",
+      "id": "85ee7b5d048d49b2",
+      "item": {
+        "type": "paragraph",
+        "id": "85ee7b5d048d49b2",
+        "text": "[[Blind Spot]] (within [[Moldable Development Patterns]])"
+      },
+      "date": 1706719115878
+    },
+    {
+      "type": "add",
+      "id": "ba543a9cbce80d92",
+      "item": {
+        "type": "paragraph",
+        "id": "ba543a9cbce80d92",
+        "text": "[[Bring Back from the Future]] (within)"
+      },
+      "after": "85ee7b5d048d49b2",
+      "date": 1706719123964
+    },
+    {
+      "type": "edit",
+      "id": "ba543a9cbce80d92",
+      "item": {
+        "type": "paragraph",
+        "id": "ba543a9cbce80d92",
+        "text": "[[Bring Back from the Future]] (within [[Holographic New Age Mysticism]])"
+      },
+      "date": 1706719147901
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706719224605
+    },
+    {
+      "type": "add",
+      "id": "47441a2115d4c7cb",
+      "item": {
+        "type": "paragraph",
+        "id": "47441a2115d4c7cb",
+        "text": "[[Beatshifting]]"
+      },
+      "after": "ba543a9cbce80d92",
+      "date": 1707127085028
+    },
+    {
+      "type": "edit",
+      "id": "47441a2115d4c7cb",
+      "item": {
+        "type": "paragraph",
+        "id": "47441a2115d4c7cb",
+        "text": "[[Beatshifting]] (with assets/caffeine/beatshifting/index.html)"
+      },
+      "date": 1707127132932
+    },
+    {
+      "type": "edit",
+      "id": "47441a2115d4c7cb",
+      "item": {
+        "type": "paragraph",
+        "id": "47441a2115d4c7cb",
+        "text": "[[Beatshifting]] (within [[Croquet]])"
+      },
+      "date": 1707129117866
+    },
+    {
+      "type": "edit",
+      "id": "47441a2115d4c7cb",
+      "item": {
+        "type": "paragraph",
+        "id": "47441a2115d4c7cb",
+        "text": "[[Beatshifting]] (within [[Croquet]] replication service)"
+      },
+      "date": 1707129341151
     }
   ]
 }

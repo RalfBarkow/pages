@@ -59,7 +59,7 @@
     {
       "type": "paragraph",
       "id": "55242fffc0a4b12a",
-      "text": "[[Traits]] (within [[Composable Units of Behaviour]])"
+      "text": "[[Traits]] (within [[Composable Units of Behaviour]]) See Biological [[Traits Composition]]"
     },
     {
       "type": "paragraph",
@@ -95,6 +95,51 @@
       "type": "paragraph",
       "id": "384b8be4a8a594d4",
       "text": "[[Thing One]] (within [[Offloaded Brain]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "349c133cebdbfd06",
+      "text": "[[Term Rewriting]] (within [[Substitution]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "d15d2f2333c44202",
+      "text": "[[Touching Cylinders]] See [[Touching Cigarettes]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "dc15e527d0567bec",
+      "text": "[[Trinity]] (within [[wiki as affordances in trinity-space]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "1afec7f4af3c3a99",
+      "text": "[[Target Morphology]] (within [[Plasticity]])"
+    },
+    {
+      "type": "roster",
+      "id": "597f7f49dba29693",
+      "text": "Plasticity\nmarc.tries.fed.wiki"
+    },
+    {
+      "type": "paragraph",
+      "id": "d79fd65afcd0f488",
+      "text": "[[Technical Debt]] (within [[Affordances]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "d4028f5507d1ce8f",
+      "text": "[[Team Software Process]] (TSP) developed by [[Watts Humphrey]] and [[Rational Unified Process]] (RUP) (within [[Technical Debt]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "85f3231906079e2a",
+      "text": "[[Task Location]] See: [[Learning Journey]] (within [[Disgust and Envy]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "0b9723521c7dd341",
+      "text": "[[Touchstone]] (within [[Marc's Tetrahedron]]) See: [[Linkon]]"
     }
   ],
   "journal": [
@@ -617,6 +662,374 @@
       "type": "fork",
       "site": "localhost:3000",
       "date": 1706188622419
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5b1b386d2db6da3c"
+      },
+      "id": "5b1b386d2db6da3c",
+      "type": "add",
+      "after": "384b8be4a8a594d4",
+      "date": 1706191284951
+    },
+    {
+      "type": "remove",
+      "id": "5b1b386d2db6da3c",
+      "date": 1706191291996
+    },
+    {
+      "type": "edit",
+      "id": "55242fffc0a4b12a",
+      "item": {
+        "type": "paragraph",
+        "id": "55242fffc0a4b12a",
+        "text": "[[Traits]] (within [[Composable Units of Behaviour]]) See Biologica [[Traits Composition]]"
+      },
+      "date": 1706191315934
+    },
+    {
+      "type": "edit",
+      "id": "55242fffc0a4b12a",
+      "item": {
+        "type": "paragraph",
+        "id": "55242fffc0a4b12a",
+        "text": "[[Traits]] (within [[Composable Units of Behaviour]]) See Biological [[Traits Composition]]"
+      },
+      "date": 1706191332988
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "349c133cebdbfd06"
+      },
+      "id": "349c133cebdbfd06",
+      "type": "add",
+      "after": "384b8be4a8a594d4",
+      "date": 1706199335441
+    },
+    {
+      "type": "edit",
+      "id": "349c133cebdbfd06",
+      "item": {
+        "type": "paragraph",
+        "id": "349c133cebdbfd06",
+        "text": "[[Term Rewriting]] (within [[Substitution]])"
+      },
+      "date": 1706199353830
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706266145538
+    },
+    {
+      "type": "add",
+      "id": "d15d2f2333c44202",
+      "item": {
+        "type": "paragraph",
+        "id": "d15d2f2333c44202",
+        "text": "[[Touching Cylinders]]"
+      },
+      "after": "349c133cebdbfd06",
+      "date": 1706266152992
+    },
+    {
+      "type": "edit",
+      "id": "d15d2f2333c44202",
+      "item": {
+        "type": "paragraph",
+        "id": "d15d2f2333c44202",
+        "text": "[[Touching Cylinders]] See [[Touching Cigarettes]]"
+      },
+      "date": 1706268234530
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706268270815
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706365084341
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dc15e527d0567bec"
+      },
+      "id": "dc15e527d0567bec",
+      "type": "add",
+      "after": "d15d2f2333c44202",
+      "date": 1706365085664
+    },
+    {
+      "type": "edit",
+      "id": "dc15e527d0567bec",
+      "item": {
+        "type": "paragraph",
+        "id": "dc15e527d0567bec",
+        "text": "[[Trinity]]"
+      },
+      "date": 1706365093212
+    },
+    {
+      "type": "edit",
+      "id": "dc15e527d0567bec",
+      "item": {
+        "type": "paragraph",
+        "id": "dc15e527d0567bec",
+        "text": "[[Trinity]] (within [[wiki as affordances in trinity-space]])"
+      },
+      "date": 1706365109529
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1afec7f4af3c3a99"
+      },
+      "id": "1afec7f4af3c3a99",
+      "type": "add",
+      "after": "dc15e527d0567bec",
+      "date": 1706598873469
+    },
+    {
+      "type": "edit",
+      "id": "1afec7f4af3c3a99",
+      "item": {
+        "type": "paragraph",
+        "id": "1afec7f4af3c3a99",
+        "text": "[[Target Morphology]]"
+      },
+      "date": 1706598884576
+    },
+    {
+      "type": "edit",
+      "id": "1afec7f4af3c3a99",
+      "item": {
+        "type": "paragraph",
+        "id": "1afec7f4af3c3a99",
+        "text": "[[Target Morphology]] (within [[Plasticity]])"
+      },
+      "date": 1706599378481
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "597f7f49dba29693"
+      },
+      "id": "597f7f49dba29693",
+      "type": "add",
+      "after": "1afec7f4af3c3a99",
+      "date": 1706599463831
+    },
+    {
+      "type": "edit",
+      "id": "597f7f49dba29693",
+      "item": {
+        "type": "roster",
+        "id": "597f7f49dba29693",
+        "text": "Plasticity\nmarc.tries.fed.wiki"
+      },
+      "date": 1706599481282
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "00285df441695cbf"
+      },
+      "id": "00285df441695cbf",
+      "type": "add",
+      "after": "597f7f49dba29693",
+      "date": 1706600200804
+    },
+    {
+      "type": "edit",
+      "id": "00285df441695cbf",
+      "item": {
+        "type": "paragraph",
+        "id": "00285df441695cbf",
+        "text": "[[Tips from Erlang]] (within [[Fred Herbert]])"
+      },
+      "date": 1706600219361
+    },
+    {
+      "type": "edit",
+      "id": "00285df441695cbf",
+      "item": {
+        "type": "paragraph",
+        "id": "00285df441695cbf",
+        "text": "[[Tips from Erlang]] (within [[Fred Hebert]])"
+      },
+      "date": 1706600258648
+    },
+    {
+      "id": "00285df441695cbf",
+      "type": "remove",
+      "removedTo": {
+        "page": "E"
+      },
+      "date": 1706600273997
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706606366489
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d79fd65afcd0f488"
+      },
+      "id": "d79fd65afcd0f488",
+      "type": "add",
+      "after": "597f7f49dba29693",
+      "date": 1706617723967
+    },
+    {
+      "type": "edit",
+      "id": "d79fd65afcd0f488",
+      "item": {
+        "type": "paragraph",
+        "id": "d79fd65afcd0f488",
+        "text": "[[Technical Debt]] (within [[Affordances]])"
+      },
+      "date": 1706617736912
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d4028f5507d1ce8f"
+      },
+      "id": "d4028f5507d1ce8f",
+      "type": "add",
+      "after": "d79fd65afcd0f488",
+      "date": 1706626087831
+    },
+    {
+      "type": "edit",
+      "id": "d4028f5507d1ce8f",
+      "item": {
+        "type": "paragraph",
+        "id": "d4028f5507d1ce8f",
+        "text": "[[Team Software Process]] (TSP) developed by [[Watts Humphrey]] and [[Rational Unified Process]] (RUP)"
+      },
+      "date": 1706626090146
+    },
+    {
+      "type": "edit",
+      "id": "d4028f5507d1ce8f",
+      "item": {
+        "type": "paragraph",
+        "id": "d4028f5507d1ce8f",
+        "text": "[[Team Software Process]] (TSP) developed by [[Watts Humphrey]] and [[Rational Unified Process]] (RUP) (within [[Technical Debt]] )"
+      },
+      "date": 1706626103971
+    },
+    {
+      "type": "edit",
+      "id": "d4028f5507d1ce8f",
+      "item": {
+        "type": "paragraph",
+        "id": "d4028f5507d1ce8f",
+        "text": "[[Team Software Process]] (TSP) developed by [[Watts Humphrey]] and [[Rational Unified Process]] (RUP) (within [[Technical Debt]])"
+      },
+      "date": 1706626113864
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706626189131
+    },
+    {
+      "type": "fork",
+      "site": "mold.dreyeck.ch",
+      "date": 1706702766102
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "85f3231906079e2a"
+      },
+      "id": "85f3231906079e2a",
+      "type": "add",
+      "after": "d4028f5507d1ce8f",
+      "date": 1706702768465
+    },
+    {
+      "type": "edit",
+      "id": "85f3231906079e2a",
+      "item": {
+        "type": "paragraph",
+        "id": "85f3231906079e2a",
+        "text": "[[Task Location]]"
+      },
+      "date": 1706702784682
+    },
+    {
+      "id": "489319e50391335a",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "489319e50391335a",
+        "text": "[[Learning Journey]] (within [[Disgust and Envy]]) See: [[Eric Evans]] is not surprised to see some form of “[[Separation of Concerns]]” pop up in a new situation. [https://www.domainlanguage.com/articles/llm-software-design-learning-journey/ post], [[Task Location]]"
+      },
+      "after": "85f3231906079e2a",
+      "attribution": {
+        "page": "L"
+      },
+      "date": 1706702822449
+    },
+    {
+      "type": "remove",
+      "id": "489319e50391335a",
+      "date": 1706702843639
+    },
+    {
+      "type": "edit",
+      "id": "85f3231906079e2a",
+      "item": {
+        "type": "paragraph",
+        "id": "85f3231906079e2a",
+        "text": "[[Task Location]] See: [[Learning Journey]] (within [[Disgust and Envy]])"
+      },
+      "date": 1706702847970
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1706702872430
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0b9723521c7dd341"
+      },
+      "id": "0b9723521c7dd341",
+      "type": "add",
+      "after": "85f3231906079e2a",
+      "date": 1707126882898
+    },
+    {
+      "type": "edit",
+      "id": "0b9723521c7dd341",
+      "item": {
+        "type": "paragraph",
+        "id": "0b9723521c7dd341",
+        "text": "[[Touchstone]] (within [[Marc's Tetrahedron]])"
+      },
+      "date": 1707126903370
+    },
+    {
+      "type": "edit",
+      "id": "0b9723521c7dd341",
+      "item": {
+        "type": "paragraph",
+        "id": "0b9723521c7dd341",
+        "text": "[[Touchstone]] (within [[Marc's Tetrahedron]]) See: [[Linkon]]"
+      },
+      "date": 1707126946035
     }
   ]
 }

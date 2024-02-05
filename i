@@ -63,6 +63,26 @@
       "type": "markdown",
       "id": "634006b4b7ed768e",
       "text": "- (within [[Flip Operation]]). See [[Copy Operation]]\n- defined as an [[Event]] that selects the states of a [[System]] "
+    },
+    {
+      "type": "paragraph",
+      "id": "70f92f8faafa3394",
+      "text": "[[Index Logs]] see [[Search Index Logs]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "2dca238d90104476",
+      "text": "Intelligent tutoring systems (ITS) (within [[Capture the Learning]]) See: [[r.LearningAnalytics.Martin.Sherin]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "113ed091d364bbc5",
+      "text": "[[The Idea Compass]] ((within [[Zettelkasten]]) within [[Antinet]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "ef9fdbda88d22463",
+      "text": "[[Information Processing]] (within [[Unsicherheitsabsorption]])"
     }
   ],
   "journal": [
@@ -539,6 +559,124 @@
         "text": "- (within [[Flip Operation]]). See [[Copy Operation]]\n- defined as an [[Event]] that selects the states of a [[System]] "
       },
       "date": 1706182850766
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "70f92f8faafa3394"
+      },
+      "id": "70f92f8faafa3394",
+      "type": "add",
+      "after": "634006b4b7ed768e",
+      "date": 1706272323297
+    },
+    {
+      "type": "edit",
+      "id": "70f92f8faafa3394",
+      "item": {
+        "type": "paragraph",
+        "id": "70f92f8faafa3394",
+        "text": "[[Index Logs]] see [[Search Index Logs]]"
+      },
+      "date": 1706272338144
+    },
+    {
+      "id": "2dca238d90104476",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "2dca238d90104476",
+        "text": "Research on intelligent tutoring systems (ITS) (within [[Capture the Learning]]) See: [[r.LearningAnalytics.Martin.Sherin]]"
+      },
+      "after": "70f92f8faafa3394",
+      "attribution": {
+        "page": "R"
+      },
+      "date": 1706694984662
+    },
+    {
+      "type": "edit",
+      "id": "2dca238d90104476",
+      "item": {
+        "type": "paragraph",
+        "id": "2dca238d90104476",
+        "text": "Intelligent tutoring systems (ITS) (within [[Capture the Learning]]) See: [[r.LearningAnalytics.Martin.Sherin]]"
+      },
+      "date": 1706694993211
+    },
+    {
+      "id": "113ed091d364bbc5",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "113ed091d364bbc5",
+        "text": "⇐ [[The Idea Compass]]"
+      },
+      "after": "2dca238d90104476",
+      "attribution": {
+        "page": "2024-02-01"
+      },
+      "date": 1706780559341
+    },
+    {
+      "type": "edit",
+      "id": "113ed091d364bbc5",
+      "item": {
+        "type": "paragraph",
+        "id": "113ed091d364bbc5",
+        "text": "[[The Idea Compass]] (within [[Zettelkasten]])"
+      },
+      "date": 1706780575624
+    },
+    {
+      "type": "edit",
+      "id": "113ed091d364bbc5",
+      "item": {
+        "type": "paragraph",
+        "id": "113ed091d364bbc5",
+        "text": "[[The Idea Compass]] ((within [[Zettelkasten]]) within [[Antinet]]"
+      },
+      "date": 1706780613287
+    },
+    {
+      "type": "edit",
+      "id": "113ed091d364bbc5",
+      "item": {
+        "type": "paragraph",
+        "id": "113ed091d364bbc5",
+        "text": "[[The Idea Compass]] ((within [[Zettelkasten]]) within [[Antinet]])"
+      },
+      "date": 1706780618612
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ef9fdbda88d22463"
+      },
+      "id": "ef9fdbda88d22463",
+      "type": "add",
+      "after": "113ed091d364bbc5",
+      "date": 1706886007322
+    },
+    {
+      "type": "edit",
+      "id": "ef9fdbda88d22463",
+      "item": {
+        "type": "paragraph",
+        "id": "ef9fdbda88d22463",
+        "text": "[[Information Processing]] (within [[Unsicherheitsabsorption)"
+      },
+      "date": 1706886021732
+    },
+    {
+      "type": "edit",
+      "id": "ef9fdbda88d22463",
+      "item": {
+        "type": "paragraph",
+        "id": "ef9fdbda88d22463",
+        "text": "[[Information Processing]] (within [[Unsicherheitsabsorption]])"
+      },
+      "date": 1706886026337
     }
   ]
 }
