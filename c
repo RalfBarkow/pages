@@ -47,6 +47,16 @@
     {
       "type": "paragraph",
       "id": "ae02940a42c52efe",
+      "text": "[[Container]] (within [[Flüchtige Zeiten]]) See: [[Metaphor of Liquidity]]"
+    },
+    {
+      "type": "markdown",
+      "id": "9821a6cc38ee5bb6",
+      "text": "- The concept of a container is [[tangible]], not abstract. "
+    },
+    {
+      "type": "paragraph",
+      "id": "b6a1144d476019d6",
       "text": "[[Containers]] (within [[r.Culkin.McLuhan]])"
     },
     {
@@ -1311,6 +1321,81 @@
         "text": "[[Catalyst]] (within [[r.Coevolution.Cluskey]]) See: [[facilitate]], [[Humans and AI]]"
       },
       "date": 1707147879431
+    },
+    {
+      "type": "edit",
+      "id": "ae02940a42c52efe",
+      "item": {
+        "type": "paragraph",
+        "id": "ae02940a42c52efe",
+        "text": "[[Containers]]"
+      },
+      "date": 1707342928721
+    },
+    {
+      "type": "add",
+      "id": "b6a1144d476019d6",
+      "item": {
+        "type": "paragraph",
+        "id": "b6a1144d476019d6",
+        "text": "[[Containers]] (within [[r.Culkin.McLuhan]])"
+      },
+      "after": "ae02940a42c52efe",
+      "date": 1707342929859
+    },
+    {
+      "type": "edit",
+      "id": "ae02940a42c52efe",
+      "item": {
+        "type": "paragraph",
+        "id": "ae02940a42c52efe",
+        "text": "[[Container]]"
+      },
+      "date": 1707342937459
+    },
+    {
+      "type": "edit",
+      "id": "ae02940a42c52efe",
+      "item": {
+        "type": "paragraph",
+        "id": "ae02940a42c52efe",
+        "text": "[[Container]] (within [[Flüchtige Zeiten]]) See:"
+      },
+      "date": 1707342959712
+    },
+    {
+      "type": "edit",
+      "id": "ae02940a42c52efe",
+      "item": {
+        "type": "paragraph",
+        "id": "ae02940a42c52efe",
+        "text": "[[Container]] (within [[Flüchtige Zeiten]]) See: [[Metaphor of Liquidity]]"
+      },
+      "date": 1707342985967
+    },
+    {
+      "id": "9821a6cc38ee5bb6",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "9821a6cc38ee5bb6",
+        "text": "The concept of a container is [[tangible]], not abstract. "
+      },
+      "after": "ae02940a42c52efe",
+      "attribution": {
+        "page": "Container"
+      },
+      "date": 1707422347886
+    },
+    {
+      "type": "edit",
+      "id": "9821a6cc38ee5bb6",
+      "item": {
+        "type": "markdown",
+        "id": "9821a6cc38ee5bb6",
+        "text": "- The concept of a container is [[tangible]], not abstract. "
+      },
+      "date": 1707422354351
     }
   ]
 }

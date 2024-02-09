@@ -45,6 +45,16 @@
       "type": "paragraph",
       "id": "c6a8f606449dac9f",
       "text": "[[Web Development]], Development Strategies for W. See: [[Mocks, Proxies, and Transpilation]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "9676eff85ba1dc14",
+      "text": "[[War]] See: [[War as Entertainment]]"
+    },
+    {
+      "type": "markdown",
+      "id": "eae8430433f0d82a",
+      "text": "- [[War and Justice]]"
     }
   ],
   "journal": [
@@ -431,6 +441,57 @@
         "text": "[[Web Development]], Development Strategies for W. See: [[Mocks, Proxies, and Transpilation]]"
       },
       "date": 1707117246209
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9676eff85ba1dc14"
+      },
+      "id": "9676eff85ba1dc14",
+      "type": "add",
+      "after": "c6a8f606449dac9f",
+      "date": 1707413405121
+    },
+    {
+      "type": "edit",
+      "id": "9676eff85ba1dc14",
+      "item": {
+        "type": "paragraph",
+        "id": "9676eff85ba1dc14",
+        "text": "[[War]]"
+      },
+      "date": 1707413410731
+    },
+    {
+      "type": "edit",
+      "id": "9676eff85ba1dc14",
+      "item": {
+        "type": "paragraph",
+        "id": "9676eff85ba1dc14",
+        "text": "[[War]] See: [[War as Entertainment]]"
+      },
+      "date": 1707413458022
+    },
+    {
+      "type": "add",
+      "id": "eae8430433f0d82a",
+      "item": {
+        "type": "paragraph",
+        "id": "eae8430433f0d82a",
+        "text": "- [[War and Justice]]"
+      },
+      "after": "9676eff85ba1dc14",
+      "date": 1707413494556
+    },
+    {
+      "type": "edit",
+      "id": "eae8430433f0d82a",
+      "item": {
+        "type": "markdown",
+        "id": "eae8430433f0d82a",
+        "text": "- [[War and Justice]]"
+      },
+      "date": 1707413495679
     }
   ]
 }

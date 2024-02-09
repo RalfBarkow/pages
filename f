@@ -14,7 +14,7 @@
     {
       "type": "paragraph",
       "id": "a66dd91eb2d3436f",
-      "text": "[[Fence after Fence]] (within [[Meta]])"
+      "text": "[[Fence after Fence]] (within [[Meta]]) See: [[Boundaries]]"
     },
     {
       "type": "paragraph",
@@ -120,6 +120,21 @@
       "type": "paragraph",
       "id": "199c9feeb96f7ff8",
       "text": "[[Finding Communities]] (within [[Goal]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "dd16babf51c2c657",
+      "text": "[[Flüchtige Zeiten]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "164ea317e1c14f12",
+      "text": "[[Functional Differentiation]] (within [[Sovereignty Effect]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "90b4a4450e975461",
+      "text": "[[Functionally Specific Subsystems]]"
     }
   ],
   "journal": [
@@ -811,6 +826,98 @@
       "type": "fork",
       "site": "localhost:3000",
       "date": 1707118574138
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1707392511387
+    },
+    {
+      "type": "edit",
+      "id": "a66dd91eb2d3436f",
+      "item": {
+        "type": "paragraph",
+        "id": "a66dd91eb2d3436f",
+        "text": "[[Fence after Fence]] (within [[Meta]]) See: [[Boundaries]]"
+      },
+      "date": 1707392523714
+    },
+    {
+      "type": "add",
+      "id": "dd16babf51c2c657",
+      "item": {
+        "type": "paragraph",
+        "id": "dd16babf51c2c657",
+        "text": "[[Flüchtige Zeiten]]"
+      },
+      "after": "199c9feeb96f7ff8",
+      "date": 1707392578618
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1707400804203
+    },
+    {
+      "type": "add",
+      "id": "164ea317e1c14f12",
+      "item": {
+        "type": "paragraph",
+        "id": "164ea317e1c14f12",
+        "text": "[Functional Differentiation]]"
+      },
+      "after": "dd16babf51c2c657",
+      "date": 1707400810837
+    },
+    {
+      "type": "edit",
+      "id": "164ea317e1c14f12",
+      "item": {
+        "type": "paragraph",
+        "id": "164ea317e1c14f12",
+        "text": "[[Functional Differentiation]]"
+      },
+      "date": 1707400815089
+    },
+    {
+      "type": "edit",
+      "id": "164ea317e1c14f12",
+      "item": {
+        "type": "paragraph",
+        "id": "164ea317e1c14f12",
+        "text": "[[Functional Differentiation]] (within [[Sovereignty Effect]])"
+      },
+      "date": 1707400858529
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "90b4a4450e975461"
+      },
+      "id": "90b4a4450e975461",
+      "type": "add",
+      "after": "164ea317e1c14f12",
+      "date": 1707401677613
+    },
+    {
+      "type": "edit",
+      "id": "90b4a4450e975461",
+      "item": {
+        "type": "paragraph",
+        "id": "90b4a4450e975461",
+        "text": "[Functionally Specific Subsystems]]"
+      },
+      "date": 1707401680374
+    },
+    {
+      "type": "edit",
+      "id": "90b4a4450e975461",
+      "item": {
+        "type": "paragraph",
+        "id": "90b4a4450e975461",
+        "text": "[[Functionally Specific Subsystems]]"
+      },
+      "date": 1707401684485
     }
   ]
 }

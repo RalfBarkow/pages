@@ -154,6 +154,16 @@
       "type": "paragraph",
       "id": "4c30e39fb3001327",
       "text": "[[Mysticism]] (within [[Inadequate World Hypotheses]]) See: [[Holographic New Age Mysticism]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "0b886730d8d12a2e",
+      "text": "[[Modeling with Semantic Networks]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "145796f9e023df12",
+      "text": "[[Max Weber]]"
     }
   ],
   "journal": [
@@ -1318,6 +1328,37 @@
         "text": "[[Mysticism]] (within [[Inadequate World Hypotheses]]) See: [[Holographic New Age Mysticism]]"
       },
       "date": 1706718886431
+    },
+    {
+      "type": "add",
+      "id": "0b886730d8d12a2e",
+      "item": {
+        "type": "paragraph",
+        "id": "0b886730d8d12a2e",
+        "text": "[[Modeling with Semantic Networks]]"
+      },
+      "after": "4c30e39fb3001327",
+      "date": 1707255206353
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "145796f9e023df12"
+      },
+      "id": "145796f9e023df12",
+      "type": "add",
+      "after": "0b886730d8d12a2e",
+      "date": 1707414779296
+    },
+    {
+      "type": "edit",
+      "id": "145796f9e023df12",
+      "item": {
+        "type": "paragraph",
+        "id": "145796f9e023df12",
+        "text": "[[Max Weber]]"
+      },
+      "date": 1707414787264
     }
   ]
 }

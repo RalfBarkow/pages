@@ -22,6 +22,11 @@
       "text": "[[Genozid]] (within [[r.Jenseits.Janser]])"
     },
     {
+      "type": "markdown",
+      "id": "513614522f1300a3",
+      "text": "- (within [[r.Homo.Bammé]])"
+    },
+    {
       "type": "paragraph",
       "id": "c937912fe9f5cfb4",
       "text": "[[Grappling]] (within [[Technical Debt]])"
@@ -271,6 +276,27 @@
         "text": "> […] when an automatic goal to be honest is activated."
       },
       "date": 1707118474154
+    },
+    {
+      "type": "add",
+      "id": "513614522f1300a3",
+      "item": {
+        "type": "paragraph",
+        "id": "513614522f1300a3",
+        "text": "- (within [[r.Homo.Bammé]])"
+      },
+      "after": "da53a61cd71e468b",
+      "date": 1707326485935
+    },
+    {
+      "type": "edit",
+      "id": "513614522f1300a3",
+      "item": {
+        "type": "markdown",
+        "id": "513614522f1300a3",
+        "text": "- (within [[r.Homo.Bammé]])"
+      },
+      "date": 1707326487991
     }
   ]
 }

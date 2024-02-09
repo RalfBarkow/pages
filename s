@@ -227,9 +227,19 @@
       "text": "[[Shame Takes Place on the Skin]] (within [[Schuld macht frei]])"
     },
     {
+      "type": "markdown",
+      "id": "ab8eb5820d2f8a83",
+      "text": "* [[Scham]]"
+    },
+    {
       "type": "paragraph",
       "id": "9d05f8b76754f3e5",
       "text": "[[Replicate and Synchronize Any JavaScript Object]] (with [[Croquet]]) See: [[Deliver Events]] (within [[Beatshifting]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "979f0dbdbfa75db3",
+      "text": "[[Site]] (within [[Location]]) See: [[Location in the Network of Message Paths]]"
     }
   ],
   "journal": [
@@ -1750,6 +1760,67 @@
         "page": "R"
       },
       "date": 1707132526696
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1707153489386
+    },
+    {
+      "type": "add",
+      "id": "ab8eb5820d2f8a83",
+      "item": {
+        "type": "paragraph",
+        "id": "ab8eb5820d2f8a83",
+        "text": "* [[Scham]]"
+      },
+      "after": "d233a91e2cf24244",
+      "date": 1707153535866
+    },
+    {
+      "type": "edit",
+      "id": "ab8eb5820d2f8a83",
+      "item": {
+        "type": "markdown",
+        "id": "ab8eb5820d2f8a83",
+        "text": "* [[Scham]]"
+      },
+      "date": 1707153537631
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1707154334330
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "979f0dbdbfa75db3"
+      },
+      "id": "979f0dbdbfa75db3",
+      "type": "add",
+      "after": "9d05f8b76754f3e5",
+      "date": 1707459921090
+    },
+    {
+      "type": "edit",
+      "id": "979f0dbdbfa75db3",
+      "item": {
+        "type": "paragraph",
+        "id": "979f0dbdbfa75db3",
+        "text": "[[Site]] (within [[Location]])"
+      },
+      "date": 1707459941973
+    },
+    {
+      "type": "edit",
+      "id": "979f0dbdbfa75db3",
+      "item": {
+        "type": "paragraph",
+        "id": "979f0dbdbfa75db3",
+        "text": "[[Site]] (within [[Location]]) See: [[Location in the Network of Message Paths]]"
+      },
+      "date": 1707459981356
     }
   ]
 }

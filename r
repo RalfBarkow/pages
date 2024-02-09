@@ -78,6 +78,11 @@
       "type": "paragraph",
       "id": "9d05f8b76754f3e5",
       "text": "[[Replicate and Synchronize Any JavaScript Object]] (with [[Croquet]]) See: [[Deliver Events]] (within [[Beatshifting]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "27cab0dfc2be5efc",
+      "text": "[[Robust Resilience]] (within [[Markov Monkey Script]])"
     }
   ],
   "journal": [
@@ -594,6 +599,27 @@
         "text": "[[Replicate and Synchronize Any JavaScript Object]] (with [[Croquet]]) See: [[Deliver Events]] (within [[Beatshifting]])"
       },
       "date": 1707132484739
+    },
+    {
+      "type": "add",
+      "id": "27cab0dfc2be5efc",
+      "item": {
+        "type": "paragraph",
+        "id": "27cab0dfc2be5efc",
+        "text": "[[Robust Resilience]] (within)"
+      },
+      "after": "9d05f8b76754f3e5",
+      "date": 1707431861850
+    },
+    {
+      "type": "edit",
+      "id": "27cab0dfc2be5efc",
+      "item": {
+        "type": "paragraph",
+        "id": "27cab0dfc2be5efc",
+        "text": "[[Robust Resilience]] (within [[Markov Monkey Script]])"
+      },
+      "date": 1707431871506
     }
   ]
 }

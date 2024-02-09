@@ -150,6 +150,11 @@
       "type": "paragraph",
       "id": "2367024b29c543f2",
       "text": "[[Processes That Require Memory]] (within)"
+    },
+    {
+      "type": "paragraph",
+      "id": "59a242995c5f9a56",
+      "text": "[[Pair of Distinct Objects]] (within [[Location in the Network of Message Paths]])"
     }
   ],
   "journal": [
@@ -1141,6 +1146,26 @@
         "text": "* [[Pattern Catalog]] ((within [[Problem-Solution Dichotomy]]) within [[Enterprise Architecture Function]])"
       },
       "date": 1706869191776
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "59a242995c5f9a56"
+      },
+      "id": "59a242995c5f9a56",
+      "type": "add",
+      "after": "2367024b29c543f2",
+      "date": 1707460063623
+    },
+    {
+      "type": "edit",
+      "id": "59a242995c5f9a56",
+      "item": {
+        "type": "paragraph",
+        "id": "59a242995c5f9a56",
+        "text": "[[Pair of Distinct Objects]] (within [[Location in the Network of Message Paths]])"
+      },
+      "date": 1707460086087
     }
   ]
 }

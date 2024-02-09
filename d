@@ -138,6 +138,31 @@
       "type": "paragraph",
       "id": "6400b8a4da6809dc",
       "text": "[[Deliver Events]] (within [[Beatshifting]]) See: [[Croquet]] replication service"
+    },
+    {
+      "type": "paragraph",
+      "id": "e9113e50f10d06d1",
+      "text": "[[Dualität]] (within [[Terminologie Ego/Alter]])"
+    },
+    {
+      "type": "markdown",
+      "id": "50dd6548e1dd1ec7",
+      "text": "- [[Duality]] See: [[Meaning Requires Dualism]], [[Exclusion of the Active Agent]]"
+    },
+    {
+      "type": "markdown",
+      "id": "af6e5480f6cbd151",
+      "text": "> [[Duality]] is embedded in string [[Notation]] as the [[Exclusion]] of the active [[Agent]] (the mathematician) from the [[Notation]].\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "6139caa97be7bf0f",
+      "text": "[[Differenzierung]] (within [[r.GdG.Luh.1]], 332ff. and [[r.Macht.Luh]], 102ff.)"
+    },
+    {
+      "type": "paragraph",
+      "id": "38ab009ebb57216b",
+      "text": "[[Dualism]] (within [[Crossing the Boundary]])"
     }
   ],
   "journal": [
@@ -1069,6 +1094,156 @@
         "text": "[[Deliver Events]] (within [[Beatshifting]]) See: [[Croquet]] replication service"
       },
       "date": 1707132270505
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e9113e50f10d06d1"
+      },
+      "id": "e9113e50f10d06d1",
+      "type": "add",
+      "after": "6400b8a4da6809dc",
+      "date": 1707387036856
+    },
+    {
+      "type": "edit",
+      "id": "e9113e50f10d06d1",
+      "item": {
+        "type": "paragraph",
+        "id": "e9113e50f10d06d1",
+        "text": "[[Dualität]] (within [[Terminologie Ego/Alter]])"
+      },
+      "date": 1707387052682
+    },
+    {
+      "type": "add",
+      "id": "50dd6548e1dd1ec7",
+      "item": {
+        "type": "paragraph",
+        "id": "50dd6548e1dd1ec7",
+        "text": "- [[Duality]]"
+      },
+      "after": "e9113e50f10d06d1",
+      "date": 1707387149573
+    },
+    {
+      "type": "edit",
+      "id": "50dd6548e1dd1ec7",
+      "item": {
+        "type": "markdown",
+        "id": "50dd6548e1dd1ec7",
+        "text": "- [[Duality]]"
+      },
+      "date": 1707387161703
+    },
+    {
+      "type": "edit",
+      "id": "50dd6548e1dd1ec7",
+      "item": {
+        "type": "markdown",
+        "id": "50dd6548e1dd1ec7",
+        "text": "- [[Duality]] See: [[Meaning Requires Dualism]]"
+      },
+      "date": 1707387206783
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1707388482300
+    },
+    {
+      "type": "edit",
+      "id": "50dd6548e1dd1ec7",
+      "item": {
+        "type": "markdown",
+        "id": "50dd6548e1dd1ec7",
+        "text": "- [[Duality]] See: [[Meaning Requires Dualism]], [[Exclusion of the Active Agent]]"
+      },
+      "date": 1707388519905
+    },
+    {
+      "id": "af6e5480f6cbd151",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "af6e5480f6cbd151",
+        "text": "> [[Duality]] is embedded in string [[Notation]] as the [[Exclusion]] of the active [[Agent]] (the mathematician) from the [[Notation]].\n"
+      },
+      "after": "50dd6548e1dd1ec7",
+      "attribution": {
+        "page": "Duality"
+      },
+      "date": 1707388551747
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6139caa97be7bf0f"
+      },
+      "id": "6139caa97be7bf0f",
+      "type": "add",
+      "after": "af6e5480f6cbd151",
+      "date": 1707398449589
+    },
+    {
+      "type": "edit",
+      "id": "6139caa97be7bf0f",
+      "item": {
+        "type": "paragraph",
+        "id": "6139caa97be7bf0f",
+        "text": "Differenzierung"
+      },
+      "date": 1707398461757
+    },
+    {
+      "type": "edit",
+      "id": "6139caa97be7bf0f",
+      "item": {
+        "type": "paragraph",
+        "id": "6139caa97be7bf0f",
+        "text": "[[Differenzierung]] (within [[r.GdG.Luh.1]], 332ff. and [[r.Macht.Luh, 102ff.)"
+      },
+      "date": 1707398533700
+    },
+    {
+      "type": "edit",
+      "id": "6139caa97be7bf0f",
+      "item": {
+        "type": "paragraph",
+        "id": "6139caa97be7bf0f",
+        "text": "[[Differenzierung]] (within [[r.GdG.Luh.1]], 332ff. and [[r.Macht.Luh]], 102ff.)"
+      },
+      "date": 1707398539192
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1707405925072
+    },
+    {
+      "type": "fork",
+      "date": 1707405931315
+    },
+    {
+      "type": "add",
+      "id": "38ab009ebb57216b",
+      "item": {
+        "type": "paragraph",
+        "id": "38ab009ebb57216b",
+        "text": "[[Dualism]] (within)"
+      },
+      "after": "6139caa97be7bf0f",
+      "date": 1707405974142
+    },
+    {
+      "type": "edit",
+      "id": "38ab009ebb57216b",
+      "item": {
+        "type": "paragraph",
+        "id": "38ab009ebb57216b",
+        "text": "[[Dualism]] (within [[Crossing the Boundary]])"
+      },
+      "date": 1707405983926
     }
   ]
 }

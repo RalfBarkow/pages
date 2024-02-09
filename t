@@ -140,6 +140,11 @@
       "type": "paragraph",
       "id": "0b9723521c7dd341",
       "text": "[[Touchstone]] (within [[Marc's Tetrahedron]]) See: [[Linkon]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "33d619a06d57ae0e",
+      "text": "[[Three Tuple Relation]] (within) See: [[Atomic Relation]]"
     }
   ],
   "journal": [
@@ -1030,6 +1035,46 @@
         "text": "[[Touchstone]] (within [[Marc's Tetrahedron]]) See: [[Linkon]]"
       },
       "date": 1707126946035
+    },
+    {
+      "type": "add",
+      "id": "33d619a06d57ae0e",
+      "item": {
+        "type": "paragraph",
+        "id": "33d619a06d57ae0e",
+        "text": "[[Three Tuple Relation]] (within) See: [[Atomic Relation]]"
+      },
+      "after": "0b9723521c7dd341",
+      "date": 1707417585272
+    },
+    {
+      "id": "8cbc0890a81494dc",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "8cbc0890a81494dc",
+        "text": "[[Associative Array]] (within [[List Indexcards]])"
+      },
+      "after": "33d619a06d57ae0e",
+      "attribution": {
+        "page": "A"
+      },
+      "date": 1707417588746
+    },
+    {
+      "type": "edit",
+      "id": "8cbc0890a81494dc",
+      "item": {
+        "type": "paragraph",
+        "id": "8cbc0890a81494dc",
+        "text": " (within [[List Indexcards]])"
+      },
+      "date": 1707417594628
+    },
+    {
+      "type": "remove",
+      "id": "8cbc0890a81494dc",
+      "date": 1707417600107
     }
   ]
 }
