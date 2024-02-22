@@ -7,14 +7,6 @@
       "text": "List Indexcard R"
     },
     {
-      "type": "reference",
-      "id": "860c80a3f784ff8e",
-      "site": "jw.om.wiki.lrc.org.uk",
-      "slug": "r",
-      "title": "R",
-      "text": "The R Project for Statistical Computing"
-    },
-    {
       "type": "paragraph",
       "id": "4673ae54d214a77e",
       "text": "[[reuse]] → [[r.Kühne.Pattern]]"
@@ -43,6 +35,11 @@
       "type": "paragraph",
       "id": "9f57ac39d0169bd7",
       "text": "[[Relocalizing Creativity]] (within [[Dupont Summit 2023]])"
+    },
+    {
+      "type": "markdown",
+      "id": "145cb8ea31617eba",
+      "text": "- **[[Relocalization]]** (within [[Sacred Economics]])"
     },
     {
       "type": "paragraph",
@@ -83,6 +80,34 @@
       "type": "paragraph",
       "id": "27cab0dfc2be5efc",
       "text": "[[Robust Resilience]] (within [[Markov Monkey Script]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "336430d7d6c0582e",
+      "text": "[[Reflector]] See: [[Simulation Time]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "68205422afe41113",
+      "text": "\"[[retrieval]] according to the matching paradigm\" ⇒ [[Path]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3e6b35f45ace6a82",
+      "text": "[[Recommendation]] (within [[Solo Collaborator]])"
+    },
+    {
+      "type": "reference",
+      "id": "1723ea75115e00fb",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "r",
+      "title": "R",
+      "text": "End of List Indexcard"
+    },
+    {
+      "type": "frame",
+      "id": "4ecf3e5913a5afbb",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
     }
   ],
   "journal": [
@@ -620,6 +645,135 @@
         "text": "[[Robust Resilience]] (within [[Markov Monkey Script]])"
       },
       "date": 1707431871506
+    },
+    {
+      "id": "1723ea75115e00fb",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "1723ea75115e00fb",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "r",
+        "title": "R",
+        "text": "End of List Indexcard"
+      },
+      "after": "27cab0dfc2be5efc",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1707799179720
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4ecf3e5913a5afbb"
+      },
+      "id": "4ecf3e5913a5afbb",
+      "type": "add",
+      "after": "1723ea75115e00fb",
+      "date": 1707799183964
+    },
+    {
+      "type": "edit",
+      "id": "4ecf3e5913a5afbb",
+      "item": {
+        "type": "frame",
+        "id": "4ecf3e5913a5afbb",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      },
+      "date": 1707799186022
+    },
+    {
+      "type": "remove",
+      "id": "860c80a3f784ff8e",
+      "date": 1707799231141
+    },
+    {
+      "type": "edit",
+      "id": "4ecf3e5913a5afbb",
+      "item": {
+        "type": "frame",
+        "id": "4ecf3e5913a5afbb",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1708003362880
+    },
+    {
+      "type": "add",
+      "id": "145cb8ea31617eba",
+      "item": {
+        "type": "paragraph",
+        "id": "145cb8ea31617eba",
+        "text": "- [[Relocalization]] (within [[Sacred Economics]])"
+      },
+      "after": "9f57ac39d0169bd7",
+      "date": 1708016868694
+    },
+    {
+      "type": "edit",
+      "id": "145cb8ea31617eba",
+      "item": {
+        "type": "markdown",
+        "id": "145cb8ea31617eba",
+        "text": "- [[Relocalization]] (within [[Sacred Economics]])"
+      },
+      "date": 1708016870481
+    },
+    {
+      "type": "edit",
+      "id": "145cb8ea31617eba",
+      "item": {
+        "type": "markdown",
+        "id": "145cb8ea31617eba",
+        "text": "- **[[Relocalization]]** (within [[Sacred Economics]])"
+      },
+      "date": 1708016885471
+    },
+    {
+      "type": "add",
+      "id": "336430d7d6c0582e",
+      "item": {
+        "type": "paragraph",
+        "id": "336430d7d6c0582e",
+        "text": "[[Reflector]] See: [[Simulation"
+      },
+      "after": "27cab0dfc2be5efc",
+      "date": 1708024627950
+    },
+    {
+      "type": "edit",
+      "id": "336430d7d6c0582e",
+      "item": {
+        "type": "paragraph",
+        "id": "336430d7d6c0582e",
+        "text": "[[Reflector]] See: [[Simulation Time]]"
+      },
+      "date": 1708024656300
+    },
+    {
+      "id": "68205422afe41113",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "68205422afe41113",
+        "text": "\"[[retrieval]] according to the matching paradigm\" ⇒ [[Path]]"
+      },
+      "after": "336430d7d6c0582e",
+      "attribution": {
+        "page": "2024-02-18"
+      },
+      "date": 1708236388810
+    },
+    {
+      "type": "add",
+      "id": "3e6b35f45ace6a82",
+      "item": {
+        "type": "paragraph",
+        "id": "3e6b35f45ace6a82",
+        "text": "[[Recommendation]] (within [[Solo Collaborator]])"
+      },
+      "after": "68205422afe41113",
+      "date": 1708427445030
     }
   ]
 }

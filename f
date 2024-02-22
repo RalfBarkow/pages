@@ -32,9 +32,9 @@
       "text": "[[Federation at Risk in 7']]"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "570de50b34e43639",
-      "text": "[[Force]] (within [[Narrative? Pattern!]])"
+      "text": "**[[Force]]** (within [[Narrative? Pattern!]])\n- What [[Force]] unites these patterns? (within [[Construction Patterns]]) See: [[Visitor as Schema]], [[Algorithmic Markup]], [[Visitor Pattern]]\n- [[Forces of Environment]] "
     },
     {
       "type": "paragraph",
@@ -122,9 +122,9 @@
       "text": "[[Finding Communities]] (within [[Goal]])"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "dd16babf51c2c657",
-      "text": "[[Flüchtige Zeiten]]"
+      "text": "**[[Flüchtige Zeiten]]**"
     },
     {
       "type": "paragraph",
@@ -135,6 +135,49 @@
       "type": "paragraph",
       "id": "90b4a4450e975461",
       "text": "[[Functionally Specific Subsystems]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "875d3a09db792aea",
+      "text": "[[Forces of Environment]] (within [[Environment as a Language]]) See: [[Traits]] of culture"
+    },
+    {
+      "type": "paragraph",
+      "id": "a04b0cd896b91a37",
+      "text": "[[Fern-Uni Schweiz]] See also: [[Matterhorn University]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "f158d9e374ff6c88",
+      "text": "[[filter]], [[filter out]] all functions from the imported [[JavaScript]] source code"
+    },
+    {
+      "type": "markdown",
+      "id": "3ae5454276a08fb5",
+      "text": "[[Progress]] is to **[[forget]]** See: [[Let It go]]\n- [[Forgetting Machines]]\n- [[Forgetting Pictures]]\n- [[Social Forgetting]]"
+    },
+    {
+      "type": "markdown",
+      "id": "cf1da3a02d437a8a",
+      "text": "**[[fail]]** See: [[Know the Problem]]"
+    },
+    {
+      "type": "markdown",
+      "id": "43bb41c23abb2cd0",
+      "text": "distinction between feedback and feedforward See: [[feed forward]], [[Advance Organizer]]"
+    },
+    {
+      "type": "reference",
+      "id": "0af5bda13da74df8",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "f",
+      "title": "F",
+      "text": "End of List Indexcard"
+    },
+    {
+      "type": "frame",
+      "id": "5c1363cd00f99e4d",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
     }
   ],
   "journal": [
@@ -918,6 +961,374 @@
         "text": "[[Functionally Specific Subsystems]]"
       },
       "date": 1707401684485
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "875d3a09db792aea"
+      },
+      "id": "875d3a09db792aea",
+      "type": "add",
+      "after": "90b4a4450e975461",
+      "date": 1707550800819
+    },
+    {
+      "type": "edit",
+      "id": "875d3a09db792aea",
+      "item": {
+        "type": "paragraph",
+        "id": "875d3a09db792aea",
+        "text": "[[Forces of Environment]] See: [[Traits]] of culture"
+      },
+      "date": 1707550814389
+    },
+    {
+      "type": "edit",
+      "id": "875d3a09db792aea",
+      "item": {
+        "type": "paragraph",
+        "id": "875d3a09db792aea",
+        "text": "[[Forces of Environment]] (within [[Environment as a Language]]) See: [[Traits]] of culture"
+      },
+      "date": 1707550835948
+    },
+    {
+      "id": "0af5bda13da74df8",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "0af5bda13da74df8",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "f",
+        "title": "F",
+        "text": "End of List Indexcard"
+      },
+      "after": "875d3a09db792aea",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1707797494183
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5c1363cd00f99e4d"
+      },
+      "id": "5c1363cd00f99e4d",
+      "type": "add",
+      "after": "0af5bda13da74df8",
+      "date": 1707797501732
+    },
+    {
+      "type": "edit",
+      "id": "5c1363cd00f99e4d",
+      "item": {
+        "type": "frame",
+        "id": "5c1363cd00f99e4d",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      },
+      "date": 1707797503923
+    },
+    {
+      "id": "a04b0cd896b91a37",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "a04b0cd896b91a37",
+        "text": "[[Matterhorn University]] See: [[Fern-Uni Schweiz]]"
+      },
+      "after": "875d3a09db792aea",
+      "attribution": {
+        "page": "M"
+      },
+      "date": 1707826592335
+    },
+    {
+      "type": "edit",
+      "id": "a04b0cd896b91a37",
+      "item": {
+        "type": "paragraph",
+        "id": "a04b0cd896b91a37",
+        "text": "[[Fern-Uni Schweiz]] [[Matterhorn University]] :"
+      },
+      "date": 1707826606127
+    },
+    {
+      "type": "edit",
+      "id": "a04b0cd896b91a37",
+      "item": {
+        "type": "paragraph",
+        "id": "a04b0cd896b91a37",
+        "text": "[[Fern-Uni Schweiz]] See also: [[Matterhorn University]]"
+      },
+      "date": 1707826615819
+    },
+    {
+      "type": "add",
+      "id": "f158d9e374ff6c88",
+      "item": {
+        "type": "paragraph",
+        "id": "f158d9e374ff6c88",
+        "text": "[[filter]] out\nA transitive verb\n(literal or figurative) herausfiltern\nB intransitive verb\ndurchsickern\nfilter through\n▶ filter out B"
+      },
+      "after": "a04b0cd896b91a37",
+      "date": 1707911404857
+    },
+    {
+      "type": "edit",
+      "id": "f158d9e374ff6c88",
+      "item": {
+        "type": "paragraph",
+        "id": "f158d9e374ff6c88",
+        "text": "[[filter]], [[filter out]]\nA transitive verb\n(literal or figurative) herausfiltern\nB intransitive verb\ndurchsickern\nfilter through\n▶ filter out B"
+      },
+      "date": 1707911457504
+    },
+    {
+      "type": "edit",
+      "id": "f158d9e374ff6c88",
+      "item": {
+        "type": "paragraph",
+        "id": "f158d9e374ff6c88",
+        "text": "[[filter]], [[filter out]]"
+      },
+      "date": 1707911472910
+    },
+    {
+      "type": "edit",
+      "id": "f158d9e374ff6c88",
+      "item": {
+        "type": "paragraph",
+        "id": "f158d9e374ff6c88",
+        "text": "[[filter]], [[filter out]] all functions from the imported JavaScript source code"
+      },
+      "date": 1707911537325
+    },
+    {
+      "type": "edit",
+      "id": "f158d9e374ff6c88",
+      "item": {
+        "type": "paragraph",
+        "id": "f158d9e374ff6c88",
+        "text": "[[filter]], [[filter out]] all functions from the imported [[JavaScript]] source code"
+      },
+      "date": 1707911550207
+    },
+    {
+      "id": "3ae5454276a08fb5",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "3ae5454276a08fb5",
+        "text": "[[Progress]] is to forget See: [[Let It go]]"
+      },
+      "after": "f158d9e374ff6c88",
+      "attribution": {
+        "page": "P"
+      },
+      "date": 1708005989440
+    },
+    {
+      "type": "edit",
+      "id": "3ae5454276a08fb5",
+      "item": {
+        "type": "paragraph",
+        "id": "3ae5454276a08fb5",
+        "text": "[[Progress]] is to [[forget]] See: [[Let It go]]"
+      },
+      "date": 1708005997264
+    },
+    {
+      "type": "add",
+      "id": "cf1da3a02d437a8a",
+      "item": {
+        "type": "paragraph",
+        "id": "cf1da3a02d437a8a",
+        "text": "[[fail]] See: [[Know the Problem]]"
+      },
+      "after": "3ae5454276a08fb5",
+      "date": 1708025888196
+    },
+    {
+      "type": "edit",
+      "id": "cf1da3a02d437a8a",
+      "item": {
+        "type": "paragraph",
+        "id": "cf1da3a02d437a8a",
+        "text": "**[[fail]]** See: [[Know the Problem]]"
+      },
+      "date": 1708025905121
+    },
+    {
+      "type": "edit",
+      "id": "cf1da3a02d437a8a",
+      "item": {
+        "type": "markdown",
+        "id": "cf1da3a02d437a8a",
+        "text": "**[[fail]]** See: [[Know the Problem]]"
+      },
+      "date": 1708025906691
+    },
+    {
+      "type": "edit",
+      "id": "dd16babf51c2c657",
+      "item": {
+        "type": "paragraph",
+        "id": "dd16babf51c2c657",
+        "text": "**[[Flüchtige Zeiten]]**"
+      },
+      "date": 1708033425165
+    },
+    {
+      "type": "edit",
+      "id": "dd16babf51c2c657",
+      "item": {
+        "type": "markdown",
+        "id": "dd16babf51c2c657",
+        "text": "**[[Flüchtige Zeiten]]**"
+      },
+      "date": 1708033426610
+    },
+    {
+      "type": "edit",
+      "id": "3ae5454276a08fb5",
+      "item": {
+        "type": "paragraph",
+        "id": "3ae5454276a08fb5",
+        "text": "[[Progress]] is to **[[forget]]** See: [[Let It go]]"
+      },
+      "date": 1708033524387
+    },
+    {
+      "type": "edit",
+      "id": "3ae5454276a08fb5",
+      "item": {
+        "type": "markdown",
+        "id": "3ae5454276a08fb5",
+        "text": "[[Progress]] is to **[[forget]]** See: [[Let It go]]"
+      },
+      "date": 1708033525983
+    },
+    {
+      "type": "edit",
+      "id": "3ae5454276a08fb5",
+      "item": {
+        "type": "markdown",
+        "id": "3ae5454276a08fb5",
+        "text": "[[Progress]] is to **[[forget]]** See: [[Let It go]]\n- [[Forgetting Machines]]"
+      },
+      "date": 1708033557969
+    },
+    {
+      "type": "edit",
+      "id": "3ae5454276a08fb5",
+      "item": {
+        "type": "markdown",
+        "id": "3ae5454276a08fb5",
+        "text": "[[Progress]] is to **[[forget]]** See: [[Let It go]]\n- [[Forgetting Machines]]\n- [[Forgetting Pictures]]"
+      },
+      "date": 1708033601190
+    },
+    {
+      "type": "edit",
+      "id": "3ae5454276a08fb5",
+      "item": {
+        "type": "markdown",
+        "id": "3ae5454276a08fb5",
+        "text": "[[Progress]] is to **[[forget]]** See: [[Let It go]]\n- [[Forgetting Machines]]\n- [[Forgetting Pictures]]\n- [[Social Forgetting]]"
+      },
+      "date": 1708033627627
+    },
+    {
+      "type": "edit",
+      "id": "570de50b34e43639",
+      "item": {
+        "type": "paragraph",
+        "id": "570de50b34e43639",
+        "text": "**[[Force]]** (within [[Narrative? Pattern!]])"
+      },
+      "date": 1708033729706
+    },
+    {
+      "type": "edit",
+      "id": "570de50b34e43639",
+      "item": {
+        "type": "markdown",
+        "id": "570de50b34e43639",
+        "text": "**[[Force]]** (within [[Narrative? Pattern!]])"
+      },
+      "date": 1708033730964
+    },
+    {
+      "type": "edit",
+      "id": "570de50b34e43639",
+      "item": {
+        "type": "markdown",
+        "id": "570de50b34e43639",
+        "text": "**[[Force]]** (within [[Narrative? Pattern!]])\n- [[Forces of Environment]]"
+      },
+      "date": 1708033742072
+    },
+    {
+      "type": "edit",
+      "id": "570de50b34e43639",
+      "item": {
+        "type": "markdown",
+        "id": "570de50b34e43639",
+        "text": "**[[Force]]** (within [[Narrative? Pattern!]])\n- What [[Force]] unites these patterns?\n- [[Forces of Environment]]"
+      },
+      "date": 1708265937167
+    },
+    {
+      "type": "edit",
+      "id": "570de50b34e43639",
+      "item": {
+        "type": "markdown",
+        "id": "570de50b34e43639",
+        "text": "**[[Force]]** (within [[Narrative? Pattern!]])\n- What [[Force]] unites these patterns? (within [[Construction Patterns]])\n- [[Forces of Environment]] "
+      },
+      "date": 1708265967719
+    },
+    {
+      "type": "edit",
+      "id": "570de50b34e43639",
+      "item": {
+        "type": "markdown",
+        "id": "570de50b34e43639",
+        "text": "**[[Force]]** (within [[Narrative? Pattern!]])\n- What [[Force]] unites these patterns? (within [[Construction Patterns]]) See: [[Visitor as Schema]] See: [[Algorithmic Markup]], [[Visitor Pattern]]\n- [[Forces of Environment]] "
+      },
+      "date": 1708266031815
+    },
+    {
+      "type": "edit",
+      "id": "570de50b34e43639",
+      "item": {
+        "type": "markdown",
+        "id": "570de50b34e43639",
+        "text": "**[[Force]]** (within [[Narrative? Pattern!]])\n- What [[Force]] unites these patterns? (within [[Construction Patterns]]) See: [[Visitor as Schema]], [[Algorithmic Markup]], [[Visitor Pattern]]\n- [[Forces of Environment]] "
+      },
+      "date": 1708266048248
+    },
+    {
+      "type": "add",
+      "id": "43bb41c23abb2cd0",
+      "item": {
+        "type": "markdown",
+        "id": "43bb41c23abb2cd0",
+        "text": "distinction between feedback and feedforward See: [[feed forward]]"
+      },
+      "after": "cf1da3a02d437a8a",
+      "date": 1708431884851
+    },
+    {
+      "type": "edit",
+      "id": "43bb41c23abb2cd0",
+      "item": {
+        "type": "markdown",
+        "id": "43bb41c23abb2cd0",
+        "text": "distinction between feedback and feedforward See: [[feed forward]], [[Advance Organizer]]"
+      },
+      "date": 1708431927937
     }
   ]
 }

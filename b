@@ -60,6 +60,49 @@
       "type": "paragraph",
       "id": "47441a2115d4c7cb",
       "text": "[[Beatshifting]] (within [[Croquet]] replication service)"
+    },
+    {
+      "type": "paragraph",
+      "id": "72e7644ff0391615",
+      "text": "[[Books Are Closed Source]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "0ccc4b00df17e0f7",
+      "text": "[[Brian Marick]] See: [[App Animal]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6202f46e10e43e22",
+      "text": "[[Before and After]] (within [[Entropy]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "d4f52944c52a00c5",
+      "text": "[[Behavior of Walk]] (within [[Walk the Neighborhood]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "00d4aa20f8c00853",
+      "text": "[[Beteiligte Spiegelung]] See: [[Participation]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "dccc058a4cda2118",
+      "text": "[[Breadth-First Search]]"
+    },
+    {
+      "type": "reference",
+      "id": "f08218b41fdab101",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "b",
+      "title": "B",
+      "text": "End of List Indexcard"
+    },
+    {
+      "type": "frame",
+      "id": "c98339ab6823e406",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
     }
   ],
   "journal": [
@@ -472,6 +515,169 @@
         "text": "[[Beatshifting]] (within [[Croquet]] replication service)"
       },
       "date": 1707129341151
+    },
+    {
+      "id": "f08218b41fdab101",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "f08218b41fdab101",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "b",
+        "title": "B",
+        "text": "List Indexcard B"
+      },
+      "after": "47441a2115d4c7cb",
+      "attribution": {
+        "page": "Speed Bot"
+      },
+      "date": 1707795890205
+    },
+    {
+      "id": "c98339ab6823e406",
+      "type": "add",
+      "item": {
+        "type": "frame",
+        "id": "c98339ab6823e406",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      },
+      "after": "f08218b41fdab101",
+      "attribution": {
+        "page": "Speed Bot"
+      },
+      "date": 1707795900343
+    },
+    {
+      "type": "edit",
+      "id": "f08218b41fdab101",
+      "item": {
+        "type": "reference",
+        "id": "f08218b41fdab101",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "b",
+        "title": "B",
+        "text": "End of List Indexcard B"
+      },
+      "date": 1707795914685
+    },
+    {
+      "type": "edit",
+      "id": "f08218b41fdab101",
+      "item": {
+        "type": "reference",
+        "id": "f08218b41fdab101",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "b",
+        "title": "B",
+        "text": "End of List Indexcard"
+      },
+      "date": 1707796985540
+    },
+    {
+      "type": "add",
+      "id": "72e7644ff0391615",
+      "item": {
+        "type": "paragraph",
+        "id": "72e7644ff0391615",
+        "text": "[[Books Are Closed Source]]"
+      },
+      "after": "47441a2115d4c7cb",
+      "date": 1707801007321
+    },
+    {
+      "type": "add",
+      "id": "0ccc4b00df17e0f7",
+      "item": {
+        "type": "paragraph",
+        "id": "0ccc4b00df17e0f7",
+        "text": "[[Brian Marick]]"
+      },
+      "after": "72e7644ff0391615",
+      "date": 1707921818930
+    },
+    {
+      "type": "edit",
+      "id": "0ccc4b00df17e0f7",
+      "item": {
+        "type": "paragraph",
+        "id": "0ccc4b00df17e0f7",
+        "text": "[[Brian Marick]] See: [[App Animal]]"
+      },
+      "date": 1707921854962
+    },
+    {
+      "type": "add",
+      "id": "6202f46e10e43e22",
+      "item": {
+        "type": "paragraph",
+        "id": "6202f46e10e43e22",
+        "text": "[[Before and After]] (within [[Entropy]])"
+      },
+      "after": "0ccc4b00df17e0f7",
+      "date": 1707924575429
+    },
+    {
+      "type": "add",
+      "id": "d4f52944c52a00c5",
+      "item": {
+        "type": "paragraph",
+        "id": "d4f52944c52a00c5",
+        "text": "[[Behavior of Walk]] (within [[Walk the Neighborhood]])"
+      },
+      "after": "6202f46e10e43e22",
+      "date": 1707981026115
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1707985606263
+    },
+    {
+      "type": "edit",
+      "id": "c98339ab6823e406",
+      "item": {
+        "type": "frame",
+        "id": "c98339ab6823e406",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 500"
+      },
+      "date": 1707985614029
+    },
+    {
+      "type": "edit",
+      "id": "c98339ab6823e406",
+      "item": {
+        "type": "frame",
+        "id": "c98339ab6823e406",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1707985621823
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1707985882339
+    },
+    {
+      "type": "add",
+      "id": "00d4aa20f8c00853",
+      "item": {
+        "type": "paragraph",
+        "id": "00d4aa20f8c00853",
+        "text": "[[Beteiligte Spiegelung]] See: [[Participation]]"
+      },
+      "after": "d4f52944c52a00c5",
+      "date": 1708247476707
+    },
+    {
+      "type": "add",
+      "id": "dccc058a4cda2118",
+      "item": {
+        "type": "paragraph",
+        "id": "dccc058a4cda2118",
+        "text": "[[Breadth-First Search]]"
+      },
+      "after": "00d4aa20f8c00853",
+      "date": 1708258236395
     }
   ]
 }

@@ -12,6 +12,11 @@
       "text": "[[Week 1: Welcome on Board and Syntax Discovery]]"
     },
     {
+      "type": "markdown",
+      "id": "3838d47a259f125d",
+      "text": "* [[Smalltalk Syntax in 7']]\n⇒ [[Live Object Programming in Pharo]]"
+    },
+    {
       "type": "paragraph",
       "id": "7feb9d9a4a25005e",
       "text": "[[Watch Everything]] "
@@ -55,6 +60,34 @@
       "type": "markdown",
       "id": "eae8430433f0d82a",
       "text": "- [[War and Justice]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "f817c79a0c6e622d",
+      "text": "[[Walk the Neighborhood]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "246adf5ed95d4e14",
+      "text": "[[Wikiversity]] (within [[Local Self-Education]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "8aed217e5e100728",
+      "text": "[[Wrapper Pattern]]"
+    },
+    {
+      "type": "reference",
+      "id": "cff13b8f1e169e91",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "w",
+      "title": "W",
+      "text": "End of List Indexcard"
+    },
+    {
+      "type": "frame",
+      "id": "6f66c17ee7f83b9f",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
     }
   ],
   "journal": [
@@ -492,6 +525,151 @@
         "text": "- [[War and Justice]]"
       },
       "date": 1707413495679
+    },
+    {
+      "id": "cff13b8f1e169e91",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "cff13b8f1e169e91",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "w",
+        "title": "W",
+        "text": "End of List Indexcard"
+      },
+      "after": "eae8430433f0d82a",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1707800641070
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6f66c17ee7f83b9f"
+      },
+      "id": "6f66c17ee7f83b9f",
+      "type": "add",
+      "after": "cff13b8f1e169e91",
+      "date": 1707800646012
+    },
+    {
+      "type": "edit",
+      "id": "6f66c17ee7f83b9f",
+      "item": {
+        "type": "frame",
+        "id": "6f66c17ee7f83b9f",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      },
+      "date": 1707800647972
+    },
+    {
+      "type": "add",
+      "id": "f817c79a0c6e622d",
+      "item": {
+        "type": "paragraph",
+        "id": "f817c79a0c6e622d",
+        "text": "[[Walk the Neighborhood]]"
+      },
+      "after": "9676eff85ba1dc14",
+      "date": 1707899050659
+    },
+    {
+      "id": "f817c79a0c6e622d",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "9023cd4345d404aa",
+        "7feb9d9a4a25005e",
+        "d902d97a83adf346",
+        "c419dd63ffe50d08",
+        "90b49303bf974876",
+        "f217444341b8fcc2",
+        "f84c90acd59580b9",
+        "c6a8f606449dac9f",
+        "9676eff85ba1dc14",
+        "eae8430433f0d82a",
+        "f817c79a0c6e622d",
+        "cff13b8f1e169e91",
+        "6f66c17ee7f83b9f"
+      ],
+      "date": 1707899054099
+    },
+    {
+      "id": "3838d47a259f125d",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "3838d47a259f125d",
+        "text": "* [[Smalltalk Syntax in 7']]\n⇒ [[Live Object Programming in Pharo]]\n** [[Week 1: Welcome on Board and Syntax Discovery]]\n* [[How to find stuff in GT in 7']]\n* [[Leibniz in 4']]"
+      },
+      "after": "9023cd4345d404aa",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1707900440745
+    },
+    {
+      "type": "edit",
+      "id": "3838d47a259f125d",
+      "item": {
+        "type": "markdown",
+        "id": "3838d47a259f125d",
+        "text": "* [[Smalltalk Syntax in 7']]\n⇒ [[Live Object Programming in Pharo]]"
+      },
+      "date": 1707900454578
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1707903168477
+    },
+    {
+      "type": "add",
+      "id": "246adf5ed95d4e14",
+      "item": {
+        "type": "paragraph",
+        "id": "246adf5ed95d4e14",
+        "text": "[[Wikiversity]] (within [[Local Self-Eduction]])"
+      },
+      "after": "f817c79a0c6e622d",
+      "date": 1707984481946
+    },
+    {
+      "type": "edit",
+      "id": "246adf5ed95d4e14",
+      "item": {
+        "type": "paragraph",
+        "id": "246adf5ed95d4e14",
+        "text": "[[Wikiversity]] (within [[Local Self-Education]])"
+      },
+      "date": 1707984503114
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1707993096746
+    },
+    {
+      "type": "edit",
+      "id": "6f66c17ee7f83b9f",
+      "item": {
+        "type": "frame",
+        "id": "6f66c17ee7f83b9f",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1707993104095
+    },
+    {
+      "type": "add",
+      "id": "8aed217e5e100728",
+      "item": {
+        "type": "paragraph",
+        "id": "8aed217e5e100728",
+        "text": "[[Wrapper Pattern]]"
+      },
+      "after": "246adf5ed95d4e14",
+      "date": 1708010955752
     }
   ]
 }

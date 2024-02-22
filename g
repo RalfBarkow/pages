@@ -40,6 +40,59 @@
       "type": "markdown",
       "id": "d81cdde6cfa5e2ef",
       "text": "> […] when an automatic goal to be honest is activated."
+    },
+    {
+      "type": "paragraph",
+      "id": "29bcb02a857808e3",
+      "text": "[[Ghost]] (within [[Efficient Proxies in Smalltalk]])"
+    },
+    {
+      "type": "markdown",
+      "id": "736085be9e6d2130",
+      "text": "- [[Ghost Page]]s [[Offer a Perceptible Outer Surface]] See: [[Ornamentation]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "ff31572e7dfe53f3",
+      "text": "[[De-Globalization]]"
+    },
+    {
+      "type": "markdown",
+      "id": "5172f3aeb0338112",
+      "text": "- [[Globalization]] (within [[The Problem Domain]])"
+    },
+    {
+      "type": "markdown",
+      "id": "7c44295e7c475985",
+      "text": "[[Growing Regions]] → \"**[[growing]]**\"\n- [[Growing a Language]] by [[Guy Steele]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d0c97ab01326b9b8",
+      "text": "[[Gift Economy]] (within [[Sacred Economics]]) See: [[The Pedestrian Crossing as Social Gift]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "52b8287f4e7c0b5e",
+      "text": "[[Guessing Game]] See: [[Mercenary Analyst]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "79dc6fb11c2d56b7",
+      "text": "[[Genwise Course Curriculum]]"
+    },
+    {
+      "type": "reference",
+      "id": "24fd4b49643185bc",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "g",
+      "title": "G",
+      "text": "End of List Indexcard"
+    },
+    {
+      "type": "frame",
+      "id": "68b644cd9805354e",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
     }
   ],
   "journal": [
@@ -297,6 +350,273 @@
         "text": "- (within [[r.Homo.Bammé]])"
       },
       "date": 1707326487991
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1707747310594
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "29bcb02a857808e3"
+      },
+      "id": "29bcb02a857808e3",
+      "type": "add",
+      "after": "d81cdde6cfa5e2ef",
+      "date": 1707747311964
+    },
+    {
+      "type": "edit",
+      "id": "29bcb02a857808e3",
+      "item": {
+        "type": "paragraph",
+        "id": "29bcb02a857808e3",
+        "text": "[[Ghost]] (within [[)"
+      },
+      "date": 1707747322304
+    },
+    {
+      "type": "edit",
+      "id": "29bcb02a857808e3",
+      "item": {
+        "type": "paragraph",
+        "id": "29bcb02a857808e3",
+        "text": "[[Ghost]] (within [[Efficient Proxies in Smalltalk]])"
+      },
+      "date": 1707747333197
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1707747364098
+    },
+    {
+      "id": "24fd4b49643185bc",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "24fd4b49643185bc",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "g",
+        "title": "G",
+        "text": "End of List Indexcard"
+      },
+      "after": "29bcb02a857808e3",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1707797584218
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "68b644cd9805354e"
+      },
+      "id": "68b644cd9805354e",
+      "type": "add",
+      "after": "24fd4b49643185bc",
+      "date": 1707797589752
+    },
+    {
+      "type": "edit",
+      "id": "68b644cd9805354e",
+      "item": {
+        "type": "frame",
+        "id": "68b644cd9805354e",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      },
+      "date": 1707797592003
+    },
+    {
+      "type": "add",
+      "id": "ff31572e7dfe53f3",
+      "item": {
+        "type": "paragraph",
+        "id": "ff31572e7dfe53f3",
+        "text": "[[De-Globalization]]"
+      },
+      "after": "29bcb02a857808e3",
+      "date": 1707893687546
+    },
+    {
+      "type": "add",
+      "id": "7c44295e7c475985",
+      "item": {
+        "type": "paragraph",
+        "id": "7c44295e7c475985",
+        "text": "[[Growing Regions]]"
+      },
+      "after": "ff31572e7dfe53f3",
+      "date": 1707945092713
+    },
+    {
+      "type": "edit",
+      "id": "68b644cd9805354e",
+      "item": {
+        "type": "frame",
+        "id": "68b644cd9805354e",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1707999125527
+    },
+    {
+      "id": "736085be9e6d2130",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "736085be9e6d2130",
+        "text": "[[Ornamentation]] See: [[Ghost Page]]s [[Offer a Perceptible Outer Surface]]"
+      },
+      "after": "29bcb02a857808e3",
+      "attribution": {
+        "page": "O"
+      },
+      "date": 1708004334790
+    },
+    {
+      "type": "edit",
+      "id": "736085be9e6d2130",
+      "item": {
+        "type": "paragraph",
+        "id": "736085be9e6d2130",
+        "text": "- [[Ghost Page]]s [[Offer a Perceptible Outer Surface]] See: [[Ornamentation]]"
+      },
+      "date": 1708004364198
+    },
+    {
+      "type": "edit",
+      "id": "736085be9e6d2130",
+      "item": {
+        "type": "markdown",
+        "id": "736085be9e6d2130",
+        "text": "- [[Ghost Page]]s [[Offer a Perceptible Outer Surface]] See: [[Ornamentation]]"
+      },
+      "date": 1708004367159
+    },
+    {
+      "type": "add",
+      "id": "5172f3aeb0338112",
+      "item": {
+        "type": "paragraph",
+        "id": "5172f3aeb0338112",
+        "text": "[[Globalization]] (within [[The Problem Domain]])"
+      },
+      "after": "ff31572e7dfe53f3",
+      "date": 1708015090128
+    },
+    {
+      "type": "edit",
+      "id": "5172f3aeb0338112",
+      "item": {
+        "type": "paragraph",
+        "id": "5172f3aeb0338112",
+        "text": "- [[Globalization]] (within [[The Problem Domain]])"
+      },
+      "date": 1708015096514
+    },
+    {
+      "type": "edit",
+      "id": "5172f3aeb0338112",
+      "item": {
+        "type": "markdown",
+        "id": "5172f3aeb0338112",
+        "text": "- [[Globalization]] (within [[The Problem Domain]])"
+      },
+      "date": 1708015098505
+    },
+    {
+      "type": "add",
+      "id": "d0c97ab01326b9b8",
+      "item": {
+        "type": "paragraph",
+        "id": "d0c97ab01326b9b8",
+        "text": "[[Gift Economy]] (within [[Sacred Economics]])"
+      },
+      "after": "7c44295e7c475985",
+      "date": 1708016396495
+    },
+    {
+      "type": "add",
+      "id": "52b8287f4e7c0b5e",
+      "item": {
+        "type": "paragraph",
+        "id": "52b8287f4e7c0b5e",
+        "text": "[[Guessing Game]] See: [[Mercenary Analyst]]"
+      },
+      "after": "d0c97ab01326b9b8",
+      "date": 1708019926403
+    },
+    {
+      "type": "add",
+      "id": "79dc6fb11c2d56b7",
+      "item": {
+        "type": "paragraph",
+        "id": "79dc6fb11c2d56b7",
+        "text": "[[Genwise Course Curriculum]]"
+      },
+      "after": "52b8287f4e7c0b5e",
+      "date": 1708023309856
+    },
+    {
+      "type": "edit",
+      "id": "d0c97ab01326b9b8",
+      "item": {
+        "type": "paragraph",
+        "id": "d0c97ab01326b9b8",
+        "text": "[[Gift Economy]] (within [[Sacred Economics]]) See: [[The Pedestrian Crossing as Social Gift]]"
+      },
+      "date": 1708024840703
+    },
+    {
+      "type": "edit",
+      "id": "7c44295e7c475985",
+      "item": {
+        "type": "paragraph",
+        "id": "7c44295e7c475985",
+        "text": "[[Growing Regions]] → \"[[growing]]\""
+      },
+      "date": 1708078675908
+    },
+    {
+      "type": "edit",
+      "id": "7c44295e7c475985",
+      "item": {
+        "type": "paragraph",
+        "id": "7c44295e7c475985",
+        "text": "[[Growing Regions]] → \"**[[growing]]**\""
+      },
+      "date": 1708078703431
+    },
+    {
+      "type": "edit",
+      "id": "7c44295e7c475985",
+      "item": {
+        "type": "markdown",
+        "id": "7c44295e7c475985",
+        "text": "[[Growing Regions]] → \"**[[growing]]**\""
+      },
+      "date": 1708078705189
+    },
+    {
+      "type": "edit",
+      "id": "7c44295e7c475985",
+      "item": {
+        "type": "markdown",
+        "id": "7c44295e7c475985",
+        "text": "[[Growing Regions]] → \"**[[growing]]**\"\n- [[Growing a Language]]"
+      },
+      "date": 1708078719230
+    },
+    {
+      "type": "edit",
+      "id": "7c44295e7c475985",
+      "item": {
+        "type": "markdown",
+        "id": "7c44295e7c475985",
+        "text": "[[Growing Regions]] → \"**[[growing]]**\"\n- [[Growing a Language]] by [[Guy Steele]]"
+      },
+      "date": 1708078742752
     }
   ]
 }

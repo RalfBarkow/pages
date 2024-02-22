@@ -1,0 +1,1952 @@
+{
+  "title": "Avoid Direct Access Of Members",
+  "story": [
+    {
+      "type": "html",
+      "text": "In many places I have seen the following.",
+      "id": "0d6a9ddeef91856fee3b8f63c47dd1bc"
+    },
+    {
+      "type": "code",
+      "text": "    public void doSomething() {\n        this.member_ = \"Some value\";\n        ...\n        ...\n    }",
+      "id": "dbdbde83d375fd87042557d751a10d0d"
+    },
+    {
+      "type": "html",
+      "text": "\nWhen there is already a getter/setter for this member. This causes problems while extending the functionality of the class. Therefore, when you have to access a member variable, do the following.",
+      "id": "abdf5dd379c66f72c60b7a21e52844c2"
+    },
+    {
+      "type": "code",
+      "text": "    public void doSomething() {\n        setMember(\"Some value\");\n        ...\n        ...\n    }",
+      "id": "bf4f5df30dc06bc7881ca7e3779c8883"
+    },
+    {
+      "type": "html",
+      "text": "\nThis enables the inherited classes to override the \"setMember\" and do some additional tasks. Also, this way some additional checks can be easily added later without breaking the existing code.",
+      "id": "03ad2b5a12244dfe114603b356161515"
+    },
+    {
+      "type": "html",
+      "text": "-- vhi",
+      "id": "b92277cf70dbe5caf887defee878e074"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "f30bf5b132fbdd22029d98aca45f0d73"
+    },
+    {
+      "type": "html",
+      "text": "\nWhat about AspectJ <i>([[Aspect Jay]])</i>, where you can override even this.member = \"Some Value\"",
+      "id": "759dc0dafffbb19a31d2204f1ac64659"
+    },
+    {
+      "type": "html",
+      "text": "<i>[[Do The Simplest Thing That Could Possibly Work]]:  unless you are having problems with cross-cutting concerns, AspectJ is a lot of work for something that is handled nicely by inheritance.</i>",
+      "id": "5db312c0938600abbb8d6b50e3019d5b"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Do The Simplest Thing That Could Possibly Work]]:\nHaving the code in a class depend on the class' own implementation strategy is not that bad of a [[Code Smell]].\nJust go ahead and use the member variables until such a time as you find that you need to redesign the implementation, then change all member access to accessor functions.",
+      "id": "370db1ba7d6d39dc1a9323974dd3a865"
+    },
+    {
+      "type": "html",
+      "text": "\nAnyway, [[Accessors Are Evil]].  ;->",
+      "id": "ab76611c64ab689ef7a6b294e079eb44"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "f30bf5b132fbdd22029d98aca45f0d73"
+    },
+    {
+      "type": "html",
+      "text": "\nThe [[Self Language]] does not expose member variables (slots) to the programmer.  All access to slots is done through accessors.  Declaring a slot defines the accessors in some implementation-dependent manner.  E.g.  declaring a slot called \"slot\" would define a getter called \"slot\" and a setter called \"slot: new_value\".",
+      "id": "5d4f91d3d07695c4e97f12739b5eaed2"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Ruby Language]] has something similar with its accessors, but also allows direct member access from within the object.",
+      "id": "d0d340cfa47bfcaf3817b156961ee006"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "f30bf5b132fbdd22029d98aca45f0d73"
+    },
+    {
+      "type": "html",
+      "text": "\nUsing your own variables (outside of accessors) is one thing. Using your parent class' variables is truly evil.",
+      "id": "07b704f6c9b5aa1628fee96e9f63dc88"
+    },
+    {
+      "type": "html",
+      "text": "\nI spent four days once (intermittently, in between doing real work) tracking down a bug that was driving me nuts. A member variable kept getting changed in the production system, and I couldn't see how. Putting a breakpoint at the setter didn't show me anything unexpected. A line-by-line inspection of the code didn't help me either. Then, all of a sudden, I noticed that the variable wasn't declared as private, but as protected. When I changed this, my jaw dropped as the approximately 500 compile errors this caused creeped out of the woodwork (about 120 of these were value changing!)",
+      "id": "27f4e3b60063b3a8fd0c1188cd754b7b"
+    },
+    {
+      "type": "html",
+      "text": "\nSometimes, good coding habits (like making your non-final variables private) can really leave you blindsided to the evil practices that others use.",
+      "id": "4469f6d2a86cb28ebee10ac61ca5c44b"
+    },
+    {
+      "type": "html",
+      "text": "<i>You can discover all sorts of interesting things about a program by simply commenting out a variable...</i>",
+      "id": "0eddeb7c71f286c0902b971adda8264f"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "f30bf5b132fbdd22029d98aca45f0d73"
+    },
+    {
+      "type": "html",
+      "text": "One could argue that <b>Java is a flawed language</b> and ideally one should be able to hide the distinction between changing variables and using an accessor. This can simplify syntax and allow one to swap one for the other. If an accessor is simply a formal wrapper around a variable, then by itself it's not providing any value and is just <b>repetitious bloat</b> that hogs eye real-estate. It only provides value if we LATER want to add more processing or control. Thus, it's more logical to start out with direct variables, but change them to accessors later if and when needed. But with Java you'd have to change the interface to do this. In a \"proper\" language, you wouldn't: you could <b>switch to accesors from variables without changing existing calling code</b>. A side-effect of this is that you wouldn't be able to tell whether it's a direct reference or an accessor by looking at the call interface alone, unless perhaps you make it \"read-only\" or add parameters.  (Somewhere there is a related existing topic on this.) ",
+      "id": "e59f22a2e6a7ce4f6a5b97f900570eef"
+    },
+    {
+      "type": "html",
+      "text": "\nBut if one is stuck with a language that forces an external extinction, like Java, I would suggest leaving variables \"naked\" if there will be relatively few users (other classes) of the class and these associations will be relatively stable. If, however, there will be a lot of using classes and/or the associations change fairly often, then go ahead and wrap them in accessors up front. -t",
+      "id": "ccff819c399208e97b637f2b319530f0"
+    },
+    {
+      "type": "html",
+      "text": "-t",
+      "id": "a918a3861a012d224cca5f079370769b"
+    },
+    {
+      "type": "html",
+      "text": "<i>Take a look at C#'s Properties, and please reflect on whether your advice is based on good practice or your personal preference. There are good reasons -- that you've not mentioned -- not to do what you suggest.</i>",
+      "id": "b447bbb1cccee508d70cdd0590eb3a6e"
+    },
+    {
+      "type": "html",
+      "text": "\nLet's stick with Java for now. I'll come back to C# later. Per Java, it's to avoid bloat. One only should create such bloat if the cost of change is great enough to justify it. Bloat creates risk by confusing and/or distracting \"the eye\", but visiting many callers to convert direct attributes to accessors when later needed also creates risk (and work). Thus, there is a balancing point of risk. If you only are likely to have a few and stable callers, then the bloat doesn't prevent enough risk & rework to justify it's own risk (by being bloat). Granted, I have no formal studies on confusion/distraction caused by bloat, and these are based on my personal observations of my own work and others'.",
+      "id": "5e9e3f10a0d540fd009d6ae664cfc58a"
+    },
+    {
+      "type": "html",
+      "text": "\nGeneral illustration of trade-offs:",
+      "id": "bc2ba08813748a26e748ce8cf7905dc5"
+    },
+    {
+      "type": "html",
+      "text": "\nScenario A: 2 Callers",
+      "id": "7fb519c50a97632184d6769e12a20125"
+    },
+    {
+      "type": "html",
+      "text": " Scenario A.1: Direct attributes",
+      "id": "5d119165b44d383f59cea7637bddd685"
+    },
+    {
+      "type": "html",
+      "text": " Visual complexity: Low",
+      "id": "fba0313e346b9b80a45101e72b6ed1fd"
+    },
+    {
+      "type": "html",
+      "text": " Cost & Risk to change callers: c * 2",
+      "id": "7be68b4e7d2a2a4f2ffe44ee7e11126a"
+    },
+    {
+      "type": "html",
+      "text": " Scenario A.2: Wrapped attributes (setX/getX)",
+      "id": "74439c3627ae1fc75772475abccb2fb3"
+    },
+    {
+      "type": "html",
+      "text": " Visual complexity: High (bloat cost)",
+      "id": "9b0475892d147e8cf95a3187995ff3f6"
+    },
+    {
+      "type": "html",
+      "text": " Cost & Risk to change callers: 0",
+      "id": "0393d4d23966ef8dd410771113a76fe7"
+    },
+    {
+      "type": "html",
+      "text": "\nScenario B: 40 Callers",
+      "id": "a70ca10aec34307dc468f431987a20a1"
+    },
+    {
+      "type": "html",
+      "text": " Scenario B.1: Direct attributes",
+      "id": "4b655413a529814c16a3519cc55250dd"
+    },
+    {
+      "type": "html",
+      "text": " Visual complexity: Low",
+      "id": "fba0313e346b9b80a45101e72b6ed1fd"
+    },
+    {
+      "type": "html",
+      "text": " Cost & Risk to change callers: c * 40 ",
+      "id": "d3dc83467858e523c686b1bfd185b46b"
+    },
+    {
+      "type": "html",
+      "text": " Scenario B.2: Wrapped attributes",
+      "id": "f792594ca305471c803da1430d3a1891"
+    },
+    {
+      "type": "html",
+      "text": " Visual complexity: High (bloat cost)",
+      "id": "9b0475892d147e8cf95a3187995ff3f6"
+    },
+    {
+      "type": "html",
+      "text": " Cost & Risk to change callers: 0",
+      "id": "0393d4d23966ef8dd410771113a76fe7"
+    },
+    {
+      "type": "html",
+      "text": "\nDifferent people may assign different values to the 1) cost of bloat (see [[Fast Eyes]]), 2) the probability that we'll later need accessors, and 3) the cost of changing the interface (and changing the callers). But do notice the \"c * 40\" (c times 40) in B.1. It's probably a high total by most scenarios (readers applying their estimated costs). If we don't wrap and have few callers (A.1), then the cost of changing the interface is relatively low, and arguably lower than the cost of bloat (A.2). I believe most would agree under that scenario it's probably a good idea to wrap, but the \"best\" choice in scenario A is probably subject to heavy debate, based on estimations of one's own [[Wet Ware]] and/or that of typical developers in their shop. It's roughly a wash by my estimate, leaning toward A.1 in the name of [[Yag Ni]]. Related: [[Decision Math And Yagni]], [[Simulation Of The Future]].",
+      "id": "093170e7520576fd32859292a5938371"
+    },
+    {
+      "type": "html",
+      "text": "<i>Do you feel that's a balanced assessment?  The only reason you mention to avoid direct access of member variables is that the interface might change.</i> ",
+      "id": "388955a0dabde42dbc03df19f16be9be"
+    },
+    {
+      "type": "html",
+      "text": "\nI am not following. Please elaborate, perhaps with a specific example.",
+      "id": "1068311cb57b92d0bc90650880fb445a"
+    },
+    {
+      "type": "html",
+      "text": "<i>It's not an issue of a specific example, but of the fact that your scenarios are focused almost entirely on \"bloat\" and \"visual complexity\".  There are good reasons to avoid direct access of member variables, such as to increase encapsulation and reduce coupling.  Why do you not mention these?</i>",
+      "id": "a59026bed60f112a49daea937f422b0f"
+    },
+    {
+      "type": "html",
+      "text": "\"Coupling\" is an ill-defined concept, and encapsulation for encapsulation's sake is a waste of code. I am not suggesting that one don't wrap/hide variables, but rather only do it WHEN there is known and existing reason, or if there is likely to be one in the future. Thus, I am not arguing against encapsulation in general. It's a matter of <i>if and when</i> to encapsulate. I'm not a [[Yag Ni]] purist in that I append \"likely to need\" in my criteria versus \"until actually needed\" in pure [[Yag Ni]]. ",
+      "id": "37d4623cea11f7de292ebea6f4c3e19e"
+    },
+    {
+      "type": "html",
+      "text": "<i>Coupling is a very well-defined [[Computer Science]]/[[Software Engineering]] concept.  Coupling exists wherever there is a dependency such that altering A affects B.  In that case, we say that A and B are coupled.  Where coupling is necessary, we try to group it together whenever possible.  That's cohesion.  To reduce accidental or intentional (but unnecessary) coupling between defined units of cohesive code, we use encapsulation.  Your argument appears to be based on the presumption that code will be static and neither re-used nor modified, and is simple enough that accidental coupling is unlikely.</i>",
+      "id": "d9204e9069ed6e22c5d6dbcebf89818c"
+    },
+    {
+      "type": "html",
+      "text": " \"Affects\" appears to be open-ended, but I don't want to do the [[Laynes Law]] dance over \"affects\" in this topic and bloat it up with off-topic bickering over English. Note that I don't dispute the general principles related to coupling and encapsulation, but they must be <b>weighed against other principles</b>, such as [[Yag Ni]]. I'm NOT prepared to say they ALWAYS trump [[Yag Ni]] et al. [[It Depends]]. I consider them ALL rules of thumb, not absolute Ten Commandments.",
+      "id": "c0f727aaa04ed654894d36961a1f435b"
+    },
+    {
+      "type": "html",
+      "text": " As far as encapsulation, we'd probably need to explore specific scenarios, being that talking in generalities is failing to improve communication it appears. IF we are doing a basic set/get wrapper around a variable, it buys us nothing in \"protection\" over a \"naked\" variable. At that stage <b>there is nothing to protect</b>. They are pretty much interchangeable. If we wrap it, it's typically in preparation for some future change where an accessor is no longer a basic set/get. Thus, there is no up-front protection provided JUST by making a set/get versus a variable. Putting a wrapper solves nothing and improves nothing and protects nothing up front. But it does cost in terms of code bloat up front. Thus, wrapping gives a net <i>negative</i> benefit, at least for the short term. If we LATER need non-basic wrappers, we can add them THEN. The decision about whether to wrap up front should depend on the probability that we will later need complex wrappers, and the amount of code impacted by the change. In other words, if we spend bloat now, we hope we get a sufficient and/or likely payoff in the future. Otherwise we are being billed for bloat without getting enough benefits from the bloat to justify all those bills. <b>It's a lot like deciding if insurance is worth the cost.</b>",
+      "id": "5e89c5a406ded18e58698dc536bf0cb4"
+    },
+    {
+      "type": "html",
+      "text": " <i>Wrappering a variable with get/set makes it possible to replace the variable behind get/set with some other mechanism, and/or validate what is set, and/or mutate what is getted, and/or guarantee the variable is not being inadvertently mutated by some code external to the class, without changing any other code.  In general terms, wrappering a variable with get/set encapsulates the internal mechanisms of the class such that the internal mechanisms of the class are decoupled from the class users.  This promotes code reuse and simplifies maintenance.</i>",
+      "id": "1a3f218caf1bf9f71e1cd2d3349b68a4"
+    },
+    {
+      "type": "html",
+      "text": " Not for basic accessors. You seem to be slipping into [[Brochure Talk]]. We need something clear and explicit. And you appeared to completely ignore my points. I do agree there are SOME potential future of wrapping up front. Thus, I am NOT disputing there exists SOME value to doing such. But you ignored the real issue: do the up-front costs justify potential future benefits. I didn't see any contrasting and comparing from you, just re-statements of the upsides, which I never disputed to begin with. Let me make it double clear: <b>I do not dispute that up-front wrapping has SOME value</b> (up-sides).",
+      "id": "8e40369fe4d4a31b6d61023421fcf211"
+    },
+    {
+      "type": "html",
+      "text": " <i>I didn't ignore your points, I dismiss them.  Arguing that private class members should be publicly accessible violates one of the basic tenets of good OO programming.  There is no excuse for it, certainly not that you lack [[Fast Eyes]].</i>",
+      "id": "feed07fbe92f2f97e592393a4fd88216"
+    },
+    {
+      "type": "html",
+      "text": " That's an authoritative argument, not a real argument.",
+      "id": "5689144d6a96e3a0ee07a7285baf041b"
+    },
+    {
+      "type": "html",
+      "text": " <i>The real argument is above.</i>",
+      "id": "baf2458622afd7e97ea0219c9d738c46"
+    },
+    {
+      "type": "html",
+      "text": " I failed to see where it is demonstrated/proved how it overrides the cost of bloat 100% of the time.",
+      "id": "7782974f2d5ac5d6cca68e1ccf05793e"
+    },
+    {
+      "type": "html",
+      "text": " <i>I fail to see where you make the case that getters/setters are \"bloat\", or that they represent a cost.  Your argument appears to be a roundabout way of claiming that in source code, fewer tokens are always superior to more tokens.</i>",
+      "id": "2065e8707a21b1034ffb9df372e736f7"
+    },
+    {
+      "type": "html",
+      "text": " All else being equal, YES. Code volume/size is a criteria we try to optimize, <b>along with</b> other factors. Software design is one big tradeoff balancing act ([[Software Engineering Is Art Of Compromise]]).",
+      "id": "631d240ed2a9c67ca967b0e7b2cbfe42"
+    },
+    {
+      "type": "html",
+      "text": " <i>Indeed, we try to optimise all relevant factors, and that was the basis for my original criticism:  As I wrote above, \"your scenarios are focused almost entirely on 'bloat' and 'visual complexity'\" and don't appear to be offering a balanced consideration of \"other factors\".</i>",
+      "id": "085c235d55892ce801ba5a1481a89d43"
+    },
+    {
+      "type": "html",
+      "text": " I disagree with your \"entirely focused\" characterization. My statement is basically a form of, \"In certain circumstances, the cost of wrapping exceeds the benefits\". That's a comparison of A to B, not a focus on just A. -t",
+      "id": "a89518ef394a4d301154a85b3269f785"
+    },
+    {
+      "type": "html",
+      "text": " <i>In the absence of evidence -- such as metrics -- to demonstrate that the cost of wrapping exceeds the benefits, why should we violate what is generally considered OO programming best practice?</i>",
+      "id": "f2f7b0fef71fcd7c3f1de58450db54d7"
+    },
+    {
+      "type": "html",
+      "text": " Why should one principle automatically override another ([[Yag Ni]])? Neither has an [[Official Certified Double Blind Peer Reviewed Published Study]] behind it. One requires an [[Official Certified Double Blind Peer Reviewed Published Study]] but the other does not? That's not rational.",
+      "id": "1dfabc4e6686bf1550b35f33b45449c4"
+    },
+    {
+      "type": "html",
+      "text": " <i>Where does [[Yag Ni]] recommend violating recognised OO programming best practices?</i>",
+      "id": "bbb02d5f50999ee6acfabd1cf7650cd5"
+    },
+    {
+      "type": "html",
+      "text": " I interpret [[Yag Ni]] in a general sense, <b>a form of parsimony</b>: keep it short. I don't know if anybody has laid out specific and/or canonical rules in which other principles override it. If they have, I'm not applying it without clear justification.",
+      "id": "e936bb178cf8feaf1c71f74532a5fd3c"
+    },
+    {
+      "type": "html",
+      "text": " [I'm honestly curious as to how get/set actually enables those changes. If you add validation to a setter, for example, you're changing the external interface of the class - it's either got to throw an exception or silently not set the value, which violates the behavioural interface established by the non-validating version of that setter. Starting out with getters and setters (or, in languages that support them, properties) guarantees the syntax doesn't change, but wouldn't you need to at least check the callsites to ensure they'll operate correctly with the new behaviour? -[[David Mc Lean]]]",
+      "id": "2f6a01b4f4c7a3cde223dcaadeaf1cd8"
+    },
+    {
+      "type": "html",
+      "text": " <i>Validation doesn't necessarily change the external interface.  A setter with validation could be: 'void setGlub(int v) {glub = v; if (glub<0) {errorState=1; log(\"ERROR: Glub<0\");}}'.</i>",
+      "id": "3a86da649e9c0d5cb112414206758abf"
+    },
+    {
+      "type": "html",
+      "text": " I never said pre-wrapping prevents <i>all</i> interface changes. But, thank you for helping to clarify that.",
+      "id": "be439d5b0010befea4a83b7fbe72f322"
+    },
+    {
+      "type": "html",
+      "text": " <i>What is \"pre-wrapping\"?</i>",
+      "id": "1d2391f6efa21551609c13ef6e69557b"
+    },
+    {
+      "type": "html",
+      "text": " Creating generic set/get's for all \"public\" attributes (variables) up front.",
+      "id": "609969b49185926d2124f7f361e6ea31"
+    },
+    {
+      "type": "html",
+      "text": " <i>No one is arguing in favour of creating setters and getters up front.  A setter should be created only when it is determined that one or more external classes require write access to the state of a class instance.  A getter should be created only when it is determined that one or more external classes requires read access to the state of a class instance.  Of course, in case it's not obvious, there should be <b>no</b> public member variables.</i>",
+      "id": "32ae040156342c71247a2eddb233b648"
+    },
+    {
+      "type": "html",
+      "text": "\nAlso, lack of encapsulation can create \"accidents\", but so can bloated code. If the accidents caused by bloat exceed those caused by lack of encapsulation, then encapsulation is not giving us a net benefit. Bloat can also slow general productivity by making more code to read and change.",
+      "id": "a0f8aef6cd667d7d7e03c6a622f56c22"
+    },
+    {
+      "type": "html",
+      "text": "<i>What is \"encapsulation for encapsulation's sake\"?  Isn't encapsulation for reducing coupling and increasing cohesion?</i>",
+      "id": "fbfa636d6f03b9be60af1c8213c505ec"
+    },
+    {
+      "type": "html",
+      "text": "\nIt depends. See above.",
+      "id": "6943613a3f9c9e04532def1deb2a14c4"
+    },
+    {
+      "type": "html",
+      "text": "<i>Encapsulation always reduces coupling and increases cohesion.  What you appear to believe \"depends\" is whether it's worth the additional code of get/set/etc. or not.</i>",
+      "id": "3e440d09ce9afce39a29198ab7ec2d7e"
+    },
+    {
+      "type": "html",
+      "text": "\nWithout a clear definition/metric of \"coupling\" and \"cohesion\", I cannot confirm nor deny that claim. But this is NOT the topic to define/debate coupling and cohesion, as a reminder. ",
+      "id": "295fd79c2b173d580e676ac4036eaff3"
+    },
+    {
+      "type": "html",
+      "text": "<i>I've given a clear definition of [[Coupling And Cohesion]].  They are abstract and often qualitative (though specific quantitative metrics may be defined for specific cases, but not in general), but that doesn't mean they're vague.</i>",
+      "id": "d47208bd08fbf5dc2b9c9ae9dfc204cf"
+    },
+    {
+      "type": "html",
+      "text": "\nIf there are no consensus numeric or Boolean metrics for it, or a definition clear enough to lead to that, then it's \"vague\" in my book. The existing proposals have too much dependency on damned English, and we know how that turns out.",
+      "id": "6747fa210bb621c030fc9af76f3b0752"
+    },
+    {
+      "type": "html",
+      "text": "<i>Many things have no established numeric or boolean metric, and yet they're clear enough to make decisions.  For example, \"programming language\" has no established metric, and yet millions of people use them and create them every day.</i>",
+      "id": "44cf9b5e9ac4617fd08e2b457ef915e9"
+    },
+    {
+      "type": "html",
+      "text": "\nMany successfully use [[Yag Ni]] also.",
+      "id": "d4b6aca446200b6975112ae1aad1e4f8"
+    },
+    {
+      "type": "html",
+      "text": "<i>[[Yag Ni]] is about only implementing requirements that you need to implement.  It isn't advice to write what would generally be considered bad code that violates encapsulation.</i>",
+      "id": "81d93c640433ba7c15a51130268237e4"
+    },
+    {
+      "type": "html",
+      "text": "\nThat's your opinion. Again, encapsulating before encapsulation is <i>actually</i> needed can indeed be interpreted as a violation of [[Yag Ni]]. But I don't want to make this into a \"principle war\" but rather explore the ACTUAL costs versus benefits with something more concrete.",
+      "id": "df2f91259f4029aa807b2a1c738ac81a"
+    },
+    {
+      "type": "html",
+      "text": "<i>That sounds like a highly nuanced and personal interpretation of [[Yag Ni]].  I'd be curious to see if [[Extreme Programming]], or any other Agile methodology that endorses [[Yag Ni]], advocates it.</i>",
+      "id": "01e7c5cea81d140e4de389d16246a02a"
+    },
+    {
+      "type": "html",
+      "text": "\nAs long as they don't rely on [[Argument From Authority]], I would indeed like to see wider opinions also.",
+      "id": "3c310fbc042ab88bdecc0d3011b91c30"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "f30bf5b132fbdd22029d98aca45f0d73"
+    },
+    {
+      "type": "html",
+      "text": "<b>Map Perspective</b>",
+      "id": "e957024c95d0cb566b17cff13e84e2f1"
+    },
+    {
+      "type": "html",
+      "text": "\nI consider objects to be \"glorified maps\" (dictionary structures). It's acceptable to have maps without wrapping each element of a map. If we say \"always wrap\" all \"public\" elements of an object, then as soon as we add a single method to the map, we would then be obligated to wrap every element, creating an all-or-nothing [[Discontinuity Spike]]. It's like that one method is a poison pill that suddenly triggers some grand encapsulation rule. The boundary between \"map\" and \"object\" can and should be fuzzy: I see no reason to hard-classify them (forced dichotomy). See also [[Merging Maps And Objects]]. -t",
+      "id": "d85e6515c558fd27c99f954f1e6729d8"
+    },
+    {
+      "type": "html",
+      "text": "<i>That also a nuanced and personal interpretation of [[Object Oriented]] programming.  OO is defined by encapsulation, inheritance, and polymorphism, not that objects are like maps.</i>",
+      "id": "765883a1bd927f1a652d5bd5beb82570"
+    },
+    {
+      "type": "html",
+      "text": "\nEncapsulation is NOT a hard requirement of OOP. And [[Nobody Agrees On What Oo Is]]. Thus, my preferred viewpoint of OO is not less valid than others.  And [[Robert Martin]]'s \"jump table\" definition/description of OOP can be viewed the same or similar to a map view. A \"jump table\" is simply a map from name/key to a function (implementation and/or reference to).",
+      "id": "16154d8563b85be62c95dafda1e3e9fb"
+    },
+    {
+      "type": "html",
+      "text": "<i>Are you referring to the exchange at [http://objectmix.com/object/312321-object-oriented-programming-explained-51-lines-6.html objectmix.com] ?</i>",
+      "id": "d735c26fcfca25cdfc5eb43230345885"
+    },
+    {
+      "type": "html",
+      "text": " I don't recognize that conversation. Anyhow, I don't see anything that contradicts \"jump tables\" being interpreted as maps of function/behavioral references.",
+      "id": "87a07aadeca79e483ff5871b15e1dbb7"
+    },
+    {
+      "type": "html",
+      "text": " <i>Describing OO as \"jump tables\" appears to equate OO with the vtables used to implement virtual function calls in C++.  Are you sure \"jump tables\" wasn't intended to be a joke?</i>",
+      "id": "2c4b56a61cbbe09c1c2a0195b4bc2489"
+    },
+    {
+      "type": "html",
+      "text": " RM appears to have an extensive C/C++ background and writes from that perspective. I myself interpret his jump-table statement to be a C-family-centric way to describe a form of <b>maps of behavioral references</b>. You are welcome to have a different personal interpretation of his words, but I am not obligated to subscribe to it. -t",
+      "id": "908d8e5893e1c3db3fb001dbd7e275b7"
+    },
+    {
+      "type": "html",
+      "text": " <i>Bob Martin has sufficient experience in OO not to write from such a peculiarly biased perspective, and normally he doesn't.  I can't find any reference to \"jump tables\" except the above exchange.  It looks more like a sarcastic quip or a joke than a definition.  Not that it would matter, anyway.</i>",
+      "id": "8a1e4fb8023e4a229b04edf53abb012b"
+    },
+    {
+      "type": "html",
+      "text": "<i>The debates over OO definitions fall into established categories.  Your \"preferred viewpoint\" appears to be unique to you, and not in any of the established categories.</i>",
+      "id": "23fe9b7484b935a9c6c80f2af2042812"
+    },
+    {
+      "type": "html",
+      "text": "\nEstablished by who? I only see differing opinions. I'm sticking by my working definition until a consensus is reached. In practice I do see maps morph into objects as more requirements are added (at least for languages that help blur the distinction).",
+      "id": "b6f9859117c5781835f3c71b8203748f"
+    },
+    {
+      "type": "html",
+      "text": "<i>Established by multiple acts of general consensus, which has resulted in groups of agreement.  Your working definition doesn't fall into any of them.  It appears to be unique to you.  Do you therefore consider any program which uses maps to be object oriented?</i>",
+      "id": "2b1c8c336c77013248b2ade91b263816"
+    },
+    {
+      "type": "html",
+      "text": "\nNo. Again RM's \"jump table\" is essentially a map of behavioral pointers. (It's an odd way to describe it, but it just may reflect too much time spent working with one language.) Thus it is NOT unique to me. (See [1] below for my working definition.)",
+      "id": "bca1e1bd78ecdf66d227c70c207ec56d"
+    },
+    {
+      "type": "html",
+      "text": "<i>What's a \"behavioral pointer\"?  The \"jump table\" definition appears to be unique to Bob Martin, and unique to that conversation.  Are you sure he wasn't making fun of something you'd written before?</i>",
+      "id": "b829a93a7a26f375b61af16316cc88bb"
+    },
+    {
+      "type": "html",
+      "text": " One advantage of the map-based definition over many of the others is that it considers objects merely as a coding convenience (code packaging) and does NOT assume objects are intended to be used for a specific purpose, such as fitting the \"real world\" or wrapping \"data structures\" behind behavioral interfaces. It's a wider view of OO; and if one dispenses with such \"purpose\" views, then map-ism naturally follows. --top",
+      "id": "9b17aa94311ddd69c051b2b3a53866d2"
+    },
+    {
+      "type": "html",
+      "text": " <i>I don't know of any established definition of OO that assumes objects are intended to be used for a specific purpose.  Wrapping data structures behind behavioural interfaces is an obvious purpose, however -- do you really want to manipulate a graph or BTree with something <b>other</b> than a behavioural interface?</i>",
+      "id": "5357621fb3ac0d20c5f0e7a65b8fc0b4"
+    },
+    {
+      "type": "html",
+      "text": " [[It Depends]] on whether one wants to provide an IS-A viewpoint/interface or a HAS-A (or ACTS-AS) style of interface. The second is often more flexible and better future-proofing in that it doesn't lock one into a given viewpoint, and is one of the reasons for the popularity of RDBMS. -t",
+      "id": "18dc1adbc3c6a45d795557d60c17e7a6"
+    },
+    {
+      "type": "html",
+      "text": " <i>How does your response relate to my question?</i>",
+      "id": "ebf6fe5b520e4eb932b08b0b3e155c2d"
+    },
+    {
+      "type": "html",
+      "text": " I reviewed your question and confirmed I answered it properly as I understood it. If you meant something different than how I read it, I cannot tell because I cannot read your mind, only your text. I will agree what we may indeed want to fully wrap SOME things; but that doesn't mean we should fully wrap everything behind behavioral interfaces.",
+      "id": "25865505eaa82f9dd03f12ab2af57eb4"
+    },
+    {
+      "type": "html",
+      "text": " <i>How, then, would you interact with a graph or BTree with something other than a behavioural interface?</i>",
+      "id": "ca04805c244c1fe8fcb2a3a3146c8002"
+    },
+    {
+      "type": "html",
+      "text": " One can use behavioural interfaces on data without making the entire thing \"be\" that thing. (I suppose if you define a \"thing\" by implementation instead of interface, that may be a different matter.)",
+      "id": "3d355ac35c3bb01eb032b1cc698d6269"
+    },
+    {
+      "type": "html",
+      "text": " <i>What do you mean?</i>",
+      "id": "f282f1db3154d2b7f7e6530df4f6a59f"
+    },
+    {
+      "type": "html",
+      "text": " One can have a tree or stack <b>view</b> of something without that thing <i>being</i> a \"tree\" or \"stack\". It's poor future-proofing of a design to lock your data behind a narrow interface anyhow. (There may be security-related reasons to do so, but for domain data, you typically don't want to box yourself in.)",
+      "id": "6c3700c1b7b630dff59d6ffebe72fa34"
+    },
+    {
+      "type": "html",
+      "text": " <i>The way you make the actual structure (e.g., tree or stack) look like some other structure (e.g., stack or tree) is by hiding the actual structure behind an interface.  To make this work, it is typical to make the actual structure private to the class that defines the interface.  For that reason, it is best to [[Avoid Direct Access Of Members]], because direct access of members would expose the actual structure (e.g., tree or stack) that you're trying to make look like something else.  Of course, the usual \"something else\" is an abstraction, so that you don't see it as (say) a tree or stack, but as a collection.</i>",
+      "id": "49c66197b7d8d1c648525ae896125e7a"
+    },
+    {
+      "type": "html",
+      "text": " Then you are artificially forcing a \"root\" structure, which can create both implementation problems, and interface conversion complexity problems. If one is going to have to select a root structure, at least make it a fairly flexible one. If for example you choose a \"stack\" as a root structure, then you will have to do tons of pushing and popping to emulate a more random-access kind of structure. Not pleasant.",
+      "id": "fdd357bb26c2b6cd98931d7f178bbe14"
+    },
+    {
+      "type": "html",
+      "text": " <i>The \"root\" structure is normally a Collection, which defines methods to add and retrieve items without reference to any underlying structure.  Indeed, it would be not pleasant to choose \"stack\" as a \"root\" structure (with push and pop methods) instead of a collection's usual add and get methods, which is why it's unlikely that anyone would do that.</i>",
+      "id": "dcf96258aa048516c0fe00b7a1fac6ba"
+    },
+    {
+      "type": "html",
+      "text": " A generic \"collection\" is more or less a \"table\", which pretty much backs my original point. For flexibility, we generally want usage-specific views on top of general \"data structures\" rather than general views on top of usage-specific (narrow) structures.",
+      "id": "e3d27a4df55bab16f4eaf036612f06a7"
+    },
+    {
+      "type": "html",
+      "text": " <i>No, we generally want generic or abstract views on top of specific or concrete data structures.  That way, we can program to a generic interface, and trivially replace the concrete data structure that underpins it, as needed to meet performance and/or resource usage requirements.</i>",
+      "id": "cff8954ab59def55df1c7f2c1ef0da09"
+    },
+    {
+      "type": "html",
+      "text": " That doesn't contradict my statement. I wasn't even addressing under-the-hood implementation. I was comparing interface to interface, not interface to raw guts.",
+      "id": "2b940d20a0c82fd3f85bc1f2e66cf775"
+    },
+    {
+      "type": "html",
+      "text": " <i>Actually, that does contradict your statement that we want \"usage-specific views on top of general 'data structures' rather than general views on top of usage-specific (narrow) structures\".  Your statement sounds like the diametric opposite of my statement.</i>",
+      "id": "142f0482fc6bc4ff13ef5851a2e4ed3d"
+    },
+    {
+      "type": "html",
+      "text": " Sorry, I am not following.",
+      "id": "689da35cfd101993e40234e5d4942b5d"
+    },
+    {
+      "type": "html",
+      "text": " <i>My statement is that abstract interfaces should hide concrete implementations.  Your statement is that usage-specific interfaces should hide abstract constructs.  Thus, they are the opposite.</i> ",
+      "id": "14b2cf12192944c8d262f7939fa57acf"
+    },
+    {
+      "type": "html",
+      "text": " \"Hide\" is probably not the right word. Adapt info to usage-specific needs is what I meant by \"on top\". I will agree that \"on top\" was probably a poor choice of words on my part.",
+      "id": "bd34a759af2d7bf80adf4e855c1c2537"
+    },
+    {
+      "type": "html",
+      "text": " <i>A collection interface is the opposite of \"adapt info to usage-specific needs\".  The choice of implementation is what adapts to \"usage-specific needs\".</i>",
+      "id": "3ef8c9bfe21edf1aa433689622140987"
+    },
+    {
+      "type": "html",
+      "text": " No, I didn't say a general collection was for the specific-adaption purpose. There is a huge communication gap somewhere here.",
+      "id": "f6a54253801aab99b593102305683c48"
+    },
+    {
+      "type": "html",
+      "text": " <i>Then what did you mean, if \"on top\" was a poor choice of words?</i>",
+      "id": "dfcdb61f99b723477f8a1452400ef2c6"
+    },
+    {
+      "type": "html",
+      "text": " I already gave a re-phrasing of it.",
+      "id": "76a7c3622324848228d0317be5e4b6c5"
+    },
+    {
+      "type": "html",
+      "text": " Let me try to restate it yet again. We generally want to wrap raw data in some kind of \"structure\" or systematic abstract interface rather than direct access. But because that data may be used for multiple purposes, we don't want the \"first layer\" to be something stiff and limiting, like a stack or a queue. Something like \"generic tables\" is a better first-layer wrapper around the raw data. Stacks and queues tend to be usage/application-specific viewpoints we want on data, but we don't want to hard-wire our general or future access to a given data item to such narrow structures. Thus, if you want flexibility, you build the stack and queue on top of (\"through\") the more general structure, such as tables.",
+      "id": "12fdd9a8ab1d3fdd4c07ad878b455fcd"
+    },
+    {
+      "type": "code",
+      "text": "      Raw-Data\n        |\n        V\n      General-Abstraction (tables) -----------> Stack (specific abstraction)\n                   \\-----------------------> Queue (specific abstraction)",
+      "id": "7d167663b08415d9ce089d7ef9f80439"
+    },
+    {
+      "type": "html",
+      "text": ".",
+      "id": "5628443bd098ee54f7e9b5516991da3c"
+    },
+    {
+      "type": "html",
+      "text": " <i>That's exactly what I wrote.  My only objection is the notion of a 'table' being a general abstraction.  It isn't as general as a collection.  A collection is a structure that lets you obtain iterators over the objects in the collection, and often (but not always) lets you add objects to the collection.  A table is a collection that is a set of tuples with a specific heading.</i>",
+      "id": "b52c382fe445820bd086bc9fa97f27fe"
+    },
+    {
+      "type": "html",
+      "text": " Okay, we generally agree on the concept, then. (Note an RDBMS may be the \"general abstraction\" in many cases, not a same-language class.) My point stands that the stack doesn't \"own\" the data, but merely provides a view/wrapper around it or some aspect of it.",
+      "id": "47fd7f813399dfc218c7ed1b6181d4d2"
+    },
+    {
+      "type": "html",
+      "text": " It's perfectly normal to describe a \"view object\" that uses data and info from another object(s) and/or database(s). Few if any will say, \"no, that's not an object because objects must entirely wrap ALL their data/state by definition\". Therefore, in colloquial-land, \"objects\" do not require 100% wrappage. -t",
+      "id": "313619fbf28459e8fd2ebb08491d2e0a"
+    },
+    {
+      "type": "html",
+      "text": " <i>I don't think anyone would say it's not an object.  What they might say is that it should [[Avoid Direct Access Of Members]].  My database view objects, for instance, do not make member variables public and do not use private member variables to represent columns in the [[Result Set]].  Instead, the D<b></b>atabaseView class provides a getRow() method that returns an associative array from column names to column values.</i> ",
+      "id": "9857bbdced5f8623e78186d79b8ed8f6"
+    },
+    {
+      "type": "html",
+      "text": " I was addressing vocabulary in that statement and not intending to suggest anything about design practices there.",
+      "id": "5e3f4cbf1496f8ec7f1fd7fa3dc173e4"
+    },
+    {
+      "type": "html",
+      "text": " <i>Again, no one would say an \"object\" without \"100% wrappage\" isn't an object.</i>",
+      "id": "2dd29895befcee6c6ed8b934ef24fb24"
+    },
+    {
+      "type": "html",
+      "text": " So then we agree that objects don't require wrapping of members to be \"objects\"?",
+      "id": "6189006b799036e3a77e15036d8fa79c"
+    },
+    {
+      "type": "html",
+      "text": " <i>Sure.  No one said they did.  The title of this page is [[Avoid Direct Access Of Members]], not D<b></b>irectlyAccessingMembersTurnsObjectsIntoNonObjects.</i>",
+      "id": "1ed019a7633dd9092bbf8e4909a5a914"
+    },
+    {
+      "type": "html",
+      "text": "<i>Could you provide an example of what you mean by \"maps morph into objects as more requirements are added\"?</i>",
+      "id": "31b5a576007d64850af31bd87abd32bd"
+    },
+    {
+      "type": "html",
+      "text": "\nOne starts with a typical record \"structure\" (AKA map), and various actions seem to group naturally with that \"structure\". The map may still be used in map-ish ways, but we now have methods that are specific to that structure. For example, it might be app configuration info that is typically only set by field technicians. We later want a \"list_to_screen\" method for it to display it for easier trouble-shooting by field technicians (using a \"hidden\" back-room UI).",
+      "id": "c85ca7859b65f9608d7d7e29e90d9caf"
+    },
+    {
+      "type": "html",
+      "text": "<i>By map, do you mean a collection of named elements, aka a dictionary?  I don't know what your field technician example is intended to illustrate, but it's trivially obvious that operations may be defined to manipulate a given structure.  That doesn't make it object oriented, only that you've defined a structure and a set of associated operations.</i>",
+      "id": "98534eb3fd30b93eff42afcecbc5fde0"
+    },
+    {
+      "type": "html",
+      "text": "That gets back to how one defines \"object oriented\". I don't define it by \"wrap-ness\" or \"encapsulation\" level. I'd argue that full wrapping is really creation of an [[Abstract Data Type]] and not (just) object orientation. OO is wider than ADT. You appear to be conflating the two. If they are one in the same, then we should dispense with the term \"object oriented\".",
+      "id": "383a9438a3eb4c83fc7c9968e027947c"
+    },
+    {
+      "type": "html",
+      "text": "<i>An [[Abstract Data Type]] is a mathematical model for a category of data structures.  It is isomorphic to certain applications of object oriented programming, but not equivalent.  Particularly, they are not the same because [[Abstract Data Type]] is not defined in terms of polymorphism, inheritance, or encapsulation.  Other OO definitions are either too amorphous or too individuated to consider.</i>",
+      "id": "d1abcf9bb5b7c9e22bf22754efaf34e9"
+    },
+    {
+      "type": "html",
+      "text": " Perhaps a better way to describe it is that you are talking about <b>user-defined types</b>, not OOP.",
+      "id": "55adb7c3a720824dbda853209da05efb"
+    },
+    {
+      "type": "html",
+      "text": " <i>What do you consider to be the distinction between user-defined types and OOP?</i>",
+      "id": "9e7a1afc19e0c8eba9ab80c0bf442bc3"
+    },
+    {
+      "type": "html",
+      "text": " Encapsulation is required for UDT's, but not \"objects\". I'm not sure I will agree it's the only difference at this point, but a key difference.",
+      "id": "c9accf36c875924f0828508212bf8162"
+    },
+    {
+      "type": "html",
+      "text": " <i>Encapsulation (as in [[Data Hiding]]) is not required for objects or UDTs.  For objects and UDTs, however, [[Data Hiding]] a good idea (in conjunction with encapsulation), in order to reduce coupling.  That's why we [[Avoid Direct Access Of Members]].</i>",
+      "id": "562b18f25cbe3599b036c1a344b0db43"
+    },
+    {
+      "type": "html",
+      "text": " I suppose that comes down to how one defines UDT. I don't want to get into that vocab dance today. Maybe another.",
+      "id": "c4a2ad829396e5b90d54dbdef2021ee4"
+    },
+    {
+      "type": "html",
+      "text": "\nThat may depend on how one defines polymorphism, inheritance, or encapsulation (the \"big 3\" for reference). Anyhow, it's reasonable that one may wish to use <i>one or two</i> of those three without having to subscribe to them <b>all</b>. There's no reason I can see to force an artificial [[Discontinuity Spike]] in order to match somebody's category system.",
+      "id": "820055ebb8411a75ff4b50727635bd46"
+    },
+    {
+      "type": "html",
+      "text": "<i>Sure, you can use one or two of polymorphism, inheritance or encapsulation, but then it's not OO.</i>",
+      "id": "dd83d736d211d4e6bbc08056bff42307"
+    },
+    {
+      "type": "html",
+      "text": "\nI have to disagree with your view of what \"OOP\" is. It doesn't matter anyhow here, for <b>one should design software based on the best design choices, NOT based on vocabulary</b>. You can't make something more efficient or more parsimonious or more economical by redefining it. (Caveat: changing the definition of the goals/metrics or \"economics\" may affect such.)",
+      "id": "af998234e2b0a7cd824f8c2941f4621a"
+    },
+    {
+      "type": "html",
+      "text": "\nI see no logic of the universe that forces a hard distinction between maps and OOP as far as how to use them, even IF I buy your definition. It's not in for a penny, in for a pound. Even if I buy your def, there is a continuum between a map and a \"true\" object and no clear reason to ignore the continuum or pretend like it doesn't exist or pretend like if we are 70% fitting \"true OO\" we should go 100% because 70% is \"bad\" or 30% is \"bad\" and 100% is \"good\". ",
+      "id": "4b9873091d4dd0b8531c5bcc607b47d1"
+    },
+    {
+      "type": "html",
+      "text": "<i>If maps are sufficient for OO, then do the static maps in C (i.e., the 'struct' construct) mean C is object oriented?</i>",
+      "id": "f6493c5864caaa64f2dea71e749a8dd8"
+    },
+    {
+      "type": "html",
+      "text": "\nThat depends on how one defines \"OO\"[1]. The definition is not really what matters and I don't want to get caught up in another term fight. The point is that useful code constructs can exist that cover the full gamut between and including a pure map (\"is\" or \"used as\") and a fully encapsulated object (no public \"variables\", only methods). What we call these things is irrelevant and shouldn't dictate how we lay out our code. It's silly to say that as soon as one introduces a single method into a map (or object used like a map), then one is suddenly obligated to wrap <i>every</i> key of the map or map-like thing. If I understand your argument correctly, then this all-or-nothing rule would apply under it. I find it a ludicrous and highly artificial \"boundary\". -t",
+      "id": "1af8f1e2e289fb2e673c7b0d34a9d69e"
+    },
+    {
+      "type": "html",
+      "text": "\nBy the way, if full encapsulation is always the \"proper\" way to do OO, then an \"OOP language\" technically shouldn't allow public variables in classes at all: only methods would be able to read and change class variables.",
+      "id": "0c340d212abd19027838ae47d8d0053f"
+    },
+    {
+      "type": "html",
+      "text": "<i>Damn straight.  OOP languages shouldn't allow public variables in classes at all.  Ever.  I don't know why they do allow it.</i>",
+      "id": "3c568bd1a8148329c97c39166ab1d40c"
+    },
+    {
+      "type": "html",
+      "text": "\nBecause unless the language is carefully-designed to avoid such, it creates bloat, and bloat slows down reading and creates errors due to <b>bloat-induced reading mistakes</b>. They don't do it because they probably don't want the bloat-related problems associated with it.",
+      "id": "5f329510d3f1bfe2e2795c7b7f438484"
+    },
+    {
+      "type": "html",
+      "text": "<i>By the same argument, structured programming is bloat compared to the simplicity of GOTOs, and slows down reading and creates errors due to <b>bloat-inducing reading mistakes.</b>  Typical OO languages don't force member variables to be private purely for historical reasons.  Modern OO practice does not make member variables public.</i>",
+      "id": "a93a4e8b50b9f7916ef7e2344e9c76d1"
+    },
+    {
+      "type": "html",
+      "text": "\nHow the heck is that the same argument? For one, goto programs are not shorter. ",
+      "id": "b66a12b2e8ff96e0c075372b09603ea0"
+    },
+    {
+      "type": "html",
+      "text": "<i>They're simpler, by your metric.  For example, they don't risk the reading mistakes that are possible from putting the initialisation, test, and increment sections of a \"for\" loop close together.</i>",
+      "id": "ab25beb76da60984248157f8acd54e87"
+    },
+    {
+      "type": "html",
+      "text": " Sorry, I'm not following this at all. Example P-2 under [[Payroll Example Two Discussion]] is CLEARLY less code and CLEARLY easier to read than P-1 (at least for normal developers, which I don't necessarily group you with. You seem to have outlier style preferences). I don't see anything equivalent in your GOTO analogy attempt. <b>The \"reading mistakes\" weighing of GOTO's versus blocks is much more nuanced</b>, as is code volume differences. -t",
+      "id": "230320936119b38f8680994d87f35b05"
+    },
+    {
+      "type": "html",
+      "text": " <i>Example P-2 under [[Payroll Example Two Discussion]] is rather unusual.  In production, the Employee class is the base for several concrete implementations which obtain the relevant values through a variety of mechanisms that depend on whether the code is deployed in an MS-Access/VBA payroll application, a C++ application, or a test harness, none of which merely store the various values in simple variables.  Hence, getters are not only appropriate, they're the only appropriate mechanism.  Example P-2 looks unusually verbose because the base class is being inherited with the various getters overridden to return a literal, purely to support the stripped-down illustration of real business code that is [[Payroll Example Two]].  Employee instances aren't defined like that in production, only in [[Payroll Example Two]].</i>",
+      "id": "20fbe30040673f62acedc8a258f9a0e5"
+    },
+    {
+      "type": "html",
+      "text": " You seem to be bringing up multiple issues, none of which are clear to me as written. Anyhow, I'm <i>not</i> critiquing the <i>general</i> application design above, but merely illustrating parsimony and grokkability differences between the two \"styles\".",
+      "id": "0afa0320e7756d59f89c667692e3ec7c"
+    },
+    {
+      "type": "html",
+      "text": " <i>Fair enough, but note that the \"style\" you're criticising in Example P-2 is, or should be, very rare.</i>",
+      "id": "d28e498e81a45cd493f0c8aee1f367d2"
+    },
+    {
+      "type": "html",
+      "text": "\nIncidentally, \"behavior-oriented programming\" or \"verb-oriented programming\" or \"interface-oriented programming\" may be better way to describe what you have in mind. Your ADT-like view of OOP came after OOP.",
+      "id": "8910d968f70e38e96c2a0d4ff6c05277"
+    },
+    {
+      "type": "html",
+      "text": "<i>None of those are established terms.  \"[[Object Oriented]]\" is the recognised term.</i>",
+      "id": "6367f9c485813e42dd8c6d7075a63936"
+    },
+    {
+      "type": "html",
+      "text": "\nAlso recognized to be a mess as far as terminology. Anyhow, you still haven't addressed the question whether something can be in an in-between state of a map and an object. You still seem to be encouraging a forced and/or artificial dichotomy. -t",
+      "id": "ad652466c7e82c62c59028ed89382974"
+    },
+    {
+      "type": "html",
+      "text": "<i>I didn't know there was an open question about \"whether something can be in an in-between state of a map and an object\".  I'm not sure why it would matter.  Whilst \"object\" is frequently used to refer to any identifiable language construct, particularly one that defines something to hold data (like a struct, class, table, variable, whatever) as opposed to (say) a control structure like a 'for' loop (which is not normally called an \"object\"), the loose and general use of \"object\" is quite distinct from the usual meaning of [[Object Oriented]].  I see no evidence that the industry or academia generally considers Map (as in a kind of container) and Object (as in [[Object Oriented]]) to be equivalent in any defining sense.</i>",
+      "id": "f0b62068690e5943da50eaf198e7ae0f"
+    },
+    {
+      "type": "html",
+      "text": "\nI don't want to get caught up in classification slots here; it's likely a wasteful [[Laynes Law]] dance. My point is that there can be a wide range of \"structures\" between those that are treated/used like a typical map, and those treated/used like a typical \"object\". I give an example above (config info) of something that starts out like a map, but a method or two is later added on. Whether it's called/labelled/classified as a \"map\", \"object\", or a \"frippokof\" doesn't matter. The point is that \"in between\" things exist with behaviors/conventions/designs/usage-patterns that straddle both the \"map\" and \"object\" world. Your \"rule\" seems to reject this in-between state, and/or it's rule(s) for when \"object-ness\" kicks in are ill-defined. I'm looking for something clear like, \"If it has more than 3 methods, then The Rule kicks in: all public attributes should now be wrapped\", or the like (along with the rational of the rule and its trigger point of 3, of course). -t",
+      "id": "278cd80c381f587af4e09c59e8d7a623"
+    },
+    {
+      "type": "html",
+      "text": "<i>Classes and prototypes -- i.e., constructs which serve as a template for instances -- should not publicly expose member variables.  In C++ and C#, 'struct' is effectively an alias for 'class', so the same \"rule\" applies.   Other non-class constructs that may be evocative of classes -- like Python's tuples, or various Map or Map-like collections (apparently) -- are not classes or prototypes, nor are they a template for instances, so the \"rule\" does not apply.</i>  ",
+      "id": "cab591aaf1706d02a12c0e0bcf4f4be1"
+    },
+    {
+      "type": "html",
+      "text": "\nOkay, that's clear enough for my satisfaction. Thank you. However, I won't deviate from my recommendation above that wrapping only be done if there are likely to be a sufficient quantity of instances/clones. -t",
+      "id": "78dae75106fa79b60d1e92c9d4e04b21"
+    },
+    {
+      "type": "html",
+      "text": "<i>Why would the quantity of instances make any difference?  Does it make a difference whether 'new Blah()' gets called once or a thousand times?  Do you perhaps mean the quantity of references to an instance?</i>",
+      "id": "5de079b0dc386862985ffeacf0e8b84a"
+    },
+    {
+      "type": "html",
+      "text": "\nWhether they are subclasses, clones, or instances probably depends on the language used and/or programming style since dynamic languages may blur the distinction between instances and sub-classing. I'm not sure of a compact way to word it that makes sense in all languages and coding styles. The cost-of-change to go back and wrap dependent usages (when the need arises) is generally higher the more \"coded\" references. I generally wouldn't count quantities in \"automated\" references, such as a loop that allocates 500 references/clones/instances. I'd only count that once (unless something really unusual is being done). Thanks for bringing up that wording point, though. The main factor that matters here is the <b>cost-of-change</b>, which we are weighing against the cost of bloat. Again, I approach it similar to \"investment math\" where we are weighing trade-offs based on our best prediction of future events. Without having a working time-machine, that's the best we can do.",
+      "id": "ff7acbadc1c1bab287a13906317a2805"
+    },
+    {
+      "type": "html",
+      "text": "<i>Would it be correct to say that it's ok to allow direct access of members if the number of dependencies on a given member are low, and not ok if the number of dependencies on a given member is high?</i>",
+      "id": "6f7bc33933599b5b07d8dbb3549dd0a1"
+    },
+    {
+      "type": "html",
+      "text": "\"Dependencies\" is too open-ended. I look at probability and cost first, not \"dependencies\". If a given \"dependency\" is unlikely to cause a problem, then it should be given less attention/weight than a factor that is likely and/or costly.",
+      "id": "06d7aaacc61e0c82f56ee659e5e44591"
+    },
+    {
+      "type": "html",
+      "text": "<i>I would have described it the other way around.  Probability is inherently unknown, and cost is often unpredictable, but dependency is straightforward.  You have a dependency between A and B if changing A affects B.  In most imperative programming languages, dependencies are defined by relationships between identifiers.  Given some definition or declaration z assigned an identifier 'p', every reference to 'p' represents a dependency upon z.  Improving coupling means reducing references to 'p'.  Improving cohesion means grouping references to 'p' together.  This means that if z changes, the impact is minimised.  The question, if any, is assuming 'p' is a member variable, how many references to 'p' does there have to be, and/or how ungrouped do they have to be, before you hide 'p' behind a wrapper?</i>  ",
+      "id": "e8d9b03687f1767b70680602aae2f1af"
+    },
+    {
+      "type": "html",
+      "text": "\nI have to disagree. Probabilities, cost-of-change, and cost of reading bloat can be roughly estimated. Focusing only on easy-to-measure factors is the [[Soviet Shoe Factory Principle]]. I'll stick with [[Simulation Of The Future]] as the most rational way to make design decisions, which generally follows investment theories. Focusing on the existing code alone is too narrow a viewpoint. -t",
+      "id": "dc5e3e22b36ba799a9999bfcb1de4766"
+    },
+    {
+      "type": "html",
+      "text": "<i>I'd be interested to see code written in the conventional focus-on-[[Coupling And Cohesion]] style compared to a style driven by [[Simulation Of The Future]].  For example, could you change [[Payroll Example Two]] -- which was written based on focus on [[Coupling And Cohesion]] -- to be based around [[Simulation Of The Future]]?  You can even base it on the <b>actual</b> future, because the payroll formulae change every six months.</i>",
+      "id": "d79bd60407f707edc0a9cfdc7bc884ab"
+    },
+    {
+      "type": "html",
+      "text": "\nI don't know enough about that domain to make a confident estimate of change patterns. The <i>kind</i> of changes to the formulas may play a role in the calculations also. I've never worked directly on a payroll app. I can tentatively agree that without sufficient estimates of change patterns, wrapping may be the better default. But if you don't have enough knowledge of the domain, you should probably talk to somebody who does before making that coding decision, and/or study past formulas & changes. AND past coding mistakes. It's quite possible they were caused by [[Bloat Induced Reading Confusion]].",
+      "id": "1f7770a80155e2d185e5cce8909150fd"
+    },
+    {
+      "type": "html",
+      "text": "<i>Changes occur every six months and can occur anywhere, but the numeric literals change the most frequently, the switch statements change next, then the structure of the formulae (including adding or removing factors), then provinces/territories are added.  The last one happened once in the ten years that I maintained the real code upon which [[Payroll Example Two]] was based.  Because changes can occur anywhere to anything, what made the most sense was to design with a focus on [[Coupling And Cohesion]]. Thus, on average, <b>any</b> change had the least impact, rather than trying to optimise for specific changes as implied by [[Simulation Of The Future]].</i>",
+      "id": "eb7dcfcf51e590aec19c73c053c35f53"
+    },
+    {
+      "type": "html",
+      "text": "\nRe: \"the switch statements change next [2nd in frequency]\" is a bit open-ended. <i>How</i> they change can matter a lot. ",
+      "id": "7c183cd5d0728572f726daa57c0d5d4a"
+    },
+    {
+      "type": "html",
+      "text": "<i>They can change in all the way that switch statements can change: More cases or fewer, the case literals can change, and the code in them can change.</i>",
+      "id": "05e51272aad75209bfb167e707dcda20"
+    },
+    {
+      "type": "html",
+      "text": "\nLet's say we classify the patterns of all possible changes into 20 different patterns. If say change-pattern 7 is 10 times more likely than pattern 15, that could very well affect the final decision of which code design technique is ranked as the most change-friendly. I don't have those specific probability values here to analyze and process.",
+      "id": "1a6f4986ff8ddcdbb92577f129229dbc"
+    },
+    {
+      "type": "html",
+      "text": "<i>Such specific probabilistic \"change patterns\" don't exist in Canadian payroll.  Numeric literals are roughly twice as likely to change as switch statements, switch statements are slightly more likely to change than formulae, and provinces/territories will be added about once every 100 years unless they repartition the country for payroll purposes into income tax regions.</i>",
+      "id": "320d57fc4d4e57ecb98784a4463139f7"
+    },
+    {
+      "type": "html",
+      "text": "\nThey do exist, per actual historic change events. You just don't know them because you forgot or nobody bothered to track them. But anyhow, how does your coding suggestion improve the changing of \"Numeric literals\", the most common change pattern, according to you?",
+      "id": "0de2b635bf43070c5f54727a59e650fb"
+    },
+    {
+      "type": "html",
+      "text": "<i>Why do you assume I \"forgot\" or \"nobody bothered to track them\"?  I developed Canadian payroll software for a decade, so I know how the payroll specification changes, and it's not something for which you can (a) identify a collection of \"change-patterns\" beyond those that I've given; or (b) assign numbers like \"10 times more likely\" other than the numbers I've given such as \"roughly twice as likely\".</i>",
+      "id": "cb4679e96bb4e52adb7e59bd445b0d3b"
+    },
+    {
+      "type": "html",
+      "text": "<i>Coding with a focus on [[Coupling And Cohesion]] has no impact on changing numeric literals.  It has a big effect on changing the switch/case statements (they're cohesive), the formulae within a province/territory (province/territory classes are cohesive but not coupled to each other), changing provincial/territorial factors independent of federal factors (each is cohesive, coupling is via inheritance through a minimal set of functions), etc.</i>",
+      "id": "2fdb8aac2528e79ac09c2836a59c99a3"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "f30bf5b132fbdd22029d98aca45f0d73"
+    },
+    {
+      "type": "html",
+      "text": "[1] In my book, it would only be OO if it facilitates defining and putting behavior (functions or references to functions) in the 'struct' nodes (per C example). And OO-ness can perhaps be considered on a continuum rather than discrete (is or isn't OO). If C makes it possible but difficult to put and use behavior in struct nodes, then it may be considered \"weak OO\". \"Orientation\" generally means \"leaning toward\". Thus, \"object oriented\" generally means \"leaning toward objects\". This can be read as \"facilitates object-ish things and usage\" or \"makes it easier to do object-ish stuff\". -t",
+      "id": "9a17c7fb4e2a75a88cbb278cbadec3fb"
+    },
+    {
+      "type": "html",
+      "text": "<i>So you define OO by \"has dotted dispatch?\"</i>",
+      "id": "b034f471b08863be960d607ce849d196"
+    },
+    {
+      "type": "html",
+      "text": "\nI don't recognize the phrase \"dotted dispatch\".",
+      "id": "bc02a430486338eef53843e290af5f50"
+    },
+    {
+      "type": "html",
+      "text": "<i>E.g.:</i>",
+      "id": "5f3758164296523181752323100a2f36"
+    },
+    {
+      "type": "code",
+      "text": " instance.method()",
+      "id": "358df8b93833d106185c930eb4f4ee4b"
+    },
+    {
+      "type": "html",
+      "text": "<i>Note the dot between the instance and the method name.  That's dotted dispatch.</i>",
+      "id": "6428d48fe6000f7f23cb9e450b7f56dc"
+    },
+    {
+      "type": "html",
+      "text": " That type of syntax is one way to simplify adding and using behavior in maps, but I'm <i>not</i> prepared to say it's the only way, at this point. I'm not smart enough to list out all possible syntactic ways to facilitate the above concepts.  -t",
+      "id": "d6a4353cbe5c9b22909053f1098a91f3"
+    },
+    {
+      "type": "html",
+      "text": "<i>Note also that 'class p {void x()};' is merely a syntactic shorthand for 'class c {}; void x(c p);'  In terms of [[Type Safety]], etc., they are equivalent, but the latter requires that 'class p' have publicly-accessible members whilst in the former, method 'x' can access private members of 'class p'.  In short, the reason for \"putting behavior ... in the 'struct' nodes\" instead of outside the 'struct' nodes is specifically to [[Avoid Direct Access Of Members]].</i>",
+      "id": "04ac6af3642ba4affd0a5ef6a711dce9"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "f30bf5b132fbdd22029d98aca45f0d73"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Java]], [[Category Interface]], [[Category Object Orientation]]",
+      "id": "2aa951f36df5e6c023b7254d299d7a45"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "f30bf5b132fbdd22029d98aca45f0d73"
+    },
+    {
+      "type": "html",
+      "text": "[[November Fourteen]]",
+      "id": "914ed8ac04bce61f96d89ec196ad7d67"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?AvoidDirectAccessOfMembers c2.com]",
+      "id": "0e0f73772bc0459a8376811a470b528c"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1418771930000,
+      "id": "01a5b5ff8c45d3f10a9fc2d5426fed03",
+      "type": "create",
+      "item": {
+        "title": "Avoid Direct Access Of Members",
+        "story": [
+          {
+            "type": "html",
+            "text": "In many places I have seen the following.",
+            "id": "0d6a9ddeef91856fee3b8f63c47dd1bc"
+          },
+          {
+            "type": "code",
+            "text": "    public void doSomething() {\n        this.member_ = \"Some value\";\n        ...\n        ...\n    }",
+            "id": "dbdbde83d375fd87042557d751a10d0d"
+          },
+          {
+            "type": "html",
+            "text": "\nWhen there is already a getter/setter for this member. This causes problems while extending the functionality of the class. Therefore, when you have to access a member variable, do the following.",
+            "id": "abdf5dd379c66f72c60b7a21e52844c2"
+          },
+          {
+            "type": "code",
+            "text": "    public void doSomething() {\n        setMember(\"Some value\");\n        ...\n        ...\n    }",
+            "id": "bf4f5df30dc06bc7881ca7e3779c8883"
+          },
+          {
+            "type": "html",
+            "text": "\nThis enables the inherited classes to override the \"setMember\" and do some additional tasks. Also, this way some additional checks can be easily added later without breaking the existing code.",
+            "id": "03ad2b5a12244dfe114603b356161515"
+          },
+          {
+            "type": "html",
+            "text": "-- vhi",
+            "id": "b92277cf70dbe5caf887defee878e074"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "f30bf5b132fbdd22029d98aca45f0d73"
+          },
+          {
+            "type": "html",
+            "text": "\nWhat about AspectJ <i>([[Aspect Jay]])</i>, where you can override even this.member = \"Some Value\"",
+            "id": "759dc0dafffbb19a31d2204f1ac64659"
+          },
+          {
+            "type": "html",
+            "text": "<i>[[Do The Simplest Thing That Could Possibly Work]]:  unless you are having problems with cross-cutting concerns, AspectJ is a lot of work for something that is handled nicely by inheritance.</i>",
+            "id": "5db312c0938600abbb8d6b50e3019d5b"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Do The Simplest Thing That Could Possibly Work]]:\nHaving the code in a class depend on the class' own implementation strategy is not that bad of a [[Code Smell]].\nJust go ahead and use the member variables until such a time as you find that you need to redesign the implementation, then change all member access to accessor functions.",
+            "id": "370db1ba7d6d39dc1a9323974dd3a865"
+          },
+          {
+            "type": "html",
+            "text": "\nAnyway, [[Accessors Are Evil]].  ;->",
+            "id": "ab76611c64ab689ef7a6b294e079eb44"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "f30bf5b132fbdd22029d98aca45f0d73"
+          },
+          {
+            "type": "html",
+            "text": "\nThe [[Self Language]] does not expose member variables (slots) to the programmer.  All access to slots is done through accessors.  Declaring a slot defines the accessors in some implementation-dependent manner.  E.g.  declaring a slot called \"slot\" would define a getter called \"slot\" and a setter called \"slot: new_value\".",
+            "id": "5d4f91d3d07695c4e97f12739b5eaed2"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Ruby Language]] has something similar with its accessors, but also allows direct member access from within the object.",
+            "id": "d0d340cfa47bfcaf3817b156961ee006"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "f30bf5b132fbdd22029d98aca45f0d73"
+          },
+          {
+            "type": "html",
+            "text": "\nUsing your own variables (outside of accessors) is one thing. Using your parent class' variables is truly evil.",
+            "id": "07b704f6c9b5aa1628fee96e9f63dc88"
+          },
+          {
+            "type": "html",
+            "text": "\nI spent four days once (intermittently, in between doing real work) tracking down a bug that was driving me nuts. A member variable kept getting changed in the production system, and I couldn't see how. Putting a breakpoint at the setter didn't show me anything unexpected. A line-by-line inspection of the code didn't help me either. Then, all of a sudden, I noticed that the variable wasn't declared as private, but as protected. When I changed this, my jaw dropped as the approximately 500 compile errors this caused creeped out of the woodwork (about 120 of these were value changing!)",
+            "id": "27f4e3b60063b3a8fd0c1188cd754b7b"
+          },
+          {
+            "type": "html",
+            "text": "\nSometimes, good coding habits (like making your non-final variables private) can really leave you blindsided to the evil practices that others use.",
+            "id": "4469f6d2a86cb28ebee10ac61ca5c44b"
+          },
+          {
+            "type": "html",
+            "text": "<i>You can discover all sorts of interesting things about a program by simply commenting out a variable...</i>",
+            "id": "0eddeb7c71f286c0902b971adda8264f"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "f30bf5b132fbdd22029d98aca45f0d73"
+          },
+          {
+            "type": "html",
+            "text": "One could argue that <b>Java is a flawed language</b> and ideally one should be able to hide the distinction between changing variables and using an accessor. This can simplify syntax and allow one to swap one for the other. If an accessor is simply a formal wrapper around a variable, then by itself it's not providing any value and is just <b>repetitious bloat</b> that hogs eye real-estate. It only provides value if we LATER want to add more processing or control. Thus, it's more logical to start out with direct variables, but change them to accessors later if and when needed. But with Java you'd have to change the interface to do this. In a \"proper\" language, you wouldn't: you could <b>switch to accesors from variables without changing existing calling code</b>. A side-effect of this is that you wouldn't be able to tell whether it's a direct reference or an accessor by looking at the call interface alone, unless perhaps you make it \"read-only\" or add parameters.  (Somewhere there is a related existing topic on this.) ",
+            "id": "e59f22a2e6a7ce4f6a5b97f900570eef"
+          },
+          {
+            "type": "html",
+            "text": "\nBut if one is stuck with a language that forces an external extinction, like Java, I would suggest leaving variables \"naked\" if there will be relatively few users (other classes) of the class and these associations will be relatively stable. If, however, there will be a lot of using classes and/or the associations change fairly often, then go ahead and wrap them in accessors up front. -t",
+            "id": "ccff819c399208e97b637f2b319530f0"
+          },
+          {
+            "type": "html",
+            "text": "-t",
+            "id": "a918a3861a012d224cca5f079370769b"
+          },
+          {
+            "type": "html",
+            "text": "<i>Take a look at C#'s Properties, and please reflect on whether your advice is based on good practice or your personal preference. There are good reasons -- that you've not mentioned -- not to do what you suggest.</i>",
+            "id": "b447bbb1cccee508d70cdd0590eb3a6e"
+          },
+          {
+            "type": "html",
+            "text": "\nLet's stick with Java for now. I'll come back to C# later. Per Java, it's to avoid bloat. One only should create such bloat if the cost of change is great enough to justify it. Bloat creates risk by confusing and/or distracting \"the eye\", but visiting many callers to convert direct attributes to accessors when later needed also creates risk (and work). Thus, there is a balancing point of risk. If you only are likely to have a few and stable callers, then the bloat doesn't prevent enough risk & rework to justify it's own risk (by being bloat). Granted, I have no formal studies on confusion/distraction caused by bloat, and these are based on my personal observations of my own work and others'.",
+            "id": "5e9e3f10a0d540fd009d6ae664cfc58a"
+          },
+          {
+            "type": "html",
+            "text": "\nGeneral illustration of trade-offs:",
+            "id": "bc2ba08813748a26e748ce8cf7905dc5"
+          },
+          {
+            "type": "html",
+            "text": "\nScenario A: 2 Callers",
+            "id": "7fb519c50a97632184d6769e12a20125"
+          },
+          {
+            "type": "html",
+            "text": " Scenario A.1: Direct attributes",
+            "id": "5d119165b44d383f59cea7637bddd685"
+          },
+          {
+            "type": "html",
+            "text": " Visual complexity: Low",
+            "id": "fba0313e346b9b80a45101e72b6ed1fd"
+          },
+          {
+            "type": "html",
+            "text": " Cost & Risk to change callers: c * 2",
+            "id": "7be68b4e7d2a2a4f2ffe44ee7e11126a"
+          },
+          {
+            "type": "html",
+            "text": " Scenario A.2: Wrapped attributes (setX/getX)",
+            "id": "74439c3627ae1fc75772475abccb2fb3"
+          },
+          {
+            "type": "html",
+            "text": " Visual complexity: High (bloat cost)",
+            "id": "9b0475892d147e8cf95a3187995ff3f6"
+          },
+          {
+            "type": "html",
+            "text": " Cost & Risk to change callers: 0",
+            "id": "0393d4d23966ef8dd410771113a76fe7"
+          },
+          {
+            "type": "html",
+            "text": "\nScenario B: 40 Callers",
+            "id": "a70ca10aec34307dc468f431987a20a1"
+          },
+          {
+            "type": "html",
+            "text": " Scenario B.1: Direct attributes",
+            "id": "4b655413a529814c16a3519cc55250dd"
+          },
+          {
+            "type": "html",
+            "text": " Visual complexity: Low",
+            "id": "fba0313e346b9b80a45101e72b6ed1fd"
+          },
+          {
+            "type": "html",
+            "text": " Cost & Risk to change callers: c * 40 ",
+            "id": "d3dc83467858e523c686b1bfd185b46b"
+          },
+          {
+            "type": "html",
+            "text": " Scenario B.2: Wrapped attributes",
+            "id": "f792594ca305471c803da1430d3a1891"
+          },
+          {
+            "type": "html",
+            "text": " Visual complexity: High (bloat cost)",
+            "id": "9b0475892d147e8cf95a3187995ff3f6"
+          },
+          {
+            "type": "html",
+            "text": " Cost & Risk to change callers: 0",
+            "id": "0393d4d23966ef8dd410771113a76fe7"
+          },
+          {
+            "type": "html",
+            "text": "\nDifferent people may assign different values to the 1) cost of bloat (see [[Fast Eyes]]), 2) the probability that we'll later need accessors, and 3) the cost of changing the interface (and changing the callers). But do notice the \"c * 40\" (c times 40) in B.1. It's probably a high total by most scenarios (readers applying their estimated costs). If we don't wrap and have few callers (A.1), then the cost of changing the interface is relatively low, and arguably lower than the cost of bloat (A.2). I believe most would agree under that scenario it's probably a good idea to wrap, but the \"best\" choice in scenario A is probably subject to heavy debate, based on estimations of one's own [[Wet Ware]] and/or that of typical developers in their shop. It's roughly a wash by my estimate, leaning toward A.1 in the name of [[Yag Ni]]. Related: [[Decision Math And Yagni]], [[Simulation Of The Future]].",
+            "id": "093170e7520576fd32859292a5938371"
+          },
+          {
+            "type": "html",
+            "text": "<i>Do you feel that's a balanced assessment?  The only reason you mention to avoid direct access of member variables is that the interface might change.</i> ",
+            "id": "388955a0dabde42dbc03df19f16be9be"
+          },
+          {
+            "type": "html",
+            "text": "\nI am not following. Please elaborate, perhaps with a specific example.",
+            "id": "1068311cb57b92d0bc90650880fb445a"
+          },
+          {
+            "type": "html",
+            "text": "<i>It's not an issue of a specific example, but of the fact that your scenarios are focused almost entirely on \"bloat\" and \"visual complexity\".  There are good reasons to avoid direct access of member variables, such as to increase encapsulation and reduce coupling.  Why do you not mention these?</i>",
+            "id": "a59026bed60f112a49daea937f422b0f"
+          },
+          {
+            "type": "html",
+            "text": "\"Coupling\" is an ill-defined concept, and encapsulation for encapsulation's sake is a waste of code. I am not suggesting that one don't wrap/hide variables, but rather only do it WHEN there is known and existing reason, or if there is likely to be one in the future. Thus, I am not arguing against encapsulation in general. It's a matter of <i>if and when</i> to encapsulate. I'm not a [[Yag Ni]] purist in that I append \"likely to need\" in my criteria versus \"until actually needed\" in pure [[Yag Ni]]. ",
+            "id": "37d4623cea11f7de292ebea6f4c3e19e"
+          },
+          {
+            "type": "html",
+            "text": "<i>Coupling is a very well-defined [[Computer Science]]/[[Software Engineering]] concept.  Coupling exists wherever there is a dependency such that altering A affects B.  In that case, we say that A and B are coupled.  Where coupling is necessary, we try to group it together whenever possible.  That's cohesion.  To reduce accidental or intentional (but unnecessary) coupling between defined units of cohesive code, we use encapsulation.  Your argument appears to be based on the presumption that code will be static and neither re-used nor modified, and is simple enough that accidental coupling is unlikely.</i>",
+            "id": "d9204e9069ed6e22c5d6dbcebf89818c"
+          },
+          {
+            "type": "html",
+            "text": " \"Affects\" appears to be open-ended, but I don't want to do the [[Laynes Law]] dance over \"affects\" in this topic and bloat it up with off-topic bickering over English. Note that I don't dispute the general principles related to coupling and encapsulation, but they must be <b>weighed against other principles</b>, such as [[Yag Ni]]. I'm NOT prepared to say they ALWAYS trump [[Yag Ni]] et al. [[It Depends]]. I consider them ALL rules of thumb, not absolute Ten Commandments.",
+            "id": "c0f727aaa04ed654894d36961a1f435b"
+          },
+          {
+            "type": "html",
+            "text": " As far as encapsulation, we'd probably need to explore specific scenarios, being that talking in generalities is failing to improve communication it appears. IF we are doing a basic set/get wrapper around a variable, it buys us nothing in \"protection\" over a \"naked\" variable. At that stage <b>there is nothing to protect</b>. They are pretty much interchangeable. If we wrap it, it's typically in preparation for some future change where an accessor is no longer a basic set/get. Thus, there is no up-front protection provided JUST by making a set/get versus a variable. Putting a wrapper solves nothing and improves nothing and protects nothing up front. But it does cost in terms of code bloat up front. Thus, wrapping gives a net <i>negative</i> benefit, at least for the short term. If we LATER need non-basic wrappers, we can add them THEN. The decision about whether to wrap up front should depend on the probability that we will later need complex wrappers, and the amount of code impacted by the change. In other words, if we spend bloat now, we hope we get a sufficient and/or likely payoff in the future. Otherwise we are being billed for bloat without getting enough benefits from the bloat to justify all those bills. <b>It's a lot like deciding if insurance is worth the cost.</b>",
+            "id": "5e89c5a406ded18e58698dc536bf0cb4"
+          },
+          {
+            "type": "html",
+            "text": " <i>Wrappering a variable with get/set makes it possible to replace the variable behind get/set with some other mechanism, and/or validate what is set, and/or mutate what is getted, and/or guarantee the variable is not being inadvertently mutated by some code external to the class, without changing any other code.  In general terms, wrappering a variable with get/set encapsulates the internal mechanisms of the class such that the internal mechanisms of the class are decoupled from the class users.  This promotes code reuse and simplifies maintenance.</i>",
+            "id": "1a3f218caf1bf9f71e1cd2d3349b68a4"
+          },
+          {
+            "type": "html",
+            "text": " Not for basic accessors. You seem to be slipping into [[Brochure Talk]]. We need something clear and explicit. And you appeared to completely ignore my points. I do agree there are SOME potential future of wrapping up front. Thus, I am NOT disputing there exists SOME value to doing such. But you ignored the real issue: do the up-front costs justify potential future benefits. I didn't see any contrasting and comparing from you, just re-statements of the upsides, which I never disputed to begin with. Let me make it double clear: <b>I do not dispute that up-front wrapping has SOME value</b> (up-sides).",
+            "id": "8e40369fe4d4a31b6d61023421fcf211"
+          },
+          {
+            "type": "html",
+            "text": " <i>I didn't ignore your points, I dismiss them.  Arguing that private class members should be publicly accessible violates one of the basic tenets of good OO programming.  There is no excuse for it, certainly not that you lack [[Fast Eyes]].</i>",
+            "id": "feed07fbe92f2f97e592393a4fd88216"
+          },
+          {
+            "type": "html",
+            "text": " That's an authoritative argument, not a real argument.",
+            "id": "5689144d6a96e3a0ee07a7285baf041b"
+          },
+          {
+            "type": "html",
+            "text": " <i>The real argument is above.</i>",
+            "id": "baf2458622afd7e97ea0219c9d738c46"
+          },
+          {
+            "type": "html",
+            "text": " I failed to see where it is demonstrated/proved how it overrides the cost of bloat 100% of the time.",
+            "id": "7782974f2d5ac5d6cca68e1ccf05793e"
+          },
+          {
+            "type": "html",
+            "text": " <i>I fail to see where you make the case that getters/setters are \"bloat\", or that they represent a cost.  Your argument appears to be a roundabout way of claiming that in source code, fewer tokens are always superior to more tokens.</i>",
+            "id": "2065e8707a21b1034ffb9df372e736f7"
+          },
+          {
+            "type": "html",
+            "text": " All else being equal, YES. Code volume/size is a criteria we try to optimize, <b>along with</b> other factors. Software design is one big tradeoff balancing act ([[Software Engineering Is Art Of Compromise]]).",
+            "id": "631d240ed2a9c67ca967b0e7b2cbfe42"
+          },
+          {
+            "type": "html",
+            "text": " <i>Indeed, we try to optimise all relevant factors, and that was the basis for my original criticism:  As I wrote above, \"your scenarios are focused almost entirely on 'bloat' and 'visual complexity'\" and don't appear to be offering a balanced consideration of \"other factors\".</i>",
+            "id": "085c235d55892ce801ba5a1481a89d43"
+          },
+          {
+            "type": "html",
+            "text": " I disagree with your \"entirely focused\" characterization. My statement is basically a form of, \"In certain circumstances, the cost of wrapping exceeds the benefits\". That's a comparison of A to B, not a focus on just A. -t",
+            "id": "a89518ef394a4d301154a85b3269f785"
+          },
+          {
+            "type": "html",
+            "text": " <i>In the absence of evidence -- such as metrics -- to demonstrate that the cost of wrapping exceeds the benefits, why should we violate what is generally considered OO programming best practice?</i>",
+            "id": "f2f7b0fef71fcd7c3f1de58450db54d7"
+          },
+          {
+            "type": "html",
+            "text": " Why should one principle automatically override another ([[Yag Ni]])? Neither has an [[Official Certified Double Blind Peer Reviewed Published Study]] behind it. One requires an [[Official Certified Double Blind Peer Reviewed Published Study]] but the other does not? That's not rational.",
+            "id": "1dfabc4e6686bf1550b35f33b45449c4"
+          },
+          {
+            "type": "html",
+            "text": " <i>Where does [[Yag Ni]] recommend violating recognised OO programming best practices?</i>",
+            "id": "bbb02d5f50999ee6acfabd1cf7650cd5"
+          },
+          {
+            "type": "html",
+            "text": " I interpret [[Yag Ni]] in a general sense, <b>a form of parsimony</b>: keep it short. I don't know if anybody has laid out specific and/or canonical rules in which other principles override it. If they have, I'm not applying it without clear justification.",
+            "id": "e936bb178cf8feaf1c71f74532a5fd3c"
+          },
+          {
+            "type": "html",
+            "text": " [I'm honestly curious as to how get/set actually enables those changes. If you add validation to a setter, for example, you're changing the external interface of the class - it's either got to throw an exception or silently not set the value, which violates the behavioural interface established by the non-validating version of that setter. Starting out with getters and setters (or, in languages that support them, properties) guarantees the syntax doesn't change, but wouldn't you need to at least check the callsites to ensure they'll operate correctly with the new behaviour? -[[David Mc Lean]]]",
+            "id": "2f6a01b4f4c7a3cde223dcaadeaf1cd8"
+          },
+          {
+            "type": "html",
+            "text": " <i>Validation doesn't necessarily change the external interface.  A setter with validation could be: 'void setGlub(int v) {glub = v; if (glub<0) {errorState=1; log(\"ERROR: Glub<0\");}}'.</i>",
+            "id": "3a86da649e9c0d5cb112414206758abf"
+          },
+          {
+            "type": "html",
+            "text": " I never said pre-wrapping prevents <i>all</i> interface changes. But, thank you for helping to clarify that.",
+            "id": "be439d5b0010befea4a83b7fbe72f322"
+          },
+          {
+            "type": "html",
+            "text": " <i>What is \"pre-wrapping\"?</i>",
+            "id": "1d2391f6efa21551609c13ef6e69557b"
+          },
+          {
+            "type": "html",
+            "text": " Creating generic set/get's for all \"public\" attributes (variables) up front.",
+            "id": "609969b49185926d2124f7f361e6ea31"
+          },
+          {
+            "type": "html",
+            "text": " <i>No one is arguing in favour of creating setters and getters up front.  A setter should be created only when it is determined that one or more external classes require write access to the state of a class instance.  A getter should be created only when it is determined that one or more external classes requires read access to the state of a class instance.  Of course, in case it's not obvious, there should be <b>no</b> public member variables.</i>",
+            "id": "32ae040156342c71247a2eddb233b648"
+          },
+          {
+            "type": "html",
+            "text": "\nAlso, lack of encapsulation can create \"accidents\", but so can bloated code. If the accidents caused by bloat exceed those caused by lack of encapsulation, then encapsulation is not giving us a net benefit. Bloat can also slow general productivity by making more code to read and change.",
+            "id": "a0f8aef6cd667d7d7e03c6a622f56c22"
+          },
+          {
+            "type": "html",
+            "text": "<i>What is \"encapsulation for encapsulation's sake\"?  Isn't encapsulation for reducing coupling and increasing cohesion?</i>",
+            "id": "fbfa636d6f03b9be60af1c8213c505ec"
+          },
+          {
+            "type": "html",
+            "text": "\nIt depends. See above.",
+            "id": "6943613a3f9c9e04532def1deb2a14c4"
+          },
+          {
+            "type": "html",
+            "text": "<i>Encapsulation always reduces coupling and increases cohesion.  What you appear to believe \"depends\" is whether it's worth the additional code of get/set/etc. or not.</i>",
+            "id": "3e440d09ce9afce39a29198ab7ec2d7e"
+          },
+          {
+            "type": "html",
+            "text": "\nWithout a clear definition/metric of \"coupling\" and \"cohesion\", I cannot confirm nor deny that claim. But this is NOT the topic to define/debate coupling and cohesion, as a reminder. ",
+            "id": "295fd79c2b173d580e676ac4036eaff3"
+          },
+          {
+            "type": "html",
+            "text": "<i>I've given a clear definition of [[Coupling And Cohesion]].  They are abstract and often qualitative (though specific quantitative metrics may be defined for specific cases, but not in general), but that doesn't mean they're vague.</i>",
+            "id": "d47208bd08fbf5dc2b9c9ae9dfc204cf"
+          },
+          {
+            "type": "html",
+            "text": "\nIf there are no consensus numeric or Boolean metrics for it, or a definition clear enough to lead to that, then it's \"vague\" in my book. The existing proposals have too much dependency on damned English, and we know how that turns out.",
+            "id": "6747fa210bb621c030fc9af76f3b0752"
+          },
+          {
+            "type": "html",
+            "text": "<i>Many things have no established numeric or boolean metric, and yet they're clear enough to make decisions.  For example, \"programming language\" has no established metric, and yet millions of people use them and create them every day.</i>",
+            "id": "44cf9b5e9ac4617fd08e2b457ef915e9"
+          },
+          {
+            "type": "html",
+            "text": "\nMany successfully use [[Yag Ni]] also.",
+            "id": "d4b6aca446200b6975112ae1aad1e4f8"
+          },
+          {
+            "type": "html",
+            "text": "<i>[[Yag Ni]] is about only implementing requirements that you need to implement.  It isn't advice to write what would generally be considered bad code that violates encapsulation.</i>",
+            "id": "81d93c640433ba7c15a51130268237e4"
+          },
+          {
+            "type": "html",
+            "text": "\nThat's your opinion. Again, encapsulating before encapsulation is <i>actually</i> needed can indeed be interpreted as a violation of [[Yag Ni]]. But I don't want to make this into a \"principle war\" but rather explore the ACTUAL costs versus benefits with something more concrete.",
+            "id": "df2f91259f4029aa807b2a1c738ac81a"
+          },
+          {
+            "type": "html",
+            "text": "<i>That sounds like a highly nuanced and personal interpretation of [[Yag Ni]].  I'd be curious to see if [[Extreme Programming]], or any other Agile methodology that endorses [[Yag Ni]], advocates it.</i>",
+            "id": "01e7c5cea81d140e4de389d16246a02a"
+          },
+          {
+            "type": "html",
+            "text": "\nAs long as they don't rely on [[Argument From Authority]], I would indeed like to see wider opinions also.",
+            "id": "3c310fbc042ab88bdecc0d3011b91c30"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "f30bf5b132fbdd22029d98aca45f0d73"
+          },
+          {
+            "type": "html",
+            "text": "<b>Map Perspective</b>",
+            "id": "e957024c95d0cb566b17cff13e84e2f1"
+          },
+          {
+            "type": "html",
+            "text": "\nI consider objects to be \"glorified maps\" (dictionary structures). It's acceptable to have maps without wrapping each element of a map. If we say \"always wrap\" all \"public\" elements of an object, then as soon as we add a single method to the map, we would then be obligated to wrap every element, creating an all-or-nothing [[Discontinuity Spike]]. It's like that one method is a poison pill that suddenly triggers some grand encapsulation rule. The boundary between \"map\" and \"object\" can and should be fuzzy: I see no reason to hard-classify them (forced dichotomy). See also [[Merging Maps And Objects]]. -t",
+            "id": "d85e6515c558fd27c99f954f1e6729d8"
+          },
+          {
+            "type": "html",
+            "text": "<i>That also a nuanced and personal interpretation of [[Object Oriented]] programming.  OO is defined by encapsulation, inheritance, and polymorphism, not that objects are like maps.</i>",
+            "id": "765883a1bd927f1a652d5bd5beb82570"
+          },
+          {
+            "type": "html",
+            "text": "\nEncapsulation is NOT a hard requirement of OOP. And [[Nobody Agrees On What Oo Is]]. Thus, my preferred viewpoint of OO is not less valid than others.  And [[Robert Martin]]'s \"jump table\" definition/description of OOP can be viewed the same or similar to a map view. A \"jump table\" is simply a map from name/key to a function (implementation and/or reference to).",
+            "id": "16154d8563b85be62c95dafda1e3e9fb"
+          },
+          {
+            "type": "html",
+            "text": "<i>Are you referring to the exchange at [http://objectmix.com/object/312321-object-oriented-programming-explained-51-lines-6.html objectmix.com] ?</i>",
+            "id": "d735c26fcfca25cdfc5eb43230345885"
+          },
+          {
+            "type": "html",
+            "text": " I don't recognize that conversation. Anyhow, I don't see anything that contradicts \"jump tables\" being interpreted as maps of function/behavioral references.",
+            "id": "87a07aadeca79e483ff5871b15e1dbb7"
+          },
+          {
+            "type": "html",
+            "text": " <i>Describing OO as \"jump tables\" appears to equate OO with the vtables used to implement virtual function calls in C++.  Are you sure \"jump tables\" wasn't intended to be a joke?</i>",
+            "id": "2c4b56a61cbbe09c1c2a0195b4bc2489"
+          },
+          {
+            "type": "html",
+            "text": " RM appears to have an extensive C/C++ background and writes from that perspective. I myself interpret his jump-table statement to be a C-family-centric way to describe a form of <b>maps of behavioral references</b>. You are welcome to have a different personal interpretation of his words, but I am not obligated to subscribe to it. -t",
+            "id": "908d8e5893e1c3db3fb001dbd7e275b7"
+          },
+          {
+            "type": "html",
+            "text": " <i>Bob Martin has sufficient experience in OO not to write from such a peculiarly biased perspective, and normally he doesn't.  I can't find any reference to \"jump tables\" except the above exchange.  It looks more like a sarcastic quip or a joke than a definition.  Not that it would matter, anyway.</i>",
+            "id": "8a1e4fb8023e4a229b04edf53abb012b"
+          },
+          {
+            "type": "html",
+            "text": "<i>The debates over OO definitions fall into established categories.  Your \"preferred viewpoint\" appears to be unique to you, and not in any of the established categories.</i>",
+            "id": "23fe9b7484b935a9c6c80f2af2042812"
+          },
+          {
+            "type": "html",
+            "text": "\nEstablished by who? I only see differing opinions. I'm sticking by my working definition until a consensus is reached. In practice I do see maps morph into objects as more requirements are added (at least for languages that help blur the distinction).",
+            "id": "b6f9859117c5781835f3c71b8203748f"
+          },
+          {
+            "type": "html",
+            "text": "<i>Established by multiple acts of general consensus, which has resulted in groups of agreement.  Your working definition doesn't fall into any of them.  It appears to be unique to you.  Do you therefore consider any program which uses maps to be object oriented?</i>",
+            "id": "2b1c8c336c77013248b2ade91b263816"
+          },
+          {
+            "type": "html",
+            "text": "\nNo. Again RM's \"jump table\" is essentially a map of behavioral pointers. (It's an odd way to describe it, but it just may reflect too much time spent working with one language.) Thus it is NOT unique to me. (See [1] below for my working definition.)",
+            "id": "bca1e1bd78ecdf66d227c70c207ec56d"
+          },
+          {
+            "type": "html",
+            "text": "<i>What's a \"behavioral pointer\"?  The \"jump table\" definition appears to be unique to Bob Martin, and unique to that conversation.  Are you sure he wasn't making fun of something you'd written before?</i>",
+            "id": "b829a93a7a26f375b61af16316cc88bb"
+          },
+          {
+            "type": "html",
+            "text": " One advantage of the map-based definition over many of the others is that it considers objects merely as a coding convenience (code packaging) and does NOT assume objects are intended to be used for a specific purpose, such as fitting the \"real world\" or wrapping \"data structures\" behind behavioral interfaces. It's a wider view of OO; and if one dispenses with such \"purpose\" views, then map-ism naturally follows. --top",
+            "id": "9b17aa94311ddd69c051b2b3a53866d2"
+          },
+          {
+            "type": "html",
+            "text": " <i>I don't know of any established definition of OO that assumes objects are intended to be used for a specific purpose.  Wrapping data structures behind behavioural interfaces is an obvious purpose, however -- do you really want to manipulate a graph or BTree with something <b>other</b> than a behavioural interface?</i>",
+            "id": "5357621fb3ac0d20c5f0e7a65b8fc0b4"
+          },
+          {
+            "type": "html",
+            "text": " [[It Depends]] on whether one wants to provide an IS-A viewpoint/interface or a HAS-A (or ACTS-AS) style of interface. The second is often more flexible and better future-proofing in that it doesn't lock one into a given viewpoint, and is one of the reasons for the popularity of RDBMS. -t",
+            "id": "18dc1adbc3c6a45d795557d60c17e7a6"
+          },
+          {
+            "type": "html",
+            "text": " <i>How does your response relate to my question?</i>",
+            "id": "ebf6fe5b520e4eb932b08b0b3e155c2d"
+          },
+          {
+            "type": "html",
+            "text": " I reviewed your question and confirmed I answered it properly as I understood it. If you meant something different than how I read it, I cannot tell because I cannot read your mind, only your text. I will agree what we may indeed want to fully wrap SOME things; but that doesn't mean we should fully wrap everything behind behavioral interfaces.",
+            "id": "25865505eaa82f9dd03f12ab2af57eb4"
+          },
+          {
+            "type": "html",
+            "text": " <i>How, then, would you interact with a graph or BTree with something other than a behavioural interface?</i>",
+            "id": "ca04805c244c1fe8fcb2a3a3146c8002"
+          },
+          {
+            "type": "html",
+            "text": " One can use behavioural interfaces on data without making the entire thing \"be\" that thing. (I suppose if you define a \"thing\" by implementation instead of interface, that may be a different matter.)",
+            "id": "3d355ac35c3bb01eb032b1cc698d6269"
+          },
+          {
+            "type": "html",
+            "text": " <i>What do you mean?</i>",
+            "id": "f282f1db3154d2b7f7e6530df4f6a59f"
+          },
+          {
+            "type": "html",
+            "text": " One can have a tree or stack <b>view</b> of something without that thing <i>being</i> a \"tree\" or \"stack\". It's poor future-proofing of a design to lock your data behind a narrow interface anyhow. (There may be security-related reasons to do so, but for domain data, you typically don't want to box yourself in.)",
+            "id": "6c3700c1b7b630dff59d6ffebe72fa34"
+          },
+          {
+            "type": "html",
+            "text": " <i>The way you make the actual structure (e.g., tree or stack) look like some other structure (e.g., stack or tree) is by hiding the actual structure behind an interface.  To make this work, it is typical to make the actual structure private to the class that defines the interface.  For that reason, it is best to [[Avoid Direct Access Of Members]], because direct access of members would expose the actual structure (e.g., tree or stack) that you're trying to make look like something else.  Of course, the usual \"something else\" is an abstraction, so that you don't see it as (say) a tree or stack, but as a collection.</i>",
+            "id": "49c66197b7d8d1c648525ae896125e7a"
+          },
+          {
+            "type": "html",
+            "text": " Then you are artificially forcing a \"root\" structure, which can create both implementation problems, and interface conversion complexity problems. If one is going to have to select a root structure, at least make it a fairly flexible one. If for example you choose a \"stack\" as a root structure, then you will have to do tons of pushing and popping to emulate a more random-access kind of structure. Not pleasant.",
+            "id": "fdd357bb26c2b6cd98931d7f178bbe14"
+          },
+          {
+            "type": "html",
+            "text": " <i>The \"root\" structure is normally a Collection, which defines methods to add and retrieve items without reference to any underlying structure.  Indeed, it would be not pleasant to choose \"stack\" as a \"root\" structure (with push and pop methods) instead of a collection's usual add and get methods, which is why it's unlikely that anyone would do that.</i>",
+            "id": "dcf96258aa048516c0fe00b7a1fac6ba"
+          },
+          {
+            "type": "html",
+            "text": " A generic \"collection\" is more or less a \"table\", which pretty much backs my original point. For flexibility, we generally want usage-specific views on top of general \"data structures\" rather than general views on top of usage-specific (narrow) structures.",
+            "id": "e3d27a4df55bab16f4eaf036612f06a7"
+          },
+          {
+            "type": "html",
+            "text": " <i>No, we generally want generic or abstract views on top of specific or concrete data structures.  That way, we can program to a generic interface, and trivially replace the concrete data structure that underpins it, as needed to meet performance and/or resource usage requirements.</i>",
+            "id": "cff8954ab59def55df1c7f2c1ef0da09"
+          },
+          {
+            "type": "html",
+            "text": " That doesn't contradict my statement. I wasn't even addressing under-the-hood implementation. I was comparing interface to interface, not interface to raw guts.",
+            "id": "2b940d20a0c82fd3f85bc1f2e66cf775"
+          },
+          {
+            "type": "html",
+            "text": " <i>Actually, that does contradict your statement that we want \"usage-specific views on top of general 'data structures' rather than general views on top of usage-specific (narrow) structures\".  Your statement sounds like the diametric opposite of my statement.</i>",
+            "id": "142f0482fc6bc4ff13ef5851a2e4ed3d"
+          },
+          {
+            "type": "html",
+            "text": " Sorry, I am not following.",
+            "id": "689da35cfd101993e40234e5d4942b5d"
+          },
+          {
+            "type": "html",
+            "text": " <i>My statement is that abstract interfaces should hide concrete implementations.  Your statement is that usage-specific interfaces should hide abstract constructs.  Thus, they are the opposite.</i> ",
+            "id": "14b2cf12192944c8d262f7939fa57acf"
+          },
+          {
+            "type": "html",
+            "text": " \"Hide\" is probably not the right word. Adapt info to usage-specific needs is what I meant by \"on top\". I will agree that \"on top\" was probably a poor choice of words on my part.",
+            "id": "bd34a759af2d7bf80adf4e855c1c2537"
+          },
+          {
+            "type": "html",
+            "text": " <i>A collection interface is the opposite of \"adapt info to usage-specific needs\".  The choice of implementation is what adapts to \"usage-specific needs\".</i>",
+            "id": "3ef8c9bfe21edf1aa433689622140987"
+          },
+          {
+            "type": "html",
+            "text": " No, I didn't say a general collection was for the specific-adaption purpose. There is a huge communication gap somewhere here.",
+            "id": "f6a54253801aab99b593102305683c48"
+          },
+          {
+            "type": "html",
+            "text": " <i>Then what did you mean, if \"on top\" was a poor choice of words?</i>",
+            "id": "dfcdb61f99b723477f8a1452400ef2c6"
+          },
+          {
+            "type": "html",
+            "text": " I already gave a re-phrasing of it.",
+            "id": "76a7c3622324848228d0317be5e4b6c5"
+          },
+          {
+            "type": "html",
+            "text": " Let me try to restate it yet again. We generally want to wrap raw data in some kind of \"structure\" or systematic abstract interface rather than direct access. But because that data may be used for multiple purposes, we don't want the \"first layer\" to be something stiff and limiting, like a stack or a queue. Something like \"generic tables\" is a better first-layer wrapper around the raw data. Stacks and queues tend to be usage/application-specific viewpoints we want on data, but we don't want to hard-wire our general or future access to a given data item to such narrow structures. Thus, if you want flexibility, you build the stack and queue on top of (\"through\") the more general structure, such as tables.",
+            "id": "12fdd9a8ab1d3fdd4c07ad878b455fcd"
+          },
+          {
+            "type": "code",
+            "text": "      Raw-Data\n        |\n        V\n      General-Abstraction (tables) -----------> Stack (specific abstraction)\n                   \\-----------------------> Queue (specific abstraction)",
+            "id": "7d167663b08415d9ce089d7ef9f80439"
+          },
+          {
+            "type": "html",
+            "text": ".",
+            "id": "5628443bd098ee54f7e9b5516991da3c"
+          },
+          {
+            "type": "html",
+            "text": " <i>That's exactly what I wrote.  My only objection is the notion of a 'table' being a general abstraction.  It isn't as general as a collection.  A collection is a structure that lets you obtain iterators over the objects in the collection, and often (but not always) lets you add objects to the collection.  A table is a collection that is a set of tuples with a specific heading.</i>",
+            "id": "b52c382fe445820bd086bc9fa97f27fe"
+          },
+          {
+            "type": "html",
+            "text": " Okay, we generally agree on the concept, then. (Note an RDBMS may be the \"general abstraction\" in many cases, not a same-language class.) My point stands that the stack doesn't \"own\" the data, but merely provides a view/wrapper around it or some aspect of it.",
+            "id": "47fd7f813399dfc218c7ed1b6181d4d2"
+          },
+          {
+            "type": "html",
+            "text": " It's perfectly normal to describe a \"view object\" that uses data and info from another object(s) and/or database(s). Few if any will say, \"no, that's not an object because objects must entirely wrap ALL their data/state by definition\". Therefore, in colloquial-land, \"objects\" do not require 100% wrappage. -t",
+            "id": "313619fbf28459e8fd2ebb08491d2e0a"
+          },
+          {
+            "type": "html",
+            "text": " <i>I don't think anyone would say it's not an object.  What they might say is that it should [[Avoid Direct Access Of Members]].  My database view objects, for instance, do not make member variables public and do not use private member variables to represent columns in the [[Result Set]].  Instead, the D<b></b>atabaseView class provides a getRow() method that returns an associative array from column names to column values.</i> ",
+            "id": "9857bbdced5f8623e78186d79b8ed8f6"
+          },
+          {
+            "type": "html",
+            "text": " I was addressing vocabulary in that statement and not intending to suggest anything about design practices there.",
+            "id": "5e3f4cbf1496f8ec7f1fd7fa3dc173e4"
+          },
+          {
+            "type": "html",
+            "text": " <i>Again, no one would say an \"object\" without \"100% wrappage\" isn't an object.</i>",
+            "id": "2dd29895befcee6c6ed8b934ef24fb24"
+          },
+          {
+            "type": "html",
+            "text": " So then we agree that objects don't require wrapping of members to be \"objects\"?",
+            "id": "6189006b799036e3a77e15036d8fa79c"
+          },
+          {
+            "type": "html",
+            "text": " <i>Sure.  No one said they did.  The title of this page is [[Avoid Direct Access Of Members]], not D<b></b>irectlyAccessingMembersTurnsObjectsIntoNonObjects.</i>",
+            "id": "1ed019a7633dd9092bbf8e4909a5a914"
+          },
+          {
+            "type": "html",
+            "text": "<i>Could you provide an example of what you mean by \"maps morph into objects as more requirements are added\"?</i>",
+            "id": "31b5a576007d64850af31bd87abd32bd"
+          },
+          {
+            "type": "html",
+            "text": "\nOne starts with a typical record \"structure\" (AKA map), and various actions seem to group naturally with that \"structure\". The map may still be used in map-ish ways, but we now have methods that are specific to that structure. For example, it might be app configuration info that is typically only set by field technicians. We later want a \"list_to_screen\" method for it to display it for easier trouble-shooting by field technicians (using a \"hidden\" back-room UI).",
+            "id": "c85ca7859b65f9608d7d7e29e90d9caf"
+          },
+          {
+            "type": "html",
+            "text": "<i>By map, do you mean a collection of named elements, aka a dictionary?  I don't know what your field technician example is intended to illustrate, but it's trivially obvious that operations may be defined to manipulate a given structure.  That doesn't make it object oriented, only that you've defined a structure and a set of associated operations.</i>",
+            "id": "98534eb3fd30b93eff42afcecbc5fde0"
+          },
+          {
+            "type": "html",
+            "text": "That gets back to how one defines \"object oriented\". I don't define it by \"wrap-ness\" or \"encapsulation\" level. I'd argue that full wrapping is really creation of an [[Abstract Data Type]] and not (just) object orientation. OO is wider than ADT. You appear to be conflating the two. If they are one in the same, then we should dispense with the term \"object oriented\".",
+            "id": "383a9438a3eb4c83fc7c9968e027947c"
+          },
+          {
+            "type": "html",
+            "text": "<i>An [[Abstract Data Type]] is a mathematical model for a category of data structures.  It is isomorphic to certain applications of object oriented programming, but not equivalent.  Particularly, they are not the same because [[Abstract Data Type]] is not defined in terms of polymorphism, inheritance, or encapsulation.  Other OO definitions are either too amorphous or too individuated to consider.</i>",
+            "id": "d1abcf9bb5b7c9e22bf22754efaf34e9"
+          },
+          {
+            "type": "html",
+            "text": " Perhaps a better way to describe it is that you are talking about <b>user-defined types</b>, not OOP.",
+            "id": "55adb7c3a720824dbda853209da05efb"
+          },
+          {
+            "type": "html",
+            "text": " <i>What do you consider to be the distinction between user-defined types and OOP?</i>",
+            "id": "9e7a1afc19e0c8eba9ab80c0bf442bc3"
+          },
+          {
+            "type": "html",
+            "text": " Encapsulation is required for UDT's, but not \"objects\". I'm not sure I will agree it's the only difference at this point, but a key difference.",
+            "id": "c9accf36c875924f0828508212bf8162"
+          },
+          {
+            "type": "html",
+            "text": " <i>Encapsulation (as in [[Data Hiding]]) is not required for objects or UDTs.  For objects and UDTs, however, [[Data Hiding]] a good idea (in conjunction with encapsulation), in order to reduce coupling.  That's why we [[Avoid Direct Access Of Members]].</i>",
+            "id": "562b18f25cbe3599b036c1a344b0db43"
+          },
+          {
+            "type": "html",
+            "text": " I suppose that comes down to how one defines UDT. I don't want to get into that vocab dance today. Maybe another.",
+            "id": "c4a2ad829396e5b90d54dbdef2021ee4"
+          },
+          {
+            "type": "html",
+            "text": "\nThat may depend on how one defines polymorphism, inheritance, or encapsulation (the \"big 3\" for reference). Anyhow, it's reasonable that one may wish to use <i>one or two</i> of those three without having to subscribe to them <b>all</b>. There's no reason I can see to force an artificial [[Discontinuity Spike]] in order to match somebody's category system.",
+            "id": "820055ebb8411a75ff4b50727635bd46"
+          },
+          {
+            "type": "html",
+            "text": "<i>Sure, you can use one or two of polymorphism, inheritance or encapsulation, but then it's not OO.</i>",
+            "id": "dd83d736d211d4e6bbc08056bff42307"
+          },
+          {
+            "type": "html",
+            "text": "\nI have to disagree with your view of what \"OOP\" is. It doesn't matter anyhow here, for <b>one should design software based on the best design choices, NOT based on vocabulary</b>. You can't make something more efficient or more parsimonious or more economical by redefining it. (Caveat: changing the definition of the goals/metrics or \"economics\" may affect such.)",
+            "id": "af998234e2b0a7cd824f8c2941f4621a"
+          },
+          {
+            "type": "html",
+            "text": "\nI see no logic of the universe that forces a hard distinction between maps and OOP as far as how to use them, even IF I buy your definition. It's not in for a penny, in for a pound. Even if I buy your def, there is a continuum between a map and a \"true\" object and no clear reason to ignore the continuum or pretend like it doesn't exist or pretend like if we are 70% fitting \"true OO\" we should go 100% because 70% is \"bad\" or 30% is \"bad\" and 100% is \"good\". ",
+            "id": "4b9873091d4dd0b8531c5bcc607b47d1"
+          },
+          {
+            "type": "html",
+            "text": "<i>If maps are sufficient for OO, then do the static maps in C (i.e., the 'struct' construct) mean C is object oriented?</i>",
+            "id": "f6493c5864caaa64f2dea71e749a8dd8"
+          },
+          {
+            "type": "html",
+            "text": "\nThat depends on how one defines \"OO\"[1]. The definition is not really what matters and I don't want to get caught up in another term fight. The point is that useful code constructs can exist that cover the full gamut between and including a pure map (\"is\" or \"used as\") and a fully encapsulated object (no public \"variables\", only methods). What we call these things is irrelevant and shouldn't dictate how we lay out our code. It's silly to say that as soon as one introduces a single method into a map (or object used like a map), then one is suddenly obligated to wrap <i>every</i> key of the map or map-like thing. If I understand your argument correctly, then this all-or-nothing rule would apply under it. I find it a ludicrous and highly artificial \"boundary\". -t",
+            "id": "1af8f1e2e289fb2e673c7b0d34a9d69e"
+          },
+          {
+            "type": "html",
+            "text": "\nBy the way, if full encapsulation is always the \"proper\" way to do OO, then an \"OOP language\" technically shouldn't allow public variables in classes at all: only methods would be able to read and change class variables.",
+            "id": "0c340d212abd19027838ae47d8d0053f"
+          },
+          {
+            "type": "html",
+            "text": "<i>Damn straight.  OOP languages shouldn't allow public variables in classes at all.  Ever.  I don't know why they do allow it.</i>",
+            "id": "3c568bd1a8148329c97c39166ab1d40c"
+          },
+          {
+            "type": "html",
+            "text": "\nBecause unless the language is carefully-designed to avoid such, it creates bloat, and bloat slows down reading and creates errors due to <b>bloat-induced reading mistakes</b>. They don't do it because they probably don't want the bloat-related problems associated with it.",
+            "id": "5f329510d3f1bfe2e2795c7b7f438484"
+          },
+          {
+            "type": "html",
+            "text": "<i>By the same argument, structured programming is bloat compared to the simplicity of GOTOs, and slows down reading and creates errors due to <b>bloat-inducing reading mistakes.</b>  Typical OO languages don't force member variables to be private purely for historical reasons.  Modern OO practice does not make member variables public.</i>",
+            "id": "a93a4e8b50b9f7916ef7e2344e9c76d1"
+          },
+          {
+            "type": "html",
+            "text": "\nHow the heck is that the same argument? For one, goto programs are not shorter. ",
+            "id": "b66a12b2e8ff96e0c075372b09603ea0"
+          },
+          {
+            "type": "html",
+            "text": "<i>They're simpler, by your metric.  For example, they don't risk the reading mistakes that are possible from putting the initialisation, test, and increment sections of a \"for\" loop close together.</i>",
+            "id": "ab25beb76da60984248157f8acd54e87"
+          },
+          {
+            "type": "html",
+            "text": " Sorry, I'm not following this at all. Example P-2 under [[Payroll Example Two Discussion]] is CLEARLY less code and CLEARLY easier to read than P-1 (at least for normal developers, which I don't necessarily group you with. You seem to have outlier style preferences). I don't see anything equivalent in your GOTO analogy attempt. <b>The \"reading mistakes\" weighing of GOTO's versus blocks is much more nuanced</b>, as is code volume differences. -t",
+            "id": "230320936119b38f8680994d87f35b05"
+          },
+          {
+            "type": "html",
+            "text": " <i>Example P-2 under [[Payroll Example Two Discussion]] is rather unusual.  In production, the Employee class is the base for several concrete implementations which obtain the relevant values through a variety of mechanisms that depend on whether the code is deployed in an MS-Access/VBA payroll application, a C++ application, or a test harness, none of which merely store the various values in simple variables.  Hence, getters are not only appropriate, they're the only appropriate mechanism.  Example P-2 looks unusually verbose because the base class is being inherited with the various getters overridden to return a literal, purely to support the stripped-down illustration of real business code that is [[Payroll Example Two]].  Employee instances aren't defined like that in production, only in [[Payroll Example Two]].</i>",
+            "id": "20fbe30040673f62acedc8a258f9a0e5"
+          },
+          {
+            "type": "html",
+            "text": " You seem to be bringing up multiple issues, none of which are clear to me as written. Anyhow, I'm <i>not</i> critiquing the <i>general</i> application design above, but merely illustrating parsimony and grokkability differences between the two \"styles\".",
+            "id": "0afa0320e7756d59f89c667692e3ec7c"
+          },
+          {
+            "type": "html",
+            "text": " <i>Fair enough, but note that the \"style\" you're criticising in Example P-2 is, or should be, very rare.</i>",
+            "id": "d28e498e81a45cd493f0c8aee1f367d2"
+          },
+          {
+            "type": "html",
+            "text": "\nIncidentally, \"behavior-oriented programming\" or \"verb-oriented programming\" or \"interface-oriented programming\" may be better way to describe what you have in mind. Your ADT-like view of OOP came after OOP.",
+            "id": "8910d968f70e38e96c2a0d4ff6c05277"
+          },
+          {
+            "type": "html",
+            "text": "<i>None of those are established terms.  \"[[Object Oriented]]\" is the recognised term.</i>",
+            "id": "6367f9c485813e42dd8c6d7075a63936"
+          },
+          {
+            "type": "html",
+            "text": "\nAlso recognized to be a mess as far as terminology. Anyhow, you still haven't addressed the question whether something can be in an in-between state of a map and an object. You still seem to be encouraging a forced and/or artificial dichotomy. -t",
+            "id": "ad652466c7e82c62c59028ed89382974"
+          },
+          {
+            "type": "html",
+            "text": "<i>I didn't know there was an open question about \"whether something can be in an in-between state of a map and an object\".  I'm not sure why it would matter.  Whilst \"object\" is frequently used to refer to any identifiable language construct, particularly one that defines something to hold data (like a struct, class, table, variable, whatever) as opposed to (say) a control structure like a 'for' loop (which is not normally called an \"object\"), the loose and general use of \"object\" is quite distinct from the usual meaning of [[Object Oriented]].  I see no evidence that the industry or academia generally considers Map (as in a kind of container) and Object (as in [[Object Oriented]]) to be equivalent in any defining sense.</i>",
+            "id": "f0b62068690e5943da50eaf198e7ae0f"
+          },
+          {
+            "type": "html",
+            "text": "\nI don't want to get caught up in classification slots here; it's likely a wasteful [[Laynes Law]] dance. My point is that there can be a wide range of \"structures\" between those that are treated/used like a typical map, and those treated/used like a typical \"object\". I give an example above (config info) of something that starts out like a map, but a method or two is later added on. Whether it's called/labelled/classified as a \"map\", \"object\", or a \"frippokof\" doesn't matter. The point is that \"in between\" things exist with behaviors/conventions/designs/usage-patterns that straddle both the \"map\" and \"object\" world. Your \"rule\" seems to reject this in-between state, and/or it's rule(s) for when \"object-ness\" kicks in are ill-defined. I'm looking for something clear like, \"If it has more than 3 methods, then The Rule kicks in: all public attributes should now be wrapped\", or the like (along with the rational of the rule and its trigger point of 3, of course). -t",
+            "id": "278cd80c381f587af4e09c59e8d7a623"
+          },
+          {
+            "type": "html",
+            "text": "<i>Classes and prototypes -- i.e., constructs which serve as a template for instances -- should not publicly expose member variables.  In C++ and C#, 'struct' is effectively an alias for 'class', so the same \"rule\" applies.   Other non-class constructs that may be evocative of classes -- like Python's tuples, or various Map or Map-like collections (apparently) -- are not classes or prototypes, nor are they a template for instances, so the \"rule\" does not apply.</i>  ",
+            "id": "cab591aaf1706d02a12c0e0bcf4f4be1"
+          },
+          {
+            "type": "html",
+            "text": "\nOkay, that's clear enough for my satisfaction. Thank you. However, I won't deviate from my recommendation above that wrapping only be done if there are likely to be a sufficient quantity of instances/clones. -t",
+            "id": "78dae75106fa79b60d1e92c9d4e04b21"
+          },
+          {
+            "type": "html",
+            "text": "<i>Why would the quantity of instances make any difference?  Does it make a difference whether 'new Blah()' gets called once or a thousand times?  Do you perhaps mean the quantity of references to an instance?</i>",
+            "id": "5de079b0dc386862985ffeacf0e8b84a"
+          },
+          {
+            "type": "html",
+            "text": "\nWhether they are subclasses, clones, or instances probably depends on the language used and/or programming style since dynamic languages may blur the distinction between instances and sub-classing. I'm not sure of a compact way to word it that makes sense in all languages and coding styles. The cost-of-change to go back and wrap dependent usages (when the need arises) is generally higher the more \"coded\" references. I generally wouldn't count quantities in \"automated\" references, such as a loop that allocates 500 references/clones/instances. I'd only count that once (unless something really unusual is being done). Thanks for bringing up that wording point, though. The main factor that matters here is the <b>cost-of-change</b>, which we are weighing against the cost of bloat. Again, I approach it similar to \"investment math\" where we are weighing trade-offs based on our best prediction of future events. Without having a working time-machine, that's the best we can do.",
+            "id": "ff7acbadc1c1bab287a13906317a2805"
+          },
+          {
+            "type": "html",
+            "text": "<i>Would it be correct to say that it's ok to allow direct access of members if the number of dependencies on a given member are low, and not ok if the number of dependencies on a given member is high?</i>",
+            "id": "6f7bc33933599b5b07d8dbb3549dd0a1"
+          },
+          {
+            "type": "html",
+            "text": "\"Dependencies\" is too open-ended. I look at probability and cost first, not \"dependencies\". If a given \"dependency\" is unlikely to cause a problem, then it should be given less attention/weight than a factor that is likely and/or costly.",
+            "id": "06d7aaacc61e0c82f56ee659e5e44591"
+          },
+          {
+            "type": "html",
+            "text": "<i>I would have described it the other way around.  Probability is inherently unknown, and cost is often unpredictable, but dependency is straightforward.  You have a dependency between A and B if changing A affects B.  In most imperative programming languages, dependencies are defined by relationships between identifiers.  Given some definition or declaration z assigned an identifier 'p', every reference to 'p' represents a dependency upon z.  Improving coupling means reducing references to 'p'.  Improving cohesion means grouping references to 'p' together.  This means that if z changes, the impact is minimised.  The question, if any, is assuming 'p' is a member variable, how many references to 'p' does there have to be, and/or how ungrouped do they have to be, before you hide 'p' behind a wrapper?</i>  ",
+            "id": "e8d9b03687f1767b70680602aae2f1af"
+          },
+          {
+            "type": "html",
+            "text": "\nI have to disagree. Probabilities, cost-of-change, and cost of reading bloat can be roughly estimated. Focusing only on easy-to-measure factors is the [[Soviet Shoe Factory Principle]]. I'll stick with [[Simulation Of The Future]] as the most rational way to make design decisions, which generally follows investment theories. Focusing on the existing code alone is too narrow a viewpoint. -t",
+            "id": "dc5e3e22b36ba799a9999bfcb1de4766"
+          },
+          {
+            "type": "html",
+            "text": "<i>I'd be interested to see code written in the conventional focus-on-[[Coupling And Cohesion]] style compared to a style driven by [[Simulation Of The Future]].  For example, could you change [[Payroll Example Two]] -- which was written based on focus on [[Coupling And Cohesion]] -- to be based around [[Simulation Of The Future]]?  You can even base it on the <b>actual</b> future, because the payroll formulae change every six months.</i>",
+            "id": "d79bd60407f707edc0a9cfdc7bc884ab"
+          },
+          {
+            "type": "html",
+            "text": "\nI don't know enough about that domain to make a confident estimate of change patterns. The <i>kind</i> of changes to the formulas may play a role in the calculations also. I've never worked directly on a payroll app. I can tentatively agree that without sufficient estimates of change patterns, wrapping may be the better default. But if you don't have enough knowledge of the domain, you should probably talk to somebody who does before making that coding decision, and/or study past formulas & changes. AND past coding mistakes. It's quite possible they were caused by [[Bloat Induced Reading Confusion]].",
+            "id": "1f7770a80155e2d185e5cce8909150fd"
+          },
+          {
+            "type": "html",
+            "text": "<i>Changes occur every six months and can occur anywhere, but the numeric literals change the most frequently, the switch statements change next, then the structure of the formulae (including adding or removing factors), then provinces/territories are added.  The last one happened once in the ten years that I maintained the real code upon which [[Payroll Example Two]] was based.  Because changes can occur anywhere to anything, what made the most sense was to design with a focus on [[Coupling And Cohesion]]. Thus, on average, <b>any</b> change had the least impact, rather than trying to optimise for specific changes as implied by [[Simulation Of The Future]].</i>",
+            "id": "eb7dcfcf51e590aec19c73c053c35f53"
+          },
+          {
+            "type": "html",
+            "text": "\nRe: \"the switch statements change next [2nd in frequency]\" is a bit open-ended. <i>How</i> they change can matter a lot. ",
+            "id": "7c183cd5d0728572f726daa57c0d5d4a"
+          },
+          {
+            "type": "html",
+            "text": "<i>They can change in all the way that switch statements can change: More cases or fewer, the case literals can change, and the code in them can change.</i>",
+            "id": "05e51272aad75209bfb167e707dcda20"
+          },
+          {
+            "type": "html",
+            "text": "\nLet's say we classify the patterns of all possible changes into 20 different patterns. If say change-pattern 7 is 10 times more likely than pattern 15, that could very well affect the final decision of which code design technique is ranked as the most change-friendly. I don't have those specific probability values here to analyze and process.",
+            "id": "1a6f4986ff8ddcdbb92577f129229dbc"
+          },
+          {
+            "type": "html",
+            "text": "<i>Such specific probabilistic \"change patterns\" don't exist in Canadian payroll.  Numeric literals are roughly twice as likely to change as switch statements, switch statements are slightly more likely to change than formulae, and provinces/territories will be added about once every 100 years unless they repartition the country for payroll purposes into income tax regions.</i>",
+            "id": "320d57fc4d4e57ecb98784a4463139f7"
+          },
+          {
+            "type": "html",
+            "text": "\nThey do exist, per actual historic change events. You just don't know them because you forgot or nobody bothered to track them. But anyhow, how does your coding suggestion improve the changing of \"Numeric literals\", the most common change pattern, according to you?",
+            "id": "0de2b635bf43070c5f54727a59e650fb"
+          },
+          {
+            "type": "html",
+            "text": "<i>Why do you assume I \"forgot\" or \"nobody bothered to track them\"?  I developed Canadian payroll software for a decade, so I know how the payroll specification changes, and it's not something for which you can (a) identify a collection of \"change-patterns\" beyond those that I've given; or (b) assign numbers like \"10 times more likely\" other than the numbers I've given such as \"roughly twice as likely\".</i>",
+            "id": "cb4679e96bb4e52adb7e59bd445b0d3b"
+          },
+          {
+            "type": "html",
+            "text": "<i>Coding with a focus on [[Coupling And Cohesion]] has no impact on changing numeric literals.  It has a big effect on changing the switch/case statements (they're cohesive), the formulae within a province/territory (province/territory classes are cohesive but not coupled to each other), changing provincial/territorial factors independent of federal factors (each is cohesive, coupling is via inheritance through a minimal set of functions), etc.</i>",
+            "id": "2fdb8aac2528e79ac09c2836a59c99a3"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "f30bf5b132fbdd22029d98aca45f0d73"
+          },
+          {
+            "type": "html",
+            "text": "[1] In my book, it would only be OO if it facilitates defining and putting behavior (functions or references to functions) in the 'struct' nodes (per C example). And OO-ness can perhaps be considered on a continuum rather than discrete (is or isn't OO). If C makes it possible but difficult to put and use behavior in struct nodes, then it may be considered \"weak OO\". \"Orientation\" generally means \"leaning toward\". Thus, \"object oriented\" generally means \"leaning toward objects\". This can be read as \"facilitates object-ish things and usage\" or \"makes it easier to do object-ish stuff\". -t",
+            "id": "9a17c7fb4e2a75a88cbb278cbadec3fb"
+          },
+          {
+            "type": "html",
+            "text": "<i>So you define OO by \"has dotted dispatch?\"</i>",
+            "id": "b034f471b08863be960d607ce849d196"
+          },
+          {
+            "type": "html",
+            "text": "\nI don't recognize the phrase \"dotted dispatch\".",
+            "id": "bc02a430486338eef53843e290af5f50"
+          },
+          {
+            "type": "html",
+            "text": "<i>E.g.:</i>",
+            "id": "5f3758164296523181752323100a2f36"
+          },
+          {
+            "type": "code",
+            "text": " instance.method()",
+            "id": "358df8b93833d106185c930eb4f4ee4b"
+          },
+          {
+            "type": "html",
+            "text": "<i>Note the dot between the instance and the method name.  That's dotted dispatch.</i>",
+            "id": "6428d48fe6000f7f23cb9e450b7f56dc"
+          },
+          {
+            "type": "html",
+            "text": " That type of syntax is one way to simplify adding and using behavior in maps, but I'm <i>not</i> prepared to say it's the only way, at this point. I'm not smart enough to list out all possible syntactic ways to facilitate the above concepts.  -t",
+            "id": "d6a4353cbe5c9b22909053f1098a91f3"
+          },
+          {
+            "type": "html",
+            "text": "<i>Note also that 'class p {void x()};' is merely a syntactic shorthand for 'class c {}; void x(c p);'  In terms of [[Type Safety]], etc., they are equivalent, but the latter requires that 'class p' have publicly-accessible members whilst in the former, method 'x' can access private members of 'class p'.  In short, the reason for \"putting behavior ... in the 'struct' nodes\" instead of outside the 'struct' nodes is specifically to [[Avoid Direct Access Of Members]].</i>",
+            "id": "04ac6af3642ba4affd0a5ef6a711dce9"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "f30bf5b132fbdd22029d98aca45f0d73"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Java]], [[Category Interface]], [[Category Object Orientation]]",
+            "id": "2aa951f36df5e6c023b7254d299d7a45"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "f30bf5b132fbdd22029d98aca45f0d73"
+          },
+          {
+            "type": "html",
+            "text": "[[November Fourteen]]",
+            "id": "914ed8ac04bce61f96d89ec196ad7d67"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?AvoidDirectAccessOfMembers c2.com]",
+            "id": "0e0f73772bc0459a8376811a470b528c"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1707742770199
+    }
+  ]
+}

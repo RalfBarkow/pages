@@ -7,9 +7,9 @@
       "text": "List Indexcard L"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "107d94342157c214",
-      "text": "[[live]] → \"[[mold]]\" [[~/mdp/0b]] → explorable domain model"
+      "text": "[[live]] → \"**[[mold]]**\" [[~/mdp/0b]] → explorable domain model"
     },
     {
       "type": "paragraph",
@@ -29,7 +29,7 @@
     {
       "type": "paragraph",
       "id": "87f7442aa18c1e15",
-      "text": "[[List Indexcards]]"
+      "text": "[[List Indexcards]] See: [[Walk the Neighborhood]] ⇒ [[Associative Array]]"
     },
     {
       "type": "paragraph",
@@ -94,7 +94,7 @@
     {
       "type": "markdown",
       "id": "2a7e8028640ef7f1",
-      "text": "- (within [[Programming]]): […] [[limit]]ing [[Decision-Making]] when knowledge requirements exceed that immediately available. ⇒ [[Limitationalität]] ⇒ [[Limitationality]] ⇒ [[Structure (Struktur)]]"
+      "text": "- (within [[Programming]]): […] [[limit]]ing [[Decision-Making]] when knowledge requirements exceed that immediately available. ⇒ **[[Limitationalität]]** ⇒ [[Limitationality]] ⇒ [[Structure (Struktur)]]"
     },
     {
       "type": "paragraph",
@@ -114,7 +114,70 @@
     {
       "type": "paragraph",
       "id": "f8b988056586d929",
-      "text": "[[Link]] See: [[Room]], [[Room Dialect]], [[Wall Dialect]], [[Walls Become Doors]] "
+      "text": "[[Link]] See: [[Room]], [[Room Dialect]], [[Wall Dialect]], [[Walls Become Doors]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "dea61e81394e4ff7",
+      "text": "[[locate]] (within [[3D Associative Symbol Array]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "49761d53ed71f6bf",
+      "text": "[[Language As Interface]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "51e6aa03e844f121",
+      "text": "[[Language Design]] and [[Language Designer]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "fac208f8d265de3f",
+      "text": "[[Language Lawyer]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e21fbefc26636a82",
+      "text": "[[Literal]]s (within [[Smalltalk Syntax in 7']]) See: [[Create a Literal]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "c4908d36baa44f4b",
+      "text": "[[Letter/Envelope Idiom]] (within [[Decorator Pattern]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "63f165611ce5275e",
+      "text": "[[Lane Rasberry]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "df5671732f6343b2",
+      "text": "[[linear]], [[Line]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d93e01eb41bdc646",
+      "text": "[[Learning From Examples]] (within [[Subsymbolic Natural Language Processing]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "a753684c3afd29c5",
+      "text": "[[Lexicon]]"
+    },
+    {
+      "type": "reference",
+      "id": "601b7d01ab9bfa4a",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "l",
+      "title": "L",
+      "text": "End of List Indexcard"
+    },
+    {
+      "type": "frame",
+      "id": "8b25db354a5c635d",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
     }
   ],
   "journal": [
@@ -1084,6 +1147,322 @@
         "text": "[[label]] 🏷️ ⇐ [[Tag]] See: [[Soup]]"
       },
       "date": 1707341639433
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1707740941462
+    },
+    {
+      "type": "edit",
+      "id": "f8b988056586d929",
+      "item": {
+        "type": "paragraph",
+        "id": "f8b988056586d929",
+        "text": "[[Link]] See: [[Room]], [[Room Dialect]], [[Wall Dialect]], [[Walls Become Doors]]"
+      },
+      "date": 1707740957159
+    },
+    {
+      "type": "add",
+      "id": "dea61e81394e4ff7",
+      "item": {
+        "type": "paragraph",
+        "id": "dea61e81394e4ff7",
+        "text": "[[locate]] (within)"
+      },
+      "after": "f8b988056586d929",
+      "date": 1707740968055
+    },
+    {
+      "type": "edit",
+      "id": "dea61e81394e4ff7",
+      "item": {
+        "type": "paragraph",
+        "id": "dea61e81394e4ff7",
+        "text": "[[locate]] (within [[3D Associative Symbol Array]])"
+      },
+      "date": 1707740983371
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1707741203714
+    },
+    {
+      "id": "601b7d01ab9bfa4a",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "601b7d01ab9bfa4a",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "l",
+        "title": "L",
+        "text": "End of List Indexcard"
+      },
+      "after": "dea61e81394e4ff7",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1707798098170
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8b25db354a5c635d"
+      },
+      "id": "8b25db354a5c635d",
+      "type": "add",
+      "after": "601b7d01ab9bfa4a",
+      "date": 1707798102669
+    },
+    {
+      "type": "edit",
+      "id": "8b25db354a5c635d",
+      "item": {
+        "type": "frame",
+        "id": "8b25db354a5c635d",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      },
+      "date": 1707798104821
+    },
+    {
+      "type": "add",
+      "id": "49761d53ed71f6bf",
+      "item": {
+        "type": "paragraph",
+        "id": "49761d53ed71f6bf",
+        "text": "[[Language As Interface]]"
+      },
+      "after": "dea61e81394e4ff7",
+      "date": 1707798474968
+    },
+    {
+      "type": "add",
+      "id": "51e6aa03e844f121",
+      "item": {
+        "type": "paragraph",
+        "id": "51e6aa03e844f121",
+        "text": "[[Language Design]]"
+      },
+      "after": "49761d53ed71f6bf",
+      "date": 1707798676186
+    },
+    {
+      "type": "edit",
+      "id": "51e6aa03e844f121",
+      "item": {
+        "type": "paragraph",
+        "id": "51e6aa03e844f121",
+        "text": "[[Language Design]] and [[Language Designer]]"
+      },
+      "date": 1707798711167
+    },
+    {
+      "type": "add",
+      "id": "fac208f8d265de3f",
+      "item": {
+        "type": "paragraph",
+        "id": "fac208f8d265de3f",
+        "text": "[[Language Lawyer]]"
+      },
+      "after": "51e6aa03e844f121",
+      "date": 1707798738159
+    },
+    {
+      "type": "add",
+      "id": "e21fbefc26636a82",
+      "item": {
+        "type": "paragraph",
+        "id": "e21fbefc26636a82",
+        "text": "[[Literal]]s"
+      },
+      "after": "fac208f8d265de3f",
+      "date": 1707903035595
+    },
+    {
+      "type": "edit",
+      "id": "e21fbefc26636a82",
+      "item": {
+        "type": "paragraph",
+        "id": "e21fbefc26636a82",
+        "text": "[[Literal]]s (within [[Smalltalk Syntax in 7']]) See: "
+      },
+      "date": 1707903068207
+    },
+    {
+      "type": "edit",
+      "id": "e21fbefc26636a82",
+      "item": {
+        "type": "paragraph",
+        "id": "e21fbefc26636a82",
+        "text": "[[Literal]]s (within [[Smalltalk Syntax in 7']]) See: [[Create a Literal]]"
+      },
+      "date": 1707903082226
+    },
+    {
+      "type": "add",
+      "id": "c4908d36baa44f4b",
+      "item": {
+        "type": "paragraph",
+        "id": "c4908d36baa44f4b",
+        "text": "[[Letter/Envelope Idiom]] (within [[Decorator Pattern]])"
+      },
+      "after": "e21fbefc26636a82",
+      "date": 1707908271281
+    },
+    {
+      "type": "edit",
+      "id": "87f7442aa18c1e15",
+      "item": {
+        "type": "paragraph",
+        "id": "87f7442aa18c1e15",
+        "text": "[[List Indexcards]] See:"
+      },
+      "date": 1707995459984
+    },
+    {
+      "id": "f817c79a0c6e622d",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "f817c79a0c6e622d",
+        "text": "[[Walk the Neighborhood]]"
+      },
+      "after": "87f7442aa18c1e15",
+      "attribution": {
+        "page": "W"
+      },
+      "date": 1707995466610
+    },
+    {
+      "type": "remove",
+      "id": "f817c79a0c6e622d",
+      "date": 1707995474515
+    },
+    {
+      "type": "edit",
+      "id": "87f7442aa18c1e15",
+      "item": {
+        "type": "paragraph",
+        "id": "87f7442aa18c1e15",
+        "text": "[[List Indexcards]] See: [[Walk the Neighborhood]]"
+      },
+      "date": 1707995475827
+    },
+    {
+      "type": "edit",
+      "id": "8b25db354a5c635d",
+      "item": {
+        "type": "frame",
+        "id": "8b25db354a5c635d",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1708000952002
+    },
+    {
+      "type": "add",
+      "id": "63f165611ce5275e",
+      "item": {
+        "type": "paragraph",
+        "id": "63f165611ce5275e",
+        "text": "[[Lane Rasberry]]"
+      },
+      "after": "c4908d36baa44f4b",
+      "date": 1708001720449
+    },
+    {
+      "type": "edit",
+      "id": "2a7e8028640ef7f1",
+      "item": {
+        "type": "markdown",
+        "id": "2a7e8028640ef7f1",
+        "text": "- (within [[Programming]]): […] [[limit]]ing [[Decision-Making]] when knowledge requirements exceed that immediately available. ⇒ **[[Limitationalität]]** ⇒ [[Limitationality]] ⇒ [[Structure (Struktur)]]"
+      },
+      "date": 1708033002902
+    },
+    {
+      "type": "edit",
+      "id": "107d94342157c214",
+      "item": {
+        "type": "paragraph",
+        "id": "107d94342157c214",
+        "text": "[[live]] → \"**[[mold]]**\" [[~/mdp/0b]] → explorable domain model"
+      },
+      "date": 1708080828722
+    },
+    {
+      "type": "edit",
+      "id": "87f7442aa18c1e15",
+      "item": {
+        "type": "paragraph",
+        "id": "87f7442aa18c1e15",
+        "text": "[[List Indexcards]] See: [[Walk the Neighborhood]] ⇒ [[Associative Array]]"
+      },
+      "date": 1708080835115
+    },
+    {
+      "type": "add",
+      "id": "df5671732f6343b2",
+      "item": {
+        "type": "paragraph",
+        "id": "df5671732f6343b2",
+        "text": "[[linear]]"
+      },
+      "after": "63f165611ce5275e",
+      "date": 1708233910666
+    },
+    {
+      "type": "edit",
+      "id": "107d94342157c214",
+      "item": {
+        "type": "markdown",
+        "id": "107d94342157c214",
+        "text": "[[live]] → \"**[[mold]]**\" [[~/mdp/0b]] → explorable domain model"
+      },
+      "date": 1708234102477
+    },
+    {
+      "type": "edit",
+      "id": "df5671732f6343b2",
+      "item": {
+        "type": "paragraph",
+        "id": "df5671732f6343b2",
+        "text": "[[linear]], [[line]]"
+      },
+      "date": 1708234114917
+    },
+    {
+      "type": "edit",
+      "id": "df5671732f6343b2",
+      "item": {
+        "type": "paragraph",
+        "id": "df5671732f6343b2",
+        "text": "[[linear]], [[Line]]"
+      },
+      "date": 1708234165522
+    },
+    {
+      "type": "add",
+      "id": "d93e01eb41bdc646",
+      "item": {
+        "type": "paragraph",
+        "id": "d93e01eb41bdc646",
+        "text": "[[Learning From Examples]] (within [[Subsymbolic Natural Language Processing]])"
+      },
+      "after": "df5671732f6343b2",
+      "date": 1708251746708
+    },
+    {
+      "type": "add",
+      "id": "a753684c3afd29c5",
+      "item": {
+        "type": "paragraph",
+        "id": "a753684c3afd29c5",
+        "text": "[[Lexicon]]"
+      },
+      "after": "d93e01eb41bdc646",
+      "date": 1708253071598
     }
   ]
 }

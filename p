@@ -42,9 +42,9 @@
       "text": "[[Parsing of Repeated Structures]] ⇒ [[Loop]] and answer a recurring [[Problem]]."
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "41f719b405ffd0cf",
-      "text": "[[Probe]] (within [[Site Survey]])"
+      "text": "**[[Probe]]** (within [[Site Survey]])"
     },
     {
       "type": "paragraph",
@@ -52,9 +52,9 @@
       "text": "[[Page]]"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "9c4dac17c9cc528b",
-      "text": "[[Agent Probes]]"
+      "text": "- [[Agent Probes]]"
     },
     {
       "type": "paragraph",
@@ -152,9 +152,77 @@
       "text": "[[Processes That Require Memory]] (within)"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "59a242995c5f9a56",
-      "text": "[[Pair of Distinct Objects]] (within [[Location in the Network of Message Paths]])"
+      "text": "[[Pair of Distinct Objects]] (within [[Location in the Network of Message Paths]])\n- **[[Path]]** See: [[Path of Interest]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "650db188f8701646",
+      "text": "[beaten] [[Path]] See also: [[Trampelpfad]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3b4c8812d29e16d8",
+      "text": "[[Personal Mastery]] (within [[Smalltalk]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "12a1808667f9bbad",
+      "text": "[[Profil]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "12ae6a5c65ee9821",
+      "text": "[[PharoJS]] See: [[Transparent Proxies]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "0206bf7d94db5879",
+      "text": "[[Pitch]] ((within [[Preface]]) within [[Kent Beck’s guide to better Smalltalk]]) See: [[unplug]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "7e8cfe47f6847a56",
+      "text": "[[Push From Local to Origin]]"
+    },
+    {
+      "type": "markdown",
+      "id": "160aed06a80464f4",
+      "text": "**[[PetitParser]]** (within [[Parsing for Agile Modeling]]) See: **[[Exploratory Parsing]]**"
+    },
+    {
+      "type": "markdown",
+      "id": "573cb3a293087b70",
+      "text": "[[Power of Exponential]]"
+    },
+    {
+      "type": "markdown",
+      "id": "a115ae22e636bc40",
+      "text": "[[Partners Can Mutually Surprise Each Other]]"
+    },
+    {
+      "type": "markdown",
+      "id": "81006e4d9f5e0f68",
+      "text": "[[Punkt]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "2a546dcd044c348e",
+      "text": "[[Persona Pattern]] See: [[Memetic Proxy]]"
+    },
+    {
+      "type": "reference",
+      "id": "e7dc8c0df83732ed",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "p",
+      "title": "P",
+      "text": "End of List Indexcard"
+    },
+    {
+      "type": "frame",
+      "id": "3fbe92c4b041c5d5",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
     }
   ],
   "journal": [
@@ -1166,6 +1234,438 @@
         "text": "[[Pair of Distinct Objects]] (within [[Location in the Network of Message Paths]])"
       },
       "date": 1707460086087
+    },
+    {
+      "id": "e7dc8c0df83732ed",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "e7dc8c0df83732ed",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "p",
+        "title": "P",
+        "text": "End of List Indexcard"
+      },
+      "after": "59a242995c5f9a56",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1707799063392
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3fbe92c4b041c5d5"
+      },
+      "id": "3fbe92c4b041c5d5",
+      "type": "add",
+      "after": "e7dc8c0df83732ed",
+      "date": 1707799068354
+    },
+    {
+      "type": "edit",
+      "id": "3fbe92c4b041c5d5",
+      "item": {
+        "type": "frame",
+        "id": "3fbe92c4b041c5d5",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      },
+      "date": 1707799077985
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1707806218829
+    },
+    {
+      "type": "add",
+      "id": "3b4c8812d29e16d8",
+      "item": {
+        "type": "paragraph",
+        "id": "3b4c8812d29e16d8",
+        "text": "[[Personal Mastery]] (within [[Smalltalk]])"
+      },
+      "after": "59a242995c5f9a56",
+      "date": 1707806235266
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1707806384063
+    },
+    {
+      "type": "add",
+      "id": "12a1808667f9bbad",
+      "item": {
+        "type": "paragraph",
+        "id": "12a1808667f9bbad",
+        "text": "[[Profil]]"
+      },
+      "after": "3b4c8812d29e16d8",
+      "date": 1707828027948
+    },
+    {
+      "type": "add",
+      "id": "12ae6a5c65ee9821",
+      "item": {
+        "type": "paragraph",
+        "id": "12ae6a5c65ee9821",
+        "text": "[[PharoJS]]"
+      },
+      "after": "12a1808667f9bbad",
+      "date": 1707830207123
+    },
+    {
+      "type": "edit",
+      "id": "12ae6a5c65ee9821",
+      "item": {
+        "type": "paragraph",
+        "id": "12ae6a5c65ee9821",
+        "text": "[[PharoJS]] See: [[Transparent Proxies]]"
+      },
+      "date": 1707830877237
+    },
+    {
+      "type": "add",
+      "id": "0206bf7d94db5879",
+      "item": {
+        "type": "paragraph",
+        "id": "0206bf7d94db5879",
+        "text": "[[Pitch]] (within [[Preface]]) within [[…]]) "
+      },
+      "after": "12ae6a5c65ee9821",
+      "date": 1707993581939
+    },
+    {
+      "type": "edit",
+      "id": "3fbe92c4b041c5d5",
+      "item": {
+        "type": "frame",
+        "id": "3fbe92c4b041c5d5",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1707993591576
+    },
+    {
+      "type": "edit",
+      "id": "0206bf7d94db5879",
+      "item": {
+        "type": "paragraph",
+        "id": "0206bf7d94db5879",
+        "text": "[[Pitch]] (within [[Preface]]) within [[[Kent Beck’s guide to better Smalltalk]]) See: [[unplug]] "
+      },
+      "date": 1707995194315
+    },
+    {
+      "type": "edit",
+      "id": "0206bf7d94db5879",
+      "item": {
+        "type": "paragraph",
+        "id": "0206bf7d94db5879",
+        "text": "[[Pitch]] ((within [[Preface]]) within [[Kent Beck’s guide to better Smalltalk]]) See: [[unplug]] "
+      },
+      "date": 1707995208246
+    },
+    {
+      "type": "edit",
+      "id": "0206bf7d94db5879",
+      "item": {
+        "type": "paragraph",
+        "id": "0206bf7d94db5879",
+        "text": "[[Pitch]] ((within [[Preface]]) within [[Kent Beck’s guide to better Smalltalk]]) See: [[unplug]]"
+      },
+      "date": 1708005919947
+    },
+    {
+      "type": "add",
+      "id": "3ae5454276a08fb5",
+      "item": {
+        "type": "paragraph",
+        "id": "3ae5454276a08fb5",
+        "text": "[[Progress]] is to forget See: [[Let It go]]"
+      },
+      "after": "0206bf7d94db5879",
+      "date": 1708005937646
+    },
+    {
+      "id": "3ae5454276a08fb5",
+      "type": "remove",
+      "removedTo": {
+        "page": "F"
+      },
+      "date": 1708005989439
+    },
+    {
+      "type": "add",
+      "id": "7e8cfe47f6847a56",
+      "item": {
+        "type": "paragraph",
+        "id": "7e8cfe47f6847a56",
+        "text": "[[Push From Local to Origin]]"
+      },
+      "after": "0206bf7d94db5879",
+      "date": 1708013745754
+    },
+    {
+      "type": "edit",
+      "id": "59a242995c5f9a56",
+      "item": {
+        "type": "paragraph",
+        "id": "59a242995c5f9a56",
+        "text": "[[Pair of Distinct Objects]] (within [[Location in the Network of Message **Paths**]])"
+      },
+      "date": 1708015366685
+    },
+    {
+      "type": "edit",
+      "id": "59a242995c5f9a56",
+      "item": {
+        "type": "markdown",
+        "id": "59a242995c5f9a56",
+        "text": "[[Pair of Distinct Objects]] (within [[Location in the Network of Message **Paths**]])"
+      },
+      "date": 1708015374193
+    },
+    {
+      "type": "edit",
+      "id": "59a242995c5f9a56",
+      "item": {
+        "type": "markdown",
+        "id": "59a242995c5f9a56",
+        "text": "[[Pair of Distinct Objects]] (within [[Location in the Network of Message Paths]])"
+      },
+      "date": 1708015386736
+    },
+    {
+      "type": "edit",
+      "id": "59a242995c5f9a56",
+      "item": {
+        "type": "markdown",
+        "id": "59a242995c5f9a56",
+        "text": "[[Pair of Distinct Objects]] (within [[Location in the Network of Message Paths]])\n- **[[Path]]**"
+      },
+      "date": 1708015412607
+    },
+    {
+      "type": "edit",
+      "id": "59a242995c5f9a56",
+      "item": {
+        "type": "markdown",
+        "id": "59a242995c5f9a56",
+        "text": "[[Pair of Distinct Objects]] (within [[Location in the Network of Message Paths]])\n- **[[Path]]** See: [[Path of Interest]]"
+      },
+      "date": 1708015448518
+    },
+    {
+      "type": "add",
+      "id": "160aed06a80464f4",
+      "item": {
+        "type": "paragraph",
+        "id": "160aed06a80464f4",
+        "text": "**[[PetitParser]]**"
+      },
+      "after": "7e8cfe47f6847a56",
+      "date": 1708019266835
+    },
+    {
+      "type": "edit",
+      "id": "160aed06a80464f4",
+      "item": {
+        "type": "markdown",
+        "id": "160aed06a80464f4",
+        "text": "**[[PetitParser]]**"
+      },
+      "date": 1708019270011
+    },
+    {
+      "type": "edit",
+      "id": "160aed06a80464f4",
+      "item": {
+        "type": "markdown",
+        "id": "160aed06a80464f4",
+        "text": "**[[PetitParser]]** (within [[Parsing for Agile Modeling]]) See: [["
+      },
+      "date": 1708019378608
+    },
+    {
+      "type": "edit",
+      "id": "160aed06a80464f4",
+      "item": {
+        "type": "markdown",
+        "id": "160aed06a80464f4",
+        "text": "**[[PetitParser]]** (within [[Parsing for Agile Modeling]]) See: **[[Exploratory Parsing]]**"
+      },
+      "date": 1708019395444
+    },
+    {
+      "type": "add",
+      "id": "573cb3a293087b70",
+      "item": {
+        "type": "markdown",
+        "id": "573cb3a293087b70",
+        "text": "[[Power of Exponential]]"
+      },
+      "after": "160aed06a80464f4",
+      "date": 1708023362798
+    },
+    {
+      "type": "edit",
+      "id": "41f719b405ffd0cf",
+      "item": {
+        "type": "paragraph",
+        "id": "41f719b405ffd0cf",
+        "text": "**[[Probe]]** (within [[Site Survey]])"
+      },
+      "date": 1708037692402
+    },
+    {
+      "type": "edit",
+      "id": "41f719b405ffd0cf",
+      "item": {
+        "type": "markdown",
+        "id": "41f719b405ffd0cf",
+        "text": "**[[Probe]]** (within [[Site Survey]])"
+      },
+      "date": 1708037695536
+    },
+    {
+      "type": "edit",
+      "id": "9c4dac17c9cc528b",
+      "item": {
+        "type": "paragraph",
+        "id": "9c4dac17c9cc528b",
+        "text": "- [[Agent Probes]]"
+      },
+      "date": 1708037704461
+    },
+    {
+      "type": "edit",
+      "id": "9c4dac17c9cc528b",
+      "item": {
+        "type": "markdown",
+        "id": "9c4dac17c9cc528b",
+        "text": "- [[Agent Probes]]"
+      },
+      "date": 1708037706122
+    },
+    {
+      "type": "add",
+      "id": "a115ae22e636bc40",
+      "item": {
+        "type": "markdown",
+        "id": "a115ae22e636bc40",
+        "text": "[[Partners Can Mutually Surprise Each Other]]"
+      },
+      "after": "573cb3a293087b70",
+      "date": 1708195665703
+    },
+    {
+      "id": "650db188f8701646",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "650db188f8701646",
+        "text": "[[Trampelpfad]] See: [beaten] [[Path]]"
+      },
+      "after": "a115ae22e636bc40",
+      "attribution": {
+        "page": "T"
+      },
+      "date": 1708235357980
+    },
+    {
+      "id": "650db188f8701646",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "36df906b8a7b190b",
+        "f7071ca518f45d20",
+        "3f2424f1ddfcaad8",
+        "ca9847394cfc2c1f",
+        "3d6afad70249316b",
+        "fb255b829c88892a",
+        "686483a1121e7956",
+        "41f719b405ffd0cf",
+        "d26e22f14f55b876",
+        "9c4dac17c9cc528b",
+        "ad0ad004b03f421e",
+        "ccf169e42a594121",
+        "5ad8569648af0d64",
+        "1d826ec1db757124",
+        "221e247085be998d",
+        "034a3e3d99460ab0",
+        "a1c7ddd0d985588c",
+        "22bfd3c319af2d27",
+        "f1db0951c68d4e12",
+        "7f637190011206b4",
+        "a02cdf6a1a287f47",
+        "7e6d1bc0191f51db",
+        "b9f6cce926f0919a",
+        "6b2a77f8071cc527",
+        "c99b6c3eb23aae1d",
+        "d5bfb7b01fe1c4a9",
+        "bb0d1deb2e8c8052",
+        "cfb017e989257c67",
+        "2367024b29c543f2",
+        "59a242995c5f9a56",
+        "650db188f8701646",
+        "3b4c8812d29e16d8",
+        "12a1808667f9bbad",
+        "12ae6a5c65ee9821",
+        "0206bf7d94db5879",
+        "7e8cfe47f6847a56",
+        "160aed06a80464f4",
+        "573cb3a293087b70",
+        "a115ae22e636bc40",
+        "e7dc8c0df83732ed",
+        "3fbe92c4b041c5d5"
+      ],
+      "date": 1708235368916
+    },
+    {
+      "type": "edit",
+      "id": "650db188f8701646",
+      "item": {
+        "type": "paragraph",
+        "id": "650db188f8701646",
+        "text": "[beaten] [[Path]] See also: [[Trampelpfad]]"
+      },
+      "date": 1708235397232
+    },
+    {
+      "type": "add",
+      "id": "81006e4d9f5e0f68",
+      "item": {
+        "type": "markdown",
+        "id": "81006e4d9f5e0f68",
+        "text": "[[Punkt]]"
+      },
+      "after": "a115ae22e636bc40",
+      "date": 1708255804188
+    },
+    {
+      "id": "2a546dcd044c348e",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "2a546dcd044c348e",
+        "text": "[[Memetic Proxy]] See: [[Persona Pattern]]"
+      },
+      "after": "81006e4d9f5e0f68",
+      "attribution": {
+        "page": "M"
+      },
+      "date": 1708291961082
+    },
+    {
+      "type": "edit",
+      "id": "2a546dcd044c348e",
+      "item": {
+        "type": "paragraph",
+        "id": "2a546dcd044c348e",
+        "text": "[[Persona Pattern]] See: [[Memetic Proxy]]"
+      },
+      "date": 1708291983112
     }
   ]
 }

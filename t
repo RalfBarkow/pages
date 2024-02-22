@@ -7,9 +7,9 @@
       "text": "List Indexcard T"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "cc70989a68ee13d3",
-      "text": "[[tools]] → \"[[mold]]\" [[~/mdp/0c2]]"
+      "text": "[[tools]] → \"**[[mold]]**\" [[~/mdp/0c2]]"
     },
     {
       "type": "paragraph",
@@ -22,9 +22,14 @@
       "text": "[[tangible]] (within [[Container]])"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "c6265aaabb37b3ac",
-      "text": "[[Tag]] ((within [[Item Tag Aggregator]]) within [[Site Survey]])"
+      "text": "**[[Tag]]** ((within [[Item Tag Aggregator]]) within [[Site Survey]])"
+    },
+    {
+      "type": "markdown",
+      "id": "88a8eb4f5db965c3",
+      "text": "- [[Tag Propagation]] (within [[Scripting Tempo Resumes]]) See: **[[Social Network Visualization]]**, [[Social Networks]]"
     },
     {
       "type": "paragraph",
@@ -137,14 +142,62 @@
       "text": "[[Task Location]] See: [[Learning Journey]] (within [[Disgust and Envy]])"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "0b9723521c7dd341",
-      "text": "[[Touchstone]] (within [[Marc's Tetrahedron]]) See: [[Linkon]]"
+      "text": "**[[Touchstone]]** (within [[Marc's Tetrahedron]]) See: [[Linkon]]"
     },
     {
       "type": "paragraph",
       "id": "33d619a06d57ae0e",
       "text": "[[Three Tuple Relation]] (within) See: [[Atomic Relation]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "1c948f65ed1dff73",
+      "text": "[[Techno-Social Bootstrapping]] (within [[Software as Tools]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "52e560f4a9276dff",
+      "text": "[[Track Dampening]] (within [[NSD Editor]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "0f368210684d31e4",
+      "text": "[[Tether]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3788806b9e0698b4",
+      "text": "[[Thinking Tools]] (within [[Systems Theory 2.0]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "650db188f8701646",
+      "text": "[[Trampelpfad]] See: [beaten] [[Path]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "18e93339af8a75b7",
+      "text": "[[Task Specification]] See: [[Task Specification by Memetic Proxy]], [[Memetic Proxy]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "ca59b4b63c24f4c5",
+      "text": "[[thisContext]] (within [[Access the Run-Time Stack]]) See: [[Context]]"
+    },
+    {
+      "type": "reference",
+      "id": "9b65b4b369fa5a05",
+      "text": "End of List Indexcard",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "t",
+      "title": "T"
+    },
+    {
+      "type": "frame",
+      "id": "fb2966c5d6e1bdd9",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
     }
   ],
   "journal": [
@@ -1075,6 +1128,287 @@
       "type": "remove",
       "id": "8cbc0890a81494dc",
       "date": 1707417600107
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1c948f65ed1dff73"
+      },
+      "id": "1c948f65ed1dff73",
+      "type": "add",
+      "after": "33d619a06d57ae0e",
+      "date": 1707775334032
+    },
+    {
+      "type": "edit",
+      "id": "1c948f65ed1dff73",
+      "item": {
+        "type": "paragraph",
+        "id": "1c948f65ed1dff73",
+        "text": "[[Techno-Social Bootstrapping]] (within [[Software as Tools]])"
+      },
+      "date": 1707775350709
+    },
+    {
+      "id": "9b65b4b369fa5a05",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "9b65b4b369fa5a05",
+        "text": "End of List Indexcard",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "t",
+        "title": "T"
+      },
+      "after": "1c948f65ed1dff73",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1707799733470
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fb2966c5d6e1bdd9"
+      },
+      "id": "fb2966c5d6e1bdd9",
+      "type": "add",
+      "after": "9b65b4b369fa5a05",
+      "date": 1707799746343
+    },
+    {
+      "type": "edit",
+      "id": "fb2966c5d6e1bdd9",
+      "item": {
+        "type": "frame",
+        "id": "fb2966c5d6e1bdd9",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      },
+      "date": 1707799748620
+    },
+    {
+      "type": "add",
+      "id": "52e560f4a9276dff",
+      "item": {
+        "type": "paragraph",
+        "id": "52e560f4a9276dff",
+        "text": "[[Track Dampening]] (within [[NSD Editor]])"
+      },
+      "after": "1c948f65ed1dff73",
+      "date": 1707804889605
+    },
+    {
+      "type": "add",
+      "id": "0f368210684d31e4",
+      "item": {
+        "type": "paragraph",
+        "id": "0f368210684d31e4",
+        "text": "[[Tether]]"
+      },
+      "after": "52e560f4a9276dff",
+      "date": 1707844692121
+    },
+    {
+      "type": "add",
+      "id": "3788806b9e0698b4",
+      "item": {
+        "type": "paragraph",
+        "id": "3788806b9e0698b4",
+        "text": "[[Thinking Tools]] (within [[Systems Theory 2.0]])"
+      },
+      "after": "0f368210684d31e4",
+      "date": 1707849503174
+    },
+    {
+      "type": "edit",
+      "id": "fb2966c5d6e1bdd9",
+      "item": {
+        "type": "frame",
+        "id": "fb2966c5d6e1bdd9",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1708004908186
+    },
+    {
+      "type": "edit",
+      "id": "c6265aaabb37b3ac",
+      "item": {
+        "type": "paragraph",
+        "id": "c6265aaabb37b3ac",
+        "text": "**[[Tag]]** ((within [[Item Tag Aggregator]]) within [[Site Survey]])"
+      },
+      "date": 1708085452453
+    },
+    {
+      "type": "add",
+      "id": "88a8eb4f5db965c3",
+      "item": {
+        "type": "paragraph",
+        "id": "88a8eb4f5db965c3",
+        "text": "- [[Tag Propagation]]"
+      },
+      "after": "c6265aaabb37b3ac",
+      "date": 1708085456711
+    },
+    {
+      "type": "edit",
+      "id": "c6265aaabb37b3ac",
+      "item": {
+        "type": "markdown",
+        "id": "c6265aaabb37b3ac",
+        "text": "**[[Tag]]** ((within [[Item Tag Aggregator]]) within [[Site Survey]])"
+      },
+      "date": 1708085459329
+    },
+    {
+      "type": "edit",
+      "id": "88a8eb4f5db965c3",
+      "item": {
+        "type": "markdown",
+        "id": "88a8eb4f5db965c3",
+        "text": "- [[Tag Propagation]]"
+      },
+      "date": 1708085461068
+    },
+    {
+      "type": "edit",
+      "id": "88a8eb4f5db965c3",
+      "item": {
+        "type": "markdown",
+        "id": "88a8eb4f5db965c3",
+        "text": "- [[Tag Propagation]] (within [[Scripting Tempo Resumes]])"
+      },
+      "date": 1708085495577
+    },
+    {
+      "type": "edit",
+      "id": "88a8eb4f5db965c3",
+      "item": {
+        "type": "markdown",
+        "id": "88a8eb4f5db965c3",
+        "text": "- [[Tag Propagation]] (within [[Scripting Tempo Resumes]]) See: [[Social Network Visualization]]"
+      },
+      "date": 1708085635766
+    },
+    {
+      "type": "edit",
+      "id": "cc70989a68ee13d3",
+      "item": {
+        "type": "paragraph",
+        "id": "cc70989a68ee13d3",
+        "text": "[[tools]] → \"**[[mold]]**\" [[~/mdp/0c2]]"
+      },
+      "date": 1708085779762
+    },
+    {
+      "type": "edit",
+      "id": "cc70989a68ee13d3",
+      "item": {
+        "type": "markdown",
+        "id": "cc70989a68ee13d3",
+        "text": "[[tools]] → \"**[[mold]]**\" [[~/mdp/0c2]]"
+      },
+      "date": 1708085783166
+    },
+    {
+      "type": "edit",
+      "id": "88a8eb4f5db965c3",
+      "item": {
+        "type": "markdown",
+        "id": "88a8eb4f5db965c3",
+        "text": "- [[Tag Propagation]] (within [[Scripting Tempo Resumes]]) See: **[[Social Network Visualization]]**"
+      },
+      "date": 1708085816625
+    },
+    {
+      "type": "edit",
+      "id": "0b9723521c7dd341",
+      "item": {
+        "type": "paragraph",
+        "id": "0b9723521c7dd341",
+        "text": "**[[Touchstone]]** (within [[Marc's Tetrahedron]]) See: [[Linkon]]"
+      },
+      "date": 1708086182884
+    },
+    {
+      "type": "edit",
+      "id": "0b9723521c7dd341",
+      "item": {
+        "type": "markdown",
+        "id": "0b9723521c7dd341",
+        "text": "**[[Touchstone]]** (within [[Marc's Tetrahedron]]) See: [[Linkon]]"
+      },
+      "date": 1708086184789
+    },
+    {
+      "type": "edit",
+      "id": "88a8eb4f5db965c3",
+      "item": {
+        "type": "markdown",
+        "id": "88a8eb4f5db965c3",
+        "text": "- [[Tag Propagation]] (within [[Scripting Tempo Resumes]]) See: **[[Social Network Visualization]]**, [[Social Networks]]"
+      },
+      "date": 1708087069621
+    },
+    {
+      "type": "add",
+      "id": "650db188f8701646",
+      "item": {
+        "type": "paragraph",
+        "id": "650db188f8701646",
+        "text": "[[Trampelpfad]] See: [beaten] [[Path]]"
+      },
+      "after": "3788806b9e0698b4",
+      "date": 1708235007017
+    },
+    {
+      "type": "fork",
+      "date": 1708235538988
+    },
+    {
+      "type": "add",
+      "id": "18e93339af8a75b7",
+      "item": {
+        "type": "paragraph",
+        "id": "18e93339af8a75b7",
+        "text": "[[Task Specification]]"
+      },
+      "after": "650db188f8701646",
+      "date": 1708292419787
+    },
+    {
+      "type": "edit",
+      "id": "18e93339af8a75b7",
+      "item": {
+        "type": "paragraph",
+        "id": "18e93339af8a75b7",
+        "text": "[[Task Specification]] See: [[Task Specification by Memetic Proxy]], [[Memetic Proxy]]"
+      },
+      "date": 1708292482337
+    },
+    {
+      "id": "ca59b4b63c24f4c5",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "ca59b4b63c24f4c5",
+        "text": "[[thisContext]] (within [[Access the Run-Time Stack]])"
+      },
+      "after": "18e93339af8a75b7",
+      "attribution": {
+        "page": "C"
+      },
+      "date": 1708426420591
+    },
+    {
+      "type": "edit",
+      "id": "ca59b4b63c24f4c5",
+      "item": {
+        "type": "paragraph",
+        "id": "ca59b4b63c24f4c5",
+        "text": "[[thisContext]] (within [[Access the Run-Time Stack]]) See: [[Context]]"
+      },
+      "date": 1708426429104
     }
   ]
 }

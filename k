@@ -45,6 +45,34 @@
       "type": "paragraph",
       "id": "b60f9069eab5193c",
       "text": "[[Knowledge]] → \"know\""
+    },
+    {
+      "type": "markdown",
+      "id": "906d1ef37edc37e4",
+      "text": "**[[Kerry Turner]]** See: [[Engagement vs Commitment]] (within [[ST2050]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "b36d99dcb8c0341c",
+      "text": "- [[Kerry's poetry]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "97095af66bb334bd",
+      "text": "[[Kaiten Continuous Experience]]"
+    },
+    {
+      "type": "reference",
+      "id": "273643917e6cb71c",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "k",
+      "title": "K",
+      "text": "End of List Indexcard"
+    },
+    {
+      "type": "frame",
+      "id": "61ecdc1aecc8e543",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
     }
   ],
   "journal": [
@@ -473,6 +501,135 @@
       "type": "fork",
       "site": "localhost:3000",
       "date": 1706474195597
+    },
+    {
+      "id": "273643917e6cb71c",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "273643917e6cb71c",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "k",
+        "title": "K",
+        "text": "End of List Indexcard"
+      },
+      "after": "b60f9069eab5193c",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1707798006126
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "61ecdc1aecc8e543"
+      },
+      "id": "61ecdc1aecc8e543",
+      "type": "add",
+      "after": "273643917e6cb71c",
+      "date": 1707798011787
+    },
+    {
+      "type": "edit",
+      "id": "61ecdc1aecc8e543",
+      "item": {
+        "type": "frame",
+        "id": "61ecdc1aecc8e543",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      },
+      "date": 1707798014024
+    },
+    {
+      "type": "add",
+      "id": "906d1ef37edc37e4",
+      "item": {
+        "type": "paragraph",
+        "id": "906d1ef37edc37e4",
+        "text": "[[Kerry Turner]] "
+      },
+      "after": "b60f9069eab5193c",
+      "date": 1707985209042
+    },
+    {
+      "id": "010494efe8eeeee2",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "010494efe8eeeee2",
+        "text": "[[Engagement vs Commitment]] (within [[ST2050]])"
+      },
+      "after": "906d1ef37edc37e4",
+      "attribution": {
+        "page": "E"
+      },
+      "date": 1707985227155
+    },
+    {
+      "type": "remove",
+      "id": "010494efe8eeeee2",
+      "date": 1707985236738
+    },
+    {
+      "type": "edit",
+      "id": "906d1ef37edc37e4",
+      "item": {
+        "type": "paragraph",
+        "id": "906d1ef37edc37e4",
+        "text": "[[Kerry Turner]] See: [[Engagement vs Commitment]] (within [[ST2050]])"
+      },
+      "date": 1707985237892
+    },
+    {
+      "type": "edit",
+      "id": "61ecdc1aecc8e543",
+      "item": {
+        "type": "frame",
+        "id": "61ecdc1aecc8e543",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1708000748098
+    },
+    {
+      "type": "add",
+      "id": "97095af66bb334bd",
+      "item": {
+        "type": "paragraph",
+        "id": "97095af66bb334bd",
+        "text": "[[Kaiten Continuous Experience]]"
+      },
+      "after": "906d1ef37edc37e4",
+      "date": 1708013873584
+    },
+    {
+      "type": "edit",
+      "id": "906d1ef37edc37e4",
+      "item": {
+        "type": "paragraph",
+        "id": "906d1ef37edc37e4",
+        "text": "**[[Kerry Turner]]** See: [[Engagement vs Commitment]] (within [[ST2050]])"
+      },
+      "date": 1708020583435
+    },
+    {
+      "type": "add",
+      "id": "b36d99dcb8c0341c",
+      "item": {
+        "type": "paragraph",
+        "id": "b36d99dcb8c0341c",
+        "text": "- [[Kerry's poetry]]"
+      },
+      "after": "906d1ef37edc37e4",
+      "date": 1708020588292
+    },
+    {
+      "type": "edit",
+      "id": "906d1ef37edc37e4",
+      "item": {
+        "type": "markdown",
+        "id": "906d1ef37edc37e4",
+        "text": "**[[Kerry Turner]]** See: [[Engagement vs Commitment]] (within [[ST2050]])"
+      },
+      "date": 1708020592775
     }
   ]
 }

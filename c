@@ -7,16 +7,13 @@
       "text": "List Indexcard C"
     },
     {
-      "id": "71d53a7bd19ffc6f",
-      "type": "reference",
-      "site": "kerry.relocalizecreativity.net",
-      "slug": "catalyst-learning-labs",
-      "title": "Catalyst Learning Labs",
-      "text": "This [[Thompson Morrison]] and [[Kavita Tanna]] [https://www.catalystlearninglabs.org/ site]"
+      "type": "paragraph",
+      "id": "1fe5377a5cc50eb3",
+      "text": "[[Catalyst Learning Labs]]"
     },
     {
       "type": "paragraph",
-      "id": "1fe5377a5cc50eb3",
+      "id": "a78482e3342a8184",
       "text": "[[Crossing the First Distinction]]"
     },
     {
@@ -35,9 +32,9 @@
       "text": "[[Conversation as Search]] (within [[Typescript Locator]])"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "473ff83b9ce908dc",
-      "text": "[[Computation]] (within [[Software as Tools]])"
+      "text": "**[[Computation]]** (within [[Software as Tools]])"
     },
     {
       "type": "markdown",
@@ -46,8 +43,18 @@
     },
     {
       "type": "paragraph",
+      "id": "57c5cfb5dc1076b4",
+      "text": "[[Computational Scripts]]"
+    },
+    {
+      "type": "pagefold",
+      "id": "e637fb5c90a3412c",
+      "text": "~"
+    },
+    {
+      "type": "markdown",
       "id": "ae02940a42c52efe",
-      "text": "[[Container]] (within [[Flüchtige Zeiten]]) See: [[Metaphor of Liquidity]]"
+      "text": "**[[Container]]** (within [[Flüchtige Zeiten]]) See: [[Metaphor of Liquidity]]"
     },
     {
       "type": "markdown",
@@ -65,19 +72,30 @@
       "text": "> A [[Container]] is an [[Object]] from the [[Outside]] and a process from the [[Inside]]. (Bricken, [[Iconic Arithmetic]] Volume I, p. 137)\n- (within [[Containers for knowledges?]])"
     },
     {
+      "type": "markdown",
+      "id": "c8b16f19e99ba653",
+      "text": "⇒ [[Containment]] ⇒ [[Crossing]] ⇒ [[Crossing the First Distinction]]  ⇒ [[Rationality]] ⇒ [[Meaning Requires Dualism]] ⇒ [[Exclusion]] ⇒ [[Counter Observation]] ⇒ [[Empowering Exhibitionism]] ⇐ [[Denkpanzer stören]]"
+    },
+    {
+      "type": "pagefold",
+      "id": "6f4e7759152b7222",
+      "text": "~",
+      "alias": "e637fb5c90a3412c"
+    },
+    {
       "type": "paragraph",
       "id": "0de225d2550c9e65",
       "text": "[[Cartes-Guides]] Alphabétiques → Leitkarten ⇒ [[Guide Cards]] See: [[Crc Card]]"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "c3fd162cce23ec9f",
-      "text": "[[Copy Operation]] (within [[Title]])"
+      "text": "[[Copy Operation]] (within [[Title]]) → **[[Copy]]**"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "7b3bd6750b999478",
-      "text": "[[Context]] (within [[within]])"
+      "text": "**[[Context]]** (within [[within]])"
     },
     {
       "type": "markdown",
@@ -87,12 +105,17 @@
     {
       "type": "paragraph",
       "id": "ca59b4b63c24f4c5",
-      "text": "[[Cause and Effect]] ((within [[Worldview]]) within  [[Systemic Thinking]])"
+      "text": "[[thisContext]] (within [[Access the Run-Time Stack]])"
     },
     {
       "type": "paragraph",
+      "id": "d6748a46f610bb6c",
+      "text": "[[Cause and Effect]] ((within [[Worldview]]) within  [[Systemic Thinking]])"
+    },
+    {
+      "type": "markdown",
       "id": "e2fa77a2e744bc87",
-      "text": "[[Computer]] (within [[Smalltalk Is the Car]])"
+      "text": "[[Computer]] (within [[Smalltalk Is the Car]]) → **[[Car]]**"
     },
     {
       "type": "paragraph",
@@ -115,14 +138,19 @@
       "text": "[[coax]]"
     },
     {
+      "type": "roster",
+      "id": "c21ff43a12c8585f",
+      "text": "Convert\njs.ward.asia.wiki.org"
+    },
+    {
       "type": "paragraph",
       "id": "cbd8848d9a104a13",
       "text": "[[Convert HTML Script to Graph]] (within js.ward.asia.wiki.org)"
     },
     {
-      "type": "roster",
-      "id": "c21ff43a12c8585f",
-      "text": "Convert\njs.ward.asia.wiki.org"
+      "type": "paragraph",
+      "id": "6914996c38805e1b",
+      "text": "[[Convert a Sitemap to a DITA Map]]"
     },
     {
       "type": "paragraph",
@@ -163,6 +191,114 @@
       "type": "paragraph",
       "id": "4d42756cdc206a39",
       "text": "[[Catalyst]] (within [[r.Coevolution.Cluskey]]) See: [[facilitate]], [[Humans and AI]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "1d34fec3395b7eef",
+      "text": "[[Concert]] by and with [[26 Markov Monkeys]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d1a1f2df8bfbc824",
+      "text": "[[Cybords]] See: [[Hear the Arithmetic Sum]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "449589b427766dbc",
+      "text": "[[curate]] (within [[Labour of curating]])"
+    },
+    {
+      "type": "markdown",
+      "id": "b5f798763ad800d6",
+      "text": "[[checks(item)]] (within [http://ward.dojo.fed.wiki/assets/pages/story-telling/telling.js telling.js] See: [[Story Telling]])"
+    },
+    {
+      "type": "markdown",
+      "id": "84ce6ccd0fcef8da",
+      "text": "[[Computers and Musical Style]]"
+    },
+    {
+      "type": "markdown",
+      "id": "c040572f4ab3b6db",
+      "text": "[[About connection]] ((within [[System in the Room]])  within [[Riding Dynamics]])"
+    },
+    {
+      "type": "markdown",
+      "id": "1f5724c054dcd919",
+      "text": "[[Caffeine]]"
+    },
+    {
+      "type": "markdown",
+      "id": "131845680eb10f3b",
+      "text": "[[Chandler]] See: [[Chap 3: Analyzing Structures]]"
+    },
+    {
+      "type": "markdown",
+      "id": "96da6e50c93b5481",
+      "text": "[[Competence Model]] See: [[Polyhedron]], [[Pentahedron]]"
+    },
+    {
+      "type": "markdown",
+      "id": "c0f6913258154f3c",
+      "text": "[[Cunningham's Law]]"
+    },
+    {
+      "type": "markdown",
+      "id": "a62b697e5bc2f6c2",
+      "text": "[[Craps Dice Game]] (within [[Functional Decomposition]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "0e1f351e443e7cd1",
+      "text": "[[Collective Electrodynamics]] See: [[Electrodynamics]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "7908fbd99e5754e9",
+      "text": "[[Cluster]] (within [[Zoom to Group]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "aa6a264100c85bd8",
+      "text": "[[Coordinate Versus Nested Gui]] See: [[Fence after Fence]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "c0e20646285c8f4e",
+      "text": "[[Classes Map]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "b64e5dd338fd6b73",
+      "text": "[[choose]] (within [[Walk the Neighborhood]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "97708c6e57a71fb6",
+      "text": "[[Associative Chaining]] (within [[Learning]]) See: [[Association]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d1a11f4c621daef4",
+      "text": "[[Automatic Code Documentation]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "b3132b943273d66c",
+      "text": "[[Causal Chain]] (within [[Restaurant Script]])"
+    },
+    {
+      "type": "reference",
+      "id": "3e8af46ff3063eaa",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "c",
+      "title": "C",
+      "text": "End of List Indexcard"
+    },
+    {
+      "type": "frame",
+      "id": "a29178af5d6036ea",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
     }
   ],
   "journal": [
@@ -1396,6 +1532,975 @@
         "text": "- The concept of a container is [[tangible]], not abstract. "
       },
       "date": 1707422354351
+    },
+    {
+      "id": "1d34fec3395b7eef",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "1d34fec3395b7eef",
+        "text": "[[Concert]] by and with [[26 Markov Monkeys]]"
+      },
+      "after": "4d42756cdc206a39",
+      "attribution": {
+        "page": "2024-02-12"
+      },
+      "date": 1707738161996
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d1a1f2df8bfbc824"
+      },
+      "id": "d1a1f2df8bfbc824",
+      "type": "add",
+      "after": "1d34fec3395b7eef",
+      "date": 1707739584725
+    },
+    {
+      "type": "edit",
+      "id": "d1a1f2df8bfbc824",
+      "item": {
+        "type": "paragraph",
+        "id": "d1a1f2df8bfbc824",
+        "text": "[[Cybords]] See: "
+      },
+      "date": 1707739590749
+    },
+    {
+      "type": "edit",
+      "id": "d1a1f2df8bfbc824",
+      "item": {
+        "type": "paragraph",
+        "id": "d1a1f2df8bfbc824",
+        "text": "[[Cybords]] See: [[Hear the Arithmetic Sum]]"
+      },
+      "date": 1707739597539
+    },
+    {
+      "id": "3e8af46ff3063eaa",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "3e8af46ff3063eaa",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "c",
+        "title": "C",
+        "text": "List Indexcard C"
+      },
+      "after": "d1a1f2df8bfbc824",
+      "attribution": {
+        "page": "Speed Bot"
+      },
+      "date": 1707795956706
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a29178af5d6036ea"
+      },
+      "id": "a29178af5d6036ea",
+      "type": "add",
+      "after": "3e8af46ff3063eaa",
+      "date": 1707796191013
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1707796233617
+    },
+    {
+      "type": "edit",
+      "id": "a29178af5d6036ea",
+      "item": {
+        "type": "frame",
+        "id": "a29178af5d6036ea",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      },
+      "date": 1707796295151
+    },
+    {
+      "type": "edit",
+      "id": "71d53a7bd19ffc6f",
+      "item": {
+        "id": "71d53a7bd19ffc6f",
+        "type": "reference",
+        "site": "kerry.relocalizecreativity.net",
+        "slug": "catalyst-learning-labs",
+        "title": "Catalyst Learning Labs",
+        "text": "[[Catalyst Learning Labs]]"
+      },
+      "date": 1707796320538
+    },
+    {
+      "type": "remove",
+      "id": "71d53a7bd19ffc6f",
+      "date": 1707796328899
+    },
+    {
+      "type": "edit",
+      "id": "1fe5377a5cc50eb3",
+      "item": {
+        "type": "paragraph",
+        "id": "1fe5377a5cc50eb3",
+        "text": "[[Catalyst Learning Labs]]"
+      },
+      "date": 1707796333368
+    },
+    {
+      "type": "add",
+      "id": "a78482e3342a8184",
+      "item": {
+        "type": "paragraph",
+        "id": "a78482e3342a8184",
+        "text": "[[Crossing the First Distinction]]"
+      },
+      "after": "1fe5377a5cc50eb3",
+      "date": 1707796334551
+    },
+    {
+      "type": "edit",
+      "id": "3e8af46ff3063eaa",
+      "item": {
+        "type": "reference",
+        "id": "3e8af46ff3063eaa",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "c",
+        "title": "C",
+        "text": "End of List Indexcard C"
+      },
+      "date": 1707796347890
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1707796412550
+    },
+    {
+      "type": "edit",
+      "id": "3e8af46ff3063eaa",
+      "item": {
+        "type": "reference",
+        "id": "3e8af46ff3063eaa",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "c",
+        "title": "C",
+        "text": "End of List Indexcard"
+      },
+      "date": 1707796998736
+    },
+    {
+      "type": "add",
+      "id": "449589b427766dbc",
+      "item": {
+        "type": "paragraph",
+        "id": "449589b427766dbc",
+        "text": "[[curate]] (within [[)"
+      },
+      "after": "d1a1f2df8bfbc824",
+      "date": 1707844839523
+    },
+    {
+      "type": "edit",
+      "id": "449589b427766dbc",
+      "item": {
+        "type": "paragraph",
+        "id": "449589b427766dbc",
+        "text": "[[curate]] (within [[Labour of curating]])"
+      },
+      "date": 1707844847288
+    },
+    {
+      "id": "b5f798763ad800d6",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "b5f798763ad800d6",
+        "text": "**checks(item)** (within [http://ward.dojo.fed.wiki/assets/pages/story-telling/telling.js telling.js] See: [[Story Telling]]): This function checks for completed tasks (items marked with `- [x]`) in the text of an item. It splits the text into lines and filters those lines that start with `- [x]`. It returns an array of completed tasks."
+      },
+      "after": "449589b427766dbc",
+      "attribution": {
+        "page": "checks(item)"
+      },
+      "date": 1707913506638
+    },
+    {
+      "type": "edit",
+      "id": "b5f798763ad800d6",
+      "item": {
+        "type": "markdown",
+        "id": "b5f798763ad800d6",
+        "text": "[[checks(item)]] (within [http://ward.dojo.fed.wiki/assets/pages/story-telling/telling.js telling.js] See: [[Story Telling]])"
+      },
+      "date": 1707913525294
+    },
+    {
+      "id": "cbd8848d9a104a13",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "1fe5377a5cc50eb3",
+        "a78482e3342a8184",
+        "299d7e431980dad6",
+        "d339e89b626f84fb",
+        "abb01936bfcb020c",
+        "473ff83b9ce908dc",
+        "0d3e68036fecfe91",
+        "ae02940a42c52efe",
+        "9821a6cc38ee5bb6",
+        "b6a1144d476019d6",
+        "7632ef5529566b44",
+        "0de225d2550c9e65",
+        "c3fd162cce23ec9f",
+        "7b3bd6750b999478",
+        "9bb87aeced97be24",
+        "ca59b4b63c24f4c5",
+        "e2fa77a2e744bc87",
+        "ae13488d22a2f182",
+        "683b05236b0df42c",
+        "22e906d9ff11ff88",
+        "f9d237f83f2afdd5",
+        "c21ff43a12c8585f",
+        "cbd8848d9a104a13",
+        "9d6bc58cc5cf469f",
+        "e0ca33b3ddc19f53",
+        "08db8e56070faaff",
+        "77e1b688bd562b03",
+        "59ed434949ba5d22",
+        "f127c931da50b792",
+        "57fee224b956e7e1",
+        "4d42756cdc206a39",
+        "1d34fec3395b7eef",
+        "d1a1f2df8bfbc824",
+        "449589b427766dbc",
+        "b5f798763ad800d6",
+        "3e8af46ff3063eaa",
+        "a29178af5d6036ea"
+      ],
+      "date": 1707916172520
+    },
+    {
+      "type": "add",
+      "id": "6914996c38805e1b",
+      "item": {
+        "type": "paragraph",
+        "id": "6914996c38805e1b",
+        "text": "[[Convert a Sitemap to a DITA Map]]"
+      },
+      "after": "cbd8848d9a104a13",
+      "date": 1707916183611
+    },
+    {
+      "type": "add",
+      "id": "84ce6ccd0fcef8da",
+      "item": {
+        "type": "markdown",
+        "id": "84ce6ccd0fcef8da",
+        "text": "[[Computers and Musical Style]]"
+      },
+      "after": "b5f798763ad800d6",
+      "date": 1707921629749
+    },
+    {
+      "type": "add",
+      "id": "c040572f4ab3b6db",
+      "item": {
+        "type": "markdown",
+        "id": "c040572f4ab3b6db",
+        "text": "[[About connection]]"
+      },
+      "after": "84ce6ccd0fcef8da",
+      "date": 1707947692254
+    },
+    {
+      "type": "edit",
+      "id": "c040572f4ab3b6db",
+      "item": {
+        "type": "markdown",
+        "id": "c040572f4ab3b6db",
+        "text": "[[About connection]] (within [[System in the Room]])"
+      },
+      "date": 1707947839268
+    },
+    {
+      "type": "edit",
+      "id": "c040572f4ab3b6db",
+      "item": {
+        "type": "markdown",
+        "id": "c040572f4ab3b6db",
+        "text": "[[About connection]] ((within [[System in the Room]])  within [[Riding Dynamics]])"
+      },
+      "date": 1707947892270
+    },
+    {
+      "type": "add",
+      "id": "1f5724c054dcd919",
+      "item": {
+        "type": "markdown",
+        "id": "1f5724c054dcd919",
+        "text": "[[Caffeine]]"
+      },
+      "after": "c040572f4ab3b6db",
+      "date": 1707990355647
+    },
+    {
+      "type": "edit",
+      "id": "a29178af5d6036ea",
+      "item": {
+        "type": "frame",
+        "id": "a29178af5d6036ea",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1707990367592
+    },
+    {
+      "type": "add",
+      "id": "131845680eb10f3b",
+      "item": {
+        "type": "markdown",
+        "id": "131845680eb10f3b",
+        "text": "[[Chandler]]"
+      },
+      "after": "1f5724c054dcd919",
+      "date": 1708004488956
+    },
+    {
+      "type": "edit",
+      "id": "131845680eb10f3b",
+      "item": {
+        "type": "markdown",
+        "id": "131845680eb10f3b",
+        "text": "[[Chandler]] See: [[Chap 3: Analyzing Structures]]"
+      },
+      "date": 1708004515894
+    },
+    {
+      "type": "add",
+      "id": "96da6e50c93b5481",
+      "item": {
+        "type": "markdown",
+        "id": "96da6e50c93b5481",
+        "text": "[[Competence Model]]"
+      },
+      "after": "131845680eb10f3b",
+      "date": 1708005588226
+    },
+    {
+      "type": "edit",
+      "id": "96da6e50c93b5481",
+      "item": {
+        "type": "markdown",
+        "id": "96da6e50c93b5481",
+        "text": "[[Competence Model]] See: [[Polyhedron]], [[Pentahedron]]"
+      },
+      "date": 1708005615312
+    },
+    {
+      "type": "edit",
+      "id": "96da6e50c93b5481",
+      "item": {
+        "type": "markdown",
+        "id": "96da6e50c93b5481",
+        "text": "[[Competence Model]] See: [[Polyhedron]], [[Pentahedron]]\n"
+      },
+      "date": 1708011167594
+    },
+    {
+      "type": "edit",
+      "id": "96da6e50c93b5481",
+      "item": {
+        "type": "markdown",
+        "id": "96da6e50c93b5481",
+        "text": "[[Competence Model]] See: [[Polyhedron]], [[Pentahedron]]"
+      },
+      "date": 1708011178151
+    },
+    {
+      "type": "add",
+      "id": "c0f6913258154f3c",
+      "item": {
+        "type": "markdown",
+        "id": "c0f6913258154f3c",
+        "text": "[[Cunningham's Law]]"
+      },
+      "after": "96da6e50c93b5481",
+      "date": 1708011183205
+    },
+    {
+      "type": "add",
+      "id": "a62b697e5bc2f6c2",
+      "item": {
+        "type": "markdown",
+        "id": "a62b697e5bc2f6c2",
+        "text": "[[Craps Dice Game]] (within [[Functional Decomposition]])"
+      },
+      "after": "c0f6913258154f3c",
+      "date": 1708025146034
+    },
+    {
+      "id": "0e1f351e443e7cd1",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "0e1f351e443e7cd1",
+        "text": "[[Collective Electrodynamics]] See: [[Electrodynamics]]"
+      },
+      "after": "a62b697e5bc2f6c2",
+      "attribution": {
+        "page": "E"
+      },
+      "date": 1708025722507
+    },
+    {
+      "type": "edit",
+      "id": "c3fd162cce23ec9f",
+      "item": {
+        "type": "paragraph",
+        "id": "c3fd162cce23ec9f",
+        "text": "[[Copy Operation]] (within [[Title]]) → [[Copy]]"
+      },
+      "date": 1708033117264
+    },
+    {
+      "type": "edit",
+      "id": "c3fd162cce23ec9f",
+      "item": {
+        "type": "paragraph",
+        "id": "c3fd162cce23ec9f",
+        "text": "[[Copy Operation]] (within [[Title]]) → **[[Copy]]**"
+      },
+      "date": 1708033126978
+    },
+    {
+      "type": "edit",
+      "id": "c3fd162cce23ec9f",
+      "item": {
+        "type": "markdown",
+        "id": "c3fd162cce23ec9f",
+        "text": "[[Copy Operation]] (within [[Title]]) → **[[Copy]]**"
+      },
+      "date": 1708033128276
+    },
+    {
+      "type": "edit",
+      "id": "ae02940a42c52efe",
+      "item": {
+        "type": "paragraph",
+        "id": "ae02940a42c52efe",
+        "text": "**[[Container]]** (within [[Flüchtige Zeiten]]) See: [[Metaphor of Liquidity]]"
+      },
+      "date": 1708033202428
+    },
+    {
+      "type": "edit",
+      "id": "ae02940a42c52efe",
+      "item": {
+        "type": "markdown",
+        "id": "ae02940a42c52efe",
+        "text": "**[[Container]]** (within [[Flüchtige Zeiten]]) See: [[Metaphor of Liquidity]]"
+      },
+      "date": 1708033204249
+    },
+    {
+      "type": "edit",
+      "id": "e2fa77a2e744bc87",
+      "item": {
+        "type": "paragraph",
+        "id": "e2fa77a2e744bc87",
+        "text": "[[Computer]] (within [[Smalltalk Is the Car]]) → [[Car]]"
+      },
+      "date": 1708033285455
+    },
+    {
+      "type": "edit",
+      "id": "e2fa77a2e744bc87",
+      "item": {
+        "type": "paragraph",
+        "id": "e2fa77a2e744bc87",
+        "text": "[[Computer]] (within [[Smalltalk Is the Car]]) → **[[Car]]**"
+      },
+      "date": 1708033294385
+    },
+    {
+      "type": "edit",
+      "id": "e2fa77a2e744bc87",
+      "item": {
+        "type": "markdown",
+        "id": "e2fa77a2e744bc87",
+        "text": "[[Computer]] (within [[Smalltalk Is the Car]]) → **[[Car]]**"
+      },
+      "date": 1708033296421
+    },
+    {
+      "type": "add",
+      "id": "7908fbd99e5754e9",
+      "item": {
+        "type": "paragraph",
+        "id": "7908fbd99e5754e9",
+        "text": "[[Cluster]] (within [[Zoom Group]])"
+      },
+      "after": "0e1f351e443e7cd1",
+      "date": 1708037967072
+    },
+    {
+      "type": "edit",
+      "id": "7908fbd99e5754e9",
+      "item": {
+        "type": "paragraph",
+        "id": "7908fbd99e5754e9",
+        "text": "[[Cluster]] (within [[Zoom to Group]])"
+      },
+      "date": 1708038001336
+    },
+    {
+      "type": "edit",
+      "id": "7632ef5529566b44",
+      "item": {
+        "type": "markdown",
+        "id": "7632ef5529566b44",
+        "text": "> A [[Container]] is an [[Object]] from the [[Outside]] and a process from the [[Inside]]. (Bricken, [[Iconic Arithmetic]] Volume I, p. 137)\n- (within [[Containers for knowledges?]])\n⇒ [[Containment]]"
+      },
+      "date": 1708038230484
+    },
+    {
+      "type": "edit",
+      "id": "7632ef5529566b44",
+      "item": {
+        "type": "markdown",
+        "id": "7632ef5529566b44",
+        "text": "> A [[Container]] is an [[Object]] from the [[Outside]] and a process from the [[Inside]]. (Bricken, [[Iconic Arithmetic]] Volume I, p. 137)\n- (within [[Containers for knowledges?]])"
+      },
+      "date": 1708038245877
+    },
+    {
+      "type": "add",
+      "id": "c8b16f19e99ba653",
+      "item": {
+        "type": "markdown",
+        "id": "c8b16f19e99ba653",
+        "text": "⇒ [[Containment]]"
+      },
+      "after": "7632ef5529566b44",
+      "date": 1708038246555
+    },
+    {
+      "type": "edit",
+      "id": "c8b16f19e99ba653",
+      "item": {
+        "type": "markdown",
+        "id": "c8b16f19e99ba653",
+        "text": "⇒ [[Containment]] ⇒ [[Crossing]]"
+      },
+      "date": 1708038267653
+    },
+    {
+      "type": "edit",
+      "id": "c8b16f19e99ba653",
+      "item": {
+        "type": "markdown",
+        "id": "c8b16f19e99ba653",
+        "text": "⇒ [[Containment]] ⇒ [[Crossing]] ⇒ [[Crossing the First Distinction]]"
+      },
+      "date": 1708038307139
+    },
+    {
+      "type": "edit",
+      "id": "c8b16f19e99ba653",
+      "item": {
+        "type": "markdown",
+        "id": "c8b16f19e99ba653",
+        "text": "⇒ [[Containment]] ⇒ [[Crossing]] ⇒ [[Crossing the First Distinction]]  ⇒ [[Rationality]]"
+      },
+      "date": 1708038350606
+    },
+    {
+      "type": "edit",
+      "id": "c8b16f19e99ba653",
+      "item": {
+        "type": "markdown",
+        "id": "c8b16f19e99ba653",
+        "text": "⇒ [[Containment]] ⇒ [[Crossing]] ⇒ [[Crossing the First Distinction]]  ⇒ [[Rationality]] ⇒ [[Meaning Requires Dualism]]"
+      },
+      "date": 1708038389653
+    },
+    {
+      "type": "edit",
+      "id": "c8b16f19e99ba653",
+      "item": {
+        "type": "markdown",
+        "id": "c8b16f19e99ba653",
+        "text": "⇒ [[Containment]] ⇒ [[Crossing]] ⇒ [[Crossing the First Distinction]]  ⇒ [[Rationality]] ⇒ [[Meaning Requires Dualism]] ⇒ [[Exclusion]]"
+      },
+      "date": 1708038425893
+    },
+    {
+      "type": "edit",
+      "id": "c8b16f19e99ba653",
+      "item": {
+        "type": "markdown",
+        "id": "c8b16f19e99ba653",
+        "text": "⇒ [[Containment]] ⇒ [[Crossing]] ⇒ [[Crossing the First Distinction]]  ⇒ [[Rationality]] ⇒ [[Meaning Requires Dualism]] ⇒ [[Exclusion]] ⇒ [[Counter Observation]]"
+      },
+      "date": 1708038468207
+    },
+    {
+      "type": "edit",
+      "id": "c8b16f19e99ba653",
+      "item": {
+        "type": "markdown",
+        "id": "c8b16f19e99ba653",
+        "text": "⇒ [[Containment]] ⇒ [[Crossing]] ⇒ [[Crossing the First Distinction]]  ⇒ [[Rationality]] ⇒ [[Meaning Requires Dualism]] ⇒ [[Exclusion]] ⇒ [[Counter Observation]] ⇒ [[Empowering Exhibitionism]]"
+      },
+      "date": 1708038551036
+    },
+    {
+      "id": "e637fb5c90a3412c",
+      "type": "add",
+      "item": {
+        "type": "pagefold",
+        "id": "e637fb5c90a3412c",
+        "text": "~"
+      },
+      "after": "0d3e68036fecfe91",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1708038596071
+    },
+    {
+      "id": "6f4e7759152b7222",
+      "type": "add",
+      "item": {
+        "type": "pagefold",
+        "id": "6f4e7759152b7222",
+        "text": "~",
+        "alias": "e637fb5c90a3412c"
+      },
+      "after": "c8b16f19e99ba653",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1708038603402
+    },
+    {
+      "type": "edit",
+      "id": "c8b16f19e99ba653",
+      "item": {
+        "type": "markdown",
+        "id": "c8b16f19e99ba653",
+        "text": "⇐⇒ [[Containment]] ⇒ [[Crossing]] ⇒ [[Crossing the First Distinction]]  ⇒ [[Rationality]] ⇒ [[Meaning Requires Dualism]] ⇒ [[Exclusion]] ⇒ [[Counter Observation]] ⇒ [[Empowering Exhibitionism]]"
+      },
+      "date": 1708038702342
+    },
+    {
+      "type": "edit",
+      "id": "c8b16f19e99ba653",
+      "item": {
+        "type": "markdown",
+        "id": "c8b16f19e99ba653",
+        "text": "⇐⇒ [[Containment]] ⇒ [[Crossing]] ⇒ [[Crossing the First Distinction]]  ⇒ [[Rationality]] ⇒ [[Meaning Requires Dualism]] ⇒ [[Exclusion]] ⇒ [[Counter Observation]] ⇒ [[Empowering Exhibitionism]] ⇐ [[Denkpanzer stören]]"
+      },
+      "date": 1708038718513
+    },
+    {
+      "type": "edit",
+      "id": "c8b16f19e99ba653",
+      "item": {
+        "type": "markdown",
+        "id": "c8b16f19e99ba653",
+        "text": "⇒ [[Containment]] ⇒ [[Crossing]] ⇒ [[Crossing the First Distinction]]  ⇒ [[Rationality]] ⇒ [[Meaning Requires Dualism]] ⇒ [[Exclusion]] ⇒ [[Counter Observation]] ⇒ [[Empowering Exhibitionism]] ⇐ [[Denkpanzer stören]]"
+      },
+      "date": 1708038739221
+    },
+    {
+      "type": "add",
+      "id": "aa6a264100c85bd8",
+      "item": {
+        "type": "paragraph",
+        "id": "aa6a264100c85bd8",
+        "text": "[[Coordinate Versus Nested Gui]]"
+      },
+      "after": "7908fbd99e5754e9",
+      "date": 1708068833450
+    },
+    {
+      "type": "edit",
+      "id": "aa6a264100c85bd8",
+      "item": {
+        "type": "paragraph",
+        "id": "aa6a264100c85bd8",
+        "text": "[[Coordinate Versus Nested Gui]] See: [[Fence after Fence]]"
+      },
+      "date": 1708068901251
+    },
+    {
+      "type": "add",
+      "id": "c0e20646285c8f4e",
+      "item": {
+        "type": "paragraph",
+        "id": "c0e20646285c8f4e",
+        "text": "[[Classes Map]]"
+      },
+      "after": "aa6a264100c85bd8",
+      "date": 1708258017018
+    },
+    {
+      "type": "add",
+      "id": "b64e5dd338fd6b73",
+      "item": {
+        "type": "paragraph",
+        "id": "b64e5dd338fd6b73",
+        "text": "[[choose]] (within )"
+      },
+      "after": "c0e20646285c8f4e",
+      "date": 1708258650950
+    },
+    {
+      "type": "edit",
+      "id": "b64e5dd338fd6b73",
+      "item": {
+        "type": "paragraph",
+        "id": "b64e5dd338fd6b73",
+        "text": "[[choose]] (within [[Walk the Neighborhood]])"
+      },
+      "date": 1708258656827
+    },
+    {
+      "type": "add",
+      "id": "97708c6e57a71fb6",
+      "item": {
+        "type": "paragraph",
+        "id": "97708c6e57a71fb6",
+        "text": "[[Associative Chaining]]"
+      },
+      "after": "b64e5dd338fd6b73",
+      "date": 1708259381923
+    },
+    {
+      "type": "edit",
+      "id": "97708c6e57a71fb6",
+      "item": {
+        "type": "paragraph",
+        "id": "97708c6e57a71fb6",
+        "text": "[[Associative Chaining]] (within [[Learning]])"
+      },
+      "date": 1708259410024
+    },
+    {
+      "type": "edit",
+      "id": "97708c6e57a71fb6",
+      "item": {
+        "type": "paragraph",
+        "id": "97708c6e57a71fb6",
+        "text": "[[Associative Chaining]] (within [[Learning]]) See: [[Association]]"
+      },
+      "date": 1708259441614
+    },
+    {
+      "type": "add",
+      "id": "57c5cfb5dc1076b4",
+      "item": {
+        "type": "paragraph",
+        "id": "57c5cfb5dc1076b4",
+        "text": "[[Computational Scripts]]"
+      },
+      "after": "473ff83b9ce908dc",
+      "date": 1708263859251
+    },
+    {
+      "id": "57c5cfb5dc1076b4",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "1fe5377a5cc50eb3",
+        "a78482e3342a8184",
+        "299d7e431980dad6",
+        "d339e89b626f84fb",
+        "abb01936bfcb020c",
+        "473ff83b9ce908dc",
+        "0d3e68036fecfe91",
+        "57c5cfb5dc1076b4",
+        "e637fb5c90a3412c",
+        "ae02940a42c52efe",
+        "9821a6cc38ee5bb6",
+        "b6a1144d476019d6",
+        "7632ef5529566b44",
+        "c8b16f19e99ba653",
+        "6f4e7759152b7222",
+        "0de225d2550c9e65",
+        "c3fd162cce23ec9f",
+        "7b3bd6750b999478",
+        "9bb87aeced97be24",
+        "ca59b4b63c24f4c5",
+        "e2fa77a2e744bc87",
+        "ae13488d22a2f182",
+        "683b05236b0df42c",
+        "22e906d9ff11ff88",
+        "f9d237f83f2afdd5",
+        "c21ff43a12c8585f",
+        "cbd8848d9a104a13",
+        "6914996c38805e1b",
+        "9d6bc58cc5cf469f",
+        "e0ca33b3ddc19f53",
+        "08db8e56070faaff",
+        "77e1b688bd562b03",
+        "59ed434949ba5d22",
+        "f127c931da50b792",
+        "57fee224b956e7e1",
+        "4d42756cdc206a39",
+        "1d34fec3395b7eef",
+        "d1a1f2df8bfbc824",
+        "449589b427766dbc",
+        "b5f798763ad800d6",
+        "84ce6ccd0fcef8da",
+        "c040572f4ab3b6db",
+        "1f5724c054dcd919",
+        "131845680eb10f3b",
+        "96da6e50c93b5481",
+        "c0f6913258154f3c",
+        "a62b697e5bc2f6c2",
+        "0e1f351e443e7cd1",
+        "7908fbd99e5754e9",
+        "aa6a264100c85bd8",
+        "c0e20646285c8f4e",
+        "b64e5dd338fd6b73",
+        "97708c6e57a71fb6",
+        "3e8af46ff3063eaa",
+        "a29178af5d6036ea"
+      ],
+      "date": 1708263861780
+    },
+    {
+      "id": "d1a11f4c621daef4",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "d1a11f4c621daef4",
+        "text": "[[Automatic Code Documentation]]"
+      },
+      "after": "97708c6e57a71fb6",
+      "attribution": {
+        "page": "A"
+      },
+      "date": 1708286411116
+    },
+    {
+      "type": "edit",
+      "id": "7b3bd6750b999478",
+      "item": {
+        "type": "paragraph",
+        "id": "7b3bd6750b999478",
+        "text": "**[[Context]]** (within [[within]])"
+      },
+      "date": 1708426326930
+    },
+    {
+      "type": "edit",
+      "id": "7b3bd6750b999478",
+      "item": {
+        "type": "markdown",
+        "id": "7b3bd6750b999478",
+        "text": "**[[Context]]** (within [[within]])"
+      },
+      "date": 1708426329054
+    },
+    {
+      "type": "edit",
+      "id": "ca59b4b63c24f4c5",
+      "item": {
+        "type": "paragraph",
+        "id": "ca59b4b63c24f4c5",
+        "text": "thisContext"
+      },
+      "date": 1708426349950
+    },
+    {
+      "type": "add",
+      "id": "d6748a46f610bb6c",
+      "item": {
+        "type": "paragraph",
+        "id": "d6748a46f610bb6c",
+        "text": "[[Cause and Effect]] ((within [[Worldview]]) within  [[Systemic Thinking]])"
+      },
+      "after": "ca59b4b63c24f4c5",
+      "date": 1708426351467
+    },
+    {
+      "type": "edit",
+      "id": "ca59b4b63c24f4c5",
+      "item": {
+        "type": "paragraph",
+        "id": "ca59b4b63c24f4c5",
+        "text": "[[thisContext]] (within [[Access the run-time stack)"
+      },
+      "date": 1708426373177
+    },
+    {
+      "type": "edit",
+      "id": "ca59b4b63c24f4c5",
+      "item": {
+        "type": "paragraph",
+        "id": "ca59b4b63c24f4c5",
+        "text": "[[thisContext]] (within [[Access the run-time stack]])"
+      },
+      "date": 1708426383900
+    },
+    {
+      "type": "edit",
+      "id": "ca59b4b63c24f4c5",
+      "item": {
+        "type": "paragraph",
+        "id": "ca59b4b63c24f4c5",
+        "text": "[[thisContext]] (within [[Access the Run-Time Stack]])"
+      },
+      "date": 1708426404813
+    },
+    {
+      "type": "add",
+      "id": "77abf0b393251d5b",
+      "item": {
+        "type": "paragraph",
+        "id": "77abf0b393251d5b",
+        "text": "[[Computational Scripts]]"
+      },
+      "after": "d1a11f4c621daef4",
+      "date": 1708431724683
+    },
+    {
+      "type": "remove",
+      "id": "77abf0b393251d5b",
+      "date": 1708431984322
+    },
+    {
+      "type": "edit",
+      "id": "473ff83b9ce908dc",
+      "item": {
+        "type": "paragraph",
+        "id": "473ff83b9ce908dc",
+        "text": "**[[Computation]]** (within [[Software as Tools]])"
+      },
+      "date": 1708432003543
+    },
+    {
+      "type": "edit",
+      "id": "473ff83b9ce908dc",
+      "item": {
+        "type": "markdown",
+        "id": "473ff83b9ce908dc",
+        "text": "**[[Computation]]** (within [[Software as Tools]])"
+      },
+      "date": 1708432005170
+    },
+    {
+      "type": "add",
+      "id": "b3132b943273d66c",
+      "item": {
+        "type": "paragraph",
+        "id": "b3132b943273d66c",
+        "text": "[[Causal Chain]] (within [[Restaurant Script]])"
+      },
+      "after": "d1a11f4c621daef4",
+      "date": 1708512620345
     }
   ]
 }

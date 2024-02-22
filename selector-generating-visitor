@@ -1,0 +1,502 @@
+{
+  "title": "Selector Generating Visitor",
+  "story": [
+    {
+      "type": "html",
+      "text": "[[[Personal Pattern]]]",
+      "id": "5151e88511b2a13b5d5b24d017b4f50c"
+    },
+    {
+      "type": "html",
+      "text": "(This page assumes knowledge of the [[Visitor Pattern]])",
+      "id": "4a97451c227373e25ffb1d0efcdbcfa0"
+    },
+    {
+      "type": "html",
+      "text": "You want to implement the [[Visitor Pattern]], as described in [[Design Patterns]] by the [[Gang Of Four]].",
+      "id": "1c80f549a98756e0a107e9ba584b6b9f"
+    },
+    {
+      "type": "html",
+      "text": "You are working in a language that supports the #perform:<br>method (Java or Smalltalk).",
+      "id": "eaa638bd61c514285aeb0ecc889fdf8c"
+    },
+    {
+      "type": "html",
+      "text": "You can't or don't want to add accept methods to your target classes, and/or",
+      "id": "51e736969af1c1d3153dbe62c8b09057"
+    },
+    {
+      "type": "html",
+      "text": "You want some visit methods to apply to a hierarchy of subclasses.",
+      "id": "87f72ad0f437241942c5a5f20bf42470"
+    },
+    {
+      "type": "html",
+      "text": "<i>Therefore</i>, implement a [[Selector Generating Visitor]].",
+      "id": "268ffafd87ce95deaf9754c2f519439c"
+    },
+    {
+      "type": "html",
+      "text": "When the visitor visits an object, it generates its own visit selector based on the name of the object's class.  If the visitor does not implement a method with that selector, it tries a selector based on the name of the next higher superclass, repeating until a valid selector is generated or visitObject:<br>is reached.  The generated selector is then performed with the object as the argument.",
+      "id": "59c45b671d1d85d8133c66cc05b23428"
+    },
+    {
+      "type": "html",
+      "text": "This avoids the need to modify target classes, and lets visit methods be inherited by subclasses.",
+      "id": "418c9c2017b546df0b223210aa3ff6bd"
+    },
+    {
+      "type": "html",
+      "text": "<i>Sample code</i>",
+      "id": "a3b9b4c92a6c9b2b9ee3fb0851b0379f"
+    },
+    {
+      "type": "html",
+      "text": "Visitor>visit:<br>anObject",
+      "id": "10161b7e299fd7101cfa1ad62145a299"
+    },
+    {
+      "type": "code",
+      "text": "  | selector |\n  selector := self generateSelector: anObject ifNone: [^self error: 'No visit selector'].\n  ^self perform: selector with: anObject\n Visitor>generateSelector: anObject ifNone: aBlock \n  | class selector |\n  class := anObject class.\n  [class = nil ifTrue: [^aBlock value].\n  selector := ('visit' , class name , ':') asSymbol.\n  self respondsTo: selector]\n    whileFalse: [class := class superclass].\n  ^selector",
+      "id": "c0dd812207a4369ea931830f4ab76655"
+    },
+    {
+      "type": "html",
+      "text": "\nCreate concrete visitor classes by subclassing Visitor and coding methods such as #visitNumber:, #visitString:, and #visitOrderedCollection:",
+      "id": "c3ae5ef04945fee1382589e07f754908"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "3d02966029fe0ba2762ba41c9e657ece"
+    },
+    {
+      "type": "html",
+      "text": "\nThese options require a little more bookkeeping, but compare for clarity and speed:",
+      "id": "adba507a891d02e155f94455ce1982c3"
+    },
+    {
+      "type": "html",
+      "text": "Visitor>visit:<br>anObject",
+      "id": "10161b7e299fd7101cfa1ad62145a299"
+    },
+    {
+      "type": "code",
+      "text": "  | class |\n  class := anOject class.\n  class = Integer ifTrue: [^self visitInteger: anObject].\n  class = Number ifTrue: [^self visitNumber: anObject].\n  class = String ifTrue:  [^self visitString: anObject].\n  class = OrderedCollection ifTrue: [^self visitOrderedCollection: anObject].\n  self error: 'Cannot visit ', class printString",
+      "id": "b323ac6e62e396694545418da781cee5"
+    },
+    {
+      "type": "html",
+      "text": "or",
+      "id": "2f7354388c78bdb195d144cea04406f4"
+    },
+    {
+      "type": "html",
+      "text": "Visitor>visit:<br>anObject",
+      "id": "10161b7e299fd7101cfa1ad62145a299"
+    },
+    {
+      "type": "code",
+      "text": "  self \n    perform: (self visitSelector: anObject)\n    with: anObject",
+      "id": "4de7821b6ee49c36bf76686b48d44e3c"
+    },
+    {
+      "type": "html",
+      "text": "Visitor>visitSelector:<br>anObject",
+      "id": "cb4ffe8a0b8400e6997523168a082f61"
+    },
+    {
+      "type": "code",
+      "text": "  ^self visitDictionary\n    at: anObject class\n    ifAbsent: [#visitError:]",
+      "id": "e80d3442e2f32423eb6d0cf14caa1f35"
+    },
+    {
+      "type": "html",
+      "text": "Visitor>visitError:<br>anObject",
+      "id": "9bdc1f09e3a5765d90a80e4374bab362"
+    },
+    {
+      "type": "html",
+      "text": "self error:<br>'Cannot visit ', anObject class printString",
+      "id": "95d581b37d110adefe0ba74ddaf7dcc4"
+    },
+    {
+      "type": "code",
+      "text": " Visitor>visitDictionary\n  visitDictionary isNil ifTrue:  \n    [visitDictionary := Dictionary new\n      at: Integer put: #visitInteger:;\n      at: Number put: #visitNumber:;\n      at: String put: #visitString:;\n      ...;\n      yourself].\n  ^visitDictionary",
+      "id": "43e183797f5acc513b4d4a8a7ca9a1ed"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "3d02966029fe0ba2762ba41c9e657ece"
+    },
+    {
+      "type": "html",
+      "text": "I like 'em (especially #visitError:).  They have the progressive flavor of YAGNI and DTST ([[You Arent Gonna Need It]] and [[Do The Simplest Thing That Could Possibly Work]]).  If you at some time run into the problem of wanting a visit method to apply to all subclasses, you might (at that time) want to move on to generating the selectors to give you that capability.  As in your example, you could dynamically cache the selectors for speed.  --[[Stan Silver]]",
+      "id": "0ee3f97894649fce0e9ccb410e61ff19"
+    },
+    {
+      "type": "html",
+      "text": "!Visitor methodsFor:<br>'visit'!",
+      "id": "db2468b800e7837824e6359cf1ceb1ba"
+    },
+    {
+      "type": "html",
+      "text": "visit:<br>anObject ",
+      "id": "734e3bdfca3f1be91b162adc6d89f30a"
+    },
+    {
+      "type": "html",
+      "text": "^self perform:<br>(self visitSelector: anObject class)",
+      "id": "081d3230819e34b09ef565f6b93f60f9"
+    },
+    {
+      "type": "html",
+      "text": "with:<br>anObject!",
+      "id": "77a6c59e7191f4e64432e06f1d3d28da"
+    },
+    {
+      "type": "html",
+      "text": "visitSelector:<br>aClass ",
+      "id": "1c61153405e5bf76fa54a28f683c2aa5"
+    },
+    {
+      "type": "html",
+      "text": "^self selectorDictionary at:<br>aClass ifAbsentPut: [self generateValidSelector: aClass]!",
+      "id": "d0f6d6c85550b32be8bc7f25e679b6c4"
+    },
+    {
+      "type": "html",
+      "text": "generateValidSelector:<br>aClass ",
+      "id": "fd5a6c4d986f0f6944ee7e2b2dd1b4d6"
+    },
+    {
+      "type": "code",
+      "text": "  | class selector |\n  class := aClass.",
+      "id": "0a2c064429964f1ed14539dc586b954c"
+    },
+    {
+      "type": "html",
+      "text": "[selector := self generateSelector:<br>class.",
+      "id": "cae2ded6a2d01c7cb13d3418fdd6a85a"
+    },
+    {
+      "type": "html",
+      "text": "self respondsTo:<br>selector]",
+      "id": "141117fcdc1984f42f6d95fb24b4b18d"
+    },
+    {
+      "type": "html",
+      "text": "whileFalse:<br>",
+      "id": "140dd63fdc8ff28dd65264365847d545"
+    },
+    {
+      "type": "html",
+      "text": "[class = Object ifTrue:<br>[^#visitError:].",
+      "id": "cf7f0723fb3bff5c6d34d36b5f7bf9a2"
+    },
+    {
+      "type": "code",
+      "text": "      class := class superclass].\n  ^selector!",
+      "id": "aaec10d950234ddb83923dc0a10ca098"
+    },
+    {
+      "type": "html",
+      "text": "generateSelector:<br>aClass ",
+      "id": "f53d107e81e8832e647030950730f893"
+    },
+    {
+      "type": "code",
+      "text": "  ^('visit' , aClass name , ':') asSymbol!",
+      "id": "92b371562a0a6fbeff775554d930fd67"
+    },
+    {
+      "type": "code",
+      "text": " selectorDictionary\n  selectorDictionary isNil ifTrue: [selectorDictionary := Dictionary new].\n  ^selectorDictionary!",
+      "id": "6d6979f04830108f1a35622720b69348"
+    },
+    {
+      "type": "html",
+      "text": "visitError:<br>anObject ",
+      "id": "7e81e9c8950d34fb9723182e58dce011"
+    },
+    {
+      "type": "html",
+      "text": "self error:<br>'Cannot visit ' , anObject class printString!",
+      "id": "546ba2e49a40560154ea41ef94f5e15a"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "3d02966029fe0ba2762ba41c9e657ece"
+    },
+    {
+      "type": "html",
+      "text": "This could also be done in Java, using the Reflection library.",
+      "id": "f2e3fd42d4e0e2f9e1dcb3f86bdb8281"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?SelectorGeneratingVisitor c2.com]",
+      "id": "d423213fe0837f36121125f76dd4d49b"
+    }
+  ],
+  "journal": [
+    {
+      "date": 974161863000,
+      "id": "fa3942926551935fd2baa0d45f22bd93",
+      "type": "create",
+      "item": {
+        "title": "Selector Generating Visitor",
+        "story": [
+          {
+            "type": "html",
+            "text": "[[[Personal Pattern]]]",
+            "id": "5151e88511b2a13b5d5b24d017b4f50c"
+          },
+          {
+            "type": "html",
+            "text": "(This page assumes knowledge of the [[Visitor Pattern]])",
+            "id": "4a97451c227373e25ffb1d0efcdbcfa0"
+          },
+          {
+            "type": "html",
+            "text": "You want to implement the [[Visitor Pattern]], as described in [[Design Patterns]] by the [[Gang Of Four]].",
+            "id": "1c80f549a98756e0a107e9ba584b6b9f"
+          },
+          {
+            "type": "html",
+            "text": "You are working in a language that supports the #perform:<br>method (Java or Smalltalk).",
+            "id": "eaa638bd61c514285aeb0ecc889fdf8c"
+          },
+          {
+            "type": "html",
+            "text": "You can't or don't want to add accept methods to your target classes, and/or",
+            "id": "51e736969af1c1d3153dbe62c8b09057"
+          },
+          {
+            "type": "html",
+            "text": "You want some visit methods to apply to a hierarchy of subclasses.",
+            "id": "87f72ad0f437241942c5a5f20bf42470"
+          },
+          {
+            "type": "html",
+            "text": "<i>Therefore</i>, implement a [[Selector Generating Visitor]].",
+            "id": "268ffafd87ce95deaf9754c2f519439c"
+          },
+          {
+            "type": "html",
+            "text": "When the visitor visits an object, it generates its own visit selector based on the name of the object's class.  If the visitor does not implement a method with that selector, it tries a selector based on the name of the next higher superclass, repeating until a valid selector is generated or visitObject:<br>is reached.  The generated selector is then performed with the object as the argument.",
+            "id": "59c45b671d1d85d8133c66cc05b23428"
+          },
+          {
+            "type": "html",
+            "text": "This avoids the need to modify target classes, and lets visit methods be inherited by subclasses.",
+            "id": "418c9c2017b546df0b223210aa3ff6bd"
+          },
+          {
+            "type": "html",
+            "text": "<i>Sample code</i>",
+            "id": "a3b9b4c92a6c9b2b9ee3fb0851b0379f"
+          },
+          {
+            "type": "html",
+            "text": "Visitor>visit:<br>anObject",
+            "id": "10161b7e299fd7101cfa1ad62145a299"
+          },
+          {
+            "type": "code",
+            "text": "  | selector |\n  selector := self generateSelector: anObject ifNone: [^self error: 'No visit selector'].\n  ^self perform: selector with: anObject\n Visitor>generateSelector: anObject ifNone: aBlock \n  | class selector |\n  class := anObject class.\n  [class = nil ifTrue: [^aBlock value].\n  selector := ('visit' , class name , ':') asSymbol.\n  self respondsTo: selector]\n    whileFalse: [class := class superclass].\n  ^selector",
+            "id": "c0dd812207a4369ea931830f4ab76655"
+          },
+          {
+            "type": "html",
+            "text": "\nCreate concrete visitor classes by subclassing Visitor and coding methods such as #visitNumber:, #visitString:, and #visitOrderedCollection:",
+            "id": "c3ae5ef04945fee1382589e07f754908"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "3d02966029fe0ba2762ba41c9e657ece"
+          },
+          {
+            "type": "html",
+            "text": "\nThese options require a little more bookkeeping, but compare for clarity and speed:",
+            "id": "adba507a891d02e155f94455ce1982c3"
+          },
+          {
+            "type": "html",
+            "text": "Visitor>visit:<br>anObject",
+            "id": "10161b7e299fd7101cfa1ad62145a299"
+          },
+          {
+            "type": "code",
+            "text": "  | class |\n  class := anOject class.\n  class = Integer ifTrue: [^self visitInteger: anObject].\n  class = Number ifTrue: [^self visitNumber: anObject].\n  class = String ifTrue:  [^self visitString: anObject].\n  class = OrderedCollection ifTrue: [^self visitOrderedCollection: anObject].\n  self error: 'Cannot visit ', class printString",
+            "id": "b323ac6e62e396694545418da781cee5"
+          },
+          {
+            "type": "html",
+            "text": "or",
+            "id": "2f7354388c78bdb195d144cea04406f4"
+          },
+          {
+            "type": "html",
+            "text": "Visitor>visit:<br>anObject",
+            "id": "10161b7e299fd7101cfa1ad62145a299"
+          },
+          {
+            "type": "code",
+            "text": "  self \n    perform: (self visitSelector: anObject)\n    with: anObject",
+            "id": "4de7821b6ee49c36bf76686b48d44e3c"
+          },
+          {
+            "type": "html",
+            "text": "Visitor>visitSelector:<br>anObject",
+            "id": "cb4ffe8a0b8400e6997523168a082f61"
+          },
+          {
+            "type": "code",
+            "text": "  ^self visitDictionary\n    at: anObject class\n    ifAbsent: [#visitError:]",
+            "id": "e80d3442e2f32423eb6d0cf14caa1f35"
+          },
+          {
+            "type": "html",
+            "text": "Visitor>visitError:<br>anObject",
+            "id": "9bdc1f09e3a5765d90a80e4374bab362"
+          },
+          {
+            "type": "html",
+            "text": "self error:<br>'Cannot visit ', anObject class printString",
+            "id": "95d581b37d110adefe0ba74ddaf7dcc4"
+          },
+          {
+            "type": "code",
+            "text": " Visitor>visitDictionary\n  visitDictionary isNil ifTrue:  \n    [visitDictionary := Dictionary new\n      at: Integer put: #visitInteger:;\n      at: Number put: #visitNumber:;\n      at: String put: #visitString:;\n      ...;\n      yourself].\n  ^visitDictionary",
+            "id": "43e183797f5acc513b4d4a8a7ca9a1ed"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "3d02966029fe0ba2762ba41c9e657ece"
+          },
+          {
+            "type": "html",
+            "text": "I like 'em (especially #visitError:).  They have the progressive flavor of YAGNI and DTST ([[You Arent Gonna Need It]] and [[Do The Simplest Thing That Could Possibly Work]]).  If you at some time run into the problem of wanting a visit method to apply to all subclasses, you might (at that time) want to move on to generating the selectors to give you that capability.  As in your example, you could dynamically cache the selectors for speed.  --[[Stan Silver]]",
+            "id": "0ee3f97894649fce0e9ccb410e61ff19"
+          },
+          {
+            "type": "html",
+            "text": "!Visitor methodsFor:<br>'visit'!",
+            "id": "db2468b800e7837824e6359cf1ceb1ba"
+          },
+          {
+            "type": "html",
+            "text": "visit:<br>anObject ",
+            "id": "734e3bdfca3f1be91b162adc6d89f30a"
+          },
+          {
+            "type": "html",
+            "text": "^self perform:<br>(self visitSelector: anObject class)",
+            "id": "081d3230819e34b09ef565f6b93f60f9"
+          },
+          {
+            "type": "html",
+            "text": "with:<br>anObject!",
+            "id": "77a6c59e7191f4e64432e06f1d3d28da"
+          },
+          {
+            "type": "html",
+            "text": "visitSelector:<br>aClass ",
+            "id": "1c61153405e5bf76fa54a28f683c2aa5"
+          },
+          {
+            "type": "html",
+            "text": "^self selectorDictionary at:<br>aClass ifAbsentPut: [self generateValidSelector: aClass]!",
+            "id": "d0f6d6c85550b32be8bc7f25e679b6c4"
+          },
+          {
+            "type": "html",
+            "text": "generateValidSelector:<br>aClass ",
+            "id": "fd5a6c4d986f0f6944ee7e2b2dd1b4d6"
+          },
+          {
+            "type": "code",
+            "text": "  | class selector |\n  class := aClass.",
+            "id": "0a2c064429964f1ed14539dc586b954c"
+          },
+          {
+            "type": "html",
+            "text": "[selector := self generateSelector:<br>class.",
+            "id": "cae2ded6a2d01c7cb13d3418fdd6a85a"
+          },
+          {
+            "type": "html",
+            "text": "self respondsTo:<br>selector]",
+            "id": "141117fcdc1984f42f6d95fb24b4b18d"
+          },
+          {
+            "type": "html",
+            "text": "whileFalse:<br>",
+            "id": "140dd63fdc8ff28dd65264365847d545"
+          },
+          {
+            "type": "html",
+            "text": "[class = Object ifTrue:<br>[^#visitError:].",
+            "id": "cf7f0723fb3bff5c6d34d36b5f7bf9a2"
+          },
+          {
+            "type": "code",
+            "text": "      class := class superclass].\n  ^selector!",
+            "id": "aaec10d950234ddb83923dc0a10ca098"
+          },
+          {
+            "type": "html",
+            "text": "generateSelector:<br>aClass ",
+            "id": "f53d107e81e8832e647030950730f893"
+          },
+          {
+            "type": "code",
+            "text": "  ^('visit' , aClass name , ':') asSymbol!",
+            "id": "92b371562a0a6fbeff775554d930fd67"
+          },
+          {
+            "type": "code",
+            "text": " selectorDictionary\n  selectorDictionary isNil ifTrue: [selectorDictionary := Dictionary new].\n  ^selectorDictionary!",
+            "id": "6d6979f04830108f1a35622720b69348"
+          },
+          {
+            "type": "html",
+            "text": "visitError:<br>anObject ",
+            "id": "7e81e9c8950d34fb9723182e58dce011"
+          },
+          {
+            "type": "html",
+            "text": "self error:<br>'Cannot visit ' , anObject class printString!",
+            "id": "546ba2e49a40560154ea41ef94f5e15a"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "3d02966029fe0ba2762ba41c9e657ece"
+          },
+          {
+            "type": "html",
+            "text": "This could also be done in Java, using the Reflection library.",
+            "id": "f2e3fd42d4e0e2f9e1dcb3f86bdb8281"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?SelectorGeneratingVisitor c2.com]",
+            "id": "d423213fe0837f36121125f76dd4d49b"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1708264940761
+    }
+  ]
+}

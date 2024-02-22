@@ -15,6 +15,24 @@
       "type": "paragraph",
       "id": "83098c6a1a2ac81b",
       "text": "[[Value]] See: [[Blind Spot]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "5331896a74df1672",
+      "text": "[[Visitor as Schema]] See: [[Algorithmic Markup]], [[Visitor Pattern]]"
+    },
+    {
+      "type": "reference",
+      "id": "8d3c55df0c6c50b6",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "v",
+      "title": "V",
+      "text": "End of List Indexcard"
+    },
+    {
+      "type": "frame",
+      "id": "16e8dccaa15dfaed",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
     }
   ],
   "journal": [
@@ -102,6 +120,94 @@
       "type": "fork",
       "site": "mold.dreyeck.ch",
       "date": 1706702074583
+    },
+    {
+      "id": "8d3c55df0c6c50b6",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "8d3c55df0c6c50b6",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "v",
+        "title": "V",
+        "text": "End of List Indexcard"
+      },
+      "after": "83098c6a1a2ac81b",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1707800293399
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "16e8dccaa15dfaed"
+      },
+      "id": "16e8dccaa15dfaed",
+      "type": "add",
+      "after": "8d3c55df0c6c50b6",
+      "date": 1707800298933
+    },
+    {
+      "type": "edit",
+      "id": "16e8dccaa15dfaed",
+      "item": {
+        "type": "frame",
+        "id": "16e8dccaa15dfaed",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      },
+      "date": 1707800301547
+    },
+    {
+      "type": "edit",
+      "id": "16e8dccaa15dfaed",
+      "item": {
+        "type": "frame",
+        "id": "16e8dccaa15dfaed",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1708005739597
+    },
+    {
+      "type": "add",
+      "id": "5331896a74df1672",
+      "item": {
+        "type": "paragraph",
+        "id": "5331896a74df1672",
+        "text": "[[Visitor as Schema]]"
+      },
+      "after": "83098c6a1a2ac81b",
+      "date": 1708264262961
+    },
+    {
+      "type": "edit",
+      "id": "5331896a74df1672",
+      "item": {
+        "type": "paragraph",
+        "id": "5331896a74df1672",
+        "text": "[[Visitor as Schema]] See: [[Algorithmic Markup]]"
+      },
+      "date": 1708264302595
+    },
+    {
+      "type": "edit",
+      "id": "5331896a74df1672",
+      "item": {
+        "type": "paragraph",
+        "id": "5331896a74df1672",
+        "text": "[[Visitor as Schema]] See: [[Algorithmic Markup]], [[Visitor Pattern]]"
+      },
+      "date": 1708264805874
+    },
+    {
+      "type": "edit",
+      "id": "16e8dccaa15dfaed",
+      "item": {
+        "type": "frame",
+        "id": "16e8dccaa15dfaed",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      },
+      "date": 1708265049697
     }
   ]
 }

@@ -1,0 +1,342 @@
+{
+  "title": "Query Traversal Versus Recursion",
+  "story": [
+    {
+      "type": "html",
+      "text": "There seem to be two \"thought camps\" with regard to how to extend relational query languages in order to better deal with graph processing so that one does not have to write as much procedural \"pointer hopping\" and looping app code when dealing with graphs, DAG's, and trees.",
+      "id": "33bb587d38c3f0303e43d1f357e32b09"
+    },
+    {
+      "type": "html",
+      "text": "\nOne approach is to add recursion to the query language, and a second is to add \"traversal\" operation(s) that are declarative in nature. The recursive approach may be more flexible, but turns the query writer into a functional programmer. Although FP proponents will be happy with this, some argue it takes away from the declarative nature of query languages.",
+      "id": "0a2fbe24453c85b74f88581b6ba0c348"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "3ce11e2e42d12d463006ce7470736257"
+    },
+    {
+      "type": "html",
+      "text": "<b>Traveral Operation Proposal</b>",
+      "id": "2cb0e2af058d8ac5e79a6c85a3306dba"
+    },
+    {
+      "type": "html",
+      "text": "\nHere is a rough draft of a generic \"traversal\" operation. (Roughly based on [[Relational And Trees]].) Basically we are assuming a many-to-many table with a matching \"from\" key set and a \"to\" key set. I use the word \"set\" because the keys may be compound keys. Some many-to-many tables don't fit this structure, but most can be converted/projected to this structure via various relational operators (UNION, JOIN, Etc.) via nested or referenced queries.",
+      "id": "b601e053b70043d0f7cfcc20903344b8"
+    },
+    {
+      "type": "html",
+      "text": "<i>Inputs</i>",
+      "id": "368acba17d14d297ef8823494583ccb2"
+    },
+    {
+      "type": "html",
+      "text": " Table - real or virtual (calculated)",
+      "id": "28dd606843a1781ba6941c8a3fc41f29"
+    },
+    {
+      "type": "html",
+      "text": " Starting Record (it's primary key)",
+      "id": "0fd1d82b560c8769a6bf06591d3e76b0"
+    },
+    {
+      "type": "html",
+      "text": " \"From\" and \"To\" key column(s) used.",
+      "id": "95fb0e80614b7c3b2549c75a5077b319"
+    },
+    {
+      "type": "html",
+      "text": " Max-Depth - Maximum traversal depth. Zero or omitted for no limit.",
+      "id": "40536feaf6f2ed7ed22bc425d36bef24"
+    },
+    {
+      "type": "html",
+      "text": " Ordering (optional) - Used to determine which path to take if multiple branches per node (does this ordering violate relational?) The to-key is always used to settle ties even if ordering is given.",
+      "id": "6ce3496551b7017974b202ace6cb959d"
+    },
+    {
+      "type": "html",
+      "text": " Distinct-Flag - To indicate if we only want distinct matches. Minimum depth (shortest path) and Ordering (above) are used if depth info is returned (see below).",
+      "id": "91c61abaa8ddb79362f94f4a275ea3e5"
+    },
+    {
+      "type": "html",
+      "text": "<i>Outputs</i>",
+      "id": "5edcb0c18e83b821a6df7eb600865e2c"
+    },
+    {
+      "type": "html",
+      "text": " The Row(s) found during traversal",
+      "id": "f91e52675a5761a35d2da8a31d19db26"
+    },
+    {
+      "type": "html",
+      "text": " The depth, that is distance from starting node. This is optional and can be a generated column or a reserved function DEPTH().",
+      "id": "cfc24e75246bdecf284331fe74681427"
+    },
+    {
+      "type": "html",
+      "text": " Parent (optional row or function) - Indicates shortest-path \"parent\" node (parent's \"from-key\").",
+      "id": "1bc87416e3fa2acf2485d1be67022b72"
+    },
+    {
+      "type": "html",
+      "text": " Sequence (optional row or function) - Indicates the traversal sequence. Because of the key rule above, there is always an ordering.",
+      "id": "aee2fb1df16b5fbbdb4074175c41e1a9"
+    },
+    {
+      "type": "html",
+      "text": "<i>Issues</i>",
+      "id": "d278a45260f4fbd14c3cdb5620c4bb73"
+    },
+    {
+      "type": "html",
+      "text": " If the supplied keys are not really unique, it could create problems for those items dependant on ordering. Perhaps it should generate an error. Needs pondering.",
+      "id": "1c3e6856651cdde7e7f581c22f50caa7"
+    },
+    {
+      "type": "html",
+      "text": "\nNote that any non-traversal-related filtering (WHERE clause) would be done before this operation, although for convenience we may want to include it. But for simplicity it will not be considered here.",
+      "id": "84a99e3afb8e610d587682180e117316"
+    },
+    {
+      "type": "html",
+      "text": "\nHypothetical SQL Example:",
+      "id": "c746c1e78a762f9185b36b0792ba5a12"
+    },
+    {
+      "type": "html",
+      "text": "Table:<br>roomstouch",
+      "id": "3c795c455b1be7d2cddac2933b0a0b8b"
+    },
+    {
+      "type": "code",
+      "text": "    ---------\n    buildingID\n    roomID  // unique only within a given building\n    buildingLink  \n    roomLink\n    otherStuff",
+      "id": "18ebb71930fc3701803c9f7fd117eadb"
+    },
+    {
+      "type": "code",
+      "text": "  SELECT *, depth() AS depth, parent() AS parent \n  TRAVERSE FROM roomstouch\n  FROMKEY buildingID, roomID \n  TOKEY buildingLink, roomLink\n  START AT 23, 7\n  MAXDEPTH 5",
+      "id": "2a777d161b366e9c81699db2e4853137"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "3ce11e2e42d12d463006ce7470736257"
+    },
+    {
+      "type": "html",
+      "text": "\nOther possible optional features:",
+      "id": "8f381b6cf5812e873d91d5127bbdd522"
+    },
+    {
+      "type": "html",
+      "text": " Time limits. Often it is practical to limit the time of processing. Example cases may be missile guidance (land analysis) and a time-based games like chess. This mirrors the general human pattern of producing better answers if given more time.",
+      "id": "0b8268261170ee6c59407ca406dbf2a3"
+    },
+    {
+      "type": "html",
+      "text": " <i>In practice, time limits and timer-signals are useful for a number of things.  However, I'm not certain I'd limit it to [[Query Traversal Versus Recursion]].  In RT decision making on data of any sort, you'll often need to limit the time spent collecting data.</i>",
+      "id": "4afb4a66411d3035ace349873c68e1d9"
+    },
+    {
+      "type": "html",
+      "text": " Agreed. It is similar to the need for a \"Top N records\" feature, found in most dialects.",
+      "id": "b06cc5492b6ad40a070ffe47312cc6b2"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "3ce11e2e42d12d463006ce7470736257"
+    },
+    {
+      "type": "html",
+      "text": "\nPerhaps a better title would be \"[[Declarative Traversal Versus Recursion]]\".",
+      "id": "c2f2682999241310b4bb573dc3c38cbf"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?QueryTraversalVersusRecursion c2.com]",
+      "id": "4e0d419a2b9e144c0b40a13b68cf7526"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1189531132000,
+      "id": "007b8f6c4875577380265198eb2c5c83",
+      "type": "create",
+      "item": {
+        "title": "Query Traversal Versus Recursion",
+        "story": [
+          {
+            "type": "html",
+            "text": "There seem to be two \"thought camps\" with regard to how to extend relational query languages in order to better deal with graph processing so that one does not have to write as much procedural \"pointer hopping\" and looping app code when dealing with graphs, DAG's, and trees.",
+            "id": "33bb587d38c3f0303e43d1f357e32b09"
+          },
+          {
+            "type": "html",
+            "text": "\nOne approach is to add recursion to the query language, and a second is to add \"traversal\" operation(s) that are declarative in nature. The recursive approach may be more flexible, but turns the query writer into a functional programmer. Although FP proponents will be happy with this, some argue it takes away from the declarative nature of query languages.",
+            "id": "0a2fbe24453c85b74f88581b6ba0c348"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "3ce11e2e42d12d463006ce7470736257"
+          },
+          {
+            "type": "html",
+            "text": "<b>Traveral Operation Proposal</b>",
+            "id": "2cb0e2af058d8ac5e79a6c85a3306dba"
+          },
+          {
+            "type": "html",
+            "text": "\nHere is a rough draft of a generic \"traversal\" operation. (Roughly based on [[Relational And Trees]].) Basically we are assuming a many-to-many table with a matching \"from\" key set and a \"to\" key set. I use the word \"set\" because the keys may be compound keys. Some many-to-many tables don't fit this structure, but most can be converted/projected to this structure via various relational operators (UNION, JOIN, Etc.) via nested or referenced queries.",
+            "id": "b601e053b70043d0f7cfcc20903344b8"
+          },
+          {
+            "type": "html",
+            "text": "<i>Inputs</i>",
+            "id": "368acba17d14d297ef8823494583ccb2"
+          },
+          {
+            "type": "html",
+            "text": " Table - real or virtual (calculated)",
+            "id": "28dd606843a1781ba6941c8a3fc41f29"
+          },
+          {
+            "type": "html",
+            "text": " Starting Record (it's primary key)",
+            "id": "0fd1d82b560c8769a6bf06591d3e76b0"
+          },
+          {
+            "type": "html",
+            "text": " \"From\" and \"To\" key column(s) used.",
+            "id": "95fb0e80614b7c3b2549c75a5077b319"
+          },
+          {
+            "type": "html",
+            "text": " Max-Depth - Maximum traversal depth. Zero or omitted for no limit.",
+            "id": "40536feaf6f2ed7ed22bc425d36bef24"
+          },
+          {
+            "type": "html",
+            "text": " Ordering (optional) - Used to determine which path to take if multiple branches per node (does this ordering violate relational?) The to-key is always used to settle ties even if ordering is given.",
+            "id": "6ce3496551b7017974b202ace6cb959d"
+          },
+          {
+            "type": "html",
+            "text": " Distinct-Flag - To indicate if we only want distinct matches. Minimum depth (shortest path) and Ordering (above) are used if depth info is returned (see below).",
+            "id": "91c61abaa8ddb79362f94f4a275ea3e5"
+          },
+          {
+            "type": "html",
+            "text": "<i>Outputs</i>",
+            "id": "5edcb0c18e83b821a6df7eb600865e2c"
+          },
+          {
+            "type": "html",
+            "text": " The Row(s) found during traversal",
+            "id": "f91e52675a5761a35d2da8a31d19db26"
+          },
+          {
+            "type": "html",
+            "text": " The depth, that is distance from starting node. This is optional and can be a generated column or a reserved function DEPTH().",
+            "id": "cfc24e75246bdecf284331fe74681427"
+          },
+          {
+            "type": "html",
+            "text": " Parent (optional row or function) - Indicates shortest-path \"parent\" node (parent's \"from-key\").",
+            "id": "1bc87416e3fa2acf2485d1be67022b72"
+          },
+          {
+            "type": "html",
+            "text": " Sequence (optional row or function) - Indicates the traversal sequence. Because of the key rule above, there is always an ordering.",
+            "id": "aee2fb1df16b5fbbdb4074175c41e1a9"
+          },
+          {
+            "type": "html",
+            "text": "<i>Issues</i>",
+            "id": "d278a45260f4fbd14c3cdb5620c4bb73"
+          },
+          {
+            "type": "html",
+            "text": " If the supplied keys are not really unique, it could create problems for those items dependant on ordering. Perhaps it should generate an error. Needs pondering.",
+            "id": "1c3e6856651cdde7e7f581c22f50caa7"
+          },
+          {
+            "type": "html",
+            "text": "\nNote that any non-traversal-related filtering (WHERE clause) would be done before this operation, although for convenience we may want to include it. But for simplicity it will not be considered here.",
+            "id": "84a99e3afb8e610d587682180e117316"
+          },
+          {
+            "type": "html",
+            "text": "\nHypothetical SQL Example:",
+            "id": "c746c1e78a762f9185b36b0792ba5a12"
+          },
+          {
+            "type": "html",
+            "text": "Table:<br>roomstouch",
+            "id": "3c795c455b1be7d2cddac2933b0a0b8b"
+          },
+          {
+            "type": "code",
+            "text": "    ---------\n    buildingID\n    roomID  // unique only within a given building\n    buildingLink  \n    roomLink\n    otherStuff",
+            "id": "18ebb71930fc3701803c9f7fd117eadb"
+          },
+          {
+            "type": "code",
+            "text": "  SELECT *, depth() AS depth, parent() AS parent \n  TRAVERSE FROM roomstouch\n  FROMKEY buildingID, roomID \n  TOKEY buildingLink, roomLink\n  START AT 23, 7\n  MAXDEPTH 5",
+            "id": "2a777d161b366e9c81699db2e4853137"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "3ce11e2e42d12d463006ce7470736257"
+          },
+          {
+            "type": "html",
+            "text": "\nOther possible optional features:",
+            "id": "8f381b6cf5812e873d91d5127bbdd522"
+          },
+          {
+            "type": "html",
+            "text": " Time limits. Often it is practical to limit the time of processing. Example cases may be missile guidance (land analysis) and a time-based games like chess. This mirrors the general human pattern of producing better answers if given more time.",
+            "id": "0b8268261170ee6c59407ca406dbf2a3"
+          },
+          {
+            "type": "html",
+            "text": " <i>In practice, time limits and timer-signals are useful for a number of things.  However, I'm not certain I'd limit it to [[Query Traversal Versus Recursion]].  In RT decision making on data of any sort, you'll often need to limit the time spent collecting data.</i>",
+            "id": "4afb4a66411d3035ace349873c68e1d9"
+          },
+          {
+            "type": "html",
+            "text": " Agreed. It is similar to the need for a \"Top N records\" feature, found in most dialects.",
+            "id": "b06cc5492b6ad40a070ffe47312cc6b2"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "3ce11e2e42d12d463006ce7470736257"
+          },
+          {
+            "type": "html",
+            "text": "\nPerhaps a better title would be \"[[Declarative Traversal Versus Recursion]]\".",
+            "id": "c2f2682999241310b4bb573dc3c38cbf"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?QueryTraversalVersusRecursion c2.com]",
+            "id": "4e0d419a2b9e144c0b40a13b68cf7526"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1707719922099
+    }
+  ]
+}

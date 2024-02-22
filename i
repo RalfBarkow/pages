@@ -25,14 +25,24 @@
       "text": "[[Indexing the Invisible]] (within [[Federation Search Explained]])"
     },
     {
+      "type": "markdown",
+      "id": "a1b0add945518273",
+      "text": "**[[Information]]** (within [[r.Data.Homan.Kovacs]])\n- (within [[Flip Operation]]). See [[Copy Operation]]\n- defined as an [[Event]] that selects the states of a [[System]]"
+    },
+    {
+      "type": "markdown",
+      "id": "492146a37540453e",
+      "text": "- (within [[Digital Garden]])"
+    },
+    {
       "type": "paragraph",
-      "id": "69e84435da6d2a85",
-      "text": "[[Information]] (within [[Digital Garden]])"
+      "id": "ef9fdbda88d22463",
+      "text": "[[Information Processing]] (within [[Unsicherheitsabsorption]])"
     },
     {
       "type": "paragraph",
       "id": "05a6c5aec7a6f32e",
-      "text": "[[Islands in the River]]"
+      "text": "[[Islands in the River]] See: [[Lack of Structure]], [[Curation]]"
     },
     {
       "type": "paragraph",
@@ -56,16 +66,6 @@
     },
     {
       "type": "paragraph",
-      "id": "a1b0add945518273",
-      "text": "[[Information]] (within [[r.Data.Homan.Kovacs]])"
-    },
-    {
-      "type": "markdown",
-      "id": "634006b4b7ed768e",
-      "text": "- (within [[Flip Operation]]). See [[Copy Operation]]\n- defined as an [[Event]] that selects the states of a [[System]] "
-    },
-    {
-      "type": "paragraph",
       "id": "70f92f8faafa3394",
       "text": "[[Index Logs]] see [[Search Index Logs]]"
     },
@@ -75,14 +75,47 @@
       "text": "Intelligent tutoring systems (ITS) (within [[Capture the Learning]]) See: [[r.LearningAnalytics.Martin.Sherin]]"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "113ed091d364bbc5",
-      "text": "[[The Idea Compass]] ((within [[Zettelkasten]]) within [[Antinet]])"
+      "text": "**[[The Idea Compass]]** ((within [[Zettelkasten]]) within [[Antinet]])"
     },
     {
       "type": "paragraph",
-      "id": "ef9fdbda88d22463",
-      "text": "[[Information Processing]] (within [[Unsicherheitsabsorption]])"
+      "id": "56f4dfc681d9371f",
+      "text": "[[Interpreter]] See: [[The Art of the Interpreter]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "0c21f9d14c2bca90",
+      "text": "[[import]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "ca36da70c1c90cf3",
+      "text": "[[Invitation]] (within [[Growing Regions]]) See: [[2024-02-09]] and an [[Invitation]] to [[improve]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "4fbe113d6671ffba",
+      "text": "[[Icon Language]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "0cde9f4fdc4dd016",
+      "text": "[[Iconic Arithmetic]]"
+    },
+    {
+      "type": "reference",
+      "id": "41682db8bb604a0e",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "i",
+      "title": "I",
+      "text": "End of List Indexcard"
+    },
+    {
+      "type": "frame",
+      "id": "133dfc8f00f02bc6",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
     }
   ],
   "journal": [
@@ -677,6 +710,351 @@
         "text": "[[Information Processing]] (within [[Unsicherheitsabsorption]])"
       },
       "date": 1706886026337
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1706886486262
+    },
+    {
+      "type": "edit",
+      "id": "05a6c5aec7a6f32e",
+      "item": {
+        "type": "paragraph",
+        "id": "05a6c5aec7a6f32e",
+        "text": "[[Islands in the River]] See: [[Lack of Structure]], [[Curation]]"
+      },
+      "date": 1706899701327
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1707797801382
+    },
+    {
+      "id": "41682db8bb604a0e",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "41682db8bb604a0e",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "i",
+        "title": "I",
+        "text": "End of List Indexcard"
+      },
+      "after": "ef9fdbda88d22463",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1707797843705
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "133dfc8f00f02bc6"
+      },
+      "id": "133dfc8f00f02bc6",
+      "type": "add",
+      "after": "41682db8bb604a0e",
+      "date": 1707797850024
+    },
+    {
+      "type": "edit",
+      "id": "133dfc8f00f02bc6",
+      "item": {
+        "type": "frame",
+        "id": "133dfc8f00f02bc6",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      },
+      "date": 1707797852191
+    },
+    {
+      "type": "add",
+      "id": "56f4dfc681d9371f",
+      "item": {
+        "type": "paragraph",
+        "id": "56f4dfc681d9371f",
+        "text": "[[Interpreter]] See: [[The Art of the Interpreter]]"
+      },
+      "after": "ef9fdbda88d22463",
+      "date": 1707806721718
+    },
+    {
+      "type": "add",
+      "id": "0c21f9d14c2bca90",
+      "item": {
+        "type": "paragraph",
+        "id": "0c21f9d14c2bca90",
+        "text": "[[import]]"
+      },
+      "after": "56f4dfc681d9371f",
+      "date": 1707895517972
+    },
+    {
+      "type": "add",
+      "id": "ca36da70c1c90cf3",
+      "item": {
+        "type": "paragraph",
+        "id": "ca36da70c1c90cf3",
+        "text": "[[Invitation]]"
+      },
+      "after": "0c21f9d14c2bca90",
+      "date": 1707945297439
+    },
+    {
+      "id": "7c44295e7c475985",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "7c44295e7c475985",
+        "text": "[[Growing Regions]]"
+      },
+      "after": "ca36da70c1c90cf3",
+      "attribution": {
+        "page": "G"
+      },
+      "date": 1707945318362
+    },
+    {
+      "type": "remove",
+      "id": "7c44295e7c475985",
+      "date": 1707945333019
+    },
+    {
+      "type": "edit",
+      "id": "ca36da70c1c90cf3",
+      "item": {
+        "type": "paragraph",
+        "id": "ca36da70c1c90cf3",
+        "text": "[[Invitation]] (within [[Growing Regions]]) "
+      },
+      "date": 1707945339635
+    },
+    {
+      "type": "edit",
+      "id": "ca36da70c1c90cf3",
+      "item": {
+        "type": "paragraph",
+        "id": "ca36da70c1c90cf3",
+        "text": "[[Invitation]] (within [[Growing Regions]]) See: [[2024-02-09]]"
+      },
+      "date": 1707945370088
+    },
+    {
+      "id": "e67e962bb680e1ba",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "e67e962bb680e1ba",
+        "text": "It should be an [[Invitation]] to [[improve]]"
+      },
+      "after": "ca36da70c1c90cf3",
+      "attribution": {
+        "page": "2024-02-09"
+      },
+      "date": 1707946696122
+    },
+    {
+      "type": "edit",
+      "id": "e67e962bb680e1ba",
+      "item": {
+        "type": "paragraph",
+        "id": "e67e962bb680e1ba",
+        "text": "See: an [[Invitation]] to [[improve]]"
+      },
+      "date": 1707946707483
+    },
+    {
+      "type": "remove",
+      "id": "e67e962bb680e1ba",
+      "date": 1707946713824
+    },
+    {
+      "type": "edit",
+      "id": "ca36da70c1c90cf3",
+      "item": {
+        "type": "paragraph",
+        "id": "ca36da70c1c90cf3",
+        "text": "[[Invitation]] (within [[Growing Regions]]) See: [[2024-02-09]] See: an [[Invitation]] to [[improve]]"
+      },
+      "date": 1707946715556
+    },
+    {
+      "type": "edit",
+      "id": "ca36da70c1c90cf3",
+      "item": {
+        "type": "paragraph",
+        "id": "ca36da70c1c90cf3",
+        "text": "[[Invitation]] (within [[Growing Regions]]) See: [[2024-02-09]] and an [[Invitation]] to [[improve]]"
+      },
+      "date": 1707946726508
+    },
+    {
+      "type": "edit",
+      "id": "133dfc8f00f02bc6",
+      "item": {
+        "type": "frame",
+        "id": "133dfc8f00f02bc6",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1708000455697
+    },
+    {
+      "type": "edit",
+      "id": "a1b0add945518273",
+      "item": {
+        "type": "paragraph",
+        "id": "a1b0add945518273",
+        "text": "**[[Information]]** (within [[r.Data.Homan.Kovacs]])"
+      },
+      "date": 1708013099014
+    },
+    {
+      "type": "edit",
+      "id": "a1b0add945518273",
+      "item": {
+        "type": "markdown",
+        "id": "a1b0add945518273",
+        "text": "**[[Information]]** (within [[r.Data.Homan.Kovacs]])"
+      },
+      "date": 1708013101256
+    },
+    {
+      "type": "edit",
+      "id": "113ed091d364bbc5",
+      "item": {
+        "type": "paragraph",
+        "id": "113ed091d364bbc5",
+        "text": "**[[The Idea Compass]]** ((within [[Zettelkasten]]) within [[Antinet]])"
+      },
+      "date": 1708013114046
+    },
+    {
+      "type": "edit",
+      "id": "113ed091d364bbc5",
+      "item": {
+        "type": "markdown",
+        "id": "113ed091d364bbc5",
+        "text": "**[[The Idea Compass]]** ((within [[Zettelkasten]]) within [[Antinet]])"
+      },
+      "date": 1708013115836
+    },
+    {
+      "type": "remove",
+      "id": "634006b4b7ed768e",
+      "date": 1708013226684
+    },
+    {
+      "type": "edit",
+      "id": "a1b0add945518273",
+      "item": {
+        "type": "markdown",
+        "id": "a1b0add945518273",
+        "text": "**[[Information]]** (within [[r.Data.Homan.Kovacs]])\n- (within [[Flip Operation]]). See [[Copy Operation]]\n- defined as an [[Event]] that selects the states of a [[System]] "
+      },
+      "date": 1708013229381
+    },
+    {
+      "id": "a1b0add945518273",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "e24ee68ad6bdc819",
+        "a7a2ad238da3b5a3",
+        "8cfa51bac5b6fca5",
+        "69e84435da6d2a85",
+        "a1b0add945518273",
+        "05a6c5aec7a6f32e",
+        "373cd966807a3e06",
+        "fb4991842170bba4",
+        "97064d8d2af32ff7",
+        "7be0dccee30ce740",
+        "70f92f8faafa3394",
+        "2dca238d90104476",
+        "113ed091d364bbc5",
+        "ef9fdbda88d22463",
+        "56f4dfc681d9371f",
+        "0c21f9d14c2bca90",
+        "ca36da70c1c90cf3",
+        "41682db8bb604a0e",
+        "133dfc8f00f02bc6"
+      ],
+      "date": 1708013235896
+    },
+    {
+      "type": "remove",
+      "id": "69e84435da6d2a85",
+      "date": 1708013242093
+    },
+    {
+      "type": "edit",
+      "id": "a1b0add945518273",
+      "item": {
+        "type": "markdown",
+        "id": "a1b0add945518273",
+        "text": "**[[Information]]** (within [[r.Data.Homan.Kovacs]])\n- (within [[Flip Operation]]). See [[Copy Operation]]\n- defined as an [[Event]] that selects the states of a [[System]]"
+      },
+      "date": 1708013246131
+    },
+    {
+      "type": "add",
+      "id": "492146a37540453e",
+      "item": {
+        "type": "markdown",
+        "id": "492146a37540453e",
+        "text": "- (within [[Digital Garden]])"
+      },
+      "after": "a1b0add945518273",
+      "date": 1708013255141
+    },
+    {
+      "id": "ef9fdbda88d22463",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "e24ee68ad6bdc819",
+        "a7a2ad238da3b5a3",
+        "8cfa51bac5b6fca5",
+        "a1b0add945518273",
+        "492146a37540453e",
+        "ef9fdbda88d22463",
+        "05a6c5aec7a6f32e",
+        "373cd966807a3e06",
+        "fb4991842170bba4",
+        "97064d8d2af32ff7",
+        "7be0dccee30ce740",
+        "70f92f8faafa3394",
+        "2dca238d90104476",
+        "113ed091d364bbc5",
+        "56f4dfc681d9371f",
+        "0c21f9d14c2bca90",
+        "ca36da70c1c90cf3",
+        "41682db8bb604a0e",
+        "133dfc8f00f02bc6"
+      ],
+      "date": 1708013287121
+    },
+    {
+      "type": "add",
+      "id": "4fbe113d6671ffba",
+      "item": {
+        "type": "paragraph",
+        "id": "4fbe113d6671ffba",
+        "text": "[[Icon Language]]"
+      },
+      "after": "ca36da70c1c90cf3",
+      "date": 1708035715008
+    },
+    {
+      "type": "add",
+      "id": "0cde9f4fdc4dd016",
+      "item": {
+        "type": "paragraph",
+        "id": "0cde9f4fdc4dd016",
+        "text": "[[Iconic Arithmetic]]"
+      },
+      "after": "4fbe113d6671ffba",
+      "date": 1708036007436
     }
   ]
 }

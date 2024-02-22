@@ -17,12 +17,9 @@
       "text": "[[Digital Antinets]] (within [[Antinet]])"
     },
     {
-      "type": "reference",
-      "id": "8818f6f5d17b30e3",
-      "site": "wiki.foprop.org",
-      "slug": "design-justice",
-      "title": "Design justice",
-      "text": "Here we describe what we mean in foprop by design justice, and why it matters in a practice concerned with [[Pattern Language]] and formación."
+      "type": "paragraph",
+      "id": "ef3c144276f9e639",
+      "text": "[[Design justice]]"
     },
     {
       "type": "paragraph",
@@ -126,6 +123,11 @@
     },
     {
       "type": "paragraph",
+      "id": "9c0377dd8b87e25f",
+      "text": "- [[draw]] (within [[Story Telling]])"
+    },
+    {
+      "type": "paragraph",
       "id": "b9c20cd9baa7455d",
       "text": "[[Double You]]"
     },
@@ -163,6 +165,44 @@
       "type": "paragraph",
       "id": "38ab009ebb57216b",
       "text": "[[Dualism]] (within [[Crossing the Boundary]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "5d26edef2eba7448",
+      "text": "[[DITA]] (within [[serialize]] [[Hypertext]] for print) See: [[Story Telling]], [[Fuel]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "2a7e7a940cc1c90c",
+      "text": "[[Double Contingency]]"
+    },
+    {
+      "type": "markdown",
+      "id": "e431a3090c9e20b7",
+      "text": "**[[disappear]]**"
+    },
+    {
+      "type": "paragraph",
+      "id": "c03a40e57d0d2328",
+      "text": "[[DISCERN]], the computer-simulated neural network model (within [[Subsymbolic Natural Language Processing]])"
+    },
+    {
+      "type": "markdown",
+      "id": "6cb2dc5273f26674",
+      "text": "⇒ [[Dot]] ⇒ [[Trajectory]] ⇒ [[Event]] ⇒ [[collect]] ⇒ [[enclose]] ⇒ [[Circle]] See also [[Homeostasis]], [[Movement]] (within a [[Circle]]), [[Bestand]] (within [[Systemrationalität und Weltrationalität]]) → \"**[[~/dot/0]]**\""
+    },
+    {
+      "type": "reference",
+      "id": "ec6d5f60c118e850",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "d",
+      "title": "D",
+      "text": "End of List Indexcard"
+    },
+    {
+      "type": "frame",
+      "id": "bfaebd61519dfa08",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
     }
   ],
   "journal": [
@@ -1244,6 +1284,263 @@
         "text": "[[Dualism]] (within [[Crossing the Boundary]])"
       },
       "date": 1707405983926
+    },
+    {
+      "id": "ec6d5f60c118e850",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "ec6d5f60c118e850",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "d",
+        "title": "D",
+        "text": "End of List Indexcard"
+      },
+      "after": "38ab009ebb57216b",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1707797137023
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bfaebd61519dfa08"
+      },
+      "id": "bfaebd61519dfa08",
+      "type": "add",
+      "after": "ec6d5f60c118e850",
+      "date": 1707797149212
+    },
+    {
+      "type": "edit",
+      "id": "bfaebd61519dfa08",
+      "item": {
+        "type": "frame",
+        "id": "bfaebd61519dfa08",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      },
+      "date": 1707797151255
+    },
+    {
+      "type": "add",
+      "id": "ef3c144276f9e639",
+      "item": {
+        "type": "paragraph",
+        "id": "ef3c144276f9e639",
+        "text": "[[Design justice]]"
+      },
+      "after": "c3f7094b674b5106",
+      "date": 1707797209052
+    },
+    {
+      "type": "remove",
+      "id": "8818f6f5d17b30e3",
+      "date": 1707797211894
+    },
+    {
+      "type": "add",
+      "id": "5d26edef2eba7448",
+      "item": {
+        "type": "paragraph",
+        "id": "5d26edef2eba7448",
+        "text": "[[DITA]] (within)"
+      },
+      "after": "38ab009ebb57216b",
+      "date": 1707915638964
+    },
+    {
+      "id": "2f96fb4104128cce",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "2f96fb4104128cce",
+        "text": "[[serialize]] [[Hypertext]] for print See: [[Story Telling]], [[Fuel]]"
+      },
+      "after": "5d26edef2eba7448",
+      "attribution": {
+        "page": "S"
+      },
+      "date": 1707915667485
+    },
+    {
+      "type": "remove",
+      "id": "2f96fb4104128cce",
+      "date": 1707915672208
+    },
+    {
+      "type": "edit",
+      "id": "5d26edef2eba7448",
+      "item": {
+        "type": "paragraph",
+        "id": "5d26edef2eba7448",
+        "text": "[[DITA]] (within [[serialize]] [[Hypertext]] for print) See: [[Story Telling]], [[Fuel]]"
+      },
+      "date": 1707915681878
+    },
+    {
+      "type": "edit",
+      "id": "bfaebd61519dfa08",
+      "item": {
+        "type": "frame",
+        "id": "bfaebd61519dfa08",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1707997378883
+    },
+    {
+      "type": "add",
+      "id": "2a7e7a940cc1c90c",
+      "item": {
+        "type": "paragraph",
+        "id": "2a7e7a940cc1c90c",
+        "text": "[[Double Contingency]]"
+      },
+      "after": "5d26edef2eba7448",
+      "date": 1708006853121
+    },
+    {
+      "type": "add",
+      "id": "9c0377dd8b87e25f",
+      "item": {
+        "type": "paragraph",
+        "id": "9c0377dd8b87e25f",
+        "text": "- [[draw]]"
+      },
+      "after": "1ef00789eb411671",
+      "date": 1708009189273
+    },
+    {
+      "type": "edit",
+      "id": "9c0377dd8b87e25f",
+      "item": {
+        "type": "paragraph",
+        "id": "9c0377dd8b87e25f",
+        "text": "- [[draw]] (within [[Story Telling]])"
+      },
+      "date": 1708009382597
+    },
+    {
+      "type": "add",
+      "id": "e431a3090c9e20b7",
+      "item": {
+        "type": "paragraph",
+        "id": "e431a3090c9e20b7",
+        "text": "**[[disappear]]**"
+      },
+      "after": "2a7e7a940cc1c90c",
+      "date": 1708084985178
+    },
+    {
+      "type": "edit",
+      "id": "e431a3090c9e20b7",
+      "item": {
+        "type": "markdown",
+        "id": "e431a3090c9e20b7",
+        "text": "**[[disappear]]**"
+      },
+      "date": 1708084986468
+    },
+    {
+      "type": "add",
+      "id": "c03a40e57d0d2328",
+      "item": {
+        "type": "paragraph",
+        "id": "c03a40e57d0d2328",
+        "text": "[[DISCERN]], the computer-simulated neural network model (within [[Subsymbolic Natural Language Processing)"
+      },
+      "after": "2a7e7a940cc1c90c",
+      "date": 1708252087770
+    },
+    {
+      "id": "c03a40e57d0d2328",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "3b173583abd743d9",
+        "c3f7094b674b5106",
+        "ef3c144276f9e639",
+        "09a74f9da482971a",
+        "b50af34236cc284c",
+        "d751a55508a2e466",
+        "74a63c8d7e24effa",
+        "3e10e1f476eea9f5",
+        "e61ebe88465e4bd0",
+        "6a7a81b6bf85de77",
+        "9a61ac91750fe6b9",
+        "0974aa0b1a845547",
+        "b1af6d0339c5431c",
+        "27758e591aae0259",
+        "0f26ad40f5a4cdbf",
+        "e45895e5fc86805e",
+        "002bf7d894fd75c2",
+        "0cb21b71eb42fcf3",
+        "4ad794b9696e303e",
+        "9def10749950d980",
+        "0e1cdf743667930f",
+        "0d48e34c9ce65a67",
+        "1ef00789eb411671",
+        "9c0377dd8b87e25f",
+        "b9c20cd9baa7455d",
+        "4e728fc231087121",
+        "6400b8a4da6809dc",
+        "e9113e50f10d06d1",
+        "50dd6548e1dd1ec7",
+        "af6e5480f6cbd151",
+        "6139caa97be7bf0f",
+        "38ab009ebb57216b",
+        "5d26edef2eba7448",
+        "2a7e7a940cc1c90c",
+        "e431a3090c9e20b7",
+        "c03a40e57d0d2328",
+        "ec6d5f60c118e850",
+        "bfaebd61519dfa08"
+      ],
+      "date": 1708252090165
+    },
+    {
+      "type": "edit",
+      "id": "c03a40e57d0d2328",
+      "item": {
+        "type": "paragraph",
+        "id": "c03a40e57d0d2328",
+        "text": "[[DISCERN]], the computer-simulated neural network model (within [[Subsymbolic Natural Language Processing]])"
+      },
+      "date": 1708252096520
+    },
+    {
+      "id": "6cb2dc5273f26674",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "6cb2dc5273f26674",
+        "text": "⇒ [[Dot]] ⇒ [[Trajectory]] ⇒ [[Event]] ⇒ [[collect]] ⇒ [[enclose]] ⇒ [[Circle]] See also [[Homeostasis]], [[Movement]] (within a [[Circle]]), [[Bestand]] (within [[Systemrationalität und Weltrationalität]]) "
+      },
+      "after": "c03a40e57d0d2328",
+      "attribution": {
+        "page": "~/dot/0"
+      },
+      "date": 1708354197195
+    },
+    {
+      "type": "edit",
+      "id": "6cb2dc5273f26674",
+      "item": {
+        "type": "paragraph",
+        "id": "6cb2dc5273f26674",
+        "text": "⇒ [[Dot]] ⇒ [[Trajectory]] ⇒ [[Event]] ⇒ [[collect]] ⇒ [[enclose]] ⇒ [[Circle]] See also [[Homeostasis]], [[Movement]] (within a [[Circle]]), [[Bestand]] (within [[Systemrationalität und Weltrationalität]]) → \"**[[~/dot/0]]**\""
+      },
+      "date": 1708354228643
+    },
+    {
+      "type": "edit",
+      "id": "6cb2dc5273f26674",
+      "item": {
+        "type": "markdown",
+        "id": "6cb2dc5273f26674",
+        "text": "⇒ [[Dot]] ⇒ [[Trajectory]] ⇒ [[Event]] ⇒ [[collect]] ⇒ [[enclose]] ⇒ [[Circle]] See also [[Homeostasis]], [[Movement]] (within a [[Circle]]), [[Bestand]] (within [[Systemrationalität und Weltrationalität]]) → \"**[[~/dot/0]]**\""
+      },
+      "date": 1708354230805
     }
   ]
 }

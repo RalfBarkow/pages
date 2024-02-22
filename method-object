@@ -1,0 +1,882 @@
+{
+  "title": "Method Object",
+  "story": [
+    {
+      "type": "html",
+      "text": "From pages 34-37 of the [[Smalltalk Best Practice Patterns]].",
+      "id": "27863d4bb0c64bc103817435d450dc1d"
+    },
+    {
+      "type": "html",
+      "text": "\nIf a method has several temps and parameters, it can be difficult to break it up with [[Composed Method]]. Each sub-method requires too many parameters for the code to read well.",
+      "id": "545d5f044b9c7cb6869ce7b89c7c135f"
+    },
+    {
+      "type": "html",
+      "text": "\nInstead:",
+      "id": "234bfbf0329cd8b87e065540cdf61a51"
+    },
+    {
+      "type": "html",
+      "text": " Create a new class",
+      "id": "c4897a09e3464bb23c418d57eb4665ac"
+    },
+    {
+      "type": "html",
+      "text": " Give the class an instance variable for each temporary variable and parameter of the original method, plus an instance variable for the original receiver, if it is used",
+      "id": "296dffbb9265e3704756e25a4dcc5549"
+    },
+    {
+      "type": "html",
+      "text": " Give the class one method, compute, whose body is the body of the original method",
+      "id": "457baf7e604abd601287a022707517f4"
+    },
+    {
+      "type": "html",
+      "text": " Replace the original method with one that creates an instance of the new class, constructed with the parameters and receiver of the original method, and invokes \"compute\"",
+      "id": "8f2c94bbb41a793a74e674fd13470bdf"
+    },
+    {
+      "type": "html",
+      "text": "\nNote that this process consists of two smaller refactorings: steps 1-3, and step 4. [[Test Every Refactoring]].",
+      "id": "bdfb9e9e3e7b0dab8a6cf72a0c0e310f"
+    },
+    {
+      "type": "html",
+      "text": "\nYou will find that the new class is easy to refactor. The sub-methods that were so painful to separate before become trivial, because all the methods share the same name space.",
+      "id": "240148a4af1240d3d025a8069b0954d1"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4198eb69e9b55a274d31fade9a77313f"
+    },
+    {
+      "type": "html",
+      "text": "This looks like a [[Functor Object]] to me ... <i>or when their use hinders clarity they can be considered [[Polter Geists]].</i>",
+      "id": "3ebf4703e1d32df7fa906322d41a7a0a"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4198eb69e9b55a274d31fade9a77313f"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Method Object]] is the twin brother of [[Lexical Closure]]. They're slightly different ways of implementing exactly the same concept: A function that can share its arguments among subfunctions without passing them explicitly. (And whose evaluation can be delayed after the arguments are passed!)",
+      "id": "005f1407cba729ee04279215c81c6a0b"
+    },
+    {
+      "type": "html",
+      "text": "\nThis [[Python Language]] [[Method Object]]:",
+      "id": "872313164a088e7f8959b9ea51423269"
+    },
+    {
+      "type": "code",
+      "text": " class Method''''''Object:\n     def __init__(self, x, y, z):\n        [store x, y and z]",
+      "id": "b3022e0bc15cbc553885407ec464dfff"
+    },
+    {
+      "type": "code",
+      "text": "     def __call__(self):\n        [do stuff with x, y and z]",
+      "id": "15b40e76ccbc9a929b19133ee6bd0e04"
+    },
+    {
+      "type": "code",
+      "text": "     def sub(self):\n        [sub-function that has access to x, y and z]",
+      "id": "4f4812f84a259c07542789a2ffd043a8"
+    },
+    {
+      "type": "html",
+      "text": "\nCould instead be written as a [[Lexical Closure]], if Python supported them*:",
+      "id": "9da9c3bd7e238f578ff26a108a4e351f"
+    },
+    {
+      "type": "code",
+      "text": " def Method''''''Function(x, y, z):\n     def compute():\n         [do stuff with x, y and z]",
+      "id": "3c51bd867eab06335663e4a47b77e54b"
+    },
+    {
+      "type": "code",
+      "text": "     def sub():\n         [sub-function that has access to x, y and z]",
+      "id": "67e954d8aa24204437c15e4bfb4ad9f8"
+    },
+    {
+      "type": "code",
+      "text": "     return compute()",
+      "id": "c8e7012c14e57e1b036b7601ee059526"
+    },
+    {
+      "type": "html",
+      "text": "\nAnd the syntax for using either is identical!",
+      "id": "6fa7464e525b1f6f0d3cc1eb02f6ffa6"
+    },
+    {
+      "type": "code",
+      "text": " m = Method''''''Object(x, y, z)\n print m()",
+      "id": "ac0f8f78f94abc1d226136a461660276"
+    },
+    {
+      "type": "code",
+      "text": " c = Method''''''Function(x, y, z)\n print c()",
+      "id": "f1bae111de1a00ae7520a526c0a58b0d"
+    },
+    {
+      "type": "html",
+      "text": " Python does give you read access to [[Lexical Variables]], but not full write access (due to its name-binding and scoping rules).",
+      "id": "6a5cab2d32a40ad54d1b0105d09322ef"
+    },
+    {
+      "type": "html",
+      "text": " <i>As of Python 3 (and possibly earlier Pythons), complete [[Lexical Scoping]] can be achieved using the nonlocal keyword. The following version gives each subfunction both read and write access to x, y, and z.</i>",
+      "id": "11f87168a98736d89086b7ff190df43c"
+    },
+    {
+      "type": "code",
+      "text": " def Method''''''Function(x, y, z):\n     def compute():\n         nonlocal x, y, z\n         [do stuff with x, y and z]",
+      "id": "df53fb4e83007344c7a233e4c2757cef"
+    },
+    {
+      "type": "code",
+      "text": "     def sub():\n         nonlocal x, y, z\n         [sub-function that has access to x, y and z]",
+      "id": "3e1d4d330a45dfb873c7c74324e2efd8"
+    },
+    {
+      "type": "code",
+      "text": "     return compute()",
+      "id": "c8e7012c14e57e1b036b7601ee059526"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4198eb69e9b55a274d31fade9a77313f"
+    },
+    {
+      "type": "html",
+      "text": "<i>Example anyone?</i>  See [[Method Object Example]]",
+      "id": "9f66ed505834f4fbb4878a95b1da82fc"
+    },
+    {
+      "type": "html",
+      "text": "<i>I was hoping for an actual or somewhat realistic domain [[Use Case]] rather than code framework.</i>",
+      "id": "1217f51d9cf391fe0a1e04a46503a549"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4198eb69e9b55a274d31fade9a77313f"
+    },
+    {
+      "type": "html",
+      "text": "\nI once created a method object to clean up some transaction-pairing code in a portfolio management system. Much to my surprise, the new object began to take on a pivotal role in our evolving system, to the point that the initial method was reduced from producing answers to producing objects. That is, it became a [[Factory Method]] for objects we now realized were more <i>in the domain</i> than the answers we had previously sought.",
+      "id": "c685ee093e3b70cd06491a96410d6f5a"
+    },
+    {
+      "type": "html",
+      "text": "\nThe object had been named after the method that spawned it, a verb turned into a noun. With its increased importance, we thought the object should be named properly but found that our domain specialists couldn't help. They ended up adopting our nominalization.",
+      "id": "663ac5b36689bad6e8917074f547beed"
+    },
+    {
+      "type": "html",
+      "text": "\nI've cited this example many times as a case where evolutionary modeling, refactoring, and simple source code esthetics led to a discovery <i>in the domain</i> unreachable by other means. I've been quizzed on this by my analysis-oriented friends: (surely) if I had worked a little harder up front, couldn't I have discovered this thing and have avoided ever programming it any other way? But the answer is no. It wasn't there as a concept in the expert's mind until we put it there. The object would remain lost today were it not for disgust for code that failed to be clear.",
+      "id": "392b838963815a0e15b6a68b960e61e1"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Ward Cunningham]]",
+      "id": "5aac33169e3e5430f9a1a86190914c43"
+    },
+    {
+      "type": "html",
+      "text": "\nSee [[What Is An Advancer]].",
+      "id": "45b60466a719f1d509ecebeaf60903f6"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4198eb69e9b55a274d31fade9a77313f"
+    },
+    {
+      "type": "html",
+      "text": "I agree that these things cannot generally be found at analysis time; mostly because the things that in my experience have wanted to become [[Method Object]]s tend to be algorithms. While doing OOA, algorithmic complexity is usually not a consideration. I suppose you <i>could</i> anticipate that you would need an algorithm if you set yourself up to look for them, but most of us don't. -- [[Russell Gold]]",
+      "id": "a77bdf8b6a060d91aed3a9f91695bdb6"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4198eb69e9b55a274d31fade9a77313f"
+    },
+    {
+      "type": "html",
+      "text": "I believe that one line of the evolution of objects has them grow out of stack frames and closures. (In this pattern, it's the stack frame that becomes the object - the instance - rather than the method itself.) This isn't always an illuminating way of looking at what objects are, but it can help understand patterns like this.",
+      "id": "37c1543413fed0902f7c43b188e2c684"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Dave Harris]]",
+      "id": "c5b2a9180f3718f559c8c8405155b6a4"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4198eb69e9b55a274d31fade9a77313f"
+    },
+    {
+      "type": "html",
+      "text": "To a CPU architect hardware guy, the [[Method Object]] refactoring is quite interesting, since it moves data that would be stack allocated into the object. As [[Dave Harris]] comments, some object patterns may have evolved out of stack frames and closures. Now, if the [[Method Object]] is stack allocated, as in C++, then the data members of the object will be stack allocated; but in languages like Java and, I believe, Smalltalk, the [[Method Object]] will be heap allocated. In many ways, [[Method Object]] is a semi-reentrant form of the old FORTRAN calling convention, where a stack memory region was allocated for parameters.",
+      "id": "43fc988764c9c2d1715a2472723d694b"
+    },
+    {
+      "type": "html",
+      "text": "\nThis is interesting because CPU architects are just getting around to hardware optimizations based on the stack pointer. Specialized stack caches were found in the Intel 960 and an AT&T chip. More recently, memory renaming hardware has been proposed that essentially converts stack references to registers.",
+      "id": "5b87430fe8eb741e7ccdaaedc30deebf"
+    },
+    {
+      "type": "html",
+      "text": "\nObviously, if refactorings like [[Method Object]] are widely used, and move data from stack to heap, these stack oriented hardware optimizations will be less useful. That's okay: there are more general techniques. It's just that the stack-oriented techniques are so much easier to implement.",
+      "id": "fb93de6c026a1bd7e090f79a60a9b815"
+    },
+    {
+      "type": "html",
+      "text": "\nFurther, good compilers can often arrange to pass parameters in registers. C++ compilers almost certainly will not be able to do so for a [[Method Object]]; even Java compiler disambiguation is probably incapable of register allocating a [[Method Object]].",
+      "id": "0f4090f84165d54074504c476410cf00"
+    },
+    {
+      "type": "html",
+      "text": "\nOh, yeah, doesn't a bit of special care need to be taken if the function refactored by [[Method Object]] is potentially recursive, or even just reentrant?  A [[Method Object]] needs to be allocated for each potentially simultaneously active calling context; allocating the [[Method Object]] as a local will suffice.",
+      "id": "cf292ee9881ecd6c38522f50bd080f4f"
+    },
+    {
+      "type": "html",
+      "text": "\nI'm interested in any other implications of object refactorings.",
+      "id": "cf90ca04dc5f0bf4bab546f07b49289a"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Andy Glew]]",
+      "id": "6b92458e6a8e18deb9631dbe30a3fc22"
+    },
+    {
+      "type": "html",
+      "text": "--",
+      "id": "ae47dad0720f8334c76b6e5ac2356d19"
+    },
+    {
+      "type": "html",
+      "text": "\nThat is an interesting point. But in general I believe compilers should be able to optimize anyway. To address your specific point: Java _can_ actually do \"escape analysis\" (since Java SE 6), which means it will track instances created within a method. If the instance never \"escapes\" the method, it can safely be allocated on the stack. Thus method object instances might actually be put on the stack by the optimizer. See [http://www.ibm.com/developerworks/java/library/j-jtp09275.html www.ibm.com] for details.",
+      "id": "21cc9c94863d0999929d4d4f752cdb1a"
+    },
+    {
+      "type": "html",
+      "text": "-- Sebastian Leske",
+      "id": "da5d85fd78f75e6ce0590e98642a29a4"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4198eb69e9b55a274d31fade9a77313f"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Smalltalk Best Practice Patterns]] and the [[Refactoring Book]] both say that each parameter from the old method should become a parameter on the constructor of the [[Method Object]]. Intuitively I would have made them parameters on the \"compute\" method (and maybe even the parameter that is pointing back to the original object). Any advantages/disadvantages fo either solution? -- [[Marko Schulz]]",
+      "id": "ab869aa8c82da61ca0b4e14c63939258"
+    },
+    {
+      "type": "html",
+      "text": "<i>Well, sending them to the constructor can be more optimal if you are going to reuse the [[Method Object]] over and over again with the same inputs. However, sending them to the compute method allows you to use the same object with different inputs.</i>",
+      "id": "e0695c479132dca95a27e32db9c84fc5"
+    },
+    {
+      "type": "html",
+      "text": "\nPassing the parameters to the constructor makes it easier to refactor your new object, since you won't have to muck with parameters every time you move code out of your <i>compute</i> method into another method. Also, being able to use the same method object with different inputs is an optimization done to avoid the cost of an extra object creation and deletion. Like all optimizations, it should never be done until necessary.",
+      "id": "d5e04fca8b1b00605fbdead9b64c73c5"
+    },
+    {
+      "type": "html",
+      "text": "\nPassing the parameters to the constructor is thread-safe. Otherwise, you must ensure that the compute method is synchronized so it can never be called in the middle of another computation. -- [[Juan Casares]]",
+      "id": "2516141542a79a4ad8c92dbdcbc46467"
+    },
+    {
+      "type": "html",
+      "text": "\nConceptually, the reason you're making a [[Method Object]] is that you're saying \"this algorithm is complicated enough to make an object with its own instance identity.\" That identity is determined by its inputs, since that's the only thing to distinguish one instance of your [[Method Object]] class from another. If you pass the inputs in for the \"compute\" method, than you don't have any significant object identity ... you might as well just make it a class method on a utility class at that point. -- francis",
+      "id": "3c3516e736464a0ceb9f06efbdd2dd06"
+    },
+    {
+      "type": "html",
+      "text": "<i>Specifically, if you really need the [[Method Object]], then the first thing the compute method must do is assign the parameters to the instance variables.  -- [[Jack Rich]]</i>",
+      "id": "fab051d990f03ca45c3744b789c33e4d"
+    },
+    {
+      "type": "html",
+      "text": "\nI'm much, much too lazy to do that.",
+      "id": "db2daa22a08038eef273032839ad3a22"
+    },
+    {
+      "type": "html",
+      "text": "\nWhat I'm doing right now is passing all of the bindings (variable names -> values) when I instantiate the method object. Then I have a single generic method to suck all of the values into the variables. That method works no matter how many variables there are or what they're named.",
+      "id": "6f87007209f5e60691406bedf9d3fb2a"
+    },
+    {
+      "type": "html",
+      "text": "\nBut I'm changing that so that instead of constructing a bindings dictionary and then passing it, I'm going to programmatically call all of the accessors in the method object with the appropriate value. This would allow me to perform basic transformations on the values as they come in, making my compute method all but disappear. It's now down to just a result object creation method.",
+      "id": "bff6c6509e60f8b7f1321ea878685d67"
+    },
+    {
+      "type": "html",
+      "text": "\nThe advantages of using distinct accessors for each variable are that you can easily see,",
+      "id": "4b5825a2331d0840722817f00473a46e"
+    },
+    {
+      "type": "html",
+      "text": " what values don't have any processing on them",
+      "id": "2bf252fdcd715325adc04798fd4f0e98"
+    },
+    {
+      "type": "html",
+      "text": " what values are discarded (make a #junk: method that does nothing)",
+      "id": "ce90ae08211fe678bb74589c815e6bc8"
+    },
+    {
+      "type": "html",
+      "text": " operations that work on multiple values from those that work on single values",
+      "id": "65668f0f895f14a2fe20b916cecb03b3"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4198eb69e9b55a274d31fade9a77313f"
+    },
+    {
+      "type": "html",
+      "text": "<i>Refactoring into a [[Method Object]] is one of the most powerful refactorings I know, but I have yet to grasp really </i>why<i> it has such a big impact on the code. With most refactorings I can imagine beforehand how much nicer the code will be, but after introducing a [[Method Object]] I'm often gladly surprised. I may even use this refactoring too seldom because I can't imagine the result.</i>",
+      "id": "8bae0573bfbad7f88abcf89e5c5c77bb"
+    },
+    {
+      "type": "html",
+      "text": "\nThe namespace inside of a method is rather limited. That inside of an object is much more powerful, as it can be shared between methods. Long stretches of logic require more powerful mechanisms to make their structure clear. Perhaps that's why moving from a lexical namespace to an object namespace does so much to clarify the logic. The sapling has been transplanted from a pot to real soil, and now it can grow more comfortably.",
+      "id": "2b5ca7d84ff13a10b66c84ea199394bf"
+    },
+    {
+      "type": "html",
+      "text": "<i>If you objectify something explicitly, you are free to really work with it. You are not limited to the implicit operation of the programming language. For example, say your method needs to live in a different module, even a different machine, you have an identifiable lump which may be moved, the 'dotted lines' for such a restructuring already exist.</i>",
+      "id": "6790ef2a07b18123e490b000fd3bd090"
+    },
+    {
+      "type": "html",
+      "text": "<i>I tend to think of everything as a simple object in some sense. Sometimes, the identity/encapsulation of the object is not at the same scale as the object so it cannot be treated individually. That is a form of optimization away from my conceptual default that every entity has an explicitly structured identity. I particularly like Linda for its support of this approach. Smalltalk appears to have a similar perfume.</i>",
+      "id": "774dd046bf022a589e2c221a51c507c9"
+    },
+    {
+      "type": "html",
+      "text": "\nA shorter way to say the above is simply that you're using the method object to implement [[Dynamic Scoping]]. See [[Dynamic Scoping In Smalltalk]] for an example.",
+      "id": "062e5704932b6262bba9ad5e0fd4bbe9"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4198eb69e9b55a274d31fade9a77313f"
+    },
+    {
+      "type": "html",
+      "text": "\nRecently, I've been working on an [[Objective Cee]] object, \"OSBlock\", that acts like a Smalltalk block.  I've made a lot of progress, but the parsing(of a string representing objective-c code) represents some complexity. I've ended up having a parser [[Method Object]] that turns a string into a tree structure by means of a string-scanning [[Method Object]] that scans through a string and keeps track of 'depth'(of square brackets: in [foo bar:[baz gaz]], foo bar: is at depth 1, and baz gaz is at depth 2) so that another [[Method Object]] can 'chunk' a string according to depth(such that the aforementioned example string is chunked into: \"_chunk_1_0\", \"foo bar:_chunk_2_0\", and \"baz gaz\").",
+      "id": "3c658b32c3111ad40bc53699ebf75594"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Method Object]] is a very powerful and useful refactoring, that gets a lot of noise out of an existing object.  <i>Usually, when a whole bunch of code is sitting around, it could be more useful somewhere else</i>- especially if it declares a ton of temps, in which case it's practically screaming 'make me an object.'  The string chunking method was larger than many of my existing objects were, the first time I implemented it. I [[Method Object]]ed it, then reimplemented it using the old interface, and it was nice.",
+      "id": "8e834d02f4d2ebba7be30038306757c7"
+    },
+    {
+      "type": "html",
+      "text": "--[[Joe Osborn]]",
+      "id": "eec1152afbd817a59e81db169cb954e6"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4198eb69e9b55a274d31fade9a77313f"
+    },
+    {
+      "type": "html",
+      "text": "I've found this refactoring very useful.\nI worked at a company where a [[Net Negative Producing Programmer]] was regarded as an all-powerful guru.  Lots of [[Long Method Smell]] in his code.  I had to work with some functionality which he had written, in a very non-[[Object Oriented]] way, as a gigantic static method on a class that was essentially a placeholder to put the method.",
+      "id": "8a4b0ee8d22429748b4cfd2e73f49b03"
+    },
+    {
+      "type": "html",
+      "text": "\nThe class was actually not intended to be instantiated--this was in [[Java Language]], and he'd made the constructor private.  I made the constructor public, and made it take all the data it needed in arguments and put it in instance variables.  Suddenly I realized I'd done the [[Method Object]] refactoring, which I'd read about on this page.  After that, the [[Extract Method]] refactorings I had wanted to do before suddenly became very easy.  With [[Extract Method]] and [[Rename Method]] refactorings, I removed the [[Long Method Smell]].",
+      "id": "b7890c3ce09f0c2323c29146220fa72c"
+    },
+    {
+      "type": "html",
+      "text": "\nThen I discovered that this class and another class were similar, and performed an [[Extract Superclass]] to make them siblings.--[[Apoorva Muralidhara]]",
+      "id": "89af28b3a1b3023218d5e6e031d90f70"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4198eb69e9b55a274d31fade9a77313f"
+    },
+    {
+      "type": "html",
+      "text": "\nI'm looking for a [[Method Object Example]] before I proceed. --[[Terry Lorber]]",
+      "id": "c95adb12715d0aedffd36be5efe2cc79"
+    },
+    {
+      "type": "html",
+      "text": "\nSee [[Dynamic Scoping In Smalltalk]] for an example.",
+      "id": "acaec77c6930504880b9f630ad848bcd"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?MethodObject c2.com]",
+      "id": "88f56fff2784414727abfbbda7662546"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1419006933000,
+      "id": "64fc7d6c772a6e36f141926ce0d586ca",
+      "type": "create",
+      "item": {
+        "title": "Method Object",
+        "story": [
+          {
+            "type": "html",
+            "text": "From pages 34-37 of the [[Smalltalk Best Practice Patterns]].",
+            "id": "27863d4bb0c64bc103817435d450dc1d"
+          },
+          {
+            "type": "html",
+            "text": "\nIf a method has several temps and parameters, it can be difficult to break it up with [[Composed Method]]. Each sub-method requires too many parameters for the code to read well.",
+            "id": "545d5f044b9c7cb6869ce7b89c7c135f"
+          },
+          {
+            "type": "html",
+            "text": "\nInstead:",
+            "id": "234bfbf0329cd8b87e065540cdf61a51"
+          },
+          {
+            "type": "html",
+            "text": " Create a new class",
+            "id": "c4897a09e3464bb23c418d57eb4665ac"
+          },
+          {
+            "type": "html",
+            "text": " Give the class an instance variable for each temporary variable and parameter of the original method, plus an instance variable for the original receiver, if it is used",
+            "id": "296dffbb9265e3704756e25a4dcc5549"
+          },
+          {
+            "type": "html",
+            "text": " Give the class one method, compute, whose body is the body of the original method",
+            "id": "457baf7e604abd601287a022707517f4"
+          },
+          {
+            "type": "html",
+            "text": " Replace the original method with one that creates an instance of the new class, constructed with the parameters and receiver of the original method, and invokes \"compute\"",
+            "id": "8f2c94bbb41a793a74e674fd13470bdf"
+          },
+          {
+            "type": "html",
+            "text": "\nNote that this process consists of two smaller refactorings: steps 1-3, and step 4. [[Test Every Refactoring]].",
+            "id": "bdfb9e9e3e7b0dab8a6cf72a0c0e310f"
+          },
+          {
+            "type": "html",
+            "text": "\nYou will find that the new class is easy to refactor. The sub-methods that were so painful to separate before become trivial, because all the methods share the same name space.",
+            "id": "240148a4af1240d3d025a8069b0954d1"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4198eb69e9b55a274d31fade9a77313f"
+          },
+          {
+            "type": "html",
+            "text": "This looks like a [[Functor Object]] to me ... <i>or when their use hinders clarity they can be considered [[Polter Geists]].</i>",
+            "id": "3ebf4703e1d32df7fa906322d41a7a0a"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4198eb69e9b55a274d31fade9a77313f"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Method Object]] is the twin brother of [[Lexical Closure]]. They're slightly different ways of implementing exactly the same concept: A function that can share its arguments among subfunctions without passing them explicitly. (And whose evaluation can be delayed after the arguments are passed!)",
+            "id": "005f1407cba729ee04279215c81c6a0b"
+          },
+          {
+            "type": "html",
+            "text": "\nThis [[Python Language]] [[Method Object]]:",
+            "id": "872313164a088e7f8959b9ea51423269"
+          },
+          {
+            "type": "code",
+            "text": " class Method''''''Object:\n     def __init__(self, x, y, z):\n        [store x, y and z]",
+            "id": "b3022e0bc15cbc553885407ec464dfff"
+          },
+          {
+            "type": "code",
+            "text": "     def __call__(self):\n        [do stuff with x, y and z]",
+            "id": "15b40e76ccbc9a929b19133ee6bd0e04"
+          },
+          {
+            "type": "code",
+            "text": "     def sub(self):\n        [sub-function that has access to x, y and z]",
+            "id": "4f4812f84a259c07542789a2ffd043a8"
+          },
+          {
+            "type": "html",
+            "text": "\nCould instead be written as a [[Lexical Closure]], if Python supported them*:",
+            "id": "9da9c3bd7e238f578ff26a108a4e351f"
+          },
+          {
+            "type": "code",
+            "text": " def Method''''''Function(x, y, z):\n     def compute():\n         [do stuff with x, y and z]",
+            "id": "3c51bd867eab06335663e4a47b77e54b"
+          },
+          {
+            "type": "code",
+            "text": "     def sub():\n         [sub-function that has access to x, y and z]",
+            "id": "67e954d8aa24204437c15e4bfb4ad9f8"
+          },
+          {
+            "type": "code",
+            "text": "     return compute()",
+            "id": "c8e7012c14e57e1b036b7601ee059526"
+          },
+          {
+            "type": "html",
+            "text": "\nAnd the syntax for using either is identical!",
+            "id": "6fa7464e525b1f6f0d3cc1eb02f6ffa6"
+          },
+          {
+            "type": "code",
+            "text": " m = Method''''''Object(x, y, z)\n print m()",
+            "id": "ac0f8f78f94abc1d226136a461660276"
+          },
+          {
+            "type": "code",
+            "text": " c = Method''''''Function(x, y, z)\n print c()",
+            "id": "f1bae111de1a00ae7520a526c0a58b0d"
+          },
+          {
+            "type": "html",
+            "text": " Python does give you read access to [[Lexical Variables]], but not full write access (due to its name-binding and scoping rules).",
+            "id": "6a5cab2d32a40ad54d1b0105d09322ef"
+          },
+          {
+            "type": "html",
+            "text": " <i>As of Python 3 (and possibly earlier Pythons), complete [[Lexical Scoping]] can be achieved using the nonlocal keyword. The following version gives each subfunction both read and write access to x, y, and z.</i>",
+            "id": "11f87168a98736d89086b7ff190df43c"
+          },
+          {
+            "type": "code",
+            "text": " def Method''''''Function(x, y, z):\n     def compute():\n         nonlocal x, y, z\n         [do stuff with x, y and z]",
+            "id": "df53fb4e83007344c7a233e4c2757cef"
+          },
+          {
+            "type": "code",
+            "text": "     def sub():\n         nonlocal x, y, z\n         [sub-function that has access to x, y and z]",
+            "id": "3e1d4d330a45dfb873c7c74324e2efd8"
+          },
+          {
+            "type": "code",
+            "text": "     return compute()",
+            "id": "c8e7012c14e57e1b036b7601ee059526"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4198eb69e9b55a274d31fade9a77313f"
+          },
+          {
+            "type": "html",
+            "text": "<i>Example anyone?</i>  See [[Method Object Example]]",
+            "id": "9f66ed505834f4fbb4878a95b1da82fc"
+          },
+          {
+            "type": "html",
+            "text": "<i>I was hoping for an actual or somewhat realistic domain [[Use Case]] rather than code framework.</i>",
+            "id": "1217f51d9cf391fe0a1e04a46503a549"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4198eb69e9b55a274d31fade9a77313f"
+          },
+          {
+            "type": "html",
+            "text": "\nI once created a method object to clean up some transaction-pairing code in a portfolio management system. Much to my surprise, the new object began to take on a pivotal role in our evolving system, to the point that the initial method was reduced from producing answers to producing objects. That is, it became a [[Factory Method]] for objects we now realized were more <i>in the domain</i> than the answers we had previously sought.",
+            "id": "c685ee093e3b70cd06491a96410d6f5a"
+          },
+          {
+            "type": "html",
+            "text": "\nThe object had been named after the method that spawned it, a verb turned into a noun. With its increased importance, we thought the object should be named properly but found that our domain specialists couldn't help. They ended up adopting our nominalization.",
+            "id": "663ac5b36689bad6e8917074f547beed"
+          },
+          {
+            "type": "html",
+            "text": "\nI've cited this example many times as a case where evolutionary modeling, refactoring, and simple source code esthetics led to a discovery <i>in the domain</i> unreachable by other means. I've been quizzed on this by my analysis-oriented friends: (surely) if I had worked a little harder up front, couldn't I have discovered this thing and have avoided ever programming it any other way? But the answer is no. It wasn't there as a concept in the expert's mind until we put it there. The object would remain lost today were it not for disgust for code that failed to be clear.",
+            "id": "392b838963815a0e15b6a68b960e61e1"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Ward Cunningham]]",
+            "id": "5aac33169e3e5430f9a1a86190914c43"
+          },
+          {
+            "type": "html",
+            "text": "\nSee [[What Is An Advancer]].",
+            "id": "45b60466a719f1d509ecebeaf60903f6"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4198eb69e9b55a274d31fade9a77313f"
+          },
+          {
+            "type": "html",
+            "text": "I agree that these things cannot generally be found at analysis time; mostly because the things that in my experience have wanted to become [[Method Object]]s tend to be algorithms. While doing OOA, algorithmic complexity is usually not a consideration. I suppose you <i>could</i> anticipate that you would need an algorithm if you set yourself up to look for them, but most of us don't. -- [[Russell Gold]]",
+            "id": "a77bdf8b6a060d91aed3a9f91695bdb6"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4198eb69e9b55a274d31fade9a77313f"
+          },
+          {
+            "type": "html",
+            "text": "I believe that one line of the evolution of objects has them grow out of stack frames and closures. (In this pattern, it's the stack frame that becomes the object - the instance - rather than the method itself.) This isn't always an illuminating way of looking at what objects are, but it can help understand patterns like this.",
+            "id": "37c1543413fed0902f7c43b188e2c684"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Dave Harris]]",
+            "id": "c5b2a9180f3718f559c8c8405155b6a4"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4198eb69e9b55a274d31fade9a77313f"
+          },
+          {
+            "type": "html",
+            "text": "To a CPU architect hardware guy, the [[Method Object]] refactoring is quite interesting, since it moves data that would be stack allocated into the object. As [[Dave Harris]] comments, some object patterns may have evolved out of stack frames and closures. Now, if the [[Method Object]] is stack allocated, as in C++, then the data members of the object will be stack allocated; but in languages like Java and, I believe, Smalltalk, the [[Method Object]] will be heap allocated. In many ways, [[Method Object]] is a semi-reentrant form of the old FORTRAN calling convention, where a stack memory region was allocated for parameters.",
+            "id": "43fc988764c9c2d1715a2472723d694b"
+          },
+          {
+            "type": "html",
+            "text": "\nThis is interesting because CPU architects are just getting around to hardware optimizations based on the stack pointer. Specialized stack caches were found in the Intel 960 and an AT&T chip. More recently, memory renaming hardware has been proposed that essentially converts stack references to registers.",
+            "id": "5b87430fe8eb741e7ccdaaedc30deebf"
+          },
+          {
+            "type": "html",
+            "text": "\nObviously, if refactorings like [[Method Object]] are widely used, and move data from stack to heap, these stack oriented hardware optimizations will be less useful. That's okay: there are more general techniques. It's just that the stack-oriented techniques are so much easier to implement.",
+            "id": "fb93de6c026a1bd7e090f79a60a9b815"
+          },
+          {
+            "type": "html",
+            "text": "\nFurther, good compilers can often arrange to pass parameters in registers. C++ compilers almost certainly will not be able to do so for a [[Method Object]]; even Java compiler disambiguation is probably incapable of register allocating a [[Method Object]].",
+            "id": "0f4090f84165d54074504c476410cf00"
+          },
+          {
+            "type": "html",
+            "text": "\nOh, yeah, doesn't a bit of special care need to be taken if the function refactored by [[Method Object]] is potentially recursive, or even just reentrant?  A [[Method Object]] needs to be allocated for each potentially simultaneously active calling context; allocating the [[Method Object]] as a local will suffice.",
+            "id": "cf292ee9881ecd6c38522f50bd080f4f"
+          },
+          {
+            "type": "html",
+            "text": "\nI'm interested in any other implications of object refactorings.",
+            "id": "cf90ca04dc5f0bf4bab546f07b49289a"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Andy Glew]]",
+            "id": "6b92458e6a8e18deb9631dbe30a3fc22"
+          },
+          {
+            "type": "html",
+            "text": "--",
+            "id": "ae47dad0720f8334c76b6e5ac2356d19"
+          },
+          {
+            "type": "html",
+            "text": "\nThat is an interesting point. But in general I believe compilers should be able to optimize anyway. To address your specific point: Java _can_ actually do \"escape analysis\" (since Java SE 6), which means it will track instances created within a method. If the instance never \"escapes\" the method, it can safely be allocated on the stack. Thus method object instances might actually be put on the stack by the optimizer. See [http://www.ibm.com/developerworks/java/library/j-jtp09275.html www.ibm.com] for details.",
+            "id": "21cc9c94863d0999929d4d4f752cdb1a"
+          },
+          {
+            "type": "html",
+            "text": "-- Sebastian Leske",
+            "id": "da5d85fd78f75e6ce0590e98642a29a4"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4198eb69e9b55a274d31fade9a77313f"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Smalltalk Best Practice Patterns]] and the [[Refactoring Book]] both say that each parameter from the old method should become a parameter on the constructor of the [[Method Object]]. Intuitively I would have made them parameters on the \"compute\" method (and maybe even the parameter that is pointing back to the original object). Any advantages/disadvantages fo either solution? -- [[Marko Schulz]]",
+            "id": "ab869aa8c82da61ca0b4e14c63939258"
+          },
+          {
+            "type": "html",
+            "text": "<i>Well, sending them to the constructor can be more optimal if you are going to reuse the [[Method Object]] over and over again with the same inputs. However, sending them to the compute method allows you to use the same object with different inputs.</i>",
+            "id": "e0695c479132dca95a27e32db9c84fc5"
+          },
+          {
+            "type": "html",
+            "text": "\nPassing the parameters to the constructor makes it easier to refactor your new object, since you won't have to muck with parameters every time you move code out of your <i>compute</i> method into another method. Also, being able to use the same method object with different inputs is an optimization done to avoid the cost of an extra object creation and deletion. Like all optimizations, it should never be done until necessary.",
+            "id": "d5e04fca8b1b00605fbdead9b64c73c5"
+          },
+          {
+            "type": "html",
+            "text": "\nPassing the parameters to the constructor is thread-safe. Otherwise, you must ensure that the compute method is synchronized so it can never be called in the middle of another computation. -- [[Juan Casares]]",
+            "id": "2516141542a79a4ad8c92dbdcbc46467"
+          },
+          {
+            "type": "html",
+            "text": "\nConceptually, the reason you're making a [[Method Object]] is that you're saying \"this algorithm is complicated enough to make an object with its own instance identity.\" That identity is determined by its inputs, since that's the only thing to distinguish one instance of your [[Method Object]] class from another. If you pass the inputs in for the \"compute\" method, than you don't have any significant object identity ... you might as well just make it a class method on a utility class at that point. -- francis",
+            "id": "3c3516e736464a0ceb9f06efbdd2dd06"
+          },
+          {
+            "type": "html",
+            "text": "<i>Specifically, if you really need the [[Method Object]], then the first thing the compute method must do is assign the parameters to the instance variables.  -- [[Jack Rich]]</i>",
+            "id": "fab051d990f03ca45c3744b789c33e4d"
+          },
+          {
+            "type": "html",
+            "text": "\nI'm much, much too lazy to do that.",
+            "id": "db2daa22a08038eef273032839ad3a22"
+          },
+          {
+            "type": "html",
+            "text": "\nWhat I'm doing right now is passing all of the bindings (variable names -> values) when I instantiate the method object. Then I have a single generic method to suck all of the values into the variables. That method works no matter how many variables there are or what they're named.",
+            "id": "6f87007209f5e60691406bedf9d3fb2a"
+          },
+          {
+            "type": "html",
+            "text": "\nBut I'm changing that so that instead of constructing a bindings dictionary and then passing it, I'm going to programmatically call all of the accessors in the method object with the appropriate value. This would allow me to perform basic transformations on the values as they come in, making my compute method all but disappear. It's now down to just a result object creation method.",
+            "id": "bff6c6509e60f8b7f1321ea878685d67"
+          },
+          {
+            "type": "html",
+            "text": "\nThe advantages of using distinct accessors for each variable are that you can easily see,",
+            "id": "4b5825a2331d0840722817f00473a46e"
+          },
+          {
+            "type": "html",
+            "text": " what values don't have any processing on them",
+            "id": "2bf252fdcd715325adc04798fd4f0e98"
+          },
+          {
+            "type": "html",
+            "text": " what values are discarded (make a #junk: method that does nothing)",
+            "id": "ce90ae08211fe678bb74589c815e6bc8"
+          },
+          {
+            "type": "html",
+            "text": " operations that work on multiple values from those that work on single values",
+            "id": "65668f0f895f14a2fe20b916cecb03b3"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4198eb69e9b55a274d31fade9a77313f"
+          },
+          {
+            "type": "html",
+            "text": "<i>Refactoring into a [[Method Object]] is one of the most powerful refactorings I know, but I have yet to grasp really </i>why<i> it has such a big impact on the code. With most refactorings I can imagine beforehand how much nicer the code will be, but after introducing a [[Method Object]] I'm often gladly surprised. I may even use this refactoring too seldom because I can't imagine the result.</i>",
+            "id": "8bae0573bfbad7f88abcf89e5c5c77bb"
+          },
+          {
+            "type": "html",
+            "text": "\nThe namespace inside of a method is rather limited. That inside of an object is much more powerful, as it can be shared between methods. Long stretches of logic require more powerful mechanisms to make their structure clear. Perhaps that's why moving from a lexical namespace to an object namespace does so much to clarify the logic. The sapling has been transplanted from a pot to real soil, and now it can grow more comfortably.",
+            "id": "2b5ca7d84ff13a10b66c84ea199394bf"
+          },
+          {
+            "type": "html",
+            "text": "<i>If you objectify something explicitly, you are free to really work with it. You are not limited to the implicit operation of the programming language. For example, say your method needs to live in a different module, even a different machine, you have an identifiable lump which may be moved, the 'dotted lines' for such a restructuring already exist.</i>",
+            "id": "6790ef2a07b18123e490b000fd3bd090"
+          },
+          {
+            "type": "html",
+            "text": "<i>I tend to think of everything as a simple object in some sense. Sometimes, the identity/encapsulation of the object is not at the same scale as the object so it cannot be treated individually. That is a form of optimization away from my conceptual default that every entity has an explicitly structured identity. I particularly like Linda for its support of this approach. Smalltalk appears to have a similar perfume.</i>",
+            "id": "774dd046bf022a589e2c221a51c507c9"
+          },
+          {
+            "type": "html",
+            "text": "\nA shorter way to say the above is simply that you're using the method object to implement [[Dynamic Scoping]]. See [[Dynamic Scoping In Smalltalk]] for an example.",
+            "id": "062e5704932b6262bba9ad5e0fd4bbe9"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4198eb69e9b55a274d31fade9a77313f"
+          },
+          {
+            "type": "html",
+            "text": "\nRecently, I've been working on an [[Objective Cee]] object, \"OSBlock\", that acts like a Smalltalk block.  I've made a lot of progress, but the parsing(of a string representing objective-c code) represents some complexity. I've ended up having a parser [[Method Object]] that turns a string into a tree structure by means of a string-scanning [[Method Object]] that scans through a string and keeps track of 'depth'(of square brackets: in [foo bar:[baz gaz]], foo bar: is at depth 1, and baz gaz is at depth 2) so that another [[Method Object]] can 'chunk' a string according to depth(such that the aforementioned example string is chunked into: \"_chunk_1_0\", \"foo bar:_chunk_2_0\", and \"baz gaz\").",
+            "id": "3c658b32c3111ad40bc53699ebf75594"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Method Object]] is a very powerful and useful refactoring, that gets a lot of noise out of an existing object.  <i>Usually, when a whole bunch of code is sitting around, it could be more useful somewhere else</i>- especially if it declares a ton of temps, in which case it's practically screaming 'make me an object.'  The string chunking method was larger than many of my existing objects were, the first time I implemented it. I [[Method Object]]ed it, then reimplemented it using the old interface, and it was nice.",
+            "id": "8e834d02f4d2ebba7be30038306757c7"
+          },
+          {
+            "type": "html",
+            "text": "--[[Joe Osborn]]",
+            "id": "eec1152afbd817a59e81db169cb954e6"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4198eb69e9b55a274d31fade9a77313f"
+          },
+          {
+            "type": "html",
+            "text": "I've found this refactoring very useful.\nI worked at a company where a [[Net Negative Producing Programmer]] was regarded as an all-powerful guru.  Lots of [[Long Method Smell]] in his code.  I had to work with some functionality which he had written, in a very non-[[Object Oriented]] way, as a gigantic static method on a class that was essentially a placeholder to put the method.",
+            "id": "8a4b0ee8d22429748b4cfd2e73f49b03"
+          },
+          {
+            "type": "html",
+            "text": "\nThe class was actually not intended to be instantiated--this was in [[Java Language]], and he'd made the constructor private.  I made the constructor public, and made it take all the data it needed in arguments and put it in instance variables.  Suddenly I realized I'd done the [[Method Object]] refactoring, which I'd read about on this page.  After that, the [[Extract Method]] refactorings I had wanted to do before suddenly became very easy.  With [[Extract Method]] and [[Rename Method]] refactorings, I removed the [[Long Method Smell]].",
+            "id": "b7890c3ce09f0c2323c29146220fa72c"
+          },
+          {
+            "type": "html",
+            "text": "\nThen I discovered that this class and another class were similar, and performed an [[Extract Superclass]] to make them siblings.--[[Apoorva Muralidhara]]",
+            "id": "89af28b3a1b3023218d5e6e031d90f70"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4198eb69e9b55a274d31fade9a77313f"
+          },
+          {
+            "type": "html",
+            "text": "\nI'm looking for a [[Method Object Example]] before I proceed. --[[Terry Lorber]]",
+            "id": "c95adb12715d0aedffd36be5efe2cc79"
+          },
+          {
+            "type": "html",
+            "text": "\nSee [[Dynamic Scoping In Smalltalk]] for an example.",
+            "id": "acaec77c6930504880b9f630ad848bcd"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?MethodObject c2.com]",
+            "id": "88f56fff2784414727abfbbda7662546"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1707806873606
+    }
+  ]
+}
