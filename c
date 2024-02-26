@@ -288,6 +288,31 @@
       "text": "[[Causal Chain]] (within [[Restaurant Script]])"
     },
     {
+      "type": "paragraph",
+      "id": "46461b5830e98c77",
+      "text": "[[Cannibalism]] (within [[War and Peace as a Permanent State]])"
+    },
+    {
+      "type": "markdown",
+      "id": "45e7b8759ea997af",
+      "text": "[[Clock]] → \"**[[~/clock/0]]**\""
+    },
+    {
+      "type": "paragraph",
+      "id": "777b62468b5fdc51",
+      "text": "[[Implementation as a Circuit]] See: [[Circuit]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "4b4c3fde03174b43",
+      "text": "[[Coroot]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "25f711620a276c23",
+      "text": "[[Croquet Jasmine]]"
+    },
+    {
       "type": "reference",
       "id": "3e8af46ff3063eaa",
       "site": "wiki.ralfbarkow.ch",
@@ -298,7 +323,7 @@
     {
       "type": "frame",
       "id": "a29178af5d6036ea",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
     }
   ],
   "journal": [
@@ -2501,6 +2526,176 @@
       },
       "after": "d1a11f4c621daef4",
       "date": 1708512620345
+    },
+    {
+      "type": "add",
+      "id": "46461b5830e98c77",
+      "item": {
+        "type": "paragraph",
+        "id": "46461b5830e98c77",
+        "text": "[[Cannibalism]] (within [[War and Peace)"
+      },
+      "after": "b3132b943273d66c",
+      "date": 1708668923284
+    },
+    {
+      "type": "edit",
+      "id": "46461b5830e98c77",
+      "item": {
+        "type": "paragraph",
+        "id": "46461b5830e98c77",
+        "text": "[[Cannibalism]] (within [[War and Peace as a Permanent State]])"
+      },
+      "date": 1708668948068
+    },
+    {
+      "id": "46461b5830e98c77",
+      "type": "remove",
+      "removedTo": {
+        "page": "W"
+      },
+      "date": 1708669558321
+    },
+    {
+      "type": "add",
+      "id": "45e7b8759ea997af",
+      "item": {
+        "type": "paragraph",
+        "id": "45e7b8759ea997af",
+        "text": "[[Clock]]"
+      },
+      "after": "b3132b943273d66c",
+      "date": 1708682293808
+    },
+    {
+      "id": "46461b5830e98c77",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "46461b5830e98c77",
+        "text": "[[Cannibalism]] (within [[War and Peace as a Permanent State]])"
+      },
+      "after": "b3132b943273d66c",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1708691450443
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1708696544552
+    },
+    {
+      "id": "777b62468b5fdc51",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "777b62468b5fdc51",
+        "text": "⇒ [[Implementation as a Circuit]]"
+      },
+      "after": "45e7b8759ea997af",
+      "attribution": {
+        "page": "2024-02-23"
+      },
+      "date": 1708696560091
+    },
+    {
+      "type": "edit",
+      "id": "777b62468b5fdc51",
+      "item": {
+        "type": "paragraph",
+        "id": "777b62468b5fdc51",
+        "text": "[[Implementation as a Circuit]]"
+      },
+      "date": 1708696564407
+    },
+    {
+      "type": "edit",
+      "id": "777b62468b5fdc51",
+      "item": {
+        "type": "paragraph",
+        "id": "777b62468b5fdc51",
+        "text": "[[Implementation as a Circuit]] See: [[Circuit]]"
+      },
+      "date": 1708696592698
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1708696635575
+    },
+    {
+      "type": "edit",
+      "id": "45e7b8759ea997af",
+      "item": {
+        "type": "paragraph",
+        "id": "45e7b8759ea997af",
+        "text": "[[Clock]] → \" ~/clock/0\""
+      },
+      "date": 1708702190293
+    },
+    {
+      "type": "edit",
+      "id": "45e7b8759ea997af",
+      "item": {
+        "type": "paragraph",
+        "id": "45e7b8759ea997af",
+        "text": "[[Clock]] → \" [[~/clock/0]]\""
+      },
+      "date": 1708702197453
+    },
+    {
+      "type": "edit",
+      "id": "a29178af5d6036ea",
+      "item": {
+        "type": "frame",
+        "id": "a29178af5d6036ea",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      },
+      "date": 1708712282892
+    },
+    {
+      "type": "add",
+      "id": "4b4c3fde03174b43",
+      "item": {
+        "type": "paragraph",
+        "id": "4b4c3fde03174b43",
+        "text": "[[Coroot]]"
+      },
+      "after": "777b62468b5fdc51",
+      "date": 1708777631219
+    },
+    {
+      "type": "edit",
+      "id": "45e7b8759ea997af",
+      "item": {
+        "type": "paragraph",
+        "id": "45e7b8759ea997af",
+        "text": "[[Clock]] → \"**[[~/clock/0]]**\""
+      },
+      "date": 1708777662346
+    },
+    {
+      "type": "edit",
+      "id": "45e7b8759ea997af",
+      "item": {
+        "type": "markdown",
+        "id": "45e7b8759ea997af",
+        "text": "[[Clock]] → \"**[[~/clock/0]]**\""
+      },
+      "date": 1708777663699
+    },
+    {
+      "type": "add",
+      "id": "25f711620a276c23",
+      "item": {
+        "type": "paragraph",
+        "id": "25f711620a276c23",
+        "text": "[[Croquet Jasmine]]"
+      },
+      "after": "4b4c3fde03174b43",
+      "date": 1708778174814
     }
   ]
 }

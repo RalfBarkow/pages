@@ -352,6 +352,16 @@
       "text": "[[Computational Scripts]]"
     },
     {
+      "type": "paragraph",
+      "id": "285caaf0c5a308bf",
+      "text": "[[Stochastic Computing]] See: [[Trifference]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d49977cd1734d8dc",
+      "text": "[[Stochastic Computation]] (within [[Polysynchronous Stochastic Circuits]])"
+    },
+    {
       "type": "reference",
       "id": "8c2cd410bbc45f08",
       "site": "wiki.ralfbarkow.ch",
@@ -3208,6 +3218,79 @@
       "type": "remove",
       "id": "77abf0b393251d5b",
       "date": 1708432040805
+    },
+    {
+      "id": "285caaf0c5a308bf",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "285caaf0c5a308bf",
+        "text": "⇒ [[Stochastic Computing]] ⇒ [[Trifference]]"
+      },
+      "after": "57c5cfb5dc1076b4",
+      "attribution": {
+        "page": "2024-02-23"
+      },
+      "date": 1708671097334
+    },
+    {
+      "type": "remove",
+      "id": "285caaf0c5a308bf",
+      "date": 1708671100859
+    },
+    {
+      "type": "add",
+      "id": "783cc7c7edf0b0b0",
+      "item": {
+        "type": "paragraph",
+        "id": "783cc7c7edf0b0b0",
+        "text": "[[Stochastic Computing]] See: [[Trifference]]"
+      },
+      "after": "57c5cfb5dc1076b4",
+      "date": 1708671108878
+    },
+    {
+      "type": "remove",
+      "id": "783cc7c7edf0b0b0",
+      "date": 1708671114560
+    },
+    {
+      "id": "285caaf0c5a308bf",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "285caaf0c5a308bf",
+        "text": "⇒ [[Stochastic Computing]] ⇒ [[Trifference]]"
+      },
+      "after": "57c5cfb5dc1076b4",
+      "attribution": {
+        "page": "2024-02-23"
+      },
+      "date": 1708671117939
+    },
+    {
+      "type": "edit",
+      "id": "285caaf0c5a308bf",
+      "item": {
+        "type": "paragraph",
+        "id": "285caaf0c5a308bf",
+        "text": "[[Stochastic Computing]] See: [[Trifference]]"
+      },
+      "date": 1708671131263
+    },
+    {
+      "id": "d49977cd1734d8dc",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "d49977cd1734d8dc",
+        "text": "[[Stochastic Computation]] (within [[Polysynchronous Stochastic Circuits]])"
+      },
+      "after": "285caaf0c5a308bf",
+      "attribution": {
+        "page": "~/clock/0"
+      },
+      "date": 1708684480035
     }
   ]
 }

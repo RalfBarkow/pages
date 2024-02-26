@@ -172,6 +172,21 @@
       "text": "[[Example]] See: [[Learning From Examples]] (within [[Subsymbolic Natural Language Processing]])"
     },
     {
+      "type": "paragraph",
+      "id": "1998bb1c09973080",
+      "text": "[[Episodes]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "9a16c886e087f7c9",
+      "text": "[[eBPF]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d497b32a8e2ff73a",
+      "text": "[[Express Data Path]]"
+    },
+    {
       "type": "reference",
       "id": "2a8ebf5fbb6fbdf2",
       "site": "wiki.ralfbarkow.ch",
@@ -182,7 +197,7 @@
     {
       "type": "frame",
       "id": "838045a6c5c125e0",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
     }
   ],
   "journal": [
@@ -1185,6 +1200,49 @@
         "text": "[[Example]] See: [[Learning From Examples]] (within [[Subsymbolic Natural Language Processing]])"
       },
       "date": 1708251805840
+    },
+    {
+      "type": "add",
+      "id": "1998bb1c09973080",
+      "item": {
+        "type": "paragraph",
+        "id": "1998bb1c09973080",
+        "text": "[[Episodes]]"
+      },
+      "after": "d93e01eb41bdc646",
+      "date": 1708755030028
+    },
+    {
+      "type": "edit",
+      "id": "838045a6c5c125e0",
+      "item": {
+        "type": "frame",
+        "id": "838045a6c5c125e0",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      },
+      "date": 1708755035161
+    },
+    {
+      "type": "add",
+      "id": "9a16c886e087f7c9",
+      "item": {
+        "type": "paragraph",
+        "id": "9a16c886e087f7c9",
+        "text": "[[eBPF]]"
+      },
+      "after": "1998bb1c09973080",
+      "date": 1708777232440
+    },
+    {
+      "type": "add",
+      "id": "d497b32a8e2ff73a",
+      "item": {
+        "type": "paragraph",
+        "id": "d497b32a8e2ff73a",
+        "text": "[[Express Data Path]]"
+      },
+      "after": "9a16c886e087f7c9",
+      "date": 1708777465274
     }
   ]
 }

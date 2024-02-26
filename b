@@ -92,6 +92,16 @@
       "text": "[[Breadth-First Search]]"
     },
     {
+      "type": "paragraph",
+      "id": "1fc17925adaef27b",
+      "text": "[[Bynase]] See: [[The Glycolytic Clock]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "ce503b9b2c58b5e9",
+      "text": "[[Bounded Seas]] See: [[Scripting With Bounded Seas]]"
+    },
+    {
       "type": "reference",
       "id": "f08218b41fdab101",
       "site": "wiki.ralfbarkow.ch",
@@ -102,7 +112,7 @@
     {
       "type": "frame",
       "id": "c98339ab6823e406",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
     }
   ],
   "journal": [
@@ -678,6 +688,51 @@
       },
       "after": "00d4aa20f8c00853",
       "date": 1708258236395
+    },
+    {
+      "type": "edit",
+      "id": "c98339ab6823e406",
+      "item": {
+        "type": "frame",
+        "id": "c98339ab6823e406",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      },
+      "date": 1708712747587
+    },
+    {
+      "id": "1fc17925adaef27b",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "1fc17925adaef27b",
+        "text": "See [[Bynase]]"
+      },
+      "after": "dccc058a4cda2118",
+      "attribution": {
+        "page": "The Glycolytic Clock"
+      },
+      "date": 1708712751618
+    },
+    {
+      "type": "edit",
+      "id": "1fc17925adaef27b",
+      "item": {
+        "type": "paragraph",
+        "id": "1fc17925adaef27b",
+        "text": "[[Bynase]] See: [[The Glycolytic Clock]]"
+      },
+      "date": 1708712769484
+    },
+    {
+      "type": "add",
+      "id": "ce503b9b2c58b5e9",
+      "item": {
+        "type": "paragraph",
+        "id": "ce503b9b2c58b5e9",
+        "text": "[[Bounded Seas]] See: [[Scripting With Bounded Seas]]"
+      },
+      "after": "1fc17925adaef27b",
+      "date": 1708757768232
     }
   ]
 }

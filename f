@@ -162,9 +162,14 @@
       "text": "**[[fail]]** See: [[Know the Problem]]"
     },
     {
-      "type": "markdown",
-      "id": "43bb41c23abb2cd0",
-      "text": "distinction between feedback and feedforward See: [[feed forward]], [[Advance Organizer]]"
+      "type": "paragraph",
+      "id": "8510ce3ae2fcb825",
+      "text": "[[Frame]] See: [[About Frame Plugin]], [[About Frame Integrations]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "800bb9c21aedc19d",
+      "text": "[[Frame]] See: [[About Frame Plugin]], [[About Frame Integrations]], [[About Frame Source]]/[[About Frame Lineup]], [[Scribble]] and [[Stream of Points]]"
     },
     {
       "type": "reference",
@@ -177,7 +182,7 @@
     {
       "type": "frame",
       "id": "5c1363cd00f99e4d",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
     }
   ],
   "journal": [
@@ -1329,6 +1334,122 @@
         "text": "distinction between feedback and feedforward See: [[feed forward]], [[Advance Organizer]]"
       },
       "date": 1708431927937
+    },
+    {
+      "type": "add",
+      "id": "a292a3426626e3d0",
+      "item": {
+        "type": "markdown",
+        "id": "a292a3426626e3d0",
+        "text": "[[Frame]]"
+      },
+      "after": "43bb41c23abb2cd0",
+      "date": 1708701774809
+    },
+    {
+      "id": "8510ce3ae2fcb825",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "8510ce3ae2fcb825",
+        "text": "⇒ [[About Frame Plugin]], [[About Frame Integrations]]"
+      },
+      "after": "a292a3426626e3d0",
+      "attribution": {
+        "page": "Frame"
+      },
+      "date": 1708701786122
+    },
+    {
+      "type": "edit",
+      "id": "8510ce3ae2fcb825",
+      "item": {
+        "type": "paragraph",
+        "id": "8510ce3ae2fcb825",
+        "text": "See: [[About Frame Plugin]], [[About Frame Integrations]]"
+      },
+      "date": 1708701793216
+    },
+    {
+      "type": "remove",
+      "id": "a292a3426626e3d0",
+      "date": 1708701799655
+    },
+    {
+      "type": "edit",
+      "id": "8510ce3ae2fcb825",
+      "item": {
+        "type": "paragraph",
+        "id": "8510ce3ae2fcb825",
+        "text": "[[Frame]] See: [[About Frame Plugin]], [[About Frame Integrations]]"
+      },
+      "date": 1708701803478
+    },
+    {
+      "type": "remove",
+      "id": "43bb41c23abb2cd0",
+      "date": 1708701817028
+    },
+    {
+      "type": "add",
+      "id": "800bb9c21aedc19d",
+      "item": {
+        "type": "paragraph",
+        "id": "800bb9c21aedc19d",
+        "text": "[[Frame]] See: [[About Frame Plugin]], [[About Frame Integrations]]"
+      },
+      "after": "8510ce3ae2fcb825",
+      "date": 1708701821543
+    },
+    {
+      "type": "edit",
+      "id": "800bb9c21aedc19d",
+      "item": {
+        "type": "paragraph",
+        "id": "800bb9c21aedc19d",
+        "text": "[[Frame]] See: [[About Frame Plugin]], [[About Frame Integrations]], [[About Frame Source]], [[About Frame Lineup]]"
+      },
+      "date": 1708701899219
+    },
+    {
+      "type": "edit",
+      "id": "800bb9c21aedc19d",
+      "item": {
+        "type": "paragraph",
+        "id": "800bb9c21aedc19d",
+        "text": "[[Frame]] See: [[About Frame Plugin]], [[About Frame Integrations]], [[About Frame Source]], [[About Frame Lineup]], [[Scribble]]"
+      },
+      "date": 1708702018192
+    },
+    {
+      "type": "edit",
+      "id": "800bb9c21aedc19d",
+      "item": {
+        "type": "paragraph",
+        "id": "800bb9c21aedc19d",
+        "text": "[[Frame]] See: [[About Frame Plugin]], [[About Frame Integrations]], [[About Frame Source]], [[About Frame Lineup]], [[Scribble]] and [[[[Stream of Points]]"
+      },
+      "date": 1708702085374
+    },
+    {
+      "type": "edit",
+      "id": "800bb9c21aedc19d",
+      "item": {
+        "type": "paragraph",
+        "id": "800bb9c21aedc19d",
+        "text": "[[Frame]] See: [[About Frame Plugin]], [[About Frame Integrations]], [[About Frame Source]]/[[About Frame Lineup]], [[Scribble]] and [[Stream of Points]]"
+      },
+      "date": 1708702108746
+    },
+    {
+      "type": "edit",
+      "id": "5c1363cd00f99e4d",
+      "item": {
+        "type": "frame",
+        "id": "5c1363cd00f99e4d",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      },
+      "date": 1708712239317
     }
   ]
 }

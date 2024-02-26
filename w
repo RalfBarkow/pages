@@ -77,6 +77,16 @@
       "text": "[[Wrapper Pattern]]"
     },
     {
+      "type": "paragraph",
+      "id": "46461b5830e98c77",
+      "text": "[[War]] (within [[War and Peace as a Permanent State]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "9e5052075c565542",
+      "text": "[[Wahrscheinlichkeit und Wissenschaft]] See: [[Stochastic Computing]], [[Trifference]]"
+    },
+    {
       "type": "reference",
       "id": "cff13b8f1e169e91",
       "site": "wiki.ralfbarkow.ch",
@@ -87,7 +97,7 @@
     {
       "type": "frame",
       "id": "6f66c17ee7f83b9f",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
     }
   ],
   "journal": [
@@ -670,6 +680,61 @@
       },
       "after": "246adf5ed95d4e14",
       "date": 1708010955752
+    },
+    {
+      "id": "46461b5830e98c77",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "46461b5830e98c77",
+        "text": "[[Cannibalism]] (within [[War and Peace as a Permanent State]])"
+      },
+      "after": "8aed217e5e100728",
+      "attribution": {
+        "page": "C"
+      },
+      "date": 1708669558323
+    },
+    {
+      "type": "edit",
+      "id": "46461b5830e98c77",
+      "item": {
+        "type": "paragraph",
+        "id": "46461b5830e98c77",
+        "text": "[[War]] (within [[War and Peace as a Permanent State]])"
+      },
+      "date": 1708669562328
+    },
+    {
+      "type": "add",
+      "id": "9e5052075c565542",
+      "item": {
+        "type": "paragraph",
+        "id": "9e5052075c565542",
+        "text": "[[Wahrscheinlichkeit und Wissenschaft]]"
+      },
+      "after": "46461b5830e98c77",
+      "date": 1708672742629
+    },
+    {
+      "type": "edit",
+      "id": "9e5052075c565542",
+      "item": {
+        "type": "paragraph",
+        "id": "9e5052075c565542",
+        "text": "[[Wahrscheinlichkeit und Wissenschaft]] See: [[Stochastic Computing]], [[Trifference]]"
+      },
+      "date": 1708672764295
+    },
+    {
+      "type": "edit",
+      "id": "6f66c17ee7f83b9f",
+      "item": {
+        "type": "frame",
+        "id": "6f66c17ee7f83b9f",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      },
+      "date": 1708710024187
     }
   ]
 }

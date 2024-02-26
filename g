@@ -13,6 +13,11 @@
     },
     {
       "type": "paragraph",
+      "id": "f56dba31e2b66ef8",
+      "text": "[[Guiding Emergent Structure]]"
+    },
+    {
+      "type": "paragraph",
       "id": "46c3170992bba246",
       "text": "[[grep]] (within [[Software as Tools]])"
     },
@@ -617,6 +622,17 @@
         "text": "[[Growing Regions]] → \"**[[growing]]**\"\n- [[Growing a Language]] by [[Guy Steele]]"
       },
       "date": 1708078742752
+    },
+    {
+      "type": "add",
+      "id": "f56dba31e2b66ef8",
+      "item": {
+        "type": "paragraph",
+        "id": "f56dba31e2b66ef8",
+        "text": "[[Guiding Emergent Structure]]"
+      },
+      "after": "a40632bae3c60135",
+      "date": 1708669865194
     }
   ]
 }

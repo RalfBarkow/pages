@@ -77,6 +77,11 @@
       "text": "[[Replicate and Synchronize Any JavaScript Object]] (with [[Croquet]]) See: [[Deliver Events]] (within [[Beatshifting]])"
     },
     {
+      "type": "markdown",
+      "id": "7a14a67c25eb0b5e",
+      "text": "- [[Replicated Computation Mode]] (within [[Croquet]])"
+    },
+    {
       "type": "paragraph",
       "id": "27cab0dfc2be5efc",
       "text": "[[Robust Resilience]] (within [[Markov Monkey Script]])"
@@ -107,7 +112,7 @@
     {
       "type": "frame",
       "id": "4ecf3e5913a5afbb",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
     }
   ],
   "journal": [
@@ -774,6 +779,37 @@
       },
       "after": "68205422afe41113",
       "date": 1708427445030
+    },
+    {
+      "type": "add",
+      "id": "7a14a67c25eb0b5e",
+      "item": {
+        "type": "paragraph",
+        "id": "7a14a67c25eb0b5e",
+        "text": "- [[Replicated Computation Mode]] (within [[Croquet]])"
+      },
+      "after": "9d05f8b76754f3e5",
+      "date": 1708779596913
+    },
+    {
+      "type": "edit",
+      "id": "7a14a67c25eb0b5e",
+      "item": {
+        "type": "markdown",
+        "id": "7a14a67c25eb0b5e",
+        "text": "- [[Replicated Computation Mode]] (within [[Croquet]])"
+      },
+      "date": 1708779598302
+    },
+    {
+      "type": "edit",
+      "id": "4ecf3e5913a5afbb",
+      "item": {
+        "type": "frame",
+        "id": "4ecf3e5913a5afbb",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      },
+      "date": 1708779619764
     }
   ]
 }
