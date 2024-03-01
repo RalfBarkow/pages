@@ -4,7 +4,7 @@
     {
       "type": "markdown",
       "id": "50fc05ed81a0a470",
-      "text": "“The big idea is **messaging** — that is what the kernel of Smalltalk/Squeak is all about (and it’s something that was never quite completed in our Xerox PARC phase). The Japanese have a small word ma — for that which is in between perhaps the nearest English equivalent is [[interstitial]]. The key in making great and growable systems is much more to design how its modules communicate rather than what their internal properties and behaviors should be.” —[[Alan Kay]]"
+      "text": "“The big idea is **[[Messaging]]** — that is what the kernel of Smalltalk/Squeak is all about (and it’s something that was never quite completed in our Xerox PARC phase). The Japanese have a small word ma — for that which is in between perhaps the nearest English equivalent is [[interstitial]]. The key in making great and growable systems is much more to design how its modules communicate rather than what their internal properties and behaviors should be.” —[[Alan Kay]]"
     },
     {
       "type": "pagefold",
@@ -270,6 +270,16 @@
       "type": "fork",
       "site": "localhost:3000",
       "date": 1702406302876
+    },
+    {
+      "type": "edit",
+      "id": "50fc05ed81a0a470",
+      "item": {
+        "type": "markdown",
+        "id": "50fc05ed81a0a470",
+        "text": "“The big idea is **[[Messaging]]** — that is what the kernel of Smalltalk/Squeak is all about (and it’s something that was never quite completed in our Xerox PARC phase). The Japanese have a small word ma — for that which is in between perhaps the nearest English equivalent is [[interstitial]]. The key in making great and growable systems is much more to design how its modules communicate rather than what their internal properties and behaviors should be.” —[[Alan Kay]]"
+      },
+      "date": 1707116282976
     }
   ]
 }

@@ -1,0 +1,314 @@
+{
+  "title": "Search for Occurrences of a String in a File",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "351c6b923f35fcdd",
+      "text": "botwhytho — 06.12.2023 08:39 via [https://discord.com/channels/729445214812504107/737255889517543545/1181862585885278228 discord]\nFound a surprising pain point while [[Pairing]] with someone in Gt."
+    },
+    {
+      "type": "reference",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "distributed-async-pair-programming",
+      "title": "Distributed Async Pair Programming",
+      "text": "What does Asynch [[Pair Programming]] mean/look like?",
+      "id": "4d462c7f3b01268d"
+    },
+    {
+      "type": "paragraph",
+      "id": "8338de4cedd427ef",
+      "text": "Exploring a folder of YAML files which have dependencies between themselves and I'm trying to build some moldable tools for. They asked me something very simple: to search for occurrences of a string in a file and I had no idea how to do it (easily from the UI, of course I can search programmatically). I see that [[AbstractFileReference]]>>#gtSpotterForDirectoriesFor: & [[AbstractFileReference]]>>#gtSpotterForFilesFor: exist but they only match on filenames when searching a directory (so these should also probably be scoped only on directories and not files as a magnifying glass on a file shows intent that the file can be searchable when it doesn't really do anything right now)."
+    },
+    {
+      "type": "paragraph",
+      "id": "c533f04259309bc7",
+      "text": "I also see that for files that have a [[SmaCC]] grammar defined, one could go to the hamburger and parse the file into an AST and then [[SmaCCParseNode]]>>#gtSpotterNodeFor: would be slightly useful but seems like too many intermediary steps (and not obvious to a beginner). \nBasically when exploring 'the outside world' around Gt something rather basic that could be done with other IDEs, or with something like grep is not easily doable at the moment. Had to use VS Code for some of this exploration\nShould I open ticket? Is this something that would get worked on or are there any concerns around implementing something like this?"
+    },
+    {
+      "type": "paragraph",
+      "id": "0edebc95f1751b1b",
+      "text": "tudor girba — 06.12.2023 21:37 via [https://discord.com/channels/729445214812504107/737255889517543545/1182058144172621854 discord]\nIt surely should be useful. We were too lazy to do it :). A simple way would be to add a spotter search over the  lines."
+    },
+    {
+      "type": "paragraph",
+      "id": "479527a61ceea38c",
+      "text": "botwhytho — 07.12.2023 01:04 via [https://discord.com/channels/729445214812504107/737255889517543545/1182110327685525524 discord]\nPlaying around a bit with this. Got the easiest (naive implementation) POC going."
+    },
+    {
+      "type": "video",
+      "id": "a0eef017351c0eae",
+      "text": "HTML5 mp4 https://cdn.discordapp.com/attachments/737255889517543545/1182110327219961896/FileContentsSearchPOCv1.mp4?ex=658cbb88&is=657a4688&hm=4c00743f1b883e385fd4dfc0a7cbf8a46e3ad9424624b54ae759e24680658e6f&\nText File Full Text Search Playground"
+    },
+    {
+      "type": "paragraph",
+      "id": "af1bf74d06715e2c",
+      "text": "Will try and improve it by inspecting highlighted result in file (as opposed to raw string of line where it is found). Then can play around with async streams, seems like subclassing AsyncFileStream to return a line at once (as opposed to a character) would be the 'correct' (and maybe performant) way to do this."
+    },
+    {
+      "type": "paragraph",
+      "id": "f9dc98007e606564",
+      "text": "tudor girba — 07.12.2023 04:32 via [https://discord.com/channels/729445214812504107/737255889517543545/1182162633709850644 discord]\nI would rather do the action in the context of the view and have the editor scroll to the line when we accept."
+    },
+    {
+      "type": "paragraph",
+      "id": "ebaa3150b4492dbd",
+      "text": "botwhytho — 07.12.2023 05:41 via [https://discord.com/channels/729445214812504107/737255889517543545/1182180026377048174 discord]\nOoh...considering the thread in another channel about sharing contexts between miller columns (which doesn't seem to work as expected), scrolling/highlighting in current object may be actually easier to accomplish, let me give that a try."
+    },
+    {
+      "type": "paragraph",
+      "id": "32714aa614132081",
+      "text": "tudor girba — 07.12.2023 05:44 via [https://discord.com/channels/729445214812504107/737255889517543545/1182180928219516999 discord]\nNot in the current object. In the current view 🙂"
+    },
+    {
+      "type": "paragraph",
+      "id": "df0c81b1783e6a34",
+      "text": "botwhytho — 07.12.2023 08:27 via [https://discord.com/channels/729445214812504107/737255889517543545/1182221766257549372 discord]\nHow can I modify a spotter to NOT spawn an object but to do something else. I've figured out how to scroll an editor to a position (statically to a specific text in a file at the moment) and added an action button with a spotter with some data I will need: start position of each line + string contents of a line, so that I can dynamically scroll file there. Now I need to connect the two by defining the action when one picks a selection from the spotter."
+    },
+    {
+      "type": "video",
+      "id": "bce29bd44229def2",
+      "text": "HTML5 mp4 https://cdn.discordapp.com/attachments/737255889517543545/1182221765842325574/FileContentsSearchPOCv2.mp4?ex=658d2351&is=657aae51&hm=b8239136cbc1a3ce1e5bacdace38e8d35ee41d2b9ad0d190161216e393bf154c&\ngtSpotterForFileContentsFor:"
+    },
+    {
+      "type": "paragraph",
+      "id": "b081119d9787b49d",
+      "text": "Also, was about to open a ticket to have a view that show how the different searches in a custom spotter are defined but just learned that alt clicking the heading of a sub search brings up the defining method 👍"
+    },
+    {
+      "type": "paragraph",
+      "id": "5184f863751a732e",
+      "text": "tudor girba — 07.12.2023 11:25 via [https://discord.com/channels/729445214812504107/737255889517543545/1182266599571456020 discord]\nYou mean like the global spotter? Or maybe like the spotter for adding a lepiter snippet?"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Search for Occurrences of a String in a File",
+        "story": []
+      },
+      "date": 1702910722140
+    },
+    {
+      "id": "351c6b923f35fcdd",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "351c6b923f35fcdd",
+        "text": "botwhytho — 06.12.2023 08:39 via [https://discord.com/channels/729445214812504107/737255889517543545/1181862585885278228 discord]\nFound a surprising pain point while [[Pairing]] with someone in Gt."
+      },
+      "attribution": {
+        "page": "2023-12-18"
+      },
+      "date": 1702910782402
+    },
+    {
+      "id": "4d462c7f3b01268d",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "distributed-async-pair-programming",
+        "title": "Distributed Async Pair Programming",
+        "text": "What does Asynch [[Pair Programming]] mean/look like?",
+        "id": "4d462c7f3b01268d"
+      },
+      "after": "351c6b923f35fcdd",
+      "attribution": {
+        "page": "2023-12-18"
+      },
+      "date": 1702910786766
+    },
+    {
+      "id": "8338de4cedd427ef",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "8338de4cedd427ef",
+        "text": "Exploring a folder of YAML files which have dependencies between themselves and I'm trying to build some moldable tools for. They asked me something very simple: to search for occurrences of a string in a file and I had no idea how to do it (easily from the UI, of course I can search programmatically). I see that [[AbstractFileReference]]>>#gtSpotterForDirectoriesFor: & [[AbstractFileReference]]>>#gtSpotterForFilesFor: exist but they only match on filenames when searching a directory (so these should also probably be scoped only on directories and not files as a magnifying glass on a file shows intent that the file can be searchable when it doesn't really do anything right now)."
+      },
+      "after": "4d462c7f3b01268d",
+      "attribution": {
+        "page": "2023-12-18"
+      },
+      "date": 1702910793139
+    },
+    {
+      "id": "c533f04259309bc7",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "c533f04259309bc7",
+        "text": "I also see that for files that have a [[SmaCC]] grammar defined, one could go to the hamburger and parse the file into an AST and then [[SmaCCParseNode]]>>#gtSpotterNodeFor: would be slightly useful but seems like too many intermediary steps (and not obvious to a beginner). \nBasically when exploring 'the outside world' around Gt something rather basic that could be done with other IDEs, or with something like grep is not easily doable at the moment. Had to use VS Code for some of this exploration\nShould I open ticket? Is this something that would get worked on or are there any concerns around implementing something like this?"
+      },
+      "after": "8338de4cedd427ef",
+      "attribution": {
+        "page": "2023-12-18"
+      },
+      "date": 1702910798582
+    },
+    {
+      "id": "0edebc95f1751b1b",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "0edebc95f1751b1b",
+        "text": "tudor girba — 06.12.2023 21:37 via [https://discord.com/channels/729445214812504107/737255889517543545/1182058144172621854 discord]\nIt surely should be useful. We were too lazy to do it :). A simple way would be to add a spotter search over the  lines."
+      },
+      "after": "c533f04259309bc7",
+      "attribution": {
+        "page": "2023-12-18"
+      },
+      "date": 1702910810723
+    },
+    {
+      "id": "479527a61ceea38c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "479527a61ceea38c",
+        "text": "botwhytho — 07.12.2023 01:04 via [https://discord.com/channels/729445214812504107/737255889517543545/1182110327685525524 discord]\nPlaying around a bit with this. Got the easiest (naive implementation) POC going."
+      },
+      "after": "0edebc95f1751b1b",
+      "attribution": {
+        "page": "2023-12-18"
+      },
+      "date": 1702910818583
+    },
+    {
+      "id": "a0eef017351c0eae",
+      "type": "add",
+      "item": {
+        "type": "video",
+        "id": "a0eef017351c0eae",
+        "text": "HTML5 mp4 https://cdn.discordapp.com/attachments/737255889517543545/1182110327219961896/FileContentsSearchPOCv1.mp4?ex=658cbb88&is=657a4688&hm=4c00743f1b883e385fd4dfc0a7cbf8a46e3ad9424624b54ae759e24680658e6f&\nText File Full Text Search Playground"
+      },
+      "after": "479527a61ceea38c",
+      "attribution": {
+        "page": "2023-12-18"
+      },
+      "date": 1702910822391
+    },
+    {
+      "id": "af1bf74d06715e2c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "af1bf74d06715e2c",
+        "text": "Will try and improve it by inspecting highlighted result in file (as opposed to raw string of line where it is found). Then can play around with async streams, seems like subclassing AsyncFileStream to return a line at once (as opposed to a character) would be the 'correct' (and maybe performant) way to do this."
+      },
+      "after": "a0eef017351c0eae",
+      "attribution": {
+        "page": "2023-12-18"
+      },
+      "date": 1702910829932
+    },
+    {
+      "id": "f9dc98007e606564",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "f9dc98007e606564",
+        "text": "tudor girba — 07.12.2023 04:32 via [https://discord.com/channels/729445214812504107/737255889517543545/1182162633709850644 discord]\nI would rather do the action in the context of the view and have the editor scroll to the line when we accept."
+      },
+      "after": "af1bf74d06715e2c",
+      "attribution": {
+        "page": "2023-12-18"
+      },
+      "date": 1702910835030
+    },
+    {
+      "id": "ebaa3150b4492dbd",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "ebaa3150b4492dbd",
+        "text": "botwhytho — 07.12.2023 05:41 via [https://discord.com/channels/729445214812504107/737255889517543545/1182180026377048174 discord]\nOoh...considering the thread in another channel about sharing contexts between miller columns (which doesn't seem to work as expected), scrolling/highlighting in current object may be actually easier to accomplish, let me give that a try."
+      },
+      "after": "f9dc98007e606564",
+      "attribution": {
+        "page": "2023-12-18"
+      },
+      "date": 1702910846469
+    },
+    {
+      "id": "32714aa614132081",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "32714aa614132081",
+        "text": "tudor girba — 07.12.2023 05:44 via [https://discord.com/channels/729445214812504107/737255889517543545/1182180928219516999 discord]\nNot in the current object. In the current view 🙂"
+      },
+      "after": "ebaa3150b4492dbd",
+      "attribution": {
+        "page": "2023-12-18"
+      },
+      "date": 1702910885845
+    },
+    {
+      "id": "df0c81b1783e6a34",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "df0c81b1783e6a34",
+        "text": "botwhytho — 07.12.2023 08:27 via [https://discord.com/channels/729445214812504107/737255889517543545/1182221766257549372 discord]\nHow can I modify a spotter to NOT spawn an object but to do something else. I've figured out how to scroll an editor to a position (statically to a specific text in a file at the moment) and added an action button with a spotter with some data I will need: start position of each line + string contents of a line, so that I can dynamically scroll file there. Now I need to connect the two by defining the action when one picks a selection from the spotter."
+      },
+      "after": "32714aa614132081",
+      "attribution": {
+        "page": "2023-12-18"
+      },
+      "date": 1702910891527
+    },
+    {
+      "id": "bce29bd44229def2",
+      "type": "add",
+      "item": {
+        "type": "video",
+        "id": "bce29bd44229def2",
+        "text": "HTML5 mp4 https://cdn.discordapp.com/attachments/737255889517543545/1182221765842325574/FileContentsSearchPOCv2.mp4?ex=658d2351&is=657aae51&hm=b8239136cbc1a3ce1e5bacdace38e8d35ee41d2b9ad0d190161216e393bf154c&\ngtSpotterForFileContentsFor:"
+      },
+      "after": "df0c81b1783e6a34",
+      "attribution": {
+        "page": "2023-12-18"
+      },
+      "date": 1702910896120
+    },
+    {
+      "id": "b081119d9787b49d",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "b081119d9787b49d",
+        "text": "Also, was about to open a ticket to have a view that show how the different searches in a custom spotter are defined but just learned that alt clicking the heading of a sub search brings up the defining method 👍"
+      },
+      "after": "bce29bd44229def2",
+      "attribution": {
+        "page": "2023-12-18"
+      },
+      "date": 1702910901311
+    },
+    {
+      "id": "5184f863751a732e",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "5184f863751a732e",
+        "text": "tudor girba — 07.12.2023 11:25 via [https://discord.com/channels/729445214812504107/737255889517543545/1182266599571456020 discord]\nYou mean like the global spotter? Or maybe like the spotter for adding a lepiter snippet?"
+      },
+      "after": "b081119d9787b49d",
+      "attribution": {
+        "page": "2023-12-18"
+      },
+      "date": 1702910904868
+    },
+    {
+      "type": "fork",
+      "date": 1702910914181
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1703083921389
+    }
+  ]
+}

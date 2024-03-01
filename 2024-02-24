@@ -1,0 +1,489 @@
+{
+  "title": "2024-02-24",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "8dbe619c223a72c6",
+      "text": "⇐ [[Parsing with PetitParser2]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "2b42374253216647",
+      "text": "⇐ [[2022-05-05]] ⇒ [[parsing contexts]]"
+    },
+    {
+      "type": "reference",
+      "id": "eb2e657a6286c1ce",
+      "site": "found.ward.fed.wiki",
+      "slug": "wizards-of-the-electronic-age",
+      "title": "Wizards of the Electronic Age",
+      "text": "Hackers is a classic 1985 documentary about the midnight programmers that created the personal computer revolution."
+    },
+    {
+      "type": "video",
+      "id": "fb8e5622c2152c1d",
+      "text": "YOUTUBE cXGLOiZUZ2U\nAlan Kay Croquet Project Demo 2003"
+    },
+    {
+      "type": "paragraph",
+      "id": "3c204ba5db6ce5ce",
+      "text": "This is an early demo of the Croquet Project from 2003! It was the demo that Alan Kay and I performed at the O'Reilly E-tech conference. It was totally live – and pretty wild. A lot of important ideas are demonstrated here including portals, replicated computation, and deep collaboration. This system was built by [[Andreas Raab]], [[David Reed]], [[Alan Kay]] and [[David A Smith]]."
+    },
+    {
+      "type": "pagefold",
+      "id": "3ff64846323cb7b9",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "ef9567c3cf1be608",
+      "text": "botwhytho via [https://discord.com/channels/729445214812504107/735949717049049129/1161964144518504508 dicord]\nI got a POC of [[eBPF]] tracing (Linux kernel [and more recently Windows in a limited fashion] functionality to trace many things without recompiling kernel/userspace code) of a function in the libClipboard.so library working 🤓 . After fleshing this out a bit more, it may be useful for situations where attaching a full blown debugger (like gdb , etc.) may not be desired. Will continue working on this so I can share package with custom views on executable files that enables quickly being able to trace arbitrary symbols (functions) in arbitrary executables/libraries (whenever possible, many times debug symbols are stripped out)."
+    },
+    {
+      "type": "video",
+      "id": "2934d7988119a481",
+      "text": "HTML5 mp4 https://cdn.discordapp.com/attachments/735949717049049129/1161964144220721224/eBPFlibClipboardPOC1.mp4?ex=65e98df0&is=65d718f0&hm=0900077129cab43c50e3ed489aeb81e0ccf23f1d21c5cdd733fc5e6e209ecc1a&\neBPF & File Watching Playground"
+    },
+    {
+      "type": "paragraph",
+      "id": "51a04e01adfe2ac4",
+      "text": "The file to the right gets appended to every time the clipboard_get_contents (non-smalltalk) low level function gets called which in the video happens when I trigger the paste keyboard shortcut. Luckily the bpftrace tool can output JSON so I'll be turning some of these queries into streams of live objects (as opposed to text)"
+    },
+    {
+      "type": "paragraph",
+      "id": "01b8124bac827416",
+      "text": "Most of the code is (and MOST of my day was spent on) code that has to do with properly trapping and forwarding UNIX signals. Otherwise this leaks child processes as the shell spawns a sudo process which spawns the bpftrace process which needs escalated privileges. Not sure if GtExternalProcessBuilder and other classes can be modified to run processes with escalated privileges (and potentially ask for root password in UI), but for the time being posting some bash-fu here in case others (or future me) find this useful\nBunch of bash things to be able to call sudo non-interactively, as well as sending signals to child processes so that all end and no zombies are spawned:"
+    },
+    {
+      "type": "code",
+      "id": "d013a901859742b2",
+      "text": "generateUProbe := [ :aFile :aFunction | \n        GtExternalProcessBuilder new\n        workingDirectory: '.';\n        command: '/usr/bin/bash';\n        args: {'-c'.\n        'trap ''echo signal received!; printf \"%s\" \"${PASSWORD}\" | sudo -p \"\" -S kill -SIGKILL $child_pid'' SIGTERM\nprintf \"%s\" \"${PASSWORD}\" |  sudo -p \"\" -S bpftrace -e ''uprobe:' , aFile asFileReference pathString , ':' , aFunction , ' {\nprintf(\"%s\\n\", ustack());\n}'' -f json -o bpf.trace &\n\nsudo_pid=$!\nsleep 1\nchild_pid=$(ps --ppid $sudo_pid -o pid= | tr -d ''\\n'')\nwait $sudo_pid\n' copyReplaceAll: Character cr asString with: Character lf asString\n}]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6d56e15964c6dc29",
+      "text": "Likewise, some code to send SIGTERM as root as otherwise the more typical process terminate doesn't have enough permissions"
+    },
+    {
+      "type": "code",
+      "id": "bee0d6a25ae813fa",
+      "text": "pipePasswordToStdin := [ :aProcess | aProcess stdin nextPutAll: (OSEnvironment current at: 'PASSWORD'); close ].\nprocessKiller := GtExternalProcessBuilder new pipeStdin; command: '/usr/bin/sudo';\nargs: {'-p'. '\"\"'. '-S'. 'kill'. process id asString} ; spawn.\npipePasswordToStdin value: processKiller.\ndone := processKiller waitAsyncWithOutput.\n1 second wait.\nprocess terminate"
+    },
+    {
+      "type": "paragraph",
+      "id": "8080b672b8db008a",
+      "text": "More cohesive views (Work in Progress) around binary executables/libraries on Linux"
+    },
+    {
+      "type": "video",
+      "id": "ee0d521244ad23ca",
+      "text": "HTML5 mp4 https://cdn.discordapp.com/attachments/735949717049049129/1162136622612099072/BinaryFileViews.mp4?ex=65ea2e92&is=65d7b992&hm=9fd15d69b8edc32957c940d20801bbb88f08a07b489e40aae85df8eb97de3115&\nViews around binary executables/libraries on Linux"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "2024-02-24",
+        "story": []
+      },
+      "date": 1708755556034
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8dbe619c223a72c6"
+      },
+      "id": "8dbe619c223a72c6",
+      "type": "add",
+      "date": 1708755557772
+    },
+    {
+      "type": "edit",
+      "id": "8dbe619c223a72c6",
+      "item": {
+        "type": "paragraph",
+        "id": "8dbe619c223a72c6",
+        "text": "⇒ [[Parsing with PetitParser2]]"
+      },
+      "date": 1708755567893
+    },
+    {
+      "type": "edit",
+      "id": "8dbe619c223a72c6",
+      "item": {
+        "type": "paragraph",
+        "id": "8dbe619c223a72c6",
+        "text": "⇐ [[Parsing with PetitParser2]]"
+      },
+      "date": 1708755583458
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2b42374253216647"
+      },
+      "id": "2b42374253216647",
+      "type": "add",
+      "after": "8dbe619c223a72c6",
+      "date": 1708758728286
+    },
+    {
+      "type": "edit",
+      "id": "2b42374253216647",
+      "item": {
+        "type": "paragraph",
+        "id": "2b42374253216647",
+        "text": "⇐ [[2022-05-05]]"
+      },
+      "date": 1708758742398
+    },
+    {
+      "type": "edit",
+      "id": "2b42374253216647",
+      "item": {
+        "type": "paragraph",
+        "id": "2b42374253216647",
+        "text": "⇐ [[2022-05-05]] ⇒ [[parsing contexts]]"
+      },
+      "date": 1708758778055
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "eb2e657a6286c1ce"
+      },
+      "id": "eb2e657a6286c1ce",
+      "type": "add",
+      "after": "2b42374253216647",
+      "date": 1708771444599
+    },
+    {
+      "type": "edit",
+      "id": "eb2e657a6286c1ce",
+      "item": {
+        "type": "reference",
+        "id": "eb2e657a6286c1ce",
+        "site": "found.ward.fed.wiki",
+        "slug": "wizards-of-the-electronic-age",
+        "title": "Wizards of the Electronic Age",
+        "text": "Hackers is a classic 1985 documentary about the midnight programmers that created the personal computer revolution."
+      },
+      "date": 1708771448353
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fb8e5622c2152c1d"
+      },
+      "id": "fb8e5622c2152c1d",
+      "type": "add",
+      "after": "eb2e657a6286c1ce",
+      "date": 1708778668082
+    },
+    {
+      "type": "edit",
+      "id": "fb8e5622c2152c1d",
+      "item": {
+        "type": "video",
+        "id": "fb8e5622c2152c1d",
+        "text": "YOUTUBE cXGLOiZUZ2U"
+      },
+      "date": 1708778681443
+    },
+    {
+      "type": "edit",
+      "id": "fb8e5622c2152c1d",
+      "item": {
+        "type": "video",
+        "id": "fb8e5622c2152c1d",
+        "text": "YOUTUBE cXGLOiZUZ2U\nAlan Kay Croquet Project Demo 2003"
+      },
+      "date": 1708778698352
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3c204ba5db6ce5ce"
+      },
+      "id": "3c204ba5db6ce5ce",
+      "type": "add",
+      "after": "fb8e5622c2152c1d",
+      "date": 1708778713233
+    },
+    {
+      "type": "edit",
+      "id": "3c204ba5db6ce5ce",
+      "item": {
+        "type": "paragraph",
+        "id": "3c204ba5db6ce5ce",
+        "text": "This is an early demo of the Croquet Project from 2003! It was the demo that Alan Kay and I performed at the O'Reilly E-tech conference. It was totally live - and pretty wild. A lot of important ideas are demonstrated here including portals, replicated computation, and deep collaboration. This system was built by Andreas Raab, David Reed, Alan Kay and David A Smith."
+      },
+      "date": 1708778715239
+    },
+    {
+      "type": "edit",
+      "id": "3c204ba5db6ce5ce",
+      "item": {
+        "type": "paragraph",
+        "id": "3c204ba5db6ce5ce",
+        "text": "This is an early demo of the Croquet Project from 2003! It was the demo that Alan Kay and I performed at the O'Reilly E-tech conference. It was totally live – and pretty wild. A lot of important ideas are demonstrated here including portals, replicated computation, and deep collaboration. This system was built by Andreas Raab, David Reed, Alan Kay and David A Smith."
+      },
+      "date": 1708778726156
+    },
+    {
+      "type": "edit",
+      "id": "3c204ba5db6ce5ce",
+      "item": {
+        "type": "paragraph",
+        "id": "3c204ba5db6ce5ce",
+        "text": "This is an early demo of the Croquet Project from 2003! It was the demo that Alan Kay and I performed at the O'Reilly E-tech conference. It was totally live – and pretty wild. A lot of important ideas are demonstrated here including portals, replicated computation, and deep collaboration. This system was built by [[Andreas Raab]], [[David Reed]], [[Alan Kay]] and [[David A Smith]]."
+      },
+      "date": 1708778767367
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ef9567c3cf1be608"
+      },
+      "id": "ef9567c3cf1be608",
+      "type": "add",
+      "after": "3c204ba5db6ce5ce",
+      "date": 1708778829518
+    },
+    {
+      "type": "edit",
+      "id": "ef9567c3cf1be608",
+      "item": {
+        "type": "paragraph",
+        "id": "ef9567c3cf1be608",
+        "text": "botwhytho via [dicord]\nI got a POC of eBPF tracing (Linux kernel [and more recently Windows in a limited fashion] functionality to trace many things without recompiling kernel/userspace code) of a function in the libClipboard.so library working 🤓 . After fleshing this out a bit more, it may be useful for situations where attaching a full blown debugger (like gdb , etc.) may not be desired. Will continue working on this so I can share package with custom views on executable files that enables quickly being able to trace arbitrary symbols (functions) in arbitrary executables/libraries (whenever possible, many times debug symbols are stripped out)."
+      },
+      "date": 1708778839883
+    },
+    {
+      "type": "edit",
+      "id": "ef9567c3cf1be608",
+      "item": {
+        "type": "paragraph",
+        "id": "ef9567c3cf1be608",
+        "text": "botwhytho via [https://discord.com/channels/729445214812504107/735949717049049129/1161964144518504508 dicord]\nI got a POC of eBPF tracing (Linux kernel [and more recently Windows in a limited fashion] functionality to trace many things without recompiling kernel/userspace code) of a function in the libClipboard.so library working 🤓 . After fleshing this out a bit more, it may be useful for situations where attaching a full blown debugger (like gdb , etc.) may not be desired. Will continue working on this so I can share package with custom views on executable files that enables quickly being able to trace arbitrary symbols (functions) in arbitrary executables/libraries (whenever possible, many times debug symbols are stripped out)."
+      },
+      "date": 1708778854701
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2934d7988119a481"
+      },
+      "id": "2934d7988119a481",
+      "type": "add",
+      "after": "ef9567c3cf1be608",
+      "date": 1708778882152
+    },
+    {
+      "type": "edit",
+      "id": "2934d7988119a481",
+      "item": {
+        "type": "video",
+        "id": "2934d7988119a481",
+        "text": "HTML5 mp4 https://cdn.discordapp.com/attachments/735949717049049129/1161964144220721224/eBPFlibClipboardPOC1.mp4?ex=65e98df0&is=65d718f0&hm=0900077129cab43c50e3ed489aeb81e0ccf23f1d21c5cdd733fc5e6e209ecc1a&"
+      },
+      "date": 1708778891588
+    },
+    {
+      "type": "edit",
+      "id": "2934d7988119a481",
+      "item": {
+        "type": "video",
+        "id": "2934d7988119a481",
+        "text": "HTML5 mp4 https://cdn.discordapp.com/attachments/735949717049049129/1161964144220721224/eBPFlibClipboardPOC1.mp4?ex=65e98df0&is=65d718f0&hm=0900077129cab43c50e3ed489aeb81e0ccf23f1d21c5cdd733fc5e6e209ecc1a&\neBPF & File Watching Playground"
+      },
+      "date": 1708778923007
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "51a04e01adfe2ac4"
+      },
+      "id": "51a04e01adfe2ac4",
+      "type": "add",
+      "after": "2934d7988119a481",
+      "date": 1708778934704
+    },
+    {
+      "type": "edit",
+      "id": "51a04e01adfe2ac4",
+      "item": {
+        "type": "paragraph",
+        "id": "51a04e01adfe2ac4",
+        "text": "The file to the right gets appended to every time the clipboard_get_contents (non-smalltalk) low level function gets called which in the video happens when I trigger the paste keyboard shortcut. Luckily the bpftrace tool can output JSON so I'll be turning some of these queries into streams of live objects (as opposed to text)"
+      },
+      "date": 1708778937211
+    },
+    {
+      "type": "edit",
+      "id": "ef9567c3cf1be608",
+      "item": {
+        "type": "paragraph",
+        "id": "ef9567c3cf1be608",
+        "text": "botwhytho via [https://discord.com/channels/729445214812504107/735949717049049129/1161964144518504508 dicord]\nI got a POC of [[eBPF]] tracing (Linux kernel [and more recently Windows in a limited fashion] functionality to trace many things without recompiling kernel/userspace code) of a function in the libClipboard.so library working 🤓 . After fleshing this out a bit more, it may be useful for situations where attaching a full blown debugger (like gdb , etc.) may not be desired. Will continue working on this so I can share package with custom views on executable files that enables quickly being able to trace arbitrary symbols (functions) in arbitrary executables/libraries (whenever possible, many times debug symbols are stripped out)."
+      },
+      "date": 1708778972601
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "01b8124bac827416"
+      },
+      "id": "01b8124bac827416",
+      "type": "add",
+      "after": "51a04e01adfe2ac4",
+      "date": 1708779034108
+    },
+    {
+      "type": "edit",
+      "id": "01b8124bac827416",
+      "item": {
+        "type": "paragraph",
+        "id": "01b8124bac827416",
+        "text": "Most of the code is (and MOST of my day was spent on) code that has to do with properly trapping and forwarding UNIX signals. Otherwise this leaks child processes as the shell spawns a sudo process which spawns the bpftrace process which needs escalated privileges. Not sure if GtExternalProcessBuilder and other classes can be modified to run processes with escalated privileges (and potentially ask for root password in UI), but for the time being posting some bash-fu here in case others (or future me) find this useful\nBunch of bash things to be able to call sudo non-interactively, as well as sending signals to child processes so that all end and no zombies are spawned:"
+      },
+      "date": 1708779035846
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d013a901859742b2"
+      },
+      "id": "d013a901859742b2",
+      "type": "add",
+      "after": "01b8124bac827416",
+      "date": 1708779041969
+    },
+    {
+      "type": "edit",
+      "id": "d013a901859742b2",
+      "item": {
+        "type": "code",
+        "id": "d013a901859742b2",
+        "text": "generateUProbe := [ :aFile :aFunction | \n        GtExternalProcessBuilder new\n        workingDirectory: '.';\n        command: '/usr/bin/bash';\n        args: {'-c'.\n        'trap ''echo signal received!; printf \"%s\" \"${PASSWORD}\" | sudo -p \"\" -S kill -SIGKILL $child_pid'' SIGTERM\nprintf \"%s\" \"${PASSWORD}\" |  sudo -p \"\" -S bpftrace -e ''uprobe:' , aFile asFileReference pathString , ':' , aFunction , ' {\nprintf(\"%s\\n\", ustack());\n}'' -f json -o bpf.trace &\n\nsudo_pid=$!\nsleep 1\nchild_pid=$(ps --ppid $sudo_pid -o pid= | tr -d ''\\n'')\nwait $sudo_pid\n' copyReplaceAll: Character cr asString with: Character lf asString\n}]"
+      },
+      "date": 1708779044268
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6d56e15964c6dc29"
+      },
+      "id": "6d56e15964c6dc29",
+      "type": "add",
+      "after": "d013a901859742b2",
+      "date": 1708779062503
+    },
+    {
+      "type": "edit",
+      "id": "6d56e15964c6dc29",
+      "item": {
+        "type": "paragraph",
+        "id": "6d56e15964c6dc29",
+        "text": "Likewise, some code to send SIGTERM as root as otherwise the more typical process terminate doesn't have enough permissions"
+      },
+      "date": 1708779064830
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bee0d6a25ae813fa"
+      },
+      "id": "bee0d6a25ae813fa",
+      "type": "add",
+      "after": "6d56e15964c6dc29",
+      "date": 1708779070018
+    },
+    {
+      "type": "edit",
+      "id": "bee0d6a25ae813fa",
+      "item": {
+        "type": "code",
+        "id": "bee0d6a25ae813fa",
+        "text": "pipePasswordToStdin := [ :aProcess | aProcess stdin nextPutAll: (OSEnvironment current at: 'PASSWORD'); close ].\nprocessKiller := GtExternalProcessBuilder new pipeStdin; command: '/usr/bin/sudo';\nargs: {'-p'. '\"\"'. '-S'. 'kill'. process id asString} ; spawn.\npipePasswordToStdin value: processKiller.\ndone := processKiller waitAsyncWithOutput.\n1 second wait.\nprocess terminate"
+      },
+      "date": 1708779072179
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8080b672b8db008a"
+      },
+      "id": "8080b672b8db008a",
+      "type": "add",
+      "after": "bee0d6a25ae813fa",
+      "date": 1708779089747
+    },
+    {
+      "type": "edit",
+      "id": "8080b672b8db008a",
+      "item": {
+        "type": "paragraph",
+        "id": "8080b672b8db008a",
+        "text": "More cohesive views (Work in Progress) around binary executables/libraries on Linux"
+      },
+      "date": 1708779092068
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ee0d521244ad23ca"
+      },
+      "id": "ee0d521244ad23ca",
+      "type": "add",
+      "after": "8080b672b8db008a",
+      "date": 1708779100440
+    },
+    {
+      "type": "edit",
+      "id": "ee0d521244ad23ca",
+      "item": {
+        "type": "video",
+        "id": "ee0d521244ad23ca",
+        "text": "HTML5 mp4 https://cdn.discordapp.com/attachments/735949717049049129/1162136622612099072/BinaryFileViews.mp4?ex=65ea2e92&is=65d7b992&hm=9fd15d69b8edc32957c940d20801bbb88f08a07b489e40aae85df8eb97de3115&"
+      },
+      "date": 1708779110524
+    },
+    {
+      "type": "edit",
+      "id": "ee0d521244ad23ca",
+      "item": {
+        "type": "video",
+        "id": "ee0d521244ad23ca",
+        "text": "HTML5 mp4 https://cdn.discordapp.com/attachments/735949717049049129/1162136622612099072/BinaryFileViews.mp4?ex=65ea2e92&is=65d7b992&hm=9fd15d69b8edc32957c940d20801bbb88f08a07b489e40aae85df8eb97de3115&\nViews around binary executables/libraries on Linux"
+      },
+      "date": 1708779212223
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1708779269090
+    },
+    {
+      "id": "3ff64846323cb7b9",
+      "type": "add",
+      "item": {
+        "type": "pagefold",
+        "id": "3ff64846323cb7b9",
+        "text": "~"
+      },
+      "after": "3c204ba5db6ce5ce",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1708779292842
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709088583224
+    }
+  ]
+}

@@ -1,0 +1,800 @@
+{
+  "title": "2024-02-22",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "33e965e1498cb073",
+      "text": "⇐ [[Speed Bot]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "391b3aff5dfa8193",
+      "text": "Modify [[Speed Bot]] so that the focus is on the paragraphs of the page."
+    },
+    {
+      "type": "paragraph",
+      "id": "e36453c76276fedd",
+      "text": "In [[telling.js]] there is a function [[linked(story)]]"
+    },
+    {
+      "type": "code",
+      "id": "5b162b8104b1ce69",
+      "text": "function linked(story) {\n  let links = []\n  const link = /\\[\\[(.*?)\\]\\]/g\n  let match\n  for (let item of story) {\n    if (item.type == 'reference') links.push(item.title)\n    let text = item.text\n    while (match = link.exec(text)) {\n      links.push(match[1])\n    }\n  }\n  return links\n}\n"
+    },
+    {
+      "type": "code",
+      "id": "92dad88629dd06cd",
+      "text": "telling := JSParser\n\t\tparse: (ZnClient new\n\t\t\t\tget: 'http://ward.dojo.fed.wiki/assets/pages/story-telling/telling.js')"
+    },
+    {
+      "type": "paragraph",
+      "id": "093959f72166b0a5",
+      "text": "We are now interested in item.type == 'paragraph'."
+    },
+    {
+      "type": "paragraph",
+      "id": "8510ce3ae2fcb825",
+      "text": "⇒ [[About Frame Plugin]], [[About Frame Integrations]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6ff6d374a11a6370",
+      "text": "The Frame plugin offers several hooks for authors interested in extending the behavior of federated wiki. JavaScript programs in the framed content can use the [[postMessage]]() protocol to tell the wiki client to follow a collaborative link, create a ghost page, or import pages into the hosting wiki."
+    },
+    {
+      "type": "reference",
+      "id": "79a94a787d8c131a",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "windowpostmessage",
+      "title": "Window.postMessage",
+      "text": "The window.postMessage method safely enables cross-origin communication - [https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage developer.mozilla.org]"
+    },
+    {
+      "type": "reference",
+      "id": "ac33ce9f2477fbc9",
+      "site": "goals.pods.wiki.dbbs.co",
+      "slug": "postmessage-excursion",
+      "title": "postMessage Excursion",
+      "text": "We collect here a few javascript libraries which build on top of the postMessage API to enable cross-origin communication. Be begin this journey with experiments to enable wiki integrations via the Frame Plugin. What we found along the way invite other design questions."
+    },
+    {
+      "type": "paragraph",
+      "id": "fe43731b73021b75",
+      "text": "To modify the [[Speed Bot]] so that every paragraph of a page can be parsed, you'll need to adjust the logic to iterate over each paragraph of the page's content and extract the relevant information. Here's a revised version of the dostart function to achieve this:"
+    },
+    {
+      "type": "code",
+      "id": "0fe84b4468cfed13",
+      "text": "window.dostart = async function (event) {\n    done = Date.now() + 10000;\n    window.result.innerText = '';\n\n    // Check if a start entry is selected\n    const selectedStartEntry = document.getElementById('indexEntries').value;\n    if (selectedStartEntry) {\n        // Set the start entry based on the selected entry\n        pick = all.find(entry => entry.page.title === selectedStartEntry);\n    } else {\n        // Use the default start entry\n        pick = all[0];\n    }\n\n    seen = new Set([pick.page.title]);\n    dot = [];\n    hue = 0.5001;\n    color = {}; // site => hsv\n    addcolor(pick);\n\n    console.log('Start: pick.page', pick.page);\n\n    try {\n        while (Date.now() < done) {\n            let remain = Math.ceil((done - Date.now()) / 1000);\n            let paragraphs = pick.page.story.filter(item => item.type === 'paragraph');\n            for (let paragraph of paragraphs) {\n                let links = visit(paragraph).filter(title => !seen.has(title));\n                if (links.length) {\n                    let link = any(links);\n                    seen.add(link);\n                    populateIndexEntries(seen);\n                    let next = await getfrom(asSlug(link), pick.sites);\n                    if (next && next.page) {\n                        addcolor(next);\n                        dot.push(`${quote(pick.page.title)} -> ${quote(next.page.title)}`);\n                        all.push(next);\n                        window.result.innerHTML += `${remain} <span onclick=doview(event)>${next.site} — ${link}</span>\\n`;\n                        pick = next;\n                    } else {\n                        window.result.innerHTML += `  <span style=\"color:gray;\">fail ${link}</span>\\n`;\n                    }\n                }\n            }\n        }\n    } catch (err) {\n        window.result.innerHTML += `\n            ${err.message}\n            ${err.stack}`;\n    }\n\n    window.result.innerHTML += \"\\n\\n\" + Object.entries(sitemaps).map(([site, infos]) => `${infos.length} — ${site}`).join(\"\\n\");\n    let text = `digraph {\\nnode [shape=box style=filled fillcolor=white]\\n${dot.join(\"\\n\")}\\n}`;\n    let story = [\n        { type: 'paragraph', text: `Random journey rooted from ${reference.title} and proceeding for ${all.length} pages travelling through ${Object.keys(color).length} sites.` },\n        { type: 'graphviz', text }\n    ];\n\n    open({ title: \"Speed Bot Journey\", story }, event.shiftKey, Object.keys(color));\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "d94cd950dd9e5059",
+      "text": "⇒ [[Parse Page Paragraphs]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "702127fad3ec880f",
+      "text": "We refactor the [[Speed Bot]] code. See [[Story Telling]]"
+    },
+    {
+      "type": "frame",
+      "id": "c98339ab6823e406",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+    },
+    {
+      "type": "paragraph",
+      "id": "a8cf46a4647a8ffd",
+      "text": "⇒ [[spaCy]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "4c4fb979993156f7",
+      "text": "JavaScript API for spaCy with Python REST API [https://spacy.io/universe/project/spacy-js/ page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "462740a84a33a543",
+      "text": "Natural Language Processing with Spacy in Node.js [https://towardsdatascience.com/natural-language-processing-with-spacy-in-node-js-87214d5547?gi=c3ad26380fd5 post] [https://github.com/jeffreyflynt/spacy-nlp github]"
+    },
+    {
+      "type": "paragraph",
+      "id": "b49723cf1d3acc03",
+      "text": "Using CoreNLP within other programming languages and packages [https://stanfordnlp.github.io/CoreNLP/other-languages.html#javascript-nodejs page] – JavaScript (node.js)\nRecommended"
+    },
+    {
+      "type": "paragraph",
+      "id": "68c12e91bf895358",
+      "text": "Render dependency graph with graphviz #2264 [https://github.com/explosion/spaCy/discussions/2264 page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3a04de780d391eda",
+      "text": "Research Digitalization Leader (100%) [https://molecularpartners-career.talent-soft.com/job/job-research-digitalization-leader-100-_155.aspx page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "2f3034c69d7735ac",
+      "text": "DUŽÍ, Marie and HORÁK, Aleš, 2020. Hyperintensional Reasoning Based on Natural Language Knowledge Base. International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems. June 2020. Vol. 28, no. 03, p. 443–468. DOI 10.1142/S021848852050018X. [Accessed 22 February 2024]. \nThe success of automated reasoning techniques over large natural-language texts heavily relies on a fine-grained analysis of natural language assumptions. While there is a common agreement that the analysis should be hyperintensional, most of the automatic reasoning systems are still based on an intensional logic, at the best. In this paper, we introduce the system of reasoning based on a fine-grained, hyperintensional analysis. To this end we apply Tichy’s Transparent Intensional Logic (TIL) with its procedural semantics. TIL is a higher-order, hyperintensional logic of partial functions, in particular apt for a fine-grained natural-language analysis. Within TIL we recognise three kinds of context, namely extensional, intensional and hyperintensional, in which a particular natural-language term, or rather its meaning, can occur. Having defined the three kinds of context and implemented an algorithm of context recognition, we are in a position to develop and implement an extensional logic of hyperintensions with the inference machine that should neither over-infer nor under-infer.\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "ee825135491d0413",
+      "text": "KIYOKI, Yasushi, THALHEIM, Bernhard, DUŽÍ, Marie, JAAKKOLA, Hannu, CHAWAKITCHAREON, Petchporn and HEIMBÜRGER, Anneli, 2020. Towards a Great Design of Conceptual Modelling. In: Frontiers in Artificial Intelligence and Applications. IOS Press. 2020. [https://jyx.jyu.fi/handle/123456789/68051 page] [Accessed 22 February 2024]. [https://doi.org/10.3233/FAIA200036 doi]"
+    },
+    {
+      "type": "paragraph",
+      "id": "1913b87d450a687e",
+      "text": "Humankind faces a most crucial mission; we must endeavour, on a global scale, to restore and improve our natural and social environments. This is a big challenge for global information systems development and for their modelling. In this paper, we discuss on different aspects of conceptual modelling in global environmental context. The paper is the summary of the panel session “The Future of Conceptual Modelling” in the 29th International Conference on Information Modelling and Knowledge Bases."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "2024-02-22",
+        "story": []
+      },
+      "date": 1708582565545
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "33e965e1498cb073"
+      },
+      "id": "33e965e1498cb073",
+      "type": "add",
+      "date": 1708582567318
+    },
+    {
+      "type": "edit",
+      "id": "33e965e1498cb073",
+      "item": {
+        "type": "paragraph",
+        "id": "33e965e1498cb073",
+        "text": "⇐ [[Speed Bot]] so abwandeln, dass der Fokus auf den paragraphen der Seite liegt."
+      },
+      "date": 1708582611388
+    },
+    {
+      "type": "edit",
+      "id": "33e965e1498cb073",
+      "item": {
+        "type": "paragraph",
+        "id": "33e965e1498cb073",
+        "text": "⇐ [[Speed Bot]]"
+      },
+      "date": 1708582643851
+    },
+    {
+      "type": "add",
+      "id": "391b3aff5dfa8193",
+      "item": {
+        "type": "paragraph",
+        "id": "391b3aff5dfa8193",
+        "text": "⇐ [[Speed Bot]] so abwandeln, dass der Fokus auf den paragraphen der Seite liegt."
+      },
+      "after": "33e965e1498cb073",
+      "date": 1708582646370
+    },
+    {
+      "type": "edit",
+      "id": "391b3aff5dfa8193",
+      "item": {
+        "type": "paragraph",
+        "id": "391b3aff5dfa8193",
+        "text": "Modify [[Speed Bot]] so that the focus is on the paragraphs of the page."
+      },
+      "date": 1708582668475
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b23a35621b53db06"
+      },
+      "id": "b23a35621b53db06",
+      "type": "add",
+      "after": "391b3aff5dfa8193",
+      "date": 1708582704209
+    },
+    {
+      "type": "remove",
+      "id": "b23a35621b53db06",
+      "date": 1708582715133
+    },
+    {
+      "type": "add",
+      "id": "e36453c76276fedd",
+      "item": {
+        "type": "paragraph",
+        "id": "e36453c76276fedd",
+        "text": "In [[telling.js]] there is a function"
+      },
+      "after": "391b3aff5dfa8193",
+      "date": 1708582729188
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "5b162b8104b1ce69"
+      },
+      "id": "5b162b8104b1ce69",
+      "type": "add",
+      "after": "e36453c76276fedd",
+      "date": 1708582734134
+    },
+    {
+      "type": "edit",
+      "id": "5b162b8104b1ce69",
+      "item": {
+        "type": "code",
+        "id": "5b162b8104b1ce69",
+        "text": "function linked(story) {\n  let links = []\n  const link = /\\[\\[(.*?)\\]\\]/g\n  let match\n  for (let item of story) {\n    if (item.type == 'reference') links.push(item.title)\n    let text = item.text\n    while (match = link.exec(text)) {\n      links.push(match[1])\n    }\n  }\n  return links\n}\n"
+      },
+      "date": 1708582737637
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "92dad88629dd06cd"
+      },
+      "id": "92dad88629dd06cd",
+      "type": "add",
+      "after": "5b162b8104b1ce69",
+      "date": 1708582778822
+    },
+    {
+      "type": "edit",
+      "id": "92dad88629dd06cd",
+      "item": {
+        "type": "code",
+        "id": "92dad88629dd06cd",
+        "text": "telling := JSParser\n\t\tparse: (ZnClient new\n\t\t\t\tget: 'http://ward.dojo.fed.wiki/assets/pages/story-telling/telling.js')"
+      },
+      "date": 1708582781041
+    },
+    {
+      "type": "edit",
+      "id": "e36453c76276fedd",
+      "item": {
+        "type": "paragraph",
+        "id": "e36453c76276fedd",
+        "text": "In [[telling.js]] there is a function [[linked(story)]"
+      },
+      "date": 1708582796888
+    },
+    {
+      "type": "edit",
+      "id": "e36453c76276fedd",
+      "item": {
+        "type": "paragraph",
+        "id": "e36453c76276fedd",
+        "text": "In [[telling.js]] there is a function [[linked(story)]]"
+      },
+      "date": 1708582800798
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "093959f72166b0a5"
+      },
+      "id": "093959f72166b0a5",
+      "type": "add",
+      "after": "92dad88629dd06cd",
+      "date": 1708582966559
+    },
+    {
+      "type": "edit",
+      "id": "093959f72166b0a5",
+      "item": {
+        "type": "paragraph",
+        "id": "093959f72166b0a5",
+        "text": "We are now interested in item.type == 'paragraph'."
+      },
+      "date": 1708582972505
+    },
+    {
+      "id": "8510ce3ae2fcb825",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "8510ce3ae2fcb825",
+        "text": "⇒ [[About Frame Plugin]], [[About Frame Integrations]]"
+      },
+      "after": "093959f72166b0a5",
+      "attribution": {
+        "page": "Frame",
+        "site": "wiki.ralfbarkow.ch"
+      },
+      "date": 1708583003051
+    },
+    {
+      "id": "6ff6d374a11a6370",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "6ff6d374a11a6370",
+        "text": "The Frame plugin offers several hooks for authors interested in extending the behavior of federated wiki. JavaScript programs in the framed content can use the postMessage() protocol to tell the wiki client to follow a collaborative link, create a ghost page, or import pages into the hosting wiki."
+      },
+      "after": "8510ce3ae2fcb825",
+      "attribution": {
+        "page": "About Frame Integrations",
+        "site": "wiki.ralfbarkow.ch"
+      },
+      "date": 1708583054101
+    },
+    {
+      "type": "edit",
+      "id": "6ff6d374a11a6370",
+      "item": {
+        "type": "paragraph",
+        "id": "6ff6d374a11a6370",
+        "text": "The Frame plugin offers several hooks for authors interested in extending the behavior of federated wiki. JavaScript programs in the framed content can use the [[postMessage]]() protocol to tell the wiki client to follow a collaborative link, create a ghost page, or import pages into the hosting wiki."
+      },
+      "date": 1708583152010
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "79a94a787d8c131a"
+      },
+      "id": "79a94a787d8c131a",
+      "type": "add",
+      "after": "6ff6d374a11a6370",
+      "date": 1708583201557
+    },
+    {
+      "type": "edit",
+      "id": "79a94a787d8c131a",
+      "item": {
+        "type": "reference",
+        "id": "79a94a787d8c131a",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "windowpostmessage",
+        "title": "Window.postMessage",
+        "text": "The window.postMessage method safely enables cross-origin communication - [https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage developer.mozilla.org]"
+      },
+      "date": 1708583204401
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ac33ce9f2477fbc9"
+      },
+      "id": "ac33ce9f2477fbc9",
+      "type": "add",
+      "after": "79a94a787d8c131a",
+      "date": 1708583570616
+    },
+    {
+      "type": "edit",
+      "id": "ac33ce9f2477fbc9",
+      "item": {
+        "type": "reference",
+        "id": "ac33ce9f2477fbc9",
+        "site": "goals.pods.wiki.dbbs.co",
+        "slug": "postmessage-excursion",
+        "title": "postMessage Excursion",
+        "text": "We collect here a few javascript libraries which build on top of the postMessage API to enable cross-origin communication. Be begin this journey with experiments to enable wiki integrations via the Frame Plugin. What we found along the way invite other design questions."
+      },
+      "date": 1708583573098
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fe43731b73021b75"
+      },
+      "id": "fe43731b73021b75",
+      "type": "add",
+      "after": "ac33ce9f2477fbc9",
+      "date": 1708584999035
+    },
+    {
+      "type": "edit",
+      "id": "fe43731b73021b75",
+      "item": {
+        "type": "paragraph",
+        "id": "fe43731b73021b75",
+        "text": "To modify the Speed Bot so that every paragraph of a page can be parsed, you'll need to adjust the logic to iterate over each paragraph of the page's content and extract the relevant information. Here's a revised version of the dostart function to achieve this:"
+      },
+      "date": 1708585010312
+    },
+    {
+      "type": "edit",
+      "id": "fe43731b73021b75",
+      "item": {
+        "type": "paragraph",
+        "id": "fe43731b73021b75",
+        "text": "To modify the [[Speed Bot]] so that every paragraph of a page can be parsed, you'll need to adjust the logic to iterate over each paragraph of the page's content and extract the relevant information. Here's a revised version of the dostart function to achieve this:"
+      },
+      "date": 1708585022303
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0fe84b4468cfed13"
+      },
+      "id": "0fe84b4468cfed13",
+      "type": "add",
+      "after": "fe43731b73021b75",
+      "date": 1708585051500
+    },
+    {
+      "type": "edit",
+      "id": "0fe84b4468cfed13",
+      "item": {
+        "type": "code",
+        "id": "0fe84b4468cfed13",
+        "text": "window.dostart = async function (event) {\n    done = Date.now() + 10000;\n    window.result.innerText = '';\n\n    // Check if a start entry is selected\n    const selectedStartEntry = document.getElementById('indexEntries').value;\n    if (selectedStartEntry) {\n        // Set the start entry based on the selected entry\n        pick = all.find(entry => entry.page.title === selectedStartEntry);\n    } else {\n        // Use the default start entry\n        pick = all[0];\n    }\n\n    seen = new Set([pick.page.title]);\n    dot = [];\n    hue = 0.5001;\n    color = {}; // site => hsv\n    addcolor(pick);\n\n    console.log('Start: pick.page', pick.page);\n\n    try {\n        while (Date.now() < done) {\n            let remain = Math.ceil((done - Date.now()) / 1000);\n            let paragraphs = pick.page.story.filter(item => item.type === 'paragraph');\n            for (let paragraph of paragraphs) {\n                let links = visit(paragraph).filter(title => !seen.has(title));\n                if (links.length) {\n                    let link = any(links);\n                    seen.add(link);\n                    populateIndexEntries(seen);\n                    let next = await getfrom(asSlug(link), pick.sites);\n                    if (next && next.page) {\n                        addcolor(next);\n                        dot.push(`${quote(pick.page.title)} -> ${quote(next.page.title)}`);\n                        all.push(next);\n                        window.result.innerHTML += `${remain} <span onclick=doview(event)>${next.site} — ${link}</span>\\n`;\n                        pick = next;\n                    } else {\n                        window.result.innerHTML += `  <span style=\"color:gray;\">fail ${link}</span>\\n`;\n                    }\n                }\n            }\n        }\n    } catch (err) {\n        window.result.innerHTML += `\n            ${err.message}\n            ${err.stack}`;\n    }\n\n    window.result.innerHTML += \"\\n\\n\" + Object.entries(sitemaps).map(([site, infos]) => `${infos.length} — ${site}`).join(\"\\n\");\n    let text = `digraph {\\nnode [shape=box style=filled fillcolor=white]\\n${dot.join(\"\\n\")}\\n}`;\n    let story = [\n        { type: 'paragraph', text: `Random journey rooted from ${reference.title} and proceeding for ${all.length} pages travelling through ${Object.keys(color).length} sites.` },\n        { type: 'graphviz', text }\n    ];\n\n    open({ title: \"Speed Bot Journey\", story }, event.shiftKey, Object.keys(color));\n}\n"
+      },
+      "date": 1708585053602
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d94cd950dd9e5059"
+      },
+      "id": "d94cd950dd9e5059",
+      "type": "add",
+      "after": "0fe84b4468cfed13",
+      "date": 1708585508642
+    },
+    {
+      "type": "edit",
+      "id": "d94cd950dd9e5059",
+      "item": {
+        "type": "paragraph",
+        "id": "d94cd950dd9e5059",
+        "text": "⇒ [[Parse Page Paragraphs]]"
+      },
+      "date": 1708585518007
+    },
+    {
+      "type": "add",
+      "id": "702127fad3ec880f",
+      "item": {
+        "type": "paragraph",
+        "id": "702127fad3ec880f",
+        "text": "We refactor "
+      },
+      "after": "d94cd950dd9e5059",
+      "date": 1708585567125
+    },
+    {
+      "type": "edit",
+      "id": "702127fad3ec880f",
+      "item": {
+        "type": "paragraph",
+        "id": "702127fad3ec880f",
+        "text": "We refactor the [[Speed Bot]] code."
+      },
+      "date": 1708585579759
+    },
+    {
+      "id": "c98339ab6823e406",
+      "type": "add",
+      "item": {
+        "type": "frame",
+        "id": "c98339ab6823e406",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "after": "702127fad3ec880f",
+      "attribution": {
+        "page": "Speed Bot"
+      },
+      "date": 1708585623075
+    },
+    {
+      "type": "edit",
+      "id": "c98339ab6823e406",
+      "item": {
+        "type": "frame",
+        "id": "c98339ab6823e406",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      },
+      "date": 1708585628716
+    },
+    {
+      "type": "edit",
+      "id": "702127fad3ec880f",
+      "item": {
+        "type": "paragraph",
+        "id": "702127fad3ec880f",
+        "text": "We refactor the [[Speed Bot]] code. See [[Story Telling]]"
+      },
+      "date": 1708585750023
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a8cf46a4647a8ffd"
+      },
+      "id": "a8cf46a4647a8ffd",
+      "type": "add",
+      "after": "c98339ab6823e406",
+      "date": 1708588036512
+    },
+    {
+      "type": "edit",
+      "id": "a8cf46a4647a8ffd",
+      "item": {
+        "type": "paragraph",
+        "id": "a8cf46a4647a8ffd",
+        "text": "JavaScript API for spaCy with Python REST API"
+      },
+      "date": 1708588038343
+    },
+    {
+      "type": "edit",
+      "id": "a8cf46a4647a8ffd",
+      "item": {
+        "type": "paragraph",
+        "id": "a8cf46a4647a8ffd",
+        "text": "JavaScript API for spaCy with Python REST API https://spacy.io/universe/project/spacy-js/ page[]"
+      },
+      "date": 1708588049859
+    },
+    {
+      "type": "edit",
+      "id": "a8cf46a4647a8ffd",
+      "item": {
+        "type": "paragraph",
+        "id": "a8cf46a4647a8ffd",
+        "text": "JavaScript API for spaCy with Python REST API [https://spacy.io/universe/project/spacy-js/ page]"
+      },
+      "date": 1708588057707
+    },
+    {
+      "type": "edit",
+      "id": "a8cf46a4647a8ffd",
+      "item": {
+        "type": "paragraph",
+        "id": "a8cf46a4647a8ffd",
+        "text": "⇒ [[spaCy]]"
+      },
+      "date": 1708589741382
+    },
+    {
+      "type": "add",
+      "id": "4c4fb979993156f7",
+      "item": {
+        "type": "paragraph",
+        "id": "4c4fb979993156f7",
+        "text": "JavaScript API for spaCy with Python REST API [https://spacy.io/universe/project/spacy-js/ page]"
+      },
+      "after": "a8cf46a4647a8ffd",
+      "date": 1708589741891
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "462740a84a33a543"
+      },
+      "id": "462740a84a33a543",
+      "type": "add",
+      "after": "4c4fb979993156f7",
+      "date": 1708592106778
+    },
+    {
+      "type": "edit",
+      "id": "462740a84a33a543",
+      "item": {
+        "type": "paragraph",
+        "id": "462740a84a33a543",
+        "text": "Natural Language Processing with Spacy in Node.js"
+      },
+      "date": 1708592109191
+    },
+    {
+      "type": "edit",
+      "id": "462740a84a33a543",
+      "item": {
+        "type": "paragraph",
+        "id": "462740a84a33a543",
+        "text": "Natural Language Processing with Spacy in Node.js [https://towardsdatascience.com/natural-language-processing-with-spacy-in-node-js-87214d5547?gi=c3ad26380fd5 post]"
+      },
+      "date": 1708592116773
+    },
+    {
+      "type": "edit",
+      "id": "462740a84a33a543",
+      "item": {
+        "type": "paragraph",
+        "id": "462740a84a33a543",
+        "text": "Natural Language Processing with Spacy in Node.js [https://towardsdatascience.com/natural-language-processing-with-spacy-in-node-js-87214d5547?gi=c3ad26380fd5 post] [https://github.com/jeffreyflynt/spacy-nlp github]"
+      },
+      "date": 1708592273301
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b49723cf1d3acc03"
+      },
+      "id": "b49723cf1d3acc03",
+      "type": "add",
+      "after": "462740a84a33a543",
+      "date": 1708600692895
+    },
+    {
+      "type": "edit",
+      "id": "b49723cf1d3acc03",
+      "item": {
+        "type": "paragraph",
+        "id": "b49723cf1d3acc03",
+        "text": "– [https://stanfordnlp.github.io/CoreNLP/other-languages.html#javascript-nodejs page]"
+      },
+      "date": 1708600702548
+    },
+    {
+      "type": "edit",
+      "id": "b49723cf1d3acc03",
+      "item": {
+        "type": "paragraph",
+        "id": "b49723cf1d3acc03",
+        "text": "Using CoreNLP within other programming languages and packages [https://stanfordnlp.github.io/CoreNLP/other-languages.html#javascript-nodejs page]"
+      },
+      "date": 1708600721918
+    },
+    {
+      "type": "edit",
+      "id": "b49723cf1d3acc03",
+      "item": {
+        "type": "paragraph",
+        "id": "b49723cf1d3acc03",
+        "text": "Using CoreNLP within other programming languages and packages [https://stanfordnlp.github.io/CoreNLP/other-languages.html#javascript-nodejs page] (JavaScript (node.js)\nRecommended)"
+      },
+      "date": 1708600766497
+    },
+    {
+      "type": "edit",
+      "id": "b49723cf1d3acc03",
+      "item": {
+        "type": "paragraph",
+        "id": "b49723cf1d3acc03",
+        "text": "Using CoreNLP within other programming languages and packages [https://stanfordnlp.github.io/CoreNLP/other-languages.html#javascript-nodejs page] – JavaScript (node.js)\nRecommended"
+      },
+      "date": 1708600778551
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "68c12e91bf895358"
+      },
+      "id": "68c12e91bf895358",
+      "type": "add",
+      "after": "b49723cf1d3acc03",
+      "date": 1708602569307
+    },
+    {
+      "type": "edit",
+      "id": "68c12e91bf895358",
+      "item": {
+        "type": "paragraph",
+        "id": "68c12e91bf895358",
+        "text": "Render dependency graph with graphviz #2264"
+      },
+      "date": 1708602571650
+    },
+    {
+      "type": "edit",
+      "id": "68c12e91bf895358",
+      "item": {
+        "type": "paragraph",
+        "id": "68c12e91bf895358",
+        "text": "Render dependency graph with graphviz #2264 [https://github.com/explosion/spaCy/discussions/2264 page]"
+      },
+      "date": 1708602587290
+    },
+    {
+      "type": "add",
+      "id": "3a04de780d391eda",
+      "item": {
+        "type": "paragraph",
+        "id": "3a04de780d391eda",
+        "text": "Research Digitalization Leader (100%)"
+      },
+      "after": "68c12e91bf895358",
+      "date": 1708603303514
+    },
+    {
+      "type": "edit",
+      "id": "3a04de780d391eda",
+      "item": {
+        "type": "paragraph",
+        "id": "3a04de780d391eda",
+        "text": "Research Digitalization Leader (100%) [https://molecularpartners-career.talent-soft.com/job/job-research-digitalization-leader-100-_155.aspx page]"
+      },
+      "date": 1708603314896
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2f3034c69d7735ac"
+      },
+      "id": "2f3034c69d7735ac",
+      "type": "add",
+      "after": "3a04de780d391eda",
+      "date": 1708612306131
+    },
+    {
+      "type": "edit",
+      "id": "2f3034c69d7735ac",
+      "item": {
+        "type": "paragraph",
+        "id": "2f3034c69d7735ac",
+        "text": "\nDUŽÍ, Marie and HORÁK, Aleš, 2020. Hyperintensional Reasoning Based on Natural Language Knowledge Base. International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems. Online. June 2020. Vol. 28, no. 03, p. 443–468. DOI 10.1142/S021848852050018X. [Accessed 22 February 2024]. \nThe success of automated reasoning techniques over large natural-language texts heavily relies on a fine-grained analysis of natural language assumptions. While there is a common agreement that the analysis should be hyperintensional, most of the automatic reasoning systems are still based on an intensional logic, at the best. In this paper, we introduce the system of reasoning based on a fine-grained, hyperintensional analysis. To this end we apply Tichy’s Transparent Intensional Logic (TIL) with its procedural semantics. TIL is a higher-order, hyperintensional logic of partial functions, in particular apt for a fine-grained natural-language analysis. Within TIL we recognise three kinds of context, namely extensional, intensional and hyperintensional, in which a particular natural-language term, or rather its meaning, can occur. Having defined the three kinds of context and implemented an algorithm of context recognition, we are in a position to develop and implement an extensional logic of hyperintensions with the inference machine that should neither over-infer nor under-infer.\n"
+      },
+      "date": 1708612309752
+    },
+    {
+      "type": "edit",
+      "id": "2f3034c69d7735ac",
+      "item": {
+        "type": "paragraph",
+        "id": "2f3034c69d7735ac",
+        "text": "DUŽÍ, Marie and HORÁK, Aleš, 2020. Hyperintensional Reasoning Based on Natural Language Knowledge Base. International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems. June 2020. Vol. 28, no. 03, p. 443–468. DOI 10.1142/S021848852050018X. [Accessed 22 February 2024]. \nThe success of automated reasoning techniques over large natural-language texts heavily relies on a fine-grained analysis of natural language assumptions. While there is a common agreement that the analysis should be hyperintensional, most of the automatic reasoning systems are still based on an intensional logic, at the best. In this paper, we introduce the system of reasoning based on a fine-grained, hyperintensional analysis. To this end we apply Tichy’s Transparent Intensional Logic (TIL) with its procedural semantics. TIL is a higher-order, hyperintensional logic of partial functions, in particular apt for a fine-grained natural-language analysis. Within TIL we recognise three kinds of context, namely extensional, intensional and hyperintensional, in which a particular natural-language term, or rather its meaning, can occur. Having defined the three kinds of context and implemented an algorithm of context recognition, we are in a position to develop and implement an extensional logic of hyperintensions with the inference machine that should neither over-infer nor under-infer.\n"
+      },
+      "date": 1708612319056
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ee825135491d0413"
+      },
+      "id": "ee825135491d0413",
+      "type": "add",
+      "after": "2f3034c69d7735ac",
+      "date": 1708613543302
+    },
+    {
+      "type": "edit",
+      "id": "ee825135491d0413",
+      "item": {
+        "type": "paragraph",
+        "id": "ee825135491d0413",
+        "text": "\nKIYOKI, Yasushi, THALHEIM, Bernhard, DUŽÍ, Marie, JAAKKOLA, Hannu, CHAWAKITCHAREON, Petchporn and HEIMBÜRGER, Anneli, 2020. Towards a Great Design of Conceptual Modelling. In: Frontiers in Artificial Intelligence and Applications. Online. IOS Press. 2020. Available from: https://jyx.jyu.fi/handle/123456789/68051 [Accessed 22 February 2024]. \n"
+      },
+      "date": 1708613545297
+    },
+    {
+      "type": "edit",
+      "id": "ee825135491d0413",
+      "item": {
+        "type": "paragraph",
+        "id": "ee825135491d0413",
+        "text": "KIYOKI, Yasushi, THALHEIM, Bernhard, DUŽÍ, Marie, JAAKKOLA, Hannu, CHAWAKITCHAREON, Petchporn and HEIMBÜRGER, Anneli, 2020. Towards a Great Design of Conceptual Modelling. In: Frontiers in Artificial Intelligence and Applications. IOS Press. 2020. [https://jyx.jyu.fi/handle/123456789/68051 page] [Accessed 22 February 2024]. \n"
+      },
+      "date": 1708613569656
+    },
+    {
+      "type": "edit",
+      "id": "ee825135491d0413",
+      "item": {
+        "type": "paragraph",
+        "id": "ee825135491d0413",
+        "text": "KIYOKI, Yasushi, THALHEIM, Bernhard, DUŽÍ, Marie, JAAKKOLA, Hannu, CHAWAKITCHAREON, Petchporn and HEIMBÜRGER, Anneli, 2020. Towards a Great Design of Conceptual Modelling. In: Frontiers in Artificial Intelligence and Applications. IOS Press. 2020. [https://jyx.jyu.fi/handle/123456789/68051 page] [Accessed 22 February 2024]. [https://doi.org/10.3233/FAIA200036 doi]"
+      },
+      "date": 1708613591686
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1913b87d450a687e"
+      },
+      "id": "1913b87d450a687e",
+      "type": "add",
+      "after": "ee825135491d0413",
+      "date": 1708613646011
+    },
+    {
+      "type": "edit",
+      "id": "1913b87d450a687e",
+      "item": {
+        "type": "paragraph",
+        "id": "1913b87d450a687e",
+        "text": "Humankind faces a most crucial mission; we must endeavour, on a global scale, to restore and improve our natural and social environments. This is a big challenge for global information systems development and for their modelling. In this paper, we discuss on different aspects of conceptual modelling in global environmental context. The paper is the summary of the panel session “The Future of Conceptual Modelling” in the 29th International Conference on Information Modelling and Knowledge Bases."
+      },
+      "date": 1708613647637
+    }
+  ]
+}
