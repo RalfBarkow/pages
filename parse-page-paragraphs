@@ -1,0 +1,2373 @@
+{
+  "title": "Parse Page Paragraphs",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "702127fad3ec880f",
+      "text": "We refactor the [[Speed Bot]] code. See [[Story Telling]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "5aa9624700f4dd96",
+      "text": "We intend to parse the natural language data of paragraphs."
+    },
+    {
+      "type": "paragraph",
+      "id": "d5c469074553cb08",
+      "text": "We are only secondarily interested in links. First and foremost, we want to visualize an [[AST]] as a ghost page and see if the verbs it contains already exist as wiki pages. Our aim is to view the sentences of the paragraphs as graphs in order to be able to search for paragraphs with similar graphs/sentences. See [[recommend]]"
+    },
+    {
+      "type": "markdown",
+      "id": "bb8ae062390db8fb",
+      "text": "We plan to refactor the `window.dostart` function. See below."
+    },
+    {
+      "type": "reference",
+      "id": "3a035be472e997f2",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "parse-page-paragraphs",
+      "title": "Parse Page Paragraphs",
+      "text": "? ⇒ [[LINEUP graph]] ⇐"
+    },
+    {
+      "type": "markdown",
+      "id": "00f76ff348892888",
+      "text": "# Application Frame"
+    },
+    {
+      "type": "frame",
+      "id": "3740343908300b7c",
+      "text": "http://localhost:3000/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 500\nSOURCE graph"
+    },
+    {
+      "type": "markdown",
+      "id": "4376defc11184983",
+      "text": "**Note**: The *Application Frame* above accesses the localhost. Scroll to the bottom of this page to work with a frame that also works on our global intranet."
+    },
+    {
+      "type": "assets",
+      "id": "0fd7bec00f963803",
+      "text": "pages/parse-page-paragraphs"
+    },
+    {
+      "type": "paragraph",
+      "id": "b2dd78abe2750e8f",
+      "text": "The first modified version of dostart [https://github.com/RalfBarkow/assets/commit/bfcbc9f13860e87800e462d2b5601a15381b28bf commit] [https://github.com/RalfBarkow/assets/blob/bfcbc9f13860e87800e462d2b5601a15381b28bf/pages/parse-page-paragraphs/speed-bot.html#L114-L117 code] iterates over each paragraph in the pick.page.story array and extracts the links from each paragraph using the visit function. If links are found, it proceeds with the same logic as before to fetch and process the next page. This ensures that every paragraph of the page is parsed for links, allowing for a more comprehensive traversal of the site's content. (ChatGPT 3.5)"
+    },
+    {
+      "type": "paragraph",
+      "id": "0eca98fd9bd1c095",
+      "text": "We add a console.log to see the Paragraphs."
+    },
+    {
+      "type": "image",
+      "id": "ab8a1d2c5a543552",
+      "text": "console.log('Paragraphs: ', paragraphs);",
+      "size": "wide",
+      "width": 430,
+      "height": 261,
+      "url": "/assets/plugins/image/20c75fed180e4b523a60287ad5b9e715.jpg"
+    },
+    {
+      "type": "markdown",
+      "id": "d4c20e44a9504fdb",
+      "text": "In the next refactoring step, we extract the `filterParagraphs(page)` function. [https://github.com/RalfBarkow/assets/commit/a3a0d1018d8a3d157c8da8c67ba335b6df6b19cc commit]"
+    },
+    {
+      "type": "code",
+      "id": "8365bdff13e1fe44",
+      "text": "function filterParagraphs(page) {\n     return page.story.filter(item => item.type === 'paragraph');\n "
+    },
+    {
+      "type": "paragraph",
+      "id": "3f277c45e7e59e59",
+      "text": "Which [[Custom View]](s) are we missing?"
+    },
+    {
+      "type": "paragraph",
+      "id": "f26e000bb110aeb7",
+      "text": "The custom view we want to see at the end of our implementation is one that visualizes the syntax tree or the parsed result of the paragraph text."
+    },
+    {
+      "type": "paragraph",
+      "id": "2e8e524a87ccdcc5",
+      "text": "In a further intermediate step, we visualize the paragraphs that we filter out during our journey with the [[Speed Bot]]. [https://github.com/RalfBarkow/assets/commit/fda9744fe2bc95f67fe95f28c0743cc28a6e7154 commit]"
+    },
+    {
+      "type": "paragraph",
+      "id": "45dcd8993acef753",
+      "text": "The paragraphs temporarily fill a drop-down list."
+    },
+    {
+      "type": "image",
+      "id": "e7e0d71095ec1c81",
+      "text": "Second drop-down list",
+      "size": "wide",
+      "width": 419,
+      "height": 158,
+      "url": "/assets/plugins/image/63b483ab9bc14bfef8095fa8ad9de74b.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "755a214cbc004042",
+      "text": "We plan to extend the [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L47-L55 addTitleDot()] and [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L57-L66 joinTitlesDot()] functions to add nodes to a graph and add relationships to this graph. See [[Dump a Structure into Graphviz]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "663074a702fb108b",
+      "text": "We focus on the [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L84-L88 filterParagraphs(page)] function. Our starting point is the creation of a [[Graph]] in place of the [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L90-L110 populateParagraphEntries(paragraphs)] function."
+    },
+    {
+      "type": "paragraph",
+      "id": "15f0137adb7214a2",
+      "text": "See \"[[Property Graphs]] as Javascript Module\" [https://wardcunningham.github.io/graph/ page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "b8c37a0a904460b3",
+      "text": "Add nodes to the graph. [https://github.com/RalfBarkow/assets/commit/c1ff2e051d632ee00bc211b9932201d3cdd70b3e commit]"
+    },
+    {
+      "type": "image",
+      "id": "44c3c1123009a02a",
+      "text": "Check if the node already exists",
+      "size": "wide",
+      "width": 430,
+      "height": 260,
+      "url": "/assets/plugins/image/65dff0920345f6692579cd6ba42d7369.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "9ea06b7c8668f42a",
+      "text": "feat(speed-bot): check if the node already exists in the graph [https://github.com/RalfBarkow/assets/commit/6e6315f163cab6edb4f9d563684ed688e57a571c commit]"
+    },
+    {
+      "type": "paragraph",
+      "id": "2dff10a4141ab6cf",
+      "text": "Remember node ids. See [[Slug]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "1fca1c88b1d55737",
+      "text": "Add relation to the graph.\nConnect remembered nodes by id."
+    },
+    {
+      "type": "pagefold",
+      "id": "8361fb0daba6ccbe",
+      "text": "2024-02-26"
+    },
+    {
+      "type": "markdown",
+      "id": "c70196335a0d90a1",
+      "text": "Say **SOURCE** to offer data to other plugins or frames.\nSee [[About Frame Source]]\n"
+    },
+    {
+      "type": "image",
+      "id": "dc471f208588b14d",
+      "text": "Say Source",
+      "size": "wide",
+      "width": 418,
+      "height": 195,
+      "url": "/assets/plugins/image/15f9b5db3dbe9a738a51405022b7969b.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "d4468a98d29802c7",
+      "text": "This page now serves as the source for a graph broadcast that is received, for example, in a frame on the [[LINEUP graph]] page."
+    },
+    {
+      "type": "image",
+      "id": "fe16ce5dea04b4cd",
+      "text": "Receive graph data",
+      "size": "wide",
+      "width": 418,
+      "height": 195,
+      "url": "/assets/plugins/image/2afdf6ddd436df420a418ed18d1b7411.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "d4b9e39bfd2dedc7",
+      "text": "Move the [[LINEUP graph]] page to the left-hand side before you start the [[Speed Bot Journey]]. The Speed Bot output then appears on the right-hand side (and overwrites the LINEUP graph page if it was still there). For the correct arrangement, see this [http://wiki.ralfbarkow.ch/view/lineup-graph/view/parse-page-paragraphs/view/speed-bot-journey lineup]."
+    },
+    {
+      "type": "markdown",
+      "id": "420e5e1638208d80",
+      "text": "Click `start` in the following frame to begin the Speed Bot Journey."
+    },
+    {
+      "type": "frame",
+      "id": "6ac1902a1613c193",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 150\nSOURCE graph"
+    },
+    {
+      "type": "markdown",
+      "id": "542f3dee6845a6bb",
+      "text": "Observe the changes in the frame at the top of the LINEUP graph page (left) and the Speed Bot Journey (right) when you click on `start`."
+    },
+    {
+      "type": "pagefold",
+      "id": "b61e97c4c3b6056c",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "31a8bf21e7e858b8",
+      "text": "Ward via matrix DM: "
+    },
+    {
+      "type": "paragraph",
+      "id": "0600b5b04e66eecf",
+      "text": "If you wanted to know the id of a node named foo in the Graph g then you could reach inside of the graph, get the nodes, and then search for name == 'foo'. In code it would look like this:\n"
+    },
+    {
+      "type": "code",
+      "id": "7f2702590009d691",
+      "text": "const id = g.nodes.findIndex(node => node.props.name == 'foo')"
+    },
+    {
+      "type": "paragraph",
+      "id": "9b565e3efa50f038",
+      "text": "If you wanted the node itself, and knew some Cypher query language, you could use our not so well documented subset of Cypher:"
+    },
+    {
+      "type": "code",
+      "id": "40299b9299b9225f",
+      "text": "const result = g.search('match (n{name:\"foo\"})')"
+    },
+    {
+      "type": "paragraph",
+      "id": "4bc4a7d1d6fd8b06",
+      "text": "This would return an array of results, each an object with a property named \"n\", based on the names used in the query. If you wanted the first result you could write:"
+    },
+    {
+      "type": "code",
+      "id": "17b43dbcb682d23e",
+      "text": "const foo = result[0].n"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Parse Page Paragraphs",
+        "story": []
+      },
+      "date": 1708585707961
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0fd7bec00f963803"
+      },
+      "id": "0fd7bec00f963803",
+      "type": "add",
+      "date": 1708585709897
+    },
+    {
+      "type": "edit",
+      "id": "0fd7bec00f963803",
+      "item": {
+        "type": "assets",
+        "id": "0fd7bec00f963803",
+        "text": "pages/parse-page-paragraphs"
+      },
+      "date": 1708585726146
+    },
+    {
+      "id": "702127fad3ec880f",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "702127fad3ec880f",
+        "text": "We refactor the [[Speed Bot]] code. See [[Story Telling]]"
+      },
+      "attribution": {
+        "page": "2024-02-22"
+      },
+      "date": 1708585838359
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3740343908300b7c"
+      },
+      "id": "3740343908300b7c",
+      "type": "add",
+      "after": "0fd7bec00f963803",
+      "date": 1708585970783
+    },
+    {
+      "type": "edit",
+      "id": "3740343908300b7c",
+      "item": {
+        "type": "frame",
+        "id": "3740343908300b7c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      },
+      "date": 1708585976391
+    },
+    {
+      "type": "edit",
+      "id": "3740343908300b7c",
+      "item": {
+        "type": "frame",
+        "id": "3740343908300b7c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 75"
+      },
+      "date": 1708585995831
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1708586067739
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ab8a1d2c5a543552"
+      },
+      "id": "ab8a1d2c5a543552",
+      "type": "add",
+      "after": "3740343908300b7c",
+      "date": 1708586864581
+    },
+    {
+      "type": "edit",
+      "id": "ab8a1d2c5a543552",
+      "item": {
+        "type": "image",
+        "id": "ab8a1d2c5a543552",
+        "text": "console.log('Paragraphs: ', paragraphs);",
+        "size": "wide",
+        "width": 430,
+        "height": 261,
+        "url": "/assets/plugins/image/20c75fed180e4b523a60287ad5b9e715.jpg"
+      },
+      "date": 1708586912444
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b2dd78abe2750e8f"
+      },
+      "id": "b2dd78abe2750e8f",
+      "type": "add",
+      "after": "ab8a1d2c5a543552",
+      "date": 1708587612137
+    },
+    {
+      "type": "edit",
+      "id": "b2dd78abe2750e8f",
+      "item": {
+        "type": "paragraph",
+        "id": "b2dd78abe2750e8f",
+        "text": "This modified version of dostart iterates over each paragraph in the pick.page.story array and extracts the links from each paragraph using the visit function. If links are found, it proceeds with the same logic as before to fetch and process the next page. This ensures that every paragraph of the page is parsed for links, allowing for a more comprehensive traversal of the site's content. (ChatGPT 3.5)"
+      },
+      "date": 1708587619862
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "db7075b19fd4ec9e"
+      },
+      "id": "db7075b19fd4ec9e",
+      "type": "add",
+      "after": "b2dd78abe2750e8f",
+      "date": 1708587647577
+    },
+    {
+      "id": "db7075b19fd4ec9e",
+      "type": "move",
+      "order": [
+        "702127fad3ec880f",
+        "0fd7bec00f963803",
+        "3740343908300b7c",
+        "ab8a1d2c5a543552",
+        "db7075b19fd4ec9e",
+        "b2dd78abe2750e8f"
+      ],
+      "date": 1708587653003
+    },
+    {
+      "type": "edit",
+      "id": "db7075b19fd4ec9e",
+      "item": {
+        "type": "code",
+        "id": "db7075b19fd4ec9e",
+        "text": "modified   pages/parse-page-paragraphs/speed-bot.html\n@@ -111,11 +111,7 @@ window.dostart = async function (event) {\n      try {\n          while (Date.now() < done) {\n     let remain = Math.ceil((done - Date.now())/1000)\n-\n-             let paragraphs = pick.page.story.filter(item => item.type === 'paragraph');\n-             console.log('Paragraphs: ', paragraphs);\n-             for (let paragraph of paragraphs) {\n-                 let links = visit(pick.page).filter(title => !seen.has(title))\n+    let links = visit(pick.page).filter(title => !seen.has(title))\n     if (links.length) {\n       let link = any(links)\n       seen.add(link)\n@@ -138,7 +134,6 @@ window.dostart = async function (event) {\n       pick = any(all) // can't find new link on page\n     }\n   }\n-         }\n }\n catch(err) {\n   window.result.innerHTML += "
+      },
+      "date": 1708587661777
+    },
+    {
+      "type": "remove",
+      "id": "db7075b19fd4ec9e",
+      "date": 1708589392609
+    },
+    {
+      "type": "edit",
+      "id": "b2dd78abe2750e8f",
+      "item": {
+        "type": "paragraph",
+        "id": "b2dd78abe2750e8f",
+        "text": "This modified version of dostart [https://github.com/RalfBarkow/assets/commit/bfcbc9f13860e87800e462d2b5601a15381b28bf commit] iterates over each paragraph in the pick.page.story array and extracts the links from each paragraph using the visit function. If links are found, it proceeds with the same logic as before to fetch and process the next page. This ensures that every paragraph of the page is parsed for links, allowing for a more comprehensive traversal of the site's content. (ChatGPT 3.5)"
+      },
+      "date": 1708589434405
+    },
+    {
+      "type": "edit",
+      "id": "b2dd78abe2750e8f",
+      "item": {
+        "type": "paragraph",
+        "id": "b2dd78abe2750e8f",
+        "text": "This modified version of dostart [https://github.com/RalfBarkow/assets/commit/bfcbc9f13860e87800e462d2b5601a15381b28bf commit] [https://github.com/RalfBarkow/assets/blob/bfcbc9f13860e87800e462d2b5601a15381b28bf/pages/parse-page-paragraphs/speed-bot.html#L114-L117 code] iterates over each paragraph in the pick.page.story array and extracts the links from each paragraph using the visit function. If links are found, it proceeds with the same logic as before to fetch and process the next page. This ensures that every paragraph of the page is parsed for links, allowing for a more comprehensive traversal of the site's content. (ChatGPT 3.5)"
+      },
+      "date": 1708589537415
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1708589636082
+    },
+    {
+      "type": "add",
+      "id": "5aa9624700f4dd96",
+      "item": {
+        "type": "paragraph",
+        "id": "5aa9624700f4dd96",
+        "text": "We intent to parse the natural language data of paragraphs."
+      },
+      "after": "702127fad3ec880f",
+      "date": 1708590147153
+    },
+    {
+      "type": "edit",
+      "id": "5aa9624700f4dd96",
+      "item": {
+        "type": "paragraph",
+        "id": "5aa9624700f4dd96",
+        "text": "We intend to parse the natural language data of paragraphs."
+      },
+      "date": 1708590160172
+    },
+    {
+      "id": "3740343908300b7c",
+      "type": "move",
+      "order": [
+        "702127fad3ec880f",
+        "5aa9624700f4dd96",
+        "3740343908300b7c",
+        "0fd7bec00f963803",
+        "ab8a1d2c5a543552",
+        "b2dd78abe2750e8f"
+      ],
+      "date": 1708590170296
+    },
+    {
+      "id": "b2dd78abe2750e8f",
+      "type": "move",
+      "order": [
+        "702127fad3ec880f",
+        "5aa9624700f4dd96",
+        "3740343908300b7c",
+        "0fd7bec00f963803",
+        "b2dd78abe2750e8f",
+        "ab8a1d2c5a543552"
+      ],
+      "date": 1708590201266
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1708590473019
+    },
+    {
+      "type": "add",
+      "id": "d5c469074553cb08",
+      "item": {
+        "type": "paragraph",
+        "id": "d5c469074553cb08",
+        "text": "We are only secondarily interested in links. First and foremost, we want to visualize an AST as a ghost page and see if the verbs it contains already exist as wiki pages. Our aim is to view the sentences of the paragraphs as graphs in order to be able to search for paragraphs with similar graphs/sentences."
+      },
+      "after": "5aa9624700f4dd96",
+      "date": 1708590481859
+    },
+    {
+      "type": "edit",
+      "id": "d5c469074553cb08",
+      "item": {
+        "type": "paragraph",
+        "id": "d5c469074553cb08",
+        "text": "We are only secondarily interested in links. First and foremost, we want to visualize an [[AST]] as a ghost page and see if the verbs it contains already exist as wiki pages. Our aim is to view the sentences of the paragraphs as graphs in order to be able to search for paragraphs with similar graphs/sentences."
+      },
+      "date": 1708590502896
+    },
+    {
+      "id": "3a035be472e997f2",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "3a035be472e997f2",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "parse-page-paragraphs",
+        "title": "Parse Page Paragraphs",
+        "text": "?"
+      },
+      "after": "d5c469074553cb08",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1708591494802
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1708591565457
+    },
+    {
+      "type": "add",
+      "id": "bb8ae062390db8fb",
+      "item": {
+        "type": "paragraph",
+        "id": "bb8ae062390db8fb",
+        "text": "We plan to refactor the `window.dostart` function. See below."
+      },
+      "after": "d5c469074553cb08",
+      "date": 1708604425462
+    },
+    {
+      "type": "edit",
+      "id": "bb8ae062390db8fb",
+      "item": {
+        "type": "markdown",
+        "id": "bb8ae062390db8fb",
+        "text": "We plan to refactor the `window.dostart` function. See below."
+      },
+      "date": 1708604427563
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1708604881210
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8365bdff13e1fe44"
+      },
+      "id": "8365bdff13e1fe44",
+      "type": "add",
+      "after": "ab8a1d2c5a543552",
+      "date": 1708605027443
+    },
+    {
+      "type": "edit",
+      "id": "8365bdff13e1fe44",
+      "item": {
+        "type": "code",
+        "id": "8365bdff13e1fe44",
+        "text": "function filterParagraphs(page) {\n     return page.story.filter(item => item.type === 'paragraph');\n "
+      },
+      "date": 1708605056637
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1708605130391
+    },
+    {
+      "type": "edit",
+      "id": "b2dd78abe2750e8f",
+      "item": {
+        "type": "paragraph",
+        "id": "b2dd78abe2750e8f",
+        "text": "The first modified version of dostart [https://github.com/RalfBarkow/assets/commit/bfcbc9f13860e87800e462d2b5601a15381b28bf commit] [https://github.com/RalfBarkow/assets/blob/bfcbc9f13860e87800e462d2b5601a15381b28bf/pages/parse-page-paragraphs/speed-bot.html#L114-L117 code] iterates over each paragraph in the pick.page.story array and extracts the links from each paragraph using the visit function. If links are found, it proceeds with the same logic as before to fetch and process the next page. This ensures that every paragraph of the page is parsed for links, allowing for a more comprehensive traversal of the site's content. (ChatGPT 3.5)"
+      },
+      "date": 1708606591556
+    },
+    {
+      "type": "add",
+      "id": "0eca98fd9bd1c095",
+      "item": {
+        "type": "paragraph",
+        "id": "0eca98fd9bd1c095",
+        "text": "We add a console.log to see the Paragraphs."
+      },
+      "after": "b2dd78abe2750e8f",
+      "date": 1708606741045
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d4c20e44a9504fdb"
+      },
+      "id": "d4c20e44a9504fdb",
+      "type": "add",
+      "after": "8365bdff13e1fe44",
+      "date": 1708606863603
+    },
+    {
+      "id": "d4c20e44a9504fdb",
+      "type": "move",
+      "order": [
+        "702127fad3ec880f",
+        "5aa9624700f4dd96",
+        "d5c469074553cb08",
+        "bb8ae062390db8fb",
+        "3a035be472e997f2",
+        "3740343908300b7c",
+        "0fd7bec00f963803",
+        "b2dd78abe2750e8f",
+        "0eca98fd9bd1c095",
+        "ab8a1d2c5a543552",
+        "d4c20e44a9504fdb",
+        "8365bdff13e1fe44"
+      ],
+      "date": 1708606865368
+    },
+    {
+      "type": "edit",
+      "id": "d4c20e44a9504fdb",
+      "item": {
+        "type": "paragraph",
+        "id": "d4c20e44a9504fdb",
+        "text": "In the next refactoring step, we extract the `filterParagraphs(page)` function."
+      },
+      "date": 1708606882274
+    },
+    {
+      "type": "edit",
+      "id": "d4c20e44a9504fdb",
+      "item": {
+        "type": "markdown",
+        "id": "d4c20e44a9504fdb",
+        "text": "In the next refactoring step, we extract the `filterParagraphs(page)` function."
+      },
+      "date": 1708606884401
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1708606941342
+    },
+    {
+      "type": "edit",
+      "id": "d5c469074553cb08",
+      "item": {
+        "type": "paragraph",
+        "id": "d5c469074553cb08",
+        "text": "We are only secondarily interested in links. First and foremost, we want to visualize an [[AST]] as a ghost page and see if the verbs it contains already exist as wiki pages. Our aim is to view the sentences of the paragraphs as graphs in order to be able to search for paragraphs with similar graphs/sentences. See [[recommend]]"
+      },
+      "date": 1708606999916
+    },
+    {
+      "type": "edit",
+      "id": "d4c20e44a9504fdb",
+      "item": {
+        "type": "markdown",
+        "id": "d4c20e44a9504fdb",
+        "text": "In the next refactoring step, we extract the `filterParagraphs(page)` function. [https://github.com/RalfBarkow/assets/commit/a3a0d1018d8a3d157c8da8c67ba335b6df6b19cc commit]"
+      },
+      "date": 1708609265102
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3f277c45e7e59e59"
+      },
+      "id": "3f277c45e7e59e59",
+      "type": "add",
+      "after": "8365bdff13e1fe44",
+      "date": 1708614987877
+    },
+    {
+      "type": "edit",
+      "id": "3f277c45e7e59e59",
+      "item": {
+        "type": "paragraph",
+        "id": "3f277c45e7e59e59",
+        "text": "Which [[Custom View]] are we missing?"
+      },
+      "date": 1708615003542
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3c1fd9dd68efbd74"
+      },
+      "id": "3c1fd9dd68efbd74",
+      "type": "add",
+      "after": "3f277c45e7e59e59",
+      "date": 1708615193310
+    },
+    {
+      "type": "edit",
+      "id": "3c1fd9dd68efbd74",
+      "item": {
+        "type": "markdown",
+        "id": "3c1fd9dd68efbd74",
+        "text": "The custom view that seems to be missing in your implementation is one that visualizes the syntax tree or the parsed result of the text. \n\nIn the `parseText` function, you're parsing the input text using an NLP library, but the parsed result needs to be presented visually so that users can understand the syntactic structure of the text. This can be achieved by creating a custom view that renders the syntax tree or the parsed result graphically.\n\nHere's how you can create a simple custom view to visualize the parsed result:\n\n```javascript\n// Function to render the parsed result visually\nfunction renderParsedResult(parsedResult) {\n  // You can customize this function based on the format of the parsed result\n  // For example, if parsedResult is a syntax tree, you can render it as a tree diagram\n  // If parsedResult is a graph, you can render it as a graph visualization\n  \n  // For demonstration purposes, let's assume parsedResult is a syntax tree represented as an object\n  // Here, we'll just log the parsed result to the console\n  console.log(parsedResult);\n}\n\n// Example usage\nconst textToParse = 'This is an example sentence.';\nconst parsedResult = parseText(textToParse);\nrenderParsedResult(parsedResult);\n```\n\nIn this example, `renderParsedResult` is a placeholder function that you can customize to render the parsed result in the desired format. Depending on the structure of the parsed result (e.g., syntax tree, graph), you can use appropriate visualization techniques such as tree diagrams, graph visualizations, or any other suitable visualization method.\n\nOnce you have the custom view implemented, users will be able to see the syntactic structure of the input text, which enhances the usability and interpretability of your NLP application. (ChatGPT 3.5)"
+      },
+      "date": 1708615203482
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1708643372511
+    },
+    {
+      "type": "add",
+      "id": "f26e000bb110aeb7",
+      "item": {
+        "type": "paragraph",
+        "id": "f26e000bb110aeb7",
+        "text": "The custom view that we want to see at the end of our implementation is one that visualizes the syntax tree or the parsed result of the text. "
+      },
+      "after": "3f277c45e7e59e59",
+      "date": 1708771663520
+    },
+    {
+      "type": "remove",
+      "id": "3c1fd9dd68efbd74",
+      "date": 1708771665673
+    },
+    {
+      "type": "edit",
+      "id": "f26e000bb110aeb7",
+      "item": {
+        "type": "paragraph",
+        "id": "f26e000bb110aeb7",
+        "text": "The custom view we want to see at the end of our implementation is one that visualizes the syntax tree or the parsed result of the paragraph text. "
+      },
+      "date": 1708771731279
+    },
+    {
+      "type": "edit",
+      "id": "f26e000bb110aeb7",
+      "item": {
+        "type": "paragraph",
+        "id": "f26e000bb110aeb7",
+        "text": "The custom view we want to see at the end of our implementation is one that visualizes the syntax tree or the parsed result of the paragraph text."
+      },
+      "date": 1708771783487
+    },
+    {
+      "type": "add",
+      "id": "2e8e524a87ccdcc5",
+      "item": {
+        "type": "paragraph",
+        "id": "2e8e524a87ccdcc5",
+        "text": "In a further intermediate step, we visualize the paragraphs that we filter out during our journey with the Speed Bot."
+      },
+      "after": "f26e000bb110aeb7",
+      "date": 1708771784010
+    },
+    {
+      "type": "edit",
+      "id": "2e8e524a87ccdcc5",
+      "item": {
+        "type": "paragraph",
+        "id": "2e8e524a87ccdcc5",
+        "text": "In a further intermediate step, we visualize the paragraphs that we filter out during our journey with the Speed Bot. [https://github.com/RalfBarkow/assets/commit/fda9744fe2bc95f67fe95f28c0743cc28a6e7154 commit]"
+      },
+      "date": 1708771813032
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1708771861451
+    },
+    {
+      "type": "edit",
+      "id": "3f277c45e7e59e59",
+      "item": {
+        "type": "paragraph",
+        "id": "3f277c45e7e59e59",
+        "text": "Which [[Custom View]](s) are we missing?"
+      },
+      "date": 1708771869435
+    },
+    {
+      "type": "add",
+      "id": "45dcd8993acef753",
+      "item": {
+        "type": "paragraph",
+        "id": "45dcd8993acef753",
+        "text": "They temporarily fill a second Select UI component."
+      },
+      "after": "2e8e524a87ccdcc5",
+      "date": 1708772484115
+    },
+    {
+      "type": "edit",
+      "id": "45dcd8993acef753",
+      "item": {
+        "type": "paragraph",
+        "id": "45dcd8993acef753",
+        "text": "They temporarily fill a drop-down list."
+      },
+      "date": 1708772563646
+    },
+    {
+      "type": "edit",
+      "id": "2e8e524a87ccdcc5",
+      "item": {
+        "type": "paragraph",
+        "id": "2e8e524a87ccdcc5",
+        "text": "In a further intermediate step, we visualize the paragraphs that we filter out during our journey with the [[Speed Bot]]. [https://github.com/RalfBarkow/assets/commit/fda9744fe2bc95f67fe95f28c0743cc28a6e7154 commit]"
+      },
+      "date": 1708772624062
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e7e0d71095ec1c81"
+      },
+      "id": "e7e0d71095ec1c81",
+      "type": "add",
+      "after": "45dcd8993acef753",
+      "date": 1708772710611
+    },
+    {
+      "type": "edit",
+      "id": "e7e0d71095ec1c81",
+      "item": {
+        "type": "image",
+        "id": "e7e0d71095ec1c81",
+        "text": "Second drop-down list",
+        "size": "wide",
+        "width": 419,
+        "height": 158,
+        "url": "/assets/plugins/image/63b483ab9bc14bfef8095fa8ad9de74b.jpg"
+      },
+      "date": 1708772753331
+    },
+    {
+      "type": "edit",
+      "id": "45dcd8993acef753",
+      "item": {
+        "type": "paragraph",
+        "id": "45dcd8993acef753",
+        "text": "The paragraphs temporarily fill a drop-down list."
+      },
+      "date": 1708772822408
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "755a214cbc004042"
+      },
+      "id": "755a214cbc004042",
+      "type": "add",
+      "after": "e7e0d71095ec1c81",
+      "date": 1708772978790
+    },
+    {
+      "type": "edit",
+      "id": "755a214cbc004042",
+      "item": {
+        "type": "paragraph",
+        "id": "755a214cbc004042",
+        "text": "We plan to extend the addTitleDot() and joinTitlesDot() functions to add nodes to a graph and add relationships to this graph."
+      },
+      "date": 1708773018893
+    },
+    {
+      "type": "edit",
+      "id": "755a214cbc004042",
+      "item": {
+        "type": "paragraph",
+        "id": "755a214cbc004042",
+        "text": "We plan to extend the [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L47-L55 addTitleDot()] and joinTitlesDot() functions to add nodes to a graph and add relationships to this graph."
+      },
+      "date": 1708773100452
+    },
+    {
+      "type": "edit",
+      "id": "755a214cbc004042",
+      "item": {
+        "type": "paragraph",
+        "id": "755a214cbc004042",
+        "text": "We plan to extend the [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L47-L55 addTitleDot()] and [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L57-L66 joinTitlesDot()] functions to add nodes to a graph and add relationships to this graph."
+      },
+      "date": 1708773127485
+    },
+    {
+      "type": "edit",
+      "id": "755a214cbc004042",
+      "item": {
+        "type": "paragraph",
+        "id": "755a214cbc004042",
+        "text": "We plan to extend the [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L47-L55 addTitleDot()] and [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L57-L66 joinTitlesDot()] functions to add nodes to a graph and add relationships to this graph. See also [[dump-a-structure-into-graphviz]]"
+      },
+      "date": 1708773180958
+    },
+    {
+      "type": "edit",
+      "id": "755a214cbc004042",
+      "item": {
+        "type": "paragraph",
+        "id": "755a214cbc004042",
+        "text": "We plan to extend the [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L47-L55 addTitleDot()] and [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L57-L66 joinTitlesDot()] functions to add nodes to a graph and add relationships to this graph. See also [[Dump a Structure into Graphviz]]"
+      },
+      "date": 1708773200271
+    },
+    {
+      "type": "edit",
+      "id": "755a214cbc004042",
+      "item": {
+        "type": "paragraph",
+        "id": "755a214cbc004042",
+        "text": "We plan to extend the [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L47-L55 addTitleDot()] and [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L57-L66 joinTitlesDot()] functions to add nodes to a graph and add relationships to this graph. See [[Dump a Structure into Graphviz]]"
+      },
+      "date": 1708773386278
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "663074a702fb108b"
+      },
+      "id": "663074a702fb108b",
+      "type": "add",
+      "after": "755a214cbc004042",
+      "date": 1708773691401
+    },
+    {
+      "type": "edit",
+      "id": "663074a702fb108b",
+      "item": {
+        "type": "paragraph",
+        "id": "663074a702fb108b",
+        "text": "We focus on [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L84-L88]"
+      },
+      "date": 1708773702398
+    },
+    {
+      "type": "edit",
+      "id": "663074a702fb108b",
+      "item": {
+        "type": "paragraph",
+        "id": "663074a702fb108b",
+        "text": "We focus on [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L84-L88 code]"
+      },
+      "date": 1708773722028
+    },
+    {
+      "type": "edit",
+      "id": "663074a702fb108b",
+      "item": {
+        "type": "paragraph",
+        "id": "663074a702fb108b",
+        "text": "We focus on the [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L84-L88 filterParagraphs(page)] function."
+      },
+      "date": 1708773747255
+    },
+    {
+      "type": "edit",
+      "id": "663074a702fb108b",
+      "item": {
+        "type": "paragraph",
+        "id": "663074a702fb108b",
+        "text": "We focus on the [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L84-L88 filterParagraphs(page)] function. Our starting point is the creation of a graph in place of the populateParagraphEntries function."
+      },
+      "date": 1708773939379
+    },
+    {
+      "type": "edit",
+      "id": "663074a702fb108b",
+      "item": {
+        "type": "paragraph",
+        "id": "663074a702fb108b",
+        "text": "We focus on the [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L84-L88 filterParagraphs(page)] function. Our starting point is the creation of a [[Graph]] in place of the populateParagraphEntries function."
+      },
+      "date": 1708773955278
+    },
+    {
+      "type": "edit",
+      "id": "663074a702fb108b",
+      "item": {
+        "type": "paragraph",
+        "id": "663074a702fb108b",
+        "text": "We focus on the [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L84-L88 filterParagraphs(page)] function. Our starting point is the creation of a [[Graph]] in place of the [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L90-L110 populateParagraphEntries] function."
+      },
+      "date": 1708773982490
+    },
+    {
+      "type": "edit",
+      "id": "663074a702fb108b",
+      "item": {
+        "type": "paragraph",
+        "id": "663074a702fb108b",
+        "text": "We focus on the [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L84-L88 filterParagraphs(page)] function. Our starting point is the creation of a [[Graph]] in place of the [https://github.com/RalfBarkow/assets/blob/fda9744fe2bc95f67fe95f28c0743cc28a6e7154/pages/parse-page-paragraphs/speed-bot.html#L90-L110 populateParagraphEntries(paragraphs)] function."
+      },
+      "date": 1708774000252
+    },
+    {
+      "type": "add",
+      "id": "15f0137adb7214a2",
+      "item": {
+        "type": "paragraph",
+        "id": "15f0137adb7214a2",
+        "text": "See Property Graphs as Javascript Module"
+      },
+      "after": "663074a702fb108b",
+      "date": 1708774118957
+    },
+    {
+      "type": "edit",
+      "id": "15f0137adb7214a2",
+      "item": {
+        "type": "paragraph",
+        "id": "15f0137adb7214a2",
+        "text": "See Property Graphs as Javascript Module [https://wardcunningham.github.io/graph/ page] "
+      },
+      "date": 1708774134248
+    },
+    {
+      "type": "edit",
+      "id": "15f0137adb7214a2",
+      "item": {
+        "type": "paragraph",
+        "id": "15f0137adb7214a2",
+        "text": "See [[Property Graphs]] as Javascript Module [https://wardcunningham.github.io/graph/ page] "
+      },
+      "date": 1708774176642
+    },
+    {
+      "type": "edit",
+      "id": "15f0137adb7214a2",
+      "item": {
+        "type": "paragraph",
+        "id": "15f0137adb7214a2",
+        "text": "See \"[[Property Graphs]] as Javascript Module\" [https://wardcunningham.github.io/graph/ page] "
+      },
+      "date": 1708775206062
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "44c3c1123009a02a"
+      },
+      "id": "44c3c1123009a02a",
+      "type": "add",
+      "after": "15f0137adb7214a2",
+      "date": 1708791546141
+    },
+    {
+      "type": "edit",
+      "id": "44c3c1123009a02a",
+      "item": {
+        "type": "image",
+        "id": "44c3c1123009a02a",
+        "text": "Uploaded image",
+        "size": "wide",
+        "width": 430,
+        "height": 260,
+        "url": "/assets/plugins/image/65dff0920345f6692579cd6ba42d7369.jpg"
+      },
+      "date": 1708791586678
+    },
+    {
+      "type": "edit",
+      "id": "44c3c1123009a02a",
+      "item": {
+        "type": "image",
+        "id": "44c3c1123009a02a",
+        "text": "[http://localhost:3000/view/welcome-visitors/view/parse0/view/parse0/view/parse-page-paragraphs/view/parse-page-paragraphs/wiki.ralfbarkow.ch/parse-page-paragraphs commit]",
+        "size": "wide",
+        "width": 430,
+        "height": 260,
+        "url": "/assets/plugins/image/65dff0920345f6692579cd6ba42d7369.jpg"
+      },
+      "date": 1708794780823
+    },
+    {
+      "type": "edit",
+      "id": "44c3c1123009a02a",
+      "item": {
+        "type": "image",
+        "id": "44c3c1123009a02a",
+        "text": "[https://github.com/RalfBarkow/assets/commit/6e6315f163cab6edb4f9d563684ed688e57a571cs commit]",
+        "size": "wide",
+        "width": 430,
+        "height": 260,
+        "url": "/assets/plugins/image/65dff0920345f6692579cd6ba42d7369.jpg"
+      },
+      "date": 1708794801579
+    },
+    {
+      "type": "edit",
+      "id": "44c3c1123009a02a",
+      "item": {
+        "type": "image",
+        "id": "44c3c1123009a02a",
+        "text": "[https://github.com/RalfBarkow/assets/commit/6e6315f163cab6edb4f9d563684ed688e57a571c commit]",
+        "size": "wide",
+        "width": 430,
+        "height": 260,
+        "url": "/assets/plugins/image/65dff0920345f6692579cd6ba42d7369.jpg"
+      },
+      "date": 1708794823412
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9ea06b7c8668f42a"
+      },
+      "id": "9ea06b7c8668f42a",
+      "type": "add",
+      "after": "44c3c1123009a02a",
+      "date": 1708794843773
+    },
+    {
+      "type": "edit",
+      "id": "9ea06b7c8668f42a",
+      "item": {
+        "type": "paragraph",
+        "id": "9ea06b7c8668f42a",
+        "text": " feat(speed-bot): check if the node already exists in the graph "
+      },
+      "date": 1708794846002
+    },
+    {
+      "type": "edit",
+      "id": "9ea06b7c8668f42a",
+      "item": {
+        "type": "paragraph",
+        "id": "9ea06b7c8668f42a",
+        "text": "feat(speed-bot): check if the node already exists in the graph "
+      },
+      "date": 1708794851805
+    },
+    {
+      "type": "edit",
+      "id": "44c3c1123009a02a",
+      "item": {
+        "type": "image",
+        "id": "44c3c1123009a02a",
+        "text": "Check if the node already exists",
+        "size": "wide",
+        "width": 430,
+        "height": 260,
+        "url": "/assets/plugins/image/65dff0920345f6692579cd6ba42d7369.jpg"
+      },
+      "date": 1708794958412
+    },
+    {
+      "type": "edit",
+      "id": "9ea06b7c8668f42a",
+      "item": {
+        "type": "paragraph",
+        "id": "9ea06b7c8668f42a",
+        "text": "feat(speed-bot): check if the node already exists in the graph [https://github.com/RalfBarkow/assets/commit/6e6315f163cab6edb4f9d563684ed688e57a571c commit]"
+      },
+      "date": 1708794962387
+    },
+    {
+      "type": "edit",
+      "id": "15f0137adb7214a2",
+      "item": {
+        "type": "paragraph",
+        "id": "15f0137adb7214a2",
+        "text": "See \"[[Property Graphs]] as Javascript Module\" [https://wardcunningham.github.io/graph/ page]"
+      },
+      "date": 1708795061877
+    },
+    {
+      "type": "add",
+      "id": "b8c37a0a904460b3",
+      "item": {
+        "type": "paragraph",
+        "id": "b8c37a0a904460b3",
+        "text": "Add nodes to the graph."
+      },
+      "after": "15f0137adb7214a2",
+      "date": 1708795062686
+    },
+    {
+      "type": "add",
+      "id": "2dff10a4141ab6cf",
+      "item": {
+        "type": "paragraph",
+        "id": "2dff10a4141ab6cf",
+        "text": "Remember node ids."
+      },
+      "after": "9ea06b7c8668f42a",
+      "date": 1708795113655
+    },
+    {
+      "type": "edit",
+      "id": "b8c37a0a904460b3",
+      "item": {
+        "type": "paragraph",
+        "id": "b8c37a0a904460b3",
+        "text": "Add nodes to the graph. [https://github.com/RalfBarkow/assets/commit/c1ff2e051d632ee00bc211b9932201d3cdd70b3e commit]"
+      },
+      "date": 1708795147337
+    },
+    {
+      "type": "add",
+      "id": "1fca1c88b1d55737",
+      "item": {
+        "type": "paragraph",
+        "id": "1fca1c88b1d55737",
+        "text": "Add relation to the graph.\nConnect remembered nodes by id."
+      },
+      "after": "2dff10a4141ab6cf",
+      "date": 1708795203343
+    },
+    {
+      "type": "edit",
+      "id": "2dff10a4141ab6cf",
+      "item": {
+        "type": "paragraph",
+        "id": "2dff10a4141ab6cf",
+        "text": "Remember node ids. See [[Slug]]"
+      },
+      "date": 1708795324822
+    },
+    {
+      "type": "edit",
+      "id": "3740343908300b7c",
+      "item": {
+        "type": "frame",
+        "id": "3740343908300b7c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 150"
+      },
+      "date": 1708932224551
+    },
+    {
+      "type": "edit",
+      "id": "3740343908300b7c",
+      "item": {
+        "type": "frame",
+        "id": "3740343908300b7c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 150\nSOURCE graph"
+      },
+      "date": 1708939046250
+    },
+    {
+      "type": "edit",
+      "id": "3a035be472e997f2",
+      "item": {
+        "type": "reference",
+        "id": "3a035be472e997f2",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "parse-page-paragraphs",
+        "title": "Parse Page Paragraphs",
+        "text": "? ⇒ [[LINEUP graph]]"
+      },
+      "date": 1708939073567
+    },
+    {
+      "type": "edit",
+      "id": "3a035be472e997f2",
+      "item": {
+        "type": "reference",
+        "id": "3a035be472e997f2",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "parse-page-paragraphs",
+        "title": "Parse Page Paragraphs",
+        "text": "? ⇒ [[LINEUP graph]] "
+      },
+      "date": 1708939108685
+    },
+    {
+      "type": "edit",
+      "id": "3a035be472e997f2",
+      "item": {
+        "type": "reference",
+        "id": "3a035be472e997f2",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "parse-page-paragraphs",
+        "title": "Parse Page Paragraphs",
+        "text": "? ⇒ [[LINEUP graph]] ⇐ [[Scribble]] "
+      },
+      "date": 1708939131312
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d4468a98d29802c7"
+      },
+      "id": "d4468a98d29802c7",
+      "type": "add",
+      "after": "1fca1c88b1d55737",
+      "date": 1708959643241
+    },
+    {
+      "type": "edit",
+      "id": "d4468a98d29802c7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4468a98d29802c7",
+        "text": "This page now acts as the source for a graph broadcast that is received from the [[LINEUP graph]] page, for example."
+      },
+      "date": 1708959651365
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d4b9e39bfd2dedc7"
+      },
+      "id": "d4b9e39bfd2dedc7",
+      "type": "add",
+      "after": "d4468a98d29802c7",
+      "date": 1708959805650
+    },
+    {
+      "type": "edit",
+      "id": "d4b9e39bfd2dedc7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4b9e39bfd2dedc7",
+        "text": "Move the [[LINEUP graph]] page to the left side before you start the Speed Bot journey; its output will appear on the right side (and overwrite the LINEUP graph page if it were still on the right side). See this lineup "
+      },
+      "date": 1708959847511
+    },
+    {
+      "type": "edit",
+      "id": "d4b9e39bfd2dedc7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4b9e39bfd2dedc7",
+        "text": "Move the [[LINEUP graph]] page to the left side before you start the Speed Bot journey; its output will appear on the right side (and overwrite the LINEUP graph page if it were still on the right side). See this lineup for the correct arrangement"
+      },
+      "date": 1708959878204
+    },
+    {
+      "type": "edit",
+      "id": "d4b9e39bfd2dedc7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4b9e39bfd2dedc7",
+        "text": "Move the [[LINEUP graph]] page to the left side before you start the Speed Bot journey; its output will appear on the right side (and overwrite the LINEUP graph page if it were still on the right side). See this [http://wiki.ralfbarkow.ch/view/lineup-graph/view/parse-page-paragraphs/view/speed-bot-journey lineup] for the correct arrangement"
+      },
+      "date": 1708959910376
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8361fb0daba6ccbe"
+      },
+      "id": "8361fb0daba6ccbe",
+      "type": "add",
+      "after": "d4b9e39bfd2dedc7",
+      "date": 1708959966057
+    },
+    {
+      "type": "edit",
+      "id": "8361fb0daba6ccbe",
+      "item": {
+        "type": "pagefold",
+        "id": "8361fb0daba6ccbe",
+        "text": "2024-02-26"
+      },
+      "date": 1708959974994
+    },
+    {
+      "id": "8361fb0daba6ccbe",
+      "type": "move",
+      "order": [
+        "702127fad3ec880f",
+        "5aa9624700f4dd96",
+        "d5c469074553cb08",
+        "bb8ae062390db8fb",
+        "3a035be472e997f2",
+        "3740343908300b7c",
+        "0fd7bec00f963803",
+        "b2dd78abe2750e8f",
+        "0eca98fd9bd1c095",
+        "ab8a1d2c5a543552",
+        "d4c20e44a9504fdb",
+        "8365bdff13e1fe44",
+        "3f277c45e7e59e59",
+        "f26e000bb110aeb7",
+        "2e8e524a87ccdcc5",
+        "45dcd8993acef753",
+        "e7e0d71095ec1c81",
+        "755a214cbc004042",
+        "663074a702fb108b",
+        "15f0137adb7214a2",
+        "b8c37a0a904460b3",
+        "44c3c1123009a02a",
+        "9ea06b7c8668f42a",
+        "2dff10a4141ab6cf",
+        "1fca1c88b1d55737",
+        "8361fb0daba6ccbe",
+        "d4468a98d29802c7",
+        "d4b9e39bfd2dedc7"
+      ],
+      "date": 1708959982555
+    },
+    {
+      "type": "edit",
+      "id": "d4b9e39bfd2dedc7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4b9e39bfd2dedc7",
+        "text": "Move the [[LINEUP graph]] page to the left side before you start the [[Speed Bot Journey]]; its output will appear on the right side (and overwrite the LINEUP graph page if it were still on the right side). See this [http://wiki.ralfbarkow.ch/view/lineup-graph/view/parse-page-paragraphs/view/speed-bot-journey lineup] for the correct arrangement"
+      },
+      "date": 1708960022909
+    },
+    {
+      "type": "edit",
+      "id": "d4b9e39bfd2dedc7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4b9e39bfd2dedc7",
+        "text": "Move the [[LINEUP graph]] page to the left side before you start the [[Speed Bot Journey]]; its output will appear on the right side (and overwrite the LINEUP graph page if it were still on the right side). See this [http://wiki.ralfbarkow.ch/view/lineup-graph/view/parse-page-paragraphs/view/speed-bot-journey lineup] for the correct arrangement."
+      },
+      "date": 1708960044133
+    },
+    {
+      "type": "edit",
+      "id": "d4b9e39bfd2dedc7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4b9e39bfd2dedc7",
+        "text": "Move the [[LINEUP graph]] page to the left-hand side before you start the [[Speed Bot Journey]]; its output will appear on the right side (and overwrite the LINEUP graph page if it were still on the right side). See this [http://wiki.ralfbarkow.ch/view/lineup-graph/view/parse-page-paragraphs/view/speed-bot-journey lineup] for the correct arrangement."
+      },
+      "date": 1708960265911
+    },
+    {
+      "type": "edit",
+      "id": "d4b9e39bfd2dedc7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4b9e39bfd2dedc7",
+        "text": "Move the [[LINEUP graph]] page to the left-hand side before you start the [[Speed Bot Journey]]. The Speed Bot output then appears on the right-hand side (and overwrites the LINEUP graph page if it was still on the right-hand side). Find the [http://wiki.ralfbarkow.ch/view/lineup-graph/view/parse-page-paragraphs/view/speed-bot-journey lineup] for the correct arrangement."
+      },
+      "date": 1708960370899
+    },
+    {
+      "type": "edit",
+      "id": "d4b9e39bfd2dedc7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4b9e39bfd2dedc7",
+        "text": "Move the [[LINEUP graph]] page to the left-hand side before you start the [[Speed Bot Journey]]. The Speed Bot output then appears on the right-hand side (and overwrites the LINEUP graph page if it was still on the right-hand side). For the correct arrangement, see this [http://wiki.ralfbarkow.ch/view/lineup-graph/view/parse-page-paragraphs/view/speed-bot-journey lineup]."
+      },
+      "date": 1708960429878
+    },
+    {
+      "type": "edit",
+      "id": "d4b9e39bfd2dedc7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4b9e39bfd2dedc7",
+        "text": "Move the [[LINEUP graph]] page to the left-hand side before you start the [[Speed Bot Journey]]. The Speed Bot output then appears on the right-hand side (and overwrites the LINEUP diagram page if it was still there). For the correct arrangement, see this [http://wiki.ralfbarkow.ch/view/lineup-graph/view/parse-page-paragraphs/view/speed-bot-journey lineup]."
+      },
+      "date": 1708960703231
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1708961366457
+    },
+    {
+      "id": "c70196335a0d90a1",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "c70196335a0d90a1",
+        "text": "Say **SOURCE** to offer data to other plugins.\nSee [[About Frame Source]]\n"
+      },
+      "after": "d4468a98d29802c7",
+      "attribution": {
+        "page": "About Frame Plugin"
+      },
+      "date": 1708961576129
+    },
+    {
+      "id": "c70196335a0d90a1",
+      "type": "move",
+      "order": [
+        "702127fad3ec880f",
+        "5aa9624700f4dd96",
+        "d5c469074553cb08",
+        "bb8ae062390db8fb",
+        "3a035be472e997f2",
+        "3740343908300b7c",
+        "0fd7bec00f963803",
+        "b2dd78abe2750e8f",
+        "0eca98fd9bd1c095",
+        "ab8a1d2c5a543552",
+        "d4c20e44a9504fdb",
+        "8365bdff13e1fe44",
+        "3f277c45e7e59e59",
+        "f26e000bb110aeb7",
+        "2e8e524a87ccdcc5",
+        "45dcd8993acef753",
+        "e7e0d71095ec1c81",
+        "755a214cbc004042",
+        "663074a702fb108b",
+        "15f0137adb7214a2",
+        "b8c37a0a904460b3",
+        "44c3c1123009a02a",
+        "9ea06b7c8668f42a",
+        "2dff10a4141ab6cf",
+        "1fca1c88b1d55737",
+        "8361fb0daba6ccbe",
+        "c70196335a0d90a1",
+        "d4468a98d29802c7",
+        "d4b9e39bfd2dedc7"
+      ],
+      "date": 1708961597838
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dc471f208588b14d"
+      },
+      "id": "dc471f208588b14d",
+      "type": "add",
+      "after": "d4b9e39bfd2dedc7",
+      "date": 1708961732909
+    },
+    {
+      "type": "edit",
+      "id": "dc471f208588b14d",
+      "item": {
+        "type": "image",
+        "id": "dc471f208588b14d",
+        "text": "Say Source",
+        "size": "wide",
+        "width": 418,
+        "height": 195,
+        "url": "/assets/plugins/image/15f9b5db3dbe9a738a51405022b7969b.jpg"
+      },
+      "date": 1708961753874
+    },
+    {
+      "id": "dc471f208588b14d",
+      "type": "move",
+      "order": [
+        "702127fad3ec880f",
+        "5aa9624700f4dd96",
+        "d5c469074553cb08",
+        "bb8ae062390db8fb",
+        "3a035be472e997f2",
+        "3740343908300b7c",
+        "0fd7bec00f963803",
+        "b2dd78abe2750e8f",
+        "0eca98fd9bd1c095",
+        "ab8a1d2c5a543552",
+        "d4c20e44a9504fdb",
+        "8365bdff13e1fe44",
+        "3f277c45e7e59e59",
+        "f26e000bb110aeb7",
+        "2e8e524a87ccdcc5",
+        "45dcd8993acef753",
+        "e7e0d71095ec1c81",
+        "755a214cbc004042",
+        "663074a702fb108b",
+        "15f0137adb7214a2",
+        "b8c37a0a904460b3",
+        "44c3c1123009a02a",
+        "9ea06b7c8668f42a",
+        "2dff10a4141ab6cf",
+        "1fca1c88b1d55737",
+        "8361fb0daba6ccbe",
+        "c70196335a0d90a1",
+        "dc471f208588b14d",
+        "d4468a98d29802c7",
+        "d4b9e39bfd2dedc7"
+      ],
+      "date": 1708961766814
+    },
+    {
+      "id": "d4468a98d29802c7",
+      "type": "move",
+      "order": [
+        "702127fad3ec880f",
+        "5aa9624700f4dd96",
+        "d5c469074553cb08",
+        "bb8ae062390db8fb",
+        "3a035be472e997f2",
+        "3740343908300b7c",
+        "0fd7bec00f963803",
+        "b2dd78abe2750e8f",
+        "0eca98fd9bd1c095",
+        "ab8a1d2c5a543552",
+        "d4c20e44a9504fdb",
+        "8365bdff13e1fe44",
+        "3f277c45e7e59e59",
+        "f26e000bb110aeb7",
+        "2e8e524a87ccdcc5",
+        "45dcd8993acef753",
+        "e7e0d71095ec1c81",
+        "755a214cbc004042",
+        "663074a702fb108b",
+        "15f0137adb7214a2",
+        "b8c37a0a904460b3",
+        "44c3c1123009a02a",
+        "9ea06b7c8668f42a",
+        "2dff10a4141ab6cf",
+        "1fca1c88b1d55737",
+        "8361fb0daba6ccbe",
+        "c70196335a0d90a1",
+        "d4468a98d29802c7",
+        "dc471f208588b14d",
+        "d4b9e39bfd2dedc7"
+      ],
+      "date": 1708961855405
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fe16ce5dea04b4cd"
+      },
+      "id": "fe16ce5dea04b4cd",
+      "type": "add",
+      "after": "d4b9e39bfd2dedc7",
+      "date": 1708961914188
+    },
+    {
+      "type": "edit",
+      "id": "fe16ce5dea04b4cd",
+      "item": {
+        "type": "image",
+        "id": "fe16ce5dea04b4cd",
+        "text": "Receive ",
+        "size": "wide",
+        "width": 418,
+        "height": 195,
+        "url": "/assets/plugins/image/2afdf6ddd436df420a418ed18d1b7411.jpg"
+      },
+      "date": 1708961932530
+    },
+    {
+      "type": "edit",
+      "id": "fe16ce5dea04b4cd",
+      "item": {
+        "type": "image",
+        "id": "fe16ce5dea04b4cd",
+        "text": "Receive graph data",
+        "size": "wide",
+        "width": 418,
+        "height": 195,
+        "url": "/assets/plugins/image/2afdf6ddd436df420a418ed18d1b7411.jpg"
+      },
+      "date": 1708961997837
+    },
+    {
+      "type": "edit",
+      "id": "d4b9e39bfd2dedc7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4b9e39bfd2dedc7",
+        "text": "Move the [[LINEUP graph]] page to the left-hand side before you start the [[Speed Bot Journey]]. The Speed Bot output then appears on the right-hand side (and overwrites the LINEUP graph age if it was still there). For the correct arrangement, see this [http://wiki.ralfbarkow.ch/view/lineup-graph/view/parse-page-paragraphs/view/speed-bot-journey lineup]."
+      },
+      "date": 1708962118723
+    },
+    {
+      "type": "edit",
+      "id": "d4b9e39bfd2dedc7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4b9e39bfd2dedc7",
+        "text": "Move the [[LINEUP graph]] page to the left-hand side before you start the [[Speed Bot Journey]]. The Speed Bot output then appears on the right-hand side (and overwrites the LINEUP graph page if it was still there). For the correct arrangement, see this [http://wiki.ralfbarkow.ch/view/lineup-graph/view/parse-page-paragraphs/view/speed-bot-journey lineup]."
+      },
+      "date": 1708962127800
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1708962159289
+    },
+    {
+      "type": "edit",
+      "id": "c70196335a0d90a1",
+      "item": {
+        "type": "markdown",
+        "id": "c70196335a0d90a1",
+        "text": "Say **SOURCE** to offer data to other plugins or frames.\nSee [[About Frame Source]]\n"
+      },
+      "date": 1708962450247
+    },
+    {
+      "type": "edit",
+      "id": "d4468a98d29802c7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4468a98d29802c7",
+        "text": "This page now acts as the source for a graph broadcast that is received from a frame on the [[LINEUP graph]] page, for example."
+      },
+      "date": 1708962476863
+    },
+    {
+      "type": "edit",
+      "id": "d4468a98d29802c7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4468a98d29802c7",
+        "text": "This page now serves as the source for a graph broadcast that is received, for example, from a frame on the [[LINEUP graph]] page, "
+      },
+      "date": 1708962543156
+    },
+    {
+      "type": "edit",
+      "id": "d4468a98d29802c7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4468a98d29802c7",
+        "text": "This page now serves as the source for a graph broadcast that is received, for example, in a frame on the [[LINEUP graph]] page, "
+      },
+      "date": 1708962568537
+    },
+    {
+      "type": "edit",
+      "id": "d4468a98d29802c7",
+      "item": {
+        "type": "paragraph",
+        "id": "d4468a98d29802c7",
+        "text": "This page now serves as the source for a graph broadcast that is received, for example, in a frame on the [[LINEUP graph]] page."
+      },
+      "date": 1708962572720
+    },
+    {
+      "id": "dc471f208588b14d",
+      "type": "move",
+      "order": [
+        "702127fad3ec880f",
+        "5aa9624700f4dd96",
+        "d5c469074553cb08",
+        "bb8ae062390db8fb",
+        "3a035be472e997f2",
+        "3740343908300b7c",
+        "0fd7bec00f963803",
+        "b2dd78abe2750e8f",
+        "0eca98fd9bd1c095",
+        "ab8a1d2c5a543552",
+        "d4c20e44a9504fdb",
+        "8365bdff13e1fe44",
+        "3f277c45e7e59e59",
+        "f26e000bb110aeb7",
+        "2e8e524a87ccdcc5",
+        "45dcd8993acef753",
+        "e7e0d71095ec1c81",
+        "755a214cbc004042",
+        "663074a702fb108b",
+        "15f0137adb7214a2",
+        "b8c37a0a904460b3",
+        "44c3c1123009a02a",
+        "9ea06b7c8668f42a",
+        "2dff10a4141ab6cf",
+        "1fca1c88b1d55737",
+        "8361fb0daba6ccbe",
+        "c70196335a0d90a1",
+        "dc471f208588b14d",
+        "d4468a98d29802c7",
+        "d4b9e39bfd2dedc7",
+        "fe16ce5dea04b4cd"
+      ],
+      "date": 1708962593093
+    },
+    {
+      "id": "fe16ce5dea04b4cd",
+      "type": "move",
+      "order": [
+        "702127fad3ec880f",
+        "5aa9624700f4dd96",
+        "d5c469074553cb08",
+        "bb8ae062390db8fb",
+        "3a035be472e997f2",
+        "3740343908300b7c",
+        "0fd7bec00f963803",
+        "b2dd78abe2750e8f",
+        "0eca98fd9bd1c095",
+        "ab8a1d2c5a543552",
+        "d4c20e44a9504fdb",
+        "8365bdff13e1fe44",
+        "3f277c45e7e59e59",
+        "f26e000bb110aeb7",
+        "2e8e524a87ccdcc5",
+        "45dcd8993acef753",
+        "e7e0d71095ec1c81",
+        "755a214cbc004042",
+        "663074a702fb108b",
+        "15f0137adb7214a2",
+        "b8c37a0a904460b3",
+        "44c3c1123009a02a",
+        "9ea06b7c8668f42a",
+        "2dff10a4141ab6cf",
+        "1fca1c88b1d55737",
+        "8361fb0daba6ccbe",
+        "c70196335a0d90a1",
+        "dc471f208588b14d",
+        "d4468a98d29802c7",
+        "fe16ce5dea04b4cd",
+        "d4b9e39bfd2dedc7"
+      ],
+      "date": 1708962609797
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6ac1902a1613c193"
+      },
+      "id": "6ac1902a1613c193",
+      "type": "add",
+      "after": "d4b9e39bfd2dedc7",
+      "date": 1708962776419
+    },
+    {
+      "type": "edit",
+      "id": "6ac1902a1613c193",
+      "item": {
+        "type": "frame",
+        "id": "6ac1902a1613c193",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 150\nSOURCE graph"
+      },
+      "date": 1708962780310
+    },
+    {
+      "type": "add",
+      "id": "420e5e1638208d80",
+      "item": {
+        "type": "paragraph",
+        "id": "420e5e1638208d80",
+        "text": "Click `start` in the following frame to begin the Speed Bot Journey."
+      },
+      "after": "d4b9e39bfd2dedc7",
+      "date": 1708962870804
+    },
+    {
+      "type": "edit",
+      "id": "420e5e1638208d80",
+      "item": {
+        "type": "markdown",
+        "id": "420e5e1638208d80",
+        "text": "Click `start` in the following frame to begin the Speed Bot Journey."
+      },
+      "date": 1708962874420
+    },
+    {
+      "type": "add",
+      "id": "542f3dee6845a6bb",
+      "item": {
+        "type": "markdown",
+        "id": "542f3dee6845a6bb",
+        "text": "Observe the frame at the beginning of the LINEUP graph page."
+      },
+      "after": "420e5e1638208d80",
+      "date": 1708963173059
+    },
+    {
+      "id": "542f3dee6845a6bb",
+      "type": "move",
+      "order": [
+        "702127fad3ec880f",
+        "5aa9624700f4dd96",
+        "d5c469074553cb08",
+        "bb8ae062390db8fb",
+        "3a035be472e997f2",
+        "3740343908300b7c",
+        "0fd7bec00f963803",
+        "b2dd78abe2750e8f",
+        "0eca98fd9bd1c095",
+        "ab8a1d2c5a543552",
+        "d4c20e44a9504fdb",
+        "8365bdff13e1fe44",
+        "3f277c45e7e59e59",
+        "f26e000bb110aeb7",
+        "2e8e524a87ccdcc5",
+        "45dcd8993acef753",
+        "e7e0d71095ec1c81",
+        "755a214cbc004042",
+        "663074a702fb108b",
+        "15f0137adb7214a2",
+        "b8c37a0a904460b3",
+        "44c3c1123009a02a",
+        "9ea06b7c8668f42a",
+        "2dff10a4141ab6cf",
+        "1fca1c88b1d55737",
+        "8361fb0daba6ccbe",
+        "c70196335a0d90a1",
+        "dc471f208588b14d",
+        "d4468a98d29802c7",
+        "fe16ce5dea04b4cd",
+        "d4b9e39bfd2dedc7",
+        "420e5e1638208d80",
+        "6ac1902a1613c193",
+        "542f3dee6845a6bb"
+      ],
+      "date": 1708963176593
+    },
+    {
+      "type": "edit",
+      "id": "542f3dee6845a6bb",
+      "item": {
+        "type": "markdown",
+        "id": "542f3dee6845a6bb",
+        "text": "Observe the changes in the frame at the top of the LINEUP graph when you click on `start`."
+      },
+      "date": 1708963284445
+    },
+    {
+      "type": "edit",
+      "id": "542f3dee6845a6bb",
+      "item": {
+        "type": "markdown",
+        "id": "542f3dee6845a6bb",
+        "text": "Observe the changes in the frame at the top of the LINEUP graph page when you click on `start`."
+      },
+      "date": 1708963299353
+    },
+    {
+      "type": "edit",
+      "id": "542f3dee6845a6bb",
+      "item": {
+        "type": "markdown",
+        "id": "542f3dee6845a6bb",
+        "text": "Observe the changes in the frame at the top of the LINEUP graph page (left) and the Speed Bot Journey (right) when you click on `start`."
+      },
+      "date": 1708963697445
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b61e97c4c3b6056c"
+      },
+      "id": "b61e97c4c3b6056c",
+      "type": "add",
+      "after": "542f3dee6845a6bb",
+      "date": 1708963879773
+    },
+    {
+      "type": "edit",
+      "id": "19c94bab069c6ac3",
+      "item": {
+        "type": "paragraph",
+        "id": "19c94bab069c6ac3",
+        "text": "Ward via matrix DM: Ward\nIf you wanted to know the id of a node named foo in the Graph g then you could reach inside of the graph, get the nodes, and then search for name == 'foo'. In code it would look like this:\nconst id = g.nodes.findIndex(node => node.props.name == 'foo')\nWard\nIf you wanted the node itself, and knew some Cypher query language, you could use our not so well documented subset of Cypher:\nconst result = g.search('match (n{name:\"foo\"})')\nThis would return an array of results, each an object with a property named \"n\", based on the names used in the query. If you wanted the first result you could write:\nconst foo = result[0].n"
+      },
+      "date": 1708963892139
+    },
+    {
+      "type": "edit",
+      "id": "19c94bab069c6ac3",
+      "item": {
+        "type": "paragraph",
+        "id": "19c94bab069c6ac3",
+        "text": "Ward via matrix DM: Ward\nIf you wanted to know the id of a node named foo in the Graph g then you could reach inside of the graph, get the nodes, and then search for name == 'foo'. In code it would look like this:\nconst id = g.nodes.findIndex(node => node.props.name == 'foo')"
+      },
+      "date": 1708963907851
+    },
+    {
+      "type": "add",
+      "id": "9b565e3efa50f038",
+      "item": {
+        "type": "paragraph",
+        "id": "9b565e3efa50f038",
+        "text": "\nIf you wanted the node itself, and knew some Cypher query language, you could use our not so well documented subset of Cypher:\nconst result = g.search('match (n{name:\"foo\"})')\nThis would return an array of results, each an object with a property named \"n\", based on the names used in the query. If you wanted the first result you could write:\nconst foo = result[0].n"
+      },
+      "after": "19c94bab069c6ac3",
+      "date": 1708963911234
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "0600b5b04e66eecf"
+      },
+      "id": "0600b5b04e66eecf",
+      "type": "add",
+      "after": "9b565e3efa50f038",
+      "date": 1708963914761
+    },
+    {
+      "id": "9b565e3efa50f038",
+      "type": "remove",
+      "removedTo": {
+        "page": "scratch"
+      },
+      "date": 1708963976399
+    },
+    {
+      "id": "0600b5b04e66eecf",
+      "type": "remove",
+      "removedTo": {
+        "page": "scratch"
+      },
+      "date": 1708963979742
+    },
+    {
+      "type": "edit",
+      "id": "b61e97c4c3b6056c",
+      "item": {
+        "type": "pagefold",
+        "id": "b61e97c4c3b6056c",
+        "text": "~"
+      },
+      "date": 1708964001488
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "31a8bf21e7e858b8"
+      },
+      "id": "31a8bf21e7e858b8",
+      "type": "add",
+      "after": "b61e97c4c3b6056c",
+      "date": 1708964012801
+    },
+    {
+      "type": "edit",
+      "id": "31a8bf21e7e858b8",
+      "item": {
+        "type": "paragraph",
+        "id": "31a8bf21e7e858b8",
+        "text": "Ward via matrix DM: "
+      },
+      "date": 1708964020271
+    },
+    {
+      "id": "9b565e3efa50f038",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "9b565e3efa50f038",
+        "text": "\nIf you wanted the node itself, and knew some Cypher query language, you could use our not so well documented subset of Cypher:\nconst result = g.search('match (n{name:\"foo\"})')\nThis would return an array of results, each an object with a property named \"n\", based on the names used in the query. If you wanted the first result you could write:\nconst foo = result[0].n"
+      },
+      "after": "31a8bf21e7e858b8",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1708964029427
+    },
+    {
+      "type": "edit",
+      "id": "9b565e3efa50f038",
+      "item": {
+        "type": "paragraph",
+        "id": "9b565e3efa50f038",
+        "text": "If you wanted the node itself, and knew some Cypher query language, you could use our not so well documented subset of Cypher:\nconst result = g.search('match (n{name:\"foo\"})')\nThis would return an array of results, each an object with a property named \"n\", based on the names used in the query. If you wanted the first result you could write:\nconst foo = result[0].n"
+      },
+      "date": 1708964035547
+    },
+    {
+      "id": "0600b5b04e66eecf",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "0600b5b04e66eecf",
+        "text": "If you wanted to know the id of a node named foo in the Graph g then you could reach inside of the graph, get the nodes, and then search for name == 'foo'. In code it would look like this:\n"
+      },
+      "after": "31a8bf21e7e858b8",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1708964071427
+    },
+    {
+      "id": "7f2702590009d691",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "7f2702590009d691",
+        "text": "const id = g.nodes.findIndex(node => node.props.name == 'foo')"
+      },
+      "after": "0600b5b04e66eecf",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1708964074049
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "40299b9299b9225f"
+      },
+      "id": "40299b9299b9225f",
+      "type": "add",
+      "after": "9b565e3efa50f038",
+      "date": 1708964107882
+    },
+    {
+      "type": "edit",
+      "id": "40299b9299b9225f",
+      "item": {
+        "type": "code",
+        "id": "40299b9299b9225f",
+        "text": "const result = g.search('match (n{name:\"foo\"})')"
+      },
+      "date": 1708964119090
+    },
+    {
+      "type": "edit",
+      "id": "9b565e3efa50f038",
+      "item": {
+        "type": "paragraph",
+        "id": "9b565e3efa50f038",
+        "text": "If you wanted the node itself, and knew some Cypher query language, you could use our not so well documented subset of Cypher:"
+      },
+      "date": 1708964129432
+    },
+    {
+      "type": "add",
+      "id": "4bc4a7d1d6fd8b06",
+      "item": {
+        "type": "paragraph",
+        "id": "4bc4a7d1d6fd8b06",
+        "text": "const result = g.search('match (n{name:\"foo\"})')\nThis would return an array of results, each an object with a property named \"n\", based on the names used in the query. If you wanted the first result you could write:\nconst foo = result[0].n"
+      },
+      "after": "9b565e3efa50f038",
+      "date": 1708964130175
+    },
+    {
+      "id": "40299b9299b9225f",
+      "type": "move",
+      "order": [
+        "702127fad3ec880f",
+        "5aa9624700f4dd96",
+        "d5c469074553cb08",
+        "bb8ae062390db8fb",
+        "3a035be472e997f2",
+        "3740343908300b7c",
+        "0fd7bec00f963803",
+        "b2dd78abe2750e8f",
+        "0eca98fd9bd1c095",
+        "ab8a1d2c5a543552",
+        "d4c20e44a9504fdb",
+        "8365bdff13e1fe44",
+        "3f277c45e7e59e59",
+        "f26e000bb110aeb7",
+        "2e8e524a87ccdcc5",
+        "45dcd8993acef753",
+        "e7e0d71095ec1c81",
+        "755a214cbc004042",
+        "663074a702fb108b",
+        "15f0137adb7214a2",
+        "b8c37a0a904460b3",
+        "44c3c1123009a02a",
+        "9ea06b7c8668f42a",
+        "2dff10a4141ab6cf",
+        "1fca1c88b1d55737",
+        "8361fb0daba6ccbe",
+        "c70196335a0d90a1",
+        "dc471f208588b14d",
+        "d4468a98d29802c7",
+        "fe16ce5dea04b4cd",
+        "d4b9e39bfd2dedc7",
+        "420e5e1638208d80",
+        "6ac1902a1613c193",
+        "542f3dee6845a6bb",
+        "b61e97c4c3b6056c",
+        "31a8bf21e7e858b8",
+        "0600b5b04e66eecf",
+        "7f2702590009d691",
+        "9b565e3efa50f038",
+        "40299b9299b9225f",
+        "4bc4a7d1d6fd8b06"
+      ],
+      "date": 1708964137086
+    },
+    {
+      "type": "edit",
+      "id": "4bc4a7d1d6fd8b06",
+      "item": {
+        "type": "paragraph",
+        "id": "4bc4a7d1d6fd8b06",
+        "text": "This would return an array of results, each an object with a property named \"n\", based on the names used in the query. If you wanted the first result you could write:\nconst foo = result[0].n"
+      },
+      "date": 1708964164597
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "17b43dbcb682d23e"
+      },
+      "id": "17b43dbcb682d23e",
+      "type": "add",
+      "after": "4bc4a7d1d6fd8b06",
+      "date": 1708964183314
+    },
+    {
+      "type": "edit",
+      "id": "17b43dbcb682d23e",
+      "item": {
+        "type": "code",
+        "id": "17b43dbcb682d23e",
+        "text": "const foo = result[0].n"
+      },
+      "date": 1708964193648
+    },
+    {
+      "type": "edit",
+      "id": "4bc4a7d1d6fd8b06",
+      "item": {
+        "type": "paragraph",
+        "id": "4bc4a7d1d6fd8b06",
+        "text": "This would return an array of results, each an object with a property named \"n\", based on the names used in the query. If you wanted the first result you could write:"
+      },
+      "date": 1708964205796
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1708964256957
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1708965357232
+    },
+    {
+      "type": "edit",
+      "id": "3a035be472e997f2",
+      "item": {
+        "type": "reference",
+        "id": "3a035be472e997f2",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "parse-page-paragraphs",
+        "title": "Parse Page Paragraphs",
+        "text": "? ⇒ [[LINEUP graph]]"
+      },
+      "date": 1709050553648
+    },
+    {
+      "type": "edit",
+      "id": "3a035be472e997f2",
+      "item": {
+        "type": "reference",
+        "id": "3a035be472e997f2",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "parse-page-paragraphs",
+        "title": "Parse Page Paragraphs",
+        "text": "? ⇒ [[LINEUP graph]] ⇐"
+      },
+      "date": 1709050563803
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709105678295
+    },
+    {
+      "type": "edit",
+      "id": "3740343908300b7c",
+      "item": {
+        "type": "frame",
+        "id": "3740343908300b7c",
+        "text": "http://localhost:3000/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 150\nSOURCE graph"
+      },
+      "date": 1709105712114
+    },
+    {
+      "id": "00f76ff348892888",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "00f76ff348892888",
+        "text": "# Application Frame"
+      },
+      "after": "3a035be472e997f2",
+      "attribution": {
+        "page": "Shuffled Cards"
+      },
+      "date": 1709105747739
+    },
+    {
+      "type": "add",
+      "id": "4376defc11184983",
+      "item": {
+        "type": "markdown",
+        "id": "4376defc11184983",
+        "text": "**Note**: This frame accesses the localhost. Scroll to the bottom of this page to work with a frame that also works in our global intranet."
+      },
+      "after": "00f76ff348892888",
+      "date": 1709105885656
+    },
+    {
+      "id": "4376defc11184983",
+      "type": "move",
+      "order": [
+        "702127fad3ec880f",
+        "5aa9624700f4dd96",
+        "d5c469074553cb08",
+        "bb8ae062390db8fb",
+        "3a035be472e997f2",
+        "00f76ff348892888",
+        "3740343908300b7c",
+        "4376defc11184983",
+        "0fd7bec00f963803",
+        "b2dd78abe2750e8f",
+        "0eca98fd9bd1c095",
+        "ab8a1d2c5a543552",
+        "d4c20e44a9504fdb",
+        "8365bdff13e1fe44",
+        "3f277c45e7e59e59",
+        "f26e000bb110aeb7",
+        "2e8e524a87ccdcc5",
+        "45dcd8993acef753",
+        "e7e0d71095ec1c81",
+        "755a214cbc004042",
+        "663074a702fb108b",
+        "15f0137adb7214a2",
+        "b8c37a0a904460b3",
+        "44c3c1123009a02a",
+        "9ea06b7c8668f42a",
+        "2dff10a4141ab6cf",
+        "1fca1c88b1d55737",
+        "8361fb0daba6ccbe",
+        "c70196335a0d90a1",
+        "dc471f208588b14d",
+        "d4468a98d29802c7",
+        "fe16ce5dea04b4cd",
+        "d4b9e39bfd2dedc7",
+        "420e5e1638208d80",
+        "6ac1902a1613c193",
+        "542f3dee6845a6bb",
+        "b61e97c4c3b6056c",
+        "31a8bf21e7e858b8",
+        "0600b5b04e66eecf",
+        "7f2702590009d691",
+        "9b565e3efa50f038",
+        "40299b9299b9225f",
+        "4bc4a7d1d6fd8b06",
+        "17b43dbcb682d23e"
+      ],
+      "date": 1709105888682
+    },
+    {
+      "type": "edit",
+      "id": "4376defc11184983",
+      "item": {
+        "type": "markdown",
+        "id": "4376defc11184983",
+        "text": "**Note**: The *Application Frame* above accesses the localhost. Scroll to the bottom of this page to work with a frame that also works in our global intranet."
+      },
+      "date": 1709105923987
+    },
+    {
+      "type": "edit",
+      "id": "4376defc11184983",
+      "item": {
+        "type": "markdown",
+        "id": "4376defc11184983",
+        "text": "**Note**: The *Application Frame* above accesses the localhost. Scroll to the bottom of this page to work with a frame that also works on our global intranet."
+      },
+      "date": 1709105944737
+    },
+    {
+      "type": "edit",
+      "id": "3740343908300b7c",
+      "item": {
+        "type": "frame",
+        "id": "3740343908300b7c",
+        "text": "http://localhost:3000/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 250\nSOURCE graph"
+      },
+      "date": 1709127201141
+    },
+    {
+      "type": "edit",
+      "id": "3740343908300b7c",
+      "item": {
+        "type": "frame",
+        "id": "3740343908300b7c",
+        "text": "http://localhost:3000/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 500\nSOURCE graph"
+      },
+      "date": 1709127206731
+    }
+  ]
+}

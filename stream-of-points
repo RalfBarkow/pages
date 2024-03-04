@@ -1,0 +1,570 @@
+{
+  "title": "Stream of Points",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "484e092159df2d01",
+      "text": "We construct some generators to emit a stream of points."
+    },
+    {
+      "type": "frame",
+      "id": "6cf52409eec3988c",
+      "text": "//frame.wiki.dbbs.co/assets/pages/snippet-template/esm.html\nSOURCE point"
+    },
+    {
+      "type": "paragraph",
+      "id": "1b26368db2846475",
+      "text": "To watch the points drawn, see [[Scribble]]."
+    },
+    {
+      "type": "code",
+      "id": "d6fab14712e4ec19",
+      "text": "function* genPoints() {\n  const {floor, random} = Math\n  const average = 15\n  let [x, y] = [0, 0]\n  while (true) {\n    yield {x, y}\n    x += floor(average * (random()-random()))\n    y += floor(average * (random()-random()))\n  }\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "44da72bcc229b615",
+      "text": "Infinite streams risk infinite loops. We can construct another generator which limits the range of the stream."
+    },
+    {
+      "type": "code",
+      "id": "fe6c3c753ffbc192",
+      "text": "function* take(n, iterator) {\n  let result, i = 0;\n  while (!(result = iterator.next()).done\n    && i++ < n) {\n    yield result.value;\n  }\n}\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "6087ed7101347282",
+      "text": "Lets introduce a little asynchrony to more closely model a stream of mouse movements."
+    },
+    {
+      "type": "code",
+      "id": "b4a918adeefb71b9",
+      "text": "async function* timejitter(iterator) {\n  const {floor, random} = Math\n  const average = 200\n  for (let point of iterator) {\n    yield point\n    let ms = floor(average * (random()-random()))\n    await new Promise(r => setTimeout(r, ms))\n  }\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "57ef99e7e9e72c99",
+      "text": "We create a few helper functions."
+    },
+    {
+      "type": "code",
+      "id": "1175e36fb0ffb4cc",
+      "text": "function resize() {\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+    },
+    {
+      "type": "code",
+      "id": "e94a6c8b06075e39",
+      "text": "function broadcast(point) {\n  window.parent.postMessage({\n    action: \"publishSourceData\",\n    name: \"point\",\n    sourceData: {point}\n  }, \"*\")\n}\n"
+    },
+    {
+      "type": "code",
+      "id": "ed8602bdb5f2928e",
+      "text": "function updateProgress(el, count) {\n  el.innerHTML = `generated ${count} points`\n}"
+    },
+    {
+      "type": "paragraph",
+      "id": "1b704f549276098d",
+      "text": "Let's broadcast a line."
+    },
+    {
+      "type": "code",
+      "id": "5eb6b67568179aa3",
+      "text": "export async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  const display = el.querySelector(\"#progress\")\n  let progress = 0\n  updateProgress(display, progress)\n  resize()\n  const line = timejitter(take(1000, genPoints()))\n  for await (let point of line) {\n    broadcast(point)\n    if (progress % 25 == 0) {\n      updateProgress(display, progress)\n    }\n    progress++\n  }\n  const now = new Date().toLocaleString(\"en-US\")\n  updateProgress(display, progress)\n  display.insertAdjacentHTML(\"afterend\", `\n    <p>stopped: ${now}</p>`)\n  resize()\n}"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Stream of Points",
+        "story": [
+          {
+            "type": "paragraph",
+            "id": "484e092159df2d01",
+            "text": "Explain what this does."
+          },
+          {
+            "type": "code",
+            "id": "5eb6b67568179aa3",
+            "text": "export async function emit(el) {\n  el.innerHTML = `<h2>Hello, World!</h2>`\n}\n\nexport async function bind(el) {\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+          },
+          {
+            "type": "paragraph",
+            "id": "caa626ac93aa7d4c",
+            "text": "In the frame below we can view the results."
+          },
+          {
+            "type": "frame",
+            "id": "6cf52409eec3988c",
+            "text": "//frame.wiki.dbbs.co/assets/pages/snippet-template/esm.html"
+          },
+          {
+            "type": "paragraph",
+            "id": "4af3e06016116216",
+            "text": "See [[About Frame Plugin]]."
+          },
+          {
+            "type": "paragraph",
+            "id": "da49ee08fd0e2a07",
+            "text": "See [[About Frame Integrations]]."
+          }
+        ]
+      },
+      "date": 1623804324968
+    },
+    {
+      "type": "edit",
+      "id": "484e092159df2d01",
+      "item": {
+        "type": "paragraph",
+        "id": "484e092159df2d01",
+        "text": "We construct some generators to emit a stream of points."
+      },
+      "date": 1623804399938
+    },
+    {
+      "type": "add",
+      "id": "d6fab14712e4ec19",
+      "item": {
+        "type": "factory",
+        "id": "d6fab14712e4ec19",
+        "text": "//code"
+      },
+      "after": "484e092159df2d01",
+      "date": 1623804412123
+    },
+    {
+      "type": "edit",
+      "id": "d6fab14712e4ec19",
+      "item": {
+        "type": "code",
+        "id": "d6fab14712e4ec19",
+        "text": "function* genPoints() {\n  const {floor, random} = Math\n  const average = 30\n  let [x, y] = [0, 0]\n  while (true) {\n    yield {x, y}\n    x += average * (random()-random())\n    y += average * (random()-random())\n  }\n}"
+      },
+      "date": 1623804508541
+    },
+    {
+      "id": "6087ed7101347282",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "6087ed7101347282",
+        "text": "Lets introduce a little asynchrony to more closely model a stream of mouse movements."
+      },
+      "after": "d6fab14712e4ec19",
+      "date": 1623804524037
+    },
+    {
+      "type": "edit",
+      "id": "d6fab14712e4ec19",
+      "item": {
+        "type": "code",
+        "id": "d6fab14712e4ec19",
+        "text": "function* genPoints() {\n  const {floor, random} = Math\n  const average = 30\n  let [x, y] = [0, 0]\n  while (true) {\n    yield {x, y}\n    x += floor(average * (random()-random()))\n    y += floor(average * (random()-random()))\n  }\n}"
+      },
+      "date": 1623804591241
+    },
+    {
+      "id": "b4a918adeefb71b9",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "b4a918adeefb71b9",
+        "text": "async function* timejitter(iterator) {\n  const {floor, random} = Math\n  for (let point of iterator) {\n    yield point\n    let ms = 5 + floor(5 * (random()+random()))\n    await new Promise(r => setTimeout(r, ms))\n  } \n}"
+      },
+      "after": "6087ed7101347282",
+      "date": 1623804604610
+    },
+    {
+      "type": "edit",
+      "id": "b4a918adeefb71b9",
+      "item": {
+        "type": "code",
+        "id": "b4a918adeefb71b9",
+        "text": "async function* timejitter(iterator) {\n  const {floor, random} = Math\n  const average = 10\n  for (let point of iterator) {\n    yield point\n    let ms = floor(average * (random()-random()))\n    await new Promise(r => setTimeout(r, ms))\n  }\n}"
+      },
+      "date": 1623804681874
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "function resize() {\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}\n\nexport async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  \n}"
+      },
+      "date": 1623804957787
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "function resize() {\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}\n\nfunction broadcast(point) {\n  window.parent.postMessage({\n    action: \"publishSourceData\",\n    name: \"point\",\n    sourceData: {point}\n  }, \"*\")\n}\n\nfunction updateProgress(el, count) {\n  el.innerHTML = `generated ${count} points`\n}\n\nexport async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  const display = el.querySelector(\"#progress\")\n  resize()\n  let progress = 0\n  updateProgress(display, progress)\n  const line = timejitter(genPoints())\n  for await (let point of line) {\n    broadcast(point)\n    if (i++ % 20 == 0) {\n      updateProgress(display,progress)\n      resize()\n    }\n  }\n}"
+      },
+      "date": 1623805339509
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "function resize() {\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}\n\nfunction broadcast(point) {\n  window.parent.postMessage({\n    action: \"publishSourceData\",\n    name: \"point\",\n    sourceData: {point}\n  }, \"*\")\n}\n\nfunction updateProgress(el, count) {\n  el.innerHTML = `generated ${count} points`\n}\n\nexport async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  const display = el.querySelector(\"#progress\")\n  resize()\n  let progress = 0\n  updateProgress(display, progress)\n  const line = timejitter(genPoints())\n  for await (let point of line) {\n    broadcast(point)\n    if (progress++ % 20 == 0) {\n      updateProgress(display,progress)\n      resize()\n    }\n  }\n}"
+      },
+      "date": 1623805361862
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "function resize() {\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}\n\nfunction broadcast(point) {\n  window.parent.postMessage({\n    action: \"publishSourceData\",\n    name: \"point\",\n    sourceData: {point}\n  }, \"*\")\n}\n\nfunction updateProgress(el, count) {\n  el.innerHTML = `generated ${count} points`\n}\n\nexport async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  const display = el.querySelector(\"#progress\")\n  resize()\n  let progress = 0\n  updateProgress(display, progress)\n  const line = timejitter(genPoints())\n  for await (let point of line) {\n    broadcast(point)\n    if (progress++ % 200 == 0) {\n      updateProgress(display,progress)\n      resize()\n    }\n  }\n}"
+      },
+      "date": 1623805406500
+    },
+    {
+      "id": "57ef99e7e9e72c99",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "57ef99e7e9e72c99",
+        "text": "Let's broadcast a line."
+      },
+      "after": "b4a918adeefb71b9",
+      "date": 1623805568275
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  const display = el.querySelector(\"#progress\")\n  let progress = 0\n  updateProgress(display, progress)\n  resize()\n  const line = timejitter(genPoints())\n  for await (let point of line) {\n    broadcast(point)\n    if (progress++ % 200 == 0) {\n      updateProgress(display,progress)\n    }\n  }\n}\n\nfunction resize() {\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}\n\nfunction broadcast(point) {\n  window.parent.postMessage({\n    action: \"publishSourceData\",\n    name: \"point\",\n    sourceData: {point}\n  }, \"*\")\n}\n\nfunction updateProgress(el, count) {\n  el.innerHTML = `generated ${count} points`\n}"
+      },
+      "date": 1623805695893
+    },
+    {
+      "id": "6cf52409eec3988c",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "6cf52409eec3988c",
+        "d6fab14712e4ec19",
+        "6087ed7101347282",
+        "b4a918adeefb71b9",
+        "57ef99e7e9e72c99",
+        "5eb6b67568179aa3",
+        "caa626ac93aa7d4c",
+        "4af3e06016116216",
+        "da49ee08fd0e2a07"
+      ],
+      "date": 1623805725315
+    },
+    {
+      "type": "remove",
+      "id": "caa626ac93aa7d4c",
+      "date": 1623805739552
+    },
+    {
+      "type": "remove",
+      "id": "4af3e06016116216",
+      "date": 1623805742085
+    },
+    {
+      "type": "remove",
+      "id": "da49ee08fd0e2a07",
+      "date": 1623805744828
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//frame.wiki.dbbs.co/assets/pages/snippet-template/esm.html\nSOURCE point"
+      },
+      "date": 1623805756902
+    },
+    {
+      "id": "44da72bcc229b615",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "44da72bcc229b615",
+        "text": "Infinite streams risk infinite loops. We can construct another generator which limits the range of the stream."
+      },
+      "after": "d6fab14712e4ec19",
+      "date": 1623806213702
+    },
+    {
+      "id": "fe6c3c753ffbc192",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "fe6c3c753ffbc192",
+        "text": "function* take(n, iterator) {\n  let result, i = 0;\n  while (!(result = iterator.next()).done\n    && i++ < n) {\n    yield result.value;\n  }\n}\n\n"
+      },
+      "after": "44da72bcc229b615",
+      "date": 1623806217707
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  const display = el.querySelector(\"#progress\")\n  let progress = 0\n  updateProgress(display, progress)\n  resize()\n  const line = timejitter(take(5000, genPoints()))\n  for await (let point of line) {\n    broadcast(point)\n    if (progress++ % 200 == 0) {\n      updateProgress(display,progress)\n    }\n  }\n}\n\nfunction resize() {\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}\n\nfunction broadcast(point) {\n  window.parent.postMessage({\n    action: \"publishSourceData\",\n    name: \"point\",\n    sourceData: {point}\n  }, \"*\")\n}\n\nfunction updateProgress(el, count) {\n  el.innerHTML = `generated ${count} points`\n}"
+      },
+      "date": 1623806261587
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  const display = el.querySelector(\"#progress\")\n  let progress = 0\n  updateProgress(display, progress)\n  resize()\n  const line = timejitter(take(5000, genPoints()))\n  for await (let point of line) {\n    broadcast(point)\n    if (progress++ % 200 == 0) {\n      updateProgress(display,progress)\n    }\n  }\n  const now = new Date().toLocaleString(\"en-US\")\n  display.insertAdjacentHTML(\"afterend\", `\n    <p>started: ${now}</p>`)\n}\n\nfunction resize() {\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}\n\nfunction broadcast(point) {\n  window.parent.postMessage({\n    action: \"publishSourceData\",\n    name: \"point\",\n    sourceData: {point}\n  }, \"*\")\n}\n\nfunction updateProgress(el, count) {\n  el.innerHTML = `generated ${count} points`\n}"
+      },
+      "date": 1623806429528
+    },
+    {
+      "type": "edit",
+      "id": "57ef99e7e9e72c99",
+      "item": {
+        "type": "paragraph",
+        "id": "57ef99e7e9e72c99",
+        "text": "We create a few helper functions."
+      },
+      "date": 1623806745426
+    },
+    {
+      "type": "add",
+      "id": "1b704f549276098d",
+      "item": {
+        "type": "paragraph",
+        "id": "1b704f549276098d",
+        "text": "Let's broadcast a line."
+      },
+      "after": "57ef99e7e9e72c99",
+      "date": 1623806747402
+    },
+    {
+      "type": "add",
+      "id": "1175e36fb0ffb4cc",
+      "item": {
+        "type": "factory",
+        "id": "1175e36fb0ffb4cc",
+        "text": "//code"
+      },
+      "after": "57ef99e7e9e72c99",
+      "date": 1623806759417
+    },
+    {
+      "type": "edit",
+      "id": "1175e36fb0ffb4cc",
+      "item": {
+        "type": "code",
+        "id": "1175e36fb0ffb4cc",
+        "text": "function resize() {\n  window.parent.postMessage({\n    action: \"resize\",\n    height: document.body.offsetHeight\n  }, \"*\")\n}"
+      },
+      "date": 1623806767313
+    },
+    {
+      "type": "add",
+      "id": "e94a6c8b06075e39",
+      "item": {
+        "type": "factory",
+        "id": "e94a6c8b06075e39",
+        "text": "//code"
+      },
+      "after": "1175e36fb0ffb4cc",
+      "date": 1623806785290
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  const display = el.querySelector(\"#progress\")\n  let progress = 0\n  updateProgress(display, progress)\n  resize()\n  const line = timejitter(take(5000, genPoints()))\n  for await (let point of line) {\n    broadcast(point)\n    if (progress++ % 200 == 0) {\n      updateProgress(display,progress)\n    }\n  }\n  const now = new Date().toLocaleString(\"en-US\")\n  display.insertAdjacentHTML(\"afterend\", `\n    <p>started: ${now}</p>`)\n}\n\nfunction updateProgress(el, count) {\n  el.innerHTML = `generated ${count} points`\n}"
+      },
+      "date": 1623806809360
+    },
+    {
+      "type": "edit",
+      "id": "e94a6c8b06075e39",
+      "item": {
+        "type": "code",
+        "id": "e94a6c8b06075e39",
+        "text": "function broadcast(point) {\n  window.parent.postMessage({\n    action: \"publishSourceData\",\n    name: \"point\",\n    sourceData: {point}\n  }, \"*\")\n}\n"
+      },
+      "date": 1623806813404
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  const display = el.querySelector(\"#progress\")\n  let progress = 0\n  updateProgress(display, progress)\n  resize()\n  const line = timejitter(take(5000, genPoints()))\n  for await (let point of line) {\n    broadcast(point)\n    if (progress++ % 200 == 0) {\n      updateProgress(display,progress)\n    }\n  }\n  const now = new Date().toLocaleString(\"en-US\")\n  display.insertAdjacentHTML(\"afterend\", `\n    <p>started: ${now}</p>`)\n}"
+      },
+      "date": 1623806829227
+    },
+    {
+      "type": "add",
+      "id": "ed8602bdb5f2928e",
+      "item": {
+        "type": "factory",
+        "id": "ed8602bdb5f2928e",
+        "text": "//code"
+      },
+      "after": "e94a6c8b06075e39",
+      "date": 1623806836558
+    },
+    {
+      "type": "edit",
+      "id": "ed8602bdb5f2928e",
+      "item": {
+        "type": "code",
+        "id": "ed8602bdb5f2928e",
+        "text": "function updateProgress(el, count) {\n  el.innerHTML = `generated ${count} points`\n}"
+      },
+      "date": 1623806839410
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  const display = el.querySelector(\"#progress\")\n  let progress = 0\n  updateProgress(display, progress)\n  resize()\n  const line = timejitter(take(5000, genPoints()))\n  for await (let point of line) {\n    broadcast(point)\n    if (progress++ % 200 == 0) {\n      updateProgress(display, progress)\n    }\n  }\n  const now = new Date().toLocaleString(\"en-US\")\n  updateProgress(display, progress)\n  display.insertAdjacentHTML(\"afterend\", `\n    <p>stopped: ${now}</p>`)\n  resize()\n}"
+      },
+      "date": 1623806940855
+    },
+    {
+      "type": "edit",
+      "id": "d6fab14712e4ec19",
+      "item": {
+        "type": "code",
+        "id": "d6fab14712e4ec19",
+        "text": "function* genPoints() {\n  const {floor, random} = Math\n  const average = 15\n  let [x, y] = [0, 0]\n  while (true) {\n    yield {x, y}\n    x += floor(average * (random()-random()))\n    y += floor(average * (random()-random()))\n  }\n}"
+      },
+      "date": 1623807887632
+    },
+    {
+      "type": "edit",
+      "id": "b4a918adeefb71b9",
+      "item": {
+        "type": "code",
+        "id": "b4a918adeefb71b9",
+        "text": "async function* timejitter(iterator) {\n  const {floor, random} = Math\n  const average = 500\n  for (let point of iterator) {\n    yield point\n    let ms = floor(average * (random()-random()))\n    await new Promise(r => setTimeout(r, ms))\n  }\n}"
+      },
+      "date": 1623807922453
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  const display = el.querySelector(\"#progress\")\n  let progress = 0\n  updateProgress(display, progress)\n  resize()\n  const line = timejitter(take(2000, genPoints()))\n  for await (let point of line) {\n    broadcast(point)\n    if (progress++ % 200 == 0) {\n      updateProgress(display, progress)\n    }\n  }\n  const now = new Date().toLocaleString(\"en-US\")\n  updateProgress(display, progress)\n  display.insertAdjacentHTML(\"afterend\", `\n    <p>stopped: ${now}</p>`)\n  resize()\n}"
+      },
+      "date": 1623807944516
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  const display = el.querySelector(\"#progress\")\n  let progress = 0\n  updateProgress(display, progress)\n  resize()\n  const line = timejitter(take(2000, genPoints()))\n  for await (let point of line) {\n    broadcast(point)\n    if (progress++ % 25 == 0) {\n      updateProgress(display, progress)\n    }\n  }\n  const now = new Date().toLocaleString(\"en-US\")\n  updateProgress(display, progress)\n  display.insertAdjacentHTML(\"afterend\", `\n    <p>stopped: ${now}</p>`)\n  resize()\n}"
+      },
+      "date": 1623808009409
+    },
+    {
+      "type": "edit",
+      "id": "b4a918adeefb71b9",
+      "item": {
+        "type": "code",
+        "id": "b4a918adeefb71b9",
+        "text": "async function* timejitter(iterator) {\n  const {floor, random} = Math\n  const average = 200\n  for (let point of iterator) {\n    yield point\n    let ms = floor(average * (random()-random()))\n    await new Promise(r => setTimeout(r, ms))\n  }\n}"
+      },
+      "date": 1623808075174
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  const display = el.querySelector(\"#progress\")\n  let progress = 0\n  updateProgress(display, progress)\n  resize()\n  const line = timejitter(take(1000, genPoints()))\n  for await (let point of line) {\n    broadcast(point)\n    if (progress % 25 == 0) {\n      updateProgress(display, progress++)\n    }\n  }\n  const now = new Date().toLocaleString(\"en-US\")\n  updateProgress(display, progress)\n  display.insertAdjacentHTML(\"afterend\", `\n    <p>stopped: ${now}</p>`)\n  resize()\n}"
+      },
+      "date": 1623808199065
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  const display = el.querySelector(\"#progress\")\n  let progress = 0\n  updateProgress(display, progress)\n  resize()\n  const line = timejitter(take(1000, genPoints()))\n  for await (let point of line) {\n    broadcast(point)\n    if (progress % 25 == 0) {\n      updateProgress(display, progress)\n    }\nprogress\n  }\n  const now = new Date().toLocaleString(\"en-US\")\n  updateProgress(display, progress)\n  display.insertAdjacentHTML(\"afterend\", `\n    <p>stopped: ${now}</p>`)\n  resize()\n}"
+      },
+      "date": 1623808248403
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "export async function emit(el) {\n  const now = new Date().toLocaleString(\"en-US\")\n  el.innerHTML = `\n  <p>started: ${now}</p>\n  <p id=\"progress\"></p>`\n}\n\nexport async function bind(el) {\n  const display = el.querySelector(\"#progress\")\n  let progress = 0\n  updateProgress(display, progress)\n  resize()\n  const line = timejitter(take(1000, genPoints()))\n  for await (let point of line) {\n    broadcast(point)\n    if (progress % 25 == 0) {\n      updateProgress(display, progress)\n    }\n    progress++\n  }\n  const now = new Date().toLocaleString(\"en-US\")\n  updateProgress(display, progress)\n  display.insertAdjacentHTML(\"afterend\", `\n    <p>stopped: ${now}</p>`)\n  resize()\n}"
+      },
+      "date": 1623808270040
+    },
+    {
+      "type": "add",
+      "id": "1b26368db2846475",
+      "item": {
+        "type": "paragraph",
+        "id": "1b26368db2846475",
+        "text": "To watch the points drawn, see [[Scribble]]."
+      },
+      "after": "484e092159df2d01",
+      "date": 1623862972899
+    },
+    {
+      "id": "1b26368db2846475",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "6cf52409eec3988c",
+        "1b26368db2846475",
+        "d6fab14712e4ec19",
+        "44da72bcc229b615",
+        "fe6c3c753ffbc192",
+        "6087ed7101347282",
+        "b4a918adeefb71b9",
+        "57ef99e7e9e72c99",
+        "1175e36fb0ffb4cc",
+        "e94a6c8b06075e39",
+        "ed8602bdb5f2928e",
+        "1b704f549276098d",
+        "5eb6b67568179aa3"
+      ],
+      "date": 1623862976126
+    },
+    {
+      "type": "fork",
+      "site": "frame.wiki.dbbs.co",
+      "date": 1707756500213
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1708944146879
+    }
+  ]
+}
