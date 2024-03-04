@@ -58,6 +58,11 @@
     },
     {
       "type": "paragraph",
+      "id": "05560528fb0944c6",
+      "text": "- [[Kerry Golden Paragraph]]"
+    },
+    {
+      "type": "paragraph",
       "id": "97095af66bb334bd",
       "text": "[[Kaiten Continuous Experience]]"
     },
@@ -630,6 +635,17 @@
         "text": "**[[Kerry Turner]]** See: [[Engagement vs Commitment]] (within [[ST2050]])"
       },
       "date": 1708020592775
+    },
+    {
+      "type": "add",
+      "id": "05560528fb0944c6",
+      "item": {
+        "type": "paragraph",
+        "id": "05560528fb0944c6",
+        "text": "- [[Kerry Golden Paragraph]]"
+      },
+      "after": "b36d99dcb8c0341c",
+      "date": 1709296838643
     }
   ]
 }

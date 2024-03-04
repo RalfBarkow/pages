@@ -97,7 +97,7 @@
     {
       "type": "frame",
       "id": "6f66c17ee7f83b9f",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
     }
   ],
   "journal": [
@@ -735,6 +735,26 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
       },
       "date": 1708710024187
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709313243276
+    },
+    {
+      "type": "edit",
+      "id": "6f66c17ee7f83b9f",
+      "item": {
+        "type": "frame",
+        "id": "6f66c17ee7f83b9f",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+      },
+      "date": 1709313266400
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709313337571
     }
   ]
 }

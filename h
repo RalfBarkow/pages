@@ -47,6 +47,11 @@
       "text": "[[Homeostasis]] ⇒ [[Homeostat]] ⇒ [[Comparator]]"
     },
     {
+      "type": "paragraph",
+      "id": "f1ed62904b3511b2",
+      "text": "[[High-Dimensional Computing]]"
+    },
+    {
       "type": "reference",
       "id": "8eb41c9ad7a9c330",
       "site": "wiki.ralfbarkow.ch",
@@ -405,6 +410,27 @@
         "text": "[[Homeostasis]] ⇒ [[Homeostat]] ⇒ [[Comparator]]"
       },
       "date": 1708354000734
+    },
+    {
+      "type": "add",
+      "id": "f1ed62904b3511b2",
+      "item": {
+        "type": "paragraph",
+        "id": "f1ed62904b3511b2",
+        "text": "High-Dimensional Computing"
+      },
+      "after": "f2481c99e2b929fa",
+      "date": 1709548678327
+    },
+    {
+      "type": "edit",
+      "id": "f1ed62904b3511b2",
+      "item": {
+        "type": "paragraph",
+        "id": "f1ed62904b3511b2",
+        "text": "[[High-Dimensional Computing]]"
+      },
+      "date": 1709548688749
     }
   ]
 }

@@ -105,6 +105,16 @@
       "text": "[[Iconic Arithmetic]]"
     },
     {
+      "type": "paragraph",
+      "id": "4d135877f9d9722b",
+      "text": "[[Identifying Distinct Activities]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "49fb23f7a5c3504e",
+      "text": "[[Indoor-Outdoor Ambiguity]] See: [[inner]]"
+    },
+    {
       "type": "reference",
       "id": "41682db8bb604a0e",
       "site": "wiki.ralfbarkow.ch",
@@ -115,7 +125,7 @@
     {
       "type": "frame",
       "id": "133dfc8f00f02bc6",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
     }
   ],
   "journal": [
@@ -1055,6 +1065,58 @@
       },
       "after": "4fbe113d6671ffba",
       "date": 1708036007436
+    },
+    {
+      "type": "add",
+      "id": "4d135877f9d9722b",
+      "item": {
+        "type": "paragraph",
+        "id": "4d135877f9d9722b",
+        "text": "[[Identifying Distinct Activities]]"
+      },
+      "after": "0cde9f4fdc4dd016",
+      "date": 1709295583958
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709305686642
+    },
+    {
+      "type": "edit",
+      "id": "133dfc8f00f02bc6",
+      "item": {
+        "type": "frame",
+        "id": "133dfc8f00f02bc6",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222"
+      },
+      "date": 1709305726142
+    },
+    {
+      "type": "edit",
+      "id": "133dfc8f00f02bc6",
+      "item": {
+        "type": "frame",
+        "id": "133dfc8f00f02bc6",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+      },
+      "date": 1709305734443
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709311289557
+    },
+    {
+      "type": "add",
+      "id": "49fb23f7a5c3504e",
+      "item": {
+        "type": "paragraph",
+        "id": "49fb23f7a5c3504e",
+        "text": "[[Indoor-Outdoor Ambiguity]] See: [[inner]]"
+      },
+      "after": "4d135877f9d9722b",
+      "date": 1709311313645
     }
   ]
 }

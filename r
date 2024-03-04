@@ -102,6 +102,11 @@
       "text": "[[Recommendation]] (within [[Solo Collaborator]])"
     },
     {
+      "type": "paragraph",
+      "id": "13be7bb0f65a4a43",
+      "text": "[[Record Your Communication In The Code]]"
+    },
+    {
       "type": "reference",
       "id": "1723ea75115e00fb",
       "site": "wiki.ralfbarkow.ch",
@@ -112,7 +117,7 @@
     {
       "type": "frame",
       "id": "4ecf3e5913a5afbb",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
     }
   ],
   "journal": [
@@ -810,6 +815,27 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
       },
       "date": 1708779619764
+    },
+    {
+      "type": "add",
+      "id": "13be7bb0f65a4a43",
+      "item": {
+        "type": "paragraph",
+        "id": "13be7bb0f65a4a43",
+        "text": "[[Record Your Communication In The Code]]"
+      },
+      "after": "3e6b35f45ace6a82",
+      "date": 1709287475433
+    },
+    {
+      "type": "edit",
+      "id": "4ecf3e5913a5afbb",
+      "item": {
+        "type": "frame",
+        "id": "4ecf3e5913a5afbb",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+      },
+      "date": 1709294076823
     }
   ]
 }

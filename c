@@ -313,6 +313,36 @@
       "text": "[[Croquet Jasmine]]"
     },
     {
+      "type": "paragraph",
+      "id": "8f8d689d98ccb337",
+      "text": "[[clog-inspector]] (within [[CLOG]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "96023f6114359efb",
+      "text": "[[Computational Plugins]] (within [[compute]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "2af7fa994ce2f32c",
+      "text": "[[Codosome Hexis]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "ab4754930471967d",
+      "text": "[[Collaborative Federation Index]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "dcef1a5e2baca6be",
+      "text": "[[Sample Aspects of Change]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e803f5d780a2475d",
+      "text": "[[Citizen Data]]"
+    },
+    {
       "type": "reference",
       "id": "3e8af46ff3063eaa",
       "site": "wiki.ralfbarkow.ch",
@@ -323,7 +353,7 @@
     {
       "type": "frame",
       "id": "a29178af5d6036ea",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
     }
   ],
   "journal": [
@@ -2696,6 +2726,116 @@
       },
       "after": "4b4c3fde03174b43",
       "date": 1708778174814
+    },
+    {
+      "type": "add",
+      "id": "8f8d689d98ccb337",
+      "item": {
+        "type": "paragraph",
+        "id": "8f8d689d98ccb337",
+        "text": "[[CLOG]]"
+      },
+      "after": "25f711620a276c23",
+      "date": 1709103075274
+    },
+    {
+      "type": "edit",
+      "id": "8f8d689d98ccb337",
+      "item": {
+        "type": "paragraph",
+        "id": "8f8d689d98ccb337",
+        "text": "[[clog-inspector]] (within [[CLOG]])"
+      },
+      "date": 1709103107645
+    },
+    {
+      "type": "add",
+      "id": "96023f6114359efb",
+      "item": {
+        "type": "paragraph",
+        "id": "96023f6114359efb",
+        "text": "[[Computational Plugins]]"
+      },
+      "after": "8f8d689d98ccb337",
+      "date": 1709157886710
+    },
+    {
+      "type": "edit",
+      "id": "96023f6114359efb",
+      "item": {
+        "type": "paragraph",
+        "id": "96023f6114359efb",
+        "text": "[[Computational Plugins]] (within [[compute]])"
+      },
+      "date": 1709157956444
+    },
+    {
+      "type": "add",
+      "id": "2af7fa994ce2f32c",
+      "item": {
+        "type": "paragraph",
+        "id": "2af7fa994ce2f32c",
+        "text": "[[Codosome Hexis]]"
+      },
+      "after": "96023f6114359efb",
+      "date": 1709216220634
+    },
+    {
+      "type": "edit",
+      "id": "a29178af5d6036ea",
+      "item": {
+        "type": "frame",
+        "id": "a29178af5d6036ea",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709216567565
+    },
+    {
+      "type": "add",
+      "id": "ab4754930471967d",
+      "item": {
+        "type": "paragraph",
+        "id": "ab4754930471967d",
+        "text": "[[Collaborative Federation Index]]"
+      },
+      "after": "2af7fa994ce2f32c",
+      "date": 1709295293431
+    },
+    {
+      "id": "dcef1a5e2baca6be",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "dcef1a5e2baca6be",
+        "text": "[[Sample Aspects of Change]]"
+      },
+      "after": "ab4754930471967d",
+      "attribution": {
+        "page": "A",
+        "site": "localhost:3000"
+      },
+      "date": 1709301988219
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709302114934
+    },
+    {
+      "type": "add",
+      "id": "e803f5d780a2475d",
+      "item": {
+        "type": "paragraph",
+        "id": "e803f5d780a2475d",
+        "text": "[[Citizen Data]]"
+      },
+      "after": "dcef1a5e2baca6be",
+      "date": 1709310904937
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709310986396
     }
   ]
 }

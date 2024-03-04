@@ -192,6 +192,21 @@
       "text": "⇒ [[Dot]] ⇒ [[Trajectory]] ⇒ [[Event]] ⇒ [[collect]] ⇒ [[enclose]] ⇒ [[Circle]] See also [[Homeostasis]], [[Movement]] (within a [[Circle]]), [[Bestand]] (within [[Systemrationalität und Weltrationalität]]) → \"**[[~/dot/0]]**\""
     },
     {
+      "type": "paragraph",
+      "id": "aa2743e35ffff1e4",
+      "text": "[[Dream Big]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "1155e93671b54a08",
+      "text": "[[Diagrams as Base Model]] (within [[Browsing Diagrams]]) See: [[diagram]] [[~/diagram/0]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "75f4ae85736d8ea3",
+      "text": "[[Doughnut]] See: [[Hot Dog]]"
+    },
+    {
       "type": "reference",
       "id": "ec6d5f60c118e850",
       "site": "wiki.ralfbarkow.ch",
@@ -202,7 +217,7 @@
     {
       "type": "frame",
       "id": "bfaebd61519dfa08",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
     }
   ],
   "journal": [
@@ -1541,6 +1556,146 @@
         "text": "⇒ [[Dot]] ⇒ [[Trajectory]] ⇒ [[Event]] ⇒ [[collect]] ⇒ [[enclose]] ⇒ [[Circle]] See also [[Homeostasis]], [[Movement]] (within a [[Circle]]), [[Bestand]] (within [[Systemrationalität und Weltrationalität]]) → \"**[[~/dot/0]]**\""
       },
       "date": 1708354230805
+    },
+    {
+      "type": "edit",
+      "id": "bfaebd61519dfa08",
+      "item": {
+        "type": "frame",
+        "id": "bfaebd61519dfa08",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709255407866
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "aa2743e35ffff1e4"
+      },
+      "id": "aa2743e35ffff1e4",
+      "type": "add",
+      "after": "bfaebd61519dfa08",
+      "date": 1709295489090
+    },
+    {
+      "type": "edit",
+      "id": "aa2743e35ffff1e4",
+      "item": {
+        "type": "paragraph",
+        "id": "aa2743e35ffff1e4",
+        "text": "[[Dream Big]]"
+      },
+      "date": 1709295493758
+    },
+    {
+      "id": "aa2743e35ffff1e4",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "3b173583abd743d9",
+        "c3f7094b674b5106",
+        "ef3c144276f9e639",
+        "09a74f9da482971a",
+        "b50af34236cc284c",
+        "d751a55508a2e466",
+        "74a63c8d7e24effa",
+        "3e10e1f476eea9f5",
+        "e61ebe88465e4bd0",
+        "6a7a81b6bf85de77",
+        "9a61ac91750fe6b9",
+        "0974aa0b1a845547",
+        "b1af6d0339c5431c",
+        "27758e591aae0259",
+        "0f26ad40f5a4cdbf",
+        "e45895e5fc86805e",
+        "002bf7d894fd75c2",
+        "0cb21b71eb42fcf3",
+        "4ad794b9696e303e",
+        "9def10749950d980",
+        "0e1cdf743667930f",
+        "0d48e34c9ce65a67",
+        "1ef00789eb411671",
+        "9c0377dd8b87e25f",
+        "b9c20cd9baa7455d",
+        "4e728fc231087121",
+        "6400b8a4da6809dc",
+        "e9113e50f10d06d1",
+        "50dd6548e1dd1ec7",
+        "af6e5480f6cbd151",
+        "6139caa97be7bf0f",
+        "38ab009ebb57216b",
+        "5d26edef2eba7448",
+        "2a7e7a940cc1c90c",
+        "e431a3090c9e20b7",
+        "c03a40e57d0d2328",
+        "6cb2dc5273f26674",
+        "aa2743e35ffff1e4",
+        "ec6d5f60c118e850",
+        "bfaebd61519dfa08"
+      ],
+      "date": 1709295514929
+    },
+    {
+      "type": "add",
+      "id": "1155e93671b54a08",
+      "item": {
+        "type": "paragraph",
+        "id": "1155e93671b54a08",
+        "text": "[[Diagrams as Base Model]]"
+      },
+      "after": "aa2743e35ffff1e4",
+      "date": 1709308971104
+    },
+    {
+      "type": "edit",
+      "id": "1155e93671b54a08",
+      "item": {
+        "type": "paragraph",
+        "id": "1155e93671b54a08",
+        "text": "[[Diagrams as Base Model]] (within [[Browsing Diagrams]])"
+      },
+      "date": 1709308993966
+    },
+    {
+      "type": "edit",
+      "id": "1155e93671b54a08",
+      "item": {
+        "type": "paragraph",
+        "id": "1155e93671b54a08",
+        "text": "[[Diagrams as Base Model]] (within [[Browsing Diagrams]]) See: [[diagram]]"
+      },
+      "date": 1709309077611
+    },
+    {
+      "type": "edit",
+      "id": "1155e93671b54a08",
+      "item": {
+        "type": "paragraph",
+        "id": "1155e93671b54a08",
+        "text": "[[Diagrams as Base Model]] (within [[Browsing Diagrams]]) See: [[diagram]] [[~/diagram/0]]"
+      },
+      "date": 1709309217913
+    },
+    {
+      "type": "add",
+      "id": "75f4ae85736d8ea3",
+      "item": {
+        "type": "paragraph",
+        "id": "75f4ae85736d8ea3",
+        "text": "[[Doghnut]] See: [[Hot Dog]]"
+      },
+      "after": "1155e93671b54a08",
+      "date": 1709412094541
+    },
+    {
+      "type": "edit",
+      "id": "75f4ae85736d8ea3",
+      "item": {
+        "type": "paragraph",
+        "id": "75f4ae85736d8ea3",
+        "text": "[[Doughnut]] See: [[Hot Dog]]"
+      },
+      "date": 1709412111215
     }
   ]
 }

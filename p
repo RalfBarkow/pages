@@ -222,6 +222,16 @@
       "text": "→ \"**[[~/parse/0]]**\""
     },
     {
+      "type": "paragraph",
+      "id": "783ecb6bd9918e9d",
+      "text": "[[Platform Earth]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "2d71c0ac8e5bdd2e",
+      "text": "[[The Product to End All Products]] See: [[Community]]"
+    },
+    {
       "type": "reference",
       "id": "e7dc8c0df83732ed",
       "site": "wiki.ralfbarkow.ch",
@@ -232,7 +242,7 @@
     {
       "type": "frame",
       "id": "3fbe92c4b041c5d5",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
     }
   ],
   "journal": [
@@ -1718,6 +1728,111 @@
         "text": "→ \"**[[~/parse/0]]**\""
       },
       "date": 1708758137124
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "783ecb6bd9918e9d"
+      },
+      "id": "783ecb6bd9918e9d",
+      "type": "add",
+      "after": "3fbe92c4b041c5d5",
+      "date": 1709216786289
+    },
+    {
+      "type": "edit",
+      "id": "783ecb6bd9918e9d",
+      "item": {
+        "type": "paragraph",
+        "id": "783ecb6bd9918e9d",
+        "text": "[[Platform Earth]]"
+      },
+      "date": 1709216790942
+    },
+    {
+      "type": "edit",
+      "id": "3fbe92c4b041c5d5",
+      "item": {
+        "type": "frame",
+        "id": "3fbe92c4b041c5d5",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709216808753
+    },
+    {
+      "id": "783ecb6bd9918e9d",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "36df906b8a7b190b",
+        "f7071ca518f45d20",
+        "3f2424f1ddfcaad8",
+        "ca9847394cfc2c1f",
+        "3d6afad70249316b",
+        "fb255b829c88892a",
+        "686483a1121e7956",
+        "41f719b405ffd0cf",
+        "d26e22f14f55b876",
+        "9c4dac17c9cc528b",
+        "ad0ad004b03f421e",
+        "ccf169e42a594121",
+        "5ad8569648af0d64",
+        "1d826ec1db757124",
+        "221e247085be998d",
+        "034a3e3d99460ab0",
+        "a1c7ddd0d985588c",
+        "22bfd3c319af2d27",
+        "f1db0951c68d4e12",
+        "7f637190011206b4",
+        "a02cdf6a1a287f47",
+        "7e6d1bc0191f51db",
+        "b9f6cce926f0919a",
+        "6b2a77f8071cc527",
+        "c99b6c3eb23aae1d",
+        "d5bfb7b01fe1c4a9",
+        "bb0d1deb2e8c8052",
+        "cfb017e989257c67",
+        "2367024b29c543f2",
+        "59a242995c5f9a56",
+        "650db188f8701646",
+        "3b4c8812d29e16d8",
+        "12a1808667f9bbad",
+        "12ae6a5c65ee9821",
+        "0206bf7d94db5879",
+        "7e8cfe47f6847a56",
+        "160aed06a80464f4",
+        "573cb3a293087b70",
+        "a115ae22e636bc40",
+        "81006e4d9f5e0f68",
+        "2a546dcd044c348e",
+        "aad70c04446a96a4",
+        "ae1cb398b052c183",
+        "783ecb6bd9918e9d",
+        "e7dc8c0df83732ed",
+        "3fbe92c4b041c5d5"
+      ],
+      "date": 1709216818742
+    },
+    {
+      "type": "add",
+      "id": "2d71c0ac8e5bdd2e",
+      "item": {
+        "type": "paragraph",
+        "id": "2d71c0ac8e5bdd2e",
+        "text": "[[The Product to End All Products]]"
+      },
+      "after": "783ecb6bd9918e9d",
+      "date": 1709281349504
+    },
+    {
+      "type": "edit",
+      "id": "2d71c0ac8e5bdd2e",
+      "item": {
+        "type": "paragraph",
+        "id": "2d71c0ac8e5bdd2e",
+        "text": "[[The Product to End All Products]] See: [[Community]]"
+      },
+      "date": 1709281931763
     }
   ]
 }

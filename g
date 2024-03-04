@@ -87,6 +87,11 @@
       "text": "[[Genwise Course Curriculum]]"
     },
     {
+      "type": "paragraph",
+      "id": "308c492ca2aca82a",
+      "text": "[[Graphviz Viewer]]"
+    },
+    {
       "type": "reference",
       "id": "24fd4b49643185bc",
       "site": "wiki.ralfbarkow.ch",
@@ -97,7 +102,7 @@
     {
       "type": "frame",
       "id": "68b644cd9805354e",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
     }
   ],
   "journal": [
@@ -633,6 +638,27 @@
       },
       "after": "a40632bae3c60135",
       "date": 1708669865194
+    },
+    {
+      "type": "edit",
+      "id": "68b644cd9805354e",
+      "item": {
+        "type": "frame",
+        "id": "68b644cd9805354e",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709255642133
+    },
+    {
+      "type": "add",
+      "id": "308c492ca2aca82a",
+      "item": {
+        "type": "paragraph",
+        "id": "308c492ca2aca82a",
+        "text": "[[Graphviz Viewer]]"
+      },
+      "after": "79dc6fb11c2d56b7",
+      "date": 1709358820721
     }
   ]
 }

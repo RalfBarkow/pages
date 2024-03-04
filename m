@@ -251,6 +251,16 @@
       "text": "[[Max Liboiron]] See: [[Hunting and Dressing Litter]]"
     },
     {
+      "type": "paragraph",
+      "id": "d89cf6f3697938d5",
+      "text": "[[Monkey]] (within [[Pair Programming]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "53096ca4578402c8",
+      "text": "[[Message]] (within [[PN Modeling Guidelines]])"
+    },
+    {
       "type": "reference",
       "id": "32f74fe2229d86ed",
       "site": "wiki.ralfbarkow.ch",
@@ -261,7 +271,7 @@
     {
       "type": "frame",
       "id": "99644c7446be481c",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
     }
   ],
   "journal": [
@@ -2054,6 +2064,68 @@
         "text": "[[Max Liboiron]] See: [[Hunting and Dressing Litter]]"
       },
       "date": 1708424882135
+    },
+    {
+      "type": "edit",
+      "id": "99644c7446be481c",
+      "item": {
+        "type": "frame",
+        "id": "99644c7446be481c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      },
+      "date": 1709196405295
+    },
+    {
+      "type": "add",
+      "id": "d89cf6f3697938d5",
+      "item": {
+        "type": "paragraph",
+        "id": "d89cf6f3697938d5",
+        "text": "[[Monkey]] (within [[Pair Programming]])"
+      },
+      "after": "f83a43f6b0781563",
+      "date": 1709196441687
+    },
+    {
+      "type": "add",
+      "id": "53096ca4578402c8",
+      "item": {
+        "type": "paragraph",
+        "id": "53096ca4578402c8",
+        "text": "[[Message]] (within )"
+      },
+      "after": "d89cf6f3697938d5",
+      "date": 1709229685595
+    },
+    {
+      "type": "edit",
+      "id": "53096ca4578402c8",
+      "item": {
+        "type": "paragraph",
+        "id": "53096ca4578402c8",
+        "text": "[[Message]] (within [[PN Modeling Guidelines]])"
+      },
+      "date": 1709229696079
+    },
+    {
+      "type": "edit",
+      "id": "99644c7446be481c",
+      "item": {
+        "type": "frame",
+        "id": "99644c7446be481c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709229867688
+    },
+    {
+      "type": "edit",
+      "id": "99644c7446be481c",
+      "item": {
+        "type": "frame",
+        "id": "99644c7446be481c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709229882239
     }
   ]
 }

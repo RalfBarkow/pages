@@ -362,6 +362,21 @@
       "text": "[[Stochastic Computation]] (within [[Polysynchronous Stochastic Circuits]])"
     },
     {
+      "type": "paragraph",
+      "id": "80e20c68374c4a2e",
+      "text": "[[SQLite Plugin]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "f6716b0905576ebb",
+      "text": "[[Songs that Call]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "a44dcd3c5b7ea446",
+      "text": "[[SOURCE code]]"
+    },
+    {
       "type": "reference",
       "id": "8c2cd410bbc45f08",
       "site": "wiki.ralfbarkow.ch",
@@ -372,7 +387,7 @@
     {
       "type": "frame",
       "id": "92d9d7c2ee7a11b7",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
     }
   ],
   "journal": [
@@ -3291,6 +3306,59 @@
         "page": "~/clock/0"
       },
       "date": 1708684480035
+    },
+    {
+      "type": "add",
+      "id": "80e20c68374c4a2e",
+      "item": {
+        "type": "paragraph",
+        "id": "80e20c68374c4a2e",
+        "text": "[[SQLite Plugin]]"
+      },
+      "after": "d49977cd1734d8dc",
+      "date": 1709295417452
+    },
+    {
+      "type": "add",
+      "id": "f6716b0905576ebb",
+      "item": {
+        "type": "paragraph",
+        "id": "f6716b0905576ebb",
+        "text": "[[Songs that Call]]"
+      },
+      "after": "80e20c68374c4a2e",
+      "date": 1709296403268
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709300966731
+    },
+    {
+      "type": "edit",
+      "id": "92d9d7c2ee7a11b7",
+      "item": {
+        "type": "frame",
+        "id": "92d9d7c2ee7a11b7",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+      },
+      "date": 1709300994473
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709357886350
+    },
+    {
+      "type": "add",
+      "id": "a44dcd3c5b7ea446",
+      "item": {
+        "type": "paragraph",
+        "id": "a44dcd3c5b7ea446",
+        "text": "[[SOURCE code]]"
+      },
+      "after": "f6716b0905576ebb",
+      "date": 1709357897296
     }
   ]
 }
