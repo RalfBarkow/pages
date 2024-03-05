@@ -67,14 +67,9 @@
       "text": "[[Software]] (within [[Software as Tools]]): [[~/sat]]"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "cec4aa683ee53d23",
-      "text": "[[shape]] (within [[r.Culkin.McLuhan]])"
-    },
-    {
-      "type": "paragraph",
-      "id": "8db389ed02cf6fc9",
-      "text": "- (within [[Moldable Development]])"
+      "text": "**[[shape]]** (within [[r.Culkin.McLuhan]])\n- [[shapeless]] → \"**[[~/shape/0]]**\" See: [[Moldable Development]]\n- [[Ontology shapes Polity]]"
     },
     {
       "type": "paragraph",
@@ -84,7 +79,17 @@
     {
       "type": "markdown",
       "id": "5cdcdcfc93510d01",
-      "text": "- [[Systems Theory 1.0]]\n- [[Systems Theory 2.0]]\n- [[Smalltalk]] is an object system, rather than a [[Language]]. See [[Smalltalk Is the Car]]"
+      "text": "- [[Systems Theory 1.0]]\n- [[Systems Theory 2.0]]\n- **[[Smalltalk]]** is an object system, rather than a [[Language]]. See: [[Smalltalk Is the Car]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "bad43f50bd0dc12a",
+      "text": "**[[Smalltalk]]** as [[Notation]] See: [[Objects, Classes, and Constructors, Smalltalk Style]], [[Notation]] for creating [[Language]]s"
+    },
+    {
+      "type": "paragraph",
+      "id": "9fe6b3bfcc041c40",
+      "text": "[[Smalltalk Class/Metaclass Kernel]]"
     },
     {
       "type": "paragraph",
@@ -113,13 +118,13 @@
     },
     {
       "type": "paragraph",
-      "id": "03ebfa18d5502930",
-      "text": "[[Search Services]]"
+      "id": "194d84e6c03eb421",
+      "text": "[[Similarity Query]] (within [[Graph Databases of Protein Structures]])"
     },
     {
       "type": "paragraph",
-      "id": "361900c9429f4aea",
-      "text": "[[Smalltalk Is the Car]]"
+      "id": "03ebfa18d5502930",
+      "text": "[[Search Services]]"
     },
     {
       "type": "paragraph",
@@ -229,7 +234,7 @@
     {
       "type": "markdown",
       "id": "ab8eb5820d2f8a83",
-      "text": "* [[Scham]]"
+      "text": "* **[[Scham]]** See: [[Culture of Shame]]"
     },
     {
       "type": "paragraph",
@@ -242,9 +247,9 @@
       "text": "[[Site]] (within [[Location]]) See: [[Location in the Network of Message Paths]]"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "19e37110ab53df81",
-      "text": "[[Speed Bot]] (within [[Story Telling]]) See: [[Symbol Board]]"
+      "text": "**[[Speed Bot]]** (within [[Story Telling]]) See: [[Symbol Board]]"
     },
     {
       "type": "paragraph",
@@ -255,11 +260,6 @@
       "type": "paragraph",
       "id": "da373c3defc960c3",
       "text": "[[Splitting the Photon]] (within [[Hear the Arithmetic Sum]])"
-    },
-    {
-      "type": "paragraph",
-      "id": "9fe6b3bfcc041c40",
-      "text": "[[Smalltalk Class/Metaclass Kernel]]"
     },
     {
       "type": "paragraph",
@@ -277,6 +277,121 @@
       "text": "[[Study The Source Witha Debugger]] See: [[Diagram Debugger]]"
     },
     {
+      "type": "paragraph",
+      "id": "8a3c76aa4aded2c9",
+      "text": "[[separate]] the [[System]] from the user interface. See: [[Model First]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "0b8bea17e52ab203",
+      "text": "[[Semantic Line Breaks]] See: [[checks(item)]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "2f96fb4104128cce",
+      "text": "[[serialize]] [[Hypertext]] for print See: [[Story Telling]], [[Fuel]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "bf986153a816257d",
+      "text": "[[System in the Room]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "54ce2cd421720f75",
+      "text": "[[Sample Aspects of Change]] (within [[Aspects of Recent Changes]]) See: [[Solo Super Collaborator]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "c0e773db126c7181",
+      "text": "[[select]] (within [[Mark the Bot's Starting Point]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "2d89b1fd9df1cf84",
+      "text": "[[Sacred Economics]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e44940541a37faaf",
+      "text": "[[Structural Transformation]] See: [[3D Associative Symbol Array]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "5a36613b9f8af892",
+      "text": "[[SDM]] (within [[Review of Kanerva’s SDM]]) See: [[Sparse Distributed Memory]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d8787cf2346e0d38",
+      "text": "[[Synthesis]] (within [[Systems Thinking]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "9942edfcf66fc683",
+      "text": "[[Two sides of wiki]]"
+    },
+    {
+      "type": "markdown",
+      "id": "5188014f87b8d8dd",
+      "text": "- [[Public Side of Wiki]]\n- [[Writing with Strangers]]"
+    },
+    {
+      "type": "markdown",
+      "id": "cdb289dc78f16f1a",
+      "text": "[[Subsymbolic Natural Language Processing]] See: [[Natural Language Processing]], [[symbolic]] → \"**[[subsymbolic]]**\""
+    },
+    {
+      "type": "paragraph",
+      "id": "ba02ead9ada0d12c",
+      "text": "[[Search Key]] (within [[Breadth-First Search]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "5331896a74df1672",
+      "text": "[[Visitor as Schema]] See: [[Algorithmic Markup]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "57c5cfb5dc1076b4",
+      "text": "[[Computational Scripts]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "285caaf0c5a308bf",
+      "text": "[[Stochastic Computing]] See: [[Trifference]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d49977cd1734d8dc",
+      "text": "[[Stochastic Computation]] (within [[Polysynchronous Stochastic Circuits]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "80e20c68374c4a2e",
+      "text": "[[SQLite Plugin]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "f6716b0905576ebb",
+      "text": "[[Songs that Call]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "a44dcd3c5b7ea446",
+      "text": "[[SOURCE code]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "8fe38d2c7152e066",
+      "text": "Wrangling Untrusted File Formats Safely [https://github.com/google/wuffs github] (within [[Secure Automata]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "bc96cb7c1892038a",
+      "text": "[[SOM_PAK]]"
+    },
+    {
       "type": "reference",
       "id": "8c2cd410bbc45f08",
       "site": "wiki.ralfbarkow.ch",
@@ -287,7 +402,7 @@
     {
       "type": "frame",
       "id": "92d9d7c2ee7a11b7",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222"
     }
   ],
   "journal": [
@@ -2128,9 +2243,1286 @@
       "date": 1707906158730
     },
     {
+      "type": "add",
+      "id": "8a3c76aa4aded2c9",
+      "item": {
+        "type": "paragraph",
+        "id": "8a3c76aa4aded2c9",
+        "text": "[[System]] as the UI See: [[Model Firs]]"
+      },
+      "after": "42cb20274f449f0f",
+      "date": 1707909143680
+    },
+    {
+      "type": "edit",
+      "id": "8a3c76aa4aded2c9",
+      "item": {
+        "type": "paragraph",
+        "id": "8a3c76aa4aded2c9",
+        "text": "[[System]] as the UI See: [[Model First]]"
+      },
+      "date": 1707909147795
+    },
+    {
+      "id": "701cb66f793631fc5736356e18883a15",
+      "type": "add",
+      "item": {
+        "type": "html",
+        "text": "When we were finished, the system was working. But my partner still had a hard time separating his idea of the system from the user interface.",
+        "id": "701cb66f793631fc5736356e18883a15"
+      },
+      "after": "8a3c76aa4aded2c9",
+      "attribution": {
+        "page": "Model First",
+        "site": "localhost:3000"
+      },
+      "date": 1707909205138
+    },
+    {
+      "type": "edit",
+      "id": "701cb66f793631fc5736356e18883a15",
+      "item": {
+        "type": "html",
+        "text": "separating his idea of the system from the user interface.",
+        "id": "701cb66f793631fc5736356e18883a15"
+      },
+      "date": 1707909233005
+    },
+    {
+      "type": "edit",
+      "id": "8a3c76aa4aded2c9",
+      "item": {
+        "type": "paragraph",
+        "id": "8a3c76aa4aded2c9",
+        "text": "[[separate]] [[System]] as the UI See: [[Model First]]"
+      },
+      "date": 1707909247309
+    },
+    {
+      "type": "edit",
+      "id": "8a3c76aa4aded2c9",
+      "item": {
+        "type": "paragraph",
+        "id": "8a3c76aa4aded2c9",
+        "text": "[[separate]] the [[System]] as the UI See: [[Model First]]"
+      },
+      "date": 1707909264202
+    },
+    {
+      "type": "remove",
+      "id": "701cb66f793631fc5736356e18883a15",
+      "date": 1707909268684
+    },
+    {
+      "type": "edit",
+      "id": "8a3c76aa4aded2c9",
+      "item": {
+        "type": "paragraph",
+        "id": "8a3c76aa4aded2c9",
+        "text": "[[separate]] the [[System]] from the user interface. See: [[Model First]]"
+      },
+      "date": 1707909282756
+    },
+    {
+      "id": "0b8bea17e52ab203",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "0b8bea17e52ab203",
+        "text": "See [[Semantic Line Breaks]]"
+      },
+      "after": "8a3c76aa4aded2c9",
+      "attribution": {
+        "page": "checks(item)"
+      },
+      "date": 1707912829546
+    },
+    {
+      "type": "edit",
+      "id": "0b8bea17e52ab203",
+      "item": {
+        "type": "paragraph",
+        "id": "0b8bea17e52ab203",
+        "text": "[[Semantic Line Breaks]] See: [[checks(item)]]"
+      },
+      "date": 1707912843303
+    },
+    {
+      "type": "add",
+      "id": "2f96fb4104128cce",
+      "item": {
+        "type": "paragraph",
+        "id": "2f96fb4104128cce",
+        "text": "[[serialize]] [[Hypertext]] for print"
+      },
+      "after": "0b8bea17e52ab203",
+      "date": 1707915003182
+    },
+    {
+      "type": "edit",
+      "id": "2f96fb4104128cce",
+      "item": {
+        "type": "paragraph",
+        "id": "2f96fb4104128cce",
+        "text": "[[serialize]] [[Hypertext]] for print See: [[Story Telling]]"
+      },
+      "date": 1707915028854
+    },
+    {
+      "type": "edit",
+      "id": "2f96fb4104128cce",
+      "item": {
+        "type": "paragraph",
+        "id": "2f96fb4104128cce",
+        "text": "[[serialize]] [[Hypertext]] for print See: [[Story Telling]], [[Fuel]]"
+      },
+      "date": 1707915058776
+    },
+    {
+      "type": "add",
+      "id": "bf986153a816257d",
+      "item": {
+        "type": "paragraph",
+        "id": "bf986153a816257d",
+        "text": "[[System in the Room]]"
+      },
+      "after": "2f96fb4104128cce",
+      "date": 1707947828597
+    },
+    {
+      "type": "add",
+      "id": "54ce2cd421720f75",
+      "item": {
+        "type": "paragraph",
+        "id": "54ce2cd421720f75",
+        "text": "[[Sample Aspects of Change]]"
+      },
+      "after": "bf986153a816257d",
+      "date": 1707983731893
+    },
+    {
+      "type": "edit",
+      "id": "54ce2cd421720f75",
+      "item": {
+        "type": "paragraph",
+        "id": "54ce2cd421720f75",
+        "text": "[[Sample Aspects of Change]] (within [[Aspects of Recent Changes]])"
+      },
+      "date": 1707983750151
+    },
+    {
+      "type": "edit",
+      "id": "54ce2cd421720f75",
+      "item": {
+        "type": "paragraph",
+        "id": "54ce2cd421720f75",
+        "text": "[[Sample Aspects of Change]] (within [[Aspects of Recent Changes]]) See: [[Solo Super Collaborator]])"
+      },
+      "date": 1707984181479
+    },
+    {
+      "type": "edit",
+      "id": "92d9d7c2ee7a11b7",
+      "item": {
+        "type": "frame",
+        "id": "92d9d7c2ee7a11b7",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1708004797243
+    },
+    {
+      "type": "edit",
+      "id": "19e37110ab53df81",
+      "item": {
+        "type": "paragraph",
+        "id": "19e37110ab53df81",
+        "text": "**[[Speed Bot]]** (within [[Story Telling]]) See: [[Symbol Board]]"
+      },
+      "date": 1708011569983
+    },
+    {
+      "type": "edit",
+      "id": "19e37110ab53df81",
+      "item": {
+        "type": "markdown",
+        "id": "19e37110ab53df81",
+        "text": "**[[Speed Bot]]** (within [[Story Telling]]) See: [[Symbol Board]]"
+      },
+      "date": 1708011571616
+    },
+    {
+      "type": "add",
+      "id": "c0e773db126c7181",
+      "item": {
+        "type": "paragraph",
+        "id": "c0e773db126c7181",
+        "text": "[[select]] (within [[Mark the Bot's Starting Point]])"
+      },
+      "after": "54ce2cd421720f75",
+      "date": 1708014613930
+    },
+    {
+      "type": "add",
+      "id": "2d89b1fd9df1cf84",
+      "item": {
+        "type": "paragraph",
+        "id": "2d89b1fd9df1cf84",
+        "text": "[[Sacred Economics]]"
+      },
+      "after": "c0e773db126c7181",
+      "date": 1708015796894
+    },
+    {
+      "type": "add",
+      "id": "e44940541a37faaf",
+      "item": {
+        "type": "paragraph",
+        "id": "e44940541a37faaf",
+        "text": "[[Structural Transformation]] See: "
+      },
+      "after": "2d89b1fd9df1cf84",
+      "date": 1708023781037
+    },
+    {
+      "type": "edit",
+      "id": "e44940541a37faaf",
+      "item": {
+        "type": "paragraph",
+        "id": "e44940541a37faaf",
+        "text": "[[Structural Transformation]] See: [[3D Associative Symbol Array]]"
+      },
+      "date": 1708023803377
+    },
+    {
+      "type": "edit",
+      "id": "ab8eb5820d2f8a83",
+      "item": {
+        "type": "markdown",
+        "id": "ab8eb5820d2f8a83",
+        "text": "* **[[Scham]]** See: [[Culture of Shame]]"
+      },
+      "date": 1708025285714
+    },
+    {
+      "type": "edit",
+      "id": "cec4aa683ee53d23",
+      "item": {
+        "type": "paragraph",
+        "id": "cec4aa683ee53d23",
+        "text": "**[[shape]]** (within [[r.Culkin.McLuhan]])"
+      },
+      "date": 1708036220189
+    },
+    {
+      "type": "edit",
+      "id": "cec4aa683ee53d23",
+      "item": {
+        "type": "markdown",
+        "id": "cec4aa683ee53d23",
+        "text": "**[[shape]]** (within [[r.Culkin.McLuhan]])"
+      },
+      "date": 1708036221666
+    },
+    {
+      "type": "edit",
+      "id": "cec4aa683ee53d23",
+      "item": {
+        "type": "markdown",
+        "id": "cec4aa683ee53d23",
+        "text": "**[[shape]]** (within [[r.Culkin.McLuhan]])\n- [[shapeless]]"
+      },
+      "date": 1708036233370
+    },
+    {
+      "type": "edit",
+      "id": "cec4aa683ee53d23",
+      "item": {
+        "type": "markdown",
+        "id": "cec4aa683ee53d23",
+        "text": "**[[shape]]** (within [[r.Culkin.McLuhan]])\n- [[shapeless]] → \"\""
+      },
+      "date": 1708036800205
+    },
+    {
+      "type": "edit",
+      "id": "cec4aa683ee53d23",
+      "item": {
+        "type": "markdown",
+        "id": "cec4aa683ee53d23",
+        "text": "**[[shape]]** (within [[r.Culkin.McLuhan]])\n- [[shapeless]] → \"[[~/shape/0]]\""
+      },
+      "date": 1708036813985
+    },
+    {
+      "type": "edit",
+      "id": "cec4aa683ee53d23",
+      "item": {
+        "type": "markdown",
+        "id": "cec4aa683ee53d23",
+        "text": "**[[shape]]** (within [[r.Culkin.McLuhan]])\n- [[shapeless]] → \"[[~/shape/0]]\" See: [[Moldable Development]]"
+      },
+      "date": 1708036846573
+    },
+    {
+      "type": "remove",
+      "id": "8db389ed02cf6fc9",
+      "date": 1708036877149
+    },
+    {
+      "id": "361900c9429f4aea",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "f207d118044203eb",
+        "2092a3b420d7d305",
+        "6d36d88e598c9690",
+        "3442e4cc70ce6337",
+        "bdb9d5f441b1a9ff",
+        "5d5ff9e6c8b16c75",
+        "1cc466b2ea9de865",
+        "24491bec53b2cb4b",
+        "caafe88bea5b33e7",
+        "c646d43d03705f1e",
+        "8452123151a1f40b",
+        "7ffd35aeb81b2947",
+        "cec4aa683ee53d23",
+        "f868c992286d946e",
+        "5cdcdcfc93510d01",
+        "361900c9429f4aea",
+        "3bf7d72dbb5196e8",
+        "0037c66e202ac6ed",
+        "12293fe24153dbea",
+        "f01f09f9110c95a2",
+        "4114c679e16c47ba",
+        "03ebfa18d5502930",
+        "8f3596088309d713",
+        "e73969c5d6819535",
+        "71c1eada140cdefe7f86201fb4fcbe5d",
+        "cfdd3472da56069b767648b5f36e8eab",
+        "205e6096e65d0872680e6e89e3b4a359",
+        "089cb31771224797116880ba80ab1f59",
+        "89a629b36a8f9339345aadff047bcb9f",
+        "a6ae0c529d9974656bdec3ef07626de0",
+        "ca6ee8104ca420a54efa5288ff49cb4e",
+        "dae6d36c64e7c29a",
+        "b903bc1e3c169e3a",
+        "2e82c1addc650521",
+        "066cf6f8cae48a48",
+        "b37816a2832e2e7d",
+        "a701471089e33cc4",
+        "8daed2f23561408e",
+        "e7e3fc35f0e4e546",
+        "90b49303bf974876",
+        "9e55e47a36d8d6be",
+        "2e4c6cdd97fd6aaa",
+        "d233a91e2cf24244",
+        "ab8eb5820d2f8a83",
+        "9d05f8b76754f3e5",
+        "979f0dbdbfa75db3",
+        "19e37110ab53df81",
+        "86e15f06011fd0e2",
+        "da373c3defc960c3",
+        "9fe6b3bfcc041c40",
+        "0c21f9d14c2bca90",
+        "9708710e8066a796",
+        "42cb20274f449f0f",
+        "8a3c76aa4aded2c9",
+        "0b8bea17e52ab203",
+        "2f96fb4104128cce",
+        "bf986153a816257d",
+        "54ce2cd421720f75",
+        "c0e773db126c7181",
+        "2d89b1fd9df1cf84",
+        "e44940541a37faaf",
+        "8c2cd410bbc45f08",
+        "92d9d7c2ee7a11b7"
+      ],
+      "date": 1708037017088
+    },
+    {
+      "type": "remove",
+      "id": "361900c9429f4aea",
+      "date": 1708037020639
+    },
+    {
+      "id": "9fe6b3bfcc041c40",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "f207d118044203eb",
+        "2092a3b420d7d305",
+        "6d36d88e598c9690",
+        "3442e4cc70ce6337",
+        "bdb9d5f441b1a9ff",
+        "5d5ff9e6c8b16c75",
+        "1cc466b2ea9de865",
+        "24491bec53b2cb4b",
+        "caafe88bea5b33e7",
+        "c646d43d03705f1e",
+        "8452123151a1f40b",
+        "7ffd35aeb81b2947",
+        "cec4aa683ee53d23",
+        "f868c992286d946e",
+        "5cdcdcfc93510d01",
+        "9fe6b3bfcc041c40",
+        "3bf7d72dbb5196e8",
+        "0037c66e202ac6ed",
+        "12293fe24153dbea",
+        "f01f09f9110c95a2",
+        "4114c679e16c47ba",
+        "03ebfa18d5502930",
+        "8f3596088309d713",
+        "e73969c5d6819535",
+        "71c1eada140cdefe7f86201fb4fcbe5d",
+        "cfdd3472da56069b767648b5f36e8eab",
+        "205e6096e65d0872680e6e89e3b4a359",
+        "089cb31771224797116880ba80ab1f59",
+        "89a629b36a8f9339345aadff047bcb9f",
+        "a6ae0c529d9974656bdec3ef07626de0",
+        "ca6ee8104ca420a54efa5288ff49cb4e",
+        "dae6d36c64e7c29a",
+        "b903bc1e3c169e3a",
+        "2e82c1addc650521",
+        "066cf6f8cae48a48",
+        "b37816a2832e2e7d",
+        "a701471089e33cc4",
+        "8daed2f23561408e",
+        "e7e3fc35f0e4e546",
+        "90b49303bf974876",
+        "9e55e47a36d8d6be",
+        "2e4c6cdd97fd6aaa",
+        "d233a91e2cf24244",
+        "ab8eb5820d2f8a83",
+        "9d05f8b76754f3e5",
+        "979f0dbdbfa75db3",
+        "19e37110ab53df81",
+        "86e15f06011fd0e2",
+        "da373c3defc960c3",
+        "0c21f9d14c2bca90",
+        "9708710e8066a796",
+        "42cb20274f449f0f",
+        "8a3c76aa4aded2c9",
+        "0b8bea17e52ab203",
+        "2f96fb4104128cce",
+        "bf986153a816257d",
+        "54ce2cd421720f75",
+        "c0e773db126c7181",
+        "2d89b1fd9df1cf84",
+        "e44940541a37faaf",
+        "8c2cd410bbc45f08",
+        "92d9d7c2ee7a11b7"
+      ],
+      "date": 1708037043523
+    },
+    {
+      "type": "edit",
+      "id": "5cdcdcfc93510d01",
+      "item": {
+        "type": "markdown",
+        "id": "5cdcdcfc93510d01",
+        "text": "- [[Systems Theory 1.0]]\n- [[Systems Theory 2.0]]\n- **[[Smalltalk]]** is an object system, rather than a [[Language]]. See [[Smalltalk Is the Car]]"
+      },
+      "date": 1708037061671
+    },
+    {
+      "type": "add",
+      "id": "bad43f50bd0dc12a",
+      "item": {
+        "type": "paragraph",
+        "id": "bad43f50bd0dc12a",
+        "text": "[[Smalltalk]] as [[Notation]]"
+      },
+      "after": "9fe6b3bfcc041c40",
+      "date": 1708037086687
+    },
+    {
+      "type": "edit",
+      "id": "5cdcdcfc93510d01",
+      "item": {
+        "type": "markdown",
+        "id": "5cdcdcfc93510d01",
+        "text": "- [[Systems Theory 1.0]]\n- [[Systems Theory 2.0]]\n- **[[Smalltalk]]** is an object system, rather than a [[Language]]. See: [[Smalltalk Is the Car]]"
+      },
+      "date": 1708037111769
+    },
+    {
+      "type": "edit",
+      "id": "bad43f50bd0dc12a",
+      "item": {
+        "type": "paragraph",
+        "id": "bad43f50bd0dc12a",
+        "text": "[[Smalltalk]] as [[Notation]] See: [[Objects, Classes, and Constructors, Smalltalk Style]]"
+      },
+      "date": 1708037131651
+    },
+    {
+      "type": "edit",
+      "id": "bad43f50bd0dc12a",
+      "item": {
+        "type": "paragraph",
+        "id": "bad43f50bd0dc12a",
+        "text": "[[Smalltalk]] as [[Notation]] See: [[Objects, Classes, and Constructors, Smalltalk Style]], [[Notation]] for creating [[Language]]s"
+      },
+      "date": 1708037277659
+    },
+    {
+      "type": "edit",
+      "id": "bad43f50bd0dc12a",
+      "item": {
+        "type": "paragraph",
+        "id": "bad43f50bd0dc12a",
+        "text": "**[[Smalltalk]]** as [[Notation]] See: [[Objects, Classes, and Constructors, Smalltalk Style]], [[Notation]] for creating [[Language]]s"
+      },
+      "date": 1708037311113
+    },
+    {
+      "id": "bad43f50bd0dc12a",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "f207d118044203eb",
+        "2092a3b420d7d305",
+        "6d36d88e598c9690",
+        "3442e4cc70ce6337",
+        "bdb9d5f441b1a9ff",
+        "5d5ff9e6c8b16c75",
+        "1cc466b2ea9de865",
+        "24491bec53b2cb4b",
+        "caafe88bea5b33e7",
+        "c646d43d03705f1e",
+        "8452123151a1f40b",
+        "7ffd35aeb81b2947",
+        "cec4aa683ee53d23",
+        "f868c992286d946e",
+        "5cdcdcfc93510d01",
+        "bad43f50bd0dc12a",
+        "9fe6b3bfcc041c40",
+        "3bf7d72dbb5196e8",
+        "0037c66e202ac6ed",
+        "12293fe24153dbea",
+        "f01f09f9110c95a2",
+        "4114c679e16c47ba",
+        "03ebfa18d5502930",
+        "8f3596088309d713",
+        "e73969c5d6819535",
+        "71c1eada140cdefe7f86201fb4fcbe5d",
+        "cfdd3472da56069b767648b5f36e8eab",
+        "205e6096e65d0872680e6e89e3b4a359",
+        "089cb31771224797116880ba80ab1f59",
+        "89a629b36a8f9339345aadff047bcb9f",
+        "a6ae0c529d9974656bdec3ef07626de0",
+        "ca6ee8104ca420a54efa5288ff49cb4e",
+        "dae6d36c64e7c29a",
+        "b903bc1e3c169e3a",
+        "2e82c1addc650521",
+        "066cf6f8cae48a48",
+        "b37816a2832e2e7d",
+        "a701471089e33cc4",
+        "8daed2f23561408e",
+        "e7e3fc35f0e4e546",
+        "90b49303bf974876",
+        "9e55e47a36d8d6be",
+        "2e4c6cdd97fd6aaa",
+        "d233a91e2cf24244",
+        "ab8eb5820d2f8a83",
+        "9d05f8b76754f3e5",
+        "979f0dbdbfa75db3",
+        "19e37110ab53df81",
+        "86e15f06011fd0e2",
+        "da373c3defc960c3",
+        "0c21f9d14c2bca90",
+        "9708710e8066a796",
+        "42cb20274f449f0f",
+        "8a3c76aa4aded2c9",
+        "0b8bea17e52ab203",
+        "2f96fb4104128cce",
+        "bf986153a816257d",
+        "54ce2cd421720f75",
+        "c0e773db126c7181",
+        "2d89b1fd9df1cf84",
+        "e44940541a37faaf",
+        "8c2cd410bbc45f08",
+        "92d9d7c2ee7a11b7"
+      ],
+      "date": 1708037315565
+    },
+    {
+      "type": "add",
+      "id": "5a36613b9f8af892",
+      "item": {
+        "type": "paragraph",
+        "id": "5a36613b9f8af892",
+        "text": "[[SDM]] (within [[]])"
+      },
+      "after": "e44940541a37faaf",
+      "date": 1708067131336
+    },
+    {
+      "type": "edit",
+      "id": "5a36613b9f8af892",
+      "item": {
+        "type": "paragraph",
+        "id": "5a36613b9f8af892",
+        "text": "[[SDM]] (within [[Review of Kanerva’s SDM]])"
+      },
+      "date": 1708067144039
+    },
+    {
+      "type": "edit",
+      "id": "5a36613b9f8af892",
+      "item": {
+        "type": "paragraph",
+        "id": "5a36613b9f8af892",
+        "text": "[[SDM]] (within [[Review of Kanerva’s SDM]]) See: [[Sparse Distributed Memory]]"
+      },
+      "date": 1708067712167
+    },
+    {
+      "type": "add",
+      "id": "d8787cf2346e0d38",
+      "item": {
+        "type": "paragraph",
+        "id": "d8787cf2346e0d38",
+        "text": "[[Synthesis]]"
+      },
+      "after": "5a36613b9f8af892",
+      "date": 1708078277526
+    },
+    {
+      "type": "edit",
+      "id": "d8787cf2346e0d38",
+      "item": {
+        "type": "paragraph",
+        "id": "d8787cf2346e0d38",
+        "text": "[[Synthesis]] (within [[Systems Thinking]])"
+      },
+      "date": 1708078292440
+    },
+    {
+      "type": "edit",
+      "id": "cec4aa683ee53d23",
+      "item": {
+        "type": "markdown",
+        "id": "cec4aa683ee53d23",
+        "text": "**[[shape]]** (within [[r.Culkin.McLuhan]])\n- [[shapeless]] → \"**[[~/shape/0]]**\" See: [[Moldable Development]]"
+      },
+      "date": 1708083280757
+    },
+    {
+      "type": "add",
+      "id": "9942edfcf66fc683",
+      "item": {
+        "type": "paragraph",
+        "id": "9942edfcf66fc683",
+        "text": "[[Two sides of wiki]]"
+      },
+      "after": "d8787cf2346e0d38",
+      "date": 1708083991067
+    },
+    {
+      "id": "5188014f87b8d8dd",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "5188014f87b8d8dd",
+        "text": "- [[Public Side of Wiki]]\n- [[Writing with strangers]]"
+      },
+      "after": "9942edfcf66fc683",
+      "attribution": {
+        "page": "Two sides of wiki"
+      },
+      "date": 1708084016114
+    },
+    {
+      "type": "edit",
+      "id": "5188014f87b8d8dd",
+      "item": {
+        "type": "markdown",
+        "id": "5188014f87b8d8dd",
+        "text": "- [[Public Side of Wiki]]\n- [[Writing with Strangers]]"
+      },
+      "date": 1708084040556
+    },
+    {
+      "type": "add",
+      "id": "cdb289dc78f16f1a",
+      "item": {
+        "type": "paragraph",
+        "id": "cdb289dc78f16f1a",
+        "text": "Subsymbolic Natural Language Processing"
+      },
+      "after": "d8787cf2346e0d38",
+      "date": 1708246775800
+    },
+    {
+      "id": "cdb289dc78f16f1a",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "f207d118044203eb",
+        "2092a3b420d7d305",
+        "6d36d88e598c9690",
+        "3442e4cc70ce6337",
+        "bdb9d5f441b1a9ff",
+        "5d5ff9e6c8b16c75",
+        "1cc466b2ea9de865",
+        "24491bec53b2cb4b",
+        "caafe88bea5b33e7",
+        "c646d43d03705f1e",
+        "8452123151a1f40b",
+        "7ffd35aeb81b2947",
+        "cec4aa683ee53d23",
+        "f868c992286d946e",
+        "5cdcdcfc93510d01",
+        "bad43f50bd0dc12a",
+        "9fe6b3bfcc041c40",
+        "3bf7d72dbb5196e8",
+        "0037c66e202ac6ed",
+        "12293fe24153dbea",
+        "f01f09f9110c95a2",
+        "4114c679e16c47ba",
+        "03ebfa18d5502930",
+        "8f3596088309d713",
+        "e73969c5d6819535",
+        "71c1eada140cdefe7f86201fb4fcbe5d",
+        "cfdd3472da56069b767648b5f36e8eab",
+        "205e6096e65d0872680e6e89e3b4a359",
+        "089cb31771224797116880ba80ab1f59",
+        "89a629b36a8f9339345aadff047bcb9f",
+        "a6ae0c529d9974656bdec3ef07626de0",
+        "ca6ee8104ca420a54efa5288ff49cb4e",
+        "dae6d36c64e7c29a",
+        "b903bc1e3c169e3a",
+        "2e82c1addc650521",
+        "066cf6f8cae48a48",
+        "b37816a2832e2e7d",
+        "a701471089e33cc4",
+        "8daed2f23561408e",
+        "e7e3fc35f0e4e546",
+        "90b49303bf974876",
+        "9e55e47a36d8d6be",
+        "2e4c6cdd97fd6aaa",
+        "d233a91e2cf24244",
+        "ab8eb5820d2f8a83",
+        "9d05f8b76754f3e5",
+        "979f0dbdbfa75db3",
+        "19e37110ab53df81",
+        "86e15f06011fd0e2",
+        "da373c3defc960c3",
+        "0c21f9d14c2bca90",
+        "9708710e8066a796",
+        "42cb20274f449f0f",
+        "8a3c76aa4aded2c9",
+        "0b8bea17e52ab203",
+        "2f96fb4104128cce",
+        "bf986153a816257d",
+        "54ce2cd421720f75",
+        "c0e773db126c7181",
+        "2d89b1fd9df1cf84",
+        "e44940541a37faaf",
+        "5a36613b9f8af892",
+        "d8787cf2346e0d38",
+        "9942edfcf66fc683",
+        "5188014f87b8d8dd",
+        "cdb289dc78f16f1a",
+        "8c2cd410bbc45f08",
+        "92d9d7c2ee7a11b7"
+      ],
+      "date": 1708246779603
+    },
+    {
+      "type": "edit",
+      "id": "cdb289dc78f16f1a",
+      "item": {
+        "type": "paragraph",
+        "id": "cdb289dc78f16f1a",
+        "text": "[[Subsymbolic Natural Language Processing]] See: [[Natural Language Processing]]"
+      },
+      "date": 1708246800943
+    },
+    {
+      "type": "edit",
+      "id": "cdb289dc78f16f1a",
+      "item": {
+        "type": "paragraph",
+        "id": "cdb289dc78f16f1a",
+        "text": "[[Subsymbolic Natural Language Processing]] See: [[Natural Language Processing]], [[symbolic]]"
+      },
+      "date": 1708246935121
+    },
+    {
+      "type": "edit",
+      "id": "cdb289dc78f16f1a",
+      "item": {
+        "type": "paragraph",
+        "id": "cdb289dc78f16f1a",
+        "text": "[[Subsymbolic Natural Language Processing]] See: [[Natural Language Processing]], [[symbolic]], [[subsymbolic]]"
+      },
+      "date": 1708246979806
+    },
+    {
+      "type": "fork",
+      "date": 1708247159111
+    },
+    {
+      "type": "edit",
+      "id": "cdb289dc78f16f1a",
+      "item": {
+        "type": "paragraph",
+        "id": "cdb289dc78f16f1a",
+        "text": "[[Subsymbolic Natural Language Processing]] See: [[Natural Language Processing]], [[symbolic]] → \" **[[subsymbolic]]**\""
+      },
+      "date": 1708247355631
+    },
+    {
+      "type": "edit",
+      "id": "cdb289dc78f16f1a",
+      "item": {
+        "type": "markdown",
+        "id": "cdb289dc78f16f1a",
+        "text": "[[Subsymbolic Natural Language Processing]] See: [[Natural Language Processing]], [[symbolic]] → \" **[[subsymbolic]]**\""
+      },
+      "date": 1708247357523
+    },
+    {
+      "type": "edit",
+      "id": "cdb289dc78f16f1a",
+      "item": {
+        "type": "markdown",
+        "id": "cdb289dc78f16f1a",
+        "text": "[[Subsymbolic Natural Language Processing]] See: [[Natural Language Processing]], [[symbolic]] → \"**[[subsymbolic]]**\""
+      },
+      "date": 1708247363408
+    },
+    {
+      "type": "edit",
+      "id": "cec4aa683ee53d23",
+      "item": {
+        "type": "markdown",
+        "id": "cec4aa683ee53d23",
+        "text": "**[[shape]]** (within [[r.Culkin.McLuhan]])\n- [[shapeless]] → \"**[[~/shape/0]]**\" See: [[Moldable Development]]\n- [[Ontology shapes Polity]]"
+      },
+      "date": 1708253725211
+    },
+    {
+      "type": "add",
+      "id": "ba02ead9ada0d12c",
+      "item": {
+        "type": "paragraph",
+        "id": "ba02ead9ada0d12c",
+        "text": "[[Search Key]]"
+      },
+      "after": "5a36613b9f8af892",
+      "date": 1708258455026
+    },
+    {
+      "id": "ba02ead9ada0d12c",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "f207d118044203eb",
+        "2092a3b420d7d305",
+        "6d36d88e598c9690",
+        "3442e4cc70ce6337",
+        "bdb9d5f441b1a9ff",
+        "5d5ff9e6c8b16c75",
+        "1cc466b2ea9de865",
+        "24491bec53b2cb4b",
+        "caafe88bea5b33e7",
+        "c646d43d03705f1e",
+        "8452123151a1f40b",
+        "7ffd35aeb81b2947",
+        "cec4aa683ee53d23",
+        "f868c992286d946e",
+        "5cdcdcfc93510d01",
+        "bad43f50bd0dc12a",
+        "9fe6b3bfcc041c40",
+        "3bf7d72dbb5196e8",
+        "0037c66e202ac6ed",
+        "12293fe24153dbea",
+        "f01f09f9110c95a2",
+        "4114c679e16c47ba",
+        "03ebfa18d5502930",
+        "8f3596088309d713",
+        "e73969c5d6819535",
+        "71c1eada140cdefe7f86201fb4fcbe5d",
+        "cfdd3472da56069b767648b5f36e8eab",
+        "205e6096e65d0872680e6e89e3b4a359",
+        "089cb31771224797116880ba80ab1f59",
+        "89a629b36a8f9339345aadff047bcb9f",
+        "a6ae0c529d9974656bdec3ef07626de0",
+        "ca6ee8104ca420a54efa5288ff49cb4e",
+        "dae6d36c64e7c29a",
+        "b903bc1e3c169e3a",
+        "2e82c1addc650521",
+        "066cf6f8cae48a48",
+        "b37816a2832e2e7d",
+        "a701471089e33cc4",
+        "8daed2f23561408e",
+        "e7e3fc35f0e4e546",
+        "90b49303bf974876",
+        "9e55e47a36d8d6be",
+        "2e4c6cdd97fd6aaa",
+        "d233a91e2cf24244",
+        "ab8eb5820d2f8a83",
+        "9d05f8b76754f3e5",
+        "979f0dbdbfa75db3",
+        "19e37110ab53df81",
+        "86e15f06011fd0e2",
+        "da373c3defc960c3",
+        "0c21f9d14c2bca90",
+        "9708710e8066a796",
+        "42cb20274f449f0f",
+        "8a3c76aa4aded2c9",
+        "0b8bea17e52ab203",
+        "2f96fb4104128cce",
+        "bf986153a816257d",
+        "54ce2cd421720f75",
+        "c0e773db126c7181",
+        "2d89b1fd9df1cf84",
+        "e44940541a37faaf",
+        "5a36613b9f8af892",
+        "d8787cf2346e0d38",
+        "9942edfcf66fc683",
+        "5188014f87b8d8dd",
+        "cdb289dc78f16f1a",
+        "ba02ead9ada0d12c",
+        "8c2cd410bbc45f08",
+        "92d9d7c2ee7a11b7"
+      ],
+      "date": 1708258458090
+    },
+    {
+      "type": "edit",
+      "id": "ba02ead9ada0d12c",
+      "item": {
+        "type": "paragraph",
+        "id": "ba02ead9ada0d12c",
+        "text": "[[Search Key]] (within [[Breadth-First Search]])"
+      },
+      "date": 1708258472887
+    },
+    {
+      "id": "5331896a74df1672",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "5331896a74df1672",
+        "text": "[[Visitor as Schema]] See: [[Algorithmic Markup]]"
+      },
+      "after": "ba02ead9ada0d12c",
+      "attribution": {
+        "page": "V"
+      },
+      "date": 1708264561814
+    },
+    {
+      "id": "77abf0b393251d5b",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "77abf0b393251d5b",
+        "text": "[[Computational Scripts]]"
+      },
+      "after": "5331896a74df1672",
+      "attribution": {
+        "page": "C"
+      },
+      "date": 1708431749477
+    },
+    {
+      "id": "57c5cfb5dc1076b4",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "57c5cfb5dc1076b4",
+        "text": "[[Computational Scripts]]"
+      },
+      "after": "77abf0b393251d5b",
+      "attribution": {
+        "page": "C"
+      },
+      "date": 1708432039233
+    },
+    {
+      "type": "remove",
+      "id": "77abf0b393251d5b",
+      "date": 1708432040805
+    },
+    {
+      "id": "285caaf0c5a308bf",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "285caaf0c5a308bf",
+        "text": "⇒ [[Stochastic Computing]] ⇒ [[Trifference]]"
+      },
+      "after": "57c5cfb5dc1076b4",
+      "attribution": {
+        "page": "2024-02-23"
+      },
+      "date": 1708671097334
+    },
+    {
+      "type": "remove",
+      "id": "285caaf0c5a308bf",
+      "date": 1708671100859
+    },
+    {
+      "type": "add",
+      "id": "783cc7c7edf0b0b0",
+      "item": {
+        "type": "paragraph",
+        "id": "783cc7c7edf0b0b0",
+        "text": "[[Stochastic Computing]] See: [[Trifference]]"
+      },
+      "after": "57c5cfb5dc1076b4",
+      "date": 1708671108878
+    },
+    {
+      "type": "remove",
+      "id": "783cc7c7edf0b0b0",
+      "date": 1708671114560
+    },
+    {
+      "id": "285caaf0c5a308bf",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "285caaf0c5a308bf",
+        "text": "⇒ [[Stochastic Computing]] ⇒ [[Trifference]]"
+      },
+      "after": "57c5cfb5dc1076b4",
+      "attribution": {
+        "page": "2024-02-23"
+      },
+      "date": 1708671117939
+    },
+    {
+      "type": "edit",
+      "id": "285caaf0c5a308bf",
+      "item": {
+        "type": "paragraph",
+        "id": "285caaf0c5a308bf",
+        "text": "[[Stochastic Computing]] See: [[Trifference]]"
+      },
+      "date": 1708671131263
+    },
+    {
+      "id": "d49977cd1734d8dc",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "d49977cd1734d8dc",
+        "text": "[[Stochastic Computation]] (within [[Polysynchronous Stochastic Circuits]])"
+      },
+      "after": "285caaf0c5a308bf",
+      "attribution": {
+        "page": "~/clock/0"
+      },
+      "date": 1708684480035
+    },
+    {
+      "type": "add",
+      "id": "80e20c68374c4a2e",
+      "item": {
+        "type": "paragraph",
+        "id": "80e20c68374c4a2e",
+        "text": "[[SQLite Plugin]]"
+      },
+      "after": "d49977cd1734d8dc",
+      "date": 1709295417452
+    },
+    {
+      "type": "add",
+      "id": "f6716b0905576ebb",
+      "item": {
+        "type": "paragraph",
+        "id": "f6716b0905576ebb",
+        "text": "[[Songs that Call]]"
+      },
+      "after": "80e20c68374c4a2e",
+      "date": 1709296403268
+    },
+    {
       "type": "fork",
       "site": "wiki.ralfbarkow.ch",
-      "date": 1707906248892
+      "date": 1709300966731
+    },
+    {
+      "type": "edit",
+      "id": "92d9d7c2ee7a11b7",
+      "item": {
+        "type": "frame",
+        "id": "92d9d7c2ee7a11b7",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+      },
+      "date": 1709300994473
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709357886350
+    },
+    {
+      "type": "add",
+      "id": "a44dcd3c5b7ea446",
+      "item": {
+        "type": "paragraph",
+        "id": "a44dcd3c5b7ea446",
+        "text": "[[SOURCE code]]"
+      },
+      "after": "f6716b0905576ebb",
+      "date": 1709357897296
+    },
+    {
+      "type": "add",
+      "id": "194d84e6c03eb421",
+      "item": {
+        "type": "paragraph",
+        "id": "194d84e6c03eb421",
+        "text": "[[Similarity Query]]"
+      },
+      "after": "f01f09f9110c95a2",
+      "date": 1709590896800
+    },
+    {
+      "id": "194d84e6c03eb421",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "f207d118044203eb",
+        "2092a3b420d7d305",
+        "6d36d88e598c9690",
+        "3442e4cc70ce6337",
+        "bdb9d5f441b1a9ff",
+        "5d5ff9e6c8b16c75",
+        "1cc466b2ea9de865",
+        "24491bec53b2cb4b",
+        "caafe88bea5b33e7",
+        "c646d43d03705f1e",
+        "8452123151a1f40b",
+        "7ffd35aeb81b2947",
+        "cec4aa683ee53d23",
+        "f868c992286d946e",
+        "5cdcdcfc93510d01",
+        "bad43f50bd0dc12a",
+        "9fe6b3bfcc041c40",
+        "3bf7d72dbb5196e8",
+        "0037c66e202ac6ed",
+        "12293fe24153dbea",
+        "f01f09f9110c95a2",
+        "4114c679e16c47ba",
+        "194d84e6c03eb421",
+        "03ebfa18d5502930",
+        "8f3596088309d713",
+        "e73969c5d6819535",
+        "71c1eada140cdefe7f86201fb4fcbe5d",
+        "cfdd3472da56069b767648b5f36e8eab",
+        "205e6096e65d0872680e6e89e3b4a359",
+        "089cb31771224797116880ba80ab1f59",
+        "89a629b36a8f9339345aadff047bcb9f",
+        "a6ae0c529d9974656bdec3ef07626de0",
+        "ca6ee8104ca420a54efa5288ff49cb4e",
+        "dae6d36c64e7c29a",
+        "b903bc1e3c169e3a",
+        "2e82c1addc650521",
+        "066cf6f8cae48a48",
+        "b37816a2832e2e7d",
+        "a701471089e33cc4",
+        "8daed2f23561408e",
+        "e7e3fc35f0e4e546",
+        "90b49303bf974876",
+        "9e55e47a36d8d6be",
+        "2e4c6cdd97fd6aaa",
+        "d233a91e2cf24244",
+        "ab8eb5820d2f8a83",
+        "9d05f8b76754f3e5",
+        "979f0dbdbfa75db3",
+        "19e37110ab53df81",
+        "86e15f06011fd0e2",
+        "da373c3defc960c3",
+        "0c21f9d14c2bca90",
+        "9708710e8066a796",
+        "42cb20274f449f0f",
+        "8a3c76aa4aded2c9",
+        "0b8bea17e52ab203",
+        "2f96fb4104128cce",
+        "bf986153a816257d",
+        "54ce2cd421720f75",
+        "c0e773db126c7181",
+        "2d89b1fd9df1cf84",
+        "e44940541a37faaf",
+        "5a36613b9f8af892",
+        "d8787cf2346e0d38",
+        "9942edfcf66fc683",
+        "5188014f87b8d8dd",
+        "cdb289dc78f16f1a",
+        "ba02ead9ada0d12c",
+        "5331896a74df1672",
+        "57c5cfb5dc1076b4",
+        "285caaf0c5a308bf",
+        "d49977cd1734d8dc",
+        "80e20c68374c4a2e",
+        "f6716b0905576ebb",
+        "a44dcd3c5b7ea446",
+        "8c2cd410bbc45f08",
+        "92d9d7c2ee7a11b7"
+      ],
+      "date": 1709590898730
+    },
+    {
+      "type": "edit",
+      "id": "194d84e6c03eb421",
+      "item": {
+        "type": "paragraph",
+        "id": "194d84e6c03eb421",
+        "text": "[[Similarity Query]] (within [[Graph Databases of Protein Structures]])"
+      },
+      "date": 1709590922362
+    },
+    {
+      "type": "edit",
+      "id": "92d9d7c2ee7a11b7",
+      "item": {
+        "type": "frame",
+        "id": "92d9d7c2ee7a11b7",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222"
+      },
+      "date": 1709622494144
+    },
+    {
+      "id": "8fe38d2c7152e066",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "8fe38d2c7152e066",
+        "text": "Wrangling Untrusted File Formats Safely [https://github.com/google/wuffs github] (within [[Secure Automata]])"
+      },
+      "after": "a44dcd3c5b7ea446",
+      "attribution": {
+        "page": "W"
+      },
+      "date": 1709622501569
+    },
+    {
+      "id": "bc96cb7c1892038a",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "bc96cb7c1892038a",
+        "text": "[[SOM_PAK]]"
+      },
+      "after": "8fe38d2c7152e066",
+      "attribution": {
+        "page": "2024-03-05"
+      },
+      "date": 1709630848063
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709630876304
     }
   ]
 }

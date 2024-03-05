@@ -28,18 +28,28 @@
     },
     {
       "type": "paragraph",
+      "id": "895fdbf166ab77fc",
+      "text": "[[Card Catalog]] (within [[Offer to the DKR Implemeters]])"
+    },
+    {
+      "type": "paragraph",
       "id": "abb01936bfcb020c",
       "text": "[[Conversation as Search]] (within [[Typescript Locator]])"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "473ff83b9ce908dc",
-      "text": "[[Computation]] (within [[Software as Tools]])"
+      "text": "**[[Computation]]** (within [[Software as Tools]])"
     },
     {
       "type": "markdown",
       "id": "0d3e68036fecfe91",
       "text": "- one-to-one [[Pattern-Matching]] and [[Substitution]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "57c5cfb5dc1076b4",
+      "text": "[[Computational Scripts]]"
     },
     {
       "type": "pagefold",
@@ -88,9 +98,9 @@
       "text": "[[Copy Operation]] (within [[Title]]) → **[[Copy]]**"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "7b3bd6750b999478",
-      "text": "[[Context]] (within [[within]])"
+      "text": "**[[Context]]** (within [[within]])"
     },
     {
       "type": "markdown",
@@ -100,6 +110,11 @@
     {
       "type": "paragraph",
       "id": "ca59b4b63c24f4c5",
+      "text": "[[thisContext]] (within [[Access the Run-Time Stack]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "d6748a46f610bb6c",
       "text": "[[Cause and Effect]] ((within [[Worldview]]) within  [[Systemic Thinking]])"
     },
     {
@@ -253,6 +268,91 @@
       "text": "[[Coordinate Versus Nested Gui]] See: [[Fence after Fence]]"
     },
     {
+      "type": "paragraph",
+      "id": "c0e20646285c8f4e",
+      "text": "[[Classes Map]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "b64e5dd338fd6b73",
+      "text": "[[choose]] (within [[Walk the Neighborhood]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "97708c6e57a71fb6",
+      "text": "[[Associative Chaining]] (within [[Learning]]) See: [[Association]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d1a11f4c621daef4",
+      "text": "[[Automatic Code Documentation]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "b3132b943273d66c",
+      "text": "[[Causal Chain]] (within [[Restaurant Script]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "46461b5830e98c77",
+      "text": "[[Cannibalism]] (within [[War and Peace as a Permanent State]])"
+    },
+    {
+      "type": "markdown",
+      "id": "45e7b8759ea997af",
+      "text": "[[Clock]] → \"**[[~/clock/0]]**\""
+    },
+    {
+      "type": "paragraph",
+      "id": "777b62468b5fdc51",
+      "text": "[[Implementation as a Circuit]] See: [[Circuit]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "4b4c3fde03174b43",
+      "text": "[[Coroot]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "25f711620a276c23",
+      "text": "[[Croquet Jasmine]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "8f8d689d98ccb337",
+      "text": "[[clog-inspector]] (within [[CLOG]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "96023f6114359efb",
+      "text": "[[Computational Plugins]] (within [[compute]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "2af7fa994ce2f32c",
+      "text": "[[Codosome Hexis]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "ab4754930471967d",
+      "text": "[[Collaborative Federation Index]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "dcef1a5e2baca6be",
+      "text": "[[Sample Aspects of Change]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e803f5d780a2475d",
+      "text": "[[Citizen Data]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d66a7eb1ca01592f",
+      "text": "[[Confluence]] (within [[Portland Confluences]])"
+    },
+    {
       "type": "reference",
       "id": "3e8af46ff3063eaa",
       "site": "wiki.ralfbarkow.ch",
@@ -263,7 +363,7 @@
     {
       "type": "frame",
       "id": "a29178af5d6036ea",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111"
     }
   ],
   "journal": [
@@ -2199,9 +2299,610 @@
       "date": 1708068901251
     },
     {
+      "type": "add",
+      "id": "c0e20646285c8f4e",
+      "item": {
+        "type": "paragraph",
+        "id": "c0e20646285c8f4e",
+        "text": "[[Classes Map]]"
+      },
+      "after": "aa6a264100c85bd8",
+      "date": 1708258017018
+    },
+    {
+      "type": "add",
+      "id": "b64e5dd338fd6b73",
+      "item": {
+        "type": "paragraph",
+        "id": "b64e5dd338fd6b73",
+        "text": "[[choose]] (within )"
+      },
+      "after": "c0e20646285c8f4e",
+      "date": 1708258650950
+    },
+    {
+      "type": "edit",
+      "id": "b64e5dd338fd6b73",
+      "item": {
+        "type": "paragraph",
+        "id": "b64e5dd338fd6b73",
+        "text": "[[choose]] (within [[Walk the Neighborhood]])"
+      },
+      "date": 1708258656827
+    },
+    {
+      "type": "add",
+      "id": "97708c6e57a71fb6",
+      "item": {
+        "type": "paragraph",
+        "id": "97708c6e57a71fb6",
+        "text": "[[Associative Chaining]]"
+      },
+      "after": "b64e5dd338fd6b73",
+      "date": 1708259381923
+    },
+    {
+      "type": "edit",
+      "id": "97708c6e57a71fb6",
+      "item": {
+        "type": "paragraph",
+        "id": "97708c6e57a71fb6",
+        "text": "[[Associative Chaining]] (within [[Learning]])"
+      },
+      "date": 1708259410024
+    },
+    {
+      "type": "edit",
+      "id": "97708c6e57a71fb6",
+      "item": {
+        "type": "paragraph",
+        "id": "97708c6e57a71fb6",
+        "text": "[[Associative Chaining]] (within [[Learning]]) See: [[Association]]"
+      },
+      "date": 1708259441614
+    },
+    {
+      "type": "add",
+      "id": "57c5cfb5dc1076b4",
+      "item": {
+        "type": "paragraph",
+        "id": "57c5cfb5dc1076b4",
+        "text": "[[Computational Scripts]]"
+      },
+      "after": "473ff83b9ce908dc",
+      "date": 1708263859251
+    },
+    {
+      "id": "57c5cfb5dc1076b4",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "1fe5377a5cc50eb3",
+        "a78482e3342a8184",
+        "299d7e431980dad6",
+        "d339e89b626f84fb",
+        "abb01936bfcb020c",
+        "473ff83b9ce908dc",
+        "0d3e68036fecfe91",
+        "57c5cfb5dc1076b4",
+        "e637fb5c90a3412c",
+        "ae02940a42c52efe",
+        "9821a6cc38ee5bb6",
+        "b6a1144d476019d6",
+        "7632ef5529566b44",
+        "c8b16f19e99ba653",
+        "6f4e7759152b7222",
+        "0de225d2550c9e65",
+        "c3fd162cce23ec9f",
+        "7b3bd6750b999478",
+        "9bb87aeced97be24",
+        "ca59b4b63c24f4c5",
+        "e2fa77a2e744bc87",
+        "ae13488d22a2f182",
+        "683b05236b0df42c",
+        "22e906d9ff11ff88",
+        "f9d237f83f2afdd5",
+        "c21ff43a12c8585f",
+        "cbd8848d9a104a13",
+        "6914996c38805e1b",
+        "9d6bc58cc5cf469f",
+        "e0ca33b3ddc19f53",
+        "08db8e56070faaff",
+        "77e1b688bd562b03",
+        "59ed434949ba5d22",
+        "f127c931da50b792",
+        "57fee224b956e7e1",
+        "4d42756cdc206a39",
+        "1d34fec3395b7eef",
+        "d1a1f2df8bfbc824",
+        "449589b427766dbc",
+        "b5f798763ad800d6",
+        "84ce6ccd0fcef8da",
+        "c040572f4ab3b6db",
+        "1f5724c054dcd919",
+        "131845680eb10f3b",
+        "96da6e50c93b5481",
+        "c0f6913258154f3c",
+        "a62b697e5bc2f6c2",
+        "0e1f351e443e7cd1",
+        "7908fbd99e5754e9",
+        "aa6a264100c85bd8",
+        "c0e20646285c8f4e",
+        "b64e5dd338fd6b73",
+        "97708c6e57a71fb6",
+        "3e8af46ff3063eaa",
+        "a29178af5d6036ea"
+      ],
+      "date": 1708263861780
+    },
+    {
+      "id": "d1a11f4c621daef4",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "d1a11f4c621daef4",
+        "text": "[[Automatic Code Documentation]]"
+      },
+      "after": "97708c6e57a71fb6",
+      "attribution": {
+        "page": "A"
+      },
+      "date": 1708286411116
+    },
+    {
+      "type": "edit",
+      "id": "7b3bd6750b999478",
+      "item": {
+        "type": "paragraph",
+        "id": "7b3bd6750b999478",
+        "text": "**[[Context]]** (within [[within]])"
+      },
+      "date": 1708426326930
+    },
+    {
+      "type": "edit",
+      "id": "7b3bd6750b999478",
+      "item": {
+        "type": "markdown",
+        "id": "7b3bd6750b999478",
+        "text": "**[[Context]]** (within [[within]])"
+      },
+      "date": 1708426329054
+    },
+    {
+      "type": "edit",
+      "id": "ca59b4b63c24f4c5",
+      "item": {
+        "type": "paragraph",
+        "id": "ca59b4b63c24f4c5",
+        "text": "thisContext"
+      },
+      "date": 1708426349950
+    },
+    {
+      "type": "add",
+      "id": "d6748a46f610bb6c",
+      "item": {
+        "type": "paragraph",
+        "id": "d6748a46f610bb6c",
+        "text": "[[Cause and Effect]] ((within [[Worldview]]) within  [[Systemic Thinking]])"
+      },
+      "after": "ca59b4b63c24f4c5",
+      "date": 1708426351467
+    },
+    {
+      "type": "edit",
+      "id": "ca59b4b63c24f4c5",
+      "item": {
+        "type": "paragraph",
+        "id": "ca59b4b63c24f4c5",
+        "text": "[[thisContext]] (within [[Access the run-time stack)"
+      },
+      "date": 1708426373177
+    },
+    {
+      "type": "edit",
+      "id": "ca59b4b63c24f4c5",
+      "item": {
+        "type": "paragraph",
+        "id": "ca59b4b63c24f4c5",
+        "text": "[[thisContext]] (within [[Access the run-time stack]])"
+      },
+      "date": 1708426383900
+    },
+    {
+      "type": "edit",
+      "id": "ca59b4b63c24f4c5",
+      "item": {
+        "type": "paragraph",
+        "id": "ca59b4b63c24f4c5",
+        "text": "[[thisContext]] (within [[Access the Run-Time Stack]])"
+      },
+      "date": 1708426404813
+    },
+    {
+      "type": "add",
+      "id": "77abf0b393251d5b",
+      "item": {
+        "type": "paragraph",
+        "id": "77abf0b393251d5b",
+        "text": "[[Computational Scripts]]"
+      },
+      "after": "d1a11f4c621daef4",
+      "date": 1708431724683
+    },
+    {
+      "type": "remove",
+      "id": "77abf0b393251d5b",
+      "date": 1708431984322
+    },
+    {
+      "type": "edit",
+      "id": "473ff83b9ce908dc",
+      "item": {
+        "type": "paragraph",
+        "id": "473ff83b9ce908dc",
+        "text": "**[[Computation]]** (within [[Software as Tools]])"
+      },
+      "date": 1708432003543
+    },
+    {
+      "type": "edit",
+      "id": "473ff83b9ce908dc",
+      "item": {
+        "type": "markdown",
+        "id": "473ff83b9ce908dc",
+        "text": "**[[Computation]]** (within [[Software as Tools]])"
+      },
+      "date": 1708432005170
+    },
+    {
+      "type": "add",
+      "id": "b3132b943273d66c",
+      "item": {
+        "type": "paragraph",
+        "id": "b3132b943273d66c",
+        "text": "[[Causal Chain]] (within [[Restaurant Script]])"
+      },
+      "after": "d1a11f4c621daef4",
+      "date": 1708512620345
+    },
+    {
+      "type": "add",
+      "id": "46461b5830e98c77",
+      "item": {
+        "type": "paragraph",
+        "id": "46461b5830e98c77",
+        "text": "[[Cannibalism]] (within [[War and Peace)"
+      },
+      "after": "b3132b943273d66c",
+      "date": 1708668923284
+    },
+    {
+      "type": "edit",
+      "id": "46461b5830e98c77",
+      "item": {
+        "type": "paragraph",
+        "id": "46461b5830e98c77",
+        "text": "[[Cannibalism]] (within [[War and Peace as a Permanent State]])"
+      },
+      "date": 1708668948068
+    },
+    {
+      "id": "46461b5830e98c77",
+      "type": "remove",
+      "removedTo": {
+        "page": "W"
+      },
+      "date": 1708669558321
+    },
+    {
+      "type": "add",
+      "id": "45e7b8759ea997af",
+      "item": {
+        "type": "paragraph",
+        "id": "45e7b8759ea997af",
+        "text": "[[Clock]]"
+      },
+      "after": "b3132b943273d66c",
+      "date": 1708682293808
+    },
+    {
+      "id": "46461b5830e98c77",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "46461b5830e98c77",
+        "text": "[[Cannibalism]] (within [[War and Peace as a Permanent State]])"
+      },
+      "after": "b3132b943273d66c",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1708691450443
+    },
+    {
       "type": "fork",
       "site": "wiki.ralfbarkow.ch",
-      "date": 1708257999924
+      "date": 1708696544552
+    },
+    {
+      "id": "777b62468b5fdc51",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "777b62468b5fdc51",
+        "text": "⇒ [[Implementation as a Circuit]]"
+      },
+      "after": "45e7b8759ea997af",
+      "attribution": {
+        "page": "2024-02-23"
+      },
+      "date": 1708696560091
+    },
+    {
+      "type": "edit",
+      "id": "777b62468b5fdc51",
+      "item": {
+        "type": "paragraph",
+        "id": "777b62468b5fdc51",
+        "text": "[[Implementation as a Circuit]]"
+      },
+      "date": 1708696564407
+    },
+    {
+      "type": "edit",
+      "id": "777b62468b5fdc51",
+      "item": {
+        "type": "paragraph",
+        "id": "777b62468b5fdc51",
+        "text": "[[Implementation as a Circuit]] See: [[Circuit]]"
+      },
+      "date": 1708696592698
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1708696635575
+    },
+    {
+      "type": "edit",
+      "id": "45e7b8759ea997af",
+      "item": {
+        "type": "paragraph",
+        "id": "45e7b8759ea997af",
+        "text": "[[Clock]] → \" ~/clock/0\""
+      },
+      "date": 1708702190293
+    },
+    {
+      "type": "edit",
+      "id": "45e7b8759ea997af",
+      "item": {
+        "type": "paragraph",
+        "id": "45e7b8759ea997af",
+        "text": "[[Clock]] → \" [[~/clock/0]]\""
+      },
+      "date": 1708702197453
+    },
+    {
+      "type": "edit",
+      "id": "a29178af5d6036ea",
+      "item": {
+        "type": "frame",
+        "id": "a29178af5d6036ea",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      },
+      "date": 1708712282892
+    },
+    {
+      "type": "add",
+      "id": "4b4c3fde03174b43",
+      "item": {
+        "type": "paragraph",
+        "id": "4b4c3fde03174b43",
+        "text": "[[Coroot]]"
+      },
+      "after": "777b62468b5fdc51",
+      "date": 1708777631219
+    },
+    {
+      "type": "edit",
+      "id": "45e7b8759ea997af",
+      "item": {
+        "type": "paragraph",
+        "id": "45e7b8759ea997af",
+        "text": "[[Clock]] → \"**[[~/clock/0]]**\""
+      },
+      "date": 1708777662346
+    },
+    {
+      "type": "edit",
+      "id": "45e7b8759ea997af",
+      "item": {
+        "type": "markdown",
+        "id": "45e7b8759ea997af",
+        "text": "[[Clock]] → \"**[[~/clock/0]]**\""
+      },
+      "date": 1708777663699
+    },
+    {
+      "type": "add",
+      "id": "25f711620a276c23",
+      "item": {
+        "type": "paragraph",
+        "id": "25f711620a276c23",
+        "text": "[[Croquet Jasmine]]"
+      },
+      "after": "4b4c3fde03174b43",
+      "date": 1708778174814
+    },
+    {
+      "type": "add",
+      "id": "8f8d689d98ccb337",
+      "item": {
+        "type": "paragraph",
+        "id": "8f8d689d98ccb337",
+        "text": "[[CLOG]]"
+      },
+      "after": "25f711620a276c23",
+      "date": 1709103075274
+    },
+    {
+      "type": "edit",
+      "id": "8f8d689d98ccb337",
+      "item": {
+        "type": "paragraph",
+        "id": "8f8d689d98ccb337",
+        "text": "[[clog-inspector]] (within [[CLOG]])"
+      },
+      "date": 1709103107645
+    },
+    {
+      "type": "add",
+      "id": "96023f6114359efb",
+      "item": {
+        "type": "paragraph",
+        "id": "96023f6114359efb",
+        "text": "[[Computational Plugins]]"
+      },
+      "after": "8f8d689d98ccb337",
+      "date": 1709157886710
+    },
+    {
+      "type": "edit",
+      "id": "96023f6114359efb",
+      "item": {
+        "type": "paragraph",
+        "id": "96023f6114359efb",
+        "text": "[[Computational Plugins]] (within [[compute]])"
+      },
+      "date": 1709157956444
+    },
+    {
+      "type": "add",
+      "id": "2af7fa994ce2f32c",
+      "item": {
+        "type": "paragraph",
+        "id": "2af7fa994ce2f32c",
+        "text": "[[Codosome Hexis]]"
+      },
+      "after": "96023f6114359efb",
+      "date": 1709216220634
+    },
+    {
+      "type": "edit",
+      "id": "a29178af5d6036ea",
+      "item": {
+        "type": "frame",
+        "id": "a29178af5d6036ea",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709216567565
+    },
+    {
+      "type": "add",
+      "id": "ab4754930471967d",
+      "item": {
+        "type": "paragraph",
+        "id": "ab4754930471967d",
+        "text": "[[Collaborative Federation Index]]"
+      },
+      "after": "2af7fa994ce2f32c",
+      "date": 1709295293431
+    },
+    {
+      "id": "dcef1a5e2baca6be",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "dcef1a5e2baca6be",
+        "text": "[[Sample Aspects of Change]]"
+      },
+      "after": "ab4754930471967d",
+      "attribution": {
+        "page": "A",
+        "site": "localhost:3000"
+      },
+      "date": 1709301988219
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709302114934
+    },
+    {
+      "type": "add",
+      "id": "e803f5d780a2475d",
+      "item": {
+        "type": "paragraph",
+        "id": "e803f5d780a2475d",
+        "text": "[[Citizen Data]]"
+      },
+      "after": "dcef1a5e2baca6be",
+      "date": 1709310904937
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709310986396
+    },
+    {
+      "type": "add",
+      "id": "d66a7eb1ca01592f",
+      "item": {
+        "type": "paragraph",
+        "id": "d66a7eb1ca01592f",
+        "text": "[[Confluence]] (within [[)"
+      },
+      "after": "e803f5d780a2475d",
+      "date": 1709614936359
+    },
+    {
+      "type": "edit",
+      "id": "d66a7eb1ca01592f",
+      "item": {
+        "type": "paragraph",
+        "id": "d66a7eb1ca01592f",
+        "text": "[[Confluence]] (within [[Portland Confluences]])"
+      },
+      "date": 1709614947685
+    },
+    {
+      "type": "edit",
+      "id": "a29178af5d6036ea",
+      "item": {
+        "type": "frame",
+        "id": "a29178af5d6036ea",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111"
+      },
+      "date": 1709614958304
+    },
+    {
+      "type": "add",
+      "id": "895fdbf166ab77fc",
+      "item": {
+        "type": "paragraph",
+        "id": "895fdbf166ab77fc",
+        "text": "[[Card Catalog]] (within [[]])"
+      },
+      "after": "d339e89b626f84fb",
+      "date": 1709621132667
+    },
+    {
+      "type": "edit",
+      "id": "895fdbf166ab77fc",
+      "item": {
+        "type": "paragraph",
+        "id": "895fdbf166ab77fc",
+        "text": "[[Card Catalog]] (within [[Offer to the DKR Implemeters]])"
+      },
+      "date": 1709621147140
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709621283422
     }
   ]
 }
