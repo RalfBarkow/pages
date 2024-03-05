@@ -133,6 +133,11 @@
     },
     {
       "type": "paragraph",
+      "id": "8c2c2c494c51e5d3",
+      "text": "[[Ego-Shooter]] See: [[Terminologie Ego/Alter]] ⇒ [[Terminology Ego/Alter]]"
+    },
+    {
+      "type": "paragraph",
       "id": "ce36ca3b75375cf1",
       "text": "[[Entropy]]"
     },
@@ -147,6 +152,51 @@
       "text": "[[Engagement vs Commitment]] (within [[ST2050]])"
     },
     {
+      "type": "paragraph",
+      "id": "4eb75946fbade072",
+      "text": "[[Evolution of the Topic Structure]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "bc11fedd6e1f331d",
+      "text": "[[Electronic Discourse]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "556325e5f06ceec1",
+      "text": "[[Embodiment]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "0e1f351e443e7cd1",
+      "text": "[[Collective Electrodynamics]] See: [[Electrodynamics]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d93e01eb41bdc646",
+      "text": "[[Example]] See: [[Learning From Examples]] (within [[Subsymbolic Natural Language Processing]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "1998bb1c09973080",
+      "text": "[[Episodes]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "9a16c886e087f7c9",
+      "text": "[[eBPF]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d497b32a8e2ff73a",
+      "text": "[[Express Data Path]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "a514b5095d1658b1",
+      "text": "[[Exploratory Parsing]] (within [[Frame]]) See: [[Exploratory Parsing in Frames]]"
+    },
+    {
       "type": "reference",
       "id": "2a8ebf5fbb6fbdf2",
       "site": "wiki.ralfbarkow.ch",
@@ -157,7 +207,7 @@
     {
       "type": "frame",
       "id": "838045a6c5c125e0",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\n"
     }
   ],
   "journal": [
@@ -1077,6 +1127,192 @@
         "text": "[[Engagement vs Commitment]] (within [[ST2050]])"
       },
       "date": 1707984959563
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1707985005586
+    },
+    {
+      "type": "edit",
+      "id": "838045a6c5c125e0",
+      "item": {
+        "type": "frame",
+        "id": "838045a6c5c125e0",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1707997492709
+    },
+    {
+      "type": "add",
+      "id": "4eb75946fbade072",
+      "item": {
+        "type": "paragraph",
+        "id": "4eb75946fbade072",
+        "text": "[[Evolution of the Topic Structure]]"
+      },
+      "after": "010494efe8eeeee2",
+      "date": 1708015008108
+    },
+    {
+      "type": "add",
+      "id": "bc11fedd6e1f331d",
+      "item": {
+        "type": "paragraph",
+        "id": "bc11fedd6e1f331d",
+        "text": "[[Electronic Discourse]]"
+      },
+      "after": "4eb75946fbade072",
+      "date": 1708015547944
+    },
+    {
+      "type": "add",
+      "id": "556325e5f06ceec1",
+      "item": {
+        "type": "paragraph",
+        "id": "556325e5f06ceec1",
+        "text": "[[Embodiment]]"
+      },
+      "after": "bc11fedd6e1f331d",
+      "date": 1708025527848
+    },
+    {
+      "type": "add",
+      "id": "0e1f351e443e7cd1",
+      "item": {
+        "type": "paragraph",
+        "id": "0e1f351e443e7cd1",
+        "text": "[[Collective Electrodynamics]] See: [[Electrodynamics]]"
+      },
+      "after": "556325e5f06ceec1",
+      "date": 1708025697817
+    },
+    {
+      "id": "d93e01eb41bdc646",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "d93e01eb41bdc646",
+        "text": "[[Learning From Examples]] (within [[Subsymbolic Natural Language Processing]])"
+      },
+      "after": "0e1f351e443e7cd1",
+      "attribution": {
+        "page": "L"
+      },
+      "date": 1708251784543
+    },
+    {
+      "type": "edit",
+      "id": "d93e01eb41bdc646",
+      "item": {
+        "type": "paragraph",
+        "id": "d93e01eb41bdc646",
+        "text": "[[Example]] See: [[Learning From Examples]] (within [[Subsymbolic Natural Language Processing]])"
+      },
+      "date": 1708251805840
+    },
+    {
+      "type": "add",
+      "id": "1998bb1c09973080",
+      "item": {
+        "type": "paragraph",
+        "id": "1998bb1c09973080",
+        "text": "[[Episodes]]"
+      },
+      "after": "d93e01eb41bdc646",
+      "date": 1708755030028
+    },
+    {
+      "type": "edit",
+      "id": "838045a6c5c125e0",
+      "item": {
+        "type": "frame",
+        "id": "838045a6c5c125e0",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      },
+      "date": 1708755035161
+    },
+    {
+      "type": "add",
+      "id": "9a16c886e087f7c9",
+      "item": {
+        "type": "paragraph",
+        "id": "9a16c886e087f7c9",
+        "text": "[[eBPF]]"
+      },
+      "after": "1998bb1c09973080",
+      "date": 1708777232440
+    },
+    {
+      "type": "add",
+      "id": "d497b32a8e2ff73a",
+      "item": {
+        "type": "paragraph",
+        "id": "d497b32a8e2ff73a",
+        "text": "[[Express Data Path]]"
+      },
+      "after": "9a16c886e087f7c9",
+      "date": 1708777465274
+    },
+    {
+      "type": "edit",
+      "id": "838045a6c5c125e0",
+      "item": {
+        "type": "frame",
+        "id": "838045a6c5c125e0",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709255473265
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709584024442
+    },
+    {
+      "id": "8c2c2c494c51e5d3",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "8c2c2c494c51e5d3",
+        "text": "[[Ego-Shooter]] See: [[Terminologie Ego/Alter]] ⇒ [[Terminology Ego/Alter]]"
+      },
+      "after": "ce497bff8e3f5117",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1709584036935
+    },
+    {
+      "type": "edit",
+      "id": "838045a6c5c125e0",
+      "item": {
+        "type": "frame",
+        "id": "838045a6c5c125e0",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\n"
+      },
+      "date": 1709584054869
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709584145262
+    },
+    {
+      "type": "add",
+      "id": "a514b5095d1658b1",
+      "item": {
+        "type": "paragraph",
+        "id": "a514b5095d1658b1",
+        "text": "[[Exploratory Parsing]] (within [[Frame]]) See: [[Exploratory Parsing in Frames]]"
+      },
+      "after": "d497b32a8e2ff73a",
+      "date": 1709584177364
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709656321149
     }
   ]
 }

@@ -353,6 +353,17 @@
       "text": "[[Confluence]] (within [[Portland Confluences]])"
     },
     {
+      "type": "paragraph",
+      "id": "0b494f77440aa0e7",
+      "text": "[[Card Catalog]] (within [[Offer to the DKR Implemeters]])",
+      "alias": "895fdbf166ab77fc"
+    },
+    {
+      "type": "paragraph",
+      "id": "983f998685e48c77",
+      "text": "[[Curing the Vulnerable Parser]] See: [[Parser]]"
+    },
+    {
       "type": "reference",
       "id": "3e8af46ff3063eaa",
       "site": "wiki.ralfbarkow.ch",
@@ -2900,9 +2911,36 @@
       "date": 1709621147140
     },
     {
+      "id": "0b494f77440aa0e7",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "0b494f77440aa0e7",
+        "text": "[[Card Catalog]] (within [[Offer to the DKR Implemeters]])",
+        "alias": "895fdbf166ab77fc"
+      },
+      "after": "d66a7eb1ca01592f",
+      "attribution": {
+        "page": "Card Catalog",
+        "site": "localhost:3000"
+      },
+      "date": 1709623063033
+    },
+    {
+      "type": "add",
+      "id": "983f998685e48c77",
+      "item": {
+        "type": "paragraph",
+        "id": "983f998685e48c77",
+        "text": "[[Curing the Vulnerable Parser]] See: [[Parser]]"
+      },
+      "after": "0b494f77440aa0e7",
+      "date": 1709631050313
+    },
+    {
       "type": "fork",
       "site": "wiki.ralfbarkow.ch",
-      "date": 1709621283422
+      "date": 1709656244078
     }
   ]
 }

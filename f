@@ -18,6 +18,16 @@
     },
     {
       "type": "paragraph",
+      "id": "9cec41b8a69e088c",
+      "text": "[[Form]] (within [[Shape]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "2c950ad8503be8a2",
+      "text": "[[InfiniteForm]]"
+    },
+    {
+      "type": "paragraph",
       "id": "a66dd91eb2d3436f",
       "text": "[[Fence after Fence]] (within [[Meta]]) See: [[Boundaries]]"
     },
@@ -80,11 +90,6 @@
       "type": "paragraph",
       "id": "d751a55508a2e466",
       "text": "[[Formacion]] ⇒ [[Living Economy]]"
-    },
-    {
-      "type": "paragraph",
-      "id": "9cec41b8a69e088c",
-      "text": "[[Form]] (within [[Shape]])"
     },
     {
       "type": "paragraph",
@@ -179,7 +184,7 @@
     {
       "type": "paragraph",
       "id": "94a82cfba79d7073",
-      "text": "[[Force]] (within [[What Is a Pattern?]])"
+      "text": "[[Force]] (within [[What Is a Pattern?]]) See: [[Recurring Problem]]"
     },
     {
       "type": "reference",
@@ -1494,9 +1499,88 @@
       "date": 1709410955744
     },
     {
+      "type": "edit",
+      "id": "94a82cfba79d7073",
+      "item": {
+        "type": "paragraph",
+        "id": "94a82cfba79d7073",
+        "text": "[[Force]] (within [[What Is a Pattern?]]) See: [[Recurring Problem]]"
+      },
+      "date": 1709414637148
+    },
+    {
+      "id": "9cec41b8a69e088c",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "01085049e7beb80b",
+        "8d72b7d1eeb777f7",
+        "9cec41b8a69e088c",
+        "a66dd91eb2d3436f",
+        "a141a047d260d847",
+        "789c821796615a42",
+        "389e7ab3f7b14490",
+        "570de50b34e43639",
+        "dad87f8ad01df5a3",
+        "c8c99ca5565d3131",
+        "a716207802fce38f",
+        "fe9cba91fe33b809",
+        "84f1abdd48ed2caa",
+        "d48f6c803ffd4ae0",
+        "26332be736252099",
+        "d751a55508a2e466",
+        "f45ac44f018a53b1",
+        "c7041daf82ee35e9",
+        "c265a4be4b2b3a91",
+        "b7c4f062a79dd8d5",
+        "c244b47a9d3b3607",
+        "9ceea77cef6257f7",
+        "d05f561551462e9c",
+        "199c9feeb96f7ff8",
+        "dd16babf51c2c657",
+        "164ea317e1c14f12",
+        "90b4a4450e975461",
+        "875d3a09db792aea",
+        "a04b0cd896b91a37",
+        "f158d9e374ff6c88",
+        "3ae5454276a08fb5",
+        "cf1da3a02d437a8a",
+        "8510ce3ae2fcb825",
+        "800bb9c21aedc19d",
+        "94a82cfba79d7073",
+        "0af5bda13da74df8",
+        "5c1363cd00f99e4d"
+      ],
+      "date": 1709620720037
+    },
+    {
+      "id": "2c950ad8503be8a2",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "2c950ad8503be8a2",
+        "text": "[[InfiniteForm]] See: [[Form]]"
+      },
+      "after": "9cec41b8a69e088c",
+      "attribution": {
+        "page": "I"
+      },
+      "date": 1709620727525
+    },
+    {
+      "type": "edit",
+      "id": "2c950ad8503be8a2",
+      "item": {
+        "type": "paragraph",
+        "id": "2c950ad8503be8a2",
+        "text": "[[InfiniteForm]]"
+      },
+      "date": 1709620736877
+    },
+    {
       "type": "fork",
       "site": "wiki.ralfbarkow.ch",
-      "date": 1709411865096
+      "date": 1709656465164
     }
   ]
 }

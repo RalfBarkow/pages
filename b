@@ -27,6 +27,11 @@
       "text": "[[Boundary]] ⇒ [[Distribution Boundary]] (within [[Half Object Plus Protocol]])"
     },
     {
+      "type": "markdown",
+      "id": "7154ee9ddd7f7d91",
+      "text": "→ \"**[[~/boundary/0]]**\""
+    },
+    {
       "type": "paragraph",
       "id": "06db26f2400da9b9",
       "text": "[[Behavior in Smalltalk]]"
@@ -82,6 +87,37 @@
       "text": "[[Behavior of Walk]] (within [[Walk the Neighborhood]])"
     },
     {
+      "type": "paragraph",
+      "id": "00d4aa20f8c00853",
+      "text": "[[Beteiligte Spiegelung]] See: [[Participation]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "dccc058a4cda2118",
+      "text": "[[Breadth-First Search]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "1fc17925adaef27b",
+      "text": "[[Bynase]] See: [[The Glycolytic Clock]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "ce503b9b2c58b5e9",
+      "text": "[[Bounded Seas]] See: [[Scripting With Bounded Seas]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e81aeb5775367387",
+      "text": "[[Base Knowledge and Derivation Paths]] (within [[AIVA Formal Theory]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "ec00c32b5855de4d",
+      "text": "[[Choosing Which Benefit Function to Maximize]] See:  [[Force]] (within [[What Is a Pattern?]]), [[Recurring Problem]]"
+    },
+    null,
+    {
       "type": "reference",
       "id": "f08218b41fdab101",
       "site": "wiki.ralfbarkow.ch",
@@ -92,7 +128,7 @@
     {
       "type": "frame",
       "id": "c98339ab6823e406",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
     }
   ],
   "journal": [
@@ -641,6 +677,277 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
       },
       "date": 1707985621823
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1707985882339
+    },
+    {
+      "type": "add",
+      "id": "00d4aa20f8c00853",
+      "item": {
+        "type": "paragraph",
+        "id": "00d4aa20f8c00853",
+        "text": "[[Beteiligte Spiegelung]] See: [[Participation]]"
+      },
+      "after": "d4f52944c52a00c5",
+      "date": 1708247476707
+    },
+    {
+      "type": "add",
+      "id": "dccc058a4cda2118",
+      "item": {
+        "type": "paragraph",
+        "id": "dccc058a4cda2118",
+        "text": "[[Breadth-First Search]]"
+      },
+      "after": "00d4aa20f8c00853",
+      "date": 1708258236395
+    },
+    {
+      "type": "edit",
+      "id": "c98339ab6823e406",
+      "item": {
+        "type": "frame",
+        "id": "c98339ab6823e406",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      },
+      "date": 1708712747587
+    },
+    {
+      "id": "1fc17925adaef27b",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "1fc17925adaef27b",
+        "text": "See [[Bynase]]"
+      },
+      "after": "dccc058a4cda2118",
+      "attribution": {
+        "page": "The Glycolytic Clock"
+      },
+      "date": 1708712751618
+    },
+    {
+      "type": "edit",
+      "id": "1fc17925adaef27b",
+      "item": {
+        "type": "paragraph",
+        "id": "1fc17925adaef27b",
+        "text": "[[Bynase]] See: [[The Glycolytic Clock]]"
+      },
+      "date": 1708712769484
+    },
+    {
+      "type": "add",
+      "id": "ce503b9b2c58b5e9",
+      "item": {
+        "type": "paragraph",
+        "id": "ce503b9b2c58b5e9",
+        "text": "[[Bounded Seas]] See: [[Scripting With Bounded Seas]]"
+      },
+      "after": "1fc17925adaef27b",
+      "date": 1708757768232
+    },
+    {
+      "type": "edit",
+      "id": "c98339ab6823e406",
+      "item": {
+        "type": "frame",
+        "id": "c98339ab6823e406",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 55"
+      },
+      "date": 1709215739143
+    },
+    {
+      "type": "add",
+      "id": "e81aeb5775367387",
+      "item": {
+        "type": "paragraph",
+        "id": "e81aeb5775367387",
+        "text": "[[Base Knowledge and Derivation Paths]] (within [[AIVA Formal Theory]])"
+      },
+      "after": "ce503b9b2c58b5e9",
+      "date": 1709215774476
+    },
+    {
+      "type": "edit",
+      "id": "c98339ab6823e406",
+      "item": {
+        "type": "frame",
+        "id": "c98339ab6823e406",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 55\nSOURCE graph"
+      },
+      "date": 1709215807755
+    },
+    {
+      "type": "edit",
+      "id": "c98339ab6823e406",
+      "item": {
+        "type": "frame",
+        "id": "c98339ab6823e406",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709215874917
+    },
+    {
+      "type": "edit",
+      "id": "b50af34236cc284c",
+      "item": {
+        "type": "paragraph",
+        "id": "b50af34236cc284c",
+        "text": "[[Boundary]] ⇒ [[Distribution Boundary]] (within [[Half Object Plus Protocol]]) "
+      },
+      "date": 1709229975425
+    },
+    {
+      "type": "edit",
+      "id": "b50af34236cc284c",
+      "item": {
+        "type": "paragraph",
+        "id": "b50af34236cc284c",
+        "text": "[[Boundary]] ⇒ [[Distribution Boundary]] (within [[Half Object Plus Protocol]]) → \"[[~/boundary/0]]\""
+      },
+      "date": 1709229994971
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709233993528
+    },
+    {
+      "type": "edit",
+      "id": "b50af34236cc284c",
+      "item": {
+        "type": "paragraph",
+        "id": "b50af34236cc284c",
+        "text": "[[Boundary]] ⇒ [[Distribution Boundary]] (within [[Half Object Plus Protocol]])"
+      },
+      "date": 1709272729417
+    },
+    {
+      "type": "add",
+      "id": "7154ee9ddd7f7d91",
+      "item": {
+        "type": "paragraph",
+        "id": "7154ee9ddd7f7d91",
+        "text": "→ \"**[[~/boundary/0]]\""
+      },
+      "after": "b50af34236cc284c",
+      "date": 1709272734673
+    },
+    {
+      "type": "edit",
+      "id": "7154ee9ddd7f7d91",
+      "item": {
+        "type": "paragraph",
+        "id": "7154ee9ddd7f7d91",
+        "text": "→ \"**[[~/boundary/0]]**\""
+      },
+      "date": 1709272741530
+    },
+    {
+      "type": "edit",
+      "id": "7154ee9ddd7f7d91",
+      "item": {
+        "type": "markdown",
+        "id": "7154ee9ddd7f7d91",
+        "text": "→ \"**[[~/boundary/0]]**\""
+      },
+      "date": 1709272744287
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709280316508
+    },
+    {
+      "type": "add",
+      "id": "ec00c32b5855de4d",
+      "item": {
+        "type": "paragraph",
+        "id": "ec00c32b5855de4d",
+        "text": "[[Choosing Which Benefit Function to Maximize]] See:  [[Force]] (within [[What Is a Pattern?]]), [[Recurring Problem]]"
+      },
+      "after": "e81aeb5775367387",
+      "date": 1709550707037
+    },
+    {
+      "id": "94a82cfba79d7073",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "854a601b415ac21c",
+        "43802c20b155ea2a",
+        "e900d1bffbec207a",
+        "b50af34236cc284c",
+        "7154ee9ddd7f7d91",
+        "06db26f2400da9b9",
+        "1fbd6a17a2fb22bf",
+        "b61e5bb51bb2e8d2",
+        "443c401c95062512",
+        "85ee7b5d048d49b2",
+        "ba543a9cbce80d92",
+        "47441a2115d4c7cb",
+        "72e7644ff0391615",
+        "0ccc4b00df17e0f7",
+        "6202f46e10e43e22",
+        "d4f52944c52a00c5",
+        "00d4aa20f8c00853",
+        "dccc058a4cda2118",
+        "1fc17925adaef27b",
+        "ce503b9b2c58b5e9",
+        "e81aeb5775367387",
+        "ec00c32b5855de4d",
+        "94a82cfba79d7073",
+        "f08218b41fdab101",
+        "c98339ab6823e406"
+      ],
+      "date": 1709550712497,
+      "error": {
+        "type": "error",
+        "msg": "Internal Server Error",
+        "response": "Server Ignoring move. Try reload."
+      }
+    },
+    {
+      "id": "94a82cfba79d7073",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "94a82cfba79d7073",
+        "text": ""
+      },
+      "after": "f08218b41fdab101",
+      "attribution": {
+        "page": "Choosing Which Benefit Function to Maximize"
+      },
+      "date": 1709550710160
+    },
+    {
+      "type": "remove",
+      "id": "94a82cfba79d7073",
+      "date": 1709550716445
+    },
+    {
+      "type": "edit",
+      "id": "ec00c32b5855de4d",
+      "item": {
+        "type": "paragraph",
+        "id": "ec00c32b5855de4d",
+        "text": "[[Choosing Which Benefit Function to Maximize]] See:  [[Force]] (within [[What Is a Pattern?]]), [[Recurring Problem]]"
+      },
+      "date": 1709550717604
+    },
+    {
+      "type": "fork",
+      "date": 1709550729717
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709656684639
     }
   ]
 }

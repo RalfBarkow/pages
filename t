@@ -7,9 +7,9 @@
       "text": "List Indexcard T"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "cc70989a68ee13d3",
-      "text": "[[tools]] → \"[[mold]]\" [[~/mdp/0c2]]"
+      "text": "[[tools]] → \"**[[mold]]**\" [[~/mdp/0c2]]"
     },
     {
       "type": "paragraph",
@@ -22,9 +22,14 @@
       "text": "[[tangible]] (within [[Container]])"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "c6265aaabb37b3ac",
-      "text": "[[Tag]] ((within [[Item Tag Aggregator]]) within [[Site Survey]])"
+      "text": "**[[Tag]]** ((within [[Item Tag Aggregator]]) within [[Site Survey]])"
+    },
+    {
+      "type": "markdown",
+      "id": "88a8eb4f5db965c3",
+      "text": "- [[Tag Propagation]] (within [[Scripting Tempo Resumes]]) See: **[[Social Network Visualization]]**, [[Social Networks]]"
     },
     {
       "type": "paragraph",
@@ -138,13 +143,81 @@
     },
     {
       "type": "paragraph",
+      "id": "18e93339af8a75b7",
+      "text": "[[Task Specification]] See: [[Task Specification by Memetic Proxy]], [[Memetic Proxy]] ⇒ [[Task]], [[Problem]], [[Problemdeterminierte Systeme]]"
+    },
+    {
+      "type": "markdown",
       "id": "0b9723521c7dd341",
-      "text": "[[Touchstone]] (within [[Marc's Tetrahedron]]) See: [[Linkon]]"
+      "text": "**[[Touchstone]]** (within [[Marc's Tetrahedron]]) See: [[Linkon]]"
     },
     {
       "type": "paragraph",
       "id": "6561bfa58609627e",
       "text": "[[Talcott Parsons]] (within [[Flüchtige Zeiten]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "33d619a06d57ae0e",
+      "text": "[[Three Tuple Relation]] (within) See: [[Atomic Relation]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "1c948f65ed1dff73",
+      "text": "[[Techno-Social Bootstrapping]] (within [[Software as Tools]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "52e560f4a9276dff",
+      "text": "[[Track Dampening]] (within [[NSD Editor]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "0f368210684d31e4",
+      "text": "[[Tether]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3788806b9e0698b4",
+      "text": "[[Thinking Tools]] (within [[Systems Theory 2.0]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "650db188f8701646",
+      "text": "[[Trampelpfad]] See: [beaten] [[Path]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "ca59b4b63c24f4c5",
+      "text": "[[thisContext]] (within [[Access the Run-Time Stack]]) See: [[Context]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "119b35b3b7ac9d6e",
+      "text": "[[Throwie]] (within [[Throwie Talkie]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "b1487a8dcc94c31c",
+      "text": "[[Take Five]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e0356451b9ef4808",
+      "text": "[[Traces Through Diagrams]] See: [[~/diagram/0]]"
+    },
+    {
+      "type": "reference",
+      "id": "9b65b4b369fa5a05",
+      "text": "End of List Indexcard",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "t",
+      "title": "T"
+    },
+    {
+      "type": "frame",
+      "id": "fb2966c5d6e1bdd9",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
     }
   ],
   "journal": [
@@ -1037,29 +1110,506 @@
       "date": 1707126946035
     },
     {
-      "type": "fork",
-      "site": "wiki.ralfbarkow.ch",
-      "date": 1707343757568
+      "type": "add",
+      "id": "33d619a06d57ae0e",
+      "item": {
+        "type": "paragraph",
+        "id": "33d619a06d57ae0e",
+        "text": "[[Three Tuple Relation]] (within) See: [[Atomic Relation]]"
+      },
+      "after": "0b9723521c7dd341",
+      "date": 1707417585272
+    },
+    {
+      "id": "8cbc0890a81494dc",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "8cbc0890a81494dc",
+        "text": "[[Associative Array]] (within [[List Indexcards]])"
+      },
+      "after": "33d619a06d57ae0e",
+      "attribution": {
+        "page": "A"
+      },
+      "date": 1707417588746
+    },
+    {
+      "type": "edit",
+      "id": "8cbc0890a81494dc",
+      "item": {
+        "type": "paragraph",
+        "id": "8cbc0890a81494dc",
+        "text": " (within [[List Indexcards]])"
+      },
+      "date": 1707417594628
+    },
+    {
+      "type": "remove",
+      "id": "8cbc0890a81494dc",
+      "date": 1707417600107
     },
     {
       "item": {
         "type": "factory",
-        "id": "6561bfa58609627e"
+        "id": "1c948f65ed1dff73"
       },
-      "id": "6561bfa58609627e",
+      "id": "1c948f65ed1dff73",
       "type": "add",
-      "after": "0b9723521c7dd341",
-      "date": 1707343759680
+      "after": "33d619a06d57ae0e",
+      "date": 1707775334032
     },
     {
       "type": "edit",
+      "id": "1c948f65ed1dff73",
+      "item": {
+        "type": "paragraph",
+        "id": "1c948f65ed1dff73",
+        "text": "[[Techno-Social Bootstrapping]] (within [[Software as Tools]])"
+      },
+      "date": 1707775350709
+    },
+    {
+      "id": "9b65b4b369fa5a05",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "9b65b4b369fa5a05",
+        "text": "End of List Indexcard",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "t",
+        "title": "T"
+      },
+      "after": "1c948f65ed1dff73",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1707799733470
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "fb2966c5d6e1bdd9"
+      },
+      "id": "fb2966c5d6e1bdd9",
+      "type": "add",
+      "after": "9b65b4b369fa5a05",
+      "date": 1707799746343
+    },
+    {
+      "type": "edit",
+      "id": "fb2966c5d6e1bdd9",
+      "item": {
+        "type": "frame",
+        "id": "fb2966c5d6e1bdd9",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      },
+      "date": 1707799748620
+    },
+    {
+      "type": "add",
+      "id": "52e560f4a9276dff",
+      "item": {
+        "type": "paragraph",
+        "id": "52e560f4a9276dff",
+        "text": "[[Track Dampening]] (within [[NSD Editor]])"
+      },
+      "after": "1c948f65ed1dff73",
+      "date": 1707804889605
+    },
+    {
+      "type": "add",
+      "id": "0f368210684d31e4",
+      "item": {
+        "type": "paragraph",
+        "id": "0f368210684d31e4",
+        "text": "[[Tether]]"
+      },
+      "after": "52e560f4a9276dff",
+      "date": 1707844692121
+    },
+    {
+      "type": "add",
+      "id": "3788806b9e0698b4",
+      "item": {
+        "type": "paragraph",
+        "id": "3788806b9e0698b4",
+        "text": "[[Thinking Tools]] (within [[Systems Theory 2.0]])"
+      },
+      "after": "0f368210684d31e4",
+      "date": 1707849503174
+    },
+    {
+      "type": "edit",
+      "id": "fb2966c5d6e1bdd9",
+      "item": {
+        "type": "frame",
+        "id": "fb2966c5d6e1bdd9",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1708004908186
+    },
+    {
+      "type": "edit",
+      "id": "c6265aaabb37b3ac",
+      "item": {
+        "type": "paragraph",
+        "id": "c6265aaabb37b3ac",
+        "text": "**[[Tag]]** ((within [[Item Tag Aggregator]]) within [[Site Survey]])"
+      },
+      "date": 1708085452453
+    },
+    {
+      "type": "add",
+      "id": "88a8eb4f5db965c3",
+      "item": {
+        "type": "paragraph",
+        "id": "88a8eb4f5db965c3",
+        "text": "- [[Tag Propagation]]"
+      },
+      "after": "c6265aaabb37b3ac",
+      "date": 1708085456711
+    },
+    {
+      "type": "edit",
+      "id": "c6265aaabb37b3ac",
+      "item": {
+        "type": "markdown",
+        "id": "c6265aaabb37b3ac",
+        "text": "**[[Tag]]** ((within [[Item Tag Aggregator]]) within [[Site Survey]])"
+      },
+      "date": 1708085459329
+    },
+    {
+      "type": "edit",
+      "id": "88a8eb4f5db965c3",
+      "item": {
+        "type": "markdown",
+        "id": "88a8eb4f5db965c3",
+        "text": "- [[Tag Propagation]]"
+      },
+      "date": 1708085461068
+    },
+    {
+      "type": "edit",
+      "id": "88a8eb4f5db965c3",
+      "item": {
+        "type": "markdown",
+        "id": "88a8eb4f5db965c3",
+        "text": "- [[Tag Propagation]] (within [[Scripting Tempo Resumes]])"
+      },
+      "date": 1708085495577
+    },
+    {
+      "type": "edit",
+      "id": "88a8eb4f5db965c3",
+      "item": {
+        "type": "markdown",
+        "id": "88a8eb4f5db965c3",
+        "text": "- [[Tag Propagation]] (within [[Scripting Tempo Resumes]]) See: [[Social Network Visualization]]"
+      },
+      "date": 1708085635766
+    },
+    {
+      "type": "edit",
+      "id": "cc70989a68ee13d3",
+      "item": {
+        "type": "paragraph",
+        "id": "cc70989a68ee13d3",
+        "text": "[[tools]] → \"**[[mold]]**\" [[~/mdp/0c2]]"
+      },
+      "date": 1708085779762
+    },
+    {
+      "type": "edit",
+      "id": "cc70989a68ee13d3",
+      "item": {
+        "type": "markdown",
+        "id": "cc70989a68ee13d3",
+        "text": "[[tools]] → \"**[[mold]]**\" [[~/mdp/0c2]]"
+      },
+      "date": 1708085783166
+    },
+    {
+      "type": "edit",
+      "id": "88a8eb4f5db965c3",
+      "item": {
+        "type": "markdown",
+        "id": "88a8eb4f5db965c3",
+        "text": "- [[Tag Propagation]] (within [[Scripting Tempo Resumes]]) See: **[[Social Network Visualization]]**"
+      },
+      "date": 1708085816625
+    },
+    {
+      "type": "edit",
+      "id": "0b9723521c7dd341",
+      "item": {
+        "type": "paragraph",
+        "id": "0b9723521c7dd341",
+        "text": "**[[Touchstone]]** (within [[Marc's Tetrahedron]]) See: [[Linkon]]"
+      },
+      "date": 1708086182884
+    },
+    {
+      "type": "edit",
+      "id": "0b9723521c7dd341",
+      "item": {
+        "type": "markdown",
+        "id": "0b9723521c7dd341",
+        "text": "**[[Touchstone]]** (within [[Marc's Tetrahedron]]) See: [[Linkon]]"
+      },
+      "date": 1708086184789
+    },
+    {
+      "type": "edit",
+      "id": "88a8eb4f5db965c3",
+      "item": {
+        "type": "markdown",
+        "id": "88a8eb4f5db965c3",
+        "text": "- [[Tag Propagation]] (within [[Scripting Tempo Resumes]]) See: **[[Social Network Visualization]]**, [[Social Networks]]"
+      },
+      "date": 1708087069621
+    },
+    {
+      "type": "add",
+      "id": "650db188f8701646",
+      "item": {
+        "type": "paragraph",
+        "id": "650db188f8701646",
+        "text": "[[Trampelpfad]] See: [beaten] [[Path]]"
+      },
+      "after": "3788806b9e0698b4",
+      "date": 1708235007017
+    },
+    {
+      "type": "fork",
+      "date": 1708235538988
+    },
+    {
+      "type": "add",
+      "id": "18e93339af8a75b7",
+      "item": {
+        "type": "paragraph",
+        "id": "18e93339af8a75b7",
+        "text": "[[Task Specification]]"
+      },
+      "after": "650db188f8701646",
+      "date": 1708292419787
+    },
+    {
+      "type": "edit",
+      "id": "18e93339af8a75b7",
+      "item": {
+        "type": "paragraph",
+        "id": "18e93339af8a75b7",
+        "text": "[[Task Specification]] See: [[Task Specification by Memetic Proxy]], [[Memetic Proxy]]"
+      },
+      "date": 1708292482337
+    },
+    {
+      "id": "ca59b4b63c24f4c5",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "ca59b4b63c24f4c5",
+        "text": "[[thisContext]] (within [[Access the Run-Time Stack]])"
+      },
+      "after": "18e93339af8a75b7",
+      "attribution": {
+        "page": "C"
+      },
+      "date": 1708426420591
+    },
+    {
+      "type": "edit",
+      "id": "ca59b4b63c24f4c5",
+      "item": {
+        "type": "paragraph",
+        "id": "ca59b4b63c24f4c5",
+        "text": "[[thisContext]] (within [[Access the Run-Time Stack]]) See: [[Context]]"
+      },
+      "date": 1708426429104
+    },
+    {
+      "type": "add",
+      "id": "119b35b3b7ac9d6e",
+      "item": {
+        "type": "paragraph",
+        "id": "119b35b3b7ac9d6e",
+        "text": "[[Throwie]] (within [[]])"
+      },
+      "after": "ca59b4b63c24f4c5",
+      "date": 1709216536368
+    },
+    {
+      "type": "edit",
+      "id": "119b35b3b7ac9d6e",
+      "item": {
+        "type": "paragraph",
+        "id": "119b35b3b7ac9d6e",
+        "text": "[[Throwie]] (within [[Throwie Talkie]])"
+      },
+      "date": 1709216545425
+    },
+    {
+      "type": "edit",
+      "id": "fb2966c5d6e1bdd9",
+      "item": {
+        "type": "frame",
+        "id": "fb2966c5d6e1bdd9",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709216559705
+    },
+    {
+      "type": "add",
+      "id": "b1487a8dcc94c31c",
+      "item": {
+        "type": "paragraph",
+        "id": "b1487a8dcc94c31c",
+        "text": "[[Take Five]]"
+      },
+      "after": "119b35b3b7ac9d6e",
+      "date": 1709296538085
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709299804599
+    },
+    {
+      "type": "edit",
+      "id": "fb2966c5d6e1bdd9",
+      "item": {
+        "type": "frame",
+        "id": "fb2966c5d6e1bdd9",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+      },
+      "date": 1709299828488
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709312350408
+    },
+    {
+      "type": "add",
+      "id": "e0356451b9ef4808",
+      "item": {
+        "type": "paragraph",
+        "id": "e0356451b9ef4808",
+        "text": "[[Traces Through Diagrams]]"
+      },
+      "after": "b1487a8dcc94c31c",
+      "date": 1709312362927
+    },
+    {
+      "type": "edit",
+      "id": "e0356451b9ef4808",
+      "item": {
+        "type": "paragraph",
+        "id": "e0356451b9ef4808",
+        "text": "[[Traces Through Diagrams]] See: [[~/diagram/0]]"
+      },
+      "date": 1709312381256
+    },
+    {
+      "id": "18e93339af8a75b7",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "cc70989a68ee13d3",
+        "f99b44b97e6c6782",
+        "40d21e0197bacab0",
+        "c6265aaabb37b3ac",
+        "88a8eb4f5db965c3",
+        "d88b6f2f125890c2",
+        "4462c39d4f5a1b74",
+        "d220da03ae9bcafc",
+        "b99f7cc4e46049a7",
+        "1d14eb9ac7f41624",
+        "610ab2978e31b61f",
+        "55242fffc0a4b12a",
+        "65c1eaceae7bae7b",
+        "e4c294c771af3fdd",
+        "6a9509da769e57ca",
+        "245ac79aeddfd201",
+        "c579b3729134746f",
+        "33ee898d78d63ab3",
+        "384b8be4a8a594d4",
+        "349c133cebdbfd06",
+        "d15d2f2333c44202",
+        "dc15e527d0567bec",
+        "1afec7f4af3c3a99",
+        "597f7f49dba29693",
+        "d79fd65afcd0f488",
+        "d4028f5507d1ce8f",
+        "85f3231906079e2a",
+        "18e93339af8a75b7",
+        "0b9723521c7dd341",
+        "33d619a06d57ae0e",
+        "1c948f65ed1dff73",
+        "52e560f4a9276dff",
+        "0f368210684d31e4",
+        "3788806b9e0698b4",
+        "650db188f8701646",
+        "ca59b4b63c24f4c5",
+        "119b35b3b7ac9d6e",
+        "b1487a8dcc94c31c",
+        "e0356451b9ef4808",
+        "9b65b4b369fa5a05",
+        "fb2966c5d6e1bdd9"
+      ],
+      "date": 1709548787948
+    },
+    {
+      "type": "edit",
+      "id": "18e93339af8a75b7",
+      "item": {
+        "type": "paragraph",
+        "id": "18e93339af8a75b7",
+        "text": "[[Task Specification]] See: [[Task Specification by Memetic Proxy]], [[Memetic Proxy]] ⇒ [[Task]], [[Problem]]"
+      },
+      "date": 1709548813050
+    },
+    {
+      "type": "edit",
+      "id": "18e93339af8a75b7",
+      "item": {
+        "type": "paragraph",
+        "id": "18e93339af8a75b7",
+        "text": "[[Task Specification]] See: [[Task Specification by Memetic Proxy]], [[Memetic Proxy]] ⇒ [[Task]], [[Problem]], [[[[Problemdeterminierte Systeme]]]]"
+      },
+      "date": 1709548837227
+    },
+    {
+      "type": "edit",
+      "id": "18e93339af8a75b7",
+      "item": {
+        "type": "paragraph",
+        "id": "18e93339af8a75b7",
+        "text": "[[Task Specification]] See: [[Task Specification by Memetic Proxy]], [[Memetic Proxy]] ⇒ [[Task]], [[Problem]], [[Problemdeterminierte Systeme]]"
+      },
+      "date": 1709548843183
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709656775871
+    },
+    {
       "id": "6561bfa58609627e",
+      "type": "add",
       "item": {
         "type": "paragraph",
         "id": "6561bfa58609627e",
         "text": "[[Talcott Parsons]] (within [[Flüchtige Zeiten]])"
       },
-      "date": 1707343775273
+      "after": "0b9723521c7dd341",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1709656792187
     }
   ]
 }

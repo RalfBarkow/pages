@@ -252,6 +252,11 @@
       "text": "[[Protein]] (within [[Graph Databases of Protein Structures]]) See: [[Similarity Query]]"
     },
     {
+      "type": "paragraph",
+      "id": "bd37ce1b0abc3a09",
+      "text": "[[Ports]] as the basis of an [[Object-Capability Model]] on the web [https://html.spec.whatwg.org/multipage/web-messaging.html#ports-as-the-basis-of-an-object-capability-model-on-the-web page]"
+    },
+    {
       "type": "reference",
       "id": "e7dc8c0df83732ed",
       "site": "wiki.ralfbarkow.ch",
@@ -262,7 +267,7 @@
     {
       "type": "frame",
       "id": "3fbe92c4b041c5d5",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
     }
   ],
   "journal": [
@@ -2074,9 +2079,34 @@
       "date": 1709631256779
     },
     {
+      "id": "bd37ce1b0abc3a09",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "bd37ce1b0abc3a09",
+        "text": "[[Ports]] as the basis of an [[Object-Capability Model]] on the web [https://html.spec.whatwg.org/multipage/web-messaging.html#ports-as-the-basis-of-an-object-capability-model-on-the-web page]"
+      },
+      "after": "53876d44041e54c6",
+      "attribution": {
+        "page": "2024-03-05",
+        "site": "localhost:3000"
+      },
+      "date": 1709653523128
+    },
+    {
+      "type": "edit",
+      "id": "3fbe92c4b041c5d5",
+      "item": {
+        "type": "frame",
+        "id": "3fbe92c4b041c5d5",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709653557134
+    },
+    {
       "type": "fork",
       "site": "wiki.ralfbarkow.ch",
-      "date": 1709633249159
+      "date": 1709656195951
     }
   ]
 }

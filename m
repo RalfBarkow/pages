@@ -143,12 +143,17 @@
     {
       "type": "paragraph",
       "id": "bbf8e51803507285",
-      "text": "[[match]] (within [[Value]])"
+      "text": "[[match]] (within [[Value]]) See: [[Matching]]"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "67d9b92ea78d32ae",
-      "text": "[[Measurement]] (within [[Simple View]]) See: The goal question metric approach, mechanism for creating a corporate [[Memory]]"
+      "text": "[[Measurement]] (within [[Simple View]]) See: The goal question metric approach, mechanism for creating a corporate **[[Memory]]**"
+    },
+    {
+      "type": "markdown",
+      "id": "fbc5cbceaec8d49e",
+      "text": "- [[Memory Effects]]\n- **[[Memory Game]]** See: [[Zettelkasten as a Memory Game]]"
     },
     {
       "type": "paragraph",
@@ -162,8 +167,121 @@
     },
     {
       "type": "paragraph",
+      "id": "145796f9e023df12",
+      "text": "[[Max Weber]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6ecf89ded0cab9d7",
+      "text": "[[Murmuration]] (within a [[Circle]], [[Shape]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "27bcba994cb29bea",
+      "text": "[[Mouse]] See: [[The Augmented Conversation]] and [[The Design of Microverse]], [[Track Dampening]] (within [[NSD Editor]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "52e560f4a9276dff",
+      "text": "[[Track Dampening]] (within [[NSD Editor]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "a04b0cd896b91a37",
+      "text": "[[Matterhorn University]] See: [[Fern-Uni Schweiz]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "f303cb3c2bf473b2",
+      "text": "[[Macht]] See: [[Macht im System]]"
+    },
+    {
+      "type": "paragraph",
       "id": "60fbe4d888b55657",
-      "text": "[[Macht]] (within [[Flüchtige Zeiten]])"
+      "text": "– (within [[Flüchtige Zeiten]])"
+    },
+    {
+      "type": "markdown",
+      "id": "45581252a4b64963",
+      "text": "**[[Mark the Bot’s Starting Point]]** See: [[checks(item)]] (within [http://ward.dojo.fed.wiki/assets/pages/story-telling/telling.js telling.js] and [[Story Telling]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "4a7e816d19f375dd",
+      "text": "[[Market Walkthrough]] (within [[Episodes]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "0fc1e69f688d03b5",
+      "text": "[[Marker]] (within [[Edit Hint]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "1d8bd82de8a9c22a",
+      "text": "[[Mathematics]] remains [[symbolic]] See: [[Return to Postsymbolism]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "abec03fef8b53ba5",
+      "text": "[[Moderator Supervision]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "9462fe7912a2a47d",
+      "text": "[[Man Kind?]]"
+    },
+    {
+      "type": "markdown",
+      "id": "50d637d3ad0dcadc",
+      "text": "**[[Money]]** (within [[Sacred Economics]]"
+    },
+    {
+      "type": "markdown",
+      "id": "7bdb1dcdb2aa8805",
+      "text": "[[The “Mirrors” Design Principles]] → \"**[[mirror]]**\"\n- [[Mirror of Man]]"
+    },
+    {
+      "type": "markdown",
+      "id": "f9ecdb9d743629a6",
+      "text": "[[Muster]] See: [[Pattern]], [[ Strukturen und Muster von Koppelungen]]/[[Structures and Patterns of Couplings]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "7908fbd99e5754e9",
+      "text": "[[meaningful]] (within [[Zoom to Group]]) See: [[Cluster]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "f83a43f6b0781563",
+      "text": "[[Max Liboiron]] See: [[Hunting and Dressing Litter]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "d89cf6f3697938d5",
+      "text": "[[Monkey]] (within [[Pair Programming]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "53096ca4578402c8",
+      "text": "[[Message]] (within [[PN Modeling Guidelines]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "44b2b5992598537f",
+      "text": "[[Measure the Degree of Folding of a Protein]] See: [[Protein]], [[Degree of Folding]]"
+    },
+    {
+      "type": "reference",
+      "id": "32f74fe2229d86ed",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "m",
+      "title": "M",
+      "text": "End of List Indexcard"
+    },
+    {
+      "type": "frame",
+      "id": "99644c7446be481c",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
     }
   ],
   "journal": [
@@ -1341,58 +1459,757 @@
       "date": 1707255206353
     },
     {
-      "type": "fork",
-      "site": "wiki.ralfbarkow.ch",
-      "date": 1707392864024
+      "item": {
+        "type": "factory",
+        "id": "145796f9e023df12"
+      },
+      "id": "145796f9e023df12",
+      "type": "add",
+      "after": "0b886730d8d12a2e",
+      "date": 1707414779296
+    },
+    {
+      "type": "edit",
+      "id": "145796f9e023df12",
+      "item": {
+        "type": "paragraph",
+        "id": "145796f9e023df12",
+        "text": "[[Max Weber]]"
+      },
+      "date": 1707414787264
+    },
+    {
+      "id": "6ecf89ded0cab9d7",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "6ecf89ded0cab9d7",
+        "text": "⇒ [[Murmuration]] (within a [[Circle]], [[Shape]])"
+      },
+      "after": "145796f9e023df12",
+      "attribution": {
+        "page": "2024-02-10"
+      },
+      "date": 1707576503894
+    },
+    {
+      "type": "edit",
+      "id": "6ecf89ded0cab9d7",
+      "item": {
+        "type": "paragraph",
+        "id": "6ecf89ded0cab9d7",
+        "text": "[[Murmuration]] (within a [[Circle]], [[Shape]])"
+      },
+      "date": 1707576509403
+    },
+    {
+      "id": "32f74fe2229d86ed",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "32f74fe2229d86ed",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "m",
+        "title": "M",
+        "text": "End of List Indexcard"
+      },
+      "after": "6ecf89ded0cab9d7",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1707798199920
     },
     {
       "item": {
         "type": "factory",
-        "id": "55e77d67139330b0"
+        "id": "99644c7446be481c"
       },
-      "id": "55e77d67139330b0",
+      "id": "99644c7446be481c",
       "type": "add",
-      "after": "0b886730d8d12a2e",
-      "date": 1707392881068
-    },
-    {
-      "id": "60fbe4d888b55657",
-      "type": "add",
-      "item": {
-        "type": "paragraph",
-        "id": "60fbe4d888b55657",
-        "text": "[[Macht]]"
-      },
-      "after": "0b886730d8d12a2e",
-      "attribution": {
-        "page": "Flüchtige Zeiten"
-      },
-      "date": 1707392885952
+      "after": "32f74fe2229d86ed",
+      "date": 1707798203990
     },
     {
       "type": "edit",
-      "id": "55e77d67139330b0",
+      "id": "99644c7446be481c",
+      "item": {
+        "type": "frame",
+        "id": "99644c7446be481c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 1500"
+      },
+      "date": 1707798206181
+    },
+    {
+      "type": "edit",
+      "id": "bbf8e51803507285",
       "item": {
         "type": "paragraph",
-        "id": "55e77d67139330b0",
-        "text": "(within [[Flüchtige Zeiten]])"
+        "id": "bbf8e51803507285",
+        "text": "[[match]] (within [[Value]]) See: [[Matching]]"
       },
-      "date": 1707392903574
+      "date": 1707801816785
+    },
+    {
+      "type": "add",
+      "id": "27bcba994cb29bea",
+      "item": {
+        "type": "paragraph",
+        "id": "27bcba994cb29bea",
+        "text": "[[Mouse]]"
+      },
+      "after": "6ecf89ded0cab9d7",
+      "date": 1707807130834
+    },
+    {
+      "id": "aee2acee21a6796b",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "aee2acee21a6796b",
+        "text": "See [[The Augmented Conversation]] and [[The Design of Microverse]]."
+      },
+      "after": "27bcba994cb29bea",
+      "attribution": {
+        "page": "2024-02-13"
+      },
+      "date": 1707807133806
     },
     {
       "type": "remove",
-      "id": "55e77d67139330b0",
-      "date": 1707392907679
+      "id": "aee2acee21a6796b",
+      "date": 1707807137625
     },
     {
       "type": "edit",
+      "id": "27bcba994cb29bea",
+      "item": {
+        "type": "paragraph",
+        "id": "27bcba994cb29bea",
+        "text": "[[Mouse]] See: [[The Augmented Conversation]] and [[The Design of Microverse]]."
+      },
+      "date": 1707807141642
+    },
+    {
+      "id": "52e560f4a9276dff",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "52e560f4a9276dff",
+        "text": "[[Track Dampening]] (within [[NSD Editor]])"
+      },
+      "after": "27bcba994cb29bea",
+      "attribution": {
+        "page": "T"
+      },
+      "date": 1707807303707
+    },
+    {
+      "type": "edit",
+      "id": "27bcba994cb29bea",
+      "item": {
+        "type": "paragraph",
+        "id": "27bcba994cb29bea",
+        "text": "[[Mouse]] See: [[The Augmented Conversation]] and [[The Design of Microverse]], [[Track Dampening]] (within [[NSD Editor]])"
+      },
+      "date": 1707807309827
+    },
+    {
+      "type": "add",
+      "id": "a04b0cd896b91a37",
+      "item": {
+        "type": "paragraph",
+        "id": "a04b0cd896b91a37",
+        "text": "[[Matterhorn University]]"
+      },
+      "after": "52e560f4a9276dff",
+      "date": 1707826496995
+    },
+    {
+      "type": "edit",
+      "id": "a04b0cd896b91a37",
+      "item": {
+        "type": "paragraph",
+        "id": "a04b0cd896b91a37",
+        "text": "[[Matterhorn University]] See: [[Fern-Uni Schweiz]]"
+      },
+      "date": 1707826582534
+    },
+    {
+      "type": "add",
+      "id": "f303cb3c2bf473b2",
+      "item": {
+        "type": "paragraph",
+        "id": "f303cb3c2bf473b2",
+        "text": "[[Macht]]"
+      },
+      "after": "a04b0cd896b91a37",
+      "date": 1707849602687
+    },
+    {
+      "type": "edit",
+      "id": "f303cb3c2bf473b2",
+      "item": {
+        "type": "paragraph",
+        "id": "f303cb3c2bf473b2",
+        "text": "[[Macht]] See: [[Macht im System]]"
+      },
+      "date": 1707849650904
+    },
+    {
+      "type": "add",
+      "id": "45581252a4b64963",
+      "item": {
+        "type": "paragraph",
+        "id": "45581252a4b64963",
+        "text": "[[Mark the Bot’s Starting Point]]"
+      },
+      "after": "f303cb3c2bf473b2",
+      "date": 1707916787829
+    },
+    {
+      "id": "b5f798763ad800d6",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "b5f798763ad800d6",
+        "text": "[[checks(item)]] (within [http://ward.dojo.fed.wiki/assets/pages/story-telling/telling.js telling.js] See: [[Story Telling]])"
+      },
+      "after": "45581252a4b64963",
+      "attribution": {
+        "page": "C"
+      },
+      "date": 1707917000904
+    },
+    {
+      "type": "edit",
+      "id": "b5f798763ad800d6",
+      "item": {
+        "type": "markdown",
+        "id": "b5f798763ad800d6",
+        "text": "See: [[checks(item)]] (within [http://ward.dojo.fed.wiki/assets/pages/story-telling/telling.js telling.js] and [[Story Telling]])"
+      },
+      "date": 1707917042211
+    },
+    {
+      "type": "remove",
+      "id": "b5f798763ad800d6",
+      "date": 1707917049136
+    },
+    {
+      "type": "edit",
+      "id": "45581252a4b64963",
+      "item": {
+        "type": "paragraph",
+        "id": "45581252a4b64963",
+        "text": "[[Mark the Bot’s Starting Point]] See: [[checks(item)]] (within [http://ward.dojo.fed.wiki/assets/pages/story-telling/telling.js telling.js] and [[Story Telling]])"
+      },
+      "date": 1707917052285
+    },
+    {
+      "type": "fork",
+      "date": 1707917283120
+    },
+    {
+      "type": "edit",
+      "id": "99644c7446be481c",
+      "item": {
+        "type": "frame",
+        "id": "99644c7446be481c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      },
+      "date": 1708001083408
+    },
+    {
+      "type": "add",
+      "id": "4a7e816d19f375dd",
+      "item": {
+        "type": "paragraph",
+        "id": "4a7e816d19f375dd",
+        "text": "[[Market Walkthrough]]"
+      },
+      "after": "45581252a4b64963",
+      "date": 1708005415655
+    },
+    {
+      "type": "edit",
+      "id": "4a7e816d19f375dd",
+      "item": {
+        "type": "paragraph",
+        "id": "4a7e816d19f375dd",
+        "text": "[[Market Walkthrough]] (within [[Episodes]])"
+      },
+      "date": 1708005444058
+    },
+    {
+      "type": "add",
+      "id": "0fc1e69f688d03b5",
+      "item": {
+        "type": "paragraph",
+        "id": "0fc1e69f688d03b5",
+        "text": "[[Marker]] (within [[Edit Hint]])"
+      },
+      "after": "4a7e816d19f375dd",
+      "date": 1708006225608
+    },
+    {
+      "id": "1d8bd82de8a9c22a",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "1d8bd82de8a9c22a",
+        "text": "Today [[Mathematics]] remains [[symbolic]] while other communication media have evolved into visual and interactive experiences. "
+      },
+      "after": "0fc1e69f688d03b5",
+      "attribution": {
+        "page": "Return to Postsymbolism"
+      },
+      "date": 1708013451546
+    },
+    {
+      "type": "edit",
+      "id": "1d8bd82de8a9c22a",
+      "item": {
+        "type": "paragraph",
+        "id": "1d8bd82de8a9c22a",
+        "text": "[[Mathematics]] remains [[symbolic]] See: "
+      },
+      "date": 1708013463312
+    },
+    {
+      "type": "edit",
+      "id": "1d8bd82de8a9c22a",
+      "item": {
+        "type": "paragraph",
+        "id": "1d8bd82de8a9c22a",
+        "text": "[[Mathematics]] remains [[symbolic]] See: [[Return to Postsymbolism]]"
+      },
+      "date": 1708013471858
+    },
+    {
+      "type": "edit",
+      "id": "45581252a4b64963",
+      "item": {
+        "type": "paragraph",
+        "id": "45581252a4b64963",
+        "text": "**[[Mark the Bot’s Starting Point]]** See: [[checks(item)]] (within [http://ward.dojo.fed.wiki/assets/pages/story-telling/telling.js telling.js] and [[Story Telling]])"
+      },
+      "date": 1708014319810
+    },
+    {
+      "type": "edit",
+      "id": "45581252a4b64963",
+      "item": {
+        "type": "markdown",
+        "id": "45581252a4b64963",
+        "text": "**[[Mark the Bot’s Starting Point]]** See: [[checks(item)]] (within [http://ward.dojo.fed.wiki/assets/pages/story-telling/telling.js telling.js] and [[Story Telling]])"
+      },
+      "date": 1708014322506
+    },
+    {
+      "type": "edit",
+      "id": "67d9b92ea78d32ae",
+      "item": {
+        "type": "paragraph",
+        "id": "67d9b92ea78d32ae",
+        "text": "[[Measurement]] (within [[Simple View]]) See: The goal question metric approach, mechanism for creating a corporate **[[Memory]]**"
+      },
+      "date": 1708015274236
+    },
+    {
+      "type": "add",
+      "id": "fbc5cbceaec8d49e",
+      "item": {
+        "type": "paragraph",
+        "id": "fbc5cbceaec8d49e",
+        "text": "- [[Memory Effects]]"
+      },
+      "after": "67d9b92ea78d32ae",
+      "date": 1708015279206
+    },
+    {
+      "type": "edit",
+      "id": "67d9b92ea78d32ae",
+      "item": {
+        "type": "markdown",
+        "id": "67d9b92ea78d32ae",
+        "text": "[[Measurement]] (within [[Simple View]]) See: The goal question metric approach, mechanism for creating a corporate **[[Memory]]**"
+      },
+      "date": 1708015281477
+    },
+    {
+      "type": "edit",
+      "id": "fbc5cbceaec8d49e",
+      "item": {
+        "type": "markdown",
+        "id": "fbc5cbceaec8d49e",
+        "text": "- [[Memory Effects]]"
+      },
+      "date": 1708015283359
+    },
+    {
+      "type": "add",
+      "id": "abec03fef8b53ba5",
+      "item": {
+        "type": "paragraph",
+        "id": "abec03fef8b53ba5",
+        "text": "[[Moderator Supervision]]"
+      },
+      "after": "1d8bd82de8a9c22a",
+      "date": 1708015616825
+    },
+    {
+      "type": "add",
+      "id": "9462fe7912a2a47d",
+      "item": {
+        "type": "paragraph",
+        "id": "9462fe7912a2a47d",
+        "text": "[[Man Kind?]]"
+      },
+      "after": "abec03fef8b53ba5",
+      "date": 1708020200809
+    },
+    {
+      "type": "add",
+      "id": "50d637d3ad0dcadc",
+      "item": {
+        "type": "paragraph",
+        "id": "50d637d3ad0dcadc",
+        "text": "**[[Money]]** (within [["
+      },
+      "after": "9462fe7912a2a47d",
+      "date": 1708022947110
+    },
+    {
+      "type": "edit",
+      "id": "50d637d3ad0dcadc",
+      "item": {
+        "type": "paragraph",
+        "id": "50d637d3ad0dcadc",
+        "text": "**[[Money]]** (within [[Sacred Economics]]"
+      },
+      "date": 1708022954179
+    },
+    {
+      "type": "edit",
+      "id": "50d637d3ad0dcadc",
+      "item": {
+        "type": "markdown",
+        "id": "50d637d3ad0dcadc",
+        "text": "**[[Money]]** (within [[Sacred Economics]]"
+      },
+      "date": 1708022955907
+    },
+    {
+      "type": "add",
+      "id": "7bdb1dcdb2aa8805",
+      "item": {
+        "type": "markdown",
+        "id": "7bdb1dcdb2aa8805",
+        "text": "[[The “Mirrors” Design Principles]]"
+      },
+      "after": "50d637d3ad0dcadc",
+      "date": 1708023545129
+    },
+    {
+      "type": "edit",
+      "id": "7bdb1dcdb2aa8805",
+      "item": {
+        "type": "markdown",
+        "id": "7bdb1dcdb2aa8805",
+        "text": "[[The “Mirrors” Design Principles]] → \"**[[mirror]]**\""
+      },
+      "date": 1708023584149
+    },
+    {
+      "type": "add",
+      "id": "f9ecdb9d743629a6",
+      "item": {
+        "type": "markdown",
+        "id": "f9ecdb9d743629a6",
+        "text": "[[Muster]]"
+      },
+      "after": "7bdb1dcdb2aa8805",
+      "date": 1708035264737
+    },
+    {
+      "type": "edit",
+      "id": "f9ecdb9d743629a6",
+      "item": {
+        "type": "markdown",
+        "id": "f9ecdb9d743629a6",
+        "text": "[[Muster]] See: [[Pattern]]"
+      },
+      "date": 1708035288076
+    },
+    {
+      "type": "edit",
+      "id": "f9ecdb9d743629a6",
+      "item": {
+        "type": "markdown",
+        "id": "f9ecdb9d743629a6",
+        "text": "[[Muster]] See: [[Pattern]], [[ Strukturen und Muster von Koppelungen]]/"
+      },
+      "date": 1708035327465
+    },
+    {
+      "type": "edit",
+      "id": "f9ecdb9d743629a6",
+      "item": {
+        "type": "markdown",
+        "id": "f9ecdb9d743629a6",
+        "text": "[[Muster]] See: [[Pattern]], [[ Strukturen und Muster von Koppelungen]]/[[Structures and Patterns of Couplings]]"
+      },
+      "date": 1708035339706
+    },
+    {
+      "id": "7908fbd99e5754e9",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "7908fbd99e5754e9",
+        "text": "[[Cluster]] (within [[Zoom to Group]])"
+      },
+      "after": "f9ecdb9d743629a6",
+      "attribution": {
+        "page": "C"
+      },
+      "date": 1708038080525
+    },
+    {
+      "type": "edit",
+      "id": "7908fbd99e5754e9",
+      "item": {
+        "type": "paragraph",
+        "id": "7908fbd99e5754e9",
+        "text": "[[meaningful]] (within [[Zoom to Group]]) See: [[Cluster]] "
+      },
+      "date": 1708038093141
+    },
+    {
+      "type": "edit",
+      "id": "fbc5cbceaec8d49e",
+      "item": {
+        "type": "markdown",
+        "id": "fbc5cbceaec8d49e",
+        "text": "- [[Memory Effects]]\n- **[[Memory Game]]**"
+      },
+      "date": 1708084358536
+    },
+    {
+      "type": "edit",
+      "id": "fbc5cbceaec8d49e",
+      "item": {
+        "type": "markdown",
+        "id": "fbc5cbceaec8d49e",
+        "text": "- [[Memory Effects]]\n- **[[Memory Game]]** See: [[Zettelkasten as a Memory Game]]"
+      },
+      "date": 1708084414081
+    },
+    {
+      "type": "edit",
+      "id": "7bdb1dcdb2aa8805",
+      "item": {
+        "type": "markdown",
+        "id": "7bdb1dcdb2aa8805",
+        "text": "[[The “Mirrors” Design Principles]] → \"**[[mirror]]**\"\n- [[Mirror of Man]]"
+      },
+      "date": 1708194540588
+    },
+    {
+      "type": "edit",
+      "id": "7908fbd99e5754e9",
+      "item": {
+        "type": "paragraph",
+        "id": "7908fbd99e5754e9",
+        "text": "[[meaningful]] (within [[Zoom to Group]]) See: [[Cluster]]"
+      },
+      "date": 1708278273525
+    },
+    {
+      "type": "add",
+      "id": "2a546dcd044c348e",
+      "item": {
+        "type": "paragraph",
+        "id": "2a546dcd044c348e",
+        "text": "[[Memetic Proxy]]"
+      },
+      "after": "7908fbd99e5754e9",
+      "date": 1708278276776
+    },
+    {
+      "type": "edit",
+      "id": "2a546dcd044c348e",
+      "item": {
+        "type": "paragraph",
+        "id": "2a546dcd044c348e",
+        "text": "[[Memetic Proxy]] See: [[Persona Pattern]]"
+      },
+      "date": 1708291786922
+    },
+    {
+      "id": "2a546dcd044c348e",
+      "type": "remove",
+      "removedTo": {
+        "page": "P"
+      },
+      "date": 1708291961080
+    },
+    {
+      "type": "add",
+      "id": "f83a43f6b0781563",
+      "item": {
+        "type": "paragraph",
+        "id": "f83a43f6b0781563",
+        "text": "[[Max Liboiron]] See: [[ ]]"
+      },
+      "after": "7908fbd99e5754e9",
+      "date": 1708424870832
+    },
+    {
+      "type": "edit",
+      "id": "f83a43f6b0781563",
+      "item": {
+        "type": "paragraph",
+        "id": "f83a43f6b0781563",
+        "text": "[[Max Liboiron]] See: [[Hunting and Dressing Litter]]"
+      },
+      "date": 1708424882135
+    },
+    {
+      "type": "edit",
+      "id": "99644c7446be481c",
+      "item": {
+        "type": "frame",
+        "id": "99644c7446be481c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      },
+      "date": 1709196405295
+    },
+    {
+      "type": "add",
+      "id": "d89cf6f3697938d5",
+      "item": {
+        "type": "paragraph",
+        "id": "d89cf6f3697938d5",
+        "text": "[[Monkey]] (within [[Pair Programming]])"
+      },
+      "after": "f83a43f6b0781563",
+      "date": 1709196441687
+    },
+    {
+      "type": "add",
+      "id": "53096ca4578402c8",
+      "item": {
+        "type": "paragraph",
+        "id": "53096ca4578402c8",
+        "text": "[[Message]] (within )"
+      },
+      "after": "d89cf6f3697938d5",
+      "date": 1709229685595
+    },
+    {
+      "type": "edit",
+      "id": "53096ca4578402c8",
+      "item": {
+        "type": "paragraph",
+        "id": "53096ca4578402c8",
+        "text": "[[Message]] (within [[PN Modeling Guidelines]])"
+      },
+      "date": 1709229696079
+    },
+    {
+      "type": "edit",
+      "id": "99644c7446be481c",
+      "item": {
+        "type": "frame",
+        "id": "99644c7446be481c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709229867688
+    },
+    {
+      "type": "edit",
+      "id": "99644c7446be481c",
+      "item": {
+        "type": "frame",
+        "id": "99644c7446be481c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709229882239
+    },
+    {
+      "id": "44b2b5992598537f",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "44b2b5992598537f",
+        "text": "[[Measure the Degree of Folding of a Protein]]"
+      },
+      "after": "53096ca4578402c8",
+      "attribution": {
+        "page": "Protein",
+        "site": "localhost:3000"
+      },
+      "date": 1709659689662
+    },
+    {
+      "type": "edit",
+      "id": "44b2b5992598537f",
+      "item": {
+        "type": "paragraph",
+        "id": "44b2b5992598537f",
+        "text": "[[Measure the Degree of Folding of a Protein]] See: [[Protein]]"
+      },
+      "date": 1709659700789
+    },
+    {
+      "type": "edit",
+      "id": "44b2b5992598537f",
+      "item": {
+        "type": "paragraph",
+        "id": "44b2b5992598537f",
+        "text": "[[Measure the Degree of Folding of a Protein]] See: [[Protein]], [[[[Degree of Folding]]]]"
+      },
+      "date": 1709660048647
+    },
+    {
+      "type": "edit",
+      "id": "44b2b5992598537f",
+      "item": {
+        "type": "paragraph",
+        "id": "44b2b5992598537f",
+        "text": "[[Measure the Degree of Folding of a Protein]] See: [[Protein]], [[Degree of Folding]]"
+      },
+      "date": 1709660056981
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709660160115
+    },
+    {
       "id": "60fbe4d888b55657",
+      "type": "add",
       "item": {
         "type": "paragraph",
         "id": "60fbe4d888b55657",
         "text": "[[Macht]] (within [[Flüchtige Zeiten]])"
       },
-      "date": 1707392908429
+      "after": "f303cb3c2bf473b2",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1709660174415
+    },
+    {
+      "type": "edit",
+      "id": "60fbe4d888b55657",
+      "item": {
+        "type": "paragraph",
+        "id": "60fbe4d888b55657",
+        "text": "– (within [[Flüchtige Zeiten]])"
+      },
+      "date": 1709660182512
     }
   ]
 }
