@@ -142,6 +142,11 @@
       "text": "[[Task Location]] See: [[Learning Journey]] (within [[Disgust and Envy]])"
     },
     {
+      "type": "paragraph",
+      "id": "18e93339af8a75b7",
+      "text": "[[Task Specification]] See: [[Task Specification by Memetic Proxy]], [[Memetic Proxy]] ⇒ [[Task]], [[Problem]], [[Problemdeterminierte Systeme]]"
+    },
+    {
       "type": "markdown",
       "id": "0b9723521c7dd341",
       "text": "**[[Touchstone]]** (within [[Marc's Tetrahedron]]) See: [[Linkon]]"
@@ -178,11 +183,6 @@
     },
     {
       "type": "paragraph",
-      "id": "18e93339af8a75b7",
-      "text": "[[Task Specification]] See: [[Task Specification by Memetic Proxy]], [[Memetic Proxy]]"
-    },
-    {
-      "type": "paragraph",
       "id": "ca59b4b63c24f4c5",
       "text": "[[thisContext]] (within [[Access the Run-Time Stack]]) See: [[Context]]"
     },
@@ -195,6 +195,11 @@
       "type": "paragraph",
       "id": "b1487a8dcc94c31c",
       "text": "[[Take Five]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e0356451b9ef4808",
+      "text": "[[Traces Through Diagrams]] See: [[~/diagram/0]]"
     },
     {
       "type": "reference",
@@ -1476,6 +1481,116 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
       },
       "date": 1709299828488
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709312350408
+    },
+    {
+      "type": "add",
+      "id": "e0356451b9ef4808",
+      "item": {
+        "type": "paragraph",
+        "id": "e0356451b9ef4808",
+        "text": "[[Traces Through Diagrams]]"
+      },
+      "after": "b1487a8dcc94c31c",
+      "date": 1709312362927
+    },
+    {
+      "type": "edit",
+      "id": "e0356451b9ef4808",
+      "item": {
+        "type": "paragraph",
+        "id": "e0356451b9ef4808",
+        "text": "[[Traces Through Diagrams]] See: [[~/diagram/0]]"
+      },
+      "date": 1709312381256
+    },
+    {
+      "id": "18e93339af8a75b7",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "cc70989a68ee13d3",
+        "f99b44b97e6c6782",
+        "40d21e0197bacab0",
+        "c6265aaabb37b3ac",
+        "88a8eb4f5db965c3",
+        "d88b6f2f125890c2",
+        "4462c39d4f5a1b74",
+        "d220da03ae9bcafc",
+        "b99f7cc4e46049a7",
+        "1d14eb9ac7f41624",
+        "610ab2978e31b61f",
+        "55242fffc0a4b12a",
+        "65c1eaceae7bae7b",
+        "e4c294c771af3fdd",
+        "6a9509da769e57ca",
+        "245ac79aeddfd201",
+        "c579b3729134746f",
+        "33ee898d78d63ab3",
+        "384b8be4a8a594d4",
+        "349c133cebdbfd06",
+        "d15d2f2333c44202",
+        "dc15e527d0567bec",
+        "1afec7f4af3c3a99",
+        "597f7f49dba29693",
+        "d79fd65afcd0f488",
+        "d4028f5507d1ce8f",
+        "85f3231906079e2a",
+        "18e93339af8a75b7",
+        "0b9723521c7dd341",
+        "33d619a06d57ae0e",
+        "1c948f65ed1dff73",
+        "52e560f4a9276dff",
+        "0f368210684d31e4",
+        "3788806b9e0698b4",
+        "650db188f8701646",
+        "ca59b4b63c24f4c5",
+        "119b35b3b7ac9d6e",
+        "b1487a8dcc94c31c",
+        "e0356451b9ef4808",
+        "9b65b4b369fa5a05",
+        "fb2966c5d6e1bdd9"
+      ],
+      "date": 1709548787948
+    },
+    {
+      "type": "edit",
+      "id": "18e93339af8a75b7",
+      "item": {
+        "type": "paragraph",
+        "id": "18e93339af8a75b7",
+        "text": "[[Task Specification]] See: [[Task Specification by Memetic Proxy]], [[Memetic Proxy]] ⇒ [[Task]], [[Problem]]"
+      },
+      "date": 1709548813050
+    },
+    {
+      "type": "edit",
+      "id": "18e93339af8a75b7",
+      "item": {
+        "type": "paragraph",
+        "id": "18e93339af8a75b7",
+        "text": "[[Task Specification]] See: [[Task Specification by Memetic Proxy]], [[Memetic Proxy]] ⇒ [[Task]], [[Problem]], [[[[Problemdeterminierte Systeme]]]]"
+      },
+      "date": 1709548837227
+    },
+    {
+      "type": "edit",
+      "id": "18e93339af8a75b7",
+      "item": {
+        "type": "paragraph",
+        "id": "18e93339af8a75b7",
+        "text": "[[Task Specification]] See: [[Task Specification by Memetic Proxy]], [[Memetic Proxy]] ⇒ [[Task]], [[Problem]], [[Problemdeterminierte Systeme]]"
+      },
+      "date": 1709548843183
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709551499317
     }
   ]
 }

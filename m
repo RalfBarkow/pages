@@ -256,6 +256,16 @@
       "text": "[[Monkey]] (within [[Pair Programming]])"
     },
     {
+      "type": "paragraph",
+      "id": "53096ca4578402c8",
+      "text": "[[Message]] (within [[PN Modeling Guidelines]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "44b2b5992598537f",
+      "text": "[[Measure the Degree of Folding of a Protein]] See: [[Protein]], [[Degree of Folding]]"
+    },
+    {
       "type": "reference",
       "id": "32f74fe2229d86ed",
       "site": "wiki.ralfbarkow.ch",
@@ -266,7 +276,7 @@
     {
       "type": "frame",
       "id": "99644c7446be481c",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
     }
   ],
   "journal": [
@@ -2082,9 +2092,95 @@
       "date": 1709196441687
     },
     {
+      "type": "add",
+      "id": "53096ca4578402c8",
+      "item": {
+        "type": "paragraph",
+        "id": "53096ca4578402c8",
+        "text": "[[Message]] (within )"
+      },
+      "after": "d89cf6f3697938d5",
+      "date": 1709229685595
+    },
+    {
+      "type": "edit",
+      "id": "53096ca4578402c8",
+      "item": {
+        "type": "paragraph",
+        "id": "53096ca4578402c8",
+        "text": "[[Message]] (within [[PN Modeling Guidelines]])"
+      },
+      "date": 1709229696079
+    },
+    {
+      "type": "edit",
+      "id": "99644c7446be481c",
+      "item": {
+        "type": "frame",
+        "id": "99644c7446be481c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709229867688
+    },
+    {
+      "type": "edit",
+      "id": "99644c7446be481c",
+      "item": {
+        "type": "frame",
+        "id": "99644c7446be481c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709229882239
+    },
+    {
+      "id": "44b2b5992598537f",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "44b2b5992598537f",
+        "text": "[[Measure the Degree of Folding of a Protein]]"
+      },
+      "after": "53096ca4578402c8",
+      "attribution": {
+        "page": "Protein",
+        "site": "localhost:3000"
+      },
+      "date": 1709659689662
+    },
+    {
+      "type": "edit",
+      "id": "44b2b5992598537f",
+      "item": {
+        "type": "paragraph",
+        "id": "44b2b5992598537f",
+        "text": "[[Measure the Degree of Folding of a Protein]] See: [[Protein]]"
+      },
+      "date": 1709659700789
+    },
+    {
+      "type": "edit",
+      "id": "44b2b5992598537f",
+      "item": {
+        "type": "paragraph",
+        "id": "44b2b5992598537f",
+        "text": "[[Measure the Degree of Folding of a Protein]] See: [[Protein]], [[[[Degree of Folding]]]]"
+      },
+      "date": 1709660048647
+    },
+    {
+      "type": "edit",
+      "id": "44b2b5992598537f",
+      "item": {
+        "type": "paragraph",
+        "id": "44b2b5992598537f",
+        "text": "[[Measure the Degree of Folding of a Protein]] See: [[Protein]], [[Degree of Folding]]"
+      },
+      "date": 1709660056981
+    },
+    {
       "type": "fork",
       "site": "wiki.ralfbarkow.ch",
-      "date": 1709197466208
+      "date": 1709713775353
     }
   ]
 }

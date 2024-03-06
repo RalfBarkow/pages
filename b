@@ -112,6 +112,11 @@
       "text": "[[Base Knowledge and Derivation Paths]] (within [[AIVA Formal Theory]])"
     },
     {
+      "type": "paragraph",
+      "id": "ec00c32b5855de4d",
+      "text": "[[Choosing Which Benefit Function to Maximize]] See:  [[Force]] (within [[What Is a Pattern?]]), [[Recurring Problem]]"
+    },
+    {
       "type": "reference",
       "id": "f08218b41fdab101",
       "site": "wiki.ralfbarkow.ch",
@@ -850,6 +855,102 @@
         "text": "→ \"**[[~/boundary/0]]**\""
       },
       "date": 1709272744287
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709280316508
+    },
+    {
+      "type": "add",
+      "id": "ec00c32b5855de4d",
+      "item": {
+        "type": "paragraph",
+        "id": "ec00c32b5855de4d",
+        "text": "[[Choosing Which Benefit Function to Maximize]] See:  [[Force]] (within [[What Is a Pattern?]]), [[Recurring Problem]]"
+      },
+      "after": "e81aeb5775367387",
+      "date": 1709550707037
+    },
+    {
+      "id": "94a82cfba79d7073",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "854a601b415ac21c",
+        "43802c20b155ea2a",
+        "e900d1bffbec207a",
+        "b50af34236cc284c",
+        "7154ee9ddd7f7d91",
+        "06db26f2400da9b9",
+        "1fbd6a17a2fb22bf",
+        "b61e5bb51bb2e8d2",
+        "443c401c95062512",
+        "85ee7b5d048d49b2",
+        "ba543a9cbce80d92",
+        "47441a2115d4c7cb",
+        "72e7644ff0391615",
+        "0ccc4b00df17e0f7",
+        "6202f46e10e43e22",
+        "d4f52944c52a00c5",
+        "00d4aa20f8c00853",
+        "dccc058a4cda2118",
+        "1fc17925adaef27b",
+        "ce503b9b2c58b5e9",
+        "e81aeb5775367387",
+        "ec00c32b5855de4d",
+        "94a82cfba79d7073",
+        "f08218b41fdab101",
+        "c98339ab6823e406"
+      ],
+      "date": 1709550712497,
+      "error": {
+        "type": "error",
+        "msg": "Internal Server Error",
+        "response": "Server Ignoring move. Try reload."
+      }
+    },
+    {
+      "id": "94a82cfba79d7073",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "94a82cfba79d7073",
+        "text": ""
+      },
+      "after": "f08218b41fdab101",
+      "attribution": {
+        "page": "Choosing Which Benefit Function to Maximize"
+      },
+      "date": 1709550710160
+    },
+    {
+      "type": "remove",
+      "id": "94a82cfba79d7073",
+      "date": 1709550716445
+    },
+    {
+      "type": "edit",
+      "id": "ec00c32b5855de4d",
+      "item": {
+        "type": "paragraph",
+        "id": "ec00c32b5855de4d",
+        "text": "[[Choosing Which Benefit Function to Maximize]] See:  [[Force]] (within [[What Is a Pattern?]]), [[Recurring Problem]]"
+      },
+      "date": 1709550717604
+    },
+    {
+      "type": "fork",
+      "date": 1709550729717
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709550772709
+    },
+    {
+      "type": "remove",
+      "date": 1709550775346
     }
   ]
 }
