@@ -93,11 +93,6 @@
     },
     {
       "type": "paragraph",
-      "id": "22bfd3c319af2d27",
-      "text": "[[Pair]] ⇒ [[Association]] See: [[Forward and Backward Association]]"
-    },
-    {
-      "type": "paragraph",
       "id": "f1db0951c68d4e12",
       "text": "[[Poetical Science]] (within [[Software as Tools]])"
     },
@@ -152,6 +147,16 @@
       "text": "[[Processes That Require Memory]] (within)"
     },
     {
+      "type": "paragraph",
+      "id": "22bfd3c319af2d27",
+      "text": "[[Pair]] ⇒ [[Association]] See: [[Forward and Backward Association]]"
+    },
+    {
+      "type": "pagefold",
+      "id": "8972a141b702009f",
+      "text": "Pair"
+    },
+    {
       "type": "markdown",
       "id": "59a242995c5f9a56",
       "text": "[[Pair of Distinct Objects]] (within [[Location in the Network of Message Paths]])\n- **[[Path]]** See: [[Path of Interest]]"
@@ -160,6 +165,16 @@
       "type": "paragraph",
       "id": "650db188f8701646",
       "text": "[beaten] [[Path]] See also: [[Trampelpfad]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "e9451909adae8cc3",
+      "text": "[[Pairs of Nodes]] See: [[Antwort]], [[Pair of Distinct Objects]]"
+    },
+    {
+      "type": "pagefold",
+      "id": "b9f4360481af150a",
+      "text": "~"
     },
     {
       "type": "paragraph",
@@ -187,9 +202,34 @@
       "text": "[[Push From Local to Origin]]"
     },
     {
+      "type": "pagefold",
+      "id": "2d183f3b78005f8d",
+      "text": "Parser"
+    },
+    {
+      "type": "paragraph",
+      "id": "983f998685e48c77",
+      "text": "[[Curing the Vulnerable Parser]] (within [[Secure Automata]]) See: [[Parser]]"
+    },
+    {
       "type": "markdown",
       "id": "160aed06a80464f4",
       "text": "**[[PetitParser]]** (within [[Parsing for Agile Modeling]]) See: **[[Exploratory Parsing]]**"
+    },
+    {
+      "type": "paragraph",
+      "id": "aad70c04446a96a4",
+      "text": "[[Parse Page Paragraphs]]"
+    },
+    {
+      "type": "markdown",
+      "id": "ae1cb398b052c183",
+      "text": "→ \"**[[~/parse/0]]**\""
+    },
+    {
+      "type": "pagefold",
+      "id": "fe800f0565dc7158",
+      "text": "~"
     },
     {
       "type": "markdown",
@@ -213,16 +253,6 @@
     },
     {
       "type": "paragraph",
-      "id": "aad70c04446a96a4",
-      "text": "[[Parse Page Paragraphs]]"
-    },
-    {
-      "type": "markdown",
-      "id": "ae1cb398b052c183",
-      "text": "→ \"**[[~/parse/0]]**\""
-    },
-    {
-      "type": "paragraph",
       "id": "783ecb6bd9918e9d",
       "text": "[[Platform Earth]]"
     },
@@ -230,6 +260,21 @@
       "type": "paragraph",
       "id": "2d71c0ac8e5bdd2e",
       "text": "[[The Product to End All Products]] See: [[Community]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "53876d44041e54c6",
+      "text": "[[Protein]] (within [[Graph Databases of Protein Structures]]) See: [[Similarity Query]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "bd37ce1b0abc3a09",
+      "text": "[[Ports]] as the basis of an [[Object-Capability Model]] on the web [https://html.spec.whatwg.org/multipage/web-messaging.html#ports-as-the-basis-of-an-object-capability-model-on-the-web page]"
+    },
+    {
+      "type": "paragraph",
+      "id": "164521ce6e2d3181",
+      "text": "[[Peak Planning Advantage]]"
     },
     {
       "type": "reference",
@@ -1833,6 +1878,446 @@
         "text": "[[The Product to End All Products]] See: [[Community]]"
       },
       "date": 1709281931763
+    },
+    {
+      "type": "add",
+      "id": "53876d44041e54c6",
+      "item": {
+        "type": "paragraph",
+        "id": "53876d44041e54c6",
+        "text": "[[Protein]]"
+      },
+      "after": "2d71c0ac8e5bdd2e",
+      "date": 1709587143266
+    },
+    {
+      "type": "edit",
+      "id": "53876d44041e54c6",
+      "item": {
+        "type": "paragraph",
+        "id": "53876d44041e54c6",
+        "text": "[[Protein]] (within [[Graph Databases of Protein Structures]])"
+      },
+      "date": 1709587164041
+    },
+    {
+      "type": "edit",
+      "id": "3fbe92c4b041c5d5",
+      "item": {
+        "type": "frame",
+        "id": "3fbe92c4b041c5d5",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111"
+      },
+      "date": 1709587185069
+    },
+    {
+      "type": "edit",
+      "id": "53876d44041e54c6",
+      "item": {
+        "type": "paragraph",
+        "id": "53876d44041e54c6",
+        "text": "[[Protein]] (within [[Graph Databases of Protein Structures]]) See: [[Similarity Query]]"
+      },
+      "date": 1709623549365
+    },
+    {
+      "id": "983f998685e48c77",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "983f998685e48c77",
+        "text": "[[Curing the Vulnerable Parser]] See: [[Parser]]"
+      },
+      "after": "7e8cfe47f6847a56",
+      "attribution": {
+        "page": "C"
+      },
+      "date": 1709631144962
+    },
+    {
+      "type": "edit",
+      "id": "983f998685e48c77",
+      "item": {
+        "type": "paragraph",
+        "id": "983f998685e48c77",
+        "text": "[[Curing the Vulnerable Parser]] (within [[[[Secure Automata]]) See: [[Parser]]"
+      },
+      "date": 1709631179758
+    },
+    {
+      "type": "edit",
+      "id": "983f998685e48c77",
+      "item": {
+        "type": "paragraph",
+        "id": "983f998685e48c77",
+        "text": "[[Curing the Vulnerable Parser]] (within [[Secure Automata]]) See: [[Parser]]"
+      },
+      "date": 1709631207480
+    },
+    {
+      "id": "2d183f3b78005f8d",
+      "type": "add",
+      "item": {
+        "type": "pagefold",
+        "id": "2d183f3b78005f8d",
+        "text": "Parser"
+      },
+      "after": "7e8cfe47f6847a56",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1709631210048
+    },
+    {
+      "id": "aad70c04446a96a4",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "36df906b8a7b190b",
+        "f7071ca518f45d20",
+        "3f2424f1ddfcaad8",
+        "ca9847394cfc2c1f",
+        "3d6afad70249316b",
+        "fb255b829c88892a",
+        "686483a1121e7956",
+        "41f719b405ffd0cf",
+        "d26e22f14f55b876",
+        "9c4dac17c9cc528b",
+        "ad0ad004b03f421e",
+        "ccf169e42a594121",
+        "5ad8569648af0d64",
+        "1d826ec1db757124",
+        "221e247085be998d",
+        "034a3e3d99460ab0",
+        "a1c7ddd0d985588c",
+        "22bfd3c319af2d27",
+        "f1db0951c68d4e12",
+        "7f637190011206b4",
+        "a02cdf6a1a287f47",
+        "7e6d1bc0191f51db",
+        "b9f6cce926f0919a",
+        "6b2a77f8071cc527",
+        "c99b6c3eb23aae1d",
+        "d5bfb7b01fe1c4a9",
+        "bb0d1deb2e8c8052",
+        "cfb017e989257c67",
+        "2367024b29c543f2",
+        "59a242995c5f9a56",
+        "650db188f8701646",
+        "3b4c8812d29e16d8",
+        "12a1808667f9bbad",
+        "12ae6a5c65ee9821",
+        "0206bf7d94db5879",
+        "7e8cfe47f6847a56",
+        "2d183f3b78005f8d",
+        "983f998685e48c77",
+        "160aed06a80464f4",
+        "aad70c04446a96a4",
+        "573cb3a293087b70",
+        "a115ae22e636bc40",
+        "81006e4d9f5e0f68",
+        "2a546dcd044c348e",
+        "ae1cb398b052c183",
+        "783ecb6bd9918e9d",
+        "2d71c0ac8e5bdd2e",
+        "53876d44041e54c6",
+        "e7dc8c0df83732ed",
+        "3fbe92c4b041c5d5"
+      ],
+      "date": 1709631238021
+    },
+    {
+      "id": "ae1cb398b052c183",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "36df906b8a7b190b",
+        "f7071ca518f45d20",
+        "3f2424f1ddfcaad8",
+        "ca9847394cfc2c1f",
+        "3d6afad70249316b",
+        "fb255b829c88892a",
+        "686483a1121e7956",
+        "41f719b405ffd0cf",
+        "d26e22f14f55b876",
+        "9c4dac17c9cc528b",
+        "ad0ad004b03f421e",
+        "ccf169e42a594121",
+        "5ad8569648af0d64",
+        "1d826ec1db757124",
+        "221e247085be998d",
+        "034a3e3d99460ab0",
+        "a1c7ddd0d985588c",
+        "22bfd3c319af2d27",
+        "f1db0951c68d4e12",
+        "7f637190011206b4",
+        "a02cdf6a1a287f47",
+        "7e6d1bc0191f51db",
+        "b9f6cce926f0919a",
+        "6b2a77f8071cc527",
+        "c99b6c3eb23aae1d",
+        "d5bfb7b01fe1c4a9",
+        "bb0d1deb2e8c8052",
+        "cfb017e989257c67",
+        "2367024b29c543f2",
+        "59a242995c5f9a56",
+        "650db188f8701646",
+        "3b4c8812d29e16d8",
+        "12a1808667f9bbad",
+        "12ae6a5c65ee9821",
+        "0206bf7d94db5879",
+        "7e8cfe47f6847a56",
+        "2d183f3b78005f8d",
+        "983f998685e48c77",
+        "160aed06a80464f4",
+        "aad70c04446a96a4",
+        "ae1cb398b052c183",
+        "573cb3a293087b70",
+        "a115ae22e636bc40",
+        "81006e4d9f5e0f68",
+        "2a546dcd044c348e",
+        "783ecb6bd9918e9d",
+        "2d71c0ac8e5bdd2e",
+        "53876d44041e54c6",
+        "e7dc8c0df83732ed",
+        "3fbe92c4b041c5d5"
+      ],
+      "date": 1709631243438
+    },
+    {
+      "id": "fe800f0565dc7158",
+      "type": "add",
+      "item": {
+        "type": "pagefold",
+        "id": "fe800f0565dc7158",
+        "text": "~"
+      },
+      "after": "ae1cb398b052c183",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1709631256779
+    },
+    {
+      "id": "bd37ce1b0abc3a09",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "bd37ce1b0abc3a09",
+        "text": "[[Ports]] as the basis of an [[Object-Capability Model]] on the web [https://html.spec.whatwg.org/multipage/web-messaging.html#ports-as-the-basis-of-an-object-capability-model-on-the-web page]"
+      },
+      "after": "53876d44041e54c6",
+      "attribution": {
+        "page": "2024-03-05",
+        "site": "localhost:3000"
+      },
+      "date": 1709653523128
+    },
+    {
+      "type": "edit",
+      "id": "3fbe92c4b041c5d5",
+      "item": {
+        "type": "frame",
+        "id": "3fbe92c4b041c5d5",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      },
+      "date": 1709653557134
+    },
+    {
+      "id": "22bfd3c319af2d27",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "36df906b8a7b190b",
+        "f7071ca518f45d20",
+        "3f2424f1ddfcaad8",
+        "ca9847394cfc2c1f",
+        "3d6afad70249316b",
+        "fb255b829c88892a",
+        "686483a1121e7956",
+        "41f719b405ffd0cf",
+        "d26e22f14f55b876",
+        "9c4dac17c9cc528b",
+        "ad0ad004b03f421e",
+        "ccf169e42a594121",
+        "5ad8569648af0d64",
+        "1d826ec1db757124",
+        "221e247085be998d",
+        "034a3e3d99460ab0",
+        "a1c7ddd0d985588c",
+        "f1db0951c68d4e12",
+        "7f637190011206b4",
+        "a02cdf6a1a287f47",
+        "7e6d1bc0191f51db",
+        "b9f6cce926f0919a",
+        "6b2a77f8071cc527",
+        "c99b6c3eb23aae1d",
+        "d5bfb7b01fe1c4a9",
+        "bb0d1deb2e8c8052",
+        "cfb017e989257c67",
+        "2367024b29c543f2",
+        "22bfd3c319af2d27",
+        "59a242995c5f9a56",
+        "650db188f8701646",
+        "3b4c8812d29e16d8",
+        "12a1808667f9bbad",
+        "12ae6a5c65ee9821",
+        "0206bf7d94db5879",
+        "7e8cfe47f6847a56",
+        "2d183f3b78005f8d",
+        "983f998685e48c77",
+        "160aed06a80464f4",
+        "aad70c04446a96a4",
+        "ae1cb398b052c183",
+        "fe800f0565dc7158",
+        "573cb3a293087b70",
+        "a115ae22e636bc40",
+        "81006e4d9f5e0f68",
+        "2a546dcd044c348e",
+        "783ecb6bd9918e9d",
+        "2d71c0ac8e5bdd2e",
+        "53876d44041e54c6",
+        "bd37ce1b0abc3a09",
+        "e7dc8c0df83732ed",
+        "3fbe92c4b041c5d5"
+      ],
+      "date": 1709662360296
+    },
+    {
+      "id": "8972a141b702009f",
+      "type": "add",
+      "item": {
+        "type": "pagefold",
+        "id": "8972a141b702009f",
+        "text": "Pair"
+      },
+      "after": "22bfd3c319af2d27",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1709662379528
+    },
+    {
+      "id": "e9451909adae8cc3",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "e9451909adae8cc3",
+        "text": "[[Pairs of Nodes]]"
+      },
+      "after": "8972a141b702009f",
+      "attribution": {
+        "page": "2024-03-05",
+        "site": "localhost:3000"
+      },
+      "date": 1709662422374
+    },
+    {
+      "id": "e9451909adae8cc3",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "36df906b8a7b190b",
+        "f7071ca518f45d20",
+        "3f2424f1ddfcaad8",
+        "ca9847394cfc2c1f",
+        "3d6afad70249316b",
+        "fb255b829c88892a",
+        "686483a1121e7956",
+        "41f719b405ffd0cf",
+        "d26e22f14f55b876",
+        "9c4dac17c9cc528b",
+        "ad0ad004b03f421e",
+        "ccf169e42a594121",
+        "5ad8569648af0d64",
+        "1d826ec1db757124",
+        "221e247085be998d",
+        "034a3e3d99460ab0",
+        "a1c7ddd0d985588c",
+        "f1db0951c68d4e12",
+        "7f637190011206b4",
+        "a02cdf6a1a287f47",
+        "7e6d1bc0191f51db",
+        "b9f6cce926f0919a",
+        "6b2a77f8071cc527",
+        "c99b6c3eb23aae1d",
+        "d5bfb7b01fe1c4a9",
+        "bb0d1deb2e8c8052",
+        "cfb017e989257c67",
+        "2367024b29c543f2",
+        "22bfd3c319af2d27",
+        "8972a141b702009f",
+        "59a242995c5f9a56",
+        "650db188f8701646",
+        "e9451909adae8cc3",
+        "3b4c8812d29e16d8",
+        "12a1808667f9bbad",
+        "12ae6a5c65ee9821",
+        "0206bf7d94db5879",
+        "7e8cfe47f6847a56",
+        "2d183f3b78005f8d",
+        "983f998685e48c77",
+        "160aed06a80464f4",
+        "aad70c04446a96a4",
+        "ae1cb398b052c183",
+        "fe800f0565dc7158",
+        "573cb3a293087b70",
+        "a115ae22e636bc40",
+        "81006e4d9f5e0f68",
+        "2a546dcd044c348e",
+        "783ecb6bd9918e9d",
+        "2d71c0ac8e5bdd2e",
+        "53876d44041e54c6",
+        "bd37ce1b0abc3a09",
+        "e7dc8c0df83732ed",
+        "3fbe92c4b041c5d5"
+      ],
+      "date": 1709662433783
+    },
+    {
+      "id": "b9f4360481af150a",
+      "type": "add",
+      "item": {
+        "type": "pagefold",
+        "id": "b9f4360481af150a",
+        "text": "~"
+      },
+      "after": "e9451909adae8cc3",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1709662448642
+    },
+    {
+      "type": "edit",
+      "id": "e9451909adae8cc3",
+      "item": {
+        "type": "paragraph",
+        "id": "e9451909adae8cc3",
+        "text": "[[Pairs of Nodes]] See: [[Antwort]]"
+      },
+      "date": 1709662478191
+    },
+    {
+      "type": "edit",
+      "id": "e9451909adae8cc3",
+      "item": {
+        "type": "paragraph",
+        "id": "e9451909adae8cc3",
+        "text": "[[Pairs of Nodes]] See: [[Antwort]], [[Pair of Distinct Objects]]"
+      },
+      "date": 1709662736898
+    },
+    {
+      "type": "add",
+      "id": "164521ce6e2d3181",
+      "item": {
+        "type": "paragraph",
+        "id": "164521ce6e2d3181",
+        "text": "[[Peak Planning Advantage]]"
+      },
+      "after": "bd37ce1b0abc3a09",
+      "date": 1709986373902
     }
   ]
 }

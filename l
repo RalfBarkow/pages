@@ -177,6 +177,11 @@
       "text": "[[Never Knew Love Like This]]"
     },
     {
+      "type": "paragraph",
+      "id": "2cf8ca2c6f0f2d6e",
+      "text": "[[LangSec]]"
+    },
+    {
       "type": "reference",
       "id": "601b7d01ab9bfa4a",
       "site": "wiki.ralfbarkow.ch",
@@ -1505,6 +1510,17 @@
       },
       "after": "e44c3038b3956d07",
       "date": 1709297171231
+    },
+    {
+      "type": "add",
+      "id": "2cf8ca2c6f0f2d6e",
+      "item": {
+        "type": "paragraph",
+        "id": "2cf8ca2c6f0f2d6e",
+        "text": "[[LangSec]]"
+      },
+      "after": "af9a84df70ada3c7",
+      "date": 1709622243637
     }
   ]
 }

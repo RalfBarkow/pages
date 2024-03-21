@@ -153,6 +153,11 @@
     },
     {
       "type": "paragraph",
+      "id": "6561bfa58609627e",
+      "text": "[[Talcott Parsons]] (within [[Flüchtige Zeiten]])"
+    },
+    {
+      "type": "paragraph",
       "id": "33d619a06d57ae0e",
       "text": "[[Three Tuple Relation]] (within) See: [[Atomic Relation]]"
     },
@@ -200,6 +205,11 @@
       "type": "paragraph",
       "id": "e0356451b9ef4808",
       "text": "[[Traces Through Diagrams]] See: [[~/diagram/0]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "153446fb292b32ea",
+      "text": "[[Tortoise Explains the Dance]] See: [[ESM Snippet Template]]"
     },
     {
       "type": "reference",
@@ -1586,6 +1596,54 @@
         "text": "[[Task Specification]] See: [[Task Specification by Memetic Proxy]], [[Memetic Proxy]] ⇒ [[Task]], [[Problem]], [[Problemdeterminierte Systeme]]"
       },
       "date": 1709548843183
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709656775871
+    },
+    {
+      "id": "6561bfa58609627e",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "6561bfa58609627e",
+        "text": "[[Talcott Parsons]] (within [[Flüchtige Zeiten]])"
+      },
+      "after": "0b9723521c7dd341",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1709656792187
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709656852354
+    },
+    {
+      "id": "153446fb292b32ea",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "153446fb292b32ea",
+        "text": "[[ESM Snippet Template]] See: [[Tortoise Explains the Dance]]"
+      },
+      "after": "e0356451b9ef4808",
+      "attribution": {
+        "page": "E"
+      },
+      "date": 1709992165205
+    },
+    {
+      "type": "edit",
+      "id": "153446fb292b32ea",
+      "item": {
+        "type": "paragraph",
+        "id": "153446fb292b32ea",
+        "text": "[[Tortoise Explains the Dance]] See: [[ESM Snippet Template]]"
+      },
+      "date": 1709992181229
     }
   ]
 }

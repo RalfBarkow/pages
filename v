@@ -22,6 +22,11 @@
       "text": "[[Visitor as Schema]] See: [[Algorithmic Markup]], [[Visitor Pattern]]"
     },
     {
+      "type": "paragraph",
+      "id": "fa659d7e1c00ec24",
+      "text": "[[Visitor Pattern]] (within [[Sitemap]])"
+    },
+    {
       "type": "reference",
       "id": "8d3c55df0c6c50b6",
       "site": "wiki.ralfbarkow.ch",
@@ -208,6 +213,21 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 75"
       },
       "date": 1708265049697
+    },
+    {
+      "id": "fa659d7e1c00ec24",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "fa659d7e1c00ec24",
+        "text": "[[Visitor Pattern]] (within [[Sitemap]])"
+      },
+      "after": "5331896a74df1672",
+      "attribution": {
+        "page": "2024-03-07",
+        "site": "localhost:3000"
+      },
+      "date": 1709808113986
     }
   ]
 }

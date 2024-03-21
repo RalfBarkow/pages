@@ -196,6 +196,11 @@
       "text": "[[Macht]] See: [[Macht im System]]"
     },
     {
+      "type": "paragraph",
+      "id": "60fbe4d888b55657",
+      "text": "– (within [[Flüchtige Zeiten]])"
+    },
+    {
       "type": "markdown",
       "id": "45581252a4b64963",
       "text": "**[[Mark the Bot’s Starting Point]]** See: [[checks(item)]] (within [http://ward.dojo.fed.wiki/assets/pages/story-telling/telling.js telling.js] and [[Story Telling]])"
@@ -259,6 +264,11 @@
       "type": "paragraph",
       "id": "53096ca4578402c8",
       "text": "[[Message]] (within [[PN Modeling Guidelines]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "44b2b5992598537f",
+      "text": "[[Measure the Degree of Folding of a Protein]] See: [[Protein]], [[Degree of Folding]]"
     },
     {
       "type": "reference",
@@ -2126,6 +2136,85 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
       },
       "date": 1709229882239
+    },
+    {
+      "id": "44b2b5992598537f",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "44b2b5992598537f",
+        "text": "[[Measure the Degree of Folding of a Protein]]"
+      },
+      "after": "53096ca4578402c8",
+      "attribution": {
+        "page": "Protein",
+        "site": "localhost:3000"
+      },
+      "date": 1709659689662
+    },
+    {
+      "type": "edit",
+      "id": "44b2b5992598537f",
+      "item": {
+        "type": "paragraph",
+        "id": "44b2b5992598537f",
+        "text": "[[Measure the Degree of Folding of a Protein]] See: [[Protein]]"
+      },
+      "date": 1709659700789
+    },
+    {
+      "type": "edit",
+      "id": "44b2b5992598537f",
+      "item": {
+        "type": "paragraph",
+        "id": "44b2b5992598537f",
+        "text": "[[Measure the Degree of Folding of a Protein]] See: [[Protein]], [[[[Degree of Folding]]]]"
+      },
+      "date": 1709660048647
+    },
+    {
+      "type": "edit",
+      "id": "44b2b5992598537f",
+      "item": {
+        "type": "paragraph",
+        "id": "44b2b5992598537f",
+        "text": "[[Measure the Degree of Folding of a Protein]] See: [[Protein]], [[Degree of Folding]]"
+      },
+      "date": 1709660056981
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709660160115
+    },
+    {
+      "id": "60fbe4d888b55657",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "60fbe4d888b55657",
+        "text": "[[Macht]] (within [[Flüchtige Zeiten]])"
+      },
+      "after": "f303cb3c2bf473b2",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1709660174415
+    },
+    {
+      "type": "edit",
+      "id": "60fbe4d888b55657",
+      "item": {
+        "type": "paragraph",
+        "id": "60fbe4d888b55657",
+        "text": "– (within [[Flüchtige Zeiten]])"
+      },
+      "date": 1709660182512
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709830034935
     }
   ]
 }

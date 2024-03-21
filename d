@@ -207,6 +207,16 @@
       "text": "[[Doughnut]] See: [[Hot Dog]]"
     },
     {
+      "type": "paragraph",
+      "id": "ac024ed617e8623d",
+      "text": "[[Doug's Unfinished Revolution]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "44b2b5992598537f",
+      "text": "[[Degree of Folding]], [[Measure the Degree of Folding of a Protein]] See: [[Protein]]"
+    },
+    {
       "type": "reference",
       "id": "ec6d5f60c118e850",
       "site": "wiki.ralfbarkow.ch",
@@ -1696,6 +1706,42 @@
         "text": "[[Doughnut]] See: [[Hot Dog]]"
       },
       "date": 1709412111215
+    },
+    {
+      "type": "add",
+      "id": "ac024ed617e8623d",
+      "item": {
+        "type": "paragraph",
+        "id": "ac024ed617e8623d",
+        "text": "[[Doug's Unfinished Revolution]]"
+      },
+      "after": "75f4ae85736d8ea3",
+      "date": 1709621702525
+    },
+    {
+      "id": "44b2b5992598537f",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "44b2b5992598537f",
+        "text": "[[Measure the Degree of Folding of a Protein]] See: [[Protein]], [[Degree of Folding]]"
+      },
+      "after": "ac024ed617e8623d",
+      "attribution": {
+        "page": "M",
+        "site": "localhost:3000"
+      },
+      "date": 1709660239881
+    },
+    {
+      "type": "edit",
+      "id": "44b2b5992598537f",
+      "item": {
+        "type": "paragraph",
+        "id": "44b2b5992598537f",
+        "text": "[[Degree of Folding]], [[Measure the Degree of Folding of a Protein]] See: [[Protein]]"
+      },
+      "date": 1709660256107
     }
   ]
 }

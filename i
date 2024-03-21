@@ -115,6 +115,16 @@
       "text": "[[Indoor-Outdoor Ambiguity]] See: [[inner]]"
     },
     {
+      "type": "paragraph",
+      "id": "2c950ad8503be8a2",
+      "text": "[[InfiniteForm]] See: [[Form]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "4dd2579de3e68047",
+      "text": "[[Identify the Language of a Sentence]]"
+    },
+    {
       "type": "reference",
       "id": "41682db8bb604a0e",
       "site": "wiki.ralfbarkow.ch",
@@ -1117,6 +1127,28 @@
       },
       "after": "4d135877f9d9722b",
       "date": 1709311313645
+    },
+    {
+      "type": "add",
+      "id": "2c950ad8503be8a2",
+      "item": {
+        "type": "paragraph",
+        "id": "2c950ad8503be8a2",
+        "text": "[[InfiniteForm]] See: [[Form]]"
+      },
+      "after": "49fb23f7a5c3504e",
+      "date": 1709620676491
+    },
+    {
+      "type": "add",
+      "id": "4dd2579de3e68047",
+      "item": {
+        "type": "paragraph",
+        "id": "4dd2579de3e68047",
+        "text": "[[Identify the Language of a Sentence]]"
+      },
+      "after": "2c950ad8503be8a2",
+      "date": 1710805968407
     }
   ]
 }

@@ -107,6 +107,16 @@
       "text": "[[Record Your Communication In The Code]]"
     },
     {
+      "type": "paragraph",
+      "id": "457e772a34c8f751",
+      "text": "[[Relentless Consensus Engine]] or [[Relentless Consensus Machine]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "2665ce43d7e684d9",
+      "text": "[[Ruliology]] See: [[Ruliad]]"
+    },
+    {
       "type": "reference",
       "id": "1723ea75115e00fb",
       "site": "wiki.ralfbarkow.ch",
@@ -836,6 +846,42 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
       },
       "date": 1709294076823
+    },
+    {
+      "id": "457e772a34c8f751",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "457e772a34c8f751",
+        "text": "[[Relentless Consensus Engine]] or [[Relentless Consensus Machine]]"
+      },
+      "after": "13be7bb0f65a4a43",
+      "attribution": {
+        "page": "2024-03-05",
+        "site": "localhost:3000"
+      },
+      "date": 1709654464598
+    },
+    {
+      "type": "add",
+      "id": "2665ce43d7e684d9",
+      "item": {
+        "type": "paragraph",
+        "id": "2665ce43d7e684d9",
+        "text": "[[Ruliology]]"
+      },
+      "after": "457e772a34c8f751",
+      "date": 1709707534601
+    },
+    {
+      "type": "edit",
+      "id": "2665ce43d7e684d9",
+      "item": {
+        "type": "paragraph",
+        "id": "2665ce43d7e684d9",
+        "text": "[[Ruliology]] See: [[Ruliad]]"
+      },
+      "date": 1709707572154
     }
   ]
 }

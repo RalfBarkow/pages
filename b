@@ -116,7 +116,6 @@
       "id": "ec00c32b5855de4d",
       "text": "[[Choosing Which Benefit Function to Maximize]] See:  [[Force]] (within [[What Is a Pattern?]]), [[Recurring Problem]]"
     },
-    null,
     {
       "type": "reference",
       "id": "f08218b41fdab101",
@@ -943,6 +942,10 @@
     {
       "type": "fork",
       "date": 1709550729717
+    },
+    {
+      "type": "remove",
+      "date": 1709973764132
     }
   ]
 }

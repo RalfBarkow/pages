@@ -17,6 +17,11 @@
       "text": "[[Xp Free Zone]]"
     },
     {
+      "type": "paragraph",
+      "id": "72500de13466b95d",
+      "text": "[[XML Topic Maps]] (within [[Offer to the DKR Implemeters]])"
+    },
+    {
       "type": "reference",
       "id": "99c0f84faaf2da89",
       "site": "wiki.ralfbarkow.ch",
@@ -27,7 +32,7 @@
     {
       "type": "frame",
       "id": "cb27b3a41ffaf798",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
     }
   ],
   "journal": [
@@ -163,6 +168,37 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
       },
       "date": 1708081137748
+    },
+    {
+      "type": "add",
+      "id": "72500de13466b95d",
+      "item": {
+        "type": "paragraph",
+        "id": "72500de13466b95d",
+        "text": "[[XML Topic Maps]]"
+      },
+      "after": "325943e419cfda8c",
+      "date": 1709830957426
+    },
+    {
+      "type": "edit",
+      "id": "cb27b3a41ffaf798",
+      "item": {
+        "type": "frame",
+        "id": "cb27b3a41ffaf798",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+      },
+      "date": 1709830976805
+    },
+    {
+      "type": "edit",
+      "id": "72500de13466b95d",
+      "item": {
+        "type": "paragraph",
+        "id": "72500de13466b95d",
+        "text": "[[XML Topic Maps]] (within [[Offer to the DKR Implemeters]])"
+      },
+      "date": 1709831156725
     }
   ]
 }

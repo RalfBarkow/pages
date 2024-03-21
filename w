@@ -87,6 +87,11 @@
       "text": "[[Wahrscheinlichkeit und Wissenschaft]] See: [[Stochastic Computing]], [[Trifference]]"
     },
     {
+      "type": "paragraph",
+      "id": "8fe38d2c7152e066",
+      "text": "Wrangling Untrusted File Formats Safely [https://github.com/google/wuffs github] (within [[Secure Automata]])"
+    },
+    {
       "type": "reference",
       "id": "cff13b8f1e169e91",
       "site": "wiki.ralfbarkow.ch",
@@ -755,6 +760,27 @@
       "type": "fork",
       "site": "localhost:3000",
       "date": 1709313337571
+    },
+    {
+      "type": "add",
+      "id": "8fe38d2c7152e066",
+      "item": {
+        "type": "paragraph",
+        "id": "8fe38d2c7152e066",
+        "text": "Wrangling Untrusted File Formats Safely (within [[Secure Automata]])"
+      },
+      "after": "9e5052075c565542",
+      "date": 1709622415436
+    },
+    {
+      "type": "edit",
+      "id": "8fe38d2c7152e066",
+      "item": {
+        "type": "paragraph",
+        "id": "8fe38d2c7152e066",
+        "text": "Wrangling Untrusted File Formats Safely [https://github.com/google/wuffs github] (within [[Secure Automata]])"
+      },
+      "date": 1709622441914
     }
   ]
 }

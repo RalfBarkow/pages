@@ -17,6 +17,11 @@
       "text": "[[JSONL]] See: [[Semantic Line Breaks]], [[checks(item)]]"
     },
     {
+      "type": "paragraph",
+      "id": "c2c44842f6842698",
+      "text": "[[Javascript Coding Notebook]] (within [http://js.ward.asia.wiki.org/view/welcome-visitors js.ward.asia.wiki])"
+    },
+    {
       "type": "reference",
       "id": "8176489dd7cf46b0",
       "site": "wiki.ralfbarkow.ch",
@@ -27,7 +32,7 @@
     {
       "type": "frame",
       "id": "0ef10f2ddc5d2afb",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222"
     }
   ],
   "journal": [
@@ -182,6 +187,51 @@
         "text": "[[JSONL]] See: [[Semantic Line Breaks]], [[checks(item)]]"
       },
       "date": 1708428357930
+    },
+    {
+      "id": "c2c44842f6842698",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "c2c44842f6842698",
+        "text": "[[Javascript Coding Notebook]] (within [http://js.ward.asia.wiki.org/view/welcome-visitors js.ward.asia.wiki.org])"
+      },
+      "after": "b0a0282c514f52c8",
+      "attribution": {
+        "page": "2024-03-21",
+        "site": "localhost:3000"
+      },
+      "date": 1711000357132
+    },
+    {
+      "type": "edit",
+      "id": "c2c44842f6842698",
+      "item": {
+        "type": "paragraph",
+        "id": "c2c44842f6842698",
+        "text": "[[Javascript Coding Notebook]] (within [http://js.ward.asia.wiki.org/view/welcome-visitors js.ward.asia.wiki])"
+      },
+      "date": 1711000461934
+    },
+    {
+      "type": "edit",
+      "id": "0ef10f2ddc5d2afb",
+      "item": {
+        "type": "frame",
+        "id": "0ef10f2ddc5d2afb",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 222"
+      },
+      "date": 1711000477151
+    },
+    {
+      "type": "edit",
+      "id": "0ef10f2ddc5d2afb",
+      "item": {
+        "type": "frame",
+        "id": "0ef10f2ddc5d2afb",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222"
+      },
+      "date": 1711000534651
     }
   ]
 }

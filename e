@@ -133,6 +133,11 @@
     },
     {
       "type": "paragraph",
+      "id": "8c2c2c494c51e5d3",
+      "text": "[[Ego-Shooter]] See: [[Terminologie Ego/Alter]] ⇒ [[Terminology Ego/Alter]]"
+    },
+    {
+      "type": "paragraph",
       "id": "ce36ca3b75375cf1",
       "text": "[[Entropy]]"
     },
@@ -159,7 +164,7 @@
     {
       "type": "paragraph",
       "id": "556325e5f06ceec1",
-      "text": "[[Embodiment]]"
+      "text": "[[Embodiment]] (within [[CajunBot]])"
     },
     {
       "type": "paragraph",
@@ -187,6 +192,16 @@
       "text": "[[Express Data Path]]"
     },
     {
+      "type": "paragraph",
+      "id": "a514b5095d1658b1",
+      "text": "[[Exploratory Parsing]] (within [[Frame]]) See: [[Exploratory Parsing in Frames]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "153446fb292b32ea",
+      "text": "[[ESM Snippet Template]] See: [[Tortoise Explains the Dance]]"
+    },
+    {
       "type": "reference",
       "id": "2a8ebf5fbb6fbdf2",
       "site": "wiki.ralfbarkow.ch",
@@ -197,7 +212,7 @@
     {
       "type": "frame",
       "id": "838045a6c5c125e0",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\n"
     }
   ],
   "journal": [
@@ -1253,6 +1268,82 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
       },
       "date": 1709255473265
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709584024442
+    },
+    {
+      "id": "8c2c2c494c51e5d3",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "8c2c2c494c51e5d3",
+        "text": "[[Ego-Shooter]] See: [[Terminologie Ego/Alter]] ⇒ [[Terminology Ego/Alter]]"
+      },
+      "after": "ce497bff8e3f5117",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1709584036935
+    },
+    {
+      "type": "edit",
+      "id": "838045a6c5c125e0",
+      "item": {
+        "type": "frame",
+        "id": "838045a6c5c125e0",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\n"
+      },
+      "date": 1709584054869
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709584145262
+    },
+    {
+      "type": "add",
+      "id": "a514b5095d1658b1",
+      "item": {
+        "type": "paragraph",
+        "id": "a514b5095d1658b1",
+        "text": "[[Exploratory Parsing]] (within [[Frame]]) See: [[Exploratory Parsing in Frames]]"
+      },
+      "after": "d497b32a8e2ff73a",
+      "date": 1709584177364
+    },
+    {
+      "type": "add",
+      "id": "153446fb292b32ea",
+      "item": {
+        "type": "paragraph",
+        "id": "153446fb292b32ea",
+        "text": "[[ESM Snippet Template]]"
+      },
+      "after": "a514b5095d1658b1",
+      "date": 1709990921775
+    },
+    {
+      "type": "edit",
+      "id": "153446fb292b32ea",
+      "item": {
+        "type": "paragraph",
+        "id": "153446fb292b32ea",
+        "text": "[[ESM Snippet Template]] See: [[Tortoise Explains the Dance]]"
+      },
+      "date": 1709990936840
+    },
+    {
+      "type": "edit",
+      "id": "556325e5f06ceec1",
+      "item": {
+        "type": "paragraph",
+        "id": "556325e5f06ceec1",
+        "text": "[[Embodiment]] (within [[CajunBot]])"
+      },
+      "date": 1710917187541
     }
   ]
 }

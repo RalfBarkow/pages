@@ -18,6 +18,16 @@
     },
     {
       "type": "paragraph",
+      "id": "9cec41b8a69e088c",
+      "text": "[[Form]] (within [[Shape]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "2c950ad8503be8a2",
+      "text": "[[InfiniteForm]]"
+    },
+    {
+      "type": "paragraph",
       "id": "a66dd91eb2d3436f",
       "text": "[[Fence after Fence]] (within [[Meta]]) See: [[Boundaries]]"
     },
@@ -37,14 +47,34 @@
       "text": "[[Federation at Risk in 7']]"
     },
     {
+      "type": "pagefold",
+      "id": "51a3fe3b752667d2",
+      "text": "Force"
+    },
+    {
       "type": "markdown",
       "id": "570de50b34e43639",
-      "text": "**[[Force]]** (within [[Narrative? Pattern!]])\n- What [[Force]] unites these patterns? (within [[Construction Patterns]]) See: [[Visitor as Schema]], [[Algorithmic Markup]], [[Visitor Pattern]]\n- [[Forces of Environment]] "
+      "text": "**[[Force]]** (within [[Narrative? Pattern!]])\n- What [[Force]] unites these patterns? (within [[Construction Patterns]]) See: [[Visitor as Schema]], [[Algorithmic Markup]], [[Visitor Pattern]]\n- [[Forces of Environment]] (within [[Environment as a Language]]) See: [[Traits]] of culture"
     },
     {
       "type": "paragraph",
       "id": "dad87f8ad01df5a3",
       "text": "[[Fiat]] – the force of objects – (within [[Narrative? Pattern!]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "94a82cfba79d7073",
+      "text": "[[Force]] (within [[What Is a Pattern?]]) See: [[Recurring Problem]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "44da2c7cd76807c1",
+      "text": "[[force]]"
+    },
+    {
+      "type": "pagefold",
+      "id": "62b83df55205b6b9",
+      "text": "~"
     },
     {
       "type": "paragraph",
@@ -80,11 +110,6 @@
       "type": "paragraph",
       "id": "d751a55508a2e466",
       "text": "[[Formacion]] ⇒ [[Living Economy]]"
-    },
-    {
-      "type": "paragraph",
-      "id": "9cec41b8a69e088c",
-      "text": "[[Form]] (within [[Shape]])"
     },
     {
       "type": "paragraph",
@@ -143,11 +168,6 @@
     },
     {
       "type": "paragraph",
-      "id": "875d3a09db792aea",
-      "text": "[[Forces of Environment]] (within [[Environment as a Language]]) See: [[Traits]] of culture"
-    },
-    {
-      "type": "paragraph",
       "id": "a04b0cd896b91a37",
       "text": "[[Fern-Uni Schweiz]] See also: [[Matterhorn University]]"
     },
@@ -178,8 +198,18 @@
     },
     {
       "type": "paragraph",
-      "id": "94a82cfba79d7073",
-      "text": "[[Force]] (within [[What Is a Pattern?]]) See: [[Recurring Problem]]"
+      "id": "a744e9f1ca803ea1",
+      "text": "[[Functional Reactive Programming]] See: [[Sodium]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "43ece73c8900a66e",
+      "text": "[[Feedback]] (within [[Formative Assessment]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "2f11b6f08d9afb38",
+      "text": "[[Favela]] (within [[Favela Chic]])"
     },
     {
       "type": "reference",
@@ -192,7 +222,7 @@
     {
       "type": "frame",
       "id": "5c1363cd00f99e4d",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE paragraph\nSOURCE graph"
     }
   ],
   "journal": [
@@ -1502,6 +1532,603 @@
         "text": "[[Force]] (within [[What Is a Pattern?]]) See: [[Recurring Problem]]"
       },
       "date": 1709414637148
+    },
+    {
+      "id": "9cec41b8a69e088c",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "01085049e7beb80b",
+        "8d72b7d1eeb777f7",
+        "9cec41b8a69e088c",
+        "a66dd91eb2d3436f",
+        "a141a047d260d847",
+        "789c821796615a42",
+        "389e7ab3f7b14490",
+        "570de50b34e43639",
+        "dad87f8ad01df5a3",
+        "c8c99ca5565d3131",
+        "a716207802fce38f",
+        "fe9cba91fe33b809",
+        "84f1abdd48ed2caa",
+        "d48f6c803ffd4ae0",
+        "26332be736252099",
+        "d751a55508a2e466",
+        "f45ac44f018a53b1",
+        "c7041daf82ee35e9",
+        "c265a4be4b2b3a91",
+        "b7c4f062a79dd8d5",
+        "c244b47a9d3b3607",
+        "9ceea77cef6257f7",
+        "d05f561551462e9c",
+        "199c9feeb96f7ff8",
+        "dd16babf51c2c657",
+        "164ea317e1c14f12",
+        "90b4a4450e975461",
+        "875d3a09db792aea",
+        "a04b0cd896b91a37",
+        "f158d9e374ff6c88",
+        "3ae5454276a08fb5",
+        "cf1da3a02d437a8a",
+        "8510ce3ae2fcb825",
+        "800bb9c21aedc19d",
+        "94a82cfba79d7073",
+        "0af5bda13da74df8",
+        "5c1363cd00f99e4d"
+      ],
+      "date": 1709620720037
+    },
+    {
+      "id": "2c950ad8503be8a2",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "2c950ad8503be8a2",
+        "text": "[[InfiniteForm]] See: [[Form]]"
+      },
+      "after": "9cec41b8a69e088c",
+      "attribution": {
+        "page": "I"
+      },
+      "date": 1709620727525
+    },
+    {
+      "type": "edit",
+      "id": "2c950ad8503be8a2",
+      "item": {
+        "type": "paragraph",
+        "id": "2c950ad8503be8a2",
+        "text": "[[InfiniteForm]]"
+      },
+      "date": 1709620736877
+    },
+    {
+      "id": "51a3fe3b752667d2",
+      "type": "add",
+      "item": {
+        "type": "pagefold",
+        "id": "51a3fe3b752667d2",
+        "text": "Force"
+      },
+      "after": "90b4a4450e975461",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1709796942578
+    },
+    {
+      "id": "62b83df55205b6b9",
+      "type": "add",
+      "item": {
+        "type": "pagefold",
+        "id": "62b83df55205b6b9",
+        "text": "~"
+      },
+      "after": "875d3a09db792aea",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1709796954377
+    },
+    {
+      "type": "add",
+      "id": "44da2c7cd76807c1",
+      "item": {
+        "type": "paragraph",
+        "id": "44da2c7cd76807c1",
+        "text": "[[Force]]"
+      },
+      "after": "875d3a09db792aea",
+      "date": 1709796963067
+    },
+    {
+      "type": "edit",
+      "id": "44da2c7cd76807c1",
+      "item": {
+        "type": "paragraph",
+        "id": "44da2c7cd76807c1",
+        "text": "[[force]]"
+      },
+      "date": 1709796999589
+    },
+    {
+      "id": "51a3fe3b752667d2",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "01085049e7beb80b",
+        "8d72b7d1eeb777f7",
+        "9cec41b8a69e088c",
+        "2c950ad8503be8a2",
+        "51a3fe3b752667d2",
+        "a66dd91eb2d3436f",
+        "a141a047d260d847",
+        "789c821796615a42",
+        "389e7ab3f7b14490",
+        "570de50b34e43639",
+        "dad87f8ad01df5a3",
+        "c8c99ca5565d3131",
+        "a716207802fce38f",
+        "fe9cba91fe33b809",
+        "84f1abdd48ed2caa",
+        "d48f6c803ffd4ae0",
+        "26332be736252099",
+        "d751a55508a2e466",
+        "f45ac44f018a53b1",
+        "c7041daf82ee35e9",
+        "c265a4be4b2b3a91",
+        "b7c4f062a79dd8d5",
+        "c244b47a9d3b3607",
+        "9ceea77cef6257f7",
+        "d05f561551462e9c",
+        "199c9feeb96f7ff8",
+        "dd16babf51c2c657",
+        "164ea317e1c14f12",
+        "90b4a4450e975461",
+        "875d3a09db792aea",
+        "44da2c7cd76807c1",
+        "62b83df55205b6b9",
+        "a04b0cd896b91a37",
+        "f158d9e374ff6c88",
+        "3ae5454276a08fb5",
+        "cf1da3a02d437a8a",
+        "8510ce3ae2fcb825",
+        "800bb9c21aedc19d",
+        "94a82cfba79d7073",
+        "0af5bda13da74df8",
+        "5c1363cd00f99e4d"
+      ],
+      "date": 1709797154619
+    },
+    {
+      "id": "51a3fe3b752667d2",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "01085049e7beb80b",
+        "8d72b7d1eeb777f7",
+        "9cec41b8a69e088c",
+        "2c950ad8503be8a2",
+        "a66dd91eb2d3436f",
+        "a141a047d260d847",
+        "789c821796615a42",
+        "389e7ab3f7b14490",
+        "51a3fe3b752667d2",
+        "570de50b34e43639",
+        "dad87f8ad01df5a3",
+        "c8c99ca5565d3131",
+        "a716207802fce38f",
+        "fe9cba91fe33b809",
+        "84f1abdd48ed2caa",
+        "d48f6c803ffd4ae0",
+        "26332be736252099",
+        "d751a55508a2e466",
+        "f45ac44f018a53b1",
+        "c7041daf82ee35e9",
+        "c265a4be4b2b3a91",
+        "b7c4f062a79dd8d5",
+        "c244b47a9d3b3607",
+        "9ceea77cef6257f7",
+        "d05f561551462e9c",
+        "199c9feeb96f7ff8",
+        "dd16babf51c2c657",
+        "164ea317e1c14f12",
+        "90b4a4450e975461",
+        "875d3a09db792aea",
+        "44da2c7cd76807c1",
+        "62b83df55205b6b9",
+        "a04b0cd896b91a37",
+        "f158d9e374ff6c88",
+        "3ae5454276a08fb5",
+        "cf1da3a02d437a8a",
+        "8510ce3ae2fcb825",
+        "800bb9c21aedc19d",
+        "94a82cfba79d7073",
+        "0af5bda13da74df8",
+        "5c1363cd00f99e4d"
+      ],
+      "date": 1709797165375
+    },
+    {
+      "id": "875d3a09db792aea",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "01085049e7beb80b",
+        "8d72b7d1eeb777f7",
+        "9cec41b8a69e088c",
+        "2c950ad8503be8a2",
+        "a66dd91eb2d3436f",
+        "a141a047d260d847",
+        "789c821796615a42",
+        "389e7ab3f7b14490",
+        "51a3fe3b752667d2",
+        "570de50b34e43639",
+        "875d3a09db792aea",
+        "dad87f8ad01df5a3",
+        "c8c99ca5565d3131",
+        "a716207802fce38f",
+        "fe9cba91fe33b809",
+        "84f1abdd48ed2caa",
+        "d48f6c803ffd4ae0",
+        "26332be736252099",
+        "d751a55508a2e466",
+        "f45ac44f018a53b1",
+        "c7041daf82ee35e9",
+        "c265a4be4b2b3a91",
+        "b7c4f062a79dd8d5",
+        "c244b47a9d3b3607",
+        "9ceea77cef6257f7",
+        "d05f561551462e9c",
+        "199c9feeb96f7ff8",
+        "dd16babf51c2c657",
+        "164ea317e1c14f12",
+        "90b4a4450e975461",
+        "44da2c7cd76807c1",
+        "62b83df55205b6b9",
+        "a04b0cd896b91a37",
+        "f158d9e374ff6c88",
+        "3ae5454276a08fb5",
+        "cf1da3a02d437a8a",
+        "8510ce3ae2fcb825",
+        "800bb9c21aedc19d",
+        "94a82cfba79d7073",
+        "0af5bda13da74df8",
+        "5c1363cd00f99e4d"
+      ],
+      "date": 1709797188513
+    },
+    {
+      "id": "44da2c7cd76807c1",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "01085049e7beb80b",
+        "8d72b7d1eeb777f7",
+        "9cec41b8a69e088c",
+        "2c950ad8503be8a2",
+        "a66dd91eb2d3436f",
+        "a141a047d260d847",
+        "789c821796615a42",
+        "389e7ab3f7b14490",
+        "51a3fe3b752667d2",
+        "570de50b34e43639",
+        "875d3a09db792aea",
+        "44da2c7cd76807c1",
+        "dad87f8ad01df5a3",
+        "c8c99ca5565d3131",
+        "a716207802fce38f",
+        "fe9cba91fe33b809",
+        "84f1abdd48ed2caa",
+        "d48f6c803ffd4ae0",
+        "26332be736252099",
+        "d751a55508a2e466",
+        "f45ac44f018a53b1",
+        "c7041daf82ee35e9",
+        "c265a4be4b2b3a91",
+        "b7c4f062a79dd8d5",
+        "c244b47a9d3b3607",
+        "9ceea77cef6257f7",
+        "d05f561551462e9c",
+        "199c9feeb96f7ff8",
+        "dd16babf51c2c657",
+        "164ea317e1c14f12",
+        "90b4a4450e975461",
+        "62b83df55205b6b9",
+        "a04b0cd896b91a37",
+        "f158d9e374ff6c88",
+        "3ae5454276a08fb5",
+        "cf1da3a02d437a8a",
+        "8510ce3ae2fcb825",
+        "800bb9c21aedc19d",
+        "94a82cfba79d7073",
+        "0af5bda13da74df8",
+        "5c1363cd00f99e4d"
+      ],
+      "date": 1709797205517
+    },
+    {
+      "id": "44da2c7cd76807c1",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "01085049e7beb80b",
+        "8d72b7d1eeb777f7",
+        "9cec41b8a69e088c",
+        "2c950ad8503be8a2",
+        "a66dd91eb2d3436f",
+        "a141a047d260d847",
+        "789c821796615a42",
+        "389e7ab3f7b14490",
+        "51a3fe3b752667d2",
+        "570de50b34e43639",
+        "875d3a09db792aea",
+        "dad87f8ad01df5a3",
+        "44da2c7cd76807c1",
+        "c8c99ca5565d3131",
+        "a716207802fce38f",
+        "fe9cba91fe33b809",
+        "84f1abdd48ed2caa",
+        "d48f6c803ffd4ae0",
+        "26332be736252099",
+        "d751a55508a2e466",
+        "f45ac44f018a53b1",
+        "c7041daf82ee35e9",
+        "c265a4be4b2b3a91",
+        "b7c4f062a79dd8d5",
+        "c244b47a9d3b3607",
+        "9ceea77cef6257f7",
+        "d05f561551462e9c",
+        "199c9feeb96f7ff8",
+        "dd16babf51c2c657",
+        "164ea317e1c14f12",
+        "90b4a4450e975461",
+        "62b83df55205b6b9",
+        "a04b0cd896b91a37",
+        "f158d9e374ff6c88",
+        "3ae5454276a08fb5",
+        "cf1da3a02d437a8a",
+        "8510ce3ae2fcb825",
+        "800bb9c21aedc19d",
+        "94a82cfba79d7073",
+        "0af5bda13da74df8",
+        "5c1363cd00f99e4d"
+      ],
+      "date": 1709797215817
+    },
+    {
+      "id": "62b83df55205b6b9",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "01085049e7beb80b",
+        "8d72b7d1eeb777f7",
+        "9cec41b8a69e088c",
+        "2c950ad8503be8a2",
+        "a66dd91eb2d3436f",
+        "a141a047d260d847",
+        "789c821796615a42",
+        "389e7ab3f7b14490",
+        "51a3fe3b752667d2",
+        "570de50b34e43639",
+        "875d3a09db792aea",
+        "dad87f8ad01df5a3",
+        "44da2c7cd76807c1",
+        "62b83df55205b6b9",
+        "c8c99ca5565d3131",
+        "a716207802fce38f",
+        "fe9cba91fe33b809",
+        "84f1abdd48ed2caa",
+        "d48f6c803ffd4ae0",
+        "26332be736252099",
+        "d751a55508a2e466",
+        "f45ac44f018a53b1",
+        "c7041daf82ee35e9",
+        "c265a4be4b2b3a91",
+        "b7c4f062a79dd8d5",
+        "c244b47a9d3b3607",
+        "9ceea77cef6257f7",
+        "d05f561551462e9c",
+        "199c9feeb96f7ff8",
+        "dd16babf51c2c657",
+        "164ea317e1c14f12",
+        "90b4a4450e975461",
+        "a04b0cd896b91a37",
+        "f158d9e374ff6c88",
+        "3ae5454276a08fb5",
+        "cf1da3a02d437a8a",
+        "8510ce3ae2fcb825",
+        "800bb9c21aedc19d",
+        "94a82cfba79d7073",
+        "0af5bda13da74df8",
+        "5c1363cd00f99e4d"
+      ],
+      "date": 1709797226568
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1709799200342
+    },
+    {
+      "id": "94a82cfba79d7073",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "01085049e7beb80b",
+        "8d72b7d1eeb777f7",
+        "9cec41b8a69e088c",
+        "2c950ad8503be8a2",
+        "a66dd91eb2d3436f",
+        "a141a047d260d847",
+        "789c821796615a42",
+        "389e7ab3f7b14490",
+        "51a3fe3b752667d2",
+        "570de50b34e43639",
+        "875d3a09db792aea",
+        "dad87f8ad01df5a3",
+        "44da2c7cd76807c1",
+        "94a82cfba79d7073",
+        "62b83df55205b6b9",
+        "c8c99ca5565d3131",
+        "a716207802fce38f",
+        "fe9cba91fe33b809",
+        "84f1abdd48ed2caa",
+        "d48f6c803ffd4ae0",
+        "26332be736252099",
+        "d751a55508a2e466",
+        "f45ac44f018a53b1",
+        "c7041daf82ee35e9",
+        "c265a4be4b2b3a91",
+        "b7c4f062a79dd8d5",
+        "c244b47a9d3b3607",
+        "9ceea77cef6257f7",
+        "d05f561551462e9c",
+        "199c9feeb96f7ff8",
+        "dd16babf51c2c657",
+        "164ea317e1c14f12",
+        "90b4a4450e975461",
+        "a04b0cd896b91a37",
+        "f158d9e374ff6c88",
+        "3ae5454276a08fb5",
+        "cf1da3a02d437a8a",
+        "8510ce3ae2fcb825",
+        "800bb9c21aedc19d",
+        "0af5bda13da74df8",
+        "5c1363cd00f99e4d"
+      ],
+      "date": 1709799217049
+    },
+    {
+      "type": "remove",
+      "id": "875d3a09db792aea",
+      "date": 1709799244978
+    },
+    {
+      "type": "edit",
+      "id": "570de50b34e43639",
+      "item": {
+        "type": "markdown",
+        "id": "570de50b34e43639",
+        "text": "**[[Force]]** (within [[Narrative? Pattern!]])\n- What [[Force]] unites these patterns? (within [[Construction Patterns]]) See: [[Visitor as Schema]], [[Algorithmic Markup]], [[Visitor Pattern]]\n- [[Forces of Environment]] (within [[Environment as a Language]]) See: [[Traits]] of culture"
+      },
+      "date": 1709799251387
+    },
+    {
+      "id": "94a82cfba79d7073",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "01085049e7beb80b",
+        "8d72b7d1eeb777f7",
+        "9cec41b8a69e088c",
+        "2c950ad8503be8a2",
+        "a66dd91eb2d3436f",
+        "a141a047d260d847",
+        "789c821796615a42",
+        "389e7ab3f7b14490",
+        "51a3fe3b752667d2",
+        "570de50b34e43639",
+        "dad87f8ad01df5a3",
+        "94a82cfba79d7073",
+        "44da2c7cd76807c1",
+        "62b83df55205b6b9",
+        "c8c99ca5565d3131",
+        "a716207802fce38f",
+        "fe9cba91fe33b809",
+        "84f1abdd48ed2caa",
+        "d48f6c803ffd4ae0",
+        "26332be736252099",
+        "d751a55508a2e466",
+        "f45ac44f018a53b1",
+        "c7041daf82ee35e9",
+        "c265a4be4b2b3a91",
+        "b7c4f062a79dd8d5",
+        "c244b47a9d3b3607",
+        "9ceea77cef6257f7",
+        "d05f561551462e9c",
+        "199c9feeb96f7ff8",
+        "dd16babf51c2c657",
+        "164ea317e1c14f12",
+        "90b4a4450e975461",
+        "a04b0cd896b91a37",
+        "f158d9e374ff6c88",
+        "3ae5454276a08fb5",
+        "cf1da3a02d437a8a",
+        "8510ce3ae2fcb825",
+        "800bb9c21aedc19d",
+        "0af5bda13da74df8",
+        "5c1363cd00f99e4d"
+      ],
+      "date": 1709799258226
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709799304670
+    },
+    {
+      "type": "add",
+      "id": "a744e9f1ca803ea1",
+      "item": {
+        "type": "paragraph",
+        "id": "a744e9f1ca803ea1",
+        "text": "[[Functional Reactive Programming]]"
+      },
+      "after": "800bb9c21aedc19d",
+      "date": 1709986493161
+    },
+    {
+      "type": "edit",
+      "id": "5c1363cd00f99e4d",
+      "item": {
+        "type": "frame",
+        "id": "5c1363cd00f99e4d",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE paragraph\nSOURCE graph"
+      },
+      "date": 1709986522293
+    },
+    {
+      "type": "edit",
+      "id": "a744e9f1ca803ea1",
+      "item": {
+        "type": "paragraph",
+        "id": "a744e9f1ca803ea1",
+        "text": "[[Functional Reactive Programming]] See: [[Sodium]]"
+      },
+      "date": 1709987735611
+    },
+    {
+      "type": "add",
+      "id": "43ece73c8900a66e",
+      "item": {
+        "type": "paragraph",
+        "id": "43ece73c8900a66e",
+        "text": "[[Feedback]] (within [[Formative Assessment]])"
+      },
+      "after": "a744e9f1ca803ea1",
+      "date": 1711008607819
+    },
+    {
+      "type": "add",
+      "id": "2f11b6f08d9afb38",
+      "item": {
+        "type": "paragraph",
+        "id": "2f11b6f08d9afb38",
+        "text": "[[Favela]] (within [[Favela Chic]])"
+      },
+      "after": "43ece73c8900a66e",
+      "date": 1711020224371
+    },
+    {
+      "type": "edit",
+      "id": "5c1363cd00f99e4d",
+      "item": {
+        "type": "frame",
+        "id": "5c1363cd00f99e4d",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE paragraph\nSOURCE graph"
+      },
+      "date": 1711020232264
     }
   ]
 }

@@ -52,6 +52,11 @@
       "text": "[[High-Dimensional Computing]]"
     },
     {
+      "type": "paragraph",
+      "id": "17d7beb331db501c",
+      "text": "[[Open Hyperdocument System]]"
+    },
+    {
       "type": "reference",
       "id": "8eb41c9ad7a9c330",
       "site": "wiki.ralfbarkow.ch",
@@ -62,7 +67,7 @@
     {
       "type": "frame",
       "id": "2327d39d4415325c",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222"
     }
   ],
   "journal": [
@@ -431,6 +436,40 @@
         "text": "[[High-Dimensional Computing]]"
       },
       "date": 1709548688749
+    },
+    {
+      "id": "17d7beb331db501c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "17d7beb331db501c",
+        "text": "[[Open Hyperdocument System]]"
+      },
+      "after": "f1ed62904b3511b2",
+      "attribution": {
+        "page": "O"
+      },
+      "date": 1709622035992
+    },
+    {
+      "type": "edit",
+      "id": "2327d39d4415325c",
+      "item": {
+        "type": "frame",
+        "id": "2327d39d4415325c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 222"
+      },
+      "date": 1709622052552
+    },
+    {
+      "type": "edit",
+      "id": "2327d39d4415325c",
+      "item": {
+        "type": "frame",
+        "id": "2327d39d4415325c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222"
+      },
+      "date": 1709622083120
     }
   ]
 }
