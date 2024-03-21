@@ -364,6 +364,11 @@
       "text": "[[Curing the Vulnerable Parser]] See: [[Parser]]"
     },
     {
+      "type": "paragraph",
+      "id": "161c03c48e9dc7cc",
+      "text": "[[Cooperation]] (within [[Visitor as Schema]])"
+    },
+    {
       "type": "reference",
       "id": "3e8af46ff3063eaa",
       "site": "wiki.ralfbarkow.ch",
@@ -2938,9 +2943,20 @@
       "date": 1709631050313
     },
     {
+      "type": "add",
+      "id": "161c03c48e9dc7cc",
+      "item": {
+        "type": "paragraph",
+        "id": "161c03c48e9dc7cc",
+        "text": "[[Cooperation]] (within [[Visitor as Schema]])"
+      },
+      "after": "983f998685e48c77",
+      "date": 1709808204427
+    },
+    {
       "type": "fork",
       "site": "wiki.ralfbarkow.ch",
-      "date": 1709656244078
+      "date": 1709835797161
     }
   ]
 }

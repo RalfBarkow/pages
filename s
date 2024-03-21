@@ -392,6 +392,16 @@
       "text": "[[SOM_PAK]]"
     },
     {
+      "type": "paragraph",
+      "id": "d8ebd180264d303f",
+      "text": "[[Semi-Edge Walk]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6a1ce5fc8f2a25e9",
+      "text": "[[Sitemap]]"
+    },
+    {
       "type": "reference",
       "id": "8c2cd410bbc45f08",
       "site": "wiki.ralfbarkow.ch",
@@ -3520,9 +3530,31 @@
       "date": 1709630848063
     },
     {
+      "type": "add",
+      "id": "d8ebd180264d303f",
+      "item": {
+        "type": "paragraph",
+        "id": "d8ebd180264d303f",
+        "text": "[[Semi-Edge Walk]]"
+      },
+      "after": "bc96cb7c1892038a",
+      "date": 1709738903488
+    },
+    {
+      "type": "add",
+      "id": "6a1ce5fc8f2a25e9",
+      "item": {
+        "type": "paragraph",
+        "id": "6a1ce5fc8f2a25e9",
+        "text": "[[Sitemap]]"
+      },
+      "after": "d8ebd180264d303f",
+      "date": 1709807854535
+    },
+    {
       "type": "fork",
       "site": "wiki.ralfbarkow.ch",
-      "date": 1709630876304
+      "date": 1709835836990
     }
   ]
 }
