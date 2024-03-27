@@ -1,0 +1,709 @@
+{
+  "title": "Tips for Binding Events",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "af5e73f0773d3723",
+      "text": "Plugins register for events emitted from various sources within wiki. Here we consider coding strategies based on the lifetime of emitters and the handlers that listen to them. Examples from Graph plugin."
+    },
+    {
+      "type": "paragraph",
+      "id": "346929bafcd5a4bb",
+      "text": "See [[Plugin Lifecycle]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "44ac1c9bb28b5e2b",
+      "text": "Plugins typically register for events in the bind portion of the emit/bind cycle. Many emits may separate a given item's emit and its corresponding bind. But the same arguments are provided with both calls."
+    },
+    {
+      "type": "code",
+      "id": "1877f8c8367f8fe7",
+      "text": "emit = ($item, item) ->\n  ...\n\nbind = ($item, item) ->\n  ..."
+    },
+    {
+      "type": "paragraph",
+      "id": "4a0d024272856f9b",
+      "text": "Once loaded, the plugin code remains resident for the  remaining lifetime of the web page. However, the dom elements that hold listeners and emit are more varied."
+    },
+    {
+      "type": "markdown",
+      "id": "e46898c68ad3695f",
+      "text": "# Item"
+    },
+    {
+      "type": "paragraph",
+      "id": "c26ca1670aa2e4ae",
+      "text": "The $item is created for the plugin when a page containing an item is rendered. Bind handlers to $item that should be forgotten when the page is discarded."
+    },
+    {
+      "type": "code",
+      "id": "8c74843f84647ce0",
+      "text": "  $item.dblclick -> wiki.textEditor $item, item"
+    },
+    {
+      "type": "markdown",
+      "id": "3f0af660b04991ec",
+      "text": "# Emits"
+    },
+    {
+      "type": "paragraph",
+      "id": "5d153a4f91ffa342",
+      "text": "The dom elements rendered into $item are often replaced through editing operations. Some logic will be required to rebind these to fresh content."
+    },
+    {
+      "type": "code",
+      "id": "c2dccf79897cf026",
+      "text": "  rebind = ->\n    $item.find('a').on 'hover', (e) ->\n      ...\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "28c2be9898edc2a1",
+      "text": "The Factory plugin is careful to unbind menu click handlers before becoming a new type of item."
+    },
+    {
+      "type": "code",
+      "id": "a5b265ca59919b02",
+      "text": "  $item.unbind()"
+    },
+    {
+      "type": "markdown",
+      "id": "97822d6907d717a9",
+      "text": "# Body"
+    },
+    {
+      "type": "paragraph",
+      "id": "63d5d6f335cd2d5b",
+      "text": "Some asynchronous events are unrelated to specific $item elements but still find need to affect them. In this case the first item bound can register the handling of all others."
+    },
+    {
+      "type": "code",
+      "id": "ef1fb720649ab3b2",
+      "text": "  unless bound\n    bound = true\n    $('body').on 'new-neighbor-done',(e, map) ->\n      ...\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "913298485e8fdf94",
+      "text": "We introduce one variable, 'bound', in the outer scope of the plugin but avoid dom manipulation on load so that the plugin can be loaded in non-dom context like tests."
+    },
+    {
+      "type": "markdown",
+      "id": "7e27dd4144bf1bcd",
+      "text": "# Afterthought"
+    },
+    {
+      "type": "paragraph",
+      "id": "4b50d719684a89d0",
+      "text": "A somewhat simpler approach is used by the RSS plugin. Each instance binds an event handler to the dom element. With each new-neighbor-done a package level handler finds and invoke these."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Tips for Binding Events",
+        "story": []
+      },
+      "date": 1462196327218
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "af5e73f0773d3723"
+      },
+      "id": "af5e73f0773d3723",
+      "type": "add",
+      "date": 1462196329220
+    },
+    {
+      "type": "edit",
+      "id": "af5e73f0773d3723",
+      "item": {
+        "type": "paragraph",
+        "id": "af5e73f0773d3723",
+        "text": "Plugins register for events emitted from various sources within wiki. Here we consider coding strategies based on the lifetime of emitters and the handlers that listen to them."
+      },
+      "date": 1462196538299
+    },
+    {
+      "type": "add",
+      "id": "346929bafcd5a4bb",
+      "item": {
+        "type": "paragraph",
+        "id": "346929bafcd5a4bb",
+        "text": "See [[Plugin Lifecycle]]"
+      },
+      "after": "af5e73f0773d3723",
+      "date": 1462196567446
+    },
+    {
+      "type": "add",
+      "id": "44ac1c9bb28b5e2b",
+      "item": {
+        "type": "paragraph",
+        "id": "44ac1c9bb28b5e2b",
+        "text": "Plugins typically register for events in the bind portion of the emit/bind cycle. "
+      },
+      "after": "346929bafcd5a4bb",
+      "date": 1462196719260
+    },
+    {
+      "type": "edit",
+      "id": "44ac1c9bb28b5e2b",
+      "item": {
+        "type": "paragraph",
+        "id": "44ac1c9bb28b5e2b",
+        "text": "Plugins typically register for events in the bind portion of the emit/bind cycle."
+      },
+      "date": 1462196748631
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1877f8c8367f8fe7"
+      },
+      "id": "1877f8c8367f8fe7",
+      "type": "add",
+      "after": "44ac1c9bb28b5e2b",
+      "date": 1462196767310
+    },
+    {
+      "type": "edit",
+      "id": "1877f8c8367f8fe7",
+      "item": {
+        "type": "code",
+        "id": "1877f8c8367f8fe7",
+        "text": "bind = ($item, item) ->\n    ..."
+      },
+      "date": 1462196778951
+    },
+    {
+      "type": "edit",
+      "id": "44ac1c9bb28b5e2b",
+      "item": {
+        "type": "paragraph",
+        "id": "44ac1c9bb28b5e2b",
+        "text": "Plugins typically register for events in the bind portion of the emit/bind cycle where they are again handed the story item and the dom element, $item, made to hold its rendering."
+      },
+      "date": 1462196846726
+    },
+    {
+      "type": "edit",
+      "id": "44ac1c9bb28b5e2b",
+      "item": {
+        "type": "paragraph",
+        "id": "44ac1c9bb28b5e2b",
+        "text": "Plugins typically register for events in the bind portion of the emit/bind cycle. Many emits may separate a given item's emit and bind. But the same arguments are provided with both calls."
+      },
+      "date": 1462196996109
+    },
+    {
+      "type": "edit",
+      "id": "1877f8c8367f8fe7",
+      "item": {
+        "type": "code",
+        "id": "1877f8c8367f8fe7",
+        "text": "emit = ($item, item) ->\n    ...\n\nbind = ($item, item) ->\n    ..."
+      },
+      "date": 1462197039277
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "4a0d024272856f9b"
+      },
+      "id": "4a0d024272856f9b",
+      "type": "add",
+      "after": "1877f8c8367f8fe7",
+      "date": 1462197132044
+    },
+    {
+      "type": "edit",
+      "id": "4a0d024272856f9b",
+      "item": {
+        "type": "paragraph",
+        "id": "4a0d024272856f9b",
+        "text": "Once loaded, the plugin code remains resident for the  remaining lifetime of the web page. However, the dom elements that hold listeners and emit are more varied."
+      },
+      "date": 1462197611884
+    },
+    {
+      "type": "add",
+      "id": "e46898c68ad3695f",
+      "item": {
+        "type": "paragraph",
+        "id": "e46898c68ad3695f",
+        "text": "# Item"
+      },
+      "after": "4a0d024272856f9b",
+      "date": 1462197624859
+    },
+    {
+      "type": "add",
+      "id": "c26ca1670aa2e4ae",
+      "item": {
+        "type": "paragraph",
+        "id": "c26ca1670aa2e4ae",
+        "text": "The $item is created for the plugin when a page containing an item is rendered. Bind handlers to $item that should be forgotten when the page is discarded."
+      },
+      "after": "e46898c68ad3695f",
+      "date": 1462197822178
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8c74843f84647ce0"
+      },
+      "id": "8c74843f84647ce0",
+      "type": "add",
+      "after": "c26ca1670aa2e4ae",
+      "date": 1462197838797
+    },
+    {
+      "type": "edit",
+      "id": "8c74843f84647ce0",
+      "item": {
+        "type": "code",
+        "id": "8c74843f84647ce0",
+        "text": "  $item.dblclick -> wiki.textEditor $item, item"
+      },
+      "date": 1462197847029
+    },
+    {
+      "type": "edit",
+      "id": "8c74843f84647ce0",
+      "item": {
+        "type": "code",
+        "id": "8c74843f84647ce0",
+        "text": "    $item.dblclick -> wiki.textEditor $item, item"
+      },
+      "date": 1462197854968
+    },
+    {
+      "type": "edit",
+      "id": "e46898c68ad3695f",
+      "item": {
+        "type": "markdown",
+        "id": "e46898c68ad3695f",
+        "text": "# Item"
+      },
+      "date": 1462197864726
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3f0af660b04991ec"
+      },
+      "id": "3f0af660b04991ec",
+      "type": "add",
+      "after": "8c74843f84647ce0",
+      "date": 1462197939628
+    },
+    {
+      "type": "edit",
+      "id": "3f0af660b04991ec",
+      "item": {
+        "type": "paragraph",
+        "id": "3f0af660b04991ec",
+        "text": "# Emit"
+      },
+      "date": 1462198024550
+    },
+    {
+      "type": "add",
+      "id": "5d153a4f91ffa342",
+      "item": {
+        "type": "paragraph",
+        "id": "5d153a4f91ffa342",
+        "text": "The dom elements rendered into $item are often replaced through editing operations. Some logic will be required to rebind to these should some other handler erase and replace them."
+      },
+      "after": "3f0af660b04991ec",
+      "date": 1462198313729
+    },
+    {
+      "type": "edit",
+      "id": "5d153a4f91ffa342",
+      "item": {
+        "type": "paragraph",
+        "id": "5d153a4f91ffa342",
+        "text": "The dom elements rendered into $item are often replaced through editing operations. Some logic will be required to rebind these when present."
+      },
+      "date": 1462198363815
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c2dccf79897cf026"
+      },
+      "id": "c2dccf79897cf026",
+      "type": "add",
+      "after": "5d153a4f91ffa342",
+      "date": 1462198380479
+    },
+    {
+      "type": "edit",
+      "id": "c2dccf79897cf026",
+      "item": {
+        "type": "code",
+        "id": "c2dccf79897cf026",
+        "text": "    rebind = ->\n        $item.find('a').on 'hover', (e) ->\n             ...\n"
+      },
+      "date": 1462198438390
+    },
+    {
+      "type": "edit",
+      "id": "5d153a4f91ffa342",
+      "item": {
+        "type": "paragraph",
+        "id": "5d153a4f91ffa342",
+        "text": "The dom elements rendered into $item are often replaced through editing operations. Some logic will be required to rebind these to fresh content."
+      },
+      "date": 1462198503027
+    },
+    {
+      "type": "edit",
+      "id": "3f0af660b04991ec",
+      "item": {
+        "type": "markdown",
+        "id": "3f0af660b04991ec",
+        "text": "# Emit"
+      },
+      "date": 1462198516141
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "97822d6907d717a9"
+      },
+      "id": "97822d6907d717a9",
+      "type": "add",
+      "after": "c2dccf79897cf026",
+      "date": 1462198539248
+    },
+    {
+      "type": "edit",
+      "id": "97822d6907d717a9",
+      "item": {
+        "type": "paragraph",
+        "id": "97822d6907d717a9",
+        "text": "# Body"
+      },
+      "date": 1462198595044
+    },
+    {
+      "type": "add",
+      "id": "63d5d6f335cd2d5b",
+      "item": {
+        "type": "paragraph",
+        "id": "63d5d6f335cd2d5b",
+        "text": "Some asynchronous events are unrelated to specific $item elements but still find need to affect them."
+      },
+      "after": "97822d6907d717a9",
+      "date": 1462198736614
+    },
+    {
+      "type": "edit",
+      "id": "63d5d6f335cd2d5b",
+      "item": {
+        "type": "paragraph",
+        "id": "63d5d6f335cd2d5b",
+        "text": "Some asynchronous events are unrelated to specific $item elements but still find need to affect them. In this case the first item bound can register the handling of all other items."
+      },
+      "date": 1462198911838
+    },
+    {
+      "type": "edit",
+      "id": "63d5d6f335cd2d5b",
+      "item": {
+        "type": "paragraph",
+        "id": "63d5d6f335cd2d5b",
+        "text": "Some asynchronous events are unrelated to specific $item elements but still find need to affect them. In this case the first item bound can register the handling of all others."
+      },
+      "date": 1462198919425
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "ef1fb720649ab3b2"
+      },
+      "id": "ef1fb720649ab3b2",
+      "type": "add",
+      "after": "63d5d6f335cd2d5b",
+      "date": 1462198924818
+    },
+    {
+      "type": "edit",
+      "id": "ef1fb720649ab3b2",
+      "item": {
+        "type": "code",
+        "id": "ef1fb720649ab3b2",
+        "text": "    unless bound\n        bound = true\n        $('body').on 'new-neighbor-done', (e, neighbor) ->\n"
+      },
+      "date": 1462198942073
+    },
+    {
+      "type": "edit",
+      "id": "ef1fb720649ab3b2",
+      "item": {
+        "type": "code",
+        "id": "ef1fb720649ab3b2",
+        "text": "    unless bound\n        bound = true\n        $('body').on 'new-neighbor-done', (e, map) ->\n            ...\n"
+      },
+      "date": 1462198981930
+    },
+    {
+      "type": "edit",
+      "id": "ef1fb720649ab3b2",
+      "item": {
+        "type": "code",
+        "id": "ef1fb720649ab3b2",
+        "text": "    unless bound\n        bound = true\n        $('body').on 'new-neighbor-done',(e, map) ->\n            ...\n"
+      },
+      "date": 1462198992116
+    },
+    {
+      "type": "edit",
+      "id": "97822d6907d717a9",
+      "item": {
+        "type": "markdown",
+        "id": "97822d6907d717a9",
+        "text": "# Body"
+      },
+      "date": 1462199008673
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "913298485e8fdf94"
+      },
+      "id": "913298485e8fdf94",
+      "type": "add",
+      "after": "ef1fb720649ab3b2",
+      "date": 1462199048333
+    },
+    {
+      "type": "edit",
+      "id": "913298485e8fdf94",
+      "item": {
+        "type": "paragraph",
+        "id": "913298485e8fdf94",
+        "text": "We introduce one variable, 'bound', in the outer scope of the plugin but avoid dom manipulation on load so that the plugin can be loaded in non-dom context such as unit testing."
+      },
+      "date": 1462199189474
+    },
+    {
+      "type": "edit",
+      "id": "913298485e8fdf94",
+      "item": {
+        "type": "paragraph",
+        "id": "913298485e8fdf94",
+        "text": "We introduce one variable, 'bound', in the outer scope of the plugin but avoid dom manipulation on load so that the plugin can be loaded in non-dom context like tests."
+      },
+      "date": 1462199215081
+    },
+    {
+      "type": "edit",
+      "id": "1877f8c8367f8fe7",
+      "item": {
+        "type": "code",
+        "id": "1877f8c8367f8fe7",
+        "text": "emit = ($item, item) ->\n  ...\n\nbind = ($item, item) ->\n  ..."
+      },
+      "date": 1462199271758
+    },
+    {
+      "type": "edit",
+      "id": "8c74843f84647ce0",
+      "item": {
+        "type": "code",
+        "id": "8c74843f84647ce0",
+        "text": "  $item.dblclick -> wiki.textEditor $item, item"
+      },
+      "date": 1462199278415
+    },
+    {
+      "type": "edit",
+      "id": "c2dccf79897cf026",
+      "item": {
+        "type": "code",
+        "id": "c2dccf79897cf026",
+        "text": "  rebind = ->\n    $item.find('a').on 'hover', (e) ->\n      ...\n"
+      },
+      "date": 1462199292740
+    },
+    {
+      "type": "edit",
+      "id": "ef1fb720649ab3b2",
+      "item": {
+        "type": "code",
+        "id": "ef1fb720649ab3b2",
+        "text": "  unless bound\n    bound = true\n      $('body').on 'new-neighbor-done',(e, map) ->\n        ...\n"
+      },
+      "date": 1462199317002
+    },
+    {
+      "type": "edit",
+      "id": "af5e73f0773d3723",
+      "item": {
+        "type": "paragraph",
+        "id": "af5e73f0773d3723",
+        "text": "Plugins register for events emitted from various sources within wiki. Here we consider coding strategies based on the lifetime of emitters and the handlers that listen to them. Examples from Graph plugin."
+      },
+      "date": 1462199372769
+    },
+    {
+      "type": "edit",
+      "id": "3f0af660b04991ec",
+      "item": {
+        "type": "markdown",
+        "id": "3f0af660b04991ec",
+        "text": "# Emits"
+      },
+      "date": 1462199410432
+    },
+    {
+      "type": "edit",
+      "id": "44ac1c9bb28b5e2b",
+      "item": {
+        "type": "paragraph",
+        "id": "44ac1c9bb28b5e2b",
+        "text": "Plugins typically register for events in the bind portion of the emit/bind cycle. Many emits may separate a given item's emit and its corresponding bind. But the same arguments are provided with both calls."
+      },
+      "date": 1462199610656
+    },
+    {
+      "type": "edit",
+      "id": "ef1fb720649ab3b2",
+      "item": {
+        "type": "code",
+        "id": "ef1fb720649ab3b2",
+        "text": "  unless bound\n    bound = true\n    $('body').on 'new-neighbor-done',(e, map) ->\n      ...\n"
+      },
+      "date": 1462199736061
+    },
+    {
+      "type": "add",
+      "id": "28c2be9898edc2a1",
+      "item": {
+        "type": "paragraph",
+        "id": "28c2be9898edc2a1",
+        "text": "The Factory plugin is careful to unbind menu click handlers before becoming a new type of item."
+      },
+      "after": "5d153a4f91ffa342",
+      "date": 1462639469025
+    },
+    {
+      "type": "move",
+      "order": [
+        "af5e73f0773d3723",
+        "346929bafcd5a4bb",
+        "44ac1c9bb28b5e2b",
+        "1877f8c8367f8fe7",
+        "4a0d024272856f9b",
+        "e46898c68ad3695f",
+        "c26ca1670aa2e4ae",
+        "8c74843f84647ce0",
+        "3f0af660b04991ec",
+        "5d153a4f91ffa342",
+        "c2dccf79897cf026",
+        "28c2be9898edc2a1",
+        "97822d6907d717a9",
+        "63d5d6f335cd2d5b",
+        "ef1fb720649ab3b2",
+        "913298485e8fdf94"
+      ],
+      "id": "28c2be9898edc2a1",
+      "date": 1462639473675
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a5b265ca59919b02"
+      },
+      "id": "a5b265ca59919b02",
+      "type": "add",
+      "after": "913298485e8fdf94",
+      "date": 1462639478346
+    },
+    {
+      "type": "edit",
+      "id": "a5b265ca59919b02",
+      "item": {
+        "type": "code",
+        "id": "a5b265ca59919b02",
+        "text": "  $item.unbind()"
+      },
+      "date": 1462639495502
+    },
+    {
+      "type": "move",
+      "order": [
+        "af5e73f0773d3723",
+        "346929bafcd5a4bb",
+        "44ac1c9bb28b5e2b",
+        "1877f8c8367f8fe7",
+        "4a0d024272856f9b",
+        "e46898c68ad3695f",
+        "c26ca1670aa2e4ae",
+        "8c74843f84647ce0",
+        "3f0af660b04991ec",
+        "5d153a4f91ffa342",
+        "c2dccf79897cf026",
+        "28c2be9898edc2a1",
+        "a5b265ca59919b02",
+        "97822d6907d717a9",
+        "63d5d6f335cd2d5b",
+        "ef1fb720649ab3b2",
+        "913298485e8fdf94"
+      ],
+      "id": "a5b265ca59919b02",
+      "date": 1462639498916
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "7e27dd4144bf1bcd"
+      },
+      "id": "7e27dd4144bf1bcd",
+      "type": "add",
+      "after": "913298485e8fdf94",
+      "date": 1470666662340
+    },
+    {
+      "type": "edit",
+      "id": "7e27dd4144bf1bcd",
+      "item": {
+        "type": "paragraph",
+        "id": "7e27dd4144bf1bcd",
+        "text": "# Afterthought"
+      },
+      "date": 1470666686563
+    },
+    {
+      "type": "add",
+      "id": "4b50d719684a89d0",
+      "item": {
+        "type": "paragraph",
+        "id": "4b50d719684a89d0",
+        "text": "A somewhat simpler approach is used by the RSS plugin. Each instance binds an event handler to the dom element. With each new-neighbor-done a package level handler finds and invoke these."
+      },
+      "after": "7e27dd4144bf1bcd",
+      "date": 1470666855426
+    },
+    {
+      "type": "edit",
+      "id": "7e27dd4144bf1bcd",
+      "item": {
+        "type": "markdown",
+        "id": "7e27dd4144bf1bcd",
+        "text": "# Afterthought"
+      },
+      "date": 1470666858091
+    },
+    {
+      "type": "fork",
+      "site": "plugins.fed.wiki.org",
+      "date": 1710053151212
+    }
+  ]
+}

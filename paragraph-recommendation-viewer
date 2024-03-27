@@ -1,0 +1,1963 @@
+{
+  "title": "Paragraph Recommendation Viewer",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "484e092159df2d01",
+      "text": "We show the paragraphs from a \"SOURCE para\" frame, for example from the [[Parse Page Paragraphs]] page."
+    },
+    {
+      "type": "markdown",
+      "id": "00f76ff348892888",
+      "text": "# Application Frame"
+    },
+    {
+      "type": "frame",
+      "id": "6cf52409eec3988c",
+      "text": "//frame.wiki.dbbs.co/assets/pages/snippet-template/esm.html\nHEIGHT 111\nLINEUP paragraph\nLINEUP graph"
+    },
+    {
+      "type": "paragraph",
+      "id": "968d423aa8266a2a",
+      "text": "We import a function that can handle the graph stream."
+    },
+    {
+      "type": "code",
+      "id": "1dfc82c877a814a2",
+      "text": "import { Graph } from 'https://wardcunningham.github.io/graph/graph.js';\nimport { handleGraphStream } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/handleGraphStream.js';"
+    },
+    {
+      "type": "markdown",
+      "id": "6dd0fb27300649ad",
+      "text": "# graphPromise",
+      "alias": "9db74f06392c5cbd"
+    },
+    {
+      "type": "code",
+      "id": "7ed09d20d922c731",
+      "text": "let graphPromise = {};\ngraphPromise.promise = new Promise((resolve, reject) => {\n    graphPromise.resolve = resolve;\n    graphPromise.reject = reject;\n});\n"
+    },
+    {
+      "type": "markdown",
+      "id": "54cd03680ccb8ccd",
+      "text": "# handleParaStream",
+      "alias": "9db74f06392c5cbd"
+    },
+    {
+      "type": "paragraph",
+      "id": "b8a37b6e0014e5d2",
+      "text": "We need a function that can handle the paragraph stream."
+    },
+    {
+      "type": "code",
+      "id": "7474b13b85017948",
+      "text": "// Import the paragraphList object\nimport paragraphList from 'https://wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/paragraphList.js';\n\n// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n    \n    // Render the paragraph\n    renderPara(paragraph);\n\n    // Add the paragraph ID to the paragraphList\n    paragraphList.addIds([paragraph.id]);\n\n    // Trigger a search in the graph based on the updated paragraphList\n    searchGraph(paragraphList);\n}\n"
+    },
+    {
+      "type": "markdown",
+      "id": "9db74f06392c5cbd",
+      "text": "# searchGraph"
+    },
+    {
+      "type": "code",
+      "id": "dd358495c4c08b29",
+      "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    graphPromise.promise.then((value) => {\n        // Use the resolved value here\n        console.log(\"(searchGraph) promise value: \", value);\n        \n        // Create the graph instance using the graph data\n        const graphInstance = new Graph(value.nodes, value.rels);\n        \n        // Perform the graph search for each paragraph ID\n        for (const paragraphId of paragraphIds) {"
+    },
+    {
+      "type": "paragraph",
+      "id": "e49e8a38e218f8ef",
+      "text": "Construct the match query with the paragraphId variable"
+    },
+    {
+      "type": "code",
+      "id": "00a9632024748351",
+      "text": "            const query = 'match (n:' + paragraphId + ')';\n            console.log(`(searchGraph) query:`, query);"
+    },
+    {
+      "type": "paragraph",
+      "id": "3583f5e0c4fa7b4e",
+      "text": "Perform the graph search using the constructed query"
+    },
+    {
+      "type": "code",
+      "id": "6d4110dd28deb8a3",
+      "text": "            try {\n                const result = graphInstance.search(query);\n\n                // Process the result\n                console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n            } catch (error) {\n                console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n            }\n        }\n    }).catch((error) => {\n        // Handle errors if the promise is rejected\n        console.error(error);\n    });\n}\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "2b83956535395893",
+      "text": "We need a function that displays the paragraph."
+    },
+    {
+      "type": "code",
+      "id": "5eb6b67568179aa3",
+      "text": "// Function to emit HTML content for the para container\nexport async function emit(el) {\n    el.innerHTML = `\n    <div id=\"para-container\"></div>\n    <style>#para-container {border: 1px solid black;}</style>`;\n}"
+    },
+    {
+      "type": "code",
+      "id": "f60c71defbe486e0",
+      "text": "// Function to render the paragraph in the paragraph container\nasync function renderPara(paragraph) {\n    // Select the paragraph container element\n    const paraContainer = document.getElementById('para-container');\n    \n    // Highlight the paragraph if recommended\n    const color = paragraph.recommended ? 'darkorange' : 'black';\n\n    // Render the paragraph in the paragraph container\n    paraContainer.innerHTML += `<div><strong style=\"color:${color};\">${paragraph.id}</strong> <span style=\"color:gray;\">${paragraph.text}</span></div>`;\n}"
+    },
+    {
+      "type": "markdown",
+      "id": "033c03b7373a6fdd",
+      "text": "# Event listener"
+    },
+    {
+      "type": "code",
+      "id": "8f875986430b7928",
+      "text": "// Event listener to handle messages sent from \"SOURCE para\" and \"SOURCE graph\" frames\nwindow.addEventListener('message', function(event) {\n    const message = event.data;\n    \n    // Check if the message is intended for this frame and contains paragraph data\n    if (message.action === 'paragraphStream') {\n        // Handle the paragraph data\n        handleParaStream(message);\n    } else if (message.action === 'graphStream') {\n        // Handle the graph data\n        handleGraphStream(message, graphPromise); // Pass the searchGraph function as the callback\n    }\n});\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "a4eeef1e23f7da30",
+      "text": "⇐ [[LINEUP graph]]"
+    },
+    {
+      "type": "assets",
+      "id": "21e9a044043f353f",
+      "text": "pages/parse-page-paragraphs"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Paragraph Recommendation Viewer",
+        "story": []
+      },
+      "date": 1710836273218
+    },
+    {
+      "id": "484e092159df2d01",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "484e092159df2d01",
+        "text": "We show the paragraphs from a SOURCE paragraph frame, for example from the [[Parse Page Paragraphs]] page."
+      },
+      "attribution": {
+        "page": "LINEUP para",
+        "site": "wiki.ralfbarkow.ch"
+      },
+      "date": 1710836277802
+    },
+    {
+      "id": "6cf52409eec3988c",
+      "type": "add",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//frame.wiki.dbbs.co/assets/pages/snippet-template/esm.html\nHEIGHT 111\nLINEUP paragraph"
+      },
+      "after": "484e092159df2d01",
+      "attribution": {
+        "page": "LINEUP para",
+        "site": "wiki.ralfbarkow.ch"
+      },
+      "date": 1710836279878
+    },
+    {
+      "id": "b8a37b6e0014e5d2",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "b8a37b6e0014e5d2",
+        "text": "We need a function that can handle a paragraph."
+      },
+      "after": "6cf52409eec3988c",
+      "attribution": {
+        "page": "LINEUP para",
+        "site": "wiki.ralfbarkow.ch"
+      },
+      "date": 1710836285061
+    },
+    {
+      "id": "7474b13b85017948",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "async function handleParaStream(message) {\n    const paragraph = message.paragraph;\n    renderPara(paragraph);\n}"
+      },
+      "after": "b8a37b6e0014e5d2",
+      "attribution": {
+        "page": "LINEUP para",
+        "site": "wiki.ralfbarkow.ch"
+      },
+      "date": 1710836288252
+    },
+    {
+      "id": "2b83956535395893",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "2b83956535395893",
+        "text": "We need a function that displays the paragraph."
+      },
+      "after": "7474b13b85017948",
+      "attribution": {
+        "page": "LINEUP para",
+        "site": "wiki.ralfbarkow.ch"
+      },
+      "date": 1710836292263
+    },
+    {
+      "id": "5eb6b67568179aa3",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "// Function to emit HTML content for the para container\nexport async function emit(el) {\n    el.innerHTML = `\n    <div id=\"para-container\"></div>\n    <style>#para-container {border: 1px solid black;}</style>`;\n}"
+      },
+      "after": "2b83956535395893",
+      "attribution": {
+        "page": "LINEUP para",
+        "site": "wiki.ralfbarkow.ch"
+      },
+      "date": 1710836308087
+    },
+    {
+      "id": "f60c71defbe486e0",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "f60c71defbe486e0",
+        "text": "// Function to render the para in the para container\nasync function renderPara(paragraph) {\n\n    // Select the graph container element\n    const paraContainer = document.getElementById('para-container');\n    \n    // Render the para in the para container, each paragraph starts on a new line\n    paraContainer.innerHTML += `<div><strong style=\"color:black;\">${paragraph.id}</strong> <span style=\"color:gray;\">${paragraph.text}</span></div>`;\n}\n"
+      },
+      "after": "5eb6b67568179aa3",
+      "attribution": {
+        "page": "LINEUP para",
+        "site": "wiki.ralfbarkow.ch"
+      },
+      "date": 1710836317124
+    },
+    {
+      "id": "8f875986430b7928",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "8f875986430b7928",
+        "text": "// Event listener to handle messages sent from \"SOURCE paragraph\" frame\nwindow.addEventListener('message', function(event) {\n    const message = event.data;\n    \n    // Check if the message is intended for this frame and contains para data\n    if (message.action === 'paragraphStream') {\n\n        // Handle the para data\n        handleParaStream(message);\n    }\n});"
+      },
+      "after": "f60c71defbe486e0",
+      "attribution": {
+        "page": "LINEUP para",
+        "site": "wiki.ralfbarkow.ch"
+      },
+      "date": 1710836328942
+    },
+    {
+      "id": "a4eeef1e23f7da30",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "a4eeef1e23f7da30",
+        "text": "⇒ [[LINEUP graph]]"
+      },
+      "after": "8f875986430b7928",
+      "attribution": {
+        "page": "LINEUP para",
+        "site": "wiki.ralfbarkow.ch"
+      },
+      "date": 1710836333819
+    },
+    {
+      "id": "1dfc82c877a814a2",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "1dfc82c877a814a2",
+        "text": "// Import the recommend function from the recommend.js module\nimport { recommend } from './recommend.js';"
+      },
+      "after": "6cf52409eec3988c",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710836489232
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "21e9a044043f353f"
+      },
+      "id": "21e9a044043f353f",
+      "type": "add",
+      "after": "a4eeef1e23f7da30",
+      "date": 1710836513711
+    },
+    {
+      "type": "edit",
+      "id": "21e9a044043f353f",
+      "item": {
+        "type": "assets",
+        "id": "21e9a044043f353f",
+        "text": "pages/parse-page-paragraphs"
+      },
+      "date": 1710836520141
+    },
+    {
+      "type": "edit",
+      "id": "f60c71defbe486e0",
+      "item": {
+        "type": "code",
+        "id": "f60c71defbe486e0",
+        "text": "// Function to render the paragraph in the paragraph container\nasync function renderPara(paragraph) {\n    // Select the paragraph container element\n    const paraContainer = document.getElementById('para-container');\n    \n    // Highlight the paragraph if recommended\n    const color = paragraph.recommended ? 'darkorange' : 'black';\n\n    // Render the paragraph in the paragraph container\n    paraContainer.innerHTML += `<div><strong style=\"color:${color};\">${paragraph.id}</strong> <span style=\"color:gray;\">${paragraph.text}</span></div>`;\n}"
+      },
+      "date": 1710836576627
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "/ Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n    \n    // Use the recommend function to determine similarity and recommendation\n    recommend(paragraph);\n\n    // Render the paragraph\n    renderPara(paragraph);\n}"
+      },
+      "date": 1710836632075
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n    \n    // Use the recommend function to determine similarity and recommendation\n    recommend(paragraph);\n\n    // Render the paragraph\n    renderPara(paragraph);\n}"
+      },
+      "date": 1710836642246
+    },
+    {
+      "type": "edit",
+      "id": "1dfc82c877a814a2",
+      "item": {
+        "type": "code",
+        "id": "1dfc82c877a814a2",
+        "text": "import { recommend } from './recommend.js';"
+      },
+      "date": 1710836907406
+    },
+    {
+      "type": "edit",
+      "id": "1dfc82c877a814a2",
+      "item": {
+        "type": "code",
+        "id": "1dfc82c877a814a2",
+        "text": "import { recommend } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/recommend.js';\n"
+      },
+      "date": 1710837170127
+    },
+    {
+      "type": "edit",
+      "id": "8f875986430b7928",
+      "item": {
+        "type": "code",
+        "id": "8f875986430b7928",
+        "text": "// Event listener to handle messages sent from \"SOURCE paragraph\" frame\nwindow.addEventListener('message', function(event) {\n    const message = event.data;\n    \n    // Check if the message is intended for this frame and contains paragraph data\n    if (message.action === 'paragraphStream') {\n        // Handle the paragraph data\n        handleParaStream(message);\n    } else if (message.action === 'graphStream') {\n        // Handle the graph data\n        handleGraphStream(message);\n    }\n});\n"
+      },
+      "date": 1710841609130
+    },
+    {
+      "type": "edit",
+      "id": "8f875986430b7928",
+      "item": {
+        "type": "code",
+        "id": "8f875986430b7928",
+        "text": "// Event listener to handle messages sent from \"SOURCE para\" and \"SOURCE graph\" frames\n\nwindow.addEventListener('message', function(event) {\n    const message = event.data;\n    \n    // Check if the message is intended for this frame and contains paragraph data\n    if (message.action === 'paragraphStream') {\n        // Handle the paragraph data\n        handleParaStream(message);\n    } else if (message.action === 'graphStream') {\n        // Handle the graph data\n        handleGraphStream(message);\n    }\n});\n"
+      },
+      "date": 1710841617860
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//frame.wiki.dbbs.co/assets/pages/snippet-template/esm.html\nHEIGHT 111\nLINEUP para\nLINEUP graph"
+      },
+      "date": 1710841901874
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//frame.wiki.dbbs.co/assets/pages/snippet-template/esm.html\nHEIGHT 111\nLINEUP paragraph\nLINEUP graph"
+      },
+      "date": 1710842164675
+    },
+    {
+      "type": "edit",
+      "id": "1dfc82c877a814a2",
+      "item": {
+        "type": "code",
+        "id": "1dfc82c877a814a2",
+        "text": "import { recommend } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/recommend.js';\nimport { handleGraphStream } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/handleGraphStream.js';"
+      },
+      "date": 1710842357452
+    },
+    {
+      "type": "edit",
+      "id": "1dfc82c877a814a2",
+      "item": {
+        "type": "code",
+        "id": "1dfc82c877a814a2",
+        "text": "import { recommend } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/recommend.js';\nimport { handleGraphStream } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/handleGraphStream.js';\nimport { handleGraphStream } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/handleParaStream.js';\n"
+      },
+      "date": 1710843527375
+    },
+    {
+      "type": "edit",
+      "id": "1dfc82c877a814a2",
+      "item": {
+        "type": "code",
+        "id": "1dfc82c877a814a2",
+        "text": "import { recommend } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/recommend.js';\nimport { handleGraphStream } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/handleGraphStream.js';\n"
+      },
+      "date": 1710843559041
+    },
+    {
+      "type": "fork",
+      "date": 1710844286787
+    },
+    {
+      "type": "edit",
+      "id": "1dfc82c877a814a2",
+      "item": {
+        "type": "code",
+        "id": "1dfc82c877a814a2",
+        "text": "import { handleGraphStream } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/handleGraphStream.js';\n"
+      },
+      "date": 1710844334196
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n\n    // Render the paragraph\n    renderPara(paragraph);\n}"
+      },
+      "date": 1710844735849
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "import { relIndex } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/relIndex.js';\n\n// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n\n    // Render the paragraph\n    renderPara(paragraph);\n\n    // Check if the paragraph is related to the graph\n    const relId = relIndex(paragraph.id, /* Specify the page ID */);\n    if (relId !== -1) {\n        // The paragraph is related to a page in the graph\n        // Perform further actions if needed\n    }\n}"
+      },
+      "date": 1710844904257
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "import { relIndex } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/relIndex.js';\n\n// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n\n    // Render the paragraph\n    renderPara(paragraph);\n\n}"
+      },
+      "date": 1710846256882
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n\n    // Render the paragraph\n    renderPara(paragraph);\n\n}"
+      },
+      "date": 1710846662765
+    },
+    {
+      "type": "fork",
+      "date": 1710846886754
+    },
+    {
+      "type": "edit",
+      "id": "b8a37b6e0014e5d2",
+      "item": {
+        "type": "paragraph",
+        "id": "b8a37b6e0014e5d2",
+        "text": "We need a function that can handle the paragraph stream."
+      },
+      "date": 1710847679298
+    },
+    {
+      "id": "968d423aa8266a2a",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "968d423aa8266a2a",
+        "text": "We import a function that can handle the graph stream."
+      },
+      "after": "6cf52409eec3988c",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710849006050
+    },
+    {
+      "id": "00f76ff348892888",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "00f76ff348892888",
+        "text": "# Application Frame"
+      },
+      "after": "484e092159df2d01",
+      "attribution": {
+        "page": "Parse Page Paragraphs",
+        "site": "wiki.ralfbarkow.ch"
+      },
+      "date": 1710849019830
+    },
+    {
+      "type": "edit",
+      "id": "484e092159df2d01",
+      "item": {
+        "type": "paragraph",
+        "id": "484e092159df2d01",
+        "text": "We show the paragraphs from a \"SOURCE para\" frame, for example from the [[Parse Page Paragraphs]] page."
+      },
+      "date": 1710849062013
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n    renderPara(paragraph);\n\n    // Trigger a search in the graph based on the paragraph ID\n    handleGraphSearch(paragraph.id);\n}"
+      },
+      "date": 1710849817841
+    },
+    {
+      "id": "033c03b7373a6fdd",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "033c03b7373a6fdd",
+        "text": "# Event listener"
+      },
+      "after": "f60c71defbe486e0",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710849880516
+    },
+    {
+      "id": "dd358495c4c08b29",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to handle graph search based on paragraph ID\nasync function handleGraphSearch(paragraphId) {\n    // Perform a search in the graph using the paragraph ID\n    const result = await searchGraph(paragraphId);\n    \n    // Process the search result as needed\n    console.log(\"Search result for paragraph ID\", paragraphId, \": \", result);\n}\n\n// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(paragraphId) {\n    // Perform the graph search here\n    // Example:\n    const result = await graph.search(`match (n:${paragraphId})`);\n    return result;\n}"
+      },
+      "after": "7474b13b85017948",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710849942107
+    },
+    {
+      "type": "edit",
+      "id": "1dfc82c877a814a2",
+      "item": {
+        "type": "code",
+        "id": "1dfc82c877a814a2",
+        "text": "import { Graph } from 'https://wardcunningham.github.io/graph/graph.js';\nimport { handleGraphStream } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/handleGraphStream.js';"
+      },
+      "date": 1710850949582
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to handle graph search based on paragraph ID\nasync function handleGraphSearch(paragraphId) {\n    // Perform a search in the graph using the paragraph ID\n    const result = searchGraph(paragraphId);\n    \n    // Process the search result as needed\n    console.log(\"Search result for paragraph ID\", paragraphId, \": \", result);\n}\n\n// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(paragraphId) {\n    // Perform the graph search here\n    // Example:\n    const result = await graph.search(`match (n:${paragraphId})`);\n    return result;\n}"
+      },
+      "date": 1710851021477
+    },
+    {
+      "type": "edit",
+      "id": "8f875986430b7928",
+      "item": {
+        "type": "code",
+        "id": "8f875986430b7928",
+        "text": "// Event listener to handle messages sent from \"SOURCE para\" and \"SOURCE graph\" frames\n\nwindow.addEventListener('message', function(event) {\n    const message = event.data;\n    \n    // Check if the message is intended for this frame and contains paragraph data\n    if (message.action === 'paragraphStream') {\n        // Handle the paragraph data\n        handleParaStream(message);\n    } else if (message.action === 'graphStream') {\n        // Handle the graph data\n        handleGraphStream(message, graphInstance); // Pass the graphInstance as an argument\n    }\n});\n"
+      },
+      "date": 1710851497247
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Declare a variable to hold the graph object\nlet graphInstance;\n\n// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(paragraphId) {\n    // Check if the graph instance is available\n    if (!graphInstance) {\n        // Wait for the graph instance to become available\n        await new Promise(resolve => {\n            const interval = setInterval(() => {\n                if (graphInstance) {\n                    clearInterval(interval);\n                    resolve();\n                }\n            }, 100);\n        });\n    }\n\n    // Perform the graph search here\n    // Example:\n    const result = await graphInstance.search(`match (n:${paragraphId})`);\n    return result;\n}\n\n// Function to handle messages received from \"SOURCE graph\" frame\nfunction handleGraphStream(message) {\n    const json = JSON.parse(message.jsonl.trim());\n    graphInstance = new Graph(json.nodes, json.rels);\n    console.log(\"handleGraphStream: \", graphInstance);\n\n    // Process the graph data as needed\n    // ...\n}\n\nexport { handleGraphStream };\n"
+      },
+      "date": 1710851547530
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Declare a variable to hold the graph object\nlet graphInstance;\n\n// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(paragraphId) {\n    // Check if the graph instance is available\n    if (!graphInstance) {\n        // Wait for the graph instance to become available\n        await new Promise(resolve => {\n            const interval = setInterval(() => {\n                if (graphInstance) {\n                    clearInterval(interval);\n                    resolve();\n                }\n            }, 100);\n        });\n    }\n\n    // Perform the graph search here\n    // Example:\n    const result = await graphInstance.search(`match (n:${paragraphId})`);\n    return result;\n}"
+      },
+      "date": 1710851594351
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Declare a variable to hold the graph object\nlet graphInstance;\n\n// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(paragraph.id) {\n    const paragraphId = paragraph.id;\n    // Check if the graph instance is available\n    if (!graphInstance) {\n        // Wait for the graph instance to become available\n        await new Promise(resolve => {\n            const interval = setInterval(() => {\n                if (graphInstance) {\n                    clearInterval(interval);\n                    resolve();\n                }\n            }, 100);\n        });\n    }\n\n    // Perform the graph search here\n    // Example:\n    const result = await graphInstance.search(`match (n:${paragraphId})`);\n    return result;\n}"
+      },
+      "date": 1710851794335
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Declare a variable to hold the graph object\nlet graphInstance;\n\n// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(paragraphId) {\n    // Check if the graph instance is available\n    if (!graphInstance) {\n        // Wait for the graph instance to become available\n        await new Promise(resolve => {\n            const interval = setInterval(() => {\n                if (graphInstance) {\n                    clearInterval(interval);\n                    resolve();\n                }\n            }, 100);\n        });\n    }\n\n    // Perform the graph search here\n    // Example:\n    const result = await graphInstance.search(`match (n:${paragraphId})`);\n    return result;\n}"
+      },
+      "date": 1710851897465
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n    renderPara(paragraph);\n\n    // Trigger a search in the graph based on the paragraph ID\n    searchGraph(paragraph.id);\n}"
+      },
+      "date": 1710852095909
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(paragraphId) {\n    // Check if the graph instance is available\n    if (!graphInstance) {\n        // Wait for the graph instance to become available\n        await new Promise(resolve => {\n            const interval = setInterval(() => {\n                if (graphInstance) {\n                    clearInterval(interval);\n                    resolve();\n                }\n            }, 100);\n        });\n    }\n\n    // Perform the graph search here\n    // Example:\n    const result = await graphInstance.search(`match (n:${paragraphId})`);\n    return result;\n}"
+      },
+      "date": 1710852119690
+    },
+    {
+      "id": "dafbbf8cf56757ab",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "dafbbf8cf56757ab",
+        "text": "// Declare a variable to hold the graph object\nlet graphInstance;"
+      },
+      "after": "1dfc82c877a814a2",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710852136285
+    },
+    {
+      "type": "edit",
+      "id": "8f875986430b7928",
+      "item": {
+        "type": "code",
+        "id": "8f875986430b7928",
+        "text": "// Event listener to handle messages sent from \"SOURCE para\" and \"SOURCE graph\" frames\n\nwindow.addEventListener('message', function(event) {\n    const message = event.data;\n    \n    // Check if the message is intended for this frame and contains paragraph data\n    if (message.action === 'paragraphStream') {\n        // Handle the paragraph data\n        handleParaStream(message);\n    } else if (message.action === 'graphStream') {\n        // Handle the graph data\n        handleGraphStream(message); \n    }\n});\n"
+      },
+      "date": 1710852496293
+    },
+    {
+      "type": "edit",
+      "id": "8f875986430b7928",
+      "item": {
+        "type": "code",
+        "id": "8f875986430b7928",
+        "text": "// Event listener to handle messages sent from \"SOURCE para\" and \"SOURCE graph\" frames\n\nwindow.addEventListener('message', function(event) {\n    const message = event.data;\n    \n    // Check if the message is intended for this frame and contains paragraph data\n    if (message.action === 'paragraphStream') {\n        // Handle the paragraph data\n        handleParaStream(message);\n    } else if (message.action === 'graphStream') {\n        // Handle the graph data\n        handleGraphStream(message);\n    }\n});\n"
+      },
+      "date": 1710852519339
+    },
+    {
+      "type": "edit",
+      "id": "dafbbf8cf56757ab",
+      "item": {
+        "type": "code",
+        "id": "dafbbf8cf56757ab",
+        "text": "// Declare a variable to hold the graph object\nlet graph = new Graph;"
+      },
+      "date": 1710852762332
+    },
+    {
+      "type": "edit",
+      "id": "dafbbf8cf56757ab",
+      "item": {
+        "type": "code",
+        "id": "dafbbf8cf56757ab",
+        "text": "// Declare a variable to hold the graph object\nlet graph = new Graph();"
+      },
+      "date": 1710852846061
+    },
+    {
+      "type": "remove",
+      "id": "dafbbf8cf56757ab",
+      "date": 1710852965228
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphInstance, paragraphId) {\n    // Wait for the graph instance to become available\n    await waitForGraphInstance(graphInstance);\n\n    // Perform the graph search here\n    // Example:\n    const result = await graphInstance.search(`match (n:${paragraphId})`);\n    return result;\n}\n"
+      },
+      "date": 1710853460017
+    },
+    {
+      "id": "7ed09d20d922c731",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "7ed09d20d922c731",
+        "text": "// Define a global variable to store the graph instance\nlet graph;"
+      },
+      "after": "1dfc82c877a814a2",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710853638535
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n    renderPara(paragraph);\n\n    // Trigger a search in the graph based on the paragraph ID\n    searchGraph(paragraph.id, graph);\n}"
+      },
+      "date": 1710853658500
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n    renderPara(paragraph);\n\n    // Trigger a search in the graph based on the paragraph ID\n    searchGraph(graph, paragraph.id);\n}"
+      },
+      "date": 1710853698804
+    },
+    {
+      "id": "fc35c6e165cd2967",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "fc35c6e165cd2967",
+        "text": "// Function to wait for the graph instance to become available\nfunction waitForGraphInstance() {\n    return new Promise(resolve => {\n        const interval = setInterval(() => {\n            if (graph) {\n                clearInterval(interval);\n                resolve();\n            }\n        }, 100);\n    });\n}\n"
+      },
+      "after": "dd358495c4c08b29",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710853931521
+    },
+    {
+      "type": "fork",
+      "date": 1710854032739
+    },
+    {
+      "type": "edit",
+      "id": "7ed09d20d922c731",
+      "item": {
+        "type": "code",
+        "id": "7ed09d20d922c731",
+        "text": "// Define a global variable to store the graph instance\nlet graphPromise;"
+      },
+      "date": 1710854663518
+    },
+    {
+      "type": "edit",
+      "id": "1dfc82c877a814a2",
+      "item": {
+        "type": "code",
+        "id": "1dfc82c877a814a2",
+        "text": "import { Graph } from 'https://wardcunningham.github.io/graph/graph.js';\nimport { handleGraphStream, graphPromise } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/handleGraphStream.js';"
+      },
+      "date": 1710854881094
+    },
+    {
+      "type": "edit",
+      "id": "7ed09d20d922c731",
+      "item": {
+        "type": "code",
+        "id": "7ed09d20d922c731",
+        "text": "// Define a global variable to store the graph instance\n//let graphPromise;"
+      },
+      "date": 1710855180404
+    },
+    {
+      "type": "edit",
+      "id": "1dfc82c877a814a2",
+      "item": {
+        "type": "code",
+        "id": "1dfc82c877a814a2",
+        "text": "import { Graph } from 'https://wardcunningham.github.io/graph/graph.js';\nimport { handleGraphStream } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/handleGraphStream.js';"
+      },
+      "date": 1710855212691,
+      "error": {
+        "type": "error",
+        "msg": ""
+      }
+    },
+    {
+      "type": "fork",
+      "date": 1710855232100
+    },
+    {
+      "type": "edit",
+      "id": "7ed09d20d922c731",
+      "item": {
+        "type": "code",
+        "id": "7ed09d20d922c731",
+        "text": "// Define a global variable to store the graph instance\nlet graphPromise;"
+      },
+      "date": 1710855241158,
+      "error": {
+        "type": "error",
+        "msg": ""
+      }
+    },
+    {
+      "type": "fork",
+      "date": 1710855260770
+    },
+    {
+      "type": "edit",
+      "id": "1dfc82c877a814a2",
+      "item": {
+        "type": "code",
+        "id": "1dfc82c877a814a2",
+        "text": "import { Graph } from 'https://wardcunningham.github.io/graph/graph.js';\nimport { handleGraphStream, graphPromise } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/handleGraphStream.js';"
+      },
+      "date": 1710855423723
+    },
+    {
+      "type": "edit",
+      "id": "7ed09d20d922c731",
+      "item": {
+        "type": "code",
+        "id": "7ed09d20d922c731",
+        "text": "// Define a global variable to store the graph instance\nlet graphPromise;\n\n// Initialize the graphPromise\ngraphPromise = new Promise((resolve, reject) => {\n    graphPromise.resolve = resolve;\n    graphPromise.reject = reject;\n});"
+      },
+      "date": 1710855529147
+    },
+    {
+      "type": "edit",
+      "id": "1dfc82c877a814a2",
+      "item": {
+        "type": "code",
+        "id": "1dfc82c877a814a2",
+        "text": "import { Graph } from 'https://wardcunningham.github.io/graph/graph.js';\nimport { handleGraphStream } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/handleGraphStream.js';"
+      },
+      "date": 1710855575345
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n    renderPara(paragraph);\n\n    // Trigger a search in the graph based on the paragraph ID\n    searchGraph(graphPromise, paragraph.id);\n}"
+      },
+      "date": 1710855676274
+    },
+    {
+      "type": "fork",
+      "date": 1710855834125
+    },
+    {
+      "type": "edit",
+      "id": "7ed09d20d922c731",
+      "item": {
+        "type": "code",
+        "id": "7ed09d20d922c731",
+        "text": "// Define a global variable to store the graph instance\nlet graphPromise = new Promise((resolve, reject) => {\n    graphPromise.resolve = resolve;\n    graphPromise.reject = reject;\n});"
+      },
+      "date": 1710856517506
+    },
+    {
+      "type": "edit",
+      "id": "7ed09d20d922c731",
+      "item": {
+        "type": "code",
+        "id": "7ed09d20d922c731",
+        "text": "// Define a global variable to store the graph promise\nlet graphPromise;\n\n// Initialize the graphPromise\ngraphPromise = new Promise((resolve, reject) => {\n    graphPromise.resolve = resolve;\n    graphPromise.reject = reject;\n});"
+      },
+      "date": 1710856625475,
+      "error": {
+        "type": "error",
+        "msg": ""
+      }
+    },
+    {
+      "type": "fork",
+      "date": 1710856646803
+    },
+    {
+      "type": "edit",
+      "id": "7ed09d20d922c731",
+      "item": {
+        "type": "code",
+        "id": "7ed09d20d922c731",
+        "text": "// Define a global variable to store the graph promise\nvar graphPromise;\n\n// Initialize the graphPromise\ngraphPromise = new Promise((resolve, reject) => {\n    graphPromise.resolve = resolve;\n    graphPromise.reject = reject;\n});"
+      },
+      "date": 1710856677186
+    },
+    {
+      "type": "edit",
+      "id": "7ed09d20d922c731",
+      "item": {
+        "type": "code",
+        "id": "7ed09d20d922c731",
+        "text": "// Define a global variable to store the graph promise\nlet graphPromise = new Promise((resolve, reject) => {\n    // Store the resolve and reject functions within the promise itself\n    graphPromise.resolve = resolve;\n    graphPromise.reject = reject;\n});"
+      },
+      "date": 1710856771780
+    },
+    {
+      "id": "7ed09d20d922c731",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "00f76ff348892888",
+        "6cf52409eec3988c",
+        "968d423aa8266a2a",
+        "7ed09d20d922c731",
+        "1dfc82c877a814a2",
+        "b8a37b6e0014e5d2",
+        "7474b13b85017948",
+        "dd358495c4c08b29",
+        "fc35c6e165cd2967",
+        "2b83956535395893",
+        "5eb6b67568179aa3",
+        "f60c71defbe486e0",
+        "033c03b7373a6fdd",
+        "8f875986430b7928",
+        "a4eeef1e23f7da30",
+        "21e9a044043f353f"
+      ],
+      "date": 1710856774905
+    },
+    {
+      "id": "7ed09d20d922c731",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "00f76ff348892888",
+        "6cf52409eec3988c",
+        "968d423aa8266a2a",
+        "1dfc82c877a814a2",
+        "7ed09d20d922c731",
+        "b8a37b6e0014e5d2",
+        "7474b13b85017948",
+        "dd358495c4c08b29",
+        "fc35c6e165cd2967",
+        "2b83956535395893",
+        "5eb6b67568179aa3",
+        "f60c71defbe486e0",
+        "033c03b7373a6fdd",
+        "8f875986430b7928",
+        "a4eeef1e23f7da30",
+        "21e9a044043f353f"
+      ],
+      "date": 1710856891215
+    },
+    {
+      "type": "edit",
+      "id": "7ed09d20d922c731",
+      "item": {
+        "type": "code",
+        "id": "7ed09d20d922c731",
+        "text": "let graphPromise = {};\ngraphPromise.promise = new Promise((resolve, reject) => {\n    graphPromise.resolve = resolve;\n    graphPromise.reject = reject;\n});\n"
+      },
+      "date": 1710857104075
+    },
+    {
+      "type": "edit",
+      "id": "fc35c6e165cd2967",
+      "item": {
+        "type": "code",
+        "id": "fc35c6e165cd2967",
+        "text": "// Function to wait for the graph instance to become available\nfunction waitForGraphInstance(graphPromise) {\n    return new Promise(resolve => {\n        const interval = setInterval(() => {\n            if (graphPromise) { // Check if graphPromise is defined\n                graphPromise.promise.then(() => {\n                    clearInterval(interval);\n                    resolve();\n                });\n            }\n        }, 100);\n    });\n}\n"
+      },
+      "date": 1710857360719
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    await waitForGraphInstance(graphPromise);\n\n    // Perform the graph search here\n    // Example:\n    const result = await graphInstance.search(`match (n:${paragraphId})`);\n    return result;\n}"
+      },
+      "date": 1710857781843
+    },
+    {
+      "type": "edit",
+      "id": "8f875986430b7928",
+      "item": {
+        "type": "code",
+        "id": "8f875986430b7928",
+        "text": "// Event listener to handle messages sent from \"SOURCE para\" and \"SOURCE graph\" frames\n\nwindow.addEventListener('message', function(event) {\n    const message = event.data;\n    \n    // Check if the message is intended for this frame and contains paragraph data\n    if (message.action === 'paragraphStream') {\n        // Handle the paragraph data\n        handleParaStream(message);\n    } else if (message.action === 'graphStream') {\n        // Handle the graph data\n        handleGraphStream(message, graphPromise);\n    }\n});\n"
+      },
+      "date": 1710858177982
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    await waitForGraphInstance(graphPromise);\n\n    // Perform the graph search here\n    // Example:\n    const result = await graphPromise.search(`match (n:${paragraphId})`);\n    return result;\n}"
+      },
+      "date": 1710858335932
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    await waitForGraphInstance(graphPromise);\n\n    // Perform the graph search here\n    // Example:\n    const result = await graphPromise.search(`match (n:a988355fcbeb4933)`);\n    return result;\n}"
+      },
+      "date": 1710858699470
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    await waitForGraphInstance(graphPromise);\n\n    // Perform the graph search here\n    // Example:\n    const result = await graphPromise.search(`match (n:a988355fcbeb4933)`);\n    console.log(\"(searchGraph) match:\", result);\n    return result;\n}"
+      },
+      "date": 1710858915708
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    await waitForGraphInstance(graphPromise);\n\n    // Perform the graph search using the resolved graphInstance\n    const graphInstance = await graphPromise;\n    const result = await graphInstance.search(`match (n:${paragraphId})`);\n    console.log(\"(searchGraph) match:\", result);\n    return result;\n}"
+      },
+      "date": 1710859501444
+    },
+    {
+      "type": "fork",
+      "date": 1710860018701
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    await waitForGraphInstance(graphPromise);\n\n    // Perform the graph search using the resolved graphInstance\n    const graphInstance = await graphPromise;\n    const result = graphInstance.search(`match (n:${paragraphId})`);\n    console.log(\"(searchGraph) match:\", result);\n    return result;\n}"
+      },
+      "date": 1710860028522
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    const graphInstanceWrapper = await graphPromise;\n    const graphInstance = graphInstanceWrapper.value; // Retrieve the resolved Graph object\n\n    // Perform the graph search using the resolved graphInstance\n    const result = graphInstance.search(`match (n:${paragraphId})`);\n    console.log(\"(searchGraph) match:\", result);\n    return result;\n}\n"
+      },
+      "date": 1710860288573
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    const graphInstanceWrapper = await graphPromise.promise;\n    const graphInstance = graphInstanceWrapper.value; // Retrieve the resolved Graph object\n\n    // Perform the graph search using the resolved graphInstance\n    const result = graphInstance.search(`match (n:${paragraphId})`);\n    console.log(\"(searchGraph) match:\", result);\n    return result;\n}\n"
+      },
+      "date": 1710860511577
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise.then(value => value); // Resolve the promise and extract the value\n\n    // Perform the graph search using the resolved graphInstance\n    const result = graphInstance.search(`match (n:${paragraphId})`);\n    console.log(\"(searchGraph) match:\", result);\n    return result;\n}\n"
+      },
+      "date": 1710861130011
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise.then(value => value); // Resolve the promise and extract the value\n\n    // Perform the graph search using the resolved graphInstance\n    const result = graphInstance.search('match (n:702127fad3ec880f)');\n    console.log(\"(searchGraph) match:\", result);\n    return result;\n}\n"
+      },
+      "date": 1710861266830
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise\n\n    // Perform the graph search using the resolved graphInstance\n    const result = await graphInstance.search('match (n:702127fad3ec880f)');\n    console.log(\"(searchGraph) match:\", result);\n    return result;\n}\n"
+      },
+      "date": 1710861469878
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise\n\n    // Perform the graph search using the resolved graphInstance\n    const result = graphInstance.search('match (n:702127fad3ec880f)');\n    console.log(\"(searchGraph) match:\", result);\n    return result;\n}\n"
+      },
+      "date": 1710861734077
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise\n\n    // Perform the graph search using the resolved graphInstance\n    const result = graphInstance.search('match (n:d5c469074553cb08)');\n    console.log(\"(searchGraph) match:\", result);\n    return result;\n}\n"
+      },
+      "date": 1710861755510
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise\n\n    // Perform the graph search using the resolved graphInstance\n    const result = graph.search('match (n:d5c469074553cb08)');\n    console.log(\"(searchGraph) match:\", result);\n    return result;\n}\n"
+      },
+      "date": 1710861768354
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise\n\n    // Perform the graph search using the resolved graphInstance\n    const result = graphInstance.search('match (n:d5c469074553cb08)');\n    console.log(\"(searchGraph) match:\", result);\n    return result;\n}\n"
+      },
+      "date": 1710861923202
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise\n\n    // Perform the graph search using the resolved graphInstance\n    const result = graphInstance.search('match (n)');\n    console.log(\"(searchGraph) match:\", result);\n    return result;\n}\n"
+      },
+      "date": 1710862342595
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise\n\n    // Construct the match query with the paragraphId variable\n    const query = \"match (n:\" + paragraphId + \")\";\n    console.log(\"(searchGraph) match:\", result);\n    return result;\n}\n"
+      },
+      "date": 1710862722363
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Construct the match query with the paragraphId variable\n    const query = \"match (n:\" + paragraphId + \")\";\n\n    // Perform the graph search using the constructed query\n    const result = graphInstance.search(query);\n    console.log(\"(searchGraph) match:\", result);\n    return result;\n}\n"
+      },
+      "date": 1710862747956
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    try {\n        // Wait for the graph instance to become available\n        const graphInstance = await graphPromise.promise\n\n        // Construct the match query with the paragraphId variable\n        const query = \"match (n:\" + paragraphId + \")\";\n\n        // Perform the graph search using the constructed query\n        const result = graphInstance.search(query);\n\n        // Process the result if a match is found\n        console.log(\"(searchGraph) match:\", result);\n        return result;\n    } catch (error) {\n        console.error(\"(searchGraph) Error occurred during graph search:\", error);\n        return null; // Return null or handle the error accordingly\n    }\n}"
+      },
+      "date": 1710863202748
+    },
+    {
+      "type": "remove",
+      "id": "fc35c6e165cd2967",
+      "date": 1710863449113
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise\n    try {\n        // Construct the match query with the paragraphId variable\n        const query = \"match (n:\" + paragraphId + \")\";\n\n        // Perform the graph search using the constructed query\n        const result = graphInstance.search(query);\n\n        // Process the result if a match is found\n        console.log(\"(searchGraph) match:\", result);\n        return result;\n    } catch (error) {\n        console.error(\"(searchGraph) Error occurred during graph search:\", error);\n        return null; // Return null or handle the error accordingly\n    }\n}"
+      },
+      "date": 1710863524340
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(graphPromise, paragraphId) {\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    try {\n        // Construct the match query with the paragraphId variable\n        const query = \"match (n:\" + paragraphId + \")\";\n\n        // Perform the graph search using the constructed query\n        const result = graphInstance.search(query);\n\n        // Check if the result is a non-empty array\n        if (Array.isArray(result) && result.length > 0) {\n            // Process the result if a match is found\n            console.log(\"(searchGraph) match:\", result);\n        } else {\n            // Log a message if the result is empty\n            console.log(\"(searchGraph) No matches found for paragraph:\", paragraphId);\n        }\n        return result;\n    } catch (error) {\n        console.error(\"(searchGraph) Error occurred during graph search:\", error);\n        return null; // Return null or handle the error accordingly\n    }\n}\n"
+      },
+      "date": 1710864075270
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n    renderPara(paragraph);\n\n    // Trigger a search in the graph based on the paragraph ID\n    searchGraph(paragraph.id);\n}"
+      },
+      "date": 1710864797076
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(paragraphId) {\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    try {\n        // Construct the match query with the paragraphId variable\n        const query = \"match (n:\" + paragraphId + \")\";\n\n        // Perform the graph search using the constructed query\n        const result = graphInstance.search(query);\n\n        // Check if the result is a non-empty array\n        if (Array.isArray(result) && result.length > 0) {\n            // Process the result if a match is found\n            console.log(\"(searchGraph) match:\", result);\n        } else {\n            // Log a message if the result is empty\n            console.log(\"(searchGraph) No matches found for paragraph:\", paragraphId);\n        }\n        return result;\n    } catch (error) {\n        console.error(\"(searchGraph) Error occurred during graph search:\", error);\n        return null; // Return null or handle the error accordingly\n    }\n}\n"
+      },
+      "date": 1710864811440
+    },
+    {
+      "type": "edit",
+      "id": "8f875986430b7928",
+      "item": {
+        "type": "code",
+        "id": "8f875986430b7928",
+        "text": "// Event listener to handle messages sent from \"SOURCE para\" and \"SOURCE graph\" frames\n\nwindow.addEventListener('message', function(event) {\n    const message = event.data;\n    \n    // Check if the message is intended for this frame and contains paragraph data\n    if (message.action === 'paragraphStream') {\n        // Handle the paragraph data\n        handleParaStream(message);\n    } else if (message.action === 'graphStream') {\n        // Handle the graph data\n        handleGraphStream(message);\n    }\n});\n"
+      },
+      "date": 1710864817615
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph ID\nasync function searchGraph(paragraphId) {\n    try {\n        // Wait for the graph instance to become available\n        const graphInstance = await graphPromise.promise;\n\n        // Construct the match query with the paragraphId variable\n        const query = \"match (n:\" + paragraphId + \")\";\n\n        // Perform the graph search using the constructed query\n        const result = graphInstance.search(query);\n\n        // Check if the result is a non-empty array\n        if (Array.isArray(result) && result.length > 0) {\n            // Process the result if a match is found\n            console.log(\"(searchGraph) match:\", result);\n        } else {\n            // Log a message if the result is empty\n            console.log(\"(searchGraph) No matches found for paragraph:\", paragraphId);\n        }\n        return result;\n    } catch (error) {\n        console.error(\"(searchGraph) Error occurred during graph search:\", error);\n        return null; // Return null or handle the error accordingly\n    }\n}"
+      },
+      "date": 1710865137450
+    },
+    {
+      "type": "edit",
+      "id": "8f875986430b7928",
+      "item": {
+        "type": "code",
+        "id": "8f875986430b7928",
+        "text": "// Event listener to handle messages sent from \"SOURCE para\" and \"SOURCE graph\" frames\n\nwindow.addEventListener('message', function(event) {\n    const message = event.data;\n    \n    // Check if the message is intended for this frame and contains paragraph data\n    if (message.action === 'paragraphStream') {\n        // Handle the paragraph data\n        handleParaStream(message);\n    } else if (message.action === 'graphStream') {\n        // Handle the graph data\n        handleGraphStream(message, graphPromise);\n    }\n});\n"
+      },
+      "date": 1710865344214
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "// Import the paragraphList object\nimport paragraphList from './paragraphList.js';\n\n// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n    \n    // Render the paragraph\n    renderPara(paragraph);\n\n    // Add the paragraph ID to the paragraphList\n    paragraphList.addParagraph(paragraph.id);\n\n    // Trigger a search in the graph based on the updated paragraphList\n    searchGraph(paragraphList.list);\n}\n"
+      },
+      "date": 1710865994134
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "// Import the paragraphList object\nimport paragraphList from 'http://localhost:3000/assets/pages/parse-page-paragraphs/paragraphList.js';\n\n// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n    \n    // Render the paragraph\n    renderPara(paragraph);\n\n    // Add the paragraph ID to the paragraphList\n    paragraphList.addParagraph(paragraph.id);\n\n    // Trigger a search in the graph based on the updated paragraphList\n    searchGraph(paragraphList.list);\n}\n"
+      },
+      "date": 1710866008439
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphIds) {\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = \"match (n:\" + paragraphId + \")\";\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = await graphInstance.search(query);\n\n            // Process the result if a match is found\n            console.log(`(searchGraph) match for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}\n"
+      },
+      "date": 1710866242411
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "// Import the paragraphList object\nimport paragraphList from 'http://localhost:3000/assets/pages/parse-page-paragraphs/paragraphList.js';\n\n// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n    \n    // Render the paragraph\n    renderPara(paragraph);\n\n    // Add the paragraph ID to the paragraphList\n    paragraphList.addIds([paragraph.id]);\n\n    // Trigger a search in the graph based on the updated paragraphList\n    searchGraph(paragraphList);\n}\n"
+      },
+      "date": 1710866547351
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = \"match (n:\" + paragraphId + \")\";\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = await graphInstance.search(query);\n\n            // Process the result if a match is found\n            console.log(`(searchGraph) match for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}\n"
+      },
+      "date": 1710866758506
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = \"match (n:\" + paragraphId + \")\";\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = await graphInstance.search(query);\n\n            // Process the result if a match is found\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}\n"
+      },
+      "date": 1710867744777
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = \"match (n:\" + paragraphId + \")\";\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result if a match is found\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}\n"
+      },
+      "date": 1710868058313
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1710868360816
+    },
+    {
+      "type": "edit",
+      "id": "1dfc82c877a814a2",
+      "item": {
+        "type": "code",
+        "id": "1dfc82c877a814a2",
+        "text": "import { Graph } from 'https://wardcunningham.github.io/graph/graph.js';\nimport { handleGraphStream } from 'https://localhost:3000/assets/pages/parse-page-paragraphs/handleGraphStream.js';"
+      },
+      "date": 1710868439460
+    },
+    {
+      "type": "edit",
+      "id": "1dfc82c877a814a2",
+      "item": {
+        "type": "code",
+        "id": "1dfc82c877a814a2",
+        "text": "import { Graph } from 'https://wardcunningham.github.io/graph/graph.js';\nimport { handleGraphStream } from 'https://wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/handleGraphStream.js';"
+      },
+      "date": 1710868470393
+    },
+    {
+      "type": "edit",
+      "id": "7474b13b85017948",
+      "item": {
+        "type": "code",
+        "id": "7474b13b85017948",
+        "text": "// Import the paragraphList object\nimport paragraphList from 'https://wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/paragraphList.js';\n\n// Function to handle paragraph stream messages\nasync function handleParaStream(message) {\n    const paragraph = message.paragraph;\n    \n    // Render the paragraph\n    renderPara(paragraph);\n\n    // Add the paragraph ID to the paragraphList\n    paragraphList.addIds([paragraph.id]);\n\n    // Trigger a search in the graph based on the updated paragraphList\n    searchGraph(paragraphList);\n}\n"
+      },
+      "date": 1710868486476
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match ()-[:' + paragraphId + ']->(n)';\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result if a match is found\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}\n"
+      },
+      "date": 1710869548111
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match ()-[:' + paragraphId + ']->(n)';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result if a match is found\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}"
+      },
+      "date": 1710869851122
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match ()-[:' + paragraphId + ']->(n)';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}"
+      },
+      "date": 1710873355056
+    },
+    {
+      "id": "9db74f06392c5cbd",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "9db74f06392c5cbd",
+        "text": "# searchGraph"
+      },
+      "after": "7474b13b85017948",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710876003113
+    },
+    {
+      "id": "54cd03680ccb8ccd",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "54cd03680ccb8ccd",
+        "text": "# handleParaStream",
+        "alias": "9db74f06392c5cbd"
+      },
+      "after": "7ed09d20d922c731",
+      "date": 1710876040155
+    },
+    {
+      "id": "6dd0fb27300649ad",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "6dd0fb27300649ad",
+        "text": "# graphPromise",
+        "alias": "9db74f06392c5cbd"
+      },
+      "after": "1dfc82c877a814a2",
+      "date": 1710876065226
+    },
+    {
+      "type": "edit",
+      "id": "a4eeef1e23f7da30",
+      "item": {
+        "type": "paragraph",
+        "id": "a4eeef1e23f7da30",
+        "text": "⇐ [[LINEUP graph]]"
+      },
+      "date": 1710884512833
+    },
+    {
+      "type": "fork",
+      "date": 1710886548417
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match ()-[:' + paragraphId + ']->(n)';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}"
+      },
+      "date": 1710887329055
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        //const query = 'match ()-[:' + paragraphId + ']->(n)';\n        const query = 'match ()-[r]->()';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}"
+      },
+      "date": 1710949356919
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        //const query = 'match ()-[:' + paragraphId + ']->(n)';\n        const query = 'match (x)-[r]->(y)';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}"
+      },
+      "date": 1710949827398
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match (x:' + paragraphId + ')';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}   "
+      },
+      "date": 1710950534197
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match (x:' + paragraphId + ')';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = await graphInstance.search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}   "
+      },
+      "date": 1710951429464
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match (x:' + paragraphId + ')';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = (await graphInstance).search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}   "
+      },
+      "date": 1710951875434
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    //const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match (x:' + paragraphId + ')';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = (await graphInstance).search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}   "
+      },
+      "date": 1710951985407
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match (x:' + paragraphId + ')';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = (await graphInstance).search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}   "
+      },
+      "date": 1710952270948
+    },
+    {
+      "type": "fork",
+      "date": 1710953260742
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match (x:' + paragraphId + ')';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}   "
+      },
+      "date": 1710953568312
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    const graphInstance = await graphPromise.promise;\n\n    console.log(\"(searchGraph) typeof graphInstance: \", typeof graphInstance); // Check the type of graphInstance\n    console.log(\"(searchGraph) graphInstance: \", graphInstance); // Log the content of graphInstance\n\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match (x:' + paragraphId + ')';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}   "
+      },
+      "date": 1710954016504
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph data to become available\n    await graphPromise.promise;\n\n    // Create the graph instance using the graph data\n    const graphInstance = new Graph(graphPromise.promise.value.nodes, graphPromise.promise.value.rels);\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match (x:' + paragraphId + ')';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}\n"
+      },
+      "date": 1710954384986
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph data to become available\n    await graphPromise.promise;\n\n    // Create the graph instance using the graph data\n    const graphData = graphPromise.promise.value; // Assuming graphPromise.promise.value is an object with 'nodes' and 'rels' properties\n    const graphInstance = new Graph(graphData.nodes, graphData.rels);\n\n    const graphInstance = new Graph(graphPromise.promise.value.nodes, graphPromise.promise.value.rels);\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match (x:' + paragraphId + ')';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}\n"
+      },
+      "date": 1710954680776
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph data to become available\n    await graphPromise.promise;\n\n    // Create the graph instance using the graph data\n    const graphData = graphPromise.promise.value;\n    const graphInstance = new Graph(graphData.nodes, graphData.rels);\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match (x:' + paragraphId + ')';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}\n"
+      },
+      "date": 1710954896239
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph data to become available\n    const graphData = await graphPromise.promise.value;\n\n    // Create the graph instance using the graph data\n    const graphInstance = new Graph(graphData.nodes, graphData.rels);\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match (x:' + paragraphId + ')';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}\n"
+      },
+      "date": 1710955049327
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph data to become available\n    const graphData = (await graphPromise).promise.value;\n\n    // Create the graph instance using the graph data\n    const graphInstance = new Graph(graphData.nodes, graphData.rels);\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match (x:' + paragraphId + ')';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}\n"
+      },
+      "date": 1710955495317
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph data to become available\n    const graphData = await graphPromise;\n    \n    // Create the graph instance using the graph data\n    const graphInstance = new Graph(graphData.nodes, graphData.rels);\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match (x:' + paragraphId + ')';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}\n"
+      },
+      "date": 1710955744865
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    graphPromise.promise.then((value) => {\n    // Use the resolved value here\n        console.log(\"(searchGraph) value: \", value);\n           // Create the graph instance using the graph data\n        const graphInstance = new Graph(value.nodes, value.rels);\n    }).catch((error) => {\n    // Handle errors if the promise is rejected\n        console.error(error);\n    });\n\n\n    // Perform the graph search for each paragraph ID\n    for (const paragraphId of paragraphIds) {\n        // Construct the match query with the paragraphId variable\n        const query = 'match (x:' + paragraphId + ')';\n        console.log(`(searchGraph) query:`, query);\n\n        try {\n            // Perform the graph search using the constructed query\n            const result = graphInstance.search(query);\n\n            // Process the result\n            console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n        } catch (error) {\n            console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n        }\n    }\n}\n"
+      },
+      "date": 1710956384644
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    graphPromise.promise.then((value) => {\n        // Use the resolved value here\n        console.log(\"(searchGraph) value: \", value);\n        \n        // Create the graph instance using the graph data\n        const graphInstance = new Graph(value.nodes, value.rels);\n        \n        // Perform the graph search for each paragraph ID\n        for (const paragraphId of paragraphIds) {\n            // Construct the match query with the paragraphId variable\n            const query = 'match (x:' + paragraphId + ')';\n            console.log(`(searchGraph) query:`, query);\n\n            try {\n                // Perform the graph search using the constructed query\n                const result = graphInstance.search(query);\n\n                // Process the result\n                console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n            } catch (error) {\n                console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n            }\n        }\n    }).catch((error) => {\n        // Handle errors if the promise is rejected\n        console.error(error);\n    });\n}\n"
+      },
+      "date": 1710956657326
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    graphPromise.promise.then((value) => {\n        // Use the resolved value here\n        console.log(\"(searchGraph) promise value: \", value);\n        \n        // Create the graph instance using the graph data\n        const graphInstance = new Graph(value.nodes, value.rels);\n        \n        // Perform the graph search for each paragraph ID\n        for (const paragraphId of paragraphIds) {\n            // Construct the match query with the paragraphId variable\n            const query = 'match (x:' + paragraphId + ')';\n            console.log(`(searchGraph) query:`, query);\n\n            try {\n                // Perform the graph search using the constructed query\n                const result = graphInstance.search(query);\n\n                // Process the result\n                console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n            } catch (error) {\n                console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n            }\n        }\n    }).catch((error) => {\n        // Handle errors if the promise is rejected\n        console.error(error);\n    });\n}\n"
+      },
+      "date": 1710957306536
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    graphPromise.promise.then((value) => {\n        // Use the resolved value here\n        console.log(\"(searchGraph) promise value: \", value);\n        \n        // Create the graph instance using the graph data\n        const graphInstance = new Graph(value.nodes, value.rels);\n        \n        // Perform the graph search for each paragraph ID\n        for (const paragraphId of paragraphIds) {\n            // Construct the match query with the paragraphId variable\n            const query = 'match (n:' + paragraphId + ')';\n            console.log(`(searchGraph) query:`, query);\n\n            try {\n                // Perform the graph search using the constructed query\n                const result = graphInstance.search(query);\n\n                // Process the result\n                console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n            } catch (error) {\n                console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n            }\n        }\n    }).catch((error) => {\n        // Handle errors if the promise is rejected\n        console.error(error);\n    });\n}\n"
+      },
+      "date": 1710957404940
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    graphPromise.promise.then((value) => {\n        // Use the resolved value here\n        console.log(\"(searchGraph) promise value: \", value);\n        \n        // Create the graph instance using the graph data\n        const graphInstance = new Graph(value.nodes, value.rels);\n        \n        // Perform the graph search for each paragraph ID\n        for (const paragraphId of paragraphIds) {\n            // Construct the match query with the paragraphId variable\n            const query = 'match (n:' + paragraphId + ')';\n            console.log(`(searchGraph) query:`, query);\n\n            try {\n                // Perform the graph search using the constructed query\n                const result = graphInstance.search(query);\n\n                // Process the result\n                console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n            } catch (error) {\n                console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n            }\n        }\n\n        // Subscribe to graph updates\n        graphPromise.subscribe((newValue) => {\n            // Update the graph instance with the new value\n            console.log(\"(searchGraph) Graph updated: \", newValue);\n            graphInstance.update(newValue.nodes, newValue.rels);\n        });\n    }).catch((error) => {\n        // Handle errors if the promise is rejected\n        console.error(error);\n    });\n}\n"
+      },
+      "date": 1710958786837
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    graphPromise.promise.then((value) => {\n        // Use the resolved value here\n        console.log(\"(searchGraph) promise value: \", value);\n        \n        // Create the graph instance using the graph data\n        const graphInstance = new Graph(value.nodes, value.rels);\n        \n        // Perform the graph search for each paragraph ID\n        for (const paragraphId of paragraphIds) {\n            // Construct the match query with the paragraphId variable\n            const query = 'match (n:' + paragraphId + ')';\n            console.log(`(searchGraph) query:`, query);\n\n            try {\n                // Perform the graph search using the constructed query\n                const result = graphInstance.search(query);\n\n                // Process the result\n                console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n            } catch (error) {\n                console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n            }\n        }\n    }).catch((error) => {\n        // Handle errors if the promise is rejected\n        console.error(error);\n    });\n}\n"
+      },
+      "date": 1710959151152
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    graphPromise.promise.then((value) => {\n        // Use the resolved value here\n        console.log(\"(searchGraph) promise value: \", value);\n        \n        // Create the graph instance using the graph data\n        const graphInstance = new Graph(value.nodes, value.rels);\n        \n        // Perform the graph search for each paragraph ID\n        for (const paragraphId of paragraphIds) {\n            // Construct the match query with the paragraphId variable\n            const query = 'match (n)';\n            console.log(`(searchGraph) query:`, query);\n\n            try {\n                // Perform the graph search using the constructed query\n                const result = graphInstance.search(query);\n\n                // Process the result\n                console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n            } catch (error) {\n                console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n            }\n        }\n    }).catch((error) => {\n        // Handle errors if the promise is rejected\n        console.error(error);\n    });\n}\n"
+      },
+      "date": 1710960078228
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1710967528025
+    },
+    {
+      "id": "6d4110dd28deb8a3",
+      "type": "add",
+      "item": {
+        "type": "factory",
+        "id": "6d4110dd28deb8a3"
+      },
+      "after": "dd358495c4c08b29",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710967560960
+    },
+    {
+      "type": "edit",
+      "id": "dd358495c4c08b29",
+      "item": {
+        "type": "code",
+        "id": "dd358495c4c08b29",
+        "text": "// Function to perform a search in the graph based on paragraph IDs\nasync function searchGraph(paragraphList) {\n    const paragraphIds = paragraphList.getIds(); // Get the list of paragraph IDs\n    console.log(\"(searchGraph) paragraphList: \", paragraphIds);\n\n    if (paragraphIds.length === 0) {\n        console.log(\"No paragraph IDs to search.\");\n        return; // Exit if there are no paragraph IDs\n    }\n\n    // Wait for the graph instance to become available\n    graphPromise.promise.then((value) => {\n        // Use the resolved value here\n        console.log(\"(searchGraph) promise value: \", value);\n        \n        // Create the graph instance using the graph data\n        const graphInstance = new Graph(value.nodes, value.rels);\n        \n        // Perform the graph search for each paragraph ID\n        for (const paragraphId of paragraphIds) {"
+      },
+      "date": 1710967599307
+    },
+    {
+      "type": "edit",
+      "id": "6d4110dd28deb8a3",
+      "item": {
+        "type": "code",
+        "id": "6d4110dd28deb8a3",
+        "text": "\n            // Construct the match query with the paragraphId variable\n            const query = 'match (n)';\n            console.log(`(searchGraph) query:`, query);\n\n            try {\n                // Perform the graph search using the constructed query\n                const result = graphInstance.search(query);\n\n                // Process the result\n                console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n            } catch (error) {\n                console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n            }\n        }\n    }).catch((error) => {\n        // Handle errors if the promise is rejected\n        console.error(error);\n    });\n}\n"
+      },
+      "date": 1710967603931
+    },
+    {
+      "id": "00a9632024748351",
+      "type": "add",
+      "item": {
+        "type": "factory",
+        "id": "00a9632024748351"
+      },
+      "after": "dd358495c4c08b29",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710967614039
+    },
+    {
+      "type": "edit",
+      "id": "6d4110dd28deb8a3",
+      "item": {
+        "type": "code",
+        "id": "6d4110dd28deb8a3",
+        "text": "\n\n            try {\n                // Perform the graph search using the constructed query\n                const result = graphInstance.search(query);\n\n                // Process the result\n                console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n            } catch (error) {\n                console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n            }\n        }\n    }).catch((error) => {\n        // Handle errors if the promise is rejected\n        console.error(error);\n    });\n}\n"
+      },
+      "date": 1710967627494
+    },
+    {
+      "type": "edit",
+      "id": "00a9632024748351",
+      "item": {
+        "type": "code",
+        "id": "00a9632024748351",
+        "text": "            // Construct the match query with the paragraphId variable\n            const query = 'match (n)';\n            console.log(`(searchGraph) query:`, query);"
+      },
+      "date": 1710967630083
+    },
+    {
+      "type": "edit",
+      "id": "6d4110dd28deb8a3",
+      "item": {
+        "type": "code",
+        "id": "6d4110dd28deb8a3",
+        "text": "            try {\n                // Perform the graph search using the constructed query\n                const result = graphInstance.search(query);\n\n                // Process the result\n                console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n            } catch (error) {\n                console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n            }\n        }\n    }).catch((error) => {\n        // Handle errors if the promise is rejected\n        console.error(error);\n    });\n}\n"
+      },
+      "date": 1710967642090
+    },
+    {
+      "id": "e49e8a38e218f8ef",
+      "type": "add",
+      "item": {
+        "type": "factory",
+        "id": "e49e8a38e218f8ef"
+      },
+      "after": "dd358495c4c08b29",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710967806625
+    },
+    {
+      "type": "edit",
+      "id": "00a9632024748351",
+      "item": {
+        "type": "code",
+        "id": "00a9632024748351",
+        "text": "\n            const query = 'match (n)';\n            console.log(`(searchGraph) query:`, query);"
+      },
+      "date": 1710967817356
+    },
+    {
+      "type": "edit",
+      "id": "e49e8a38e218f8ef",
+      "item": {
+        "type": "paragraph",
+        "id": "e49e8a38e218f8ef",
+        "text": "Construct the match query with the paragraphId variable"
+      },
+      "date": 1710967826560
+    },
+    {
+      "id": "3583f5e0c4fa7b4e",
+      "type": "add",
+      "item": {
+        "type": "factory",
+        "id": "3583f5e0c4fa7b4e"
+      },
+      "after": "00a9632024748351",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710967855245
+    },
+    {
+      "type": "edit",
+      "id": "6d4110dd28deb8a3",
+      "item": {
+        "type": "code",
+        "id": "6d4110dd28deb8a3",
+        "text": "            try {\n                const result = graphInstance.search(query);\n\n                // Process the result\n                console.log(`(searchGraph) result for paragraph ID ${paragraphId}:`, result);\n            } catch (error) {\n                console.error(`(searchGraph) Error occurred during graph search for paragraph ID ${paragraphId}:`, error);\n            }\n        }\n    }).catch((error) => {\n        // Handle errors if the promise is rejected\n        console.error(error);\n    });\n}\n"
+      },
+      "date": 1710967866021
+    },
+    {
+      "type": "edit",
+      "id": "3583f5e0c4fa7b4e",
+      "item": {
+        "type": "paragraph",
+        "id": "3583f5e0c4fa7b4e",
+        "text": "Perform the graph search using the constructed query"
+      },
+      "date": 1710967872457
+    },
+    {
+      "type": "edit",
+      "id": "1dfc82c877a814a2",
+      "item": {
+        "type": "code",
+        "id": "1dfc82c877a814a2",
+        "text": "import { Graph } from 'https://wardcunningham.github.io/graph/graph.js';\nimport { handleGraphStream } from 'http://localhost:3000/assets/pages/parse-page-paragraphs/handleGraphStream.js';"
+      },
+      "date": 1710969098549
+    },
+    {
+      "type": "edit",
+      "id": "8f875986430b7928",
+      "item": {
+        "type": "code",
+        "id": "8f875986430b7928",
+        "text": "// Event listener to handle messages sent from \"SOURCE para\" and \"SOURCE graph\" frames\nwindow.addEventListener('message', function(event) {\n    const message = event.data;\n    \n    // Check if the message is intended for this frame and contains paragraph data\n    if (message.action === 'paragraphStream') {\n        // Handle the paragraph data\n        handleParaStream(message);\n    } else if (message.action === 'graphStream') {\n        // Handle the graph data\n        handleGraphStream(message, graphPromise, searchGraph); // Pass the searchGraph function as the callback\n    }\n});\n"
+      },
+      "date": 1710971191167
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "06aaaa6be946d6d1"
+      },
+      "id": "06aaaa6be946d6d1",
+      "type": "add",
+      "after": "21e9a044043f353f",
+      "date": 1710971227439
+    },
+    {
+      "id": "06aaaa6be946d6d1",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "00f76ff348892888",
+        "6cf52409eec3988c",
+        "968d423aa8266a2a",
+        "1dfc82c877a814a2",
+        "6dd0fb27300649ad",
+        "7ed09d20d922c731",
+        "54cd03680ccb8ccd",
+        "b8a37b6e0014e5d2",
+        "7474b13b85017948",
+        "9db74f06392c5cbd",
+        "dd358495c4c08b29",
+        "e49e8a38e218f8ef",
+        "00a9632024748351",
+        "3583f5e0c4fa7b4e",
+        "6d4110dd28deb8a3",
+        "2b83956535395893",
+        "5eb6b67568179aa3",
+        "f60c71defbe486e0",
+        "033c03b7373a6fdd",
+        "8f875986430b7928",
+        "06aaaa6be946d6d1",
+        "a4eeef1e23f7da30",
+        "21e9a044043f353f"
+      ],
+      "date": 1710971233585
+    },
+    {
+      "type": "edit",
+      "id": "06aaaa6be946d6d1",
+      "item": {
+        "type": "markdown",
+        "id": "06aaaa6be946d6d1",
+        "text": "In this setup, when the handleGraphStream function receives an updated graph, it calls the searchGraph function, passing the updated graph instance as an argument. This triggers the search for paragraphs in the updated graph."
+      },
+      "date": 1710971237116
+    },
+    {
+      "type": "edit",
+      "id": "06aaaa6be946d6d1",
+      "item": {
+        "type": "markdown",
+        "id": "06aaaa6be946d6d1",
+        "text": "In this setup, when the `handleGraphStream` function receives an updated graph, it calls the `searchGraph` function, passing the updated graph instance as an argument. This triggers the search for paragraphs in the updated graph."
+      },
+      "date": 1710971272593
+    },
+    {
+      "type": "fork",
+      "date": 1710973858302
+    },
+    {
+      "type": "remove",
+      "id": "06aaaa6be946d6d1",
+      "date": 1710974108920
+    },
+    {
+      "type": "edit",
+      "id": "8f875986430b7928",
+      "item": {
+        "type": "code",
+        "id": "8f875986430b7928",
+        "text": "// Event listener to handle messages sent from \"SOURCE para\" and \"SOURCE graph\" frames\nwindow.addEventListener('message', function(event) {\n    const message = event.data;\n    \n    // Check if the message is intended for this frame and contains paragraph data\n    if (message.action === 'paragraphStream') {\n        // Handle the paragraph data\n        handleParaStream(message);\n    } else if (message.action === 'graphStream') {\n        // Handle the graph data\n        handleGraphStream(message, graphPromise); // Pass the searchGraph function as the callback\n    }\n});\n"
+      },
+      "date": 1710974128831
+    },
+    {
+      "type": "fork",
+      "date": 1710975183904
+    },
+    {
+      "type": "edit",
+      "id": "00a9632024748351",
+      "item": {
+        "type": "code",
+        "id": "00a9632024748351",
+        "text": "            const query = 'match (n:' + paragraphId + ')';\n            console.log(`(searchGraph) query:`, query);"
+      },
+      "date": 1710977329913
+    }
+  ]
+}

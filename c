@@ -28,6 +28,11 @@
     },
     {
       "type": "paragraph",
+      "id": "895fdbf166ab77fc",
+      "text": "[[Card Catalog]] (within [[Offer to the DKR Implemeters]])"
+    },
+    {
+      "type": "paragraph",
       "id": "abb01936bfcb020c",
       "text": "[[Conversation as Search]] (within [[Typescript Locator]])"
     },
@@ -163,9 +168,34 @@
       "text": "[[CSV]] (within [[Exports from OPM]]) See: Source of Whole In Parts Conversation Set"
     },
     {
+      "type": "pagefold",
+      "id": "c8edcb9290d06f15",
+      "text": "control"
+    },
+    {
       "type": "paragraph",
       "id": "e0ca33b3ddc19f53",
       "text": "[[control]] systems through such models ⇒ [[LLM]]s See: [[The Phenomenon of Control]], [[Model Power]], [[Model Monopoly]] → \"[[~/mdp/0c1]]\""
+    },
+    {
+      "type": "paragraph",
+      "id": "fac1a911a90fa8bd",
+      "text": "⇒ [[Problems of Control]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6097469210e98775",
+      "text": "[[Find the Optimal Algorithm for Control]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "299fddd5c6d9c40d",
+      "text": "[[~/control/0]]"
+    },
+    {
+      "type": "pagefold",
+      "id": "10bd8a463331c497",
+      "text": "~"
     },
     {
       "type": "paragraph",
@@ -348,6 +378,27 @@
       "text": "[[Citizen Data]]"
     },
     {
+      "type": "paragraph",
+      "id": "d66a7eb1ca01592f",
+      "text": "[[Confluence]] (within [[Portland Confluences]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "0b494f77440aa0e7",
+      "text": "[[Card Catalog]] (within [[Offer to the DKR Implemeters]])",
+      "alias": "895fdbf166ab77fc"
+    },
+    {
+      "type": "paragraph",
+      "id": "983f998685e48c77",
+      "text": "[[Curing the Vulnerable Parser]] See: [[Parser]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "161c03c48e9dc7cc",
+      "text": "[[Cooperation]] (within [[Visitor as Schema]])"
+    },
+    {
       "type": "reference",
       "id": "3e8af46ff3063eaa",
       "site": "wiki.ralfbarkow.ch",
@@ -358,7 +409,7 @@
     {
       "type": "frame",
       "id": "a29178af5d6036ea",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111"
     }
   ],
   "journal": [
@@ -2838,28 +2889,171 @@
       "date": 1709310904937
     },
     {
-      "id": "89dd228fa137404d",
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709310986396
+    },
+    {
       "type": "add",
+      "id": "d66a7eb1ca01592f",
       "item": {
         "type": "paragraph",
-        "id": "89dd228fa137404d",
-        "text": "[[r.Computer.Wedde]] schreibt:"
+        "id": "d66a7eb1ca01592f",
+        "text": "[[Confluence]] (within [[)"
       },
-      "after": "e2fa77a2e744bc87",
-      "attribution": {
-        "page": "2024-03-01"
-      },
-      "date": 1709311887680
+      "after": "e803f5d780a2475d",
+      "date": 1709614936359
     },
     {
       "type": "edit",
-      "id": "89dd228fa137404d",
+      "id": "d66a7eb1ca01592f",
       "item": {
         "type": "paragraph",
-        "id": "89dd228fa137404d",
-        "text": "- [[r.Computer.Wedde]]"
+        "id": "d66a7eb1ca01592f",
+        "text": "[[Confluence]] (within [[Portland Confluences]])"
       },
-      "date": 1709311897466
+      "date": 1709614947685
+    },
+    {
+      "type": "edit",
+      "id": "a29178af5d6036ea",
+      "item": {
+        "type": "frame",
+        "id": "a29178af5d6036ea",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111"
+      },
+      "date": 1709614958304
+    },
+    {
+      "type": "add",
+      "id": "895fdbf166ab77fc",
+      "item": {
+        "type": "paragraph",
+        "id": "895fdbf166ab77fc",
+        "text": "[[Card Catalog]] (within [[]])"
+      },
+      "after": "d339e89b626f84fb",
+      "date": 1709621132667
+    },
+    {
+      "type": "edit",
+      "id": "895fdbf166ab77fc",
+      "item": {
+        "type": "paragraph",
+        "id": "895fdbf166ab77fc",
+        "text": "[[Card Catalog]] (within [[Offer to the DKR Implemeters]])"
+      },
+      "date": 1709621147140
+    },
+    {
+      "id": "0b494f77440aa0e7",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "0b494f77440aa0e7",
+        "text": "[[Card Catalog]] (within [[Offer to the DKR Implemeters]])",
+        "alias": "895fdbf166ab77fc"
+      },
+      "after": "d66a7eb1ca01592f",
+      "attribution": {
+        "page": "Card Catalog",
+        "site": "localhost:3000"
+      },
+      "date": 1709623063033
+    },
+    {
+      "type": "add",
+      "id": "983f998685e48c77",
+      "item": {
+        "type": "paragraph",
+        "id": "983f998685e48c77",
+        "text": "[[Curing the Vulnerable Parser]] See: [[Parser]]"
+      },
+      "after": "0b494f77440aa0e7",
+      "date": 1709631050313
+    },
+    {
+      "type": "add",
+      "id": "161c03c48e9dc7cc",
+      "item": {
+        "type": "paragraph",
+        "id": "161c03c48e9dc7cc",
+        "text": "[[Cooperation]] (within [[Visitor as Schema]])"
+      },
+      "after": "983f998685e48c77",
+      "date": 1709808204427
+    },
+    {
+      "id": "fac1a911a90fa8bd",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "fac1a911a90fa8bd",
+        "text": "⇒ [[Problems of Control]]"
+      },
+      "after": "e0ca33b3ddc19f53",
+      "attribution": {
+        "page": "2024-03-20",
+        "site": "localhost:3000"
+      },
+      "date": 1710914288041
+    },
+    {
+      "id": "6097469210e98775",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "6097469210e98775",
+        "text": "[[Find the Optimal Algorithm for Control]]"
+      },
+      "after": "fac1a911a90fa8bd",
+      "attribution": {
+        "page": "2024-03-20",
+        "site": "localhost:3000"
+      },
+      "date": 1710914347453
+    },
+    {
+      "id": "c8edcb9290d06f15",
+      "type": "add",
+      "item": {
+        "type": "pagefold",
+        "id": "c8edcb9290d06f15",
+        "text": "control"
+      },
+      "after": "9d6bc58cc5cf469f",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710914470184
+    },
+    {
+      "id": "10bd8a463331c497",
+      "type": "add",
+      "item": {
+        "type": "pagefold",
+        "id": "10bd8a463331c497",
+        "text": "~"
+      },
+      "after": "6097469210e98775",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710914502471
+    },
+    {
+      "id": "299fddd5c6d9c40d",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "299fddd5c6d9c40d",
+        "text": "[[~/control/0]]"
+      },
+      "after": "6097469210e98775",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710914553677
     },
     {
       "type": "edit",
@@ -2869,7 +3063,26 @@
         "id": "e2fa77a2e744bc87",
         "text": "**[[Computer]]** (within [[Smalltalk Is the Car]]) → **[[Car]]**"
       },
-      "date": 1709311922358
+      "date": 1710914901655
+    },
+    {
+      "id": "89dd228fa137404d",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "89dd228fa137404d",
+        "text": "- [[r.Computer.Wedde]]"
+      },
+      "after": "e2fa77a2e744bc87",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1710914909096
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1710915046671
     }
   ]
 }
