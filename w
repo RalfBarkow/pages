@@ -92,6 +92,11 @@
       "text": "Wrangling Untrusted File Formats Safely [https://github.com/google/wuffs github] (within [[Secure Automata]])"
     },
     {
+      "type": "paragraph",
+      "id": "2b3104f099ac4e88",
+      "text": "[[Web Components]] (within [[Elm and Web Components]])"
+    },
+    {
       "type": "reference",
       "id": "cff13b8f1e169e91",
       "site": "wiki.ralfbarkow.ch",
@@ -781,6 +786,17 @@
         "text": "Wrangling Untrusted File Formats Safely [https://github.com/google/wuffs github] (within [[Secure Automata]])"
       },
       "date": 1709622441914
+    },
+    {
+      "type": "add",
+      "id": "2b3104f099ac4e88",
+      "item": {
+        "type": "paragraph",
+        "id": "2b3104f099ac4e88",
+        "text": "[[Web Components]] (within [[Elm and Web Components]])"
+      },
+      "after": "8fe38d2c7152e066",
+      "date": 1711386696832
     }
   ]
 }
