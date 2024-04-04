@@ -1,0 +1,127 @@
+{
+  "title": "Story Browser",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "e8299dc071d0f25c",
+      "text": "Lightweight demo/story browser web component in plain JavaScript, no dependencies [https://gist.github.com/JanMiksovsky/6cc2d7289804132717c0cbd57c5dd917 gist]\n"
+    },
+    {
+      "type": "code",
+      "id": "f451020d33c109e3",
+      "text": "/**\n * Lightweight demo/story browser in plain JavaScript, no dependencies.\n */\n\n// Semi-private fields stored via Symbol keys on an element instance.\nconst defaultPathKey = Symbol();\nconst linksKey = Symbol();\nconst pathKey = Symbol();\n\n// The template for the component's shadow tree.\nconst template = `\n  <style>\n    :host {\n      display: grid;\n      grid-template-columns: auto 1fr;\n      overflow: hidden;\n    }\n\n    [part~=\"navigation\"] {\n      position: relative;\n      overflow: auto;\n    }\n\n    #toolbar {\n      display: grid;\n      position: sticky;\n      top: 0;\n      width: 100%;\n    }\n\n    #closeButton {\n      background: none;\n      border: none;\n      color: inherit;\n      margin: 0.5em;\n      position: absolute;\n      right: 0;\n    }\n\n    [part~=\"frame\"] {\n      border: none;\n      height: 100%;\n      position: relative;\n      width: 100%;\n    }\n  </style>\n  <nav id=\"navigation\" part=\"navigation\">\n    <div id=\"toolbar\">\n      <button id=\"closeButton\">⨉</button>\n    </div>\n    <slot></slot>\n  </nav>\n  <iframe id=\"frame\" part=\"frame\"></iframe>\n`;\n\n// The story browsing web component.\nexport default class StoryBrowser extends HTMLElement {\n  constructor() {\n    super();\n\n    this[defaultPathKey] = null;\n    this[linksKey] = [];\n    this[pathKey] = getPathFromHash(window.location.hash);\n\n    // Attach shadow and copy template into it.\n    const root = this.attachShadow({ mode: \"open\" });\n    root.innerHTML = template;\n\n    // Clicking close button navigates to current page (without frame).\n    root.getElementById(\"closeButton\")?.addEventListener(\"click\", () => {\n      if (this[pathKey]) {\n        window.location = this[pathKey];\n      }\n    });\n\n    // When the frame loads a page, use the page's title as the document title.\n    const frame = root.getElementById(\"frame\");\n    frame?.addEventListener(\"load\", () => {\n      document.title = frame.contentDocument.title;\n    });\n\n    // If links assigned to default slot change, highlight the current link.\n    root.querySelector(\"slot\")?.addEventListener(\"slotchange\", () => {\n      refreshLinks(this);\n    });\n\n    // When hash changes, load the indicated page.\n    window.addEventListener(\"hashchange\", () => {\n      this[pathKey] =\n        getPathFromHash(window.location.hash) || this[defaultPathKey];\n      render(this);\n    });\n\n    render(this);\n  }\n}\n\n// Given a URL hash, return the value of any `path` parameter in it.\nfunction getPathFromHash(hash) {\n  const match = /#path=(?<path>[^&]+)/.exec(hash);\n  return match?.groups?.path;\n}\n\n// Highlight any navigation links that point to the current page.\nfunction highlighCurrentLink(element) {\n  const links = element[linksKey];\n  const path = element[pathKey];\n  let currentLink;\n  if (links && path) {\n    // Mark any links which are current.\n    const expectedHash = `#path=${path}`;\n    links.forEach((link) => {\n      const current = link.hash === expectedHash;\n      link.classList.toggle(\"current\", current);\n      if (current && !currentLink) {\n        currentLink = link;\n      }\n    });\n    // Scroll the (first) current link into view.\n    if (currentLink) {\n      currentLink.scrollIntoView({ block: \"nearest\" });\n    }\n  }\n}\n\n// Following a change in the set of nodes assigned to the default slot,\n// extract the set of anchor tags in that collection of nodes.\nfunction refreshLinks(element) {\n  const slot = element.shadowRoot.querySelector(\"slot\");\n\n  const links = [];\n  slot.assignedElements({ flatten: true }).forEach((el) => {\n    if (el instanceof HTMLAnchorElement) {\n      // This element is itself a link.\n      links.push(el);\n    }\n    if (el instanceof HTMLElement) {\n      // Add any links inside this element\n      links.push(...el.querySelectorAll(\"a\"));\n    }\n  });\n  element[linksKey] = links;\n\n  // Use first link as default path.\n  element[defaultPathKey] = getPathFromHash(links[0].hash);\n\n  // Use the default path as a path if we don't have a path already.\n  if (element[defaultPathKey] && !element[pathKey]) {\n    element[pathKey] = element[defaultPathKey];\n  }\n\n  render(element);\n}\n\n// Update the shadow tree after a change in path or link set.\nfunction render(element) {\n  // Show the indicated story in the frame.\n  const path = element[pathKey];\n  const frame = element.shadowRoot.getElementById(\"frame\");\n  if (frame.contentDocument.location.pathname !== path) {\n    // Use `replace` to avoid affecting browser history.\n    frame.contentWindow.location.replace(path);\n  }\n\n  highlighCurrentLink(element);\n}\n"
+    },
+    {
+      "type": "markdown",
+      "id": "5ea7e9f40a832ff3",
+      "text": "# Application Frame"
+    },
+    {
+      "type": "frame",
+      "id": "4087407aca4ea848",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/snippet-template/esm.html"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Story Browser",
+        "story": []
+      },
+      "date": 1711821442265
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "f451020d33c109e3"
+      },
+      "id": "f451020d33c109e3",
+      "type": "add",
+      "date": 1711821444030
+    },
+    {
+      "type": "edit",
+      "id": "f451020d33c109e3",
+      "item": {
+        "type": "code",
+        "id": "f451020d33c109e3",
+        "text": "/**\n * Lightweight demo/story browser in plain JavaScript, no dependencies.\n */\n\n// Semi-private fields stored via Symbol keys on an element instance.\nconst defaultPathKey = Symbol();\nconst linksKey = Symbol();\nconst pathKey = Symbol();\n\n// The template for the component's shadow tree.\nconst template = `\n  <style>\n    :host {\n      display: grid;\n      grid-template-columns: auto 1fr;\n      overflow: hidden;\n    }\n\n    [part~=\"navigation\"] {\n      position: relative;\n      overflow: auto;\n    }\n\n    #toolbar {\n      display: grid;\n      position: sticky;\n      top: 0;\n      width: 100%;\n    }\n\n    #closeButton {\n      background: none;\n      border: none;\n      color: inherit;\n      margin: 0.5em;\n      position: absolute;\n      right: 0;\n    }\n\n    [part~=\"frame\"] {\n      border: none;\n      height: 100%;\n      position: relative;\n      width: 100%;\n    }\n  </style>\n  <nav id=\"navigation\" part=\"navigation\">\n    <div id=\"toolbar\">\n      <button id=\"closeButton\">⨉</button>\n    </div>\n    <slot></slot>\n  </nav>\n  <iframe id=\"frame\" part=\"frame\"></iframe>\n`;\n\n// The story browsing web component.\nexport default class StoryBrowser extends HTMLElement {\n  constructor() {\n    super();\n\n    this[defaultPathKey] = null;\n    this[linksKey] = [];\n    this[pathKey] = getPathFromHash(window.location.hash);\n\n    // Attach shadow and copy template into it.\n    const root = this.attachShadow({ mode: \"open\" });\n    root.innerHTML = template;\n\n    // Clicking close button navigates to current page (without frame).\n    root.getElementById(\"closeButton\")?.addEventListener(\"click\", () => {\n      if (this[pathKey]) {\n        window.location = this[pathKey];\n      }\n    });\n\n    // When the frame loads a page, use the page's title as the document title.\n    const frame = root.getElementById(\"frame\");\n    frame?.addEventListener(\"load\", () => {\n      document.title = frame.contentDocument.title;\n    });\n\n    // If links assigned to default slot change, highlight the current link.\n    root.querySelector(\"slot\")?.addEventListener(\"slotchange\", () => {\n      refreshLinks(this);\n    });\n\n    // When hash changes, load the indicated page.\n    window.addEventListener(\"hashchange\", () => {\n      this[pathKey] =\n        getPathFromHash(window.location.hash) || this[defaultPathKey];\n      render(this);\n    });\n\n    render(this);\n  }\n}\n\n// Given a URL hash, return the value of any `path` parameter in it.\nfunction getPathFromHash(hash) {\n  const match = /#path=(?<path>[^&]+)/.exec(hash);\n  return match?.groups?.path;\n}\n\n// Highlight any navigation links that point to the current page.\nfunction highlighCurrentLink(element) {\n  const links = element[linksKey];\n  const path = element[pathKey];\n  let currentLink;\n  if (links && path) {\n    // Mark any links which are current.\n    const expectedHash = `#path=${path}`;\n    links.forEach((link) => {\n      const current = link.hash === expectedHash;\n      link.classList.toggle(\"current\", current);\n      if (current && !currentLink) {\n        currentLink = link;\n      }\n    });\n    // Scroll the (first) current link into view.\n    if (currentLink) {\n      currentLink.scrollIntoView({ block: \"nearest\" });\n    }\n  }\n}\n\n// Following a change in the set of nodes assigned to the default slot,\n// extract the set of anchor tags in that collection of nodes.\nfunction refreshLinks(element) {\n  const slot = element.shadowRoot.querySelector(\"slot\");\n\n  const links = [];\n  slot.assignedElements({ flatten: true }).forEach((el) => {\n    if (el instanceof HTMLAnchorElement) {\n      // This element is itself a link.\n      links.push(el);\n    }\n    if (el instanceof HTMLElement) {\n      // Add any links inside this element\n      links.push(...el.querySelectorAll(\"a\"));\n    }\n  });\n  element[linksKey] = links;\n\n  // Use first link as default path.\n  element[defaultPathKey] = getPathFromHash(links[0].hash);\n\n  // Use the default path as a path if we don't have a path already.\n  if (element[defaultPathKey] && !element[pathKey]) {\n    element[pathKey] = element[defaultPathKey];\n  }\n\n  render(element);\n}\n\n// Update the shadow tree after a change in path or link set.\nfunction render(element) {\n  // Show the indicated story in the frame.\n  const path = element[pathKey];\n  const frame = element.shadowRoot.getElementById(\"frame\");\n  if (frame.contentDocument.location.pathname !== path) {\n    // Use `replace` to avoid affecting browser history.\n    frame.contentWindow.location.replace(path);\n  }\n\n  highlighCurrentLink(element);\n}\n"
+      },
+      "date": 1711821448174
+    },
+    {
+      "id": "5ea7e9f40a832ff3",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "5ea7e9f40a832ff3",
+        "text": "# Application Frame"
+      },
+      "after": "f451020d33c109e3",
+      "attribution": {
+        "page": "Elix Plain Example",
+        "site": "wiki.ralfbarkow.ch"
+      },
+      "date": 1711821477718
+    },
+    {
+      "id": "4087407aca4ea848",
+      "type": "add",
+      "item": {
+        "type": "frame",
+        "id": "4087407aca4ea848",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/snippet-template/esm.html"
+      },
+      "after": "5ea7e9f40a832ff3",
+      "attribution": {
+        "page": "Elix Plain Example",
+        "site": "wiki.ralfbarkow.ch"
+      },
+      "date": 1711821480898
+    },
+    {
+      "type": "edit",
+      "id": "f451020d33c109e3",
+      "item": {
+        "type": "code",
+        "id": "f451020d33c109e3",
+        "text": "// Semi-private fields stored via Symbol keys on an element instance.\nconst defaultPathKey = Symbol();\nconst linksKey = Symbol();\nconst pathKey = Symbol();\n\n// The template for the component's shadow tree.\nconst template = `\n  <style>\n    :host {\n      display: grid;\n      grid-template-columns: auto 1fr;\n      overflow: hidden;\n    }\n\n    [part~=\"navigation\"] {\n      position: relative;\n      overflow: auto;\n    }\n\n    #toolbar {\n      display: grid;\n      position: sticky;\n      top: 0;\n      width: 100%;\n    }\n\n    #closeButton {\n      background: none;\n      border: none;\n      color: inherit;\n      margin: 0.5em;\n      position: absolute;\n      right: 0;\n    }\n\n    [part~=\"frame\"] {\n      border: none;\n      height: 100%;\n      position: relative;\n      width: 100%;\n    }\n  </style>\n  <nav id=\"navigation\" part=\"navigation\">\n    <div id=\"toolbar\">\n      <button id=\"closeButton\">⨉</button>\n    </div>\n    <slot></slot>\n  </nav>\n  <iframe id=\"frame\" part=\"frame\"></iframe>\n`;\n\n// The story browsing web component.\nexport default class StoryBrowser extends HTMLElement {\n  constructor() {\n    super();\n\n    this[defaultPathKey] = null;\n    this[linksKey] = [];\n    this[pathKey] = getPathFromHash(window.location.hash);\n\n    // Attach shadow and copy template into it.\n    const root = this.attachShadow({ mode: \"open\" });\n    root.innerHTML = template;\n\n    // Clicking close button navigates to current page (without frame).\n    root.getElementById(\"closeButton\")?.addEventListener(\"click\", () => {\n      if (this[pathKey]) {\n        window.location = this[pathKey];\n      }\n    });\n\n    // When the frame loads a page, use the page's title as the document title.\n    const frame = root.getElementById(\"frame\");\n    frame?.addEventListener(\"load\", () => {\n      document.title = frame.contentDocument.title;\n    });\n\n    // If links assigned to default slot change, highlight the current link.\n    root.querySelector(\"slot\")?.addEventListener(\"slotchange\", () => {\n      refreshLinks(this);\n    });\n\n    // When hash changes, load the indicated page.\n    window.addEventListener(\"hashchange\", () => {\n      this[pathKey] =\n        getPathFromHash(window.location.hash) || this[defaultPathKey];\n      render(this);\n    });\n\n    render(this);\n  }\n}\n\n// Given a URL hash, return the value of any `path` parameter in it.\nfunction getPathFromHash(hash) {\n  const match = /#path=(?<path>[^&]+)/.exec(hash);\n  return match?.groups?.path;\n}\n\n// Highlight any navigation links that point to the current page.\nfunction highlighCurrentLink(element) {\n  const links = element[linksKey];\n  const path = element[pathKey];\n  let currentLink;\n  if (links && path) {\n    // Mark any links which are current.\n    const expectedHash = `#path=${path}`;\n    links.forEach((link) => {\n      const current = link.hash === expectedHash;\n      link.classList.toggle(\"current\", current);\n      if (current && !currentLink) {\n        currentLink = link;\n      }\n    });\n    // Scroll the (first) current link into view.\n    if (currentLink) {\n      currentLink.scrollIntoView({ block: \"nearest\" });\n    }\n  }\n}\n\n// Following a change in the set of nodes assigned to the default slot,\n// extract the set of anchor tags in that collection of nodes.\nfunction refreshLinks(element) {\n  const slot = element.shadowRoot.querySelector(\"slot\");\n\n  const links = [];\n  slot.assignedElements({ flatten: true }).forEach((el) => {\n    if (el instanceof HTMLAnchorElement) {\n      // This element is itself a link.\n      links.push(el);\n    }\n    if (el instanceof HTMLElement) {\n      // Add any links inside this element\n      links.push(...el.querySelectorAll(\"a\"));\n    }\n  });\n  element[linksKey] = links;\n\n  // Use first link as default path.\n  element[defaultPathKey] = getPathFromHash(links[0].hash);\n\n  // Use the default path as a path if we don't have a path already.\n  if (element[defaultPathKey] && !element[pathKey]) {\n    element[pathKey] = element[defaultPathKey];\n  }\n\n  render(element);\n}\n\n// Update the shadow tree after a change in path or link set.\nfunction render(element) {\n  // Show the indicated story in the frame.\n  const path = element[pathKey];\n  const frame = element.shadowRoot.getElementById(\"frame\");\n  if (frame.contentDocument.location.pathname !== path) {\n    // Use `replace` to avoid affecting browser history.\n    frame.contentWindow.location.replace(path);\n  }\n\n  highlighCurrentLink(element);\n}\n"
+      },
+      "date": 1711821529847
+    },
+    {
+      "type": "edit",
+      "id": "f451020d33c109e3",
+      "item": {
+        "type": "code",
+        "id": "f451020d33c109e3",
+        "text": "/**\n * Lightweight demo/story browser in plain JavaScript, no dependencies.\n */\n\n// Semi-private fields stored via Symbol keys on an element instance.\nconst defaultPathKey = Symbol();\nconst linksKey = Symbol();\nconst pathKey = Symbol();\n\n// The template for the component's shadow tree.\nconst template = `\n  <style>\n    :host {\n      display: grid;\n      grid-template-columns: auto 1fr;\n      overflow: hidden;\n    }\n\n    [part~=\"navigation\"] {\n      position: relative;\n      overflow: auto;\n    }\n\n    #toolbar {\n      display: grid;\n      position: sticky;\n      top: 0;\n      width: 100%;\n    }\n\n    #closeButton {\n      background: none;\n      border: none;\n      color: inherit;\n      margin: 0.5em;\n      position: absolute;\n      right: 0;\n    }\n\n    [part~=\"frame\"] {\n      border: none;\n      height: 100%;\n      position: relative;\n      width: 100%;\n    }\n  </style>\n  <nav id=\"navigation\" part=\"navigation\">\n    <div id=\"toolbar\">\n      <button id=\"closeButton\">⨉</button>\n    </div>\n    <slot></slot>\n  </nav>\n  <iframe id=\"frame\" part=\"frame\"></iframe>\n`;\n\n// The story browsing web component.\nexport default class StoryBrowser extends HTMLElement {\n  constructor() {\n    super();\n\n    this[defaultPathKey] = null;\n    this[linksKey] = [];\n    this[pathKey] = getPathFromHash(window.location.hash);\n\n    // Attach shadow and copy template into it.\n    const root = this.attachShadow({ mode: \"open\" });\n    root.innerHTML = template;\n\n    // Clicking close button navigates to current page (without frame).\n    root.getElementById(\"closeButton\")?.addEventListener(\"click\", () => {\n      if (this[pathKey]) {\n        window.location = this[pathKey];\n      }\n    });\n\n    // When the frame loads a page, use the page's title as the document title.\n    const frame = root.getElementById(\"frame\");\n    frame?.addEventListener(\"load\", () => {\n      document.title = frame.contentDocument.title;\n    });\n\n    // If links assigned to default slot change, highlight the current link.\n    root.querySelector(\"slot\")?.addEventListener(\"slotchange\", () => {\n      refreshLinks(this);\n    });\n\n    // When hash changes, load the indicated page.\n    window.addEventListener(\"hashchange\", () => {\n      this[pathKey] =\n        getPathFromHash(window.location.hash) || this[defaultPathKey];\n      render(this);\n    });\n\n    render(this);\n  }\n}\n\n// Given a URL hash, return the value of any `path` parameter in it.\nfunction getPathFromHash(hash) {\n  const match = /#path=(?<path>[^&]+)/.exec(hash);\n  return match?.groups?.path;\n}\n\n// Highlight any navigation links that point to the current page.\nfunction highlighCurrentLink(element) {\n  const links = element[linksKey];\n  const path = element[pathKey];\n  let currentLink;\n  if (links && path) {\n    // Mark any links which are current.\n    const expectedHash = `#path=${path}`;\n    links.forEach((link) => {\n      const current = link.hash === expectedHash;\n      link.classList.toggle(\"current\", current);\n      if (current && !currentLink) {\n        currentLink = link;\n      }\n    });\n    // Scroll the (first) current link into view.\n    if (currentLink) {\n      currentLink.scrollIntoView({ block: \"nearest\" });\n    }\n  }\n}\n\n// Following a change in the set of nodes assigned to the default slot,\n// extract the set of anchor tags in that collection of nodes.\nfunction refreshLinks(element) {\n  const slot = element.shadowRoot.querySelector(\"slot\");\n\n  const links = [];\n  slot.assignedElements({ flatten: true }).forEach((el) => {\n    if (el instanceof HTMLAnchorElement) {\n      // This element is itself a link.\n      links.push(el);\n    }\n    if (el instanceof HTMLElement) {\n      // Add any links inside this element\n      links.push(...el.querySelectorAll(\"a\"));\n    }\n  });\n  element[linksKey] = links;\n\n  // Use first link as default path.\n  element[defaultPathKey] = getPathFromHash(links[0].hash);\n\n  // Use the default path as a path if we don't have a path already.\n  if (element[defaultPathKey] && !element[pathKey]) {\n    element[pathKey] = element[defaultPathKey];\n  }\n\n  render(element);\n}\n\n// Update the shadow tree after a change in path or link set.\nfunction render(element) {\n  // Show the indicated story in the frame.\n  const path = element[pathKey];\n  const frame = element.shadowRoot.getElementById(\"frame\");\n  if (frame.contentDocument.location.pathname !== path) {\n    // Use `replace` to avoid affecting browser history.\n    frame.contentWindow.location.replace(path);\n  }\n\n  highlighCurrentLink(element);\n}\n"
+      },
+      "date": 1711821567296
+    },
+    {
+      "id": "e8299dc071d0f25c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "e8299dc071d0f25c",
+        "text": "Lightweight demo/story browser web component in plain JavaScript, no dependencies [https://gist.github.com/JanMiksovsky/6cc2d7289804132717c0cbd57c5dd917 gist]\n ⇒ [[Story Browser]]"
+      },
+      "attribution": {
+        "page": "2024-03-30"
+      },
+      "date": 1711821607872
+    },
+    {
+      "type": "edit",
+      "id": "e8299dc071d0f25c",
+      "item": {
+        "type": "paragraph",
+        "id": "e8299dc071d0f25c",
+        "text": "Lightweight demo/story browser web component in plain JavaScript, no dependencies [https://gist.github.com/JanMiksovsky/6cc2d7289804132717c0cbd57c5dd917 gist]\n"
+      },
+      "date": 1711821615031
+    }
+  ]
+}
