@@ -271,6 +271,11 @@
       "text": "[[Measure the Degree of Folding of a Protein]] See: [[Protein]], [[Degree of Folding]]"
     },
     {
+      "type": "paragraph",
+      "id": "8363099aea04025b",
+      "text": "[[Multi Input Multi Output]] (within [[Unit Programming Language]])"
+    },
+    {
       "type": "reference",
       "id": "32f74fe2229d86ed",
       "site": "wiki.ralfbarkow.ch",
@@ -2215,6 +2220,17 @@
       "type": "fork",
       "site": "localhost:3000",
       "date": 1709830034935
+    },
+    {
+      "type": "add",
+      "id": "8363099aea04025b",
+      "item": {
+        "type": "paragraph",
+        "id": "8363099aea04025b",
+        "text": "[[Multi Input Multi Output]] (within [[Unit Programming Language]])"
+      },
+      "after": "44b2b5992598537f",
+      "date": 1712071621033
     }
   ]
 }

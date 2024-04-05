@@ -217,6 +217,11 @@
       "text": "[[Degree of Folding]], [[Measure the Degree of Folding of a Protein]] See: [[Protein]]"
     },
     {
+      "type": "paragraph",
+      "id": "953c29484bebf606",
+      "text": "[[Decker]]"
+    },
+    {
       "type": "reference",
       "id": "ec6d5f60c118e850",
       "site": "wiki.ralfbarkow.ch",
@@ -1742,6 +1747,17 @@
         "text": "[[Degree of Folding]], [[Measure the Degree of Folding of a Protein]] See: [[Protein]]"
       },
       "date": 1709660256107
+    },
+    {
+      "type": "add",
+      "id": "953c29484bebf606",
+      "item": {
+        "type": "paragraph",
+        "id": "953c29484bebf606",
+        "text": "[[Decker]]"
+      },
+      "after": "44b2b5992598537f",
+      "date": 1712158702793
     }
   ]
 }

@@ -404,6 +404,11 @@
       "text": "[[Cognition]] (within [[CajunBot]])"
     },
     {
+      "type": "paragraph",
+      "id": "882ad58e8d272bcc",
+      "text": "[[Complexity]] (within [[ Complexity in One Computer]])"
+    },
+    {
       "type": "reference",
       "id": "3e8af46ff3063eaa",
       "site": "wiki.ralfbarkow.ch",
@@ -3094,6 +3099,27 @@
       },
       "after": "161c03c48e9dc7cc",
       "date": 1710917074900
+    },
+    {
+      "type": "add",
+      "id": "882ad58e8d272bcc",
+      "item": {
+        "type": "paragraph",
+        "id": "882ad58e8d272bcc",
+        "text": "[[Complexity]] (within)"
+      },
+      "after": "93892d4cf62e33d3",
+      "date": 1711613453026
+    },
+    {
+      "type": "edit",
+      "id": "882ad58e8d272bcc",
+      "item": {
+        "type": "paragraph",
+        "id": "882ad58e8d272bcc",
+        "text": "[[Complexity]] (within [[ Complexity in One Computer]])"
+      },
+      "date": 1711613465987
     }
   ]
 }

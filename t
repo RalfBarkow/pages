@@ -212,6 +212,11 @@
       "text": "[[Tortoise Explains the Dance]] See: [[ESM Snippet Template]]"
     },
     {
+      "type": "paragraph",
+      "id": "9fe0de1b1e9bb399",
+      "text": "[[Turn a Face to the Other]]"
+    },
+    {
       "type": "reference",
       "id": "9b65b4b369fa5a05",
       "text": "End of List Indexcard",
@@ -1644,6 +1649,17 @@
         "text": "[[Tortoise Explains the Dance]] See: [[ESM Snippet Template]]"
       },
       "date": 1709992181229
+    },
+    {
+      "type": "add",
+      "id": "9fe0de1b1e9bb399",
+      "item": {
+        "type": "paragraph",
+        "id": "9fe0de1b1e9bb399",
+        "text": "[[Turn a Face to the Other]]"
+      },
+      "after": "153446fb292b32ea",
+      "date": 1711709954701
     }
   ]
 }
