@@ -58,7 +58,12 @@
     {
       "type": "paragraph",
       "id": "b2983cb462f1bc44",
-      "text": "mold.dreyeck.ch"
+      "text": "mold.dreyeck.ch ⇒ [[EuroPLoP Project Diary]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "5458f09467aa7159",
+      "text": "⇒ [[EuroPLoP Project Diary]]"
     },
     {
       "type": "paragraph",
@@ -89,6 +94,16 @@
       "type": "paragraph",
       "id": "513bac397f78e1f1",
       "text": "[[A Mentoring Course on Smalltalk]] (within [[Smalltalk]])"
+    },
+    {
+      "type": "markdown",
+      "id": "1a8f5d6f5352b20b",
+      "text": "* [[Crossing the First Distinction]]\n* [[Making Sense of Raw Perceptions]]\n* [[Color Quantization]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "c48f6f106fc7892f",
+      "text": "⇒ [[Laws of Form Objects]] [https://github.com/RalfBarkow/Laws-of-Form-Objects github] – See section 5.3.1 of Andrés Valloud, „A Mentoring Course on Smalltalk“, 2010 "
     },
     {
       "type": "paragraph",
@@ -286,7 +301,7 @@
     {
       "type": "frame",
       "id": "99644c7446be481c",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -2231,6 +2246,144 @@
       },
       "after": "44b2b5992598537f",
       "date": 1712071621033
+    },
+    {
+      "id": "1a8f5d6f5352b20b",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "1a8f5d6f5352b20b",
+        "text": "* [[Crossing the First Distinction]]\n* [[Making Sense of Raw Perceptions]]\n* [[Color Quantization]]"
+      },
+      "after": "513bac397f78e1f1",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713866896078
+    },
+    {
+      "id": "c48f6f106fc7892f",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "c48f6f106fc7892f",
+        "text": "⇒ [[Laws of Form Objects]] [https://github.com/RalfBarkow/Laws-of-Form-Objects github] – See section 5.3.1 of Andrés Valloud, „A Mentoring Course on Smalltalk“, 2010 "
+      },
+      "after": "1a8f5d6f5352b20b",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713866906668
+    },
+    {
+      "id": "5458f09467aa7159",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "5458f09467aa7159",
+        "text": "[[Moldable Development Patterns]] ⇒ [[EuroPLoP Project Diary]]"
+      },
+      "after": "b4fa8103ea13329c",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713867029657
+    },
+    {
+      "type": "edit",
+      "id": "5458f09467aa7159",
+      "item": {
+        "type": "paragraph",
+        "id": "5458f09467aa7159",
+        "text": "⇒ [[EuroPLoP Project Diary]]"
+      },
+      "date": 1713867037927
+    },
+    {
+      "id": "5458f09467aa7159",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "251c6926601107b0",
+        "75df03f4643264d7",
+        "6eeab7313510bb35",
+        "93364be5c1e75631",
+        "f21da786c5dd73a7",
+        "5061e7797926c5c9",
+        "b4fa8103ea13329c",
+        "4d8a2961b2861295",
+        "5eeddb7f69a8e303",
+        "b2983cb462f1bc44",
+        "5458f09467aa7159",
+        "5e0def92ad7f3471",
+        "16b0d59a6f3dc118",
+        "9406edbc4f6f3cd2",
+        "187b833b2fc3f15c",
+        "9c77373a8e0d1740",
+        "513bac397f78e1f1",
+        "1a8f5d6f5352b20b",
+        "c48f6f106fc7892f",
+        "a8c941c24823b36f",
+        "1672e878587c24d5",
+        "0ce89d4770e2ba24",
+        "6313ed559b81fa54",
+        "72b23e446a6ffc0b",
+        "e65a9a7504cb94ac",
+        "a92a816bddcd6c6c",
+        "9d91af6aaf145b14",
+        "6a152716db7fbabe",
+        "6c428ce738238cfd",
+        "bbf8e51803507285",
+        "67d9b92ea78d32ae",
+        "fbc5cbceaec8d49e",
+        "4c30e39fb3001327",
+        "0b886730d8d12a2e",
+        "145796f9e023df12",
+        "6ecf89ded0cab9d7",
+        "27bcba994cb29bea",
+        "52e560f4a9276dff",
+        "a04b0cd896b91a37",
+        "f303cb3c2bf473b2",
+        "60fbe4d888b55657",
+        "45581252a4b64963",
+        "4a7e816d19f375dd",
+        "0fc1e69f688d03b5",
+        "1d8bd82de8a9c22a",
+        "abec03fef8b53ba5",
+        "9462fe7912a2a47d",
+        "50d637d3ad0dcadc",
+        "7bdb1dcdb2aa8805",
+        "f9ecdb9d743629a6",
+        "7908fbd99e5754e9",
+        "f83a43f6b0781563",
+        "d89cf6f3697938d5",
+        "53096ca4578402c8",
+        "44b2b5992598537f",
+        "8363099aea04025b",
+        "32f74fe2229d86ed",
+        "99644c7446be481c"
+      ],
+      "date": 1713867051858
+    },
+    {
+      "type": "edit",
+      "id": "b2983cb462f1bc44",
+      "item": {
+        "type": "paragraph",
+        "id": "b2983cb462f1bc44",
+        "text": "mold.dreyeck.ch ⇒ [[EuroPLoP Project Diary]]"
+      },
+      "date": 1713867056266
+    },
+    {
+      "type": "edit",
+      "id": "99644c7446be481c",
+      "item": {
+        "type": "frame",
+        "id": "99644c7446be481c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1713870253472
     }
   ]
 }

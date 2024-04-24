@@ -277,6 +277,21 @@
       "text": "[[Peak Planning Advantage]]"
     },
     {
+      "type": "paragraph",
+      "id": "3713d61817d0e9c7",
+      "text": "[[Projects]] and [[Dojo Exercises]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "ad83bbd76f773627",
+      "text": "[[Pollution Is Colonialism]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "8df00b002abe4941",
+      "text": "[[Particle]] [[Movement]] (within the [[Geometric Amoebot Model]])"
+    },
+    {
       "type": "reference",
       "id": "e7dc8c0df83732ed",
       "site": "wiki.ralfbarkow.ch",
@@ -287,7 +302,7 @@
     {
       "type": "frame",
       "id": "3fbe92c4b041c5d5",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -2318,6 +2333,75 @@
       },
       "after": "bd37ce1b0abc3a09",
       "date": 1709986373902
+    },
+    {
+      "id": "3713d61817d0e9c7",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "3713d61817d0e9c7",
+        "text": "[[Projects]] and [[Dojo Exercises]]"
+      },
+      "after": "164521ce6e2d3181",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713867324780
+    },
+    {
+      "type": "edit",
+      "id": "3fbe92c4b041c5d5",
+      "item": {
+        "type": "frame",
+        "id": "3fbe92c4b041c5d5",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1713867354717
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1713887568858
+    },
+    {
+      "id": "ad83bbd76f773627",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "ad83bbd76f773627",
+        "text": "⇒ [[Pollution Is Colonialism]]"
+      },
+      "after": "3713d61817d0e9c7",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713887581303
+    },
+    {
+      "type": "edit",
+      "id": "ad83bbd76f773627",
+      "item": {
+        "type": "paragraph",
+        "id": "ad83bbd76f773627",
+        "text": "[[Pollution Is Colonialism]]"
+      },
+      "date": 1713887587054
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1713887624877
+    },
+    {
+      "type": "add",
+      "id": "8df00b002abe4941",
+      "item": {
+        "type": "paragraph",
+        "id": "8df00b002abe4941",
+        "text": "[[Particle]] [[Movement]] (within the [[Geometric Amoebot Model]])"
+      },
+      "after": "ad83bbd76f773627",
+      "date": 1713978371183
     }
   ]
 }

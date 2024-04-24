@@ -63,6 +63,11 @@
     },
     {
       "type": "paragraph",
+      "id": "8ba314d4b592a49c",
+      "text": "[[Dreyeck]] ⇒ [[Wiki School]] [http://school.wiki.dreyeck.ch page] ⇒ [[dreyeck Portal]]"
+    },
+    {
+      "type": "paragraph",
       "id": "0974aa0b1a845547",
       "text": "[[Design]] (within [[CRC Cards]])"
     },
@@ -222,6 +227,16 @@
       "text": "[[Decker]]"
     },
     {
+      "type": "paragraph",
+      "id": "874f530936a86db0",
+      "text": "[[Dahinterismus]] See: [[force]] (within [[Murmuration]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "3713d61817d0e9c7",
+      "text": "[[Projects]] and [[Dojo Exercises]]"
+    },
+    {
       "type": "reference",
       "id": "ec6d5f60c118e850",
       "site": "wiki.ralfbarkow.ch",
@@ -232,7 +247,7 @@
     {
       "type": "frame",
       "id": "bfaebd61519dfa08",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -1758,6 +1773,65 @@
       },
       "after": "44b2b5992598537f",
       "date": 1712158702793
+    },
+    {
+      "type": "edit",
+      "id": "bfaebd61519dfa08",
+      "item": {
+        "type": "frame",
+        "id": "bfaebd61519dfa08",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1712741557545
+    },
+    {
+      "type": "edit",
+      "id": "bfaebd61519dfa08",
+      "item": {
+        "type": "frame",
+        "id": "bfaebd61519dfa08",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1712741573381
+    },
+    {
+      "type": "add",
+      "id": "874f530936a86db0",
+      "item": {
+        "type": "paragraph",
+        "id": "874f530936a86db0",
+        "text": "[[Dahinterismus]] See: [[force]] (within [[Murmuration]])"
+      },
+      "after": "953c29484bebf606",
+      "date": 1712741619226
+    },
+    {
+      "id": "3713d61817d0e9c7",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "3713d61817d0e9c7",
+        "text": "[[Projects]] and [[Dojo Exercises]]"
+      },
+      "after": "874f530936a86db0",
+      "attribution": {
+        "page": "P"
+      },
+      "date": 1713867485700
+    },
+    {
+      "id": "8ba314d4b592a49c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "8ba314d4b592a49c",
+        "text": "[[Dreyeck]] ⇒ [[Wiki School]] [http://school.wiki.dreyeck.ch page] ⇒ [[dreyeck Portal]]"
+      },
+      "after": "9a61ac91750fe6b9",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713867525886
     }
   ]
 }

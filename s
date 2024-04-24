@@ -18,11 +18,6 @@
     },
     {
       "type": "paragraph",
-      "id": "6d36d88e598c9690",
-      "text": "[[Smalltalk Syntax in 7']]"
-    },
-    {
-      "type": "paragraph",
       "id": "3442e4cc70ce6337",
       "text": "[[separate]] (within [[Therefore]])"
     },
@@ -82,7 +77,7 @@
       "text": "- [[Systems Theory 1.0]]\n- [[Systems Theory 2.0]]\n- **[[Smalltalk]]** is an object system, rather than a [[Language]]. See: [[Smalltalk Is the Car]]"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "bad43f50bd0dc12a",
       "text": "**[[Smalltalk]]** as [[Notation]] See: [[Objects, Classes, and Constructors, Smalltalk Style]], [[Notation]] for creating [[Language]]s"
     },
@@ -90,6 +85,16 @@
       "type": "paragraph",
       "id": "9fe6b3bfcc041c40",
       "text": "[[Smalltalk Class/Metaclass Kernel]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6d36d88e598c9690",
+      "text": "[[Smalltalk Syntax in 7']]"
+    },
+    {
+      "type": "paragraph",
+      "id": "513bac397f78e1f1",
+      "text": "[[A Mentoring Course on Smalltalk]]"
     },
     {
       "type": "paragraph",
@@ -273,6 +278,11 @@
     },
     {
       "type": "paragraph",
+      "id": "b12be9c7adad391a",
+      "text": "[[How to Delete Structure]]"
+    },
+    {
+      "type": "paragraph",
       "id": "42cb20274f449f0f",
       "text": "[[Study The Source Witha Debugger]] See: [[Diagram Debugger]]"
     },
@@ -412,6 +422,11 @@
       "text": "[[Sodium]] (within [[Functional Reactive Programming]])"
     },
     {
+      "type": "paragraph",
+      "id": "398868cc4e236eb0",
+      "text": "[[Social]]"
+    },
+    {
       "type": "reference",
       "id": "8c2cd410bbc45f08",
       "site": "wiki.ralfbarkow.ch",
@@ -422,7 +437,7 @@
     {
       "type": "frame",
       "id": "92d9d7c2ee7a11b7",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE paragraph\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -3605,6 +3620,157 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE paragraph\nSOURCE graph"
       },
       "date": 1709987843883
+    },
+    {
+      "type": "add",
+      "id": "398868cc4e236eb0",
+      "item": {
+        "type": "paragraph",
+        "id": "398868cc4e236eb0",
+        "text": "[[Social]]"
+      },
+      "after": "a744e9f1ca803ea1",
+      "date": 1712557260590
+    },
+    {
+      "id": "6d36d88e598c9690",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "f207d118044203eb",
+        "2092a3b420d7d305",
+        "3442e4cc70ce6337",
+        "bdb9d5f441b1a9ff",
+        "5d5ff9e6c8b16c75",
+        "1cc466b2ea9de865",
+        "24491bec53b2cb4b",
+        "caafe88bea5b33e7",
+        "c646d43d03705f1e",
+        "8452123151a1f40b",
+        "7ffd35aeb81b2947",
+        "cec4aa683ee53d23",
+        "f868c992286d946e",
+        "5cdcdcfc93510d01",
+        "bad43f50bd0dc12a",
+        "9fe6b3bfcc041c40",
+        "6d36d88e598c9690",
+        "3bf7d72dbb5196e8",
+        "0037c66e202ac6ed",
+        "12293fe24153dbea",
+        "f01f09f9110c95a2",
+        "4114c679e16c47ba",
+        "194d84e6c03eb421",
+        "03ebfa18d5502930",
+        "8f3596088309d713",
+        "e73969c5d6819535",
+        "71c1eada140cdefe7f86201fb4fcbe5d",
+        "cfdd3472da56069b767648b5f36e8eab",
+        "205e6096e65d0872680e6e89e3b4a359",
+        "089cb31771224797116880ba80ab1f59",
+        "89a629b36a8f9339345aadff047bcb9f",
+        "a6ae0c529d9974656bdec3ef07626de0",
+        "ca6ee8104ca420a54efa5288ff49cb4e",
+        "dae6d36c64e7c29a",
+        "b903bc1e3c169e3a",
+        "2e82c1addc650521",
+        "066cf6f8cae48a48",
+        "b37816a2832e2e7d",
+        "a701471089e33cc4",
+        "8daed2f23561408e",
+        "e7e3fc35f0e4e546",
+        "90b49303bf974876",
+        "9e55e47a36d8d6be",
+        "2e4c6cdd97fd6aaa",
+        "d233a91e2cf24244",
+        "ab8eb5820d2f8a83",
+        "9d05f8b76754f3e5",
+        "979f0dbdbfa75db3",
+        "19e37110ab53df81",
+        "86e15f06011fd0e2",
+        "da373c3defc960c3",
+        "0c21f9d14c2bca90",
+        "9708710e8066a796",
+        "42cb20274f449f0f",
+        "8a3c76aa4aded2c9",
+        "0b8bea17e52ab203",
+        "2f96fb4104128cce",
+        "bf986153a816257d",
+        "54ce2cd421720f75",
+        "c0e773db126c7181",
+        "2d89b1fd9df1cf84",
+        "e44940541a37faaf",
+        "5a36613b9f8af892",
+        "d8787cf2346e0d38",
+        "9942edfcf66fc683",
+        "5188014f87b8d8dd",
+        "cdb289dc78f16f1a",
+        "ba02ead9ada0d12c",
+        "5331896a74df1672",
+        "57c5cfb5dc1076b4",
+        "285caaf0c5a308bf",
+        "d49977cd1734d8dc",
+        "80e20c68374c4a2e",
+        "f6716b0905576ebb",
+        "a44dcd3c5b7ea446",
+        "8fe38d2c7152e066",
+        "bc96cb7c1892038a",
+        "d8ebd180264d303f",
+        "6a1ce5fc8f2a25e9",
+        "265f5591dabdc750",
+        "a744e9f1ca803ea1",
+        "398868cc4e236eb0",
+        "8c2cd410bbc45f08",
+        "92d9d7c2ee7a11b7"
+      ],
+      "date": 1713866964750
+    },
+    {
+      "type": "edit",
+      "id": "bad43f50bd0dc12a",
+      "item": {
+        "type": "markdown",
+        "id": "bad43f50bd0dc12a",
+        "text": "**[[Smalltalk]]** as [[Notation]] See: [[Objects, Classes, and Constructors, Smalltalk Style]], [[Notation]] for creating [[Language]]s"
+      },
+      "date": 1713866974670
+    },
+    {
+      "id": "513bac397f78e1f1",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "513bac397f78e1f1",
+        "text": "[[A Mentoring Course on Smalltalk]]"
+      },
+      "after": "6d36d88e598c9690",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713866992937
+    },
+    {
+      "id": "b12be9c7adad391a",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "b12be9c7adad391a",
+        "text": "[[How to Delete Structure]]"
+      },
+      "after": "9708710e8066a796",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713867123593
+    },
+    {
+      "type": "edit",
+      "id": "92d9d7c2ee7a11b7",
+      "item": {
+        "type": "frame",
+        "id": "92d9d7c2ee7a11b7",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1713869578896
     }
   ]
 }

@@ -1,0 +1,376 @@
+{
+  "title": "rstream-dataflow",
+  "story": [
+    {
+      "type": "code",
+      "id": "e7eaa02ca91d7918",
+      "text": "import { Atom, defAtom } from 'https://esm.run/@thi.ng/atom';\nimport { fromRAF } from 'https://esm.run@thi.ng/rstream';\nimport { initGraph, mul, node1 } from 'https://esm.run/@thi.ng/rstream-graph';\nimport { map } from 'https://esm.run/@thi.ng/transducers';\n"
+    },
+    {
+      "type": "code",
+      "id": "e62149640a239241",
+      "text": "// atom for storing dataflow results (optional, here only for\n// debugging/stringifying graph state)\nconst db = defAtom({});\n"
+    },
+    {
+      "type": "code",
+      "id": "bba425511b59b596",
+      "text": "// RequestAnimationFrame based stream\nconst raf = fromRAF();\n\n// Define the dataflow graph\nconst graph = initGraph(db, {\n    // Node to transform RAF stream into a sine wave\n    sine: {\n        fn: node1(map((x) => 0.8 + 0.2 * Math.sin(x * 0.05))),\n        ins: { src: { stream: () => raf } },\n        outs: { \"*\": \"sin\" },\n    },\n    // Node to multiply sine wave with constant value\n    mul: {\n        fn: mul,\n        ins: {\n            a: { stream: \"/sine/node\" },\n            b: { const: 10 }, // Use a constant value\n        },\n        outs: { \"*\": \"result\" },\n    },\n});\n\n// Start the hdom update loop\n// Display the current state of the Atom\nstart(() => [\n    \"div\",\n    [\n        \"pre.absolute.top-1.left-1.pa0.ma0.z-2.f7\",\n        JSON.stringify(db.deref(), null, 2),\n    ],\n]);\n\n// Log the graph's DOT representation\nconsole.log(toDot(walk([raf])));\n"
+    },
+    {
+      "type": "markdown",
+      "id": "00f76ff348892888",
+      "text": "# Application Frame"
+    },
+    {
+      "type": "frame",
+      "id": "ddb9f8e3172ed2a3",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/snippet-template/esm.html"
+    },
+    {
+      "type": "image",
+      "id": "bfb3599323b27778",
+      "text": "class Stream extends Subscription",
+      "size": "wide",
+      "width": 418,
+      "height": 92,
+      "url": "/assets/plugins/image/8f45dd77175a05c2516d9ad778895c3e.jpg"
+    },
+    {
+      "type": "paragraph",
+      "id": "33732955179006a9",
+      "text": "See \"[rstream] error when using skypack build #462\" [https://github.com/thi-ng/umbrella/issues/462 github]"
+    },
+    {
+      "type": "paragraph",
+      "id": "16ceec548c365573",
+      "text": "Se also \"[rstream] error handling, subscribe/transform cleanups\n#279\" [https://github.com/thi-ng/umbrella/pull/279 github]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "rstream-dataflow",
+        "story": []
+      },
+      "date": 1713365770372
+    },
+    {
+      "id": "bba425511b59b596",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "bba425511b59b596",
+        "text": "import { Atom } from \"https://cdn.skypack.dev/@thi.ng/atom\";\nimport * as rs from \"https://cdn.skypack.dev/@thi.ng/rstream\";\nimport * as rsg from \"https://cdn.skypack.dev/@thi.ng/rstream-graph\";\n\n// (optional) state atom to source value change streams from\nconst state = new Atom({a: 1, b: 2});\n\n// graph declaration / definition\nconst graph = rsg.initGraph(state, {\n    // this node sources both of its inputs\n    // from values in the state atom\n    add: {\n        fn: rsg.add,\n        ins: {\n            a: { path: \"a\" },\n            b: { path: \"b\" }\n        },\n    },\n    // this node receives values from the `add` node\n    // and the given iterable\n    mul: {\n        fn: rsg.mul,\n        ins: {\n            a: { stream: \"/add/node\" },\n            b: { stream: () => rs.fromIterable([10, 20, 30]) }\n        },\n    }\n});\n\n// (optional) subscribe to individual nodes\ngraph.mul.subscribe({\n    next: (x) => console.log(\"result:\", x)\n});\n\n// result: 30\n// result: 60\n// result: 90\n\n// changes in subscribed atom values flow through the graph\nsetTimeout(() => state.resetIn(\"a\", 10), 1000);\n// result: 360"
+      },
+      "attribution": {
+        "page": "rstream-graph"
+      },
+      "date": 1713365775522
+    },
+    {
+      "id": "00f76ff348892888",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "00f76ff348892888",
+        "text": "# Application Frame"
+      },
+      "after": "bba425511b59b596",
+      "attribution": {
+        "page": "rstream-graph"
+      },
+      "date": 1713365791219
+    },
+    {
+      "id": "ddb9f8e3172ed2a3",
+      "type": "add",
+      "item": {
+        "type": "frame",
+        "id": "ddb9f8e3172ed2a3",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/snippet-template/esm.html"
+      },
+      "after": "00f76ff348892888",
+      "attribution": {
+        "page": "rstream-graph"
+      },
+      "date": 1713365801538
+    },
+    {
+      "type": "edit",
+      "id": "bba425511b59b596",
+      "item": {
+        "type": "code",
+        "id": "bba425511b59b596",
+        "text": "import { Atom } from \"https://cdn.skypack.dev/@thi.ng/atom\";\nimport { defAtom } from \"@thi.ng/atom\";\nimport { fromRAF } from \"@thi.ng/rstream\";\nimport { initGraph, mul, node1 } from \"@thi.ng/rstream-graph\";\nimport { map } from \"@thi.ng/transducers\";\n\n// Create an atom for storing dataflow results\nconst db = defAtom({});\n\n// RequestAnimationFrame based stream\nconst raf = fromRAF();\n\n// Define the dataflow graph\nconst graph = initGraph(db, {\n    // Node to transform RAF stream into a sine wave\n    sine: {\n        fn: node1(map((x) => 0.8 + 0.2 * Math.sin(x * 0.05))),\n        ins: { src: { stream: () => raf } },\n        outs: { \"*\": \"sin\" },\n    },\n    // Node to multiply sine wave with constant value\n    mul: {\n        fn: mul,\n        ins: {\n            a: { stream: \"/sine/node\" },\n            b: { const: 10 }, // Use a constant value\n        },\n        outs: { \"*\": \"result\" },\n    },\n});\n\n// Start the hdom update loop\n// Display the current state of the Atom\nstart(() => [\n    \"div\",\n    [\n        \"pre.absolute.top-1.left-1.pa0.ma0.z-2.f7\",\n        JSON.stringify(db.deref(), null, 2),\n    ],\n]);\n\n// Log the graph's DOT representation\nconsole.log(toDot(walk([raf])));\n"
+      },
+      "date": 1713365819496
+    },
+    {
+      "type": "edit",
+      "id": "bba425511b59b596",
+      "item": {
+        "type": "code",
+        "id": "bba425511b59b596",
+        "text": "import { Atom } from \"https://cdn.skypack.dev/@thi.ng/atom\";\nimport { fromRAF } from \"https://cdn.skypack.dev/@thi.ng/rstream\";\nimport { initGraph, mul, node1 } from \"https://cdn.skypack.dev/@thi.ng/rstream-graph\";\nimport { map } from \"https://cdn.skypack.dev/@thi.ng/transducers\";\n\n// Create an atom for storing dataflow results\nconst db = defAtom({});\n\n// RequestAnimationFrame based stream\nconst raf = fromRAF();\n\n// Define the dataflow graph\nconst graph = initGraph(db, {\n    // Node to transform RAF stream into a sine wave\n    sine: {\n        fn: node1(map((x) => 0.8 + 0.2 * Math.sin(x * 0.05))),\n        ins: { src: { stream: () => raf } },\n        outs: { \"*\": \"sin\" },\n    },\n    // Node to multiply sine wave with constant value\n    mul: {\n        fn: mul,\n        ins: {\n            a: { stream: \"/sine/node\" },\n            b: { const: 10 }, // Use a constant value\n        },\n        outs: { \"*\": \"result\" },\n    },\n});\n\n// Start the hdom update loop\n// Display the current state of the Atom\nstart(() => [\n    \"div\",\n    [\n        \"pre.absolute.top-1.left-1.pa0.ma0.z-2.f7\",\n        JSON.stringify(db.deref(), null, 2),\n    ],\n]);\n\n// Log the graph's DOT representation\nconsole.log(toDot(walk([raf])));\n"
+      },
+      "date": 1713365855761
+    },
+    {
+      "type": "edit",
+      "id": "bba425511b59b596",
+      "item": {
+        "type": "code",
+        "id": "bba425511b59b596",
+        "text": "import { Atom, defAtom } from \"https://cdn.skypack.dev/@thi.ng/atom\";\nimport { fromRAF } from \"https://cdn.skypack.dev/@thi.ng/rstream\";\nimport { initGraph, mul, node1 } from \"https://cdn.skypack.dev/@thi.ng/rstream-graph\";\nimport { map } from \"https://cdn.skypack.dev/@thi.ng/transducers\";\n\n// Create an atom for storing dataflow results\nconst db = defAtom({});\n\n// RequestAnimationFrame based stream\nconst raf = fromRAF();\n\n// Define the dataflow graph\nconst graph = initGraph(db, {\n    // Node to transform RAF stream into a sine wave\n    sine: {\n        fn: node1(map((x) => 0.8 + 0.2 * Math.sin(x * 0.05))),\n        ins: { src: { stream: () => raf } },\n        outs: { \"*\": \"sin\" },\n    },\n    // Node to multiply sine wave with constant value\n    mul: {\n        fn: mul,\n        ins: {\n            a: { stream: \"/sine/node\" },\n            b: { const: 10 }, // Use a constant value\n        },\n        outs: { \"*\": \"result\" },\n    },\n});\n\n// Start the hdom update loop\n// Display the current state of the Atom\nstart(() => [\n    \"div\",\n    [\n        \"pre.absolute.top-1.left-1.pa0.ma0.z-2.f7\",\n        JSON.stringify(db.deref(), null, 2),\n    ],\n]);\n\n// Log the graph's DOT representation\nconsole.log(toDot(walk([raf])));\n"
+      },
+      "date": 1713365923648
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e7eaa02ca91d7918"
+      },
+      "id": "e7eaa02ca91d7918",
+      "type": "add",
+      "after": "ddb9f8e3172ed2a3",
+      "date": 1713366062757
+    },
+    {
+      "id": "e7eaa02ca91d7918",
+      "type": "move",
+      "order": [
+        "e7eaa02ca91d7918",
+        "bba425511b59b596",
+        "00f76ff348892888",
+        "ddb9f8e3172ed2a3"
+      ],
+      "date": 1713366068083
+    },
+    {
+      "type": "edit",
+      "id": "bba425511b59b596",
+      "item": {
+        "type": "code",
+        "id": "bba425511b59b596",
+        "text": "\n// Create an atom for storing dataflow results\nconst db = defAtom({});\n\n// RequestAnimationFrame based stream\nconst raf = fromRAF();\n\n// Define the dataflow graph\nconst graph = initGraph(db, {\n    // Node to transform RAF stream into a sine wave\n    sine: {\n        fn: node1(map((x) => 0.8 + 0.2 * Math.sin(x * 0.05))),\n        ins: { src: { stream: () => raf } },\n        outs: { \"*\": \"sin\" },\n    },\n    // Node to multiply sine wave with constant value\n    mul: {\n        fn: mul,\n        ins: {\n            a: { stream: \"/sine/node\" },\n            b: { const: 10 }, // Use a constant value\n        },\n        outs: { \"*\": \"result\" },\n    },\n});\n\n// Start the hdom update loop\n// Display the current state of the Atom\nstart(() => [\n    \"div\",\n    [\n        \"pre.absolute.top-1.left-1.pa0.ma0.z-2.f7\",\n        JSON.stringify(db.deref(), null, 2),\n    ],\n]);\n\n// Log the graph's DOT representation\nconsole.log(toDot(walk([raf])));\n"
+      },
+      "date": 1713366077887
+    },
+    {
+      "type": "edit",
+      "id": "e7eaa02ca91d7918",
+      "item": {
+        "type": "code",
+        "id": "e7eaa02ca91d7918",
+        "text": "import { Atom, defAtom } from \"https://cdn.skypack.dev/@thi.ng/atom\";\nimport { fromRAF } from \"https://cdn.skypack.dev/@thi.ng/rstream\";\nimport { initGraph, mul, node1 } from \"https://cdn.skypack.dev/@thi.ng/rstream-graph\";\nimport { map } from \"https://cdn.skypack.dev/@thi.ng/transducers\";\n"
+      },
+      "date": 1713366078860
+    },
+    {
+      "type": "edit",
+      "id": "bba425511b59b596",
+      "item": {
+        "type": "code",
+        "id": "bba425511b59b596",
+        "text": "// atom for storing dataflow results (optional, here only for\n// debugging/stringifying graph state)\nconst db = defAtom<any>({});\n\n// RequestAnimationFrame based stream\nconst raf = fromRAF();\n\n// Define the dataflow graph\nconst graph = initGraph(db, {\n    // Node to transform RAF stream into a sine wave\n    sine: {\n        fn: node1(map((x) => 0.8 + 0.2 * Math.sin(x * 0.05))),\n        ins: { src: { stream: () => raf } },\n        outs: { \"*\": \"sin\" },\n    },\n    // Node to multiply sine wave with constant value\n    mul: {\n        fn: mul,\n        ins: {\n            a: { stream: \"/sine/node\" },\n            b: { const: 10 }, // Use a constant value\n        },\n        outs: { \"*\": \"result\" },\n    },\n});\n\n// Start the hdom update loop\n// Display the current state of the Atom\nstart(() => [\n    \"div\",\n    [\n        \"pre.absolute.top-1.left-1.pa0.ma0.z-2.f7\",\n        JSON.stringify(db.deref(), null, 2),\n    ],\n]);\n\n// Log the graph's DOT representation\nconsole.log(toDot(walk([raf])));\n"
+      },
+      "date": 1713366098559
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e62149640a239241"
+      },
+      "id": "e62149640a239241",
+      "type": "add",
+      "after": "ddb9f8e3172ed2a3",
+      "date": 1713366121388
+    },
+    {
+      "id": "e62149640a239241",
+      "type": "move",
+      "order": [
+        "e7eaa02ca91d7918",
+        "e62149640a239241",
+        "bba425511b59b596",
+        "00f76ff348892888",
+        "ddb9f8e3172ed2a3"
+      ],
+      "date": 1713366125095
+    },
+    {
+      "type": "edit",
+      "id": "bba425511b59b596",
+      "item": {
+        "type": "code",
+        "id": "bba425511b59b596",
+        "text": "// RequestAnimationFrame based stream\nconst raf = fromRAF();\n\n// Define the dataflow graph\nconst graph = initGraph(db, {\n    // Node to transform RAF stream into a sine wave\n    sine: {\n        fn: node1(map((x) => 0.8 + 0.2 * Math.sin(x * 0.05))),\n        ins: { src: { stream: () => raf } },\n        outs: { \"*\": \"sin\" },\n    },\n    // Node to multiply sine wave with constant value\n    mul: {\n        fn: mul,\n        ins: {\n            a: { stream: \"/sine/node\" },\n            b: { const: 10 }, // Use a constant value\n        },\n        outs: { \"*\": \"result\" },\n    },\n});\n\n// Start the hdom update loop\n// Display the current state of the Atom\nstart(() => [\n    \"div\",\n    [\n        \"pre.absolute.top-1.left-1.pa0.ma0.z-2.f7\",\n        JSON.stringify(db.deref(), null, 2),\n    ],\n]);\n\n// Log the graph's DOT representation\nconsole.log(toDot(walk([raf])));\n"
+      },
+      "date": 1713366136670
+    },
+    {
+      "type": "edit",
+      "id": "e62149640a239241",
+      "item": {
+        "type": "code",
+        "id": "e62149640a239241",
+        "text": "// atom for storing dataflow results (optional, here only for\n// debugging/stringifying graph state)\nconst db = defAtom<any>({});"
+      },
+      "date": 1713366138361
+    },
+    {
+      "type": "edit",
+      "id": "e62149640a239241",
+      "item": {
+        "type": "code",
+        "id": "e62149640a239241",
+        "text": "// atom for storing dataflow results (optional, here only for\n// debugging/stringifying graph state)\nconst db = defAtom({});\n"
+      },
+      "date": 1713366190317
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bfb3599323b27778"
+      },
+      "id": "bfb3599323b27778",
+      "type": "add",
+      "after": "ddb9f8e3172ed2a3",
+      "date": 1713368960702
+    },
+    {
+      "type": "edit",
+      "id": "bfb3599323b27778",
+      "item": {
+        "type": "image",
+        "id": "bfb3599323b27778",
+        "text": "class Stream extends Subscription",
+        "size": "wide",
+        "width": 418,
+        "height": 92,
+        "url": "/assets/plugins/image/8f45dd77175a05c2516d9ad778895c3e.jpg"
+      },
+      "date": 1713368982916
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3c3609e5d0b8e81a"
+      },
+      "id": "3c3609e5d0b8e81a",
+      "type": "add",
+      "after": "bfb3599323b27778",
+      "date": 1713369021891
+    },
+    {
+      "type": "edit",
+      "id": "3c3609e5d0b8e81a",
+      "item": {
+        "type": "paragraph",
+        "id": "3c3609e5d0b8e81a",
+        "text": "<this>: undefined"
+      },
+      "date": 1713369030637
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "16ceec548c365573"
+      },
+      "id": "16ceec548c365573",
+      "type": "add",
+      "after": "3c3609e5d0b8e81a",
+      "date": 1713369936496
+    },
+    {
+      "type": "edit",
+      "id": "16ceec548c365573",
+      "item": {
+        "type": "paragraph",
+        "id": "16ceec548c365573",
+        "text": "–  Merged\n[rstream] error handling, subscribe/transform cleanups\n#279 "
+      },
+      "date": 1713369944307
+    },
+    {
+      "type": "edit",
+      "id": "16ceec548c365573",
+      "item": {
+        "type": "paragraph",
+        "id": "16ceec548c365573",
+        "text": "– [rstream] error handling, subscribe/transform cleanups\n#279 "
+      },
+      "date": 1713369950743
+    },
+    {
+      "type": "edit",
+      "id": "16ceec548c365573",
+      "item": {
+        "type": "paragraph",
+        "id": "16ceec548c365573",
+        "text": "– [rstream] error handling, subscribe/transform cleanups\n#279 [https://github.com/thi-ng/umbrella/pull/279 github]"
+      },
+      "date": 1713369979686
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1713381726950
+    },
+    {
+      "id": "33732955179006a9",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "33732955179006a9",
+        "text": "See \"[rstream] error when using skypack build #462\" [https://github.com/thi-ng/umbrella/issues/462 github]"
+      },
+      "after": "16ceec548c365573",
+      "attribution": {
+        "page": "Playground: rdom"
+      },
+      "date": 1713450325579
+    },
+    {
+      "type": "edit",
+      "id": "e7eaa02ca91d7918",
+      "item": {
+        "type": "code",
+        "id": "e7eaa02ca91d7918",
+        "text": "import { Atom, defAtom } from 'https://esm.run/@thi.ng/atom';\nimport { fromRAF } from 'https://esm.run@thi.ng/rstream';\nimport { initGraph, mul, node1 } from 'https://esm.run/@thi.ng/rstream-graph';\nimport { map } from 'https://esm.run/@thi.ng/transducers';\n"
+      },
+      "date": 1713450399584
+    },
+    {
+      "type": "remove",
+      "id": "3c3609e5d0b8e81a",
+      "date": 1713450530709
+    },
+    {
+      "id": "16ceec548c365573",
+      "type": "move",
+      "order": [
+        "e7eaa02ca91d7918",
+        "e62149640a239241",
+        "bba425511b59b596",
+        "00f76ff348892888",
+        "ddb9f8e3172ed2a3",
+        "bfb3599323b27778",
+        "33732955179006a9",
+        "16ceec548c365573"
+      ],
+      "date": 1713450532734
+    },
+    {
+      "type": "edit",
+      "id": "16ceec548c365573",
+      "item": {
+        "type": "paragraph",
+        "id": "16ceec548c365573",
+        "text": "Se also \"[rstream] error handling, subscribe/transform cleanups\n#279\" [https://github.com/thi-ng/umbrella/pull/279 github]"
+      },
+      "date": 1713450545850
+    }
+  ]
+}

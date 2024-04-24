@@ -182,6 +182,16 @@
       "text": "[[LangSec]]"
     },
     {
+      "type": "paragraph",
+      "id": "ce4825d546ef65ae",
+      "text": "[[Laws of Form and Object Oriented Programming]] "
+    },
+    {
+      "type": "markdown",
+      "id": "3838d47a259f125d",
+      "text": "* [[Smalltalk Syntax in 7']]\n⇒ [[Live Object Programming in Pharo]]\n** [[Week 1: Welcome on Board and Syntax Discovery]]\n* [[How to find stuff in GT in 7']]\n* [[Leibniz in 4']]"
+    },
+    {
       "type": "reference",
       "id": "601b7d01ab9bfa4a",
       "site": "wiki.ralfbarkow.ch",
@@ -192,7 +202,7 @@
     {
       "type": "frame",
       "id": "8b25db354a5c635d",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 250"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -1521,6 +1531,44 @@
       },
       "after": "af9a84df70ada3c7",
       "date": 1709622243637
+    },
+    {
+      "id": "ce4825d546ef65ae",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "ce4825d546ef65ae",
+        "text": "[[Laws of Form and Object Oriented Programming]] "
+      },
+      "after": "2cf8ca2c6f0f2d6e",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713866764106
+    },
+    {
+      "id": "3838d47a259f125d",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "3838d47a259f125d",
+        "text": "* [[Smalltalk Syntax in 7']]\n⇒ [[Live Object Programming in Pharo]]\n** [[Week 1: Welcome on Board and Syntax Discovery]]\n* [[How to find stuff in GT in 7']]\n* [[Leibniz in 4']]"
+      },
+      "after": "ce4825d546ef65ae",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713866770656
+    },
+    {
+      "type": "edit",
+      "id": "8b25db354a5c635d",
+      "item": {
+        "type": "frame",
+        "id": "8b25db354a5c635d",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1713866807343
     }
   ]
 }

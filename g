@@ -102,7 +102,7 @@
     {
       "type": "frame",
       "id": "68b644cd9805354e",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -659,6 +659,16 @@
       },
       "after": "79dc6fb11c2d56b7",
       "date": 1709358820721
+    },
+    {
+      "type": "edit",
+      "id": "68b644cd9805354e",
+      "item": {
+        "type": "frame",
+        "id": "68b644cd9805354e",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1713869087871
     }
   ]
 }

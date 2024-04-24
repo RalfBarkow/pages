@@ -22,6 +22,16 @@
       "text": "[[Javascript Coding Notebook]] (within [http://js.ward.asia.wiki.org/view/welcome-visitors js.ward.asia.wiki])"
     },
     {
+      "type": "paragraph",
+      "id": "7e7b6ea8be994d22",
+      "text": "– JavaScript Testing with [[Jasmine]] by [[Evan Hahn]]. [https://priv.gg/e/OReilly.JavaScript.Testing.With.Jasmine.Apr.2013.ISBN.1449356370.pdf pdf]"
+    },
+    {
+      "type": "paragraph",
+      "id": "aeeec6a79da60717",
+      "text": "[[J Programming Language]]"
+    },
+    {
       "type": "reference",
       "id": "8176489dd7cf46b0",
       "site": "wiki.ralfbarkow.ch",
@@ -32,7 +42,7 @@
     {
       "type": "frame",
       "id": "0ef10f2ddc5d2afb",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -232,6 +242,78 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222"
       },
       "date": 1711000534651
+    },
+    {
+      "type": "edit",
+      "id": "c2c44842f6842698",
+      "item": {
+        "type": "paragraph",
+        "id": "c2c44842f6842698",
+        "text": "[[Javascript Coding Notebook]] (within [http://js.ward.asia.wiki.org/view/welcome-visitors js.ward.asia.wiki]) "
+      },
+      "date": 1712494819166
+    },
+    {
+      "type": "edit",
+      "id": "c2c44842f6842698",
+      "item": {
+        "type": "paragraph",
+        "id": "c2c44842f6842698",
+        "text": "[[Javascript Coding Notebook]] (within [http://js.ward.asia.wiki.org/view/welcome-visitors js.ward.asia.wiki])"
+      },
+      "date": 1712495013337
+    },
+    {
+      "type": "add",
+      "id": "aeeec6a79da60717",
+      "item": {
+        "type": "paragraph",
+        "id": "aeeec6a79da60717",
+        "text": "[[J Programming Language]]"
+      },
+      "after": "c2c44842f6842698",
+      "date": 1712495017315
+    },
+    {
+      "type": "edit",
+      "id": "0ef10f2ddc5d2afb",
+      "item": {
+        "type": "frame",
+        "id": "0ef10f2ddc5d2afb",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1712495096261
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1712729684431
+    },
+    {
+      "type": "edit",
+      "id": "0ef10f2ddc5d2afb",
+      "item": {
+        "type": "frame",
+        "id": "0ef10f2ddc5d2afb",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1712729706254
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1712729721768
+    },
+    {
+      "type": "add",
+      "id": "7e7b6ea8be994d22",
+      "item": {
+        "type": "paragraph",
+        "id": "7e7b6ea8be994d22",
+        "text": "– JavaScript Testing with [[Jasmine]] by [[Evan Hahn]]. [https://priv.gg/e/OReilly.JavaScript.Testing.With.Jasmine.Apr.2013.ISBN.1449356370.pdf pdf]"
+      },
+      "after": "c2c44842f6842698",
+      "date": 1712730514511
     }
   ]
 }

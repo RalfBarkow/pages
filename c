@@ -406,7 +406,12 @@
     {
       "type": "paragraph",
       "id": "882ad58e8d272bcc",
-      "text": "[[Complexity]] (within [[ Complexity in One Computer]])"
+      "text": "[[Complexity]] (within [[Complexity in One Computer]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "59c80d9bc47ef34a",
+      "text": "[[Clerk]] (within [[Clojure]])"
     },
     {
       "type": "reference",
@@ -419,7 +424,7 @@
     {
       "type": "frame",
       "id": "a29178af5d6036ea",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222"
     }
   ],
   "journal": [
@@ -3120,6 +3125,47 @@
         "text": "[[Complexity]] (within [[ Complexity in One Computer]])"
       },
       "date": 1711613465987
+    },
+    {
+      "type": "edit",
+      "id": "a29178af5d6036ea",
+      "item": {
+        "type": "frame",
+        "id": "a29178af5d6036ea",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222"
+      },
+      "date": 1712747927256
+    },
+    {
+      "type": "fork",
+      "site": "wiki.ralfbarkow.ch",
+      "date": 1712779918115
+    },
+    {
+      "type": "edit",
+      "id": "882ad58e8d272bcc",
+      "item": {
+        "type": "paragraph",
+        "id": "882ad58e8d272bcc",
+        "text": "[[Complexity]] (within [[Complexity in One Computer]])"
+      },
+      "date": 1712779927668
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1712779984984
+    },
+    {
+      "type": "add",
+      "id": "59c80d9bc47ef34a",
+      "item": {
+        "type": "paragraph",
+        "id": "59c80d9bc47ef34a",
+        "text": "[[Clerk]] (within [[Clojure]])"
+      },
+      "after": "882ad58e8d272bcc",
+      "date": 1713973728173
     }
   ]
 }

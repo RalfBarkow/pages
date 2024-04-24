@@ -73,6 +73,11 @@
     },
     {
       "type": "paragraph",
+      "id": "8ba314d4b592a49c",
+      "text": "[[Dreyeck]] ⇒ [[Wiki School]] [http://school.wiki.dreyeck.ch page] ⇒ [[dreyeck Portal]]"
+    },
+    {
+      "type": "paragraph",
       "id": "8aed217e5e100728",
       "text": "[[Wrapper Pattern]]"
     },
@@ -107,7 +112,7 @@
     {
       "type": "frame",
       "id": "6f66c17ee7f83b9f",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -797,6 +802,30 @@
       },
       "after": "8fe38d2c7152e066",
       "date": 1711386696832
+    },
+    {
+      "type": "edit",
+      "id": "6f66c17ee7f83b9f",
+      "item": {
+        "type": "frame",
+        "id": "6f66c17ee7f83b9f",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1713867551307
+    },
+    {
+      "id": "8ba314d4b592a49c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "8ba314d4b592a49c",
+        "text": "[[Dreyeck]] ⇒ [[Wiki School]] [http://school.wiki.dreyeck.ch page] ⇒ [[dreyeck Portal]]"
+      },
+      "after": "246adf5ed95d4e14",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713867602578
     }
   ]
 }
