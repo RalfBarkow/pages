@@ -217,6 +217,44 @@
       "text": "[[Turn a Face to the Other]]"
     },
     {
+      "type": "paragraph",
+      "id": "9b3661e33267d889",
+      "text": "[[Traveller]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "be106109dfd94086",
+      "text": "=> [[Travellers Move Around]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "acbd6ba16ca38137",
+      "text": "[[Time]] See: [[Island Time]], [[The Now]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "fe5c5d2079a85eb0",
+      "text": "[[Temporal Aspect]], 6414 See: [[Fast to Deep]] and [[Exploring Hyperlearning]], 6416"
+    },
+    {
+      "type": "roster",
+      "id": "57362409d23c4267",
+      "text": "thompson.fed.wiki"
+    },
+    {
+      "id": "c6eab1d7dc942f00",
+      "type": "reference",
+      "site": "thompson.fed.wiki",
+      "slug": "temporal-aspect",
+      "title": "Temporal Aspect",
+      "text": "A temporal aspect is a page identified by the date it was last revised and the links from that page."
+    },
+    {
+      "type": "paragraph",
+      "id": "396ce593dac0c352",
+      "text": "[[Twin]]"
+    },
+    {
       "type": "reference",
       "id": "9b65b4b369fa5a05",
       "text": "End of List Indexcard",
@@ -1680,6 +1718,300 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
       },
       "date": 1713869521326
+    },
+    {
+      "type": "add",
+      "id": "9b3661e33267d889",
+      "item": {
+        "type": "paragraph",
+        "id": "9b3661e33267d889",
+        "text": "[[Traveller]]"
+      },
+      "after": "9fe0de1b1e9bb399",
+      "date": 1719657827727
+    },
+    {
+      "type": "add",
+      "id": "be106109dfd94086",
+      "item": {
+        "type": "paragraph",
+        "id": "be106109dfd94086",
+        "text": "=> [[Travellers Move Around]]"
+      },
+      "after": "9b3661e33267d889",
+      "date": 1719737499865
+    },
+    {
+      "type": "add",
+      "id": "acbd6ba16ca38137",
+      "item": {
+        "type": "paragraph",
+        "id": "acbd6ba16ca38137",
+        "text": "[[Time]]"
+      },
+      "after": "be106109dfd94086",
+      "date": 1719738688223
+    },
+    {
+      "type": "edit",
+      "id": "acbd6ba16ca38137",
+      "item": {
+        "type": "paragraph",
+        "id": "acbd6ba16ca38137",
+        "text": "[[Time]] See: [[Island Time]]"
+      },
+      "date": 1719738729953
+    },
+    {
+      "type": "edit",
+      "id": "acbd6ba16ca38137",
+      "item": {
+        "type": "paragraph",
+        "id": "acbd6ba16ca38137",
+        "text": "[[Time]] See: [[Island Time]], [[The Now]]"
+      },
+      "date": 1719738758589
+    },
+    {
+      "type": "add",
+      "id": "fe5c5d2079a85eb0",
+      "item": {
+        "type": "paragraph",
+        "id": "fe5c5d2079a85eb0",
+        "text": "[["
+      },
+      "after": "acbd6ba16ca38137",
+      "date": 1719831540371
+    },
+    {
+      "type": "edit",
+      "id": "fe5c5d2079a85eb0",
+      "item": {
+        "type": "paragraph",
+        "id": "fe5c5d2079a85eb0",
+        "text": "[[Temporal Aspect]]"
+      },
+      "date": 1719831551265
+    },
+    {
+      "type": "edit",
+      "id": "fe5c5d2079a85eb0",
+      "item": {
+        "type": "paragraph",
+        "id": "fe5c5d2079a85eb0",
+        "text": "[[Temporal Aspect]], 6414"
+      },
+      "date": 1719831581660
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "57362409d23c4267"
+      },
+      "id": "57362409d23c4267",
+      "type": "add",
+      "after": "fb2966c5d6e1bdd9",
+      "date": 1719831594009
+    },
+    {
+      "type": "edit",
+      "id": "57362409d23c4267",
+      "item": {
+        "type": "roster",
+        "id": "57362409d23c4267",
+        "text": "thompson.fed.wiki"
+      },
+      "date": 1719831601661
+    },
+    {
+      "id": "57362409d23c4267",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "cc70989a68ee13d3",
+        "f99b44b97e6c6782",
+        "40d21e0197bacab0",
+        "c6265aaabb37b3ac",
+        "88a8eb4f5db965c3",
+        "d88b6f2f125890c2",
+        "4462c39d4f5a1b74",
+        "d220da03ae9bcafc",
+        "b99f7cc4e46049a7",
+        "1d14eb9ac7f41624",
+        "610ab2978e31b61f",
+        "55242fffc0a4b12a",
+        "65c1eaceae7bae7b",
+        "e4c294c771af3fdd",
+        "6a9509da769e57ca",
+        "245ac79aeddfd201",
+        "c579b3729134746f",
+        "33ee898d78d63ab3",
+        "384b8be4a8a594d4",
+        "349c133cebdbfd06",
+        "d15d2f2333c44202",
+        "dc15e527d0567bec",
+        "1afec7f4af3c3a99",
+        "597f7f49dba29693",
+        "d79fd65afcd0f488",
+        "d4028f5507d1ce8f",
+        "85f3231906079e2a",
+        "18e93339af8a75b7",
+        "0b9723521c7dd341",
+        "6561bfa58609627e",
+        "33d619a06d57ae0e",
+        "1c948f65ed1dff73",
+        "52e560f4a9276dff",
+        "0f368210684d31e4",
+        "3788806b9e0698b4",
+        "650db188f8701646",
+        "ca59b4b63c24f4c5",
+        "119b35b3b7ac9d6e",
+        "b1487a8dcc94c31c",
+        "e0356451b9ef4808",
+        "153446fb292b32ea",
+        "9fe0de1b1e9bb399",
+        "9b3661e33267d889",
+        "be106109dfd94086",
+        "acbd6ba16ca38137",
+        "fe5c5d2079a85eb0",
+        "57362409d23c4267",
+        "9b65b4b369fa5a05",
+        "fb2966c5d6e1bdd9"
+      ],
+      "date": 1719831607848
+    },
+    {
+      "id": "c6eab1d7dc942f00",
+      "type": "add",
+      "item": {
+        "id": "c6eab1d7dc942f00",
+        "type": "reference",
+        "site": "thompson.fed.wiki",
+        "slug": "temporal-aspect",
+        "title": "Temporal Aspect",
+        "text": "A temporal aspect is a page identified by the date it was last revised and the links from that page."
+      },
+      "after": "57362409d23c4267",
+      "date": 1719831616192
+    },
+    {
+      "type": "edit",
+      "id": "fe5c5d2079a85eb0",
+      "item": {
+        "type": "paragraph",
+        "id": "fe5c5d2079a85eb0",
+        "text": "[[Temporal Aspect]], 6414 See: [[Fast and Deep]]"
+      },
+      "date": 1719831686253
+    },
+    {
+      "type": "edit",
+      "id": "fe5c5d2079a85eb0",
+      "item": {
+        "type": "paragraph",
+        "id": "fe5c5d2079a85eb0",
+        "text": "[[Temporal Aspect]], 6414 See: [[Fast to Deep]]"
+      },
+      "date": 1719831709060
+    },
+    {
+      "type": "edit",
+      "id": "fe5c5d2079a85eb0",
+      "item": {
+        "type": "paragraph",
+        "id": "fe5c5d2079a85eb0",
+        "text": "[[Temporal Aspect]], 6414 See: [[Fast to Deep]] and [[Exploring Hyperlearning]]"
+      },
+      "date": 1719831937937
+    },
+    {
+      "type": "edit",
+      "id": "fe5c5d2079a85eb0",
+      "item": {
+        "type": "paragraph",
+        "id": "fe5c5d2079a85eb0",
+        "text": "[[Temporal Aspect]], 6414 See: [[Fast to Deep]] and [[Exploring Hyperlearning]], 6416"
+      },
+      "date": 1719832350254
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "396ce593dac0c352"
+      },
+      "id": "396ce593dac0c352",
+      "type": "add",
+      "after": "fb2966c5d6e1bdd9",
+      "date": 1719916705211
+    },
+    {
+      "type": "edit",
+      "id": "396ce593dac0c352",
+      "item": {
+        "type": "paragraph",
+        "id": "396ce593dac0c352",
+        "text": "[[Twin]]"
+      },
+      "date": 1719916712821
+    },
+    {
+      "id": "396ce593dac0c352",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "cc70989a68ee13d3",
+        "f99b44b97e6c6782",
+        "40d21e0197bacab0",
+        "c6265aaabb37b3ac",
+        "88a8eb4f5db965c3",
+        "d88b6f2f125890c2",
+        "4462c39d4f5a1b74",
+        "d220da03ae9bcafc",
+        "b99f7cc4e46049a7",
+        "1d14eb9ac7f41624",
+        "610ab2978e31b61f",
+        "55242fffc0a4b12a",
+        "65c1eaceae7bae7b",
+        "e4c294c771af3fdd",
+        "6a9509da769e57ca",
+        "245ac79aeddfd201",
+        "c579b3729134746f",
+        "33ee898d78d63ab3",
+        "384b8be4a8a594d4",
+        "349c133cebdbfd06",
+        "d15d2f2333c44202",
+        "dc15e527d0567bec",
+        "1afec7f4af3c3a99",
+        "597f7f49dba29693",
+        "d79fd65afcd0f488",
+        "d4028f5507d1ce8f",
+        "85f3231906079e2a",
+        "18e93339af8a75b7",
+        "0b9723521c7dd341",
+        "6561bfa58609627e",
+        "33d619a06d57ae0e",
+        "1c948f65ed1dff73",
+        "52e560f4a9276dff",
+        "0f368210684d31e4",
+        "3788806b9e0698b4",
+        "650db188f8701646",
+        "ca59b4b63c24f4c5",
+        "119b35b3b7ac9d6e",
+        "b1487a8dcc94c31c",
+        "e0356451b9ef4808",
+        "153446fb292b32ea",
+        "9fe0de1b1e9bb399",
+        "9b3661e33267d889",
+        "be106109dfd94086",
+        "acbd6ba16ca38137",
+        "fe5c5d2079a85eb0",
+        "57362409d23c4267",
+        "c6eab1d7dc942f00",
+        "396ce593dac0c352",
+        "9b65b4b369fa5a05",
+        "fb2966c5d6e1bdd9"
+      ],
+      "date": 1719916720144
     }
   ]
 }

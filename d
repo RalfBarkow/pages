@@ -2,6 +2,14 @@
   "title": "D",
   "story": [
     {
+      "id": "f388b139df0ff7bc",
+      "type": "reference",
+      "site": "thompson.fed.wiki",
+      "slug": "fast-to-deep",
+      "title": "Fast to Deep",
+      "text": "We continue to explore how the wiki's new affordances allows us to quickly find [[Third-Order Meaning]] in our thinking."
+    },
+    {
       "type": "pagefold",
       "id": "1dbcb05a56540609",
       "text": "List Indexcard D"
@@ -235,6 +243,16 @@
       "type": "paragraph",
       "id": "3713d61817d0e9c7",
       "text": "[[Projects]] and [[Dojo Exercises]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3c8330b1d92763a1",
+      "text": "[[Documentation]] (within [[Documentation System]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "5eac05e2328457de",
+      "text": "[[Fast to Deep]] (Schnell bis in die Tiefe) See: [[Story Vector]]"
     },
     {
       "type": "reference",
@@ -1832,6 +1850,68 @@
         "page": "Welcome Visitors"
       },
       "date": 1713867525886
+    },
+    {
+      "type": "add",
+      "id": "3c8330b1d92763a1",
+      "item": {
+        "type": "paragraph",
+        "id": "3c8330b1d92763a1",
+        "text": "[[Documentation]]"
+      },
+      "after": "3713d61817d0e9c7",
+      "date": 1716526965219
+    },
+    {
+      "type": "edit",
+      "id": "3c8330b1d92763a1",
+      "item": {
+        "type": "paragraph",
+        "id": "3c8330b1d92763a1",
+        "text": "[[Documentation]] (within [[Documentation System]])"
+      },
+      "date": 1716527203059
+    },
+    {
+      "id": "5eac05e2328457de",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "5eac05e2328457de",
+        "text": "[[Fast to Deep]] (Schnell bis in die Tiefe)"
+      },
+      "after": "3c8330b1d92763a1",
+      "attribution": {
+        "page": "F"
+      },
+      "date": 1719754883867
+    },
+    {
+      "id": "f388b139df0ff7bc",
+      "type": "add",
+      "item": {
+        "id": "f388b139df0ff7bc",
+        "type": "reference",
+        "site": "thompson.fed.wiki",
+        "slug": "fast-to-deep",
+        "title": "Fast to Deep",
+        "text": "We continue to explore how the wiki's new affordances allows us to quickly find [[Third-Order Meaning]] in our thinking."
+      },
+      "after": "45d0887b265c5d6f",
+      "attribution": {
+        "page": "F"
+      },
+      "date": 1719754893033
+    },
+    {
+      "type": "edit",
+      "id": "5eac05e2328457de",
+      "item": {
+        "type": "paragraph",
+        "id": "5eac05e2328457de",
+        "text": "[[Fast to Deep]] (Schnell bis in die Tiefe) See: [[Story Vector]]"
+      },
+      "date": 1719754928353
     }
   ]
 }

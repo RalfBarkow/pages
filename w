@@ -102,6 +102,16 @@
       "text": "[[Web Components]] (within [[Elm and Web Components]])"
     },
     {
+      "type": "paragraph",
+      "id": "c575c0f5d73d4b17",
+      "text": "[[Wiki Turns 30]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "30d964a3142799ff",
+      "text": "[[Writing Down Boolean Algebra]] See: [[Movement]]"
+    },
+    {
       "type": "reference",
       "id": "cff13b8f1e169e91",
       "site": "wiki.ralfbarkow.ch",
@@ -826,6 +836,31 @@
         "page": "Welcome Visitors"
       },
       "date": 1713867602578
+    },
+    {
+      "type": "add",
+      "id": "c575c0f5d73d4b17",
+      "item": {
+        "type": "paragraph",
+        "id": "c575c0f5d73d4b17",
+        "text": "[[Wiki Turns 30]]"
+      },
+      "after": "2b3104f099ac4e88",
+      "date": 1715162349074
+    },
+    {
+      "id": "30d964a3142799ff",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "30d964a3142799ff",
+        "text": "[[Writing Down Boolean Algebra]] See: [[Movement]]"
+      },
+      "after": "c575c0f5d73d4b17",
+      "attribution": {
+        "page": "B"
+      },
+      "date": 1719918855786
     }
   ]
 }

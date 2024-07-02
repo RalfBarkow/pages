@@ -117,6 +117,26 @@
       "text": "[[Choosing Which Benefit Function to Maximize]] See:  [[Force]] (within [[What Is a Pattern?]]), [[Recurring Problem]]"
     },
     {
+      "type": "paragraph",
+      "id": "d6340bcb5ebbf93b",
+      "text": "[[Body]] See: [[Körper]], [[Form des Körpers]], [[empty]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "dff2afe67f92d5e5",
+      "text": "[[Body-Inhabiting Spirit]] See: [[Spirit]] (within [[Body]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "202dde6b5a702722",
+      "text": "[[Bicycle for the Mind]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "30d964a3142799ff",
+      "text": "[[Writing Down Boolean Algebra]] See: [[Movement]]"
+    },
+    {
       "type": "reference",
       "id": "f08218b41fdab101",
       "site": "wiki.ralfbarkow.ch",
@@ -966,6 +986,136 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE paragraph\nSOURCE graph"
       },
       "date": 1713421287753
+    },
+    {
+      "type": "add",
+      "id": "d6340bcb5ebbf93b",
+      "item": {
+        "type": "paragraph",
+        "id": "d6340bcb5ebbf93b",
+        "text": "[[Body]] See: [[Körper]]"
+      },
+      "after": "ec00c32b5855de4d",
+      "date": 1719567265571
+    },
+    {
+      "type": "edit",
+      "id": "d6340bcb5ebbf93b",
+      "item": {
+        "type": "paragraph",
+        "id": "d6340bcb5ebbf93b",
+        "text": "[[Body]] See: [[Körper]], [[Form des Körpers]]"
+      },
+      "date": 1719567285506
+    },
+    {
+      "type": "edit",
+      "id": "d6340bcb5ebbf93b",
+      "item": {
+        "type": "paragraph",
+        "id": "d6340bcb5ebbf93b",
+        "text": "[[Body]] See: [[Körper]], [[Form des Körpers]], [[empty]]"
+      },
+      "date": 1719567312636
+    },
+    {
+      "type": "add",
+      "id": "202dde6b5a702722",
+      "item": {
+        "type": "paragraph",
+        "id": "202dde6b5a702722",
+        "text": "[[Bicycle for the Mind]]"
+      },
+      "after": "d6340bcb5ebbf93b",
+      "date": 1719763390152
+    },
+    {
+      "type": "add",
+      "id": "30d964a3142799ff",
+      "item": {
+        "type": "paragraph",
+        "id": "30d964a3142799ff",
+        "text": "[[Writing Down Boolean Algebra]]"
+      },
+      "after": "202dde6b5a702722",
+      "date": 1719846693235
+    },
+    {
+      "type": "add",
+      "id": "67bb6b98ddd0fc4d",
+      "item": {
+        "type": "paragraph",
+        "id": "67bb6b98ddd0fc4d",
+        "text": "– [[Movement]]"
+      },
+      "after": "30d964a3142799ff",
+      "date": 1719847684670
+    },
+    {
+      "type": "remove",
+      "id": "67bb6b98ddd0fc4d",
+      "date": 1719849786170
+    },
+    {
+      "type": "edit",
+      "id": "30d964a3142799ff",
+      "item": {
+        "type": "paragraph",
+        "id": "30d964a3142799ff",
+        "text": "[[Writing Down Boolean Algebra]] See: [[Movement]]"
+      },
+      "date": 1719849787508
+    },
+    {
+      "type": "edit",
+      "id": "d6340bcb5ebbf93b",
+      "item": {
+        "type": "paragraph",
+        "id": "d6340bcb5ebbf93b",
+        "text": "[[Body]] See: [[Körper]], [[Form des Körpers]], [[empty]], [[Body-Inhabiting Spirit]]"
+      },
+      "date": 1719923926435
+    },
+    {
+      "type": "edit",
+      "id": "d6340bcb5ebbf93b",
+      "item": {
+        "type": "paragraph",
+        "id": "d6340bcb5ebbf93b",
+        "text": "[[Body]] See: [[Körper]], [[Form des Körpers]], [[empty]]"
+      },
+      "date": 1719923942537
+    },
+    {
+      "type": "add",
+      "id": "dff2afe67f92d5e5",
+      "item": {
+        "type": "paragraph",
+        "id": "dff2afe67f92d5e5",
+        "text": "[[Body-Inhabiting Spirit]] See: [[Spirit]]"
+      },
+      "after": "d6340bcb5ebbf93b",
+      "date": 1719923950102
+    },
+    {
+      "type": "edit",
+      "id": "dff2afe67f92d5e5",
+      "item": {
+        "type": "paragraph",
+        "id": "dff2afe67f92d5e5",
+        "text": "[[Body-Inhabiting Spirit]] See: [[Spirit]] (within [[Body]]"
+      },
+      "date": 1719923971943
+    },
+    {
+      "type": "edit",
+      "id": "dff2afe67f92d5e5",
+      "item": {
+        "type": "paragraph",
+        "id": "dff2afe67f92d5e5",
+        "text": "[[Body-Inhabiting Spirit]] See: [[Spirit]] (within [[Body]])"
+      },
+      "date": 1719923975721
     }
   ]
 }

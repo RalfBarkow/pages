@@ -28,6 +28,11 @@
     },
     {
       "type": "paragraph",
+      "id": "812f02b160dcd82a",
+      "text": "[[Form des Körpers]]"
+    },
+    {
+      "type": "paragraph",
       "id": "a66dd91eb2d3436f",
       "text": "[[Fence after Fence]] (within [[Meta]]) See: [[Boundaries]]"
     },
@@ -210,6 +215,24 @@
       "type": "paragraph",
       "id": "2f11b6f08d9afb38",
       "text": "[[Favela]] (within [[Favela Chic]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "5eac05e2328457de",
+      "text": "[[Fast to Deep]] (Schnell bis in die Tiefe) See: [[Story Vector]]"
+    },
+    {
+      "type": "roster",
+      "id": "45d0887b265c5d6f",
+      "text": "thompson.fed.wiki"
+    },
+    {
+      "id": "f388b139df0ff7bc",
+      "type": "reference",
+      "site": "thompson.fed.wiki",
+      "slug": "fast-to-deep",
+      "title": "Fast to Deep",
+      "text": "We continue to explore how the wiki's new affordances allows us to quickly find [[Third-Order Meaning]] in our thinking."
     },
     {
       "type": "reference",
@@ -2149,6 +2172,152 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
       },
       "date": 1713867807489
+    },
+    {
+      "type": "add",
+      "id": "812f02b160dcd82a",
+      "item": {
+        "type": "paragraph",
+        "id": "812f02b160dcd82a",
+        "text": "[[Form des Körpers]]"
+      },
+      "after": "2c950ad8503be8a2",
+      "date": 1719392701161
+    },
+    {
+      "type": "add",
+      "id": "ef5aa2864b97a063",
+      "item": {
+        "type": "paragraph",
+        "id": "ef5aa2864b97a063",
+        "text": "thompson.fed.wiki"
+      },
+      "after": "2f11b6f08d9afb38",
+      "date": 1719754528494
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "45d0887b265c5d6f"
+      },
+      "id": "45d0887b265c5d6f",
+      "type": "add",
+      "after": "5c1363cd00f99e4d",
+      "date": 1719754530349
+    },
+    {
+      "type": "edit",
+      "id": "45d0887b265c5d6f",
+      "item": {
+        "type": "roster",
+        "id": "45d0887b265c5d6f",
+        "text": "thompson.fed.wiki"
+      },
+      "date": 1719754533560
+    },
+    {
+      "id": "45d0887b265c5d6f",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "01085049e7beb80b",
+        "8d72b7d1eeb777f7",
+        "9cec41b8a69e088c",
+        "2c950ad8503be8a2",
+        "812f02b160dcd82a",
+        "a66dd91eb2d3436f",
+        "a141a047d260d847",
+        "789c821796615a42",
+        "389e7ab3f7b14490",
+        "51a3fe3b752667d2",
+        "570de50b34e43639",
+        "dad87f8ad01df5a3",
+        "94a82cfba79d7073",
+        "44da2c7cd76807c1",
+        "62b83df55205b6b9",
+        "c8c99ca5565d3131",
+        "a716207802fce38f",
+        "fe9cba91fe33b809",
+        "84f1abdd48ed2caa",
+        "d48f6c803ffd4ae0",
+        "26332be736252099",
+        "d751a55508a2e466",
+        "f45ac44f018a53b1",
+        "c7041daf82ee35e9",
+        "c265a4be4b2b3a91",
+        "b7c4f062a79dd8d5",
+        "c244b47a9d3b3607",
+        "9ceea77cef6257f7",
+        "d05f561551462e9c",
+        "199c9feeb96f7ff8",
+        "dd16babf51c2c657",
+        "164ea317e1c14f12",
+        "90b4a4450e975461",
+        "a04b0cd896b91a37",
+        "f158d9e374ff6c88",
+        "3ae5454276a08fb5",
+        "cf1da3a02d437a8a",
+        "8510ce3ae2fcb825",
+        "800bb9c21aedc19d",
+        "a744e9f1ca803ea1",
+        "43ece73c8900a66e",
+        "2f11b6f08d9afb38",
+        "ef5aa2864b97a063",
+        "45d0887b265c5d6f",
+        "0af5bda13da74df8",
+        "5c1363cd00f99e4d"
+      ],
+      "date": 1719754554033
+    },
+    {
+      "type": "remove",
+      "id": "ef5aa2864b97a063",
+      "date": 1719754559944
+    },
+    {
+      "type": "add",
+      "id": "5eac05e2328457de",
+      "item": {
+        "type": "paragraph",
+        "id": "5eac05e2328457de",
+        "text": "[[Fast to Deep]]"
+      },
+      "after": "2f11b6f08d9afb38",
+      "date": 1719754576389
+    },
+    {
+      "id": "f388b139df0ff7bc",
+      "type": "add",
+      "item": {
+        "id": "f388b139df0ff7bc",
+        "type": "reference",
+        "site": "thompson.fed.wiki",
+        "slug": "fast-to-deep",
+        "title": "Fast to Deep",
+        "text": "We continue to explore how the wiki's new affordances allows us to quickly find [[Third-Order Meaning]] in our thinking."
+      },
+      "after": "45d0887b265c5d6f",
+      "date": 1719754588580
+    },
+    {
+      "type": "edit",
+      "id": "5eac05e2328457de",
+      "item": {
+        "type": "paragraph",
+        "id": "5eac05e2328457de",
+        "text": "[[Fast to Deep]] (Schnell bis in die Tiefe)"
+      },
+      "date": 1719754744625
+    },
+    {
+      "type": "edit",
+      "id": "5eac05e2328457de",
+      "item": {
+        "type": "paragraph",
+        "id": "5eac05e2328457de",
+        "text": "[[Fast to Deep]] (Schnell bis in die Tiefe) See: [[Story Vector]]"
+      },
+      "date": 1719754933571
     }
   ]
 }

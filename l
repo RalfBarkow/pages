@@ -143,6 +143,11 @@
     },
     {
       "type": "paragraph",
+      "id": "8c57797cfccecf10",
+      "text": "[[Literate Programming Essentials]]"
+    },
+    {
+      "type": "paragraph",
       "id": "c4908d36baa44f4b",
       "text": "[[Letter/Envelope Idiom]] (within [[Decorator Pattern]])"
     },
@@ -1569,6 +1574,17 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
       },
       "date": 1713866807343
+    },
+    {
+      "type": "add",
+      "id": "8c57797cfccecf10",
+      "item": {
+        "type": "paragraph",
+        "id": "8c57797cfccecf10",
+        "text": "[[Literate Programming Essentials]]"
+      },
+      "after": "e21fbefc26636a82",
+      "date": 1714041561007
     }
   ]
 }

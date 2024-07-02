@@ -62,6 +62,11 @@
       "text": "[[hdom-canvas]]"
     },
     {
+      "type": "paragraph",
+      "id": "6f8188bcb8be02a6",
+      "text": "[[halfway]] See: [[Semi-Edge Walk]]"
+    },
+    {
       "type": "reference",
       "id": "8eb41c9ad7a9c330",
       "site": "wiki.ralfbarkow.ch",
@@ -496,6 +501,27 @@
       },
       "after": "17d7beb331db501c",
       "date": 1713703169106
+    },
+    {
+      "type": "add",
+      "id": "6f8188bcb8be02a6",
+      "item": {
+        "type": "paragraph",
+        "id": "6f8188bcb8be02a6",
+        "text": "[[halfway]] See: "
+      },
+      "after": "dd3e8208e0a580cc",
+      "date": 1719239284770
+    },
+    {
+      "type": "edit",
+      "id": "6f8188bcb8be02a6",
+      "item": {
+        "type": "paragraph",
+        "id": "6f8188bcb8be02a6",
+        "text": "[[halfway]] See: [[Semi-Edge Walk]]"
+      },
+      "date": 1719239295859
     }
   ]
 }

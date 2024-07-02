@@ -291,6 +291,21 @@
       "text": "[[Multi Input Multi Output]] (within [[Unit Programming Language]])"
     },
     {
+      "type": "paragraph",
+      "id": "619779f7d6b7fa20",
+      "text": "[[Multicaster]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "ec401ec65ea9d029",
+      "text": "[[Move]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "c6efd523f46b7414",
+      "text": "=> [[Travellers Move Around]]"
+    },
+    {
       "type": "reference",
       "id": "32f74fe2229d86ed",
       "site": "wiki.ralfbarkow.ch",
@@ -2384,6 +2399,39 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
       },
       "date": 1713870253472
+    },
+    {
+      "type": "add",
+      "id": "619779f7d6b7fa20",
+      "item": {
+        "type": "paragraph",
+        "id": "619779f7d6b7fa20",
+        "text": "[[Multicaster]]"
+      },
+      "after": "8363099aea04025b",
+      "date": 1719658148438
+    },
+    {
+      "type": "add",
+      "id": "ec401ec65ea9d029",
+      "item": {
+        "type": "paragraph",
+        "id": "ec401ec65ea9d029",
+        "text": "[[Move]]"
+      },
+      "after": "619779f7d6b7fa20",
+      "date": 1719737735691
+    },
+    {
+      "type": "add",
+      "id": "c6efd523f46b7414",
+      "item": {
+        "type": "paragraph",
+        "id": "c6efd523f46b7414",
+        "text": "=> [[Travellers Move Around]]"
+      },
+      "after": "ec401ec65ea9d029",
+      "date": 1719737744504
     }
   ]
 }
