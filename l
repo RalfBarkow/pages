@@ -143,6 +143,11 @@
     },
     {
       "type": "paragraph",
+      "id": "8c57797cfccecf10",
+      "text": "[[Literate Programming Essentials]]"
+    },
+    {
+      "type": "paragraph",
       "id": "c4908d36baa44f4b",
       "text": "[[Letter/Envelope Idiom]] (within [[Decorator Pattern]])"
     },
@@ -177,6 +182,21 @@
       "text": "[[Never Knew Love Like This]]"
     },
     {
+      "type": "paragraph",
+      "id": "2cf8ca2c6f0f2d6e",
+      "text": "[[LangSec]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "ce4825d546ef65ae",
+      "text": "[[Laws of Form and Object Oriented Programming]] "
+    },
+    {
+      "type": "markdown",
+      "id": "3838d47a259f125d",
+      "text": "* [[Smalltalk Syntax in 7']]\n⇒ [[Live Object Programming in Pharo]]\n** [[Week 1: Welcome on Board and Syntax Discovery]]\n* [[How to find stuff in GT in 7']]\n* [[Leibniz in 4']]"
+    },
+    {
       "type": "reference",
       "id": "601b7d01ab9bfa4a",
       "site": "wiki.ralfbarkow.ch",
@@ -187,7 +207,7 @@
     {
       "type": "frame",
       "id": "8b25db354a5c635d",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -1507,9 +1527,43 @@
       "date": 1709297171231
     },
     {
-      "type": "fork",
-      "site": "wiki.ralfbarkow.ch",
-      "date": 1709298931676
+      "type": "add",
+      "id": "2cf8ca2c6f0f2d6e",
+      "item": {
+        "type": "paragraph",
+        "id": "2cf8ca2c6f0f2d6e",
+        "text": "[[LangSec]]"
+      },
+      "after": "af9a84df70ada3c7",
+      "date": 1709622243637
+    },
+    {
+      "id": "ce4825d546ef65ae",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "ce4825d546ef65ae",
+        "text": "[[Laws of Form and Object Oriented Programming]] "
+      },
+      "after": "2cf8ca2c6f0f2d6e",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713866764106
+    },
+    {
+      "id": "3838d47a259f125d",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "3838d47a259f125d",
+        "text": "* [[Smalltalk Syntax in 7']]\n⇒ [[Live Object Programming in Pharo]]\n** [[Week 1: Welcome on Board and Syntax Discovery]]\n* [[How to find stuff in GT in 7']]\n* [[Leibniz in 4']]"
+      },
+      "after": "ce4825d546ef65ae",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713866770656
     },
     {
       "type": "edit",
@@ -1517,9 +1571,20 @@
       "item": {
         "type": "frame",
         "id": "8b25db354a5c635d",
-        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
       },
-      "date": 1709298959439
+      "date": 1713866807343
+    },
+    {
+      "type": "add",
+      "id": "8c57797cfccecf10",
+      "item": {
+        "type": "paragraph",
+        "id": "8c57797cfccecf10",
+        "text": "[[Literate Programming Essentials]]"
+      },
+      "after": "e21fbefc26636a82",
+      "date": 1714041561007
     }
   ]
 }

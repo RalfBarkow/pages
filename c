@@ -399,6 +399,46 @@
       "text": "[[Cooperation]] (within [[Visitor as Schema]])"
     },
     {
+      "type": "paragraph",
+      "id": "93892d4cf62e33d3",
+      "text": "[[Cognition]] (within [[CajunBot]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "882ad58e8d272bcc",
+      "text": "[[Complexity]] (within [[Complexity in One Computer]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "59c80d9bc47ef34a",
+      "text": "[[Clerk]] (within [[Clojure]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "e3a7ca14e11d0af2",
+      "text": "[[Cave]]"
+    },
+    {
+      "type": "roster",
+      "id": "dc717a697e2bcf20",
+      "text": "cave.fed.wiki"
+    },
+    {
+      "type": "paragraph",
+      "id": "3668a93796f31987",
+      "text": "[[Coding the Colossal Cave]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "b901fc623a7b79a2",
+      "text": "[[Interpersonal Computing]]"
+    },
+    {
+      "type": "roster",
+      "id": "498167e8eee6b98d",
+      "text": "wiki.dbbs.co"
+    },
+    {
       "type": "reference",
       "id": "3e8af46ff3063eaa",
       "site": "wiki.ralfbarkow.ch",
@@ -409,7 +449,7 @@
     {
       "type": "frame",
       "id": "a29178af5d6036ea",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222"
     }
   ],
   "journal": [
@@ -3080,9 +3120,354 @@
       "date": 1710914909096
     },
     {
+      "type": "add",
+      "id": "93892d4cf62e33d3",
+      "item": {
+        "type": "paragraph",
+        "id": "93892d4cf62e33d3",
+        "text": "[[Cognition]] (within [[CajunBot]])"
+      },
+      "after": "161c03c48e9dc7cc",
+      "date": 1710917074900
+    },
+    {
+      "type": "add",
+      "id": "882ad58e8d272bcc",
+      "item": {
+        "type": "paragraph",
+        "id": "882ad58e8d272bcc",
+        "text": "[[Complexity]] (within)"
+      },
+      "after": "93892d4cf62e33d3",
+      "date": 1711613453026
+    },
+    {
+      "type": "edit",
+      "id": "882ad58e8d272bcc",
+      "item": {
+        "type": "paragraph",
+        "id": "882ad58e8d272bcc",
+        "text": "[[Complexity]] (within [[ Complexity in One Computer]])"
+      },
+      "date": 1711613465987
+    },
+    {
+      "type": "edit",
+      "id": "a29178af5d6036ea",
+      "item": {
+        "type": "frame",
+        "id": "a29178af5d6036ea",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222"
+      },
+      "date": 1712747927256
+    },
+    {
       "type": "fork",
       "site": "wiki.ralfbarkow.ch",
-      "date": 1710915046671
+      "date": 1712779918115
+    },
+    {
+      "type": "edit",
+      "id": "882ad58e8d272bcc",
+      "item": {
+        "type": "paragraph",
+        "id": "882ad58e8d272bcc",
+        "text": "[[Complexity]] (within [[Complexity in One Computer]])"
+      },
+      "date": 1712779927668
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1712779984984
+    },
+    {
+      "type": "add",
+      "id": "59c80d9bc47ef34a",
+      "item": {
+        "type": "paragraph",
+        "id": "59c80d9bc47ef34a",
+        "text": "[[Clerk]] (within [[Clojure]])"
+      },
+      "after": "882ad58e8d272bcc",
+      "date": 1713973728173
+    },
+    {
+      "type": "add",
+      "id": "e3a7ca14e11d0af2",
+      "item": {
+        "type": "paragraph",
+        "id": "e3a7ca14e11d0af2",
+        "text": "[[Cave]]"
+      },
+      "after": "59c80d9bc47ef34a",
+      "date": 1719566534361
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "dc717a697e2bcf20"
+      },
+      "id": "dc717a697e2bcf20",
+      "type": "add",
+      "after": "a29178af5d6036ea",
+      "date": 1719566551782
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3668a93796f31987"
+      },
+      "id": "3668a93796f31987",
+      "type": "add",
+      "after": "dc717a697e2bcf20",
+      "date": 1719566554289
+    },
+    {
+      "type": "edit",
+      "id": "dc717a697e2bcf20",
+      "item": {
+        "type": "roster",
+        "id": "dc717a697e2bcf20",
+        "text": "cave.fed.wiki"
+      },
+      "date": 1719566565402
+    },
+    {
+      "id": "dc717a697e2bcf20",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "1fe5377a5cc50eb3",
+        "a78482e3342a8184",
+        "299d7e431980dad6",
+        "d339e89b626f84fb",
+        "895fdbf166ab77fc",
+        "abb01936bfcb020c",
+        "473ff83b9ce908dc",
+        "0d3e68036fecfe91",
+        "57c5cfb5dc1076b4",
+        "e637fb5c90a3412c",
+        "ae02940a42c52efe",
+        "9821a6cc38ee5bb6",
+        "b6a1144d476019d6",
+        "7632ef5529566b44",
+        "c8b16f19e99ba653",
+        "6f4e7759152b7222",
+        "0de225d2550c9e65",
+        "c3fd162cce23ec9f",
+        "7b3bd6750b999478",
+        "9bb87aeced97be24",
+        "ca59b4b63c24f4c5",
+        "d6748a46f610bb6c",
+        "e2fa77a2e744bc87",
+        "89dd228fa137404d",
+        "ae13488d22a2f182",
+        "683b05236b0df42c",
+        "22e906d9ff11ff88",
+        "f9d237f83f2afdd5",
+        "c21ff43a12c8585f",
+        "cbd8848d9a104a13",
+        "6914996c38805e1b",
+        "9d6bc58cc5cf469f",
+        "c8edcb9290d06f15",
+        "e0ca33b3ddc19f53",
+        "fac1a911a90fa8bd",
+        "6097469210e98775",
+        "299fddd5c6d9c40d",
+        "10bd8a463331c497",
+        "08db8e56070faaff",
+        "77e1b688bd562b03",
+        "59ed434949ba5d22",
+        "f127c931da50b792",
+        "57fee224b956e7e1",
+        "4d42756cdc206a39",
+        "1d34fec3395b7eef",
+        "d1a1f2df8bfbc824",
+        "449589b427766dbc",
+        "b5f798763ad800d6",
+        "84ce6ccd0fcef8da",
+        "c040572f4ab3b6db",
+        "1f5724c054dcd919",
+        "131845680eb10f3b",
+        "96da6e50c93b5481",
+        "c0f6913258154f3c",
+        "a62b697e5bc2f6c2",
+        "0e1f351e443e7cd1",
+        "7908fbd99e5754e9",
+        "aa6a264100c85bd8",
+        "c0e20646285c8f4e",
+        "b64e5dd338fd6b73",
+        "97708c6e57a71fb6",
+        "d1a11f4c621daef4",
+        "b3132b943273d66c",
+        "46461b5830e98c77",
+        "45e7b8759ea997af",
+        "777b62468b5fdc51",
+        "4b4c3fde03174b43",
+        "25f711620a276c23",
+        "8f8d689d98ccb337",
+        "96023f6114359efb",
+        "2af7fa994ce2f32c",
+        "ab4754930471967d",
+        "dcef1a5e2baca6be",
+        "e803f5d780a2475d",
+        "d66a7eb1ca01592f",
+        "0b494f77440aa0e7",
+        "983f998685e48c77",
+        "161c03c48e9dc7cc",
+        "93892d4cf62e33d3",
+        "882ad58e8d272bcc",
+        "59c80d9bc47ef34a",
+        "e3a7ca14e11d0af2",
+        "dc717a697e2bcf20",
+        "3e8af46ff3063eaa",
+        "a29178af5d6036ea",
+        "3668a93796f31987"
+      ],
+      "date": 1719566569493
+    },
+    {
+      "type": "edit",
+      "id": "3668a93796f31987",
+      "item": {
+        "type": "paragraph",
+        "id": "3668a93796f31987",
+        "text": "Coding the Colossal Cave"
+      },
+      "date": 1719566588420
+    },
+    {
+      "id": "3668a93796f31987",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "1fe5377a5cc50eb3",
+        "a78482e3342a8184",
+        "299d7e431980dad6",
+        "d339e89b626f84fb",
+        "895fdbf166ab77fc",
+        "abb01936bfcb020c",
+        "473ff83b9ce908dc",
+        "0d3e68036fecfe91",
+        "57c5cfb5dc1076b4",
+        "e637fb5c90a3412c",
+        "ae02940a42c52efe",
+        "9821a6cc38ee5bb6",
+        "b6a1144d476019d6",
+        "7632ef5529566b44",
+        "c8b16f19e99ba653",
+        "6f4e7759152b7222",
+        "0de225d2550c9e65",
+        "c3fd162cce23ec9f",
+        "7b3bd6750b999478",
+        "9bb87aeced97be24",
+        "ca59b4b63c24f4c5",
+        "d6748a46f610bb6c",
+        "e2fa77a2e744bc87",
+        "89dd228fa137404d",
+        "ae13488d22a2f182",
+        "683b05236b0df42c",
+        "22e906d9ff11ff88",
+        "f9d237f83f2afdd5",
+        "c21ff43a12c8585f",
+        "cbd8848d9a104a13",
+        "6914996c38805e1b",
+        "9d6bc58cc5cf469f",
+        "c8edcb9290d06f15",
+        "e0ca33b3ddc19f53",
+        "fac1a911a90fa8bd",
+        "6097469210e98775",
+        "299fddd5c6d9c40d",
+        "10bd8a463331c497",
+        "08db8e56070faaff",
+        "77e1b688bd562b03",
+        "59ed434949ba5d22",
+        "f127c931da50b792",
+        "57fee224b956e7e1",
+        "4d42756cdc206a39",
+        "1d34fec3395b7eef",
+        "d1a1f2df8bfbc824",
+        "449589b427766dbc",
+        "b5f798763ad800d6",
+        "84ce6ccd0fcef8da",
+        "c040572f4ab3b6db",
+        "1f5724c054dcd919",
+        "131845680eb10f3b",
+        "96da6e50c93b5481",
+        "c0f6913258154f3c",
+        "a62b697e5bc2f6c2",
+        "0e1f351e443e7cd1",
+        "7908fbd99e5754e9",
+        "aa6a264100c85bd8",
+        "c0e20646285c8f4e",
+        "b64e5dd338fd6b73",
+        "97708c6e57a71fb6",
+        "d1a11f4c621daef4",
+        "b3132b943273d66c",
+        "46461b5830e98c77",
+        "45e7b8759ea997af",
+        "777b62468b5fdc51",
+        "4b4c3fde03174b43",
+        "25f711620a276c23",
+        "8f8d689d98ccb337",
+        "96023f6114359efb",
+        "2af7fa994ce2f32c",
+        "ab4754930471967d",
+        "dcef1a5e2baca6be",
+        "e803f5d780a2475d",
+        "d66a7eb1ca01592f",
+        "0b494f77440aa0e7",
+        "983f998685e48c77",
+        "161c03c48e9dc7cc",
+        "93892d4cf62e33d3",
+        "882ad58e8d272bcc",
+        "59c80d9bc47ef34a",
+        "e3a7ca14e11d0af2",
+        "dc717a697e2bcf20",
+        "3668a93796f31987",
+        "3e8af46ff3063eaa",
+        "a29178af5d6036ea"
+      ],
+      "date": 1719566592665
+    },
+    {
+      "type": "edit",
+      "id": "3668a93796f31987",
+      "item": {
+        "type": "paragraph",
+        "id": "3668a93796f31987",
+        "text": "[[Coding the Colossal Cave]]"
+      },
+      "date": 1719566600951
+    },
+    {
+      "id": "b901fc623a7b79a2",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "b901fc623a7b79a2",
+        "text": "[[Interpersonal Computing]]"
+      },
+      "after": "3668a93796f31987",
+      "attribution": {
+        "page": "I"
+      },
+      "date": 1719763270877
+    },
+    {
+      "id": "498167e8eee6b98d",
+      "type": "add",
+      "item": {
+        "type": "roster",
+        "id": "498167e8eee6b98d",
+        "text": "wiki.dbbs.co"
+      },
+      "after": "b901fc623a7b79a2",
+      "attribution": {
+        "page": "I"
+      },
+      "date": 1719763276492
     }
   ]
 }

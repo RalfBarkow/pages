@@ -13,14 +13,6 @@
     },
     {
       "type": "reference",
-      "id": "de767023c88d2cb2",
-      "site": "localhost:3000",
-      "slug": "monkey",
-      "title": "Monkey",
-      "text": "@ localhost"
-    },
-    {
-      "type": "reference",
       "id": "674e954315a254cb",
       "site": "wiki.ralfbarkow.ch",
       "slug": "monkey",
@@ -30,7 +22,7 @@
     {
       "type": "frame",
       "id": "3740343908300b7c",
-      "text": "http://localhost:3000/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 300\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
     }
   ],
   "journal": [
@@ -111,9 +103,14 @@
       "date": 1709196687023
     },
     {
-      "type": "fork",
-      "site": "wiki.ralfbarkow.ch",
-      "date": 1709196906061
+      "type": "edit",
+      "id": "3740343908300b7c",
+      "item": {
+        "type": "frame",
+        "id": "3740343908300b7c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 55\nSOURCE graph"
+      },
+      "date": 1709215805978
     },
     {
       "type": "edit",
@@ -121,26 +118,9 @@
       "item": {
         "type": "frame",
         "id": "3740343908300b7c",
-        "text": "http://localhost:3000/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 300\nSOURCE graph"
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
       },
-      "date": 1709196945229
-    },
-    {
-      "id": "de767023c88d2cb2",
-      "type": "add",
-      "item": {
-        "type": "reference",
-        "id": "de767023c88d2cb2",
-        "site": "localhost:3000",
-        "slug": "monkey",
-        "title": "Monkey",
-        "text": "@ localhost"
-      },
-      "after": "d89cf6f3697938d5",
-      "attribution": {
-        "page": "scratch"
-      },
-      "date": 1709197499271
+      "date": 1709293362385
     }
   ]
 }

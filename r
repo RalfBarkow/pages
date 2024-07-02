@@ -57,6 +57,11 @@
       "text": "[[Risk Analysis]] (within [[Technical Debt]])"
     },
     {
+      "type": "markdown",
+      "id": "f44c907e53a63328",
+      "text": "* [[Federation at Risk in 7']]"
+    },
+    {
       "type": "paragraph",
       "id": "2dca238d90104476",
       "text": "Research on intelligent tutoring systems (ITS) (within [[Capture the Learning]]) See: [[r.LearningAnalytics.Martin.Sherin]]"
@@ -117,6 +122,16 @@
       "text": "[[Ruliology]] See: [[Ruliad]]"
     },
     {
+      "type": "paragraph",
+      "id": "01680176f6e7cb54",
+      "text": "[[rdom-forms]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "05a6c5aec7a6f32e",
+      "text": "[[Islands in the River]]"
+    },
+    {
       "type": "reference",
       "id": "1723ea75115e00fb",
       "site": "wiki.ralfbarkow.ch",
@@ -127,7 +142,7 @@
     {
       "type": "frame",
       "id": "4ecf3e5913a5afbb",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -884,9 +899,73 @@
       "date": 1709707572154
     },
     {
-      "type": "fork",
-      "site": "wiki.ralfbarkow.ch",
-      "date": 1709713708527
+      "type": "add",
+      "id": "01680176f6e7cb54",
+      "item": {
+        "type": "paragraph",
+        "id": "01680176f6e7cb54",
+        "text": "[[rdom-forms]]"
+      },
+      "after": "2665ce43d7e684d9",
+      "date": 1713856440576
+    },
+    {
+      "type": "edit",
+      "id": "4ecf3e5913a5afbb",
+      "item": {
+        "type": "frame",
+        "id": "4ecf3e5913a5afbb",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+      },
+      "date": 1713856478471
+    },
+    {
+      "type": "edit",
+      "id": "4ecf3e5913a5afbb",
+      "item": {
+        "type": "frame",
+        "id": "4ecf3e5913a5afbb",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE paragraph\nSOURCE graph"
+      },
+      "date": 1713856510492
+    },
+    {
+      "id": "05a6c5aec7a6f32e",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "05a6c5aec7a6f32e",
+        "text": "[[Islands in the River]]"
+      },
+      "after": "01680176f6e7cb54",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713867157650
+    },
+    {
+      "id": "f44c907e53a63328",
+      "type": "add",
+      "item": {
+        "type": "markdown",
+        "id": "f44c907e53a63328",
+        "text": "* [[Federation at Risk in 7']]"
+      },
+      "after": "8c6c571e91403dd6",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713867643346
+    },
+    {
+      "type": "edit",
+      "id": "4ecf3e5913a5afbb",
+      "item": {
+        "type": "frame",
+        "id": "4ecf3e5913a5afbb",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1713869690163
     }
   ]
 }

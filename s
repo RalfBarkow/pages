@@ -18,11 +18,6 @@
     },
     {
       "type": "paragraph",
-      "id": "6d36d88e598c9690",
-      "text": "[[Smalltalk Syntax in 7']]"
-    },
-    {
-      "type": "paragraph",
       "id": "3442e4cc70ce6337",
       "text": "[[separate]] (within [[Therefore]])"
     },
@@ -82,7 +77,7 @@
       "text": "- [[Systems Theory 1.0]]\n- [[Systems Theory 2.0]]\n- **[[Smalltalk]]** is an object system, rather than a [[Language]]. See: [[Smalltalk Is the Car]]"
     },
     {
-      "type": "paragraph",
+      "type": "markdown",
       "id": "bad43f50bd0dc12a",
       "text": "**[[Smalltalk]]** as [[Notation]] See: [[Objects, Classes, and Constructors, Smalltalk Style]], [[Notation]] for creating [[Language]]s"
     },
@@ -90,6 +85,16 @@
       "type": "paragraph",
       "id": "9fe6b3bfcc041c40",
       "text": "[[Smalltalk Class/Metaclass Kernel]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6d36d88e598c9690",
+      "text": "[[Smalltalk Syntax in 7']]"
+    },
+    {
+      "type": "paragraph",
+      "id": "513bac397f78e1f1",
+      "text": "[[A Mentoring Course on Smalltalk]]"
     },
     {
       "type": "paragraph",
@@ -114,7 +119,17 @@
     {
       "type": "markdown",
       "id": "4114c679e16c47ba",
-      "text": "> In a memory game players need to find pairs of similar [[Card]]s. In each round a player turns over two cards at a time. If the two cards show the same symbol they are [[remove]]d [⇒ [[How to Delete Structure]]] and the player gets a point. If not, they are both [[flip]]ped. [⇒ [[Flip Operation]]]"
+      "text": "> In a memory game players need to find pairs of similar [[Card]]s. In each round a player turns over two cards at a time. If the two cards show the [[same]] symbol they are [[remove]]d [⇒ [[How to Delete Structure]]] and the player gets a point. If not, they are both [[flip]]ped. [⇒ [[Flip Operation]]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "80f06ec3d308e468",
+      "text": "=> [[same]], 6199  See: [[Two Sheets of Paper]], [[Island Time]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "be607988855c0927",
+      "text": "=> [[Same or Newer]]"
     },
     {
       "type": "paragraph",
@@ -273,6 +288,11 @@
     },
     {
       "type": "paragraph",
+      "id": "b12be9c7adad391a",
+      "text": "[[How to Delete Structure]]"
+    },
+    {
+      "type": "paragraph",
       "id": "42cb20274f449f0f",
       "text": "[[Study The Source Witha Debugger]] See: [[Diagram Debugger]]"
     },
@@ -412,12 +432,34 @@
       "text": "[[Sodium]] (within [[Functional Reactive Programming]])"
     },
     {
-      "type": "reference",
-      "id": "b0c2bc47e80bbc6a",
-      "site": "localhost:3000",
-      "slug": "s",
-      "title": "S",
-      "text": "@ localhost"
+      "type": "paragraph",
+      "id": "398868cc4e236eb0",
+      "text": "[[Social]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "8fc8fff7352ab660",
+      "text": "[[Step]], Zettel: 2000 See: [[Step as Distinction]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "4715c7a0b99094d8",
+      "text": "[[SVG]] See: [[Drawing Automation]]"
+    },
+    {
+      "type": "roster",
+      "id": "49b4387159fdc702",
+      "text": "found.ward.fed.wiki"
+    },
+    {
+      "type": "paragraph",
+      "id": "57a8e76fd86414be",
+      "text": "[[Morphing Arbitrary Paths in SVG]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "4c20c938d70cc401",
+      "text": "[[Solarpunk Explained]]"
     },
     {
       "type": "reference",
@@ -430,7 +472,7 @@
     {
       "type": "frame",
       "id": "92d9d7c2ee7a11b7",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE paragraph\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -3615,18 +3657,23 @@
       "date": 1709987843883
     },
     {
-      "type": "fork",
-      "site": "wiki.ralfbarkow.ch",
-      "date": 1709988357765
+      "type": "add",
+      "id": "398868cc4e236eb0",
+      "item": {
+        "type": "paragraph",
+        "id": "398868cc4e236eb0",
+        "text": "[[Social]]"
+      },
+      "after": "a744e9f1ca803ea1",
+      "date": 1712557260590
     },
     {
-      "id": "c35060e66fad8705",
+      "id": "6d36d88e598c9690",
       "type": "move",
       "order": [
         "1dbcb05a56540609",
         "f207d118044203eb",
         "2092a3b420d7d305",
-        "6d36d88e598c9690",
         "3442e4cc70ce6337",
         "bdb9d5f441b1a9ff",
         "5d5ff9e6c8b16c75",
@@ -3641,6 +3688,7 @@
         "5cdcdcfc93510d01",
         "bad43f50bd0dc12a",
         "9fe6b3bfcc041c40",
+        "6d36d88e598c9690",
         "3bf7d72dbb5196e8",
         "0037c66e202ac6ed",
         "12293fe24153dbea",
@@ -3705,41 +3753,49 @@
         "6a1ce5fc8f2a25e9",
         "265f5591dabdc750",
         "a744e9f1ca803ea1",
-        "c35060e66fad8705",
+        "398868cc4e236eb0",
         "8c2cd410bbc45f08",
         "92d9d7c2ee7a11b7"
       ],
-      "date": 1709990471774,
-      "error": {
-        "type": "error",
-        "msg": "Internal Server Error",
-        "response": "Server Ignoring move. Try reload."
-      }
+      "date": 1713866964750
     },
     {
-      "type": "remove",
-      "date": 1709990554105
+      "type": "edit",
+      "id": "bad43f50bd0dc12a",
+      "item": {
+        "type": "markdown",
+        "id": "bad43f50bd0dc12a",
+        "text": "**[[Smalltalk]]** as [[Notation]] See: [[Objects, Classes, and Constructors, Smalltalk Style]], [[Notation]] for creating [[Language]]s"
+      },
+      "date": 1713866974670
     },
     {
-      "type": "fork",
-      "date": 1709990558532
-    },
-    {
-      "id": "b0c2bc47e80bbc6a",
+      "id": "513bac397f78e1f1",
       "type": "add",
       "item": {
-        "type": "reference",
-        "id": "b0c2bc47e80bbc6a",
-        "site": "localhost:3000",
-        "slug": "s",
-        "title": "S",
-        "text": "@ localhost"
+        "type": "paragraph",
+        "id": "513bac397f78e1f1",
+        "text": "[[A Mentoring Course on Smalltalk]]"
       },
-      "after": "a744e9f1ca803ea1",
+      "after": "6d36d88e598c9690",
       "attribution": {
-        "page": "scratch"
+        "page": "Welcome Visitors"
       },
-      "date": 1709990631470
+      "date": 1713866992937
+    },
+    {
+      "id": "b12be9c7adad391a",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "b12be9c7adad391a",
+        "text": "[[How to Delete Structure]]"
+      },
+      "after": "9708710e8066a796",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713867123593
     },
     {
       "type": "edit",
@@ -3747,9 +3803,394 @@
       "item": {
         "type": "frame",
         "id": "92d9d7c2ee7a11b7",
-        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE paragraph\nSOURCE graph"
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
       },
-      "date": 1709990655807
+      "date": 1713869578896
+    },
+    {
+      "type": "edit",
+      "id": "4114c679e16c47ba",
+      "item": {
+        "type": "markdown",
+        "id": "4114c679e16c47ba",
+        "text": "> In a memory game players need to find pairs of similar [[Card]]s. In each round a player turns over two cards at a time. If the two cards show the [[same]] symbol they are [[remove]]d [⇒ [[How to Delete Structure]]] and the player gets a point. If not, they are both [[flip]]ped. [⇒ [[Flip Operation]]]"
+      },
+      "date": 1718135422653
+    },
+    {
+      "id": "80f06ec3d308e468",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "80f06ec3d308e468",
+        "text": "=> [[same]] See: [[Two Sheets of Paper]]"
+      },
+      "after": "4114c679e16c47ba",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1718135841105
+    },
+    {
+      "type": "edit",
+      "id": "80f06ec3d308e468",
+      "item": {
+        "type": "paragraph",
+        "id": "80f06ec3d308e468",
+        "text": "=> [[same]],  See: [[Two Sheets of Paper]]"
+      },
+      "date": 1718135886937
+    },
+    {
+      "type": "edit",
+      "id": "80f06ec3d308e468",
+      "item": {
+        "type": "paragraph",
+        "id": "80f06ec3d308e468",
+        "text": "=> [[same]], 6199  See: [[Two Sheets of Paper]]"
+      },
+      "date": 1718135905335
+    },
+    {
+      "type": "add",
+      "id": "8fc8fff7352ab660",
+      "item": {
+        "type": "paragraph",
+        "id": "8fc8fff7352ab660",
+        "text": "[[Step]], Zettel: 2000"
+      },
+      "after": "398868cc4e236eb0",
+      "date": 1719133525386,
+      "error": {
+        "type": "error",
+        "msg": "",
+        "response": "Forbidden"
+      }
+    },
+    {
+      "type": "fork",
+      "date": 1719133555000
+    },
+    {
+      "type": "edit",
+      "id": "8fc8fff7352ab660",
+      "item": {
+        "type": "paragraph",
+        "id": "8fc8fff7352ab660",
+        "text": "[[Step]], Zettel: 2000 See: [[Step as Distinction]]"
+      },
+      "date": 1719133702962
+    },
+    {
+      "type": "add",
+      "id": "4715c7a0b99094d8",
+      "item": {
+        "type": "paragraph",
+        "id": "4715c7a0b99094d8",
+        "text": "[[SVG]]"
+      },
+      "after": "8fc8fff7352ab660",
+      "date": 1719566939573
+    },
+    {
+      "type": "edit",
+      "id": "4715c7a0b99094d8",
+      "item": {
+        "type": "paragraph",
+        "id": "4715c7a0b99094d8",
+        "text": "[[SVG]] See: [[Drawing Automation]]"
+      },
+      "date": 1719566952730
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "49b4387159fdc702"
+      },
+      "id": "49b4387159fdc702",
+      "type": "add",
+      "after": "92d9d7c2ee7a11b7",
+      "date": 1719566952766
+    },
+    {
+      "type": "edit",
+      "id": "49b4387159fdc702",
+      "item": {
+        "type": "roster",
+        "id": "49b4387159fdc702",
+        "text": "found.ward.fed.wiki/"
+      },
+      "date": 1719566971955
+    },
+    {
+      "id": "49b4387159fdc702",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "f207d118044203eb",
+        "2092a3b420d7d305",
+        "3442e4cc70ce6337",
+        "bdb9d5f441b1a9ff",
+        "5d5ff9e6c8b16c75",
+        "1cc466b2ea9de865",
+        "24491bec53b2cb4b",
+        "caafe88bea5b33e7",
+        "c646d43d03705f1e",
+        "8452123151a1f40b",
+        "7ffd35aeb81b2947",
+        "cec4aa683ee53d23",
+        "f868c992286d946e",
+        "5cdcdcfc93510d01",
+        "bad43f50bd0dc12a",
+        "9fe6b3bfcc041c40",
+        "6d36d88e598c9690",
+        "513bac397f78e1f1",
+        "3bf7d72dbb5196e8",
+        "0037c66e202ac6ed",
+        "12293fe24153dbea",
+        "f01f09f9110c95a2",
+        "4114c679e16c47ba",
+        "80f06ec3d308e468",
+        "194d84e6c03eb421",
+        "03ebfa18d5502930",
+        "8f3596088309d713",
+        "e73969c5d6819535",
+        "71c1eada140cdefe7f86201fb4fcbe5d",
+        "cfdd3472da56069b767648b5f36e8eab",
+        "205e6096e65d0872680e6e89e3b4a359",
+        "089cb31771224797116880ba80ab1f59",
+        "89a629b36a8f9339345aadff047bcb9f",
+        "a6ae0c529d9974656bdec3ef07626de0",
+        "ca6ee8104ca420a54efa5288ff49cb4e",
+        "dae6d36c64e7c29a",
+        "b903bc1e3c169e3a",
+        "2e82c1addc650521",
+        "066cf6f8cae48a48",
+        "b37816a2832e2e7d",
+        "a701471089e33cc4",
+        "8daed2f23561408e",
+        "e7e3fc35f0e4e546",
+        "90b49303bf974876",
+        "9e55e47a36d8d6be",
+        "2e4c6cdd97fd6aaa",
+        "d233a91e2cf24244",
+        "ab8eb5820d2f8a83",
+        "9d05f8b76754f3e5",
+        "979f0dbdbfa75db3",
+        "19e37110ab53df81",
+        "86e15f06011fd0e2",
+        "da373c3defc960c3",
+        "0c21f9d14c2bca90",
+        "9708710e8066a796",
+        "b12be9c7adad391a",
+        "42cb20274f449f0f",
+        "8a3c76aa4aded2c9",
+        "0b8bea17e52ab203",
+        "2f96fb4104128cce",
+        "bf986153a816257d",
+        "54ce2cd421720f75",
+        "c0e773db126c7181",
+        "2d89b1fd9df1cf84",
+        "e44940541a37faaf",
+        "5a36613b9f8af892",
+        "d8787cf2346e0d38",
+        "9942edfcf66fc683",
+        "5188014f87b8d8dd",
+        "cdb289dc78f16f1a",
+        "ba02ead9ada0d12c",
+        "5331896a74df1672",
+        "57c5cfb5dc1076b4",
+        "285caaf0c5a308bf",
+        "d49977cd1734d8dc",
+        "80e20c68374c4a2e",
+        "f6716b0905576ebb",
+        "a44dcd3c5b7ea446",
+        "8fe38d2c7152e066",
+        "bc96cb7c1892038a",
+        "d8ebd180264d303f",
+        "6a1ce5fc8f2a25e9",
+        "265f5591dabdc750",
+        "a744e9f1ca803ea1",
+        "398868cc4e236eb0",
+        "8fc8fff7352ab660",
+        "4715c7a0b99094d8",
+        "49b4387159fdc702",
+        "8c2cd410bbc45f08",
+        "92d9d7c2ee7a11b7"
+      ],
+      "date": 1719566977512
+    },
+    {
+      "type": "add",
+      "id": "57a8e76fd86414be",
+      "item": {
+        "type": "paragraph",
+        "id": "57a8e76fd86414be",
+        "text": "[[Morphing Arbitrary Paths in SVG]]"
+      },
+      "after": "4715c7a0b99094d8",
+      "date": 1719566994537
+    },
+    {
+      "id": "57a8e76fd86414be",
+      "type": "move",
+      "order": [
+        "1dbcb05a56540609",
+        "f207d118044203eb",
+        "2092a3b420d7d305",
+        "3442e4cc70ce6337",
+        "bdb9d5f441b1a9ff",
+        "5d5ff9e6c8b16c75",
+        "1cc466b2ea9de865",
+        "24491bec53b2cb4b",
+        "caafe88bea5b33e7",
+        "c646d43d03705f1e",
+        "8452123151a1f40b",
+        "7ffd35aeb81b2947",
+        "cec4aa683ee53d23",
+        "f868c992286d946e",
+        "5cdcdcfc93510d01",
+        "bad43f50bd0dc12a",
+        "9fe6b3bfcc041c40",
+        "6d36d88e598c9690",
+        "513bac397f78e1f1",
+        "3bf7d72dbb5196e8",
+        "0037c66e202ac6ed",
+        "12293fe24153dbea",
+        "f01f09f9110c95a2",
+        "4114c679e16c47ba",
+        "80f06ec3d308e468",
+        "194d84e6c03eb421",
+        "03ebfa18d5502930",
+        "8f3596088309d713",
+        "e73969c5d6819535",
+        "71c1eada140cdefe7f86201fb4fcbe5d",
+        "cfdd3472da56069b767648b5f36e8eab",
+        "205e6096e65d0872680e6e89e3b4a359",
+        "089cb31771224797116880ba80ab1f59",
+        "89a629b36a8f9339345aadff047bcb9f",
+        "a6ae0c529d9974656bdec3ef07626de0",
+        "ca6ee8104ca420a54efa5288ff49cb4e",
+        "dae6d36c64e7c29a",
+        "b903bc1e3c169e3a",
+        "2e82c1addc650521",
+        "066cf6f8cae48a48",
+        "b37816a2832e2e7d",
+        "a701471089e33cc4",
+        "8daed2f23561408e",
+        "e7e3fc35f0e4e546",
+        "90b49303bf974876",
+        "9e55e47a36d8d6be",
+        "2e4c6cdd97fd6aaa",
+        "d233a91e2cf24244",
+        "ab8eb5820d2f8a83",
+        "9d05f8b76754f3e5",
+        "979f0dbdbfa75db3",
+        "19e37110ab53df81",
+        "86e15f06011fd0e2",
+        "da373c3defc960c3",
+        "0c21f9d14c2bca90",
+        "9708710e8066a796",
+        "b12be9c7adad391a",
+        "42cb20274f449f0f",
+        "8a3c76aa4aded2c9",
+        "0b8bea17e52ab203",
+        "2f96fb4104128cce",
+        "bf986153a816257d",
+        "54ce2cd421720f75",
+        "c0e773db126c7181",
+        "2d89b1fd9df1cf84",
+        "e44940541a37faaf",
+        "5a36613b9f8af892",
+        "d8787cf2346e0d38",
+        "9942edfcf66fc683",
+        "5188014f87b8d8dd",
+        "cdb289dc78f16f1a",
+        "ba02ead9ada0d12c",
+        "5331896a74df1672",
+        "57c5cfb5dc1076b4",
+        "285caaf0c5a308bf",
+        "d49977cd1734d8dc",
+        "80e20c68374c4a2e",
+        "f6716b0905576ebb",
+        "a44dcd3c5b7ea446",
+        "8fe38d2c7152e066",
+        "bc96cb7c1892038a",
+        "d8ebd180264d303f",
+        "6a1ce5fc8f2a25e9",
+        "265f5591dabdc750",
+        "a744e9f1ca803ea1",
+        "398868cc4e236eb0",
+        "8fc8fff7352ab660",
+        "4715c7a0b99094d8",
+        "49b4387159fdc702",
+        "57a8e76fd86414be",
+        "8c2cd410bbc45f08",
+        "92d9d7c2ee7a11b7"
+      ],
+      "date": 1719566996351
+    },
+    {
+      "type": "add",
+      "id": "4c20c938d70cc401",
+      "item": {
+        "type": "paragraph",
+        "id": "4c20c938d70cc401",
+        "text": "Solarpunk Explained"
+      },
+      "after": "57a8e76fd86414be",
+      "date": 1719650948935
+    },
+    {
+      "type": "edit",
+      "id": "49b4387159fdc702",
+      "item": {
+        "type": "roster",
+        "id": "49b4387159fdc702",
+        "text": "found.ward.fed.wiki"
+      },
+      "date": 1719650952518
+    },
+    {
+      "type": "edit",
+      "id": "4c20c938d70cc401",
+      "item": {
+        "type": "paragraph",
+        "id": "4c20c938d70cc401",
+        "text": "[[Solarpunk Explained]]"
+      },
+      "date": 1719650971677
+    },
+    {
+      "type": "edit",
+      "id": "80f06ec3d308e468",
+      "item": {
+        "type": "paragraph",
+        "id": "80f06ec3d308e468",
+        "text": "=> [[same]], 6199  See: [[Two Sheets of Paper]], [[ Island Time]]"
+      },
+      "date": 1719738337648
+    },
+    {
+      "type": "edit",
+      "id": "80f06ec3d308e468",
+      "item": {
+        "type": "paragraph",
+        "id": "80f06ec3d308e468",
+        "text": "=> [[same]], 6199  See: [[Two Sheets of Paper]], [[Island Time]]"
+      },
+      "date": 1719738391819
+    },
+    {
+      "type": "add",
+      "id": "be607988855c0927",
+      "item": {
+        "type": "paragraph",
+        "id": "be607988855c0927",
+        "text": "=> [[Same or Newer]]"
+      },
+      "after": "80f06ec3d308e468",
+      "date": 1719905008647
     }
   ]
 }

@@ -1,0 +1,412 @@
+{
+  "title": "Smalltalk Syntax",
+  "story": [
+    {
+      "type": "html",
+      "text": "Smalltalk syntax is enjoyable for some similar reasons to [[Python Syntax]].",
+      "id": "97ff75974579dcb72191a56e6ee7d995"
+    },
+    {
+      "type": "html",
+      "text": "\nSmalltalk is completely message based.  The <b>only</b> way to interact with an object is to send messages to it.  So a good place to start is [[Smalltalk Message Rules]].",
+      "id": "4f0810898fd298ab24fcafb02ba72b75"
+    },
+    {
+      "type": "html",
+      "text": "<b>Braces:</b> Braces are needed, but for different reasons than in a traditional Algol-like language.",
+      "id": "bc236df482a8c3a55e17633801da6485"
+    },
+    {
+      "type": "html",
+      "text": "<b>Smallest amount of typing:</b> In some ways Smalltalk is very compact, but the culture encourages long method and variable names for readability.  The argument is that you're going to type the code once and read it 10 times:<br>which should be made more efficient ?",
+      "id": "18a2b30f7f69b69cc82df27cbb027c2d"
+    },
+    {
+      "type": "html",
+      "text": "<b>Simplicity of syntax:</b> There are actually very few rules that make up the language.\tThere's no special syntax for data structures since everything is an object.",
+      "id": "77d39c396a427fd55264244e59c6d37b"
+    },
+    {
+      "type": "html",
+      "text": "<b>Blocks:</b> Blocks are a powerful and clear way of specifying closures (and useful for lazy evaluation).  Sort of changes the idioms for using collections compared to Java, for example:",
+      "id": "6cb56669c6abfb0937309544d297825c"
+    },
+    {
+      "type": "code",
+      "text": " ''Java version''\n Iterator it = myCollection.iterator();\n while (it.hasNext())\n {\n   Myobject anObject = (Myobject) it.next();\n   anObject.doSomething();\n }",
+      "id": "001bdda87120df5a4cd4e24a386b87be"
+    },
+    {
+      "type": "code",
+      "text": " ''Smalltalk version''\n myCollection do: [:anObject | anObject doSomething].",
+      "id": "2f0407e9838176b05d89761bd9c48fef"
+    },
+    {
+      "type": "html",
+      "text": "<b>Readability:</b> Once one becomes familiar with the syntax (and rules of precedence), it is amazingly clear to read.  Algol languages seem to be cluttered with dots and brackets.",
+      "id": "bb10fc966a3e7027f2c6e72a2a1a0f3b"
+    },
+    {
+      "type": "html",
+      "text": "<b>Multi-parameter messages:</b> Inherently self-documenting since every parameter is labeled in the method name, for example:",
+      "id": "d7e911b5e4fd8dde4d2478ba87a1279b"
+    },
+    {
+      "type": "code",
+      "text": " ''Java version''\n myDictionary.put(key, value);",
+      "id": "38256b60bc08833efb5c116a98ffc7ee"
+    },
+    {
+      "type": "code",
+      "text": " ''Smalltalk version''\n myDictionary at: key put: value.",
+      "id": "2598809406e6c0c33c19ddea5bdf9a95"
+    },
+    {
+      "type": "code",
+      "text": " ''...or''\n myString findString: 'foo' startingAt: 2",
+      "id": "af766e2bab0618a7d6bfaec2c6efc100"
+    },
+    {
+      "type": "html",
+      "text": "\nNo. This is of course nice, but for decades, people have called everything you could imagine \"self-documenting\", up to and including C and assembler. No. Something is \"self-documenting\" only if it somehow includes multiple paragraphs of freeform English text. Everything is \"self-documenting\" if the programmer is sufficiently disciplined, and nothing is if they are the opposite. Example:",
+      "id": "9fa31ab5b24aaf3dc4fbf8ad827c9458"
+    },
+    {
+      "type": "code",
+      "text": "  ''Java version''\n  jkfdjkfjdk.xxxxrrrrr(yytytytde, qererere);",
+      "id": "f892a1e58d4952c9fe74729637678a21"
+    },
+    {
+      "type": "code",
+      "text": "  ''Smalltalk version''\n  jkfdjkfjdk xxxxrrrrr: 'yytytytde' qererere: 2;",
+      "id": "875200a9ad376717bde74871a0ad3abf"
+    },
+    {
+      "type": "html",
+      "text": "\nStandard methods in standard classes can't go wrong to <b>that</b> extent, of course, but the standard methods/classes are not the real problem in languages, because they're well known and guaranteed to have thorough documentation, etc.",
+      "id": "7c34d39ce0b46cbb58709d55929dc2f1"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6afa20eb7f8a103c91482dc9e5600a5d"
+    },
+    {
+      "type": "html",
+      "text": "\nI am currently trying to write (with Lex/Yacc) a parser for Smalltalk.",
+      "id": "64e8ffdb49a0c24a308875e1cc0bcff9"
+    },
+    {
+      "type": "html",
+      "text": "(Just for fun, because I like writing small interpreters and Smalltalk\nsyntax seemed easy enough.) Fair enough, the resulting grammar is probably\nquite a lot simpler than a C++ grammar, but nevertheless I discovered\nthe following syntactic warts that make Smalltalk somewhat more challenging\nto parse:",
+      "id": "81284436bbe71462a078f410a0a49673"
+    },
+    {
+      "type": "html",
+      "text": " Cascades are problematic with LALR(1) recognition. Take a construct like 1+2+3;+4, where the final +4 message should be sent to the result of (1+2). The problem is that the parser has to handle the last binary message just prior to the semicolon different than the previous ones, since the receiver of this last message is also the receiver of all the cascaded messages. [[Budds Little Smalltalk]] avoids this problem by changing the rules:<br>in Little Smalltalk the whole expression in front of the semicolon (1+2+3) becomes the receiver of +4. Fix: parse a slightly too lax grammar (expr cascade), and then do a semantic check.",
+      "id": "230ea8f02c0dbe4e1cac18fa7f24ad07"
+    },
+    {
+      "type": "html",
+      "text": " <i>My Smalltalk transformed 1+2+3;+4 into (1+2)+3;+4 before parsing it. I think that makes the parsing problem easier -- [[Tom Stambaugh]]</i> ",
+      "id": "c5b00aa421eba7631e39593f86aafe96"
+    },
+    {
+      "type": "html",
+      "text": " More to the point would be to parse the obvious way, then simply walk the parse tree, using <b>;</b> nodes to flag that the cascade needs to be retargeted from child to grandchild.",
+      "id": "ce6961c9b949b2c85854d97d975d861f"
+    },
+    {
+      "type": "html",
+      "text": "<b>foo</b> should be lexed as identifier foo, <b>foo:</b> should be lexed as keyword #foo:, but <b>foo:=</b> should be lexed as two identifiers:<br>identifier foo and the assignment operator. This doesn't work with the longest match rule of Lex. Fix: add a new syntactic category: identifier directly followed by :=.",
+      "id": "0a3003b71b2e8f53f525a5e434cb1f0e"
+    },
+    {
+      "type": "html",
+      "text": " <i>It's not impossible in lex. You can use forward context to rule out <b>foo:</b> if the lookahead is <b>=</b>. Or more optimally, treat <b>:</b> as an operator in lex, and combine with names in the yacc rule.</i>",
+      "id": "f8002e3f3644fa8259669fe23da24385"
+    },
+    {
+      "type": "html",
+      "text": "This problem has to do with ANSI's \"Smalltalk Interchange Format\":<br>in that format, whether a bang(!)-delimited piece of text should be interpreted as a statement list or a method definition cannot be determined by the parser: for this, semantic information is needed. (Namely: did we just read a \"[[Class Name]] methodsFor: 'protocol'\".)",
+      "id": "b1a8da2b83e91aaa32a5304755c41790"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Budds Little Smalltalk]] solved these problems by bending the rules of the language a little. Would this be acceptable to you?",
+      "id": "9a0eb1d7eb1e31b3bc10d66c1ae06f22"
+    },
+    {
+      "type": "html",
+      "text": "<i>Uh, this would not be acceptable to me. Mostly because I view it as unnecessary. The \"Smalltalk Interchange Format\" (which I grew up calling \"Chunk Format\") is designed to be read by an object in a live Smalltalk environment, not a compiler -- the receiver unpacks the bang-delimited string and passes it to the compiler when needed. -- [[Tom Stambaugh]]</i>",
+      "id": "7a9334d185c7590065d6ea1d25e97afc"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Stephan Houben]]",
+      "id": "b09f247bb783a38b48583073843e0282"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6afa20eb7f8a103c91482dc9e5600a5d"
+    },
+    {
+      "type": "html",
+      "text": "\nNote, that Smalltalk has no special if, case and looping constructs, but the base-library contains methods implementing \"if\" and looping and they are usually optimized aggresively by the compiler. There is no [[Smalltalk Case Statement]] and there is usually no need for it.",
+      "id": "9824503ffd5bc9085a2283606f200e38"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6afa20eb7f8a103c91482dc9e5600a5d"
+    },
+    {
+      "type": "html",
+      "text": " [[Smalltalk Language]]",
+      "id": "cf30bac6d45d3a78f6eb870b4afc8e07"
+    },
+    {
+      "type": "html",
+      "text": " [[Smalltalk Message Rules]].",
+      "id": "83e832710fbb7c9bbf58924c3431e023"
+    },
+    {
+      "type": "html",
+      "text": "\nA nice demo of extreme simplicity in [[Smalltalk Syntax]]:",
+      "id": "a9bdaaab0084a4c9e680eaee10de9688"
+    },
+    {
+      "type": "html",
+      "text": " [[Smalltalk Syntax Ina Postcard]]",
+      "id": "04bb8e1dd95ce3f2dc37b0d48fcc27fe"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6afa20eb7f8a103c91482dc9e5600a5d"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Smalltalk]]",
+      "id": "77350dc0c585a5af11ec17b8724abcea"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?SmalltalkSyntax c2.com]",
+      "id": "54e79394b8244e6057e4e6a939227673"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1393631608000,
+      "id": "c2623bf993b7f11a81851144823d95c4",
+      "type": "create",
+      "item": {
+        "title": "Smalltalk Syntax",
+        "story": [
+          {
+            "type": "html",
+            "text": "Smalltalk syntax is enjoyable for some similar reasons to [[Python Syntax]].",
+            "id": "97ff75974579dcb72191a56e6ee7d995"
+          },
+          {
+            "type": "html",
+            "text": "\nSmalltalk is completely message based.  The <b>only</b> way to interact with an object is to send messages to it.  So a good place to start is [[Smalltalk Message Rules]].",
+            "id": "4f0810898fd298ab24fcafb02ba72b75"
+          },
+          {
+            "type": "html",
+            "text": "<b>Braces:</b> Braces are needed, but for different reasons than in a traditional Algol-like language.",
+            "id": "bc236df482a8c3a55e17633801da6485"
+          },
+          {
+            "type": "html",
+            "text": "<b>Smallest amount of typing:</b> In some ways Smalltalk is very compact, but the culture encourages long method and variable names for readability.  The argument is that you're going to type the code once and read it 10 times:<br>which should be made more efficient ?",
+            "id": "18a2b30f7f69b69cc82df27cbb027c2d"
+          },
+          {
+            "type": "html",
+            "text": "<b>Simplicity of syntax:</b> There are actually very few rules that make up the language.\tThere's no special syntax for data structures since everything is an object.",
+            "id": "77d39c396a427fd55264244e59c6d37b"
+          },
+          {
+            "type": "html",
+            "text": "<b>Blocks:</b> Blocks are a powerful and clear way of specifying closures (and useful for lazy evaluation).  Sort of changes the idioms for using collections compared to Java, for example:",
+            "id": "6cb56669c6abfb0937309544d297825c"
+          },
+          {
+            "type": "code",
+            "text": " ''Java version''\n Iterator it = myCollection.iterator();\n while (it.hasNext())\n {\n   Myobject anObject = (Myobject) it.next();\n   anObject.doSomething();\n }",
+            "id": "001bdda87120df5a4cd4e24a386b87be"
+          },
+          {
+            "type": "code",
+            "text": " ''Smalltalk version''\n myCollection do: [:anObject | anObject doSomething].",
+            "id": "2f0407e9838176b05d89761bd9c48fef"
+          },
+          {
+            "type": "html",
+            "text": "<b>Readability:</b> Once one becomes familiar with the syntax (and rules of precedence), it is amazingly clear to read.  Algol languages seem to be cluttered with dots and brackets.",
+            "id": "bb10fc966a3e7027f2c6e72a2a1a0f3b"
+          },
+          {
+            "type": "html",
+            "text": "<b>Multi-parameter messages:</b> Inherently self-documenting since every parameter is labeled in the method name, for example:",
+            "id": "d7e911b5e4fd8dde4d2478ba87a1279b"
+          },
+          {
+            "type": "code",
+            "text": " ''Java version''\n myDictionary.put(key, value);",
+            "id": "38256b60bc08833efb5c116a98ffc7ee"
+          },
+          {
+            "type": "code",
+            "text": " ''Smalltalk version''\n myDictionary at: key put: value.",
+            "id": "2598809406e6c0c33c19ddea5bdf9a95"
+          },
+          {
+            "type": "code",
+            "text": " ''...or''\n myString findString: 'foo' startingAt: 2",
+            "id": "af766e2bab0618a7d6bfaec2c6efc100"
+          },
+          {
+            "type": "html",
+            "text": "\nNo. This is of course nice, but for decades, people have called everything you could imagine \"self-documenting\", up to and including C and assembler. No. Something is \"self-documenting\" only if it somehow includes multiple paragraphs of freeform English text. Everything is \"self-documenting\" if the programmer is sufficiently disciplined, and nothing is if they are the opposite. Example:",
+            "id": "9fa31ab5b24aaf3dc4fbf8ad827c9458"
+          },
+          {
+            "type": "code",
+            "text": "  ''Java version''\n  jkfdjkfjdk.xxxxrrrrr(yytytytde, qererere);",
+            "id": "f892a1e58d4952c9fe74729637678a21"
+          },
+          {
+            "type": "code",
+            "text": "  ''Smalltalk version''\n  jkfdjkfjdk xxxxrrrrr: 'yytytytde' qererere: 2;",
+            "id": "875200a9ad376717bde74871a0ad3abf"
+          },
+          {
+            "type": "html",
+            "text": "\nStandard methods in standard classes can't go wrong to <b>that</b> extent, of course, but the standard methods/classes are not the real problem in languages, because they're well known and guaranteed to have thorough documentation, etc.",
+            "id": "7c34d39ce0b46cbb58709d55929dc2f1"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6afa20eb7f8a103c91482dc9e5600a5d"
+          },
+          {
+            "type": "html",
+            "text": "\nI am currently trying to write (with Lex/Yacc) a parser for Smalltalk.",
+            "id": "64e8ffdb49a0c24a308875e1cc0bcff9"
+          },
+          {
+            "type": "html",
+            "text": "(Just for fun, because I like writing small interpreters and Smalltalk\nsyntax seemed easy enough.) Fair enough, the resulting grammar is probably\nquite a lot simpler than a C++ grammar, but nevertheless I discovered\nthe following syntactic warts that make Smalltalk somewhat more challenging\nto parse:",
+            "id": "81284436bbe71462a078f410a0a49673"
+          },
+          {
+            "type": "html",
+            "text": " Cascades are problematic with LALR(1) recognition. Take a construct like 1+2+3;+4, where the final +4 message should be sent to the result of (1+2). The problem is that the parser has to handle the last binary message just prior to the semicolon different than the previous ones, since the receiver of this last message is also the receiver of all the cascaded messages. [[Budds Little Smalltalk]] avoids this problem by changing the rules:<br>in Little Smalltalk the whole expression in front of the semicolon (1+2+3) becomes the receiver of +4. Fix: parse a slightly too lax grammar (expr cascade), and then do a semantic check.",
+            "id": "230ea8f02c0dbe4e1cac18fa7f24ad07"
+          },
+          {
+            "type": "html",
+            "text": " <i>My Smalltalk transformed 1+2+3;+4 into (1+2)+3;+4 before parsing it. I think that makes the parsing problem easier -- [[Tom Stambaugh]]</i> ",
+            "id": "c5b00aa421eba7631e39593f86aafe96"
+          },
+          {
+            "type": "html",
+            "text": " More to the point would be to parse the obvious way, then simply walk the parse tree, using <b>;</b> nodes to flag that the cascade needs to be retargeted from child to grandchild.",
+            "id": "ce6961c9b949b2c85854d97d975d861f"
+          },
+          {
+            "type": "html",
+            "text": "<b>foo</b> should be lexed as identifier foo, <b>foo:</b> should be lexed as keyword #foo:, but <b>foo:=</b> should be lexed as two identifiers:<br>identifier foo and the assignment operator. This doesn't work with the longest match rule of Lex. Fix: add a new syntactic category: identifier directly followed by :=.",
+            "id": "0a3003b71b2e8f53f525a5e434cb1f0e"
+          },
+          {
+            "type": "html",
+            "text": " <i>It's not impossible in lex. You can use forward context to rule out <b>foo:</b> if the lookahead is <b>=</b>. Or more optimally, treat <b>:</b> as an operator in lex, and combine with names in the yacc rule.</i>",
+            "id": "f8002e3f3644fa8259669fe23da24385"
+          },
+          {
+            "type": "html",
+            "text": "This problem has to do with ANSI's \"Smalltalk Interchange Format\":<br>in that format, whether a bang(!)-delimited piece of text should be interpreted as a statement list or a method definition cannot be determined by the parser: for this, semantic information is needed. (Namely: did we just read a \"[[Class Name]] methodsFor: 'protocol'\".)",
+            "id": "b1a8da2b83e91aaa32a5304755c41790"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Budds Little Smalltalk]] solved these problems by bending the rules of the language a little. Would this be acceptable to you?",
+            "id": "9a0eb1d7eb1e31b3bc10d66c1ae06f22"
+          },
+          {
+            "type": "html",
+            "text": "<i>Uh, this would not be acceptable to me. Mostly because I view it as unnecessary. The \"Smalltalk Interchange Format\" (which I grew up calling \"Chunk Format\") is designed to be read by an object in a live Smalltalk environment, not a compiler -- the receiver unpacks the bang-delimited string and passes it to the compiler when needed. -- [[Tom Stambaugh]]</i>",
+            "id": "7a9334d185c7590065d6ea1d25e97afc"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Stephan Houben]]",
+            "id": "b09f247bb783a38b48583073843e0282"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6afa20eb7f8a103c91482dc9e5600a5d"
+          },
+          {
+            "type": "html",
+            "text": "\nNote, that Smalltalk has no special if, case and looping constructs, but the base-library contains methods implementing \"if\" and looping and they are usually optimized aggresively by the compiler. There is no [[Smalltalk Case Statement]] and there is usually no need for it.",
+            "id": "9824503ffd5bc9085a2283606f200e38"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6afa20eb7f8a103c91482dc9e5600a5d"
+          },
+          {
+            "type": "html",
+            "text": " [[Smalltalk Language]]",
+            "id": "cf30bac6d45d3a78f6eb870b4afc8e07"
+          },
+          {
+            "type": "html",
+            "text": " [[Smalltalk Message Rules]].",
+            "id": "83e832710fbb7c9bbf58924c3431e023"
+          },
+          {
+            "type": "html",
+            "text": "\nA nice demo of extreme simplicity in [[Smalltalk Syntax]]:",
+            "id": "a9bdaaab0084a4c9e680eaee10de9688"
+          },
+          {
+            "type": "html",
+            "text": " [[Smalltalk Syntax Ina Postcard]]",
+            "id": "04bb8e1dd95ce3f2dc37b0d48fcc27fe"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6afa20eb7f8a103c91482dc9e5600a5d"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Smalltalk]]",
+            "id": "77350dc0c585a5af11ec17b8724abcea"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?SmalltalkSyntax c2.com]",
+            "id": "54e79394b8244e6057e4e6a939227673"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1702911544063
+    }
+  ]
+}

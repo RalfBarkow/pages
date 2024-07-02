@@ -67,6 +67,11 @@
       "text": "[[Kaiten Continuous Experience]]"
     },
     {
+      "type": "paragraph",
+      "id": "a05bab4de90cb14c",
+      "text": "[[Körper]] Siehe: [[Form des Körpers]]"
+    },
+    {
       "type": "reference",
       "id": "273643917e6cb71c",
       "site": "wiki.ralfbarkow.ch",
@@ -77,7 +82,7 @@
     {
       "type": "frame",
       "id": "61ecdc1aecc8e543",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -648,19 +653,35 @@
       "date": 1709296838643
     },
     {
-      "type": "fork",
-      "site": "wiki.ralfbarkow.ch",
-      "date": 1709299714023
-    },
-    {
       "type": "edit",
       "id": "61ecdc1aecc8e543",
       "item": {
         "type": "frame",
         "id": "61ecdc1aecc8e543",
-        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
       },
-      "date": 1709299733774
+      "date": 1713870390251
+    },
+    {
+      "type": "add",
+      "id": "a05bab4de90cb14c",
+      "item": {
+        "type": "paragraph",
+        "id": "a05bab4de90cb14c",
+        "text": "[[Körper]] See: [[Form des Körpers]]"
+      },
+      "after": "97095af66bb334bd",
+      "date": 1719567134137
+    },
+    {
+      "type": "edit",
+      "id": "a05bab4de90cb14c",
+      "item": {
+        "type": "paragraph",
+        "id": "a05bab4de90cb14c",
+        "text": "[[Körper]] Siehe: [[Form des Körpers]]"
+      },
+      "date": 1719567150972
     }
   ]
 }

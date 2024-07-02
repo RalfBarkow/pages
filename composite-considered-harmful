@@ -1,0 +1,1282 @@
+{
+  "title": "Composite Considered Harmful",
+  "story": [
+    {
+      "type": "html",
+      "text": "My motivation for this is so someone can explain what I am missing .",
+      "id": "660f1ca799de2254002e1be2396259d7"
+    },
+    {
+      "type": "html",
+      "text": "\nThesis: Creating a supertype which has <i>both</i> the tree and node operations in it is redundant.",
+      "id": "36efcd0c55fca2948a75c6787a5a71dc"
+    },
+    {
+      "type": "html",
+      "text": "\nCommentary:\nThis Composite thing doesn't quite gel with me. Normally you'd extend Leaf to treeLeaf and there wouldn't be a problem. As it stands this pattern appears redundant and thus unsafe.",
+      "id": "c996cb589859aa4278c5f4f06d74c08d"
+    },
+    {
+      "type": "html",
+      "text": "\nExpansion:\nThe standard GoF composite example (page 164):",
+      "id": "21984f8e212ee1ec7ba8a62cbe0a36c5"
+    },
+    {
+      "type": "code",
+      "text": " ''Component''\n  Op()  //Probably abstract\n  Add(Component) // Throws an exception by default?\n  Remove(Component) // ditto\n  GetChild(int) // ditto",
+      "id": "351001a3f7eca53a3529d2ccb9539bfd"
+    },
+    {
+      "type": "code",
+      "text": " ''Leaf'' inherits from Component\n  Op()  // meaningful\n  Add(Component) // not meaningful, use default?\n  Remove(Component) // ditto\n  GetChild(int) // ditto",
+      "id": "8d1123125cb3bf39df424a0af0bf490f"
+    },
+    {
+      "type": "code",
+      "text": " ''Composite'' inherits from Component\n  Op()  // Probably meaningful\n  Add(Component) // meaningful\n  Remove(Component)  // meaningful\n  GetChild(int) // meaningful",
+      "id": "1fd70a72de63c818a68181e9c5757e70"
+    },
+    {
+      "type": "html",
+      "text": "\nAlternative:",
+      "id": "68154a28b29b88b5c61d5ce80126cfc1"
+    },
+    {
+      "type": "code",
+      "text": " ''Leaf''\n  Op()  // meaningful",
+      "id": "41a8d8ed71b8059e96ead6bc5b1e4c50"
+    },
+    {
+      "type": "code",
+      "text": " ''CompositeLeaf'' inherits from Leaf\n  Op()  // Probably meaningful\n  Add(Leaf)   // meaningful\n  Remove(Leaf) // meaningful\n  GetChild(int) // meaningful",
+      "id": "75781d18c027d4b1aae141a354c235ce"
+    },
+    {
+      "type": "html",
+      "text": "\nSo why bother with Component?",
+      "id": "32fcc5cd0b2065aa74ad7ed782f133b9"
+    },
+    {
+      "type": "html",
+      "text": "\nLets say I have a function that Op's stuff. It can do it with:",
+      "id": "4d5fa98cdd0a6c370c0b89dda562f7f5"
+    },
+    {
+      "type": "code",
+      "text": " Leaf myLeaf;\n myLeaf.Op();",
+      "id": "9ae5d5d895521d9425ee5cdc219b40f2"
+    },
+    {
+      "type": "html",
+      "text": "\nIt will work with either type since a Leaf reference is compatible with a [[Composite Leaf]].",
+      "id": "41970c1d8a2121ffaa741dd12d4b1fd5"
+    },
+    {
+      "type": "html",
+      "text": "\nSimilarly, if I have a function that does composite stuff:",
+      "id": "eb02f1dd1380f3004182d07b7e0c6013"
+    },
+    {
+      "type": "code",
+      "text": " CompositeLeaf myComposite;\n Leaf newStuff;\n myComposite.Add(newStuff);",
+      "id": "0c36357a11a8a99e82d5dbfc678f60f2"
+    },
+    {
+      "type": "html",
+      "text": "\nIf I have a function that attempts to do an add(..) on a non composite Leaf then there will be a static error. So, to do it safely one should do :",
+      "id": "a903aa1a6b89593c30222f219916721b"
+    },
+    {
+      "type": "code",
+      "text": "  \n Leaf unknownLeaf;\n if (unknownLeaf instanceof CompositeLeaf)\n   (CompositeLeaf) unknownLeaf.Add(newStuff);",
+      "id": "5abf50f89af5ecdf2eb3f45940deb3ff"
+    },
+    {
+      "type": "html",
+      "text": "\nUsing the GoF pattern one swaps static type safety and a cast for some exception handling code. Is this the reason to do it this way? That seems a little odd, and a bit smelly.",
+      "id": "e49bdd75d059a9bd6b9a7a7ff0cb6ff3"
+    },
+    {
+      "type": "html",
+      "text": "\nI'm hoping someone can explain why the normal way of extending stuff is not appropriate.",
+      "id": "9e0d12bd468148df1afc64ae9e303128"
+    },
+    {
+      "type": "html",
+      "text": "--[[Richard Henderson]]",
+      "id": "95047ff33fa380a84fce145502874cf2"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+    },
+    {
+      "type": "html",
+      "text": "\nLet me check that I understand this. You are proposing\nthat the class used for internal nodes should inherit\nfrom Leaf. To my nose :-), this smells because internal\nnodes are not leaves. ",
+      "id": "402a598db1d47758e1f54897406bc099"
+    },
+    {
+      "type": "html",
+      "text": "<i>They are because they have the method which characterizes a Leaf, in this case add()</i>",
+      "id": "3f627a9a0432a9c389731aab9f132fdd"
+    },
+    {
+      "type": "html",
+      "text": "\nAny operation that makes sense for leaves but not for internal nodes will need to be overridden in Composite<b></b>Leaf, just to say \"I lied; this isn't really a subtype of Leaf\".",
+      "id": "600dfa21214efd8d0f49acf95e8a4b8a"
+    },
+    {
+      "type": "html",
+      "text": "<i>But that's what we're doing by putting structural stuff in the superclass. Lying about leaves as if they all have meaningful structural behaviour.</i>",
+      "id": "51dff0e65c2328e151c37b5533564dc2"
+    },
+    {
+      "type": "html",
+      "text": "\nI'm not sure what the advantage of your proposed design is over the \"usual\" Composite. Having one class fewer? That advantage will probably go away as soon as you have more than one kind of Leaf. With an ordinary Composite, you can just make the superclass of each Leaf class be Component. With your design, presumably you need a new Leaf class for them all to inherit from. And what if you have two kinds of internal node? You'll need a common superclass for them\nif you're using <i>instanceof</i> tests, and once more the advantage in class count has gone away.",
+      "id": "0c915d0d0edebd8f0ad70d81705b79b2"
+    },
+    {
+      "type": "html",
+      "text": "<i>I am using Leaf as the superclass of all types of Leaf, structured or otherwise, perhaps I should have made them all abstract.</i>",
+      "id": "860f20a3460e265ffeb2957095e0d70a"
+    },
+    {
+      "type": "html",
+      "text": "\nIf you're happy doing <i>instanceof</i> tests then you don't need any exception handling for the ordinary Composite. You can just check types before doing any of the operations that might have raised an exception.",
+      "id": "d51423397b29989e6a683cb3f7239387"
+    },
+    {
+      "type": "html",
+      "text": "\nSo now I think <i>I</i> am missing something. Why is your variant of Composite better than the original?",
+      "id": "4d290a1bdbbda64bbe8de4e94f7d5586"
+    },
+    {
+      "type": "html",
+      "text": "<i>Because, IMO, the structural methods should not be in the supertype.</i>",
+      "id": "cbede672ef8cfce8a49bb41a95ef5373"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+    },
+    {
+      "type": "html",
+      "text": "I refine the [[Composite Pattern]], but not be eliminating the Composite class. Instead, I do something like the following:",
+      "id": "74c294e78ac45547573b633c3c1e8838"
+    },
+    {
+      "type": "code",
+      "text": " interface Component\n {\n     void accept( Visitor block );\n }",
+      "id": "a1628b0fa1219ca8660142331fad519e"
+    },
+    {
+      "type": "code",
+      "text": " class Leaf implements Component\n {\n     void accept( Visitor block )\n     {\n         block.visit( this );\n     }\n }",
+      "id": "8d0e62469ab633fbdf30061aeaa95df5"
+    },
+    {
+      "type": "code",
+      "text": " class Group implements Component\n {\n     private ArrayList m_children;",
+      "id": "3a1c231b367909e433417649a1df79f0"
+    },
+    {
+      "type": "code",
+      "text": "     void accept( Visitor block )\n     {\n         block.visit( this );",
+      "id": "f52de08248f35ee13eb40e91e08573cb"
+    },
+    {
+      "type": "code",
+      "text": "         for( Iterator it = m_children.iterator(); it.hasNext() )\n             ((Component)it.next()).accept( block );\n     }",
+      "id": "301f0a14ee3a8360cfd6bcd2e4c0f4e4"
+    },
+    {
+      "type": "code",
+      "text": "     void add( Component aChild ) {...}\n     void remove( Component aChild ) {...}\n     int  count() {...}\n }",
+      "id": "639bf17cc13a1dbda278df8b86187542"
+    },
+    {
+      "type": "html",
+      "text": "\nAnd this is usually enough for me. The only polymorphism that *I* need is with the #accept method. I don't usually need to ask a component how many children it has. So I suppose I straddle the fence. I don't like the polymorphism on methods that don't make sense in Component but I also don't like removing Component and making N<b></b>odeGroup have to replace the #accept behavior of a L<b></b>eafNode. -- [[Robert Di Falco]]",
+      "id": "64f39c574c54d9cd7cd639120d01ecc4"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+    },
+    {
+      "type": "html",
+      "text": "\nOkay Robert, I'll go with that. ",
+      "id": "5fcad04ae8c500beaf9063dc7ba4ef18"
+    },
+    {
+      "type": "html",
+      "text": "\nThe main issue I am getting at is the presence of the structural methods in the supertype. Even the GoF book itself seems a bit tentative about it. -- [[Richard Henderson]].",
+      "id": "30b303f27e20808bcf05a563560b35f9"
+    },
+    {
+      "type": "html",
+      "text": "\nThe way I implement Composite, I put methods to <i>query</i> the structure into the supertype, but methods to <i>modify</i> the structure only in subtypes that hold collections of components.",
+      "id": "c8a08a278fd43aa82a30298af9f2e6bf"
+    },
+    {
+      "type": "html",
+      "text": "\nE.g:",
+      "id": "5bde0e30a066429b37e8523fa1834e2c"
+    },
+    {
+      "type": "code",
+      "text": " interface Node {\n     Enumeration children();\n     // and other common methods\n }",
+      "id": "ea72c9ed102e0d6ab9191bf46fb3d010"
+    },
+    {
+      "type": "code",
+      "text": " class LeafNode implements Node {\n     public Enumeration children() {\n         return new EmptyEnumeration();\n     }\n }",
+      "id": "098a3ad07bb31457846cf4e60d831fec"
+    },
+    {
+      "type": "code",
+      "text": " class EmptyEnumeration implements Enumeration {\n     public boolean hasNextElement() { return false; }\n     public void nextElement() { throw new I''''''ndexOutOfBoundsException(); }\n }",
+      "id": "50c1125390eb6ba967229f2a6fbb5d70"
+    },
+    {
+      "type": "code",
+      "text": " class CompositeNode implements Node {\n     private Vector _children = new Vector();\n     \n     public Enumeration children() {\n         return _children.elements();\n     }\n     \n     public addChild( Node child ) {\n         _children.add(child);\n     }\n     \n     public removeChild( Node child ) {\n         _children.remove(child);\n     }\n }",
+      "id": "d9d46ca881352b5e0c53136410aa0fda"
+    },
+    {
+      "type": "html",
+      "text": "\nI also often use the Visitor pattern, as described above, to let client code traverse the composite structure and find modifiable nodes.",
+      "id": "c93f1a2d3bb142362fa08db2780e0821"
+    },
+    {
+      "type": "html",
+      "text": "--[[Nat Pryce]]",
+      "id": "5c5f93f0497fac7cc196830720e82042"
+    },
+    {
+      "type": "html",
+      "text": "<i>That is more like the GoF, and I don't like it. If a leaf doesn't have structural behaviour, then I think it is better if the interface doesn't give the impression it has structural behaviour. Why bother having </i>children()<i> in the supertype? It might slightly simplify your traversal code, but not by very much. You still need a type test to tell if a node is a leaf node or a branch node.</i>",
+      "id": "81f3f02463dde89ddb42c81296f885e6"
+    },
+    {
+      "type": "html",
+      "text": "\nI think this is all based on a misunderstanding of the [[Composite Pattern]]. You don't put methods like add and remove in the base class - only methods that make sense on atomic things or composites. Atoms implement the methods directly, whereas composites implement them in terms of the operations on their children.",
+      "id": "7024d5e32ad4430e030dce9d843971a1"
+    },
+    {
+      "type": "html",
+      "text": "\nFor example:",
+      "id": "19f48e0e45b35f629bba2c2a599d2981"
+    },
+    {
+      "type": "code",
+      "text": " abstract class Investment // the base class\n {\n  abstract int getValue() ;\n }",
+      "id": "fffaebafebb41c3dc26718df328455de"
+    },
+    {
+      "type": "code",
+      "text": " class Cash extends Investment // an atom\n {\n  Account acct ; // Account does what you'd expect\n  int getValue()\n  {\n   return acct.balance() ;\n  }\n  // changeAccountType etc methods go here\n }",
+      "id": "bd689577f5d8d7921e068b53c36177d8"
+    },
+    {
+      "type": "code",
+      "text": " class Shares extends Investment // an atom\n {\n  Company comp ;\n  int number ;\n  int getValue()\n  {\n   Market mkt = Market.getInstance() ;\n   return number * mkt.getShareValue( comp ) ;\n  }\n  // extendHolding and retractHolding etc methods go here\n }",
+      "id": "d4627414988db0e0cdbd6279a9cf6eaf"
+    },
+    {
+      "type": "code",
+      "text": " class Portfolio extends Investment // the composite\n {\n  Set investments ;\n  int getValue()\n  {\n   int value = 0 ;\n   Iterator it = investments.iterator() ;\n   while (it.hasNext()) value += ((Investment)it.next()).getValue() ;\n   return value ;\n  }\n  // addInvestment and removeInvestment etc methods go here\n }",
+      "id": "8d5f5fb6d54e185d4f23d99f4b1e13bf"
+    },
+    {
+      "type": "html",
+      "text": "\nDoes this help?",
+      "id": "a1ad9f363e5fc6cf0dbddecd5750285b"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Tom Anderson]]",
+      "id": "15e15f2baf76b806d50b1f9e2dfa0e75"
+    },
+    {
+      "type": "html",
+      "text": "\nI completely agree Tom. Yet page 164 of Design Patterns does the opposite. A real head-scratcher for me. Why do such a horrible thing? Do people really think this is a good idea?",
+      "id": "ba45f1a113df4c1324e8a9b4cdc7be09"
+    },
+    {
+      "type": "html",
+      "text": "<i>I do. Of course the pattern is tricky and can be mis-applied. But what the pattern is about is when domain objects are naturally containers of other domain objects, and therefore they have a double function: that of container, and that of domain object. Another condition is that their property of being a container influences directly how they perform as domain objects. However, real life situation where these conditions are met are rare, and thus the pattern should be applied with caution. But it shouldn't be considered harmful. </i>",
+      "id": "b81b254ec5b2df622a86dc8d5114fa6a"
+    },
+    {
+      "type": "html",
+      "text": "<i>If you look at the GoF examples,they don't talk in terms of Node and Leaf, they talk in terms of domain objects. By the way, I generaslly don't see why Node and Leaf should ever be distinct classe. For example: every Swing component is also a Container , and its essential paint(Graphics g) method depends on it being aware of its children and having access to them. Thus it has both the proper methods of any component, and the methods of java.awt.Container. Your example with an abstract Node and Leaf and [[Composite Node]] is really not a good example for the pattern, nor is it a good example. Because if something is a Node or a Leaf is something that varies at runtime: it may have children or it may not have children. Then why in the world, do you want to ditinguish between Leaf and Nodes? -- [[Costin Cozianu]]</i>",
+      "id": "6abbf8f3e9193eddb42b5c290c8c3ce1"
+    },
+    {
+      "type": "html",
+      "text": "\nBecause you'll have to. In the book, it is claimed that the reason to promote the structural interface into the supertype is for 'transparency', so that clients can 'treat all objects in the composite uniformly'.",
+      "id": "823febf4c599e25b7ba99a4ad18aba91"
+    },
+    {
+      "type": "html",
+      "text": "\nIf it were the case that all objects could contain other objects, then I would agree with you, and indeed we'd only need a single supertype. That is not, however, the contention of the book. They admit that they are breaking OO convention. They admit what they are doing is unsafe. What they don't do is give a reason for breaking these conventions. Transparency would only be true if you could truly treat the objects the same, but you can't.",
+      "id": "5e4d2d771ad11adc699eac6892b8d52f"
+    },
+    {
+      "type": "html",
+      "text": "\nConsider your clients. You've got clients that manipulate/navigate the structure, and you've got clients that call the other (Leaf) operations. I have no problem with putting the Leaf methods in the supertype. The add() operation is meaningful to both. ",
+      "id": "20f4bb15dc9d88623f3f2abfb87ba1b3"
+    },
+    {
+      "type": "html",
+      "text": "\nClients of the former functionality must deal with both structured objects and Leaf objects. That transparent interface gains them nothing if they must code to handle exceptions, or code to determine the specific subtype. The presence of the structure methods gains them nothing. Therefore, for me, there is no good reason to put them in the supertype.",
+      "id": "508e1aeffe7a1bfde8a4033129a4c12a"
+    },
+    {
+      "type": "html",
+      "text": "\nSo, the natural class hierarchy is the correct OO one IMO. Factor the common functionality into the supertype. Put the variant functionality into subtypes. In that case, there is no need for a separate Leaf interface as it is the same as the supertype interface.",
+      "id": "2260aff19fe6223cd815e50e339039ee"
+    },
+    {
+      "type": "html",
+      "text": "<i>Ok, my mistake. After I checked with the book I see that you are absolutely right. It's always been in my mind that Composite was about hierarchies where everything IS-A container, but now I see that the GoF book advocates erasing the differences between objects that are not containers and objects that are. Well, it should be [[Considered Harmful]] after all. It doesn't solve any problem, but it creates more. In this case, the real and solution is what you exposed here: creating an explicit abstract type for composuites/containers instead of moving those operations all the way to the root of the hierarchy. -- Costin</i>",
+      "id": "38c19baa10742f3f2ad2063ca98b90bd"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+    },
+    {
+      "type": "html",
+      "text": "Nat, Why put the children enumeration in the base class? I don't see why a Leaf class would have to return an empty enumeration. It seems artificial. Since we need to operate on both Leaf nodes and Group nodes, why not just have an #accept method in their common ancestor and be done with it? In other words, why would you ever need to ask a Leaf for its children? -- [[Robert Di Falco]] ",
+      "id": "58300fb0f725015683e6f0e71bfa80e2"
+    },
+    {
+      "type": "html",
+      "text": "\nYes it was artificial.  In general, I agree with [[Tom Anderson]]'s explanation above.  However, some common methods do expose some sort of structural information and I was trying to show that.  A better example, used in JUnit, is where the Node interface (interface Test in JUnit) defines a method to count the number of nodes in the composite.",
+      "id": "a66e1f991498ca937b67ae9d2e9ef2d1"
+    },
+    {
+      "type": "code",
+      "text": " interface Node {\n     int count();\n }",
+      "id": "94e1ffb8296ac653804e7a4025b0525b"
+    },
+    {
+      "type": "code",
+      "text": " class Leaf implements Node {\n     public int count() { return 1; }\n }",
+      "id": "84fb5315a3944bb4807a1c18a4880acb"
+    },
+    {
+      "type": "code",
+      "text": " class Group implements Node {\n     public int count() {\n         int total = 1;\n         for( Iterator i = children(); i.hasNext(); ) {\n             total += ((Node)i.next()).count();\n         }\n         return total;\n     }\n     \n     public Iterator children() ...\n }",
+      "id": "99c481f2fbc0029bfbf9c4e52dcf4725"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+    },
+    {
+      "type": "html",
+      "text": "I have to say that I'm not even sure why #countTestCases exists in Junit. They have it implemented like so:",
+      "id": "d603b78d44c72331cfc82f3dc74b18f1"
+    },
+    {
+      "type": "code",
+      "text": " public int countTestCases() {\n    int count= 0;\n    for (Enumeration e= tests(); e.hasMoreElements(); ) {\n       Test test= (Test)e.nextElement();\n       count= count + test.countTestCases();\n    }\n    return count;\n }",
+      "id": "6e8eb7f615fd1d15b70690522860c95b"
+    },
+    {
+      "type": "html",
+      "text": "\nThis is the reason why we need #countTestCases in the Test (i.e. Node) interface. This could be eliminated like so:",
+      "id": "390a03fe62f9666d695c2dcbd24e251e"
+    },
+    {
+      "type": "code",
+      "text": " class CountTestsVisitor EmptyVisitor {\n    int count;\n    public void visit( TestCase tc ) {\n       count += 1;\n    }\n }",
+      "id": "18aaba0b6e2e257352aca303795adfdb"
+    },
+    {
+      "type": "html",
+      "text": "\nThen we can just use it like so:",
+      "id": "cc66be82b8f2ad20c4aacf121fb84857"
+    },
+    {
+      "type": "code",
+      "text": " CountTestsVisitor counter = new CountTestsVisitor();\n some_testsuite_or_testcase.accept( counter );\n System.out.println( \"Tests: \" + counter.count );",
+      "id": "81c635e82b6e6ee5dab5b83ec31a2829"
+    },
+    {
+      "type": "html",
+      "text": "\nIn this same way, we can remove all collection like behavior from the root Node interface. -- [[Robert Di Falco]]",
+      "id": "bec04516e716381a40374cbc2f8f327f"
+    },
+    {
+      "type": "html",
+      "text": "\nWell, in the same way, we can remove <i>all</i> behaviour from the root Node interface. But that's not the point. Good OO design (IMHO) ends up with operations being provided by those objects that are best able to perform those operations. Therefore, if we need to know how many nodes are in a tree of composites, we should ask the tree, not some other object. The [[Visitor Pattern]] is useful if you need to extend the operations of a composite object when you cannot change its implementation, and the [[Composite Pattern]] is useful when you can change its implementation. -- [[Nat Pryce]]",
+      "id": "71c716bb0a68b5f78795f05d7a34894a"
+    },
+    {
+      "type": "html",
+      "text": "<i>Just for the record Nat, do you think the GoF version of composite is a good one? With structural operations which are NOT meaningful to the leaf subtype in the supertype?</i>",
+      "id": "fe0bb933076509633d070df57def1e82"
+    },
+    {
+      "type": "html",
+      "text": "\nActually, you could not remove <i>all</i> behavior from the root Node interface. It would still need the #accept(Visitor) method declared. --[[Robert Di Falco]]",
+      "id": "99e7c2eac996452382f19b0c06a799a7"
+    },
+    {
+      "type": "html",
+      "text": "\nIn practice I don't follow the GoF version of composite \"by the book\".  I think [[Tom Anderson]]'s comments are the most accurate.  I put \"domain\" methods into the supertype (Node interface), some of which may expose some structural information or other [[Design Burp]]s.  E.g. a method for counting the nodes exposes the fact that the object being queried might contain multiple component objects, the [[Visitor Pattern]] exposes that there are a predetermined number of subclasses that define important behaviour.  However, if possible I prefer to push methods down into the subclasses.  Methods for modifying the composite structure belong here.  Like [[Robert Di Falco]] I find that I often combine the [[Visitor Pattern]] and [[Composite Pattern]], especially if the composite structure must be modified",
+      "id": "48ba30deddd8b612102e3af6a3ef9bac"
+    },
+    {
+      "type": "html",
+      "text": "<i>after</i> it has initially been constructed. --[[Nat Pryce]]",
+      "id": "1476a5ca92e9c977542f7b8059f788a9"
+    },
+    {
+      "type": "html",
+      "text": "<i>Excellent. Tom agrees with my thesis, so I'll transitively place you in the 'harmful' gang too. Will anyone defend the GoF composite which explicitly states that the structural modifiers go in a common supertype? Where's number 3? He was arguing with me on my turf not long ago :). --[[Richard Henderson]].</i>",
+      "id": "2bac9c7d58092e9adfac46c30a944d54"
+    },
+    {
+      "type": "html",
+      "text": "\nI think \"harmful\" is too strong a judgement.  After all, I've used the [[Composite Pattern]] many, many times, and found it to be very useful.  I'd say that from my experience the description in the [[Gang Of Four]] Book is too strict, but in any case  one is not meant to treat the GoF book as dogma -- that goes against the fundamental philosophy of patterns.  ",
+      "id": "31fe3276868a599859da96bbaca5be6b"
+    },
+    {
+      "type": "html",
+      "text": "\nThe intent of the [[Composite Pattern]] is: <i>Compose objects into tree structures that represent whole-part hierarchies. Composite lets clients treat individual objects and compositions of objects uniformly. A leaf has the same interface as a node.</i>\nI interpret that to mean that objects and compositions of objects can be used uniformly where that makes sense, and also implement other methods that cannot be used uniformly where necessary.  That is, leaf and node have an interface in common, and also have interfaces that are not in common.  But then again, I have also used the [[Composite Pattern]] in designs where all nodes had the ability to contain children, and leaf nodes were just nodes without children, not nodes of any particular type. ",
+      "id": "79764dc402b67a7a587cb3582e58a295"
+    },
+    {
+      "type": "html",
+      "text": "\nAn example of the [[Composite Pattern]] where composite nodes and leaf nodes have different types is the Unix directory hieararchy: directories have operations for adding/removing files, but files do not.  Furthermore, different leaf nodes can have different types, such as files, pipe endpoints, devices, fifo's etc.  An example where composite and leaf nodes have the same type is the window hierarchy in the X Window System: any window can contain other windows, and it is up to the program creating the windows (or more usually a GUI toolkit) as to whether a window is a \"container\" that can contain other windows or a \"control\" that does not.",
+      "id": "11f877571a427e65e328182a55c3ffd1"
+    },
+    {
+      "type": "html",
+      "text": "--[[Nat Pryce]]",
+      "id": "5c5f93f0497fac7cc196830720e82042"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+    },
+    {
+      "type": "html",
+      "text": "\nComposite is a pattern for developing an interface where internal-node is-a leaf-node. Read that again. For example, in a [[Bill Of Materials]] application, subassembly is-a part. The \"add\" method doesn't strictly need to be in the supertype. Clients of the supertype don't GENERALLY care to add things anyway. Adding children is something done during construction, and Composite is not about construction so much as interface. Leave \"add(child)\" out of the superclass. If you're adding parts to a subassembly, then you already have an object statically known to be an internal node. If you have a part, and you want to know it's [[Bill Of Materials]], then you should be able to get it. You should be able to get the BOM on a screw, which will probably have an empty parts list. Either that, or you should be able to get the screw to provide a UI component which conveniently doesn't have a \"BOM subtree\" button. There are many ways. -- [[Ian Kjos]]",
+      "id": "c09ccf7db6b7361d9e90ea39e952f215"
+    },
+    {
+      "type": "html",
+      "text": "<b>More violent agreement. Thank you for your input :) ---RIH</b>",
+      "id": "cafde53d7f58edcb763abf2bf761f699"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+    },
+    {
+      "type": "html",
+      "text": "<i>My first time in GoF i had to re-read Composite a bunch of times before i figured why it was not just another collection class. For me the node-leaf relationship is more like</i> a node <b>might-be</b> leaf <i>at the moment but later on</i> node <b>could-change-to</b> container<i>, and vice-versa. The example of a Bill of Materials works for me .. as you write a BoM (real world) you can work top-down .. you first write the top level items and then <b>flatten</b> the BOM by expanding all assemblies. If i remember correctly it was while reading GoF Facade (?sic?) (which ever pattern has the Pro point that its objects would look the same even if the type of the object be changed over time) that i connected the effect to the design of Composite. If you cannot tell the nature of any node then you truly <b>must</b> treat them all the same .. and so all operations and navigation methods have to be in the interface (or abstract, root class) for the Composite to work.</i>",
+      "id": "2f928a046247ae49831d0402c903d0b7"
+    },
+    {
+      "type": "html",
+      "text": "<i>A second point of interest for me is that most contributors here seem to equate Composite with hierarchy. I see only one line on the UML diagram for association and that need not be interpreted as </i>contains child objects <i> but more like </i>points to other nodes<i> making it possible for a Composite to be more like <b>blob of possible blobs</b>, or for nodes to</i> contain <i>themselves .. odd things like that. A second corollory of my interpretation is that every node is a</i> point of contact <i>with the collection rather than having one be the <b>top of the hierarchy</b> </i>. ",
+      "id": "8bd17eb50c5ea6e0decd298dd4ec0770"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Jeff Hayes]]",
+      "id": "15ccec940f6a4e8994370187592e1f77"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+    },
+    {
+      "type": "html",
+      "text": "Having immersed my head in [[Functional Programming]] languages for far too long [and having no experience or formal training] I can't quite understand what's the problem here.  Does it have to do with mutability?",
+      "id": "6760a391ac30775097fe47919a8d21f1"
+    },
+    {
+      "type": "html",
+      "text": "\nBecause, as far as I can see, it's something like this:",
+      "id": "54771ad7b8bf452996776c67a8f57c99"
+    },
+    {
+      "type": "code",
+      "text": "  data Tree a = Branch a (Tree a) (Tree a) | TNil\n  data Leaf a = Branch a TNil TNil",
+      "id": "76a9ab68a642636986c9ed40e451a7f6"
+    },
+    {
+      "type": "html",
+      "text": "\nor, staying more true to the original example:",
+      "id": "1bc19b92d123b454b613757837e08181"
+    },
+    {
+      "type": "code",
+      "text": "  data Composite a = Comp a [Composite a] | Leaf a",
+      "id": "9a6be61f5fd06724695768ccdb164962"
+    },
+    {
+      "type": "html",
+      "text": "addChild ::<br>Composite a -> Composite a -> Composite a -- Because it's purely functional, need to return new state.",
+      "id": "ad1a8b72d79dc1c301a2d7c9cbd99755"
+    },
+    {
+      "type": "html",
+      "text": "removeChild ::<br>Composite a -> Composite a",
+      "id": "86f6e9bdc438c66a693d66373c05b2ed"
+    },
+    {
+      "type": "html",
+      "text": "getChild ::<br>Composite a -> Int -> Maybe (Composite a)",
+      "id": "9c0c82c774314f5e3f6ffde7e7e59dd0"
+    },
+    {
+      "type": "html",
+      "text": "\nThen make:",
+      "id": "861f5f4d0a6a5bb248531408ab5454eb"
+    },
+    {
+      "type": "code",
+      "text": "  addChild (Leaf x) c = Comp x [c]",
+      "id": "b70a2020234a79437d2da5433c35953e"
+    },
+    {
+      "type": "code",
+      "text": "  removeChild (Leaf x) = undefined -- Runtime error.  Alternately, make it a no-op.\n  \n  getChild _ _ = Nothing -- Not there.",
+      "id": "eedc087d24f9741651ae1d5c76da9db4"
+    },
+    {
+      "type": "html",
+      "text": "\nIs this smelly?  It seems that way at first, but note that doing those operations on the Leaf are *EXACTLY THE SAME* as doing those operations on an empty Composite--either way, you're trying to \"get\" something nonexistant.",
+      "id": "af99b71dd8104923783d2ac81e850014"
+    },
+    {
+      "type": "html",
+      "text": "\nThis is the GoF way.",
+      "id": "f056c320dbd49ae5b63268d13f9b455f"
+    },
+    {
+      "type": "html",
+      "text": "\nOn second thought, this seems to be more about inheritance.  Well, hmm.  I can't offer much info there, but I think I may be able to offer a new perspective on the debate.",
+      "id": "2bb9ea483b5c22c65baa2be00bf09658"
+    },
+    {
+      "type": "html",
+      "text": "\nOne of you says that Composite should inherit from Leaf.  That is,  Composite isa Leaf.",
+      "id": "230f51735bcfcb3779f59153af493238"
+    },
+    {
+      "type": "html",
+      "text": "\nThe other one says that Leaf should inherit from Composite <the usual way>.  That is, Leaf isa Composite.",
+      "id": "cf7f21a3e9ad7b68f01dffabdd6204e5"
+    },
+    {
+      "type": "html",
+      "text": "\nLet's rephrase that.  The first guy says that <i>you should be able to treat any Composite node as if it were a single object.</i>  The other guy says that <i>you should be able to treat a single object as if it were a Composite of one, or a Composite with no children.</i>",
+      "id": "27feb97b7196fd1c4dce0acf4aceb5e4"
+    },
+    {
+      "type": "html",
+      "text": "\nTBH, what's likely going to happen is that you end up being able to do neither--you write a superclass and then specialize it to the single and composite cases.  But here's a halfway-decent example of the first guy's view:",
+      "id": "a3c3deac3c564a28da9586408f70d57a"
+    },
+    {
+      "type": "html",
+      "text": "class [[Strange Node]][T](private value :<br>T) {",
+      "id": "c0bba214d861497ca18e8b4a0aa3eeb7"
+    },
+    {
+      "type": "html",
+      "text": "def values = value ::<br>Nil",
+      "id": "193abcdcee994bebd1485bcae66843ce"
+    },
+    {
+      "type": "code",
+      "text": "  }\n  class StrangeComposite[T](head : T, tail : StrangeNode[T]) extends StrangeNode(head) {\n    override def values = head :: tail.values\n  }",
+      "id": "4712c46a7218540efdf040104ac384b7"
+    },
+    {
+      "type": "html",
+      "text": "\nUnfortunately, there aren't many examples (in my mind) datatypes where \"The whole is a part\" applies; \"The part is a whole\" is more common, e.g. a string as an array of strings of length 1, an XML node as a tag and a (possibly empty) list of XML nodes, etc.  A parent window, though, is still a window, and should be treated as such.  That's likely a good time to use \"The whole is a part.\"",
+      "id": "aa403481318f5a467d50f8bf6ed1eb80"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+    },
+    {
+      "type": "html",
+      "text": "It's possible this exposes one of the [[Limits Of Hierarchies]]. The variations of valid or use-able features may be better modeled with sets than trees, hierarchies, or DAGs. Just food for thought.",
+      "id": "df03c7665e7eb8d636465be0ecf56c1e"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?CompositeConsideredHarmful c2.com]",
+      "id": "f712565eeaad820234d1a8cdbc42c39a"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1339096517000,
+      "id": "11fa49abf006f9aee5fb1f43fa83cd02",
+      "type": "create",
+      "item": {
+        "title": "Composite Considered Harmful",
+        "story": [
+          {
+            "type": "html",
+            "text": "My motivation for this is so someone can explain what I am missing .",
+            "id": "660f1ca799de2254002e1be2396259d7"
+          },
+          {
+            "type": "html",
+            "text": "\nThesis: Creating a supertype which has <i>both</i> the tree and node operations in it is redundant.",
+            "id": "36efcd0c55fca2948a75c6787a5a71dc"
+          },
+          {
+            "type": "html",
+            "text": "\nCommentary:\nThis Composite thing doesn't quite gel with me. Normally you'd extend Leaf to treeLeaf and there wouldn't be a problem. As it stands this pattern appears redundant and thus unsafe.",
+            "id": "c996cb589859aa4278c5f4f06d74c08d"
+          },
+          {
+            "type": "html",
+            "text": "\nExpansion:\nThe standard GoF composite example (page 164):",
+            "id": "21984f8e212ee1ec7ba8a62cbe0a36c5"
+          },
+          {
+            "type": "code",
+            "text": " ''Component''\n  Op()  //Probably abstract\n  Add(Component) // Throws an exception by default?\n  Remove(Component) // ditto\n  GetChild(int) // ditto",
+            "id": "351001a3f7eca53a3529d2ccb9539bfd"
+          },
+          {
+            "type": "code",
+            "text": " ''Leaf'' inherits from Component\n  Op()  // meaningful\n  Add(Component) // not meaningful, use default?\n  Remove(Component) // ditto\n  GetChild(int) // ditto",
+            "id": "8d1123125cb3bf39df424a0af0bf490f"
+          },
+          {
+            "type": "code",
+            "text": " ''Composite'' inherits from Component\n  Op()  // Probably meaningful\n  Add(Component) // meaningful\n  Remove(Component)  // meaningful\n  GetChild(int) // meaningful",
+            "id": "1fd70a72de63c818a68181e9c5757e70"
+          },
+          {
+            "type": "html",
+            "text": "\nAlternative:",
+            "id": "68154a28b29b88b5c61d5ce80126cfc1"
+          },
+          {
+            "type": "code",
+            "text": " ''Leaf''\n  Op()  // meaningful",
+            "id": "41a8d8ed71b8059e96ead6bc5b1e4c50"
+          },
+          {
+            "type": "code",
+            "text": " ''CompositeLeaf'' inherits from Leaf\n  Op()  // Probably meaningful\n  Add(Leaf)   // meaningful\n  Remove(Leaf) // meaningful\n  GetChild(int) // meaningful",
+            "id": "75781d18c027d4b1aae141a354c235ce"
+          },
+          {
+            "type": "html",
+            "text": "\nSo why bother with Component?",
+            "id": "32fcc5cd0b2065aa74ad7ed782f133b9"
+          },
+          {
+            "type": "html",
+            "text": "\nLets say I have a function that Op's stuff. It can do it with:",
+            "id": "4d5fa98cdd0a6c370c0b89dda562f7f5"
+          },
+          {
+            "type": "code",
+            "text": " Leaf myLeaf;\n myLeaf.Op();",
+            "id": "9ae5d5d895521d9425ee5cdc219b40f2"
+          },
+          {
+            "type": "html",
+            "text": "\nIt will work with either type since a Leaf reference is compatible with a [[Composite Leaf]].",
+            "id": "41970c1d8a2121ffaa741dd12d4b1fd5"
+          },
+          {
+            "type": "html",
+            "text": "\nSimilarly, if I have a function that does composite stuff:",
+            "id": "eb02f1dd1380f3004182d07b7e0c6013"
+          },
+          {
+            "type": "code",
+            "text": " CompositeLeaf myComposite;\n Leaf newStuff;\n myComposite.Add(newStuff);",
+            "id": "0c36357a11a8a99e82d5dbfc678f60f2"
+          },
+          {
+            "type": "html",
+            "text": "\nIf I have a function that attempts to do an add(..) on a non composite Leaf then there will be a static error. So, to do it safely one should do :",
+            "id": "a903aa1a6b89593c30222f219916721b"
+          },
+          {
+            "type": "code",
+            "text": "  \n Leaf unknownLeaf;\n if (unknownLeaf instanceof CompositeLeaf)\n   (CompositeLeaf) unknownLeaf.Add(newStuff);",
+            "id": "5abf50f89af5ecdf2eb3f45940deb3ff"
+          },
+          {
+            "type": "html",
+            "text": "\nUsing the GoF pattern one swaps static type safety and a cast for some exception handling code. Is this the reason to do it this way? That seems a little odd, and a bit smelly.",
+            "id": "e49bdd75d059a9bd6b9a7a7ff0cb6ff3"
+          },
+          {
+            "type": "html",
+            "text": "\nI'm hoping someone can explain why the normal way of extending stuff is not appropriate.",
+            "id": "9e0d12bd468148df1afc64ae9e303128"
+          },
+          {
+            "type": "html",
+            "text": "--[[Richard Henderson]]",
+            "id": "95047ff33fa380a84fce145502874cf2"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+          },
+          {
+            "type": "html",
+            "text": "\nLet me check that I understand this. You are proposing\nthat the class used for internal nodes should inherit\nfrom Leaf. To my nose :-), this smells because internal\nnodes are not leaves. ",
+            "id": "402a598db1d47758e1f54897406bc099"
+          },
+          {
+            "type": "html",
+            "text": "<i>They are because they have the method which characterizes a Leaf, in this case add()</i>",
+            "id": "3f627a9a0432a9c389731aab9f132fdd"
+          },
+          {
+            "type": "html",
+            "text": "\nAny operation that makes sense for leaves but not for internal nodes will need to be overridden in Composite<b></b>Leaf, just to say \"I lied; this isn't really a subtype of Leaf\".",
+            "id": "600dfa21214efd8d0f49acf95e8a4b8a"
+          },
+          {
+            "type": "html",
+            "text": "<i>But that's what we're doing by putting structural stuff in the superclass. Lying about leaves as if they all have meaningful structural behaviour.</i>",
+            "id": "51dff0e65c2328e151c37b5533564dc2"
+          },
+          {
+            "type": "html",
+            "text": "\nI'm not sure what the advantage of your proposed design is over the \"usual\" Composite. Having one class fewer? That advantage will probably go away as soon as you have more than one kind of Leaf. With an ordinary Composite, you can just make the superclass of each Leaf class be Component. With your design, presumably you need a new Leaf class for them all to inherit from. And what if you have two kinds of internal node? You'll need a common superclass for them\nif you're using <i>instanceof</i> tests, and once more the advantage in class count has gone away.",
+            "id": "0c915d0d0edebd8f0ad70d81705b79b2"
+          },
+          {
+            "type": "html",
+            "text": "<i>I am using Leaf as the superclass of all types of Leaf, structured or otherwise, perhaps I should have made them all abstract.</i>",
+            "id": "860f20a3460e265ffeb2957095e0d70a"
+          },
+          {
+            "type": "html",
+            "text": "\nIf you're happy doing <i>instanceof</i> tests then you don't need any exception handling for the ordinary Composite. You can just check types before doing any of the operations that might have raised an exception.",
+            "id": "d51423397b29989e6a683cb3f7239387"
+          },
+          {
+            "type": "html",
+            "text": "\nSo now I think <i>I</i> am missing something. Why is your variant of Composite better than the original?",
+            "id": "4d290a1bdbbda64bbe8de4e94f7d5586"
+          },
+          {
+            "type": "html",
+            "text": "<i>Because, IMO, the structural methods should not be in the supertype.</i>",
+            "id": "cbede672ef8cfce8a49bb41a95ef5373"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+          },
+          {
+            "type": "html",
+            "text": "I refine the [[Composite Pattern]], but not be eliminating the Composite class. Instead, I do something like the following:",
+            "id": "74c294e78ac45547573b633c3c1e8838"
+          },
+          {
+            "type": "code",
+            "text": " interface Component\n {\n     void accept( Visitor block );\n }",
+            "id": "a1628b0fa1219ca8660142331fad519e"
+          },
+          {
+            "type": "code",
+            "text": " class Leaf implements Component\n {\n     void accept( Visitor block )\n     {\n         block.visit( this );\n     }\n }",
+            "id": "8d0e62469ab633fbdf30061aeaa95df5"
+          },
+          {
+            "type": "code",
+            "text": " class Group implements Component\n {\n     private ArrayList m_children;",
+            "id": "3a1c231b367909e433417649a1df79f0"
+          },
+          {
+            "type": "code",
+            "text": "     void accept( Visitor block )\n     {\n         block.visit( this );",
+            "id": "f52de08248f35ee13eb40e91e08573cb"
+          },
+          {
+            "type": "code",
+            "text": "         for( Iterator it = m_children.iterator(); it.hasNext() )\n             ((Component)it.next()).accept( block );\n     }",
+            "id": "301f0a14ee3a8360cfd6bcd2e4c0f4e4"
+          },
+          {
+            "type": "code",
+            "text": "     void add( Component aChild ) {...}\n     void remove( Component aChild ) {...}\n     int  count() {...}\n }",
+            "id": "639bf17cc13a1dbda278df8b86187542"
+          },
+          {
+            "type": "html",
+            "text": "\nAnd this is usually enough for me. The only polymorphism that *I* need is with the #accept method. I don't usually need to ask a component how many children it has. So I suppose I straddle the fence. I don't like the polymorphism on methods that don't make sense in Component but I also don't like removing Component and making N<b></b>odeGroup have to replace the #accept behavior of a L<b></b>eafNode. -- [[Robert Di Falco]]",
+            "id": "64f39c574c54d9cd7cd639120d01ecc4"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+          },
+          {
+            "type": "html",
+            "text": "\nOkay Robert, I'll go with that. ",
+            "id": "5fcad04ae8c500beaf9063dc7ba4ef18"
+          },
+          {
+            "type": "html",
+            "text": "\nThe main issue I am getting at is the presence of the structural methods in the supertype. Even the GoF book itself seems a bit tentative about it. -- [[Richard Henderson]].",
+            "id": "30b303f27e20808bcf05a563560b35f9"
+          },
+          {
+            "type": "html",
+            "text": "\nThe way I implement Composite, I put methods to <i>query</i> the structure into the supertype, but methods to <i>modify</i> the structure only in subtypes that hold collections of components.",
+            "id": "c8a08a278fd43aa82a30298af9f2e6bf"
+          },
+          {
+            "type": "html",
+            "text": "\nE.g:",
+            "id": "5bde0e30a066429b37e8523fa1834e2c"
+          },
+          {
+            "type": "code",
+            "text": " interface Node {\n     Enumeration children();\n     // and other common methods\n }",
+            "id": "ea72c9ed102e0d6ab9191bf46fb3d010"
+          },
+          {
+            "type": "code",
+            "text": " class LeafNode implements Node {\n     public Enumeration children() {\n         return new EmptyEnumeration();\n     }\n }",
+            "id": "098a3ad07bb31457846cf4e60d831fec"
+          },
+          {
+            "type": "code",
+            "text": " class EmptyEnumeration implements Enumeration {\n     public boolean hasNextElement() { return false; }\n     public void nextElement() { throw new I''''''ndexOutOfBoundsException(); }\n }",
+            "id": "50c1125390eb6ba967229f2a6fbb5d70"
+          },
+          {
+            "type": "code",
+            "text": " class CompositeNode implements Node {\n     private Vector _children = new Vector();\n     \n     public Enumeration children() {\n         return _children.elements();\n     }\n     \n     public addChild( Node child ) {\n         _children.add(child);\n     }\n     \n     public removeChild( Node child ) {\n         _children.remove(child);\n     }\n }",
+            "id": "d9d46ca881352b5e0c53136410aa0fda"
+          },
+          {
+            "type": "html",
+            "text": "\nI also often use the Visitor pattern, as described above, to let client code traverse the composite structure and find modifiable nodes.",
+            "id": "c93f1a2d3bb142362fa08db2780e0821"
+          },
+          {
+            "type": "html",
+            "text": "--[[Nat Pryce]]",
+            "id": "5c5f93f0497fac7cc196830720e82042"
+          },
+          {
+            "type": "html",
+            "text": "<i>That is more like the GoF, and I don't like it. If a leaf doesn't have structural behaviour, then I think it is better if the interface doesn't give the impression it has structural behaviour. Why bother having </i>children()<i> in the supertype? It might slightly simplify your traversal code, but not by very much. You still need a type test to tell if a node is a leaf node or a branch node.</i>",
+            "id": "81f3f02463dde89ddb42c81296f885e6"
+          },
+          {
+            "type": "html",
+            "text": "\nI think this is all based on a misunderstanding of the [[Composite Pattern]]. You don't put methods like add and remove in the base class - only methods that make sense on atomic things or composites. Atoms implement the methods directly, whereas composites implement them in terms of the operations on their children.",
+            "id": "7024d5e32ad4430e030dce9d843971a1"
+          },
+          {
+            "type": "html",
+            "text": "\nFor example:",
+            "id": "19f48e0e45b35f629bba2c2a599d2981"
+          },
+          {
+            "type": "code",
+            "text": " abstract class Investment // the base class\n {\n  abstract int getValue() ;\n }",
+            "id": "fffaebafebb41c3dc26718df328455de"
+          },
+          {
+            "type": "code",
+            "text": " class Cash extends Investment // an atom\n {\n  Account acct ; // Account does what you'd expect\n  int getValue()\n  {\n   return acct.balance() ;\n  }\n  // changeAccountType etc methods go here\n }",
+            "id": "bd689577f5d8d7921e068b53c36177d8"
+          },
+          {
+            "type": "code",
+            "text": " class Shares extends Investment // an atom\n {\n  Company comp ;\n  int number ;\n  int getValue()\n  {\n   Market mkt = Market.getInstance() ;\n   return number * mkt.getShareValue( comp ) ;\n  }\n  // extendHolding and retractHolding etc methods go here\n }",
+            "id": "d4627414988db0e0cdbd6279a9cf6eaf"
+          },
+          {
+            "type": "code",
+            "text": " class Portfolio extends Investment // the composite\n {\n  Set investments ;\n  int getValue()\n  {\n   int value = 0 ;\n   Iterator it = investments.iterator() ;\n   while (it.hasNext()) value += ((Investment)it.next()).getValue() ;\n   return value ;\n  }\n  // addInvestment and removeInvestment etc methods go here\n }",
+            "id": "8d5f5fb6d54e185d4f23d99f4b1e13bf"
+          },
+          {
+            "type": "html",
+            "text": "\nDoes this help?",
+            "id": "a1ad9f363e5fc6cf0dbddecd5750285b"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Tom Anderson]]",
+            "id": "15e15f2baf76b806d50b1f9e2dfa0e75"
+          },
+          {
+            "type": "html",
+            "text": "\nI completely agree Tom. Yet page 164 of Design Patterns does the opposite. A real head-scratcher for me. Why do such a horrible thing? Do people really think this is a good idea?",
+            "id": "ba45f1a113df4c1324e8a9b4cdc7be09"
+          },
+          {
+            "type": "html",
+            "text": "<i>I do. Of course the pattern is tricky and can be mis-applied. But what the pattern is about is when domain objects are naturally containers of other domain objects, and therefore they have a double function: that of container, and that of domain object. Another condition is that their property of being a container influences directly how they perform as domain objects. However, real life situation where these conditions are met are rare, and thus the pattern should be applied with caution. But it shouldn't be considered harmful. </i>",
+            "id": "b81b254ec5b2df622a86dc8d5114fa6a"
+          },
+          {
+            "type": "html",
+            "text": "<i>If you look at the GoF examples,they don't talk in terms of Node and Leaf, they talk in terms of domain objects. By the way, I generaslly don't see why Node and Leaf should ever be distinct classe. For example: every Swing component is also a Container , and its essential paint(Graphics g) method depends on it being aware of its children and having access to them. Thus it has both the proper methods of any component, and the methods of java.awt.Container. Your example with an abstract Node and Leaf and [[Composite Node]] is really not a good example for the pattern, nor is it a good example. Because if something is a Node or a Leaf is something that varies at runtime: it may have children or it may not have children. Then why in the world, do you want to ditinguish between Leaf and Nodes? -- [[Costin Cozianu]]</i>",
+            "id": "6abbf8f3e9193eddb42b5c290c8c3ce1"
+          },
+          {
+            "type": "html",
+            "text": "\nBecause you'll have to. In the book, it is claimed that the reason to promote the structural interface into the supertype is for 'transparency', so that clients can 'treat all objects in the composite uniformly'.",
+            "id": "823febf4c599e25b7ba99a4ad18aba91"
+          },
+          {
+            "type": "html",
+            "text": "\nIf it were the case that all objects could contain other objects, then I would agree with you, and indeed we'd only need a single supertype. That is not, however, the contention of the book. They admit that they are breaking OO convention. They admit what they are doing is unsafe. What they don't do is give a reason for breaking these conventions. Transparency would only be true if you could truly treat the objects the same, but you can't.",
+            "id": "5e4d2d771ad11adc699eac6892b8d52f"
+          },
+          {
+            "type": "html",
+            "text": "\nConsider your clients. You've got clients that manipulate/navigate the structure, and you've got clients that call the other (Leaf) operations. I have no problem with putting the Leaf methods in the supertype. The add() operation is meaningful to both. ",
+            "id": "20f4bb15dc9d88623f3f2abfb87ba1b3"
+          },
+          {
+            "type": "html",
+            "text": "\nClients of the former functionality must deal with both structured objects and Leaf objects. That transparent interface gains them nothing if they must code to handle exceptions, or code to determine the specific subtype. The presence of the structure methods gains them nothing. Therefore, for me, there is no good reason to put them in the supertype.",
+            "id": "508e1aeffe7a1bfde8a4033129a4c12a"
+          },
+          {
+            "type": "html",
+            "text": "\nSo, the natural class hierarchy is the correct OO one IMO. Factor the common functionality into the supertype. Put the variant functionality into subtypes. In that case, there is no need for a separate Leaf interface as it is the same as the supertype interface.",
+            "id": "2260aff19fe6223cd815e50e339039ee"
+          },
+          {
+            "type": "html",
+            "text": "<i>Ok, my mistake. After I checked with the book I see that you are absolutely right. It's always been in my mind that Composite was about hierarchies where everything IS-A container, but now I see that the GoF book advocates erasing the differences between objects that are not containers and objects that are. Well, it should be [[Considered Harmful]] after all. It doesn't solve any problem, but it creates more. In this case, the real and solution is what you exposed here: creating an explicit abstract type for composuites/containers instead of moving those operations all the way to the root of the hierarchy. -- Costin</i>",
+            "id": "38c19baa10742f3f2ad2063ca98b90bd"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+          },
+          {
+            "type": "html",
+            "text": "Nat, Why put the children enumeration in the base class? I don't see why a Leaf class would have to return an empty enumeration. It seems artificial. Since we need to operate on both Leaf nodes and Group nodes, why not just have an #accept method in their common ancestor and be done with it? In other words, why would you ever need to ask a Leaf for its children? -- [[Robert Di Falco]] ",
+            "id": "58300fb0f725015683e6f0e71bfa80e2"
+          },
+          {
+            "type": "html",
+            "text": "\nYes it was artificial.  In general, I agree with [[Tom Anderson]]'s explanation above.  However, some common methods do expose some sort of structural information and I was trying to show that.  A better example, used in JUnit, is where the Node interface (interface Test in JUnit) defines a method to count the number of nodes in the composite.",
+            "id": "a66e1f991498ca937b67ae9d2e9ef2d1"
+          },
+          {
+            "type": "code",
+            "text": " interface Node {\n     int count();\n }",
+            "id": "94e1ffb8296ac653804e7a4025b0525b"
+          },
+          {
+            "type": "code",
+            "text": " class Leaf implements Node {\n     public int count() { return 1; }\n }",
+            "id": "84fb5315a3944bb4807a1c18a4880acb"
+          },
+          {
+            "type": "code",
+            "text": " class Group implements Node {\n     public int count() {\n         int total = 1;\n         for( Iterator i = children(); i.hasNext(); ) {\n             total += ((Node)i.next()).count();\n         }\n         return total;\n     }\n     \n     public Iterator children() ...\n }",
+            "id": "99c481f2fbc0029bfbf9c4e52dcf4725"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+          },
+          {
+            "type": "html",
+            "text": "I have to say that I'm not even sure why #countTestCases exists in Junit. They have it implemented like so:",
+            "id": "d603b78d44c72331cfc82f3dc74b18f1"
+          },
+          {
+            "type": "code",
+            "text": " public int countTestCases() {\n    int count= 0;\n    for (Enumeration e= tests(); e.hasMoreElements(); ) {\n       Test test= (Test)e.nextElement();\n       count= count + test.countTestCases();\n    }\n    return count;\n }",
+            "id": "6e8eb7f615fd1d15b70690522860c95b"
+          },
+          {
+            "type": "html",
+            "text": "\nThis is the reason why we need #countTestCases in the Test (i.e. Node) interface. This could be eliminated like so:",
+            "id": "390a03fe62f9666d695c2dcbd24e251e"
+          },
+          {
+            "type": "code",
+            "text": " class CountTestsVisitor EmptyVisitor {\n    int count;\n    public void visit( TestCase tc ) {\n       count += 1;\n    }\n }",
+            "id": "18aaba0b6e2e257352aca303795adfdb"
+          },
+          {
+            "type": "html",
+            "text": "\nThen we can just use it like so:",
+            "id": "cc66be82b8f2ad20c4aacf121fb84857"
+          },
+          {
+            "type": "code",
+            "text": " CountTestsVisitor counter = new CountTestsVisitor();\n some_testsuite_or_testcase.accept( counter );\n System.out.println( \"Tests: \" + counter.count );",
+            "id": "81c635e82b6e6ee5dab5b83ec31a2829"
+          },
+          {
+            "type": "html",
+            "text": "\nIn this same way, we can remove all collection like behavior from the root Node interface. -- [[Robert Di Falco]]",
+            "id": "bec04516e716381a40374cbc2f8f327f"
+          },
+          {
+            "type": "html",
+            "text": "\nWell, in the same way, we can remove <i>all</i> behaviour from the root Node interface. But that's not the point. Good OO design (IMHO) ends up with operations being provided by those objects that are best able to perform those operations. Therefore, if we need to know how many nodes are in a tree of composites, we should ask the tree, not some other object. The [[Visitor Pattern]] is useful if you need to extend the operations of a composite object when you cannot change its implementation, and the [[Composite Pattern]] is useful when you can change its implementation. -- [[Nat Pryce]]",
+            "id": "71c716bb0a68b5f78795f05d7a34894a"
+          },
+          {
+            "type": "html",
+            "text": "<i>Just for the record Nat, do you think the GoF version of composite is a good one? With structural operations which are NOT meaningful to the leaf subtype in the supertype?</i>",
+            "id": "fe0bb933076509633d070df57def1e82"
+          },
+          {
+            "type": "html",
+            "text": "\nActually, you could not remove <i>all</i> behavior from the root Node interface. It would still need the #accept(Visitor) method declared. --[[Robert Di Falco]]",
+            "id": "99e7c2eac996452382f19b0c06a799a7"
+          },
+          {
+            "type": "html",
+            "text": "\nIn practice I don't follow the GoF version of composite \"by the book\".  I think [[Tom Anderson]]'s comments are the most accurate.  I put \"domain\" methods into the supertype (Node interface), some of which may expose some structural information or other [[Design Burp]]s.  E.g. a method for counting the nodes exposes the fact that the object being queried might contain multiple component objects, the [[Visitor Pattern]] exposes that there are a predetermined number of subclasses that define important behaviour.  However, if possible I prefer to push methods down into the subclasses.  Methods for modifying the composite structure belong here.  Like [[Robert Di Falco]] I find that I often combine the [[Visitor Pattern]] and [[Composite Pattern]], especially if the composite structure must be modified",
+            "id": "48ba30deddd8b612102e3af6a3ef9bac"
+          },
+          {
+            "type": "html",
+            "text": "<i>after</i> it has initially been constructed. --[[Nat Pryce]]",
+            "id": "1476a5ca92e9c977542f7b8059f788a9"
+          },
+          {
+            "type": "html",
+            "text": "<i>Excellent. Tom agrees with my thesis, so I'll transitively place you in the 'harmful' gang too. Will anyone defend the GoF composite which explicitly states that the structural modifiers go in a common supertype? Where's number 3? He was arguing with me on my turf not long ago :). --[[Richard Henderson]].</i>",
+            "id": "2bac9c7d58092e9adfac46c30a944d54"
+          },
+          {
+            "type": "html",
+            "text": "\nI think \"harmful\" is too strong a judgement.  After all, I've used the [[Composite Pattern]] many, many times, and found it to be very useful.  I'd say that from my experience the description in the [[Gang Of Four]] Book is too strict, but in any case  one is not meant to treat the GoF book as dogma -- that goes against the fundamental philosophy of patterns.  ",
+            "id": "31fe3276868a599859da96bbaca5be6b"
+          },
+          {
+            "type": "html",
+            "text": "\nThe intent of the [[Composite Pattern]] is: <i>Compose objects into tree structures that represent whole-part hierarchies. Composite lets clients treat individual objects and compositions of objects uniformly. A leaf has the same interface as a node.</i>\nI interpret that to mean that objects and compositions of objects can be used uniformly where that makes sense, and also implement other methods that cannot be used uniformly where necessary.  That is, leaf and node have an interface in common, and also have interfaces that are not in common.  But then again, I have also used the [[Composite Pattern]] in designs where all nodes had the ability to contain children, and leaf nodes were just nodes without children, not nodes of any particular type. ",
+            "id": "79764dc402b67a7a587cb3582e58a295"
+          },
+          {
+            "type": "html",
+            "text": "\nAn example of the [[Composite Pattern]] where composite nodes and leaf nodes have different types is the Unix directory hieararchy: directories have operations for adding/removing files, but files do not.  Furthermore, different leaf nodes can have different types, such as files, pipe endpoints, devices, fifo's etc.  An example where composite and leaf nodes have the same type is the window hierarchy in the X Window System: any window can contain other windows, and it is up to the program creating the windows (or more usually a GUI toolkit) as to whether a window is a \"container\" that can contain other windows or a \"control\" that does not.",
+            "id": "11f877571a427e65e328182a55c3ffd1"
+          },
+          {
+            "type": "html",
+            "text": "--[[Nat Pryce]]",
+            "id": "5c5f93f0497fac7cc196830720e82042"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+          },
+          {
+            "type": "html",
+            "text": "\nComposite is a pattern for developing an interface where internal-node is-a leaf-node. Read that again. For example, in a [[Bill Of Materials]] application, subassembly is-a part. The \"add\" method doesn't strictly need to be in the supertype. Clients of the supertype don't GENERALLY care to add things anyway. Adding children is something done during construction, and Composite is not about construction so much as interface. Leave \"add(child)\" out of the superclass. If you're adding parts to a subassembly, then you already have an object statically known to be an internal node. If you have a part, and you want to know it's [[Bill Of Materials]], then you should be able to get it. You should be able to get the BOM on a screw, which will probably have an empty parts list. Either that, or you should be able to get the screw to provide a UI component which conveniently doesn't have a \"BOM subtree\" button. There are many ways. -- [[Ian Kjos]]",
+            "id": "c09ccf7db6b7361d9e90ea39e952f215"
+          },
+          {
+            "type": "html",
+            "text": "<b>More violent agreement. Thank you for your input :) ---RIH</b>",
+            "id": "cafde53d7f58edcb763abf2bf761f699"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+          },
+          {
+            "type": "html",
+            "text": "<i>My first time in GoF i had to re-read Composite a bunch of times before i figured why it was not just another collection class. For me the node-leaf relationship is more like</i> a node <b>might-be</b> leaf <i>at the moment but later on</i> node <b>could-change-to</b> container<i>, and vice-versa. The example of a Bill of Materials works for me .. as you write a BoM (real world) you can work top-down .. you first write the top level items and then <b>flatten</b> the BOM by expanding all assemblies. If i remember correctly it was while reading GoF Facade (?sic?) (which ever pattern has the Pro point that its objects would look the same even if the type of the object be changed over time) that i connected the effect to the design of Composite. If you cannot tell the nature of any node then you truly <b>must</b> treat them all the same .. and so all operations and navigation methods have to be in the interface (or abstract, root class) for the Composite to work.</i>",
+            "id": "2f928a046247ae49831d0402c903d0b7"
+          },
+          {
+            "type": "html",
+            "text": "<i>A second point of interest for me is that most contributors here seem to equate Composite with hierarchy. I see only one line on the UML diagram for association and that need not be interpreted as </i>contains child objects <i> but more like </i>points to other nodes<i> making it possible for a Composite to be more like <b>blob of possible blobs</b>, or for nodes to</i> contain <i>themselves .. odd things like that. A second corollory of my interpretation is that every node is a</i> point of contact <i>with the collection rather than having one be the <b>top of the hierarchy</b> </i>. ",
+            "id": "8bd17eb50c5ea6e0decd298dd4ec0770"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Jeff Hayes]]",
+            "id": "15ccec940f6a4e8994370187592e1f77"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+          },
+          {
+            "type": "html",
+            "text": "Having immersed my head in [[Functional Programming]] languages for far too long [and having no experience or formal training] I can't quite understand what's the problem here.  Does it have to do with mutability?",
+            "id": "6760a391ac30775097fe47919a8d21f1"
+          },
+          {
+            "type": "html",
+            "text": "\nBecause, as far as I can see, it's something like this:",
+            "id": "54771ad7b8bf452996776c67a8f57c99"
+          },
+          {
+            "type": "code",
+            "text": "  data Tree a = Branch a (Tree a) (Tree a) | TNil\n  data Leaf a = Branch a TNil TNil",
+            "id": "76a9ab68a642636986c9ed40e451a7f6"
+          },
+          {
+            "type": "html",
+            "text": "\nor, staying more true to the original example:",
+            "id": "1bc19b92d123b454b613757837e08181"
+          },
+          {
+            "type": "code",
+            "text": "  data Composite a = Comp a [Composite a] | Leaf a",
+            "id": "9a6be61f5fd06724695768ccdb164962"
+          },
+          {
+            "type": "html",
+            "text": "addChild ::<br>Composite a -> Composite a -> Composite a -- Because it's purely functional, need to return new state.",
+            "id": "ad1a8b72d79dc1c301a2d7c9cbd99755"
+          },
+          {
+            "type": "html",
+            "text": "removeChild ::<br>Composite a -> Composite a",
+            "id": "86f6e9bdc438c66a693d66373c05b2ed"
+          },
+          {
+            "type": "html",
+            "text": "getChild ::<br>Composite a -> Int -> Maybe (Composite a)",
+            "id": "9c0c82c774314f5e3f6ffde7e7e59dd0"
+          },
+          {
+            "type": "html",
+            "text": "\nThen make:",
+            "id": "861f5f4d0a6a5bb248531408ab5454eb"
+          },
+          {
+            "type": "code",
+            "text": "  addChild (Leaf x) c = Comp x [c]",
+            "id": "b70a2020234a79437d2da5433c35953e"
+          },
+          {
+            "type": "code",
+            "text": "  removeChild (Leaf x) = undefined -- Runtime error.  Alternately, make it a no-op.\n  \n  getChild _ _ = Nothing -- Not there.",
+            "id": "eedc087d24f9741651ae1d5c76da9db4"
+          },
+          {
+            "type": "html",
+            "text": "\nIs this smelly?  It seems that way at first, but note that doing those operations on the Leaf are *EXACTLY THE SAME* as doing those operations on an empty Composite--either way, you're trying to \"get\" something nonexistant.",
+            "id": "af99b71dd8104923783d2ac81e850014"
+          },
+          {
+            "type": "html",
+            "text": "\nThis is the GoF way.",
+            "id": "f056c320dbd49ae5b63268d13f9b455f"
+          },
+          {
+            "type": "html",
+            "text": "\nOn second thought, this seems to be more about inheritance.  Well, hmm.  I can't offer much info there, but I think I may be able to offer a new perspective on the debate.",
+            "id": "2bb9ea483b5c22c65baa2be00bf09658"
+          },
+          {
+            "type": "html",
+            "text": "\nOne of you says that Composite should inherit from Leaf.  That is,  Composite isa Leaf.",
+            "id": "230f51735bcfcb3779f59153af493238"
+          },
+          {
+            "type": "html",
+            "text": "\nThe other one says that Leaf should inherit from Composite <the usual way>.  That is, Leaf isa Composite.",
+            "id": "cf7f21a3e9ad7b68f01dffabdd6204e5"
+          },
+          {
+            "type": "html",
+            "text": "\nLet's rephrase that.  The first guy says that <i>you should be able to treat any Composite node as if it were a single object.</i>  The other guy says that <i>you should be able to treat a single object as if it were a Composite of one, or a Composite with no children.</i>",
+            "id": "27feb97b7196fd1c4dce0acf4aceb5e4"
+          },
+          {
+            "type": "html",
+            "text": "\nTBH, what's likely going to happen is that you end up being able to do neither--you write a superclass and then specialize it to the single and composite cases.  But here's a halfway-decent example of the first guy's view:",
+            "id": "a3c3deac3c564a28da9586408f70d57a"
+          },
+          {
+            "type": "html",
+            "text": "class [[Strange Node]][T](private value :<br>T) {",
+            "id": "c0bba214d861497ca18e8b4a0aa3eeb7"
+          },
+          {
+            "type": "html",
+            "text": "def values = value ::<br>Nil",
+            "id": "193abcdcee994bebd1485bcae66843ce"
+          },
+          {
+            "type": "code",
+            "text": "  }\n  class StrangeComposite[T](head : T, tail : StrangeNode[T]) extends StrangeNode(head) {\n    override def values = head :: tail.values\n  }",
+            "id": "4712c46a7218540efdf040104ac384b7"
+          },
+          {
+            "type": "html",
+            "text": "\nUnfortunately, there aren't many examples (in my mind) datatypes where \"The whole is a part\" applies; \"The part is a whole\" is more common, e.g. a string as an array of strings of length 1, an XML node as a tag and a (possibly empty) list of XML nodes, etc.  A parent window, though, is still a window, and should be treated as such.  That's likely a good time to use \"The whole is a part.\"",
+            "id": "aa403481318f5a467d50f8bf6ed1eb80"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "357b2c2b3dc6f5e5ad2827a7338dc07f"
+          },
+          {
+            "type": "html",
+            "text": "It's possible this exposes one of the [[Limits Of Hierarchies]]. The variations of valid or use-able features may be better modeled with sets than trees, hierarchies, or DAGs. Just food for thought.",
+            "id": "df03c7665e7eb8d636465be0ecf56c1e"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?CompositeConsideredHarmful c2.com]",
+            "id": "f712565eeaad820234d1a8cdbc42c39a"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1706653462583
+    }
+  ]
+}

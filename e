@@ -164,7 +164,7 @@
     {
       "type": "paragraph",
       "id": "556325e5f06ceec1",
-      "text": "[[Embodiment]]"
+      "text": "[[Embodiment]] (within [[CajunBot]])"
     },
     {
       "type": "paragraph",
@@ -197,6 +197,11 @@
       "text": "[[Exploratory Parsing]] (within [[Frame]]) See: [[Exploratory Parsing in Frames]]"
     },
     {
+      "type": "paragraph",
+      "id": "153446fb292b32ea",
+      "text": "[[ESM Snippet Template]] See: [[Tortoise Explains the Dance]]"
+    },
+    {
       "type": "reference",
       "id": "2a8ebf5fbb6fbdf2",
       "site": "wiki.ralfbarkow.ch",
@@ -207,7 +212,7 @@
     {
       "type": "frame",
       "id": "838045a6c5c125e0",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\n"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -1310,9 +1315,45 @@
       "date": 1709584177364
     },
     {
-      "type": "fork",
-      "site": "wiki.ralfbarkow.ch",
-      "date": 1709585693484
+      "type": "add",
+      "id": "153446fb292b32ea",
+      "item": {
+        "type": "paragraph",
+        "id": "153446fb292b32ea",
+        "text": "[[ESM Snippet Template]]"
+      },
+      "after": "a514b5095d1658b1",
+      "date": 1709990921775
+    },
+    {
+      "type": "edit",
+      "id": "153446fb292b32ea",
+      "item": {
+        "type": "paragraph",
+        "id": "153446fb292b32ea",
+        "text": "[[ESM Snippet Template]] See: [[Tortoise Explains the Dance]]"
+      },
+      "date": 1709990936840
+    },
+    {
+      "type": "edit",
+      "id": "556325e5f06ceec1",
+      "item": {
+        "type": "paragraph",
+        "id": "556325e5f06ceec1",
+        "text": "[[Embodiment]] (within [[CajunBot]])"
+      },
+      "date": 1710917187541
+    },
+    {
+      "type": "edit",
+      "id": "838045a6c5c125e0",
+      "item": {
+        "type": "frame",
+        "id": "838045a6c5c125e0",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1713702490986
     }
   ]
 }

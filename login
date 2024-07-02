@@ -2,24 +2,14 @@
   "title": "Login",
   "story": [
     {
-      "type": "paragraph",
-      "id": "93fb5d2dad2eaa17",
-      "text": "The wiki [[Application]] must be configured to request login authentication from the [[Identity]] provider that has been chosen for this particular server. [https://github.com/fedwiki/wiki-security-passportjs/blob/master/ReadMe.md readme]"
-    },
-    {
-      "type": "paragraph",
-      "id": "11cbc8d39f9b96df",
-      "text": "Each identity provider requires registration with their service which will require you creating a developer account. The wiki security plugin provides an outline of this process for each supported provider. [https://github.com/fedwiki/wiki-security-passportjs/blob/master/docs/configuration.md readme]"
+      "type": "markdown",
+      "id": "59c31cc22c62c5de",
+      "text": "\nAs a Wikifarm host, you must choose which authentication provider to use. You will need to register an application with the desired identity provider and configure the wiki server. See Configuring wiki-security-passportjs [https://github.com/fedwiki/wiki-security-passportjs/blob/master/docs/configuration.md github]."
     },
     {
       "type": "paragraph",
       "id": "20ffefec318e8eff",
       "text": "See [[Configuring OAuth in Google]]"
-    },
-    {
-      "type": "markdown",
-      "id": "59c31cc22c62c5de",
-      "text": "Temp edit"
     }
   ],
   "journal": [
@@ -130,6 +120,57 @@
       "type": "fork",
       "site": "marc.tries.fed.wiki",
       "date": 1628806658992
+    },
+    {
+      "type": "edit",
+      "id": "93fb5d2dad2eaa17",
+      "item": {
+        "type": "paragraph",
+        "id": "93fb5d2dad2eaa17",
+        "text": "The [[Federated Wiki]] [[Application]] must be configured to request login authentication from the [[Identity]] provider that has been chosen for this particular server. [https://github.com/fedwiki/wiki-security-passportjs/blob/master/ReadMe.md readme]"
+      },
+      "date": 1714380046411
+    },
+    {
+      "type": "edit",
+      "id": "59c31cc22c62c5de",
+      "item": {
+        "type": "markdown",
+        "id": "59c31cc22c62c5de",
+        "text": "\n\nAs a Wikifarm host, you must choose which authentication provider to use. You will need to register an application with the desired identity provider and configure the wiki server. See Configuring wiki-security-passportjs."
+      },
+      "date": 1714380165000
+    },
+    {
+      "type": "edit",
+      "id": "59c31cc22c62c5de",
+      "item": {
+        "type": "markdown",
+        "id": "59c31cc22c62c5de",
+        "text": "\nAs a Wikifarm host, you must choose which authentication provider to use. You will need to register an application with the desired identity provider and configure the wiki server. See Configuring wiki-security-passportjs [https://github.com/fedwiki/wiki-security-passportjs/blob/master/docs/configuration.md github]."
+      },
+      "date": 1714380201944
+    },
+    {
+      "id": "59c31cc22c62c5de",
+      "type": "move",
+      "order": [
+        "59c31cc22c62c5de",
+        "93fb5d2dad2eaa17",
+        "11cbc8d39f9b96df",
+        "20ffefec318e8eff"
+      ],
+      "date": 1714380232155
+    },
+    {
+      "type": "remove",
+      "id": "93fb5d2dad2eaa17",
+      "date": 1714380244645
+    },
+    {
+      "type": "remove",
+      "id": "11cbc8d39f9b96df",
+      "date": 1714380246516
     }
   ]
 }

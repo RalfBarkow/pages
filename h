@@ -52,6 +52,21 @@
       "text": "[[High-Dimensional Computing]]"
     },
     {
+      "type": "paragraph",
+      "id": "17d7beb331db501c",
+      "text": "[[Open Hyperdocument System]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "dd3e8208e0a580cc",
+      "text": "[[hdom-canvas]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "6f8188bcb8be02a6",
+      "text": "[[halfway]] See: [[Semi-Edge Walk]]"
+    },
+    {
       "type": "reference",
       "id": "8eb41c9ad7a9c330",
       "site": "wiki.ralfbarkow.ch",
@@ -62,7 +77,7 @@
     {
       "type": "frame",
       "id": "2327d39d4415325c",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -433,9 +448,18 @@
       "date": 1709548688749
     },
     {
-      "type": "fork",
-      "site": "wiki.ralfbarkow.ch",
-      "date": 1709551513761
+      "id": "17d7beb331db501c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "17d7beb331db501c",
+        "text": "[[Open Hyperdocument System]]"
+      },
+      "after": "f1ed62904b3511b2",
+      "attribution": {
+        "page": "O"
+      },
+      "date": 1709622035992
     },
     {
       "type": "edit",
@@ -443,9 +467,61 @@
       "item": {
         "type": "frame",
         "id": "2327d39d4415325c",
-        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+        "text": "//wiki.ralfbarkow.ch/assets/pages/story-telling/speed-bot.html\nHEIGHT 222"
       },
-      "date": 1709551524125
+      "date": 1709622052552
+    },
+    {
+      "type": "edit",
+      "id": "2327d39d4415325c",
+      "item": {
+        "type": "frame",
+        "id": "2327d39d4415325c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222"
+      },
+      "date": 1709622083120
+    },
+    {
+      "type": "edit",
+      "id": "2327d39d4415325c",
+      "item": {
+        "type": "frame",
+        "id": "2327d39d4415325c",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1713703128360
+    },
+    {
+      "type": "add",
+      "id": "dd3e8208e0a580cc",
+      "item": {
+        "type": "paragraph",
+        "id": "dd3e8208e0a580cc",
+        "text": "[[hdom-canvas]]"
+      },
+      "after": "17d7beb331db501c",
+      "date": 1713703169106
+    },
+    {
+      "type": "add",
+      "id": "6f8188bcb8be02a6",
+      "item": {
+        "type": "paragraph",
+        "id": "6f8188bcb8be02a6",
+        "text": "[[halfway]] See: "
+      },
+      "after": "dd3e8208e0a580cc",
+      "date": 1719239284770
+    },
+    {
+      "type": "edit",
+      "id": "6f8188bcb8be02a6",
+      "item": {
+        "type": "paragraph",
+        "id": "6f8188bcb8be02a6",
+        "text": "[[halfway]] See: [[Semi-Edge Walk]]"
+      },
+      "date": 1719239295859
     }
   ]
 }

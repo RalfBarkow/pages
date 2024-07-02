@@ -1,0 +1,462 @@
+{
+  "title": "Independent Visitor Pattern",
+  "story": [
+    {
+      "type": "html",
+      "text": "<i>I've put the ideas from this discussion into a concrete example with running code and disciplined refactoring: [[Visitor Pattern Refactoring]] -- [[Justin Sampson]]</i>",
+      "id": "e26c9164378eded6a1d9bec435396daa"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4f810b120c5a51163374459feaec5585"
+    },
+    {
+      "type": "html",
+      "text": "\nReading the discussion of the [[Visitor Pattern]], particularly the concerns about circular dependencies, I started to wonder how the pattern could be refactored to remove the cycles. [[Acyclic Visitor]] eliminates the compile-time dependencies by using multiple inheritance and dynamic casts, which a lot of people are uncomfortable with for various reasons. So I sat down with a simple [[Visitor Pattern]] class diagram and started thinking.",
+      "id": "f26a65ed5c11c2c5b9d4d9b14ce1d0b8"
+    },
+    {
+      "type": "html",
+      "text": "\nThen this example occurred to me: Doesn't the [[Simple Api For Xml]] (SAX) kind of look like it could be a Visitor for a [[Document Object Model]] (DOM) structure? It certainly seems to fit the pattern, and doesn't have any circular dependencies. The idea is that SAX is event-based while DOM is tree-based, but they both represent basically the same model. (Actually it looks more like a [[Hierarchical Visitor Pattern]].)",
+      "id": "02f4a51145ff2037b9b76d5c927fb655"
+    },
+    {
+      "type": "html",
+      "text": "\nFor the purpose of discussion consider these classes: <i>These are <b>not</b> the real SAX and DOM classes or interfaces; they are vastly simplified to make an easy example. The method names are also changed to look more like the description of [[Hierarchical Visitor Pattern]].</i>",
+      "id": "29a74830422981c11e7cd5c84c0b937a"
+    },
+    {
+      "type": "code",
+      "text": "    interface Sax''''''Visitor {\n        void enterDocument();\n        void leaveDocument();\n        void enterElement(String name, Map attributes);\n        void leaveElement(String name);\n        void visitText(String characters);\n    }",
+      "id": "e436a4e38f8605f8d4a6b0368e2616a3"
+    },
+    {
+      "type": "code",
+      "text": "    abstract class Dom''''''Node {\n        abstract void accept(Sax''''''Visitor sax);\n    }",
+      "id": "324cbf23471b8fe4367660f1cbc290c5"
+    },
+    {
+      "type": "code",
+      "text": "    class Dom''''''Document extends Dom''''''Node {\n        Dom''''''Element root;\n        void accept(Sax''''''Visitor sax) {\n            sax.enterDocument();\n            root.accept(sax);\n            sax.leaveDocument();\n        }\n    }",
+      "id": "9655844e0da7f7106fa85be525909f48"
+    },
+    {
+      "type": "code",
+      "text": "    class Dom''''''Element extends Dom''''''Node {\n        String name;\n        Map attributes;\n        List content;  // list of Dom''''''Element and Dom''''''Text objects\n        void accept(Sax''''''Visitor sax) {\n            sax.enterElement(name, attributes);\n            Iterator contentIterator = content.iterator();\n            while (contentIterator.hasNext()) {\n                ((Dom''''''Node) contentIterator.next()).accept(sax);\n            }\n            sax.leaveElement(name);\n        }\n    }",
+      "id": "a3086ade0832e3a75bd12b3c8c99062f"
+    },
+    {
+      "type": "code",
+      "text": "    class Dom''''''Text extends Dom''''''Node {\n        String text;\n        void accept(Sax''''''Visitor sax) {\n            sax.visitText(text);\n        }\n    }",
+      "id": "1db8562162f6915eb124f342418465d1"
+    },
+    {
+      "type": "html",
+      "text": "\nNotice that the DOM classes depend on the SAX visitor interface, but the SAX visitor does not depend on the DOM classes. The idea is that the SAX visitor describes everything it cares about directly in its interface, without reference to the classes implementing the structure.",
+      "id": "70e9bee6271daf5f0339befee788bd37"
+    },
+    {
+      "type": "html",
+      "text": "\nThat is, the visitor is independent of the particular way the structure is implemented. The visitor's interface describes exactly what it wants to visit and what information it needs. The structure classes can be changed drastically, but as long as they can maintain the appearance that the visitor cares about -- that is, they can provide the information the visitor asks for -- the visitor doesn't need to change. This is apparent in the fact that SAX is most often used as part of a [[Builder Pattern]], where the SAX visitor is <i>building</i> a DOM tree -- and the driver is actually an XML parser reading from a file. The SAX visitor (actually it's called the Content<b></b>Handler) doesn't care how the model is represented, it just cares about getting the information in the right order.",
+      "id": "3dfec428bcc3e60137d8f467e78773f4"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Justin Sampson]]",
+      "id": "acd3f86ac48dd1faf14370a2790b84f2"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4f810b120c5a51163374459feaec5585"
+    },
+    {
+      "type": "html",
+      "text": "\nI thought of a few more ways to refactor this pattern last night.",
+      "id": "4ca597cea6246cab52ec353212c22722"
+    },
+    {
+      "type": "html",
+      "text": "<b>1.</b> The whole idea of the pattern was that the visitor shouldn't be dependent on the representation of the model, it should just declare what it wants to know for each kind of structure it could encounter. That raises a concern about the way I wrote the enterElement method above, which takes a Map of the element's attributes. It would be cleaner to write the interface like this:",
+      "id": "01114ad0caf12114f42d7b9522073ff9"
+    },
+    {
+      "type": "code",
+      "text": "    interface Sax''''''Visitor {\n        void enterDocument();\n        void leaveDocument();\n        void enterElement(String name);\n        void leaveElement(String name);\n        void visitAttribute(String name, String value);\n        void visitText(String characters);\n    }",
+      "id": "7cd9066054c7e3a1fa864cd0a07daf1f"
+    },
+    {
+      "type": "html",
+      "text": "\nNow all that is required by the visitor is that elements contain attributes, but the way they are represented within the class implementing the element doesn't matter. The iteration through the attributes is moved from the visitor to the model; which makes sense, since the original intent of the [[Visitor Pattern]] was to refactor traversal code out of visitor class. That gives us more flexibility to refactor the Dom<b></b>Element class.",
+      "id": "0cedb1ab6ffdceac56687bab0dac7e46"
+    },
+    {
+      "type": "html",
+      "text": "\nFor example, maybe instead of having a Map inside Dom<b></b>Element, we could introduce another class:",
+      "id": "9905d0dfa3a4344cb93da8d3bbd9e119"
+    },
+    {
+      "type": "code",
+      "text": "    class Dom''''''Attribute extends Dom''''''Node {\n        String name;\n        String value;\n        void accept(Sax''''''Visitor sax) {\n            sax.visitAttribute(name, value);\n        }\n    }",
+      "id": "baeff960087557e629aaca7fcbc5a49a"
+    },
+    {
+      "type": "html",
+      "text": "\nThen Dom<b></b>Element's content list can contain attribute nodes just like text and nested element nodes. (This is actually how the real DOM works.) The point is, since the visitor isn't dependent on the implementation, we can choose whether to use the map or introduce another subclass. Or go the other way, too -- if we already have a subclass, but it's not pulling its own weight and we want to eliminate it. The original [[Visitor Pattern]] and all its other variations wouldn't allow that, because they would be dependent on the existence of that subclass.",
+      "id": "dbd976a269ce1f0a3d3d5b9b05009417"
+    },
+    {
+      "type": "html",
+      "text": "<b>2.</b> As another way to go, if we think that some visitor method is taking too many  parameters, then we can use [[Introduce Parameter Object]] to factor them out. This is actually how the real SAX works with attributes; they have an Attributes interface that gets passed in where I was passing in a Map to enterElement above. The implementation passes in an adapter implementing that interface for callbacks to the implementation to get the data.",
+      "id": "6cb53f000968fc792b78e9e8b784552a"
+    },
+    {
+      "type": "html",
+      "text": "\nThis introduces an extra class that may seem redundant with the structure classes, but it still avoids the circular dependencies, and again it allows us to change the structural implementation at will as long as we can still provide an adapter to the visitor's parameter interface. Our Attributes adapter could be a wrapper for the Map, or it could delegate to the Dom<b></b>Element to iterate through its content and look for Dom<b></b>Attribute nodes; either way, the visitor doesn't know the difference and doesn't have to be changed.",
+      "id": "94482c27133dae040eecb495ceb329f6"
+    },
+    {
+      "type": "html",
+      "text": "<b>3.</b> The structure classes (Dom<b></b>Node et al.) are still dependent on the visitor interface. There is no more circular dependence, but there is still a dependence. What happens if we want to add a different <i>kind</i> of visitor? That is, the [[Visitor Pattern]] allows us to plug visitors that do different things with the information, but it doesn't allow us to plug in visitors that look at the structure differently.",
+      "id": "aab0640509424da4bcc95596804627ec"
+    },
+    {
+      "type": "html",
+      "text": "\nFor example, let's say we just want to count all the nodes in the structure. (Okay, it's a silly example, but it's simple.) We could write a new visitor interface like this:",
+      "id": "d59dcdabe903292d4521fbc6547fc38f"
+    },
+    {
+      "type": "code",
+      "text": "    interface Dummy''''''Visitor {\n        void visitNode();\n    }",
+      "id": "cc8d767606dc1489ffe57017deffb78a"
+    },
+    {
+      "type": "html",
+      "text": "\nTo support this in the code above, we would have to add a new accept(Dummy<b></b>Visitor) method to Dom<b></b>Node and all its subclasses.",
+      "id": "2bc56182999c49f3d13593474b06c84d"
+    },
+    {
+      "type": "html",
+      "text": "\nAlternatively, what if we factor out all that traversal code into yet another class?",
+      "id": "5e466b25d2382eef99e6ea656508456a"
+    },
+    {
+      "type": "code",
+      "text": "    class S''''''axTourGuide {\n        void traverseDocument(Dom''''''Document dom, Sax''''''Visitor sax) {\n            sax.enterDocument();\n            traverseElement(dom.getRootElement(), sax);\n            sax.leaveDocument();\n        }\n        void traverseElement(Dom''''''Element dom, Sax''''''Visitor sax) {\n            sax.enterElement(dom.getName());\n            Iterator contentIterator = dom.getContentIterator();\n            while (contentIterator.hasNext()) {\n                Dom''''''Node node = (Dom''''''Node) contentIterator.next();\n                if (node instanceof Dom''''''Attribute) {\n                    traverseAttribute((Dom''''''Attribute) node, sax);\n                } else if (node instanceof Dom''''''Element) {\n                    traverseElement((Dom''''''Element) node, sax);\n                } else if (node instanceof Dom''''''Text) {\n                    traverseText((Dom''''''Text) node, sax);\n                }\n            }\n            sax.leaveElement(dom.getName());\n        }\n        void traverseAttribute(Dom''''''Attribute dom, Sax''''''Visitor sax) {\n            sax.visitAtttribute(dom.getName(), dom.getValue());\n        }\n        void traverseText(Dom''''''Text dom, Sax''''''Visitor sax) {\n            sax.visitText(dom.getCharacters());\n        }\n    }",
+      "id": "fcaa87558bd6e0692d73c1706e00af4b"
+    },
+    {
+      "type": "html",
+      "text": "\nThat uses runtime type information and downcasting, but now we can remove the accept() methods from Dom<b></b>Node et al., eliminating the dependence of the structure on the visitor. Then whenever we want to add a new <i>kind</i> of visitor, we don't need to touch the structure classes at all; we just need to write a new Tour<b></b>Guide class:",
+      "id": "8b69435a00f77d1e260cb7b7e6a49755"
+    },
+    {
+      "type": "code",
+      "text": "    class D''''''ummyTourGuide {\n        void traverseDocument(Dom''''''Document dom, D''''''ummyVisitor dum) {\n            dum.visitNode();\n            traverseElement(dom.getRootElement(), dum);\n        }\n        void traverseElement(Dom''''''Element dom, D''''''ummyVisitor dum) {\n            dum.visitNode();\n            Iterator contentIterator = dom.getContentIterator();\n            while (contentIterator.hasNext()) {\n                Dom''''''Node node = (Dom''''''Node) contentIterator.next();\n                if (node instanceof Dom''''''Attribute) {\n                    traverseAttribute((Dom''''''Attribute) node, dum);\n                } else if (node instanceof Dom''''''Element) {\n                    traverseElement((Dom''''''Element) node, dum);\n                } else if (node instanceof Dom''''''Text) {\n                    traverseText((Dom''''''Text) node, dum);\n                }\n            }\n        }\n        void traverseAttribute(Dom''''''Attribute dom, D''''''ummyVisitor dum) {\n            dum.visitNode();\n        }\n        void traverseText(Dom''''''Text dom, D''''''ummyVisitor dum) {\n            dum.visitNode();\n        }\n    }",
+      "id": "65aa36bdc3d80cb9c8e5d6546a36d6d2"
+    },
+    {
+      "type": "html",
+      "text": "\nAn extra bonus from this refactoring is that now, again just by introducing more T<b></b>ourGuides, we can support using one kind of visitor with different structure implementations just as well as different kinds of visitors with one structure.",
+      "id": "f7adc60992fad118c2b839949446141c"
+    },
+    {
+      "type": "html",
+      "text": "\nContinuing the XML example, we could introduce a new Tour<b></b>Guide which, instead of traversing a DOM tree, actually parses an XML file. This P<b></b>arsingTourGuide would have a parseXml(Input<b></b>Stream, Sax<b></b>Visitor) method. Each time it sees \"<foo \" it calls sax.enterElement(\"foo\"), then it calls visitAttribute() as it parses each attribute, and so forth. And so we have arrived, in a roundabout way, at the <i>original intent</i> of SAX, that is, a standard interface for XML parsers.",
+      "id": "66cfb7bc6a88bf8b62e562b5f6c4b8ab"
+    },
+    {
+      "type": "html",
+      "text": "<b>So,</b> in summary, here are the participants we've come up with in this final refactoring:",
+      "id": "aa552d35f5e8bbc5ff4d81e572ef46b4"
+    },
+    {
+      "type": "html",
+      "text": "<b>Visitor</b> (Sax<b></b>Visitor, Dummy<b></b>Visitor):<br>Describes what information a particular kind of visitor wants to know about some kind of model. Doesn't depend on any other participants.",
+      "id": "964774096691a1fc50db4160c18423c8"
+    },
+    {
+      "type": "html",
+      "text": "<b>Structure</b> (Dom<b></b>Document, Dom<b></b>Element, Dom<b></b>Attribute, Dom<b></b>Text, Input<b></b>Stream):<br>Describes a particular representation of some structural model. Doesn't depend on any other participants.",
+      "id": "5caf4be6e5a5d0ee13c30b74a97e6752"
+    },
+    {
+      "type": "html",
+      "text": "<b>Tour</b><b>Guide</b> (S<b></b>axTourGuide, D<b></b>ummyTourGuide, P<b></b>arsingTourGuide):<br>Implements a traversal algorithm over the Structure as appropriate for the Visitor.",
+      "id": "8bf81cbbd74a53831f3bf1e8e5fd7f38"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Justin Sampson]]",
+      "id": "acd3f86ac48dd1faf14370a2790b84f2"
+    },
+    {
+      "type": "html",
+      "text": "\nThis is like a visitor with [[Eviscerated Object]]s as parameters (an [[Eviscerated Visitor]]?). The tradeoff between this and a normal visitor is that in a normal visitor, you get access to the real original objects, whereas here, you don't, but you avoid cyclic dependencies, plus you don't actually need to have any original objects, so you can drive a visit from some other source (eg rather than building the DOM tree and visiting that, you can use SAX input directly). I [[Have This Pattern]], and i use it a lot in conjunction with parsers, as i describe on [[Pretty Printing Java With Visitor]].",
+      "id": "66c10f0b5ac82a4192338b6357a74bf0"
+    },
+    {
+      "type": "html",
+      "text": "\nAgain, this makes me ponder the relationship between [[Visitor And Builder]].",
+      "id": "c624bcbca27740a004c9b4369d9ab30a"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Tom Anderson]]",
+      "id": "73b238444beeefd07abfd73a24e744ef"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4f810b120c5a51163374459feaec5585"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Pattern]]",
+      "id": "e7cc80fec4087ec481648a920f95407a"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?IndependentVisitorPattern c2.com]",
+      "id": "a982e84a52e4b245fb9fa750734e5df3"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1290259445000,
+      "id": "cde608f6f3303277ec6916a0bf2c2da1",
+      "type": "create",
+      "item": {
+        "title": "Independent Visitor Pattern",
+        "story": [
+          {
+            "type": "html",
+            "text": "<i>I've put the ideas from this discussion into a concrete example with running code and disciplined refactoring: [[Visitor Pattern Refactoring]] -- [[Justin Sampson]]</i>",
+            "id": "e26c9164378eded6a1d9bec435396daa"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4f810b120c5a51163374459feaec5585"
+          },
+          {
+            "type": "html",
+            "text": "\nReading the discussion of the [[Visitor Pattern]], particularly the concerns about circular dependencies, I started to wonder how the pattern could be refactored to remove the cycles. [[Acyclic Visitor]] eliminates the compile-time dependencies by using multiple inheritance and dynamic casts, which a lot of people are uncomfortable with for various reasons. So I sat down with a simple [[Visitor Pattern]] class diagram and started thinking.",
+            "id": "f26a65ed5c11c2c5b9d4d9b14ce1d0b8"
+          },
+          {
+            "type": "html",
+            "text": "\nThen this example occurred to me: Doesn't the [[Simple Api For Xml]] (SAX) kind of look like it could be a Visitor for a [[Document Object Model]] (DOM) structure? It certainly seems to fit the pattern, and doesn't have any circular dependencies. The idea is that SAX is event-based while DOM is tree-based, but they both represent basically the same model. (Actually it looks more like a [[Hierarchical Visitor Pattern]].)",
+            "id": "02f4a51145ff2037b9b76d5c927fb655"
+          },
+          {
+            "type": "html",
+            "text": "\nFor the purpose of discussion consider these classes: <i>These are <b>not</b> the real SAX and DOM classes or interfaces; they are vastly simplified to make an easy example. The method names are also changed to look more like the description of [[Hierarchical Visitor Pattern]].</i>",
+            "id": "29a74830422981c11e7cd5c84c0b937a"
+          },
+          {
+            "type": "code",
+            "text": "    interface Sax''''''Visitor {\n        void enterDocument();\n        void leaveDocument();\n        void enterElement(String name, Map attributes);\n        void leaveElement(String name);\n        void visitText(String characters);\n    }",
+            "id": "e436a4e38f8605f8d4a6b0368e2616a3"
+          },
+          {
+            "type": "code",
+            "text": "    abstract class Dom''''''Node {\n        abstract void accept(Sax''''''Visitor sax);\n    }",
+            "id": "324cbf23471b8fe4367660f1cbc290c5"
+          },
+          {
+            "type": "code",
+            "text": "    class Dom''''''Document extends Dom''''''Node {\n        Dom''''''Element root;\n        void accept(Sax''''''Visitor sax) {\n            sax.enterDocument();\n            root.accept(sax);\n            sax.leaveDocument();\n        }\n    }",
+            "id": "9655844e0da7f7106fa85be525909f48"
+          },
+          {
+            "type": "code",
+            "text": "    class Dom''''''Element extends Dom''''''Node {\n        String name;\n        Map attributes;\n        List content;  // list of Dom''''''Element and Dom''''''Text objects\n        void accept(Sax''''''Visitor sax) {\n            sax.enterElement(name, attributes);\n            Iterator contentIterator = content.iterator();\n            while (contentIterator.hasNext()) {\n                ((Dom''''''Node) contentIterator.next()).accept(sax);\n            }\n            sax.leaveElement(name);\n        }\n    }",
+            "id": "a3086ade0832e3a75bd12b3c8c99062f"
+          },
+          {
+            "type": "code",
+            "text": "    class Dom''''''Text extends Dom''''''Node {\n        String text;\n        void accept(Sax''''''Visitor sax) {\n            sax.visitText(text);\n        }\n    }",
+            "id": "1db8562162f6915eb124f342418465d1"
+          },
+          {
+            "type": "html",
+            "text": "\nNotice that the DOM classes depend on the SAX visitor interface, but the SAX visitor does not depend on the DOM classes. The idea is that the SAX visitor describes everything it cares about directly in its interface, without reference to the classes implementing the structure.",
+            "id": "70e9bee6271daf5f0339befee788bd37"
+          },
+          {
+            "type": "html",
+            "text": "\nThat is, the visitor is independent of the particular way the structure is implemented. The visitor's interface describes exactly what it wants to visit and what information it needs. The structure classes can be changed drastically, but as long as they can maintain the appearance that the visitor cares about -- that is, they can provide the information the visitor asks for -- the visitor doesn't need to change. This is apparent in the fact that SAX is most often used as part of a [[Builder Pattern]], where the SAX visitor is <i>building</i> a DOM tree -- and the driver is actually an XML parser reading from a file. The SAX visitor (actually it's called the Content<b></b>Handler) doesn't care how the model is represented, it just cares about getting the information in the right order.",
+            "id": "3dfec428bcc3e60137d8f467e78773f4"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Justin Sampson]]",
+            "id": "acd3f86ac48dd1faf14370a2790b84f2"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4f810b120c5a51163374459feaec5585"
+          },
+          {
+            "type": "html",
+            "text": "\nI thought of a few more ways to refactor this pattern last night.",
+            "id": "4ca597cea6246cab52ec353212c22722"
+          },
+          {
+            "type": "html",
+            "text": "<b>1.</b> The whole idea of the pattern was that the visitor shouldn't be dependent on the representation of the model, it should just declare what it wants to know for each kind of structure it could encounter. That raises a concern about the way I wrote the enterElement method above, which takes a Map of the element's attributes. It would be cleaner to write the interface like this:",
+            "id": "01114ad0caf12114f42d7b9522073ff9"
+          },
+          {
+            "type": "code",
+            "text": "    interface Sax''''''Visitor {\n        void enterDocument();\n        void leaveDocument();\n        void enterElement(String name);\n        void leaveElement(String name);\n        void visitAttribute(String name, String value);\n        void visitText(String characters);\n    }",
+            "id": "7cd9066054c7e3a1fa864cd0a07daf1f"
+          },
+          {
+            "type": "html",
+            "text": "\nNow all that is required by the visitor is that elements contain attributes, but the way they are represented within the class implementing the element doesn't matter. The iteration through the attributes is moved from the visitor to the model; which makes sense, since the original intent of the [[Visitor Pattern]] was to refactor traversal code out of visitor class. That gives us more flexibility to refactor the Dom<b></b>Element class.",
+            "id": "0cedb1ab6ffdceac56687bab0dac7e46"
+          },
+          {
+            "type": "html",
+            "text": "\nFor example, maybe instead of having a Map inside Dom<b></b>Element, we could introduce another class:",
+            "id": "9905d0dfa3a4344cb93da8d3bbd9e119"
+          },
+          {
+            "type": "code",
+            "text": "    class Dom''''''Attribute extends Dom''''''Node {\n        String name;\n        String value;\n        void accept(Sax''''''Visitor sax) {\n            sax.visitAttribute(name, value);\n        }\n    }",
+            "id": "baeff960087557e629aaca7fcbc5a49a"
+          },
+          {
+            "type": "html",
+            "text": "\nThen Dom<b></b>Element's content list can contain attribute nodes just like text and nested element nodes. (This is actually how the real DOM works.) The point is, since the visitor isn't dependent on the implementation, we can choose whether to use the map or introduce another subclass. Or go the other way, too -- if we already have a subclass, but it's not pulling its own weight and we want to eliminate it. The original [[Visitor Pattern]] and all its other variations wouldn't allow that, because they would be dependent on the existence of that subclass.",
+            "id": "dbd976a269ce1f0a3d3d5b9b05009417"
+          },
+          {
+            "type": "html",
+            "text": "<b>2.</b> As another way to go, if we think that some visitor method is taking too many  parameters, then we can use [[Introduce Parameter Object]] to factor them out. This is actually how the real SAX works with attributes; they have an Attributes interface that gets passed in where I was passing in a Map to enterElement above. The implementation passes in an adapter implementing that interface for callbacks to the implementation to get the data.",
+            "id": "6cb53f000968fc792b78e9e8b784552a"
+          },
+          {
+            "type": "html",
+            "text": "\nThis introduces an extra class that may seem redundant with the structure classes, but it still avoids the circular dependencies, and again it allows us to change the structural implementation at will as long as we can still provide an adapter to the visitor's parameter interface. Our Attributes adapter could be a wrapper for the Map, or it could delegate to the Dom<b></b>Element to iterate through its content and look for Dom<b></b>Attribute nodes; either way, the visitor doesn't know the difference and doesn't have to be changed.",
+            "id": "94482c27133dae040eecb495ceb329f6"
+          },
+          {
+            "type": "html",
+            "text": "<b>3.</b> The structure classes (Dom<b></b>Node et al.) are still dependent on the visitor interface. There is no more circular dependence, but there is still a dependence. What happens if we want to add a different <i>kind</i> of visitor? That is, the [[Visitor Pattern]] allows us to plug visitors that do different things with the information, but it doesn't allow us to plug in visitors that look at the structure differently.",
+            "id": "aab0640509424da4bcc95596804627ec"
+          },
+          {
+            "type": "html",
+            "text": "\nFor example, let's say we just want to count all the nodes in the structure. (Okay, it's a silly example, but it's simple.) We could write a new visitor interface like this:",
+            "id": "d59dcdabe903292d4521fbc6547fc38f"
+          },
+          {
+            "type": "code",
+            "text": "    interface Dummy''''''Visitor {\n        void visitNode();\n    }",
+            "id": "cc8d767606dc1489ffe57017deffb78a"
+          },
+          {
+            "type": "html",
+            "text": "\nTo support this in the code above, we would have to add a new accept(Dummy<b></b>Visitor) method to Dom<b></b>Node and all its subclasses.",
+            "id": "2bc56182999c49f3d13593474b06c84d"
+          },
+          {
+            "type": "html",
+            "text": "\nAlternatively, what if we factor out all that traversal code into yet another class?",
+            "id": "5e466b25d2382eef99e6ea656508456a"
+          },
+          {
+            "type": "code",
+            "text": "    class S''''''axTourGuide {\n        void traverseDocument(Dom''''''Document dom, Sax''''''Visitor sax) {\n            sax.enterDocument();\n            traverseElement(dom.getRootElement(), sax);\n            sax.leaveDocument();\n        }\n        void traverseElement(Dom''''''Element dom, Sax''''''Visitor sax) {\n            sax.enterElement(dom.getName());\n            Iterator contentIterator = dom.getContentIterator();\n            while (contentIterator.hasNext()) {\n                Dom''''''Node node = (Dom''''''Node) contentIterator.next();\n                if (node instanceof Dom''''''Attribute) {\n                    traverseAttribute((Dom''''''Attribute) node, sax);\n                } else if (node instanceof Dom''''''Element) {\n                    traverseElement((Dom''''''Element) node, sax);\n                } else if (node instanceof Dom''''''Text) {\n                    traverseText((Dom''''''Text) node, sax);\n                }\n            }\n            sax.leaveElement(dom.getName());\n        }\n        void traverseAttribute(Dom''''''Attribute dom, Sax''''''Visitor sax) {\n            sax.visitAtttribute(dom.getName(), dom.getValue());\n        }\n        void traverseText(Dom''''''Text dom, Sax''''''Visitor sax) {\n            sax.visitText(dom.getCharacters());\n        }\n    }",
+            "id": "fcaa87558bd6e0692d73c1706e00af4b"
+          },
+          {
+            "type": "html",
+            "text": "\nThat uses runtime type information and downcasting, but now we can remove the accept() methods from Dom<b></b>Node et al., eliminating the dependence of the structure on the visitor. Then whenever we want to add a new <i>kind</i> of visitor, we don't need to touch the structure classes at all; we just need to write a new Tour<b></b>Guide class:",
+            "id": "8b69435a00f77d1e260cb7b7e6a49755"
+          },
+          {
+            "type": "code",
+            "text": "    class D''''''ummyTourGuide {\n        void traverseDocument(Dom''''''Document dom, D''''''ummyVisitor dum) {\n            dum.visitNode();\n            traverseElement(dom.getRootElement(), dum);\n        }\n        void traverseElement(Dom''''''Element dom, D''''''ummyVisitor dum) {\n            dum.visitNode();\n            Iterator contentIterator = dom.getContentIterator();\n            while (contentIterator.hasNext()) {\n                Dom''''''Node node = (Dom''''''Node) contentIterator.next();\n                if (node instanceof Dom''''''Attribute) {\n                    traverseAttribute((Dom''''''Attribute) node, dum);\n                } else if (node instanceof Dom''''''Element) {\n                    traverseElement((Dom''''''Element) node, dum);\n                } else if (node instanceof Dom''''''Text) {\n                    traverseText((Dom''''''Text) node, dum);\n                }\n            }\n        }\n        void traverseAttribute(Dom''''''Attribute dom, D''''''ummyVisitor dum) {\n            dum.visitNode();\n        }\n        void traverseText(Dom''''''Text dom, D''''''ummyVisitor dum) {\n            dum.visitNode();\n        }\n    }",
+            "id": "65aa36bdc3d80cb9c8e5d6546a36d6d2"
+          },
+          {
+            "type": "html",
+            "text": "\nAn extra bonus from this refactoring is that now, again just by introducing more T<b></b>ourGuides, we can support using one kind of visitor with different structure implementations just as well as different kinds of visitors with one structure.",
+            "id": "f7adc60992fad118c2b839949446141c"
+          },
+          {
+            "type": "html",
+            "text": "\nContinuing the XML example, we could introduce a new Tour<b></b>Guide which, instead of traversing a DOM tree, actually parses an XML file. This P<b></b>arsingTourGuide would have a parseXml(Input<b></b>Stream, Sax<b></b>Visitor) method. Each time it sees \"<foo \" it calls sax.enterElement(\"foo\"), then it calls visitAttribute() as it parses each attribute, and so forth. And so we have arrived, in a roundabout way, at the <i>original intent</i> of SAX, that is, a standard interface for XML parsers.",
+            "id": "66cfb7bc6a88bf8b62e562b5f6c4b8ab"
+          },
+          {
+            "type": "html",
+            "text": "<b>So,</b> in summary, here are the participants we've come up with in this final refactoring:",
+            "id": "aa552d35f5e8bbc5ff4d81e572ef46b4"
+          },
+          {
+            "type": "html",
+            "text": "<b>Visitor</b> (Sax<b></b>Visitor, Dummy<b></b>Visitor):<br>Describes what information a particular kind of visitor wants to know about some kind of model. Doesn't depend on any other participants.",
+            "id": "964774096691a1fc50db4160c18423c8"
+          },
+          {
+            "type": "html",
+            "text": "<b>Structure</b> (Dom<b></b>Document, Dom<b></b>Element, Dom<b></b>Attribute, Dom<b></b>Text, Input<b></b>Stream):<br>Describes a particular representation of some structural model. Doesn't depend on any other participants.",
+            "id": "5caf4be6e5a5d0ee13c30b74a97e6752"
+          },
+          {
+            "type": "html",
+            "text": "<b>Tour</b><b>Guide</b> (S<b></b>axTourGuide, D<b></b>ummyTourGuide, P<b></b>arsingTourGuide):<br>Implements a traversal algorithm over the Structure as appropriate for the Visitor.",
+            "id": "8bf81cbbd74a53831f3bf1e8e5fd7f38"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Justin Sampson]]",
+            "id": "acd3f86ac48dd1faf14370a2790b84f2"
+          },
+          {
+            "type": "html",
+            "text": "\nThis is like a visitor with [[Eviscerated Object]]s as parameters (an [[Eviscerated Visitor]]?). The tradeoff between this and a normal visitor is that in a normal visitor, you get access to the real original objects, whereas here, you don't, but you avoid cyclic dependencies, plus you don't actually need to have any original objects, so you can drive a visit from some other source (eg rather than building the DOM tree and visiting that, you can use SAX input directly). I [[Have This Pattern]], and i use it a lot in conjunction with parsers, as i describe on [[Pretty Printing Java With Visitor]].",
+            "id": "66c10f0b5ac82a4192338b6357a74bf0"
+          },
+          {
+            "type": "html",
+            "text": "\nAgain, this makes me ponder the relationship between [[Visitor And Builder]].",
+            "id": "c624bcbca27740a004c9b4369d9ab30a"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Tom Anderson]]",
+            "id": "73b238444beeefd07abfd73a24e744ef"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4f810b120c5a51163374459feaec5585"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Pattern]]",
+            "id": "e7cc80fec4087ec481648a920f95407a"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?IndependentVisitorPattern c2.com]",
+            "id": "a982e84a52e4b245fb9fa750734e5df3"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1708264957423
+    }
+  ]
+}

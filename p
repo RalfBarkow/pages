@@ -272,6 +272,36 @@
       "text": "[[Ports]] as the basis of an [[Object-Capability Model]] on the web [https://html.spec.whatwg.org/multipage/web-messaging.html#ports-as-the-basis-of-an-object-capability-model-on-the-web page]"
     },
     {
+      "type": "paragraph",
+      "id": "164521ce6e2d3181",
+      "text": "[[Peak Planning Advantage]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3713d61817d0e9c7",
+      "text": "[[Projects]] and [[Dojo Exercises]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "ad83bbd76f773627",
+      "text": "[[Pollution Is Colonialism]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "8df00b002abe4941",
+      "text": "[[Particle]] [[Movement]] (within the [[Geometric Amoebot Model]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "c71ddc581e8e90d6",
+      "text": "[[Progress]] See: [[Angelus Novus]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "92ab39cd309e6def",
+      "text": "[[Page Without Title]] See: [[Note Without Title]]"
+    },
+    {
       "type": "reference",
       "id": "e7dc8c0df83732ed",
       "site": "wiki.ralfbarkow.ch",
@@ -282,7 +312,7 @@
     {
       "type": "frame",
       "id": "3fbe92c4b041c5d5",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -2304,9 +2334,129 @@
       "date": 1709662736898
     },
     {
+      "type": "add",
+      "id": "164521ce6e2d3181",
+      "item": {
+        "type": "paragraph",
+        "id": "164521ce6e2d3181",
+        "text": "[[Peak Planning Advantage]]"
+      },
+      "after": "bd37ce1b0abc3a09",
+      "date": 1709986373902
+    },
+    {
+      "id": "3713d61817d0e9c7",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "3713d61817d0e9c7",
+        "text": "[[Projects]] and [[Dojo Exercises]]"
+      },
+      "after": "164521ce6e2d3181",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713867324780
+    },
+    {
+      "type": "edit",
+      "id": "3fbe92c4b041c5d5",
+      "item": {
+        "type": "frame",
+        "id": "3fbe92c4b041c5d5",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1713867354717
+    },
+    {
       "type": "fork",
       "site": "wiki.ralfbarkow.ch",
-      "date": 1709713723002
+      "date": 1713887568858
+    },
+    {
+      "id": "ad83bbd76f773627",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "ad83bbd76f773627",
+        "text": "⇒ [[Pollution Is Colonialism]]"
+      },
+      "after": "3713d61817d0e9c7",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713887581303
+    },
+    {
+      "type": "edit",
+      "id": "ad83bbd76f773627",
+      "item": {
+        "type": "paragraph",
+        "id": "ad83bbd76f773627",
+        "text": "[[Pollution Is Colonialism]]"
+      },
+      "date": 1713887587054
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1713887624877
+    },
+    {
+      "type": "add",
+      "id": "8df00b002abe4941",
+      "item": {
+        "type": "paragraph",
+        "id": "8df00b002abe4941",
+        "text": "[[Particle]] [[Movement]] (within the [[Geometric Amoebot Model]])"
+      },
+      "after": "ad83bbd76f773627",
+      "date": 1713978371183
+    },
+    {
+      "type": "add",
+      "id": "c71ddc581e8e90d6",
+      "item": {
+        "type": "paragraph",
+        "id": "c71ddc581e8e90d6",
+        "text": "[[Progress]]"
+      },
+      "after": "8df00b002abe4941",
+      "date": 1717498425161
+    },
+    {
+      "type": "edit",
+      "id": "c71ddc581e8e90d6",
+      "item": {
+        "type": "paragraph",
+        "id": "c71ddc581e8e90d6",
+        "text": "[[Progress]] See: [[Angelus Novus]]"
+      },
+      "date": 1717498435017
+    },
+    {
+      "id": "92ab39cd309e6def",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "92ab39cd309e6def",
+        "text": "[[Note Without Title]]"
+      },
+      "after": "c71ddc581e8e90d6",
+      "attribution": {
+        "page": "N"
+      },
+      "date": 1719917882085
+    },
+    {
+      "type": "edit",
+      "id": "92ab39cd309e6def",
+      "item": {
+        "type": "paragraph",
+        "id": "92ab39cd309e6def",
+        "text": "[[Page Without Title]] See: [[Note Without Title]]"
+      },
+      "date": 1719917895938
     }
   ]
 }

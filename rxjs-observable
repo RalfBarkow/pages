@@ -1,0 +1,2079 @@
+{
+  "title": "RxJS Observable",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "484e092159df2d01",
+      "text": "We experiment with RxJS Observable to learn more about processing streams of events from existing tools. [https://rxjs.dev/guide/overview docs]"
+    },
+    {
+      "type": "paragraph",
+      "id": "032f1701b29aa899",
+      "text": "We import the essential fromEvent() method from RxJS."
+    },
+    {
+      "type": "code",
+      "id": "5eb6b67568179aa3",
+      "text": "import {fromEvent} from 'https://cdn.jsdelivr.net/npm/rxjs@7.8.1/+esm'\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "fc71f7a4d3bf2fae",
+      "text": "We create a click counter."
+    },
+    {
+      "type": "code",
+      "id": "d6afbafabb711433",
+      "text": "output.insertAdjacentHTML(\n  \"beforebegin\",\n  `<button id=\"counter\" data-n=\"0\">Click</button>`\n)\n\nfromEvent(counter, \"click\")\n.subscribe(event => {\n  let {n} = counter.dataset\n  counter.dataset.n = +n + 1\n  counter.innerHTML = `Count (${counter.dataset.n})`\n})"
+    },
+    {
+      "type": "paragraph",
+      "id": "262c673fd74f4eab",
+      "text": "This example doesn't show why Observable is worth the trouble. We already have addEventListener(\"click\"). Maybe drawing lines will reveal more."
+    },
+    {
+      "type": "paragraph",
+      "id": "2b83956535395893",
+      "text": "We need a canvas on which to draw."
+    },
+    {
+      "type": "code",
+      "id": "992841a9d56810ba",
+      "text": "let canvas = document.createElement(\"canvas\")\ncanvas.id = \"canvas\"\ncanvas.style = \"border: 1px solid black;\"\ncanvas.width = 380\ncanvas.height = 330\nlet ctx = canvas.getContext(\"2d\")\noutput.appendChild(canvas)\n\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "dfbdd5e2b02f4940",
+      "text": "Lets make drag events draw lines on the canvas."
+    },
+    {
+      "type": "paragraph",
+      "id": "fb40d813972f2b0f",
+      "text": "We import a couple operators which we will explain below."
+    },
+    {
+      "type": "code",
+      "id": "229bcd6e49ad42ee",
+      "text": "import {switchMap, takeUntil}\n  from 'https://cdn.jsdelivr.net/npm/rxjs@7.8.1/+esm'\n"
+    },
+    {
+      "type": "paragraph",
+      "id": "912c8cbeba24c733",
+      "text": "To detect drags we need to observe three different events: mousedown at the start of our line, a stream of mousemove events that we will draw to the canvas, and mouseup to stop the line."
+    },
+    {
+      "type": "code",
+      "id": "75d9b0827ad3fe76",
+      "text": "let down$ = fromEvent(canvas, \"mousedown\")\nlet move$ = fromEvent(canvas, \"mousemove\")\nlet up$ = fromEvent(canvas, \"mouseup\")"
+    },
+    {
+      "type": "paragraph",
+      "id": "bf726323d25ccda2",
+      "text": "The next bit is dense."
+    },
+    {
+      "type": "paragraph",
+      "id": "f5a7ba2db0ffe8c3",
+      "text": "The chief benefit of using an Observable library is to be able to use and create and simple functions that process events in interesting ways. Moreover, we can compose operators into more complex assemblies."
+    },
+    {
+      "type": "paragraph",
+      "id": "e4506ffb7eb89129",
+      "text": "Observable.pipe() lets us send forward the events to one or more operators."
+    },
+    {
+      "type": "paragraph",
+      "id": "8a9d55ad7b13b524",
+      "text": "switchMap() is a special sort of map() over the stream of events. [https://rxjs.dev/api/operators/switchMap docs] In this case, the first \"stream\" is the mousedown event that is piped into switchMap. We switch the single mousedown event into a stream of mousemove events."
+    },
+    {
+      "type": "paragraph",
+      "id": "0b1ff9c0dd3d88d1",
+      "text": "Before switching streams, we take the opportunity to position the start of our line in the canvas."
+    },
+    {
+      "type": "paragraph",
+      "id": "6fc33b11b98f238d",
+      "text": "takeUntil() is special operator which passes the incoming stream of events from the pipe until it notices a signal to stop. In this case, the incoming stream are mousemove events and the stop signal is a mouseup event."
+    },
+    {
+      "type": "code",
+      "id": "c480db45bc8abd89",
+      "text": "let drag$ = down$.pipe(switchMap(e => {\n  ctx.moveTo(e.offsetX,e.offsetY)\n  return move$.pipe(takeUntil(up$))\n}))"
+    },
+    {
+      "type": "paragraph",
+      "id": "e50106f35b3c5108",
+      "text": "We subscribe to this complex assembly with a simple function that draws lines on the canvas."
+    },
+    {
+      "type": "code",
+      "id": "f05c67bc814e7f1b",
+      "text": "drag$.subscribe(e => {\n  ctx.lineTo(e.offsetX, e.offsetY)\n  ctx.stroke()\n})"
+    },
+    {
+      "type": "paragraph",
+      "id": "0b3701cf746f1062",
+      "text": "We'll finish with some instructions to the reader."
+    },
+    {
+      "type": "code",
+      "id": "d910d3d6b649b13b",
+      "text": "export default `<em>\nTry drawing lines in the box above. Reload to clear.\n</em>`"
+    },
+    {
+      "type": "paragraph",
+      "id": "caa626ac93aa7d4c",
+      "text": "In the frame below we can view the results."
+    },
+    {
+      "type": "frame",
+      "id": "6cf52409eec3988c",
+      "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/importjs.html\nHEIGHT 400"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "RxJS Observable",
+        "story": [
+          {
+            "type": "paragraph",
+            "id": "484e092159df2d01",
+            "text": "Explain what this does."
+          },
+          {
+            "type": "code",
+            "id": "5eb6b67568179aa3",
+            "text": "// Code that does it.\n\n2 + 3\n\n"
+          },
+          {
+            "type": "frame",
+            "id": "6cf52409eec3988c",
+            "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/basicjs.html\nHEIGHT 400"
+          }
+        ]
+      },
+      "date": 1620068445342
+    },
+    {
+      "type": "remove",
+      "id": "5eb6b67568179aa3",
+      "date": 1620068685305
+    },
+    {
+      "type": "remove",
+      "id": "484e092159df2d01",
+      "date": 1620068688662
+    },
+    {
+      "id": "484e092159df2d01",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "484e092159df2d01",
+        "text": "We experiment with RxJS Observable to build some skills and understanding for improving stream processing in wiki. [http://reactivex.io/rxjs/manual/overview.html#observable docs]"
+      },
+      "date": 1620068692944
+    },
+    {
+      "id": "032f1701b29aa899",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "032f1701b29aa899",
+        "text": "We import the Observable library from a CDN."
+      },
+      "after": "484e092159df2d01",
+      "date": 1620068695714
+    },
+    {
+      "id": "5eb6b67568179aa3",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "let ready = import(\"https://cdn.skypack.dev/rx/\")\n  .then(({default: {Observable}}) => \n    window.Observable = Observable\n  )\n"
+      },
+      "after": "032f1701b29aa899",
+      "date": 1620068698505
+    },
+    {
+      "id": "21b8445da9face50",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "21b8445da9face50",
+        "text": "We create a button so we can follow the first example from the docs. We install the button before our existing element (named \"show\") so that the click responses will appear below the button."
+      },
+      "after": "5eb6b67568179aa3",
+      "date": 1620068701309
+    },
+    {
+      "id": "6a6847dba27b6cb4",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "6a6847dba27b6cb4",
+        "text": "show.insertAdjacentHTML(\n  \"beforebegin\", \n  `<button id=\"button\">add 1</button>`\n)"
+      },
+      "after": "21b8445da9face50",
+      "date": 1620068704301
+    },
+    {
+      "id": "7f2c9a5eb4c1239e",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "7f2c9a5eb4c1239e",
+        "text": "We use the library to observe clicks."
+      },
+      "after": "6a6847dba27b6cb4",
+      "date": 1620068716122
+    },
+    {
+      "id": "a8d6d04860898ad2",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "a8d6d04860898ad2",
+        "text": "async function main() {\n  await ready; //ensure Observable is loaded\n  Observable.fromEvent(button, 'click')\n    .subscribe(_ => {\n      show.innerHTML += \"Clicked!\\n\"\n    })\n  return null\n}\n\nmain()"
+      },
+      "after": "7f2c9a5eb4c1239e",
+      "date": 1620068831886
+    },
+    {
+      "type": "edit",
+      "id": "032f1701b29aa899",
+      "item": {
+        "type": "paragraph",
+        "id": "032f1701b29aa899",
+        "text": "We import the Observable library from a CDN. (It required logging and trial and error to discover the shape of the payload from this dynamic use of import().)"
+      },
+      "date": 1620068973422
+    },
+    {
+      "type": "edit",
+      "id": "21b8445da9face50",
+      "item": {
+        "type": "paragraph",
+        "id": "21b8445da9face50",
+        "text": "We create a button so we can follow the first example from the docs. (We install the button before our existing element (named \"show\") so that the click responses will appear below the button.)"
+      },
+      "date": 1620068992024
+    },
+    {
+      "type": "edit",
+      "id": "a8d6d04860898ad2",
+      "item": {
+        "type": "code",
+        "id": "a8d6d04860898ad2",
+        "text": "async function main() {\n  await ready; // to ensure Observable is loaded\n  Observable.fromEvent(button, 'click')\n    .subscribe(_ => {\n      show.innerHTML += \"Clicked!\\n\"\n    })\n  return null\n}\n\nmain()"
+      },
+      "date": 1620069013153
+    },
+    {
+      "type": "edit",
+      "id": "6a6847dba27b6cb4",
+      "item": {
+        "type": "code",
+        "id": "6a6847dba27b6cb4",
+        "text": "output.insertAdjacentHTML(\n  \"beforebegin\", \n  `<button id=\"button1\" data-value=\"0\">clicks (0)</button>`\n)"
+      },
+      "date": 1620072111051
+    },
+    {
+      "type": "add",
+      "id": "6b78ffb122f63144",
+      "item": {
+        "type": "paragraph",
+        "id": "6b78ffb122f63144",
+        "text": "We need a function to show the change in clicks."
+      },
+      "after": "6a6847dba27b6cb4",
+      "date": 1620078081755
+    },
+    {
+      "type": "add",
+      "id": "030a8b8ace51415d",
+      "item": {
+        "type": "factory",
+        "id": "030a8b8ace51415d",
+        "text": "function increment(button) {"
+      },
+      "after": "6b78ffb122f63144",
+      "date": 1620078106260
+    },
+    {
+      "type": "edit",
+      "id": "030a8b8ace51415d",
+      "item": {
+        "type": "code",
+        "id": "030a8b8ace51415d",
+        "text": "function increment(button) {\n  button.dataset.value += 1\n  let {value} = button.dataset\n  button.innerHTML = `clicks (${value})`\n}"
+      },
+      "date": 1620078242956
+    },
+    {
+      "type": "edit",
+      "id": "a8d6d04860898ad2",
+      "item": {
+        "type": "code",
+        "id": "a8d6d04860898ad2",
+        "text": "async function main() {\n  await ready; // to ensure Observable is loaded\n  Observable.fromEvent(button1, 'click')\n    .subscribe(e => increment(e.target))\n  return null\n}\n\nmain()"
+      },
+      "date": 1620078299373
+    },
+    {
+      "type": "edit",
+      "id": "030a8b8ace51415d",
+      "item": {
+        "type": "code",
+        "id": "030a8b8ace51415d",
+        "text": "function increment(button) {\n  let {value} = button.dataset\n  value = button.dataset.value = 1 + value\n  button.innerHTML = `clicks (${value})`\n}"
+      },
+      "date": 1620078365576
+    },
+    {
+      "type": "edit",
+      "id": "030a8b8ace51415d",
+      "item": {
+        "type": "code",
+        "id": "030a8b8ace51415d",
+        "text": "function increment(button) {\n  let {value} = button.dataset\n  value = button.dataset.value = +value + 1\n  button.innerHTML = `clicks (${value})`\n}"
+      },
+      "date": 1620078389832
+    },
+    {
+      "type": "edit",
+      "id": "a8d6d04860898ad2",
+      "item": {
+        "type": "code",
+        "id": "a8d6d04860898ad2",
+        "text": "async function main() {\n  await ready; // to ensure Observable is loaded\n  Observable.fromEvent(button1, 'click')\n    .subscribe(e => increment(e.target))\n}\n\nmain()\nnull"
+      },
+      "date": 1620078417312
+    },
+    {
+      "type": "edit",
+      "id": "a8d6d04860898ad2",
+      "item": {
+        "type": "code",
+        "id": "a8d6d04860898ad2",
+        "text": "async function respondToClicks() {\n  await ready; // to ensure Observable is loaded\n  Observable.fromEvent(button1, 'click')\n    .subscribe(e => increment(e.target))\n}\n\nrespondToClicks()\nnull"
+      },
+      "date": 1620078614010
+    },
+    {
+      "id": "caa626ac93aa7d4c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "caa626ac93aa7d4c",
+        "text": "In the frame below we can view the results."
+      },
+      "after": "a8d6d04860898ad2",
+      "date": 1620078878213
+    },
+    {
+      "type": "add",
+      "id": "262c673fd74f4eab",
+      "item": {
+        "type": "paragraph",
+        "id": "262c673fd74f4eab",
+        "text": "This example doesn't show why Observable is worth the trouble. We already have addEventListener(\"click\"). Maybe drawing lines will reveal more."
+      },
+      "after": "a8d6d04860898ad2",
+      "date": 1620079005755
+    },
+    {
+      "type": "fork",
+      "date": 1620082184704
+    },
+    {
+      "id": "992841a9d56810ba",
+      "type": "add",
+      "item": {
+        "type": "code",
+        "id": "992841a9d56810ba",
+        "text": "let canvas = document.createElement(\"canvas\")\ncanvas.id = \"canvas\"\ncanvas.style = \"border: 1px solid black;\"\ncanvas.width = 380\ncanvas.height = 300\nlet ctx = canvas.getContext(\"2d\")\nctx.translate(190, 150)\noutput.appendChild(canvas)\n\n"
+      },
+      "after": "262c673fd74f4eab",
+      "date": 1620083486682
+    },
+    {
+      "id": "2b83956535395893",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "2b83956535395893",
+        "text": "We need a canvas on which to draw."
+      },
+      "after": "262c673fd74f4eab",
+      "date": 1620083498977
+    },
+    {
+      "type": "add",
+      "id": "dfbdd5e2b02f4940",
+      "item": {
+        "type": "paragraph",
+        "id": "dfbdd5e2b02f4940",
+        "text": "Lets make mousedown events observable."
+      },
+      "after": "992841a9d56810ba",
+      "date": 1620083617013
+    },
+    {
+      "type": "add",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "factory",
+        "id": "75d9b0827ad3fe76",
+        "text": "async function observeMousedown() {"
+      },
+      "after": "dfbdd5e2b02f4940",
+      "date": 1620083636930
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "let mousedown\nasync function observeMousedown() {\n  await ready; // to ensure Observable is loaded\n  mousedown = Observable.fromEvent(canvas, \"mousedown\")\n}"
+      },
+      "date": 1620083728856
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "let mousedown\nasync function observeMousedown() {\n  await ready; // to ensure Observable is loaded\n  mousedown = Observable\n    .fromEvent(canvas, \"mousedown\")\n}"
+      },
+      "date": 1620083735524
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "let mousedown\nasync function observeMousedown() {\n  await ready; // to ensure Observable is loaded\n  mousedown = Observable\n    .fromEvent(canvas, \"mousedown\")\n}\n\nobserveMousedown()\n\nnull"
+      },
+      "date": 1620083846854
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "let mousedown\nasync function observeMousedown() {\n  await ready; // to ensure Observable is loaded\n  mousedown = Observable\n    .fromEvent(canvas, \"mousedown\")\n}\n\nobserveMousedown()"
+      },
+      "date": 1620084478002
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "let mousedown\nasync function observeMousedown() {\n  await ready; // to ensure Observable is loaded\n  mousedown = Observable\n    .fromEvent(canvas, \"mousedown\")\n  console.log(\"mousedown now available\")\n}\n\nobserveMousedown()"
+      },
+      "date": 1620084526561
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "async function observeMousedown() {\n  await ready; // to ensure Observable is loaded\n  window.mousedown = Observable\n    .fromEvent(canvas, \"mousedown\")\n  console.log(\"mousedown now available\")\n}\n\nobserveMousedown()"
+      },
+      "date": 1620084555544
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "async function observeMousedown() {\n  await ready; // to ensure Observable is loaded\n  window.mousedown = Observable\n    .fromEvent(document, \"mousedown\")\n  console.log(\"mousedown now available\")\n}\n\nobserveMousedown()"
+      },
+      "date": 1620084770081
+    },
+    {
+      "type": "add",
+      "id": "7c8e851af45c11e6",
+      "item": {
+        "type": "paragraph",
+        "id": "7c8e851af45c11e6",
+        "text": "TODO: getting stuck here"
+      },
+      "after": "75d9b0827ad3fe76",
+      "date": 1620085179215
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "async function observeDrags() {\n  await ready; // to ensure Observable is loaded\n  let move = Observable.fromEvent(canvas, \"mousemove\")\n}\n\nobserveMousedown()"
+      },
+      "date": 1620086225320
+    },
+    {
+      "type": "edit",
+      "id": "dfbdd5e2b02f4940",
+      "item": {
+        "type": "paragraph",
+        "id": "dfbdd5e2b02f4940",
+        "text": "Lets make drag events on the canvas observable."
+      },
+      "date": 1620086297234
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "async function observeDrags() {\n  await ready; // to ensure Observable is loaded\n  let move = Observable.fromEvent(canvas, \"mousemove\")\n  \n}\n\nobserveDrags()"
+      },
+      "date": 1620086328656
+    },
+    {
+      "type": "fork",
+      "date": 1620087068992
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "async function observeDrags() {\n  await ready; // to ensure Observable is loaded\n  const {\n    fromEvent,\n    pairwise,\n    pipe,\n    switchMap,\n    takeUntil\n  } = Observable.fromEvent(canvas, \"mousedown\")\n  fromEvent(canvas, \"mousemove\").pipe(\n    switchMap(_ => {\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      takeUntil(fromEvent(canvas, \"mouseleave\")),\n      pairwise()\n    })\n  )\n  \n}\n\nobserveDrags()"
+      },
+      "date": 1620087362404
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "let drag\nasync function observeDrags() {\n  await ready; // to ensure Observable is loaded\n  const {\n    fromEvent,\n    pairwise,\n    pipe,\n    switchMap,\n    takeUntil\n  } = Observable\n\n  drag = fromEvent(canvas, \"mousedown\").pipe(\n    switchMap(_ => fromEvent(canvas, \"mousemove\")\n      .pipe(\n        takeUntil(fromEvent(canvas, \"mouseup\")),\n        takeUntil(fromEvent(canvas, \"mouseleave\")),\n        pairwise()\n  ) ) )\n  console.log(\"drag ready\")\n}\n\nobserveDrags()"
+      },
+      "date": 1620087845943
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "let drag\nasync function observeDrags() {\n  await ready; // to ensure Observable is loaded\n  const {\n    fromEvent,\n    pairwise,\n    pipe,\n    switchMap,\n    takeUntil\n  } = Observable\n\n  console.log({\n    fromEvent,\n    pairwise,\n    pipe,\n    switchMap,\n    takeUntil\n  })\n  drag = fromEvent(canvas, \"mousedown\").pipe(\n    switchMap(_ => fromEvent(canvas, \"mousemove\")\n      .pipe(\n        takeUntil(fromEvent(canvas, \"mouseup\")),\n        takeUntil(fromEvent(canvas, \"mouseleave\")),\n        pairwise()\n  ) ) )\n  console.log(\"drag ready\")\n}\n\nobserveDrags()"
+      },
+      "date": 1620088150395
+    },
+    {
+      "type": "fork",
+      "date": 1620088947942
+    },
+    {
+      "type": "edit",
+      "id": "7c8e851af45c11e6",
+      "item": {
+        "type": "paragraph",
+        "id": "7c8e851af45c11e6",
+        "text": "TODO: getting stuck here. guessing library changed since this [https://medium.com/@tarik.nzl/creating-a-canvas-component-with-free-hand-drawing-with-rxjs-and-angular-61279f577415 blog]"
+      },
+      "date": 1620089609091
+    },
+    {
+      "type": "edit",
+      "id": "484e092159df2d01",
+      "item": {
+        "type": "paragraph",
+        "id": "484e092159df2d01",
+        "text": "We experiment with RxJS Observable to build some skills and understanding for improving stream processing in wiki. Initial results reveal only obstacles to understanding. [http://reactivex.io/rxjs/manual/overview.html#observable docs]"
+      },
+      "date": 1620139859685
+    },
+    {
+      "type": "edit",
+      "id": "032f1701b29aa899",
+      "item": {
+        "type": "paragraph",
+        "id": "032f1701b29aa899",
+        "text": "We import the Observable library from a CDN. "
+      },
+      "date": 1620140042259
+    },
+    {
+      "type": "edit",
+      "id": "6cf52409eec3988c",
+      "item": {
+        "type": "frame",
+        "id": "6cf52409eec3988c",
+        "text": "//wiki.dbbs.co/assets/pages/js-snippet-template/importjs.html\nHEIGHT 400"
+      },
+      "date": 1620145158917
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import Observable from \"https://cdn.skypack.dev/rx/\""
+      },
+      "date": 1620145222544
+    },
+    {
+      "type": "edit",
+      "id": "a8d6d04860898ad2",
+      "item": {
+        "type": "code",
+        "id": "a8d6d04860898ad2",
+        "text": "Observable.fromEvent(button1, 'click')\n  .subscribe(e => increment(e.target))\n"
+      },
+      "date": 1620145252392
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import {Observable} from \"https://cdn.skypack.dev/rx/\""
+      },
+      "date": 1620145285712
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import \"https://cdn.skypack.dev/rx/\""
+      },
+      "date": 1620145319664
+    },
+    {
+      "type": "edit",
+      "id": "a8d6d04860898ad2",
+      "item": {
+        "type": "code",
+        "id": "a8d6d04860898ad2",
+        "text": "rx.Observable.fromEvent(button1, 'click')\n  .subscribe(e => increment(e.target))\n"
+      },
+      "date": 1620145331640
+    },
+    {
+      "type": "edit",
+      "id": "a8d6d04860898ad2",
+      "item": {
+        "type": "code",
+        "id": "a8d6d04860898ad2",
+        "text": "Rx.Observable.fromEvent(button1, 'click')\n  .subscribe(e => increment(e.target))\n"
+      },
+      "date": 1620145342469
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import rx from \"https://cdn.skypack.dev/rx\""
+      },
+      "date": 1620145391885
+    },
+    {
+      "type": "edit",
+      "id": "6a6847dba27b6cb4",
+      "item": {
+        "type": "code",
+        "id": "6a6847dba27b6cb4",
+        "text": "output.innerHTML = `\n  <button id=\"button1\" data-value=\"0\">\n  clicks (0)\n  </button>`\n"
+      },
+      "date": 1620151519811
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import {fromEvent} from \"https://cdn.skypack.dev/rxjs\""
+      },
+      "date": 1620151542483
+    },
+    {
+      "type": "edit",
+      "id": "a8d6d04860898ad2",
+      "item": {
+        "type": "code",
+        "id": "a8d6d04860898ad2",
+        "text": "fromEvent(button1, 'click')\n  .subscribe(e => increment(e.target))\n"
+      },
+      "date": 1620151551816
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "let drag\nasync function observeDrags() {\n  const {\n    fromEvent,\n    pairwise,\n    pipe,\n    switchMap,\n    takeUntil\n  } = Observable\n\n  console.log({\n    fromEvent,\n    pairwise,\n    pipe,\n    switchMap,\n    takeUntil\n  })\n  drag = fromEvent(canvas, \"mousedown\").pipe(\n    switchMap(_ => fromEvent(canvas, \"mousemove\")\n      .pipe(\n        takeUntil(fromEvent(canvas, \"mouseup\")),\n        takeUntil(fromEvent(canvas, \"mouseleave\")),\n        pairwise()\n  ) ) )\n  console.log(\"drag ready\")\n}"
+      },
+      "date": 1620151606497
+    },
+    {
+      "type": "edit",
+      "id": "a8d6d04860898ad2",
+      "item": {
+        "type": "code",
+        "id": "a8d6d04860898ad2",
+        "text": "console.log({\n  button1,\n  fromEvent\n})\nfromEvent(button1, 'click')\n  .subscribe(e => increment(e.target))\n"
+      },
+      "date": 1620151705687
+    },
+    {
+      "type": "edit",
+      "id": "a8d6d04860898ad2",
+      "item": {
+        "type": "code",
+        "id": "a8d6d04860898ad2",
+        "text": "console.log({\n  button1,\n  fromEvent\n})\nfromEvent(button1, 'click')\n  .subscribe(e => increment(button1))\n"
+      },
+      "date": 1620151772057
+    },
+    {
+      "type": "edit",
+      "id": "030a8b8ace51415d",
+      "item": {
+        "type": "code",
+        "id": "030a8b8ace51415d",
+        "text": "function increment(button) {\n  let {value} = button.dataset\n  value = button.dataset.value = +value + 1\n  console.log({button, value})\n  button.innerHTML = `clicks (${value})`\n}"
+      },
+      "date": 1620151816047
+    },
+    {
+      "type": "edit",
+      "id": "a8d6d04860898ad2",
+      "item": {
+        "type": "code",
+        "id": "a8d6d04860898ad2",
+        "text": "console.log({\n  button1,\n  fromEvent\n})\n//fromEvent(button1, 'click').subscribe(e => increment(button1))\nfromEvent(button1, 'click').subscribe(() => console.log('Clicked!'));"
+      },
+      "date": 1620151878327
+    },
+    {
+      "type": "edit",
+      "id": "a8d6d04860898ad2",
+      "item": {
+        "type": "code",
+        "id": "a8d6d04860898ad2",
+        "text": "//fromEvent(button1, 'click').subscribe(e => increment(button1))\nlet buttonToObserve = fromEvent(button1, 'click')\n\nconsole.log({\n  button1,\n  fromEvent,\n  buttonToObserve\n})\nbuttonToObserve.subscribe(\n  () => console.log('Clicked!')\n)"
+      },
+      "date": 1620151976329
+    },
+    {
+      "type": "edit",
+      "id": "a8d6d04860898ad2",
+      "item": {
+        "type": "code",
+        "id": "a8d6d04860898ad2",
+        "text": "//fromEvent(button1, 'click').subscribe(e => increment(button1))\nlet buttonToObserve = fromEvent(button1, 'click')\n\nconsole.log({\n  button1,\n  fromEvent,\n  buttonToObserve\n})\nbuttonToObserve.subscribe(\n  () => console.log('Clicked!'),\n  error => console.error(error)\n)"
+      },
+      "date": 1620152050107
+    },
+    {
+      "type": "edit",
+      "id": "21b8445da9face50",
+      "item": {
+        "type": "paragraph",
+        "id": "21b8445da9face50",
+        "text": "We create a button so we can follow the first example from the docs."
+      },
+      "date": 1620152118512
+    },
+    {
+      "type": "remove",
+      "id": "21b8445da9face50",
+      "date": 1620152138799
+    },
+    {
+      "type": "remove",
+      "id": "6a6847dba27b6cb4",
+      "date": 1620152141186
+    },
+    {
+      "type": "remove",
+      "id": "6b78ffb122f63144",
+      "date": 1620152145178
+    },
+    {
+      "type": "remove",
+      "id": "030a8b8ace51415d",
+      "date": 1620152150005
+    },
+    {
+      "type": "remove",
+      "id": "a8d6d04860898ad2",
+      "date": 1620152158696
+    },
+    {
+      "type": "remove",
+      "id": "7f2c9a5eb4c1239e",
+      "date": 1620152162911
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import {fromEvent} from \"https://cdn.skypack.dev/rxjs\"\n\nfromEvent(document, 'click')\n  .subscribe(() => console.log('Clicked!'))"
+      },
+      "date": 1620152184447
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import {fromEvent} from \"https://cdn.skypack.dev/rxjs\"\n\nfromEvent(document, 'click')\n  .subscribe(() => output.innerHTML+=\"Clicked!<br>\")"
+      },
+      "date": 1620152250347
+    },
+    {
+      "type": "edit",
+      "id": "032f1701b29aa899",
+      "item": {
+        "type": "paragraph",
+        "id": "032f1701b29aa899",
+        "text": "We run the first example from RxJS [https://rxjs-dev.firebaseapp.com/guide/overview docs]"
+      },
+      "date": 1620153091547
+    },
+    {
+      "type": "add",
+      "id": "fc71f7a4d3bf2fae",
+      "item": {
+        "type": "paragraph",
+        "id": "fc71f7a4d3bf2fae",
+        "text": "We try that trick with a button."
+      },
+      "after": "5eb6b67568179aa3",
+      "date": 1620153155552
+    },
+    {
+      "type": "add",
+      "id": "d6afbafabb711433",
+      "item": {
+        "type": "paragraph",
+        "id": "d6afbafabb711433",
+        "text": "output.insertAdjacentHTML("
+      },
+      "after": "fc71f7a4d3bf2fae",
+      "date": 1620153196983
+    },
+    {
+      "type": "edit",
+      "id": "d6afbafabb711433",
+      "item": {
+        "type": "code",
+        "id": "d6afbafabb711433",
+        "text": "output.insertAdjacentHTML(\n  \"beforebegin\",\n  `<button id=\"counter\" data-n=\"0\">Click</button>`\n)\n\nfromEvent(counter, \"click\")\n.subscribe(_ => {\n  let {n} = counter.dataset\n  counter.dataset.n = +n + 1\n  counter.innerHTML = `Count (${counter.dataset.n})`\n})"
+      },
+      "date": 1620153616199
+    },
+    {
+      "type": "edit",
+      "id": "d6afbafabb711433",
+      "item": {
+        "type": "code",
+        "id": "d6afbafabb711433",
+        "text": "output.insertAdjacentHTML(\n  \"beforebegin\",\n  `<button id=\"counter\" data-n=\"0\">Click</button>`\n)\n\nfromEvent(counter, \"click\")\n.subscribe(event => {\n  event.stopPropagation()\n  event.preventDefault()\n  let {n} = counter.dataset\n  counter.dataset.n = +n + 1\n  counter.innerHTML = `Count (${counter.dataset.n})`\n})"
+      },
+      "date": 1620153705944
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  pairwise,\n  pipe,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs\"\nlet drag = fromEvent(canvas, \"mousedown\").pipe(\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      takeUntil(fromEvent(canvas, \"mouseleave\")),\n      pairwise()\n) ) )"
+      },
+      "date": 1620154538979
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {pipe} from \"https://cdn.skypack.dev/rxjs\"\nimport {\n  pairwise,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\nlet drag = fromEvent(canvas, \"mousedown\").pipe(\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      takeUntil(fromEvent(canvas, \"mouseleave\")),\n      pairwise()\n) ) )"
+      },
+      "date": 1620154691842
+    },
+    {
+      "type": "add",
+      "id": "d4413c9dac7ac3a1",
+      "item": {
+        "type": "factory",
+        "id": "d4413c9dac7ac3a1",
+        "text": "drag.subscribe()"
+      },
+      "after": "7c8e851af45c11e6",
+      "date": 1620154823461
+    },
+    {
+      "type": "edit",
+      "id": "d4413c9dac7ac3a1",
+      "item": {
+        "type": "code",
+        "id": "d4413c9dac7ac3a1",
+        "text": "drag.subscribe(\n  event => {\n    console.log(event)\n  }\n)"
+      },
+      "date": 1620154862526
+    },
+    {
+      "type": "edit",
+      "id": "d4413c9dac7ac3a1",
+      "item": {
+        "type": "code",
+        "id": "d4413c9dac7ac3a1",
+        "text": "drag.subscribe(\n  event => {\n    console.log(event)\n  },\n  console.error\n)"
+      },
+      "date": 1620154901005
+    },
+    {
+      "type": "edit",
+      "id": "d4413c9dac7ac3a1",
+      "item": {
+        "type": "code",
+        "id": "d4413c9dac7ac3a1",
+        "text": "console.log({drag})\ndrag.subscribe(\n  event => {\n    console.log(event)\n  },\n  console.error\n)"
+      },
+      "date": 1620154926107
+    },
+    {
+      "type": "edit",
+      "id": "d4413c9dac7ac3a1",
+      "item": {
+        "type": "code",
+        "id": "d4413c9dac7ac3a1",
+        "text": "console.log({drag})\n\nObject.assign(window, {\n  \n})\ndrag.subscribe(\n  event => {\n    console.log(event)\n  },\n  console.error\n)"
+      },
+      "date": 1620155121528
+    },
+    {
+      "type": "edit",
+      "id": "d4413c9dac7ac3a1",
+      "item": {
+        "type": "code",
+        "id": "d4413c9dac7ac3a1",
+        "text": "console.log({drag})\n\nObject.assign(window, {\n  drag,\n  fromEvent,\n  pairwise,\n  switchMap,\n  takeUntil  \n})\ndrag.subscribe(\n  event => {\n    console.log(event)\n  },\n  console.error\n)"
+      },
+      "date": 1620155162886
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import {fromEvent}\n  from \"https://cdn.skypack.dev/rxjs\"\n\nfromEvent(document, 'click')\n  .subscribe(() => output.innerHTML+=\"Clicked!<br>\")"
+      },
+      "date": 1620159092366
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {pipe} from \"https://cdn.skypack.dev/rxjs\"\nimport {\n  pairwise,\n  mergeMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n"
+      },
+      "date": 1620160928988
+    },
+    {
+      "type": "edit",
+      "id": "d4413c9dac7ac3a1",
+      "item": {
+        "type": "code",
+        "id": "d4413c9dac7ac3a1",
+        "text": "Object.assign(window, {\n  drag,\n  fromEvent,\n  pairwise,\n  mergeMap,\n  takeUntil  \n})"
+      },
+      "date": 1620160977373
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  pairwise,\n  mergeMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n"
+      },
+      "date": 1620161027150
+    },
+    {
+      "type": "edit",
+      "id": "d4413c9dac7ac3a1",
+      "item": {
+        "type": "code",
+        "id": "d4413c9dac7ac3a1",
+        "text": "Object.assign(window, {\n  fromEvent,\n  pairwise,\n  mergeMap,\n  takeUntil  \n})"
+      },
+      "date": 1620161049875
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  mergeMap,\n  pairwise,\n  repeat,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n"
+      },
+      "date": 1620161761750
+    },
+    {
+      "type": "remove",
+      "id": "d4413c9dac7ac3a1",
+      "date": 1620161767573
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  mergeMap,\n  pairwise,\n  repeat,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nObject.assign(window, {\n  fromEvent,\n  mergeMap,\n  pairwise,\n  repeat,\n  takeUntil  \n})"
+      },
+      "date": 1620161785125
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nObject.assign(window, {\n  fromEvent,\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  takeUntil \n})"
+      },
+      "date": 1620164156135
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import {fromEvent}\n  from \"https://cdn.skypack.dev/rxjs\""
+      },
+      "date": 1620164214697
+    },
+    {
+      "type": "edit",
+      "id": "032f1701b29aa899",
+      "item": {
+        "type": "paragraph",
+        "id": "032f1701b29aa899",
+        "text": "We import the essential fromEvent() method from RxJS."
+      },
+      "date": 1620164478778
+    },
+    {
+      "type": "edit",
+      "id": "fc71f7a4d3bf2fae",
+      "item": {
+        "type": "paragraph",
+        "id": "fc71f7a4d3bf2fae",
+        "text": "We create a click counter."
+      },
+      "date": 1620164498837
+    },
+    {
+      "type": "edit",
+      "id": "d6afbafabb711433",
+      "item": {
+        "type": "code",
+        "id": "d6afbafabb711433",
+        "text": "output.insertAdjacentHTML(\n  \"beforebegin\",\n  `<button id=\"counter\" data-n=\"0\">Click</button>`\n)\n\nfromEvent(counter, \"click\")\n.subscribe(event => {\n  let {n} = counter.dataset\n  counter.dataset.n = +n + 1\n  counter.innerHTML = `Count (${counter.dataset.n})`\n})"
+      },
+      "date": 1620164527316
+    },
+    {
+      "type": "edit",
+      "id": "484e092159df2d01",
+      "item": {
+        "type": "paragraph",
+        "id": "484e092159df2d01",
+        "text": "We experiment with RxJS Observable to build some skills and understanding for improving stream processing in wiki. Initial results reveal only obstacles to understanding. [https://rxjs.dev/guide/overview docs]"
+      },
+      "date": 1620164624824
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nlet down$ = fromEvent(canvas, \"mousedown\")\nlet move$ = fromEvent(canvas, \"mousemove\")\nlet up$ = fromEvent(canvas, \"mouseup\")\nlet leave$ = fromEvent(canvas, \"mouseleave\")\n\nlet drag$ = down$.concatMap(\n  move$.pipe(takeUntil(up$))\n)\n\nObject.assign(window, {\n  fromEvent,\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  takeUntil,\n  down$, move$, up$, leave$, drag$\n})\n\n"
+      },
+      "date": 1620164921224
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nlet down$ = fromEvent(canvas, \"mousedown\")\nlet move$ = fromEvent(canvas, \"mousemove\")\nlet up$ = fromEvent(canvas, \"mouseup\")\nlet leave$ = fromEvent(canvas, \"mouseleave\")\n\nlet drag$ = down$.pipe(\n  move$.pipe(takeUntil(up$))\n)\n\nObject.assign(window, {\n  fromEvent,\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  takeUntil,\n  down$, move$, up$, leave$, drag$\n})\n\n"
+      },
+      "date": 1620165371322
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nlet down$ = fromEvent(canvas, \"mousedown\")\nlet move$ = fromEvent(canvas, \"mousemove\")\nlet up$ = fromEvent(canvas, \"mouseup\")\nlet leave$ = fromEvent(canvas, \"mouseleave\")\n\nObject.assign(window, {\n  fromEvent,\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  takeUntil,\n  down$, move$, up$, leave$\n})\n\n"
+      },
+      "date": 1620165457012
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nObject.assign(window, {\n  fromEvent,\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n})\n\n"
+      },
+      "date": 1620165928184
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nlet down$ = fromEvent(canvas, 'mousedown')\nlet move$ = fromEvent(canvas, 'mousemove')\nlet up$ = fromEvent(canvas, 'mouseup')\nlet drag$ = down$.pipe(\n  switchMap(event => \n    move$.pipe(takeUntil(up$), pairwise())\n) )\n\nObject.assign(window, {\n  fromEvent,\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil,\n  down$, move$, up$, drag$\n})"
+      },
+      "date": 1620166531554
+    },
+    {
+      "type": "add",
+      "id": "47e28171f7f9d811",
+      "item": {
+        "type": "paragraph",
+        "id": "47e28171f7f9d811",
+        "text": "Finally, lets draw on the canvas."
+      },
+      "after": "7c8e851af45c11e6",
+      "date": 1620166592678
+    },
+    {
+      "type": "add",
+      "id": "b48384b70af28ab8",
+      "item": {
+        "type": "paragraph",
+        "id": "b48384b70af28ab8",
+        "text": "drag$.subscribe(event => {"
+      },
+      "after": "47e28171f7f9d811",
+      "date": 1620166611320
+    },
+    {
+      "type": "edit",
+      "id": "b48384b70af28ab8",
+      "item": {
+        "type": "code",
+        "id": "b48384b70af28ab8",
+        "text": "drag$.subscribe(([start, end]) => {\n  Object.keys(start).filter(/[XY]$/.test)\n  ctx.beginPath()\n  ctx.moveTo(start.offsetX, start.offsetY)\n  ctx.lineTo(end.offsetX, end.offsetY)\n  ctx.stroke()\n  ctx.closePath()\n})"
+      },
+      "date": 1620166952205
+    },
+    {
+      "type": "edit",
+      "id": "b48384b70af28ab8",
+      "item": {
+        "type": "code",
+        "id": "b48384b70af28ab8",
+        "text": "drag$.subscribe(([start, end]) => {\n  console.log(\"dragging\", {\n    start: Object.fromEntries(Object.entries(start)\n      .filter((k,v) => /[XY]$/.test(k))),\n    end: Object.fromEntries(Object.entries(end)\n      .filter((k,v) => /[XY]$/.test(k)))\n  )\n  ctx.beginPath()\n  ctx.moveTo(start.offsetX, start.offsetY)\n  ctx.lineTo(end.offsetX, end.offsetY)\n  ctx.stroke()\n  ctx.closePath()\n})"
+      },
+      "date": 1620167252202
+    },
+    {
+      "type": "edit",
+      "id": "b48384b70af28ab8",
+      "item": {
+        "type": "code",
+        "id": "b48384b70af28ab8",
+        "text": "drag$.subscribe(([start, end]) => {\n  console.log(\"dragging\", {\n    start: Object.fromEntries(Object.entries(start)\n      .filter((k,v) => /[XY]$/.test(k))),\n    end: Object.fromEntries(Object.entries(end)\n      .filter((k,v) => /[XY]$/.test(k)))\n  })\n  ctx.beginPath()\n  ctx.moveTo(start.offsetX, start.offsetY)\n  ctx.lineTo(end.offsetX, end.offsetY)\n  ctx.stroke()\n  ctx.closePath()\n})"
+      },
+      "date": 1620167269933
+    },
+    {
+      "type": "edit",
+      "id": "b48384b70af28ab8",
+      "item": {
+        "type": "code",
+        "id": "b48384b70af28ab8",
+        "text": "/* \ndrag$.subscribe(([start, end]) => {\n  console.log(\"dragging\", {\n    start: Object.fromEntries(Object.entries(start)\n      .filter((k,v) => /[XY]$/.test(k))),\n    end: Object.fromEntries(Object.entries(end)\n      .filter((k,v) => /[XY]$/.test(k)))\n  })\n  ctx.beginPath()\n  ctx.moveTo(start.offsetX, start.offsetY)\n  ctx.lineTo(end.offsetX, end.offsetY)\n  ctx.stroke()\n  ctx.closePath()\n})\n\n*/"
+      },
+      "date": 1620167382395
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      pairwise()\n) ) ).subscribe(console.log)\n\nObject.assign(window, {\n  fromEvent,\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil,\n  down$, move$, up$, drag$\n})"
+      },
+      "date": 1620167817473
+    },
+    {
+      "type": "fork",
+      "date": 1620168494444
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      pairwise()\n) ) ).subscribe(it => {\n  console.log({it})\n})\n\nObject.assign(window, {\n  fromEvent,\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil,\n  down$, move$, up$, drag$\n})"
+      },
+      "date": 1620168543644
+    },
+    {
+      "type": "fork",
+      "date": 1620168947663
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      pairwise()\n) ) ).subscribe(it => {\n  console.log({it})\n})\n"
+      },
+      "date": 1620169145990
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      pairwise()\n) ) ).subscribe(([start, end]) => {\n  console.log(\"dragging\", {\n    start: Object.fromEntries(Object.entries(start)\n      .filter((k,v) => /[XY]$/.test(k))),\n    end: Object.fromEntries(Object.entries(end)\n      .filter((k,v) => /[XY]$/.test(k)))\n  })\n})\n"
+      },
+      "date": 1620169219682
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      pairwise()\n) ) ).subscribe(([start, end]) => {\n  console.log(\"dragging\", {start, end})\n})\n"
+      },
+      "date": 1620169283327
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      pairwise()\n) ) ).subscribe(([start, end]) => {\n  console.log(\n    \"dragging\", {start, end},\n    {\n      start: Object.keys(start).filter(/[XY]$/.test)\n    }\n  )\n})\n"
+      },
+      "date": 1620169384362
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      pairwise()\n) ) ).subscribe(([start, end]) => {\n  console.log(\n    \"dragging\", {start, end},\n    {\n      start: Object.keys(start)\n    }\n  )\n})\n"
+      },
+      "date": 1620169439601
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      pairwise()\n) ) ).subscribe(([start, end]) => {\n  let log = (msg, {\n    type,\n    clientX, clientY,\n    layerX, layerY,\n    movementX, movementY,\n    offsetX, offsetY,\n    pageX, pageY,\n    screenX, screenY,\n    x, y\n  }) => console.log(msg, {\n    type,\n    clientX, clientY,\n    layerX, layerY,\n    movementX, movementY,\n    offsetX, offsetY,\n    pageX, pageY,\n    screenX, screenY,\n    x, y\n  })\n  log(\"start\", start)\n  log(\"end\", end)\n})\n"
+      },
+      "date": 1620169762475
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      pairwise()\n) ) ).subscribe(([start, end]) => {\n  let log = (msg, {\n    type,\n    movementX, movementY,\n    offsetX, offsetY\n  }) => console.log(msg, {\n    type,\n    movementX, movementY,\n    offsetX, offsetY\n  })\n  log(\"start\", start)\n  log(\"end\", end)\n})\n"
+      },
+      "date": 1620169867565
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      pairwise()\n) ) ).subscribe(([start, end]) => {\n  let log = (msg, {\n    type, movementX, movementY, offsetX, offsetY\n  }) => console.log(msg, {\n    type, movementX, movementY, offsetX, offsetY\n  })\n  log(\"start\", start)\n  log(\"end\", end)\n  ctx.beginPath()\n  ctx.moveTo(start.offsetX, start.offsetY)\n  ctx.lineTo(end.offsetX, end.offsetY)\n  ctx.stroke()\n  ctx.closePath()\n})\n"
+      },
+      "date": 1620169991772
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      pairwise()\n) ) ).subscribe(([start, end]) => {\n  let log = (msg, {\n    type, movementX, movementY, offsetX, offsetY\n  }) => console.log(msg, {\n    type, movementX, movementY, offsetX, offsetY\n  })\n  log(\"start\", start)\n  log(\"end\", end)\n  translateX = Math.floor(canvas.width/2)\n  translateY = Math.floor(canvas.height/2)\n  ctx.beginPath()\n  ctx.moveTo(\n    start.offsetX-translateX,\n    start.offsetY-translateY)\n  ctx.lineTo(\n    end.offsetX-translateX,\n    end.offsetY-translateY)\n  ctx.stroke()\n  ctx.closePath()\n})\n"
+      },
+      "date": 1620170273371
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      pairwise()\n) ) ).subscribe(([start, end]) => {\n  let log = (msg, {\n    type, movementX, movementY, offsetX, offsetY\n  }) => console.log(msg, {\n    type, movementX, movementY, offsetX, offsetY\n  })\n  log(\"start\", start)\n  log(\"end\", end)\n  translateX = Math.floor(+canvas.width/2)\n  translateY = Math.floor(+canvas.height/2)\n  ctx.beginPath()\n  ctx.moveTo(\n    start.offsetX-translateX,\n    start.offsetY-translateY)\n  ctx.lineTo(\n    end.offsetX-translateX,\n    end.offsetY-translateY)\n  ctx.stroke()\n  ctx.closePath()\n})\n"
+      },
+      "date": 1620170317622
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(\n      takeUntil(fromEvent(canvas, \"mouseup\")),\n      pairwise()\n) ) ).subscribe(([start, end]) => {\n  let log = (msg, {\n    type, movementX, movementY, offsetX, offsetY\n  }) => console.log(msg, {\n    type, movementX, movementY, offsetX, offsetY\n  })\n  log(\"start\", start)\n  log(\"end\", end)\n  let translateX = Math.floor(+canvas.width/2)\n  let translateY = Math.floor(+canvas.height/2)\n  ctx.beginPath()\n  ctx.moveTo(\n    start.offsetX-translateX,\n    start.offsetY-translateY)\n  ctx.lineTo(\n    end.offsetX-translateX,\n    end.offsetY-translateY)\n  ctx.stroke()\n  ctx.closePath()\n})\n"
+      },
+      "date": 1620170346860
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  event => {\n    ctx.beginPath()\n    ctx.moveTo(event.offsetX, offsetY)\n  },\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(takeUntil(fromEvent(canvas, \"mouseup\"))))\n).subscribe(end => {\n  ctx.lineTo(\n    end.offsetX-Math.floor(+canvas.width/2),\n    end.offsetY-Math.floor(+canvas.height/2))\n  ctx.stroke()\n})\n"
+      },
+      "date": 1620170609674
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  event => {\n    ctx.beginPath()\n    ctx.moveTo(event.offsetX, event.offsetY)\n  },\n  switchMap(_ => fromEvent(canvas, \"mousemove\")\n    .pipe(takeUntil(fromEvent(canvas, \"mouseup\"))))\n).subscribe(end => {\n  ctx.lineTo(\n    end.offsetX-Math.floor(+canvas.width/2),\n    end.offsetY-Math.floor(+canvas.height/2))\n  ctx.stroke()\n})\n"
+      },
+      "date": 1620170631130
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(event => {\n    ctx.beginPath()\n    ctx.moveTo(event.offsetX, event.offsetY)\n    return fromEvent(canvas, \"mousemove\")\n      .pipe(takeUntil(fromEvent(canvas, \"mouseup\"))))\n  }).subscribe(end => {\n  ctx.lineTo(\n    end.offsetX-Math.floor(+canvas.width/2),\n    end.offsetY-Math.floor(+canvas.height/2))\n  ctx.stroke()\n})\n"
+      },
+      "date": 1620170701357
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(event => {\n    ctx.beginPath()\n    ctx.moveTo(event.offsetX, event.offsetY)\n    return fromEvent(canvas, \"mousemove\")\n      .pipe(takeUntil(fromEvent(canvas, \"mouseup\")))\n  }).subscribe(end => {\n  ctx.lineTo(\n    end.offsetX-Math.floor(+canvas.width/2),\n    end.offsetY-Math.floor(+canvas.height/2))\n  ctx.stroke()\n})\n"
+      },
+      "date": 1620170750277
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\").pipe(\n  switchMap(event => {\n    ctx.beginPath()\n    ctx.moveTo(event.offsetX, event.offsetY)\n    return fromEvent(canvas, \"mousemove\")\n      .pipe(takeUntil(fromEvent(canvas, \"mouseup\")))\n  }).subscribe(end => {\n    ctx.lineTo(\n      end.offsetX-Math.floor(+canvas.width/2),\n      end.offsetY-Math.floor(+canvas.height/2))\n    ctx.stroke()\n  })\n)"
+      },
+      "date": 1620170819355
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\")\n  .pipe(switchMap(event => {\n    ctx.beginPath()\n    ctx.moveTo(event.offsetX, event.offsetY)\n    return fromEvent(canvas, \"mousemove\")\n      .pipe(takeUntil(fromEvent(canvas, \"mouseup\")))\n  }))\n  .subscribe(end => {\n    ctx.lineTo(\n      end.offsetX-Math.floor(+canvas.width/2),\n      end.offsetY-Math.floor(+canvas.height/2))\n    ctx.stroke()\n  })\n"
+      },
+      "date": 1620170939372
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\")\n  .pipe(switchMap(event => {\n    return fromEvent(canvas, \"mousemove\")\n      .pipe(takeUntil(fromEvent(canvas, \"mouseup\")))\n  }))\n  .subscribe(end => {\n    ctx.lineTo(\n      end.offsetX-Math.floor(+canvas.width/2),\n      end.offsetY-Math.floor(+canvas.height/2))\n    ctx.stroke()\n  })\n"
+      },
+      "date": 1620171003505
+    },
+    {
+      "type": "edit",
+      "id": "b48384b70af28ab8",
+      "item": {
+        "type": "code",
+        "id": "b48384b70af28ab8",
+        "text": "/* \ndrag$.subscribe(([start, end]) => {\n  console.log(\"dragging\", {\n    start: Object.fromEntries(Object.entries(start)\n      .filter((k,v) => /[XY]$/.test(k))),\n    end: Object.fromEntries(Object.entries(end)\n      .filter((k,v) => /[XY]$/.test(k)))\n  })\n  ctx.moveTo(start.offsetX, start.offsetY)\n  ctx.lineTo(end.offsetX, end.offsetY)\n  ctx.stroke()\n})\n\n*/"
+      },
+      "date": 1620171045866
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {\n  concatMap,\n  mergeMap,\n  pairwise,\n  repeat,\n  switchMap,\n  takeUntil\n} from \"https://cdn.skypack.dev/rxjs/operators\"\n\nfromEvent(canvas, \"mousedown\")\n  .pipe(switchMap(event => {\n    ctx.moveTo(\n      event.offsetX-Math.floor(+canvas.width/2),\n      event.offsetY-Math.floor(+canvas.height/2))\n    return fromEvent(canvas, \"mousemove\")\n      .pipe(takeUntil(fromEvent(canvas, \"mouseup\")))\n  }))\n  .subscribe(end => {\n    ctx.lineTo(\n      end.offsetX-Math.floor(+canvas.width/2),\n      end.offsetY-Math.floor(+canvas.height/2))\n    ctx.stroke()\n  })\n"
+      },
+      "date": 1620171163046
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {switchMap, takeUntil}\n  from \"https://cdn.skypack.dev/rxjs/operators\"\n\nlet down$ = fromEvent(canvas, \"mousedown\")\nlet move$ = fromEvent(canvas, \"mousemove\")\nlet up$ = fromEvent(canvas, \"mouseup\")\ndown$.pipe(switchMap(event => {\n  ctx.moveTo(\n    event.offsetX-Math.floor(+canvas.width/2),\n    event.offsetY-Math.floor(+canvas.height/2))\n  return move$.pipe(takeUntil(up$))\n}))\n.subscribe(end => {\n  ctx.lineTo(\n    end.offsetX-Math.floor(+canvas.width/2),\n    end.offsetY-Math.floor(+canvas.height/2))\n  ctx.stroke()\n})\n"
+      },
+      "date": 1620171475386
+    },
+    {
+      "type": "edit",
+      "id": "dfbdd5e2b02f4940",
+      "item": {
+        "type": "paragraph",
+        "id": "dfbdd5e2b02f4940",
+        "text": "Lets make drag events draw lines on the canvas."
+      },
+      "date": 1620171486443
+    },
+    {
+      "type": "remove",
+      "id": "b48384b70af28ab8",
+      "date": 1620171492478
+    },
+    {
+      "type": "remove",
+      "id": "caa626ac93aa7d4c",
+      "date": 1620171495795
+    },
+    {
+      "type": "remove",
+      "id": "47e28171f7f9d811",
+      "date": 1620171496989
+    },
+    {
+      "type": "remove",
+      "id": "7c8e851af45c11e6",
+      "date": 1620171504896
+    },
+    {
+      "type": "edit",
+      "id": "992841a9d56810ba",
+      "item": {
+        "type": "code",
+        "id": "992841a9d56810ba",
+        "text": "let canvas = document.createElement(\"canvas\")\ncanvas.id = \"canvas\"\ncanvas.style = \"border: 1px solid black;\"\ncanvas.width = 380\ncanvas.height = 300\nlet translateX = Math.floor(canvas.width/2)\nlet translateY = Math.floor(canvas.height/2)\nlet ctx = canvas.getContext(\"2d\")\nctx.translate(translateX, translateY)\noutput.appendChild(canvas)\n\n"
+      },
+      "date": 1620171642335
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "import {switchMap, takeUntil}\n  from \"https://cdn.skypack.dev/rxjs/operators\"\n\nlet down$ = fromEvent(canvas, \"mousedown\")\nlet move$ = fromEvent(canvas, \"mousemove\")\nlet up$ = fromEvent(canvas, \"mouseup\")\ndown$.pipe(switchMap(e => {\n  ctx.moveTo(e.offsetX-transX,e.offsetY-transY)\n  return move$.pipe(takeUntil(up$))\n}))\n.subscribe(e => {\n  ctx.lineTo(e.offsetX-transX, e.offsetY-transY)\n  ctx.stroke()\n})"
+      },
+      "date": 1620171774584
+    },
+    {
+      "type": "edit",
+      "id": "992841a9d56810ba",
+      "item": {
+        "type": "code",
+        "id": "992841a9d56810ba",
+        "text": "let canvas = document.createElement(\"canvas\")\ncanvas.id = \"canvas\"\ncanvas.style = \"border: 1px solid black;\"\ncanvas.width = 380\ncanvas.height = 300\nlet transX = Math.floor(canvas.width/2)\nlet transY = Math.floor(canvas.height/2)\nlet ctx = canvas.getContext(\"2d\")\nctx.translate(transX, transY)\noutput.appendChild(canvas)\n\n"
+      },
+      "date": 1620171789258
+    },
+    {
+      "type": "edit",
+      "id": "484e092159df2d01",
+      "item": {
+        "type": "paragraph",
+        "id": "484e092159df2d01",
+        "text": "We experiment with RxJS Observable to learn more about processing streams of events from existing tools. [https://rxjs.dev/guide/overview docs]"
+      },
+      "date": 1620171924992
+    },
+    {
+      "type": "add",
+      "id": "965924adb7c02412",
+      "item": {
+        "type": "paragraph",
+        "id": "965924adb7c02412",
+        "text": "That is a dense bit of code."
+      },
+      "after": "dfbdd5e2b02f4940",
+      "date": 1620172057357
+    },
+    {
+      "id": "965924adb7c02412",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "032f1701b29aa899",
+        "5eb6b67568179aa3",
+        "fc71f7a4d3bf2fae",
+        "d6afbafabb711433",
+        "262c673fd74f4eab",
+        "2b83956535395893",
+        "992841a9d56810ba",
+        "dfbdd5e2b02f4940",
+        "75d9b0827ad3fe76",
+        "965924adb7c02412",
+        "6cf52409eec3988c"
+      ],
+      "date": 1620172060663
+    },
+    {
+      "type": "remove",
+      "id": "965924adb7c02412",
+      "date": 1620172167975
+    },
+    {
+      "type": "add",
+      "id": "fb40d813972f2b0f",
+      "item": {
+        "type": "paragraph",
+        "id": "fb40d813972f2b0f",
+        "text": "We import a couple operators which we will explain below."
+      },
+      "after": "dfbdd5e2b02f4940",
+      "date": 1620172239149
+    },
+    {
+      "type": "add",
+      "id": "229bcd6e49ad42ee",
+      "item": {
+        "type": "factory",
+        "id": "229bcd6e49ad42ee",
+        "text": "import "
+      },
+      "after": "fb40d813972f2b0f",
+      "date": 1620172305496
+    },
+    {
+      "type": "edit",
+      "id": "229bcd6e49ad42ee",
+      "item": {
+        "type": "code",
+        "id": "229bcd6e49ad42ee",
+        "text": "import {switchMap, takeUntil}\n  from \"https://cdn.skypack.dev/rxjs/operators\"\n"
+      },
+      "date": 1620172321560
+    },
+    {
+      "type": "add",
+      "id": "912c8cbeba24c733",
+      "item": {
+        "type": "paragraph",
+        "id": "912c8cbeba24c733",
+        "text": "To detect drags we actually need to observe three different events: mousedown at the start of our line, a stream of mousemove events that we will draw to the canvas, and mouseup to stop the line. "
+      },
+      "after": "fb40d813972f2b0f",
+      "date": 1620172460041
+    },
+    {
+      "id": "912c8cbeba24c733",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "032f1701b29aa899",
+        "5eb6b67568179aa3",
+        "fc71f7a4d3bf2fae",
+        "d6afbafabb711433",
+        "262c673fd74f4eab",
+        "2b83956535395893",
+        "992841a9d56810ba",
+        "dfbdd5e2b02f4940",
+        "fb40d813972f2b0f",
+        "229bcd6e49ad42ee",
+        "912c8cbeba24c733",
+        "75d9b0827ad3fe76",
+        "6cf52409eec3988c"
+      ],
+      "date": 1620172463761
+    },
+    {
+      "type": "edit",
+      "id": "75d9b0827ad3fe76",
+      "item": {
+        "type": "code",
+        "id": "75d9b0827ad3fe76",
+        "text": "let down$ = fromEvent(canvas, \"mousedown\")\nlet move$ = fromEvent(canvas, \"mousemove\")\nlet up$ = fromEvent(canvas, \"mouseup\")"
+      },
+      "date": 1620172484203
+    },
+    {
+      "type": "edit",
+      "id": "912c8cbeba24c733",
+      "item": {
+        "type": "paragraph",
+        "id": "912c8cbeba24c733",
+        "text": "To detect drags we actually need to observe three different events: mousedown at the start of our line, a stream of mousemove events that we will draw to the canvas, and mouseup to stop the line."
+      },
+      "date": 1620172493410
+    },
+    {
+      "type": "add",
+      "id": "bf726323d25ccda2",
+      "item": {
+        "type": "paragraph",
+        "id": "bf726323d25ccda2",
+        "text": "The next bit is dense."
+      },
+      "after": "912c8cbeba24c733",
+      "date": 1620172499939
+    },
+    {
+      "id": "bf726323d25ccda2",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "032f1701b29aa899",
+        "5eb6b67568179aa3",
+        "fc71f7a4d3bf2fae",
+        "d6afbafabb711433",
+        "262c673fd74f4eab",
+        "2b83956535395893",
+        "992841a9d56810ba",
+        "dfbdd5e2b02f4940",
+        "fb40d813972f2b0f",
+        "229bcd6e49ad42ee",
+        "912c8cbeba24c733",
+        "75d9b0827ad3fe76",
+        "bf726323d25ccda2",
+        "6cf52409eec3988c"
+      ],
+      "date": 1620172502753
+    },
+    {
+      "type": "add",
+      "id": "c480db45bc8abd89",
+      "item": {
+        "type": "factory",
+        "id": "c480db45bc8abd89",
+        "text": "down$.pipe(switchMap(e => {\n  ctx.moveTo(e.offsetX-transX,e.offsetY-transY)\n  return move$.pipe(takeUntil(up$))\n}))\n.subscribe(e => {\n  ctx.lineTo(e.offsetX-transX, e.offsetY-transY)\n  ctx.stroke()\n})"
+      },
+      "after": "bf726323d25ccda2",
+      "date": 1620172506438
+    },
+    {
+      "type": "edit",
+      "id": "c480db45bc8abd89",
+      "item": {
+        "type": "code",
+        "id": "c480db45bc8abd89",
+        "text": "let drag$ = down$.pipe(switchMap(e => {\n  ctx.moveTo(e.offsetX-transX,e.offsetY-transY)\n  return move$.pipe(takeUntil(up$))\n}))"
+      },
+      "date": 1620172543516
+    },
+    {
+      "type": "add",
+      "id": "e50106f35b3c5108",
+      "item": {
+        "type": "paragraph",
+        "id": "e50106f35b3c5108",
+        "text": "Here's where we actually draw lines on the canvas."
+      },
+      "after": "bf726323d25ccda2",
+      "date": 1620172559974
+    },
+    {
+      "id": "e50106f35b3c5108",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "032f1701b29aa899",
+        "5eb6b67568179aa3",
+        "fc71f7a4d3bf2fae",
+        "d6afbafabb711433",
+        "262c673fd74f4eab",
+        "2b83956535395893",
+        "992841a9d56810ba",
+        "dfbdd5e2b02f4940",
+        "fb40d813972f2b0f",
+        "229bcd6e49ad42ee",
+        "912c8cbeba24c733",
+        "75d9b0827ad3fe76",
+        "bf726323d25ccda2",
+        "c480db45bc8abd89",
+        "e50106f35b3c5108",
+        "6cf52409eec3988c"
+      ],
+      "date": 1620172562314
+    },
+    {
+      "type": "add",
+      "id": "f05c67bc814e7f1b",
+      "item": {
+        "type": "factory",
+        "id": "f05c67bc814e7f1b",
+        "text": ".subscribe(e => {\n  ctx.lineTo(e.offsetX-transX, e.offsetY-transY)\n  ctx.stroke()\n})"
+      },
+      "after": "e50106f35b3c5108",
+      "date": 1620172566045
+    },
+    {
+      "type": "edit",
+      "id": "f05c67bc814e7f1b",
+      "item": {
+        "type": "code",
+        "id": "f05c67bc814e7f1b",
+        "text": "drag$.subscribe(e => {\n  ctx.lineTo(e.offsetX-transX, e.offsetY-transY)\n  ctx.stroke()\n})"
+      },
+      "date": 1620172576046
+    },
+    {
+      "type": "edit",
+      "id": "912c8cbeba24c733",
+      "item": {
+        "type": "paragraph",
+        "id": "912c8cbeba24c733",
+        "text": "To detect drags we need to observe three different events: mousedown at the start of our line, a stream of mousemove events that we will draw to the canvas, and mouseup to stop the line."
+      },
+      "date": 1620172642412
+    },
+    {
+      "type": "edit",
+      "id": "bf726323d25ccda2",
+      "item": {
+        "type": "paragraph",
+        "id": "bf726323d25ccda2",
+        "text": "The next bit is dense. The chief benefit of using an Observable library is to be able to use and create and simple functions that process events in interesting ways. Moreover, we can compose operators into more complex assemblies."
+      },
+      "date": 1620172906747
+    },
+    {
+      "type": "add",
+      "id": "e4506ffb7eb89129",
+      "item": {
+        "type": "paragraph",
+        "id": "e4506ffb7eb89129",
+        "text": "Observable.pipe() lets us send forward the events to one or more operators."
+      },
+      "after": "bf726323d25ccda2",
+      "date": 1620172936490
+    },
+    {
+      "type": "add",
+      "id": "8a9d55ad7b13b524",
+      "item": {
+        "type": "paragraph",
+        "id": "8a9d55ad7b13b524",
+        "text": "switchMap() is a special sort of map() over the stream of events. It switches one stream to another. In this case, the first \"stream\" is the mousedown event that is piped into switchMap. We switch to the stream of mousemove events."
+      },
+      "after": "e4506ffb7eb89129",
+      "date": 1620173063020
+    },
+    {
+      "type": "add",
+      "id": "6fc33b11b98f238d",
+      "item": {
+        "type": "paragraph",
+        "id": "6fc33b11b98f238d",
+        "text": "takeUntil() is special operator which passes the incoming stream of events from the pipe until it notices a signal to stop: in this case the mouseup event."
+      },
+      "after": "8a9d55ad7b13b524",
+      "date": 1620173222105
+    },
+    {
+      "type": "edit",
+      "id": "bf726323d25ccda2",
+      "item": {
+        "type": "paragraph",
+        "id": "bf726323d25ccda2",
+        "text": "The next bit is dense."
+      },
+      "date": 1620173229181
+    },
+    {
+      "type": "add",
+      "id": "f5a7ba2db0ffe8c3",
+      "item": {
+        "type": "paragraph",
+        "id": "f5a7ba2db0ffe8c3",
+        "text": "The chief benefit of using an Observable library is to be able to use and create and simple functions that process events in interesting ways. Moreover, we can compose operators into more complex assemblies."
+      },
+      "after": "bf726323d25ccda2",
+      "date": 1620173238454
+    },
+    {
+      "type": "add",
+      "id": "0b1ff9c0dd3d88d1",
+      "item": {
+        "type": "paragraph",
+        "id": "0b1ff9c0dd3d88d1",
+        "text": "Before switching streams, we take the opportunity to position the start of our line in the canvas."
+      },
+      "after": "8a9d55ad7b13b524",
+      "date": 1620173338187
+    },
+    {
+      "type": "edit",
+      "id": "6fc33b11b98f238d",
+      "item": {
+        "type": "paragraph",
+        "id": "6fc33b11b98f238d",
+        "text": "takeUntil() is special operator which passes the incoming stream of events from the pipe until it notices a signal to stop. In this case, the incoming stream are mousemove events and the stop signal is a mouseup event."
+      },
+      "date": 1620173378375
+    },
+    {
+      "type": "edit",
+      "id": "e50106f35b3c5108",
+      "item": {
+        "type": "paragraph",
+        "id": "e50106f35b3c5108",
+        "text": "We subscribe to this complex assembly with a simple function that draws lines on the canvas."
+      },
+      "date": 1620173441470
+    },
+    {
+      "type": "add",
+      "id": "0b3701cf746f1062",
+      "item": {
+        "type": "paragraph",
+        "id": "0b3701cf746f1062",
+        "text": "We'll finish with some instructions to the reader."
+      },
+      "after": "e50106f35b3c5108",
+      "date": 1620173490688
+    },
+    {
+      "id": "0b3701cf746f1062",
+      "type": "move",
+      "order": [
+        "484e092159df2d01",
+        "032f1701b29aa899",
+        "5eb6b67568179aa3",
+        "fc71f7a4d3bf2fae",
+        "d6afbafabb711433",
+        "262c673fd74f4eab",
+        "2b83956535395893",
+        "992841a9d56810ba",
+        "dfbdd5e2b02f4940",
+        "fb40d813972f2b0f",
+        "229bcd6e49ad42ee",
+        "912c8cbeba24c733",
+        "75d9b0827ad3fe76",
+        "bf726323d25ccda2",
+        "f5a7ba2db0ffe8c3",
+        "e4506ffb7eb89129",
+        "8a9d55ad7b13b524",
+        "0b1ff9c0dd3d88d1",
+        "6fc33b11b98f238d",
+        "c480db45bc8abd89",
+        "e50106f35b3c5108",
+        "f05c67bc814e7f1b",
+        "0b3701cf746f1062",
+        "6cf52409eec3988c"
+      ],
+      "date": 1620173493174
+    },
+    {
+      "id": "caa626ac93aa7d4c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "caa626ac93aa7d4c",
+        "text": "In the frame below we can view the results."
+      },
+      "after": "0b3701cf746f1062",
+      "date": 1620173520090
+    },
+    {
+      "type": "add",
+      "id": "d910d3d6b649b13b",
+      "item": {
+        "type": "factory",
+        "id": "d910d3d6b649b13b",
+        "text": "<em>Try drawing lines in the box above.</em>"
+      },
+      "after": "0b3701cf746f1062",
+      "date": 1620173561535
+    },
+    {
+      "type": "edit",
+      "id": "d910d3d6b649b13b",
+      "item": {
+        "type": "code",
+        "id": "d910d3d6b649b13b",
+        "text": "export default `<em>\nTry drawing lines in the box above.\n</em>`"
+      },
+      "date": 1620173578938
+    },
+    {
+      "type": "edit",
+      "id": "d910d3d6b649b13b",
+      "item": {
+        "type": "code",
+        "id": "d910d3d6b649b13b",
+        "text": "export default `<em>\nTry drawing lines in the box above. Reload to clear.\n</em>`"
+      },
+      "date": 1620173614034
+    },
+    {
+      "type": "edit",
+      "id": "992841a9d56810ba",
+      "item": {
+        "type": "code",
+        "id": "992841a9d56810ba",
+        "text": "let canvas = document.createElement(\"canvas\")\ncanvas.id = \"canvas\"\ncanvas.style = \"border: 1px solid black;\"\ncanvas.width = 380\ncanvas.height = 350\nlet transX = Math.floor(canvas.width/2)\nlet transY = Math.floor(canvas.height/2)\nlet ctx = canvas.getContext(\"2d\")\nctx.translate(transX, transY)\noutput.appendChild(canvas)\n\n"
+      },
+      "date": 1620173766776
+    },
+    {
+      "type": "edit",
+      "id": "992841a9d56810ba",
+      "item": {
+        "type": "code",
+        "id": "992841a9d56810ba",
+        "text": "let canvas = document.createElement(\"canvas\")\ncanvas.id = \"canvas\"\ncanvas.style = \"border: 1px solid black;\"\ncanvas.width = 380\ncanvas.height = 330\nlet transX = Math.floor(canvas.width/2)\nlet transY = Math.floor(canvas.height/2)\nlet ctx = canvas.getContext(\"2d\")\nctx.translate(transX, transY)\noutput.appendChild(canvas)\n\n"
+      },
+      "date": 1620173777097
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import {fromEvent}\n  from \"https://cdn.skypack.dev/rxjs@7\""
+      },
+      "date": 1620174558040
+    },
+    {
+      "type": "edit",
+      "id": "229bcd6e49ad42ee",
+      "item": {
+        "type": "code",
+        "id": "229bcd6e49ad42ee",
+        "text": "import {switchMap, takeUntil}\n  from \"https://cdn.skypack.dev/rxjs@7/operators\"\n"
+      },
+      "date": 1620174566410
+    },
+    {
+      "type": "edit",
+      "id": "8a9d55ad7b13b524",
+      "item": {
+        "type": "paragraph",
+        "id": "8a9d55ad7b13b524",
+        "text": "switchMap() is a special sort of map() over the stream of events. [https://rxjs.dev/api/operators/switchMap docs] In this case, the first \"stream\" is the mousedown event that is piped into switchMap. We switch the single mousedown event into a stream of mousemove events."
+      },
+      "date": 1620224557743
+    },
+    {
+      "type": "edit",
+      "id": "992841a9d56810ba",
+      "item": {
+        "type": "code",
+        "id": "992841a9d56810ba",
+        "text": "let canvas = document.createElement(\"canvas\")\ncanvas.id = \"canvas\"\ncanvas.style = \"border: 1px solid black;\"\ncanvas.width = 380\ncanvas.height = 330\nlet ctx = canvas.getContext(\"2d\")\noutput.appendChild(canvas)\n\n"
+      },
+      "date": 1620326591183
+    },
+    {
+      "type": "edit",
+      "id": "c480db45bc8abd89",
+      "item": {
+        "type": "code",
+        "id": "c480db45bc8abd89",
+        "text": "let drag$ = down$.pipe(switchMap(e => {\n  ctx.moveTo(e.offsetX,e.offsetY)\n  return move$.pipe(takeUntil(up$))\n}))"
+      },
+      "date": 1620326603451
+    },
+    {
+      "type": "edit",
+      "id": "f05c67bc814e7f1b",
+      "item": {
+        "type": "code",
+        "id": "f05c67bc814e7f1b",
+        "text": "drag$.subscribe(e => {\n  ctx.lineTo(e.offsetX, e.offsetY)\n  ctx.stroke()\n})"
+      },
+      "date": 1620326612043
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import {fromEvent} from 'https://cdn.jsdelivr.net/npm/rxjs@7.8.1/+esm'\n/*\nimport {fromEvent}\n  from \"https://cdn.skypack.dev/rxjs@7\"\n*/"
+      },
+      "date": 1713623321419
+    },
+    {
+      "type": "edit",
+      "id": "5eb6b67568179aa3",
+      "item": {
+        "type": "code",
+        "id": "5eb6b67568179aa3",
+        "text": "import {fromEvent} from 'https://cdn.jsdelivr.net/npm/rxjs@7.8.1/+esm'\n"
+      },
+      "date": 1713623379523
+    },
+    {
+      "type": "edit",
+      "id": "229bcd6e49ad42ee",
+      "item": {
+        "type": "code",
+        "id": "229bcd6e49ad42ee",
+        "text": "import {switchMap, takeUntil}\n  from 'https://cdn.jsdelivr.net/npm/rxjs@7.8.1/+esm'\n"
+      },
+      "date": 1713623443558
+    },
+    {
+      "type": "fork",
+      "site": "wiki.dbbs.co",
+      "date": 1713825538011
+    }
+  ]
+}

@@ -73,6 +73,11 @@
     },
     {
       "type": "paragraph",
+      "id": "8ba314d4b592a49c",
+      "text": "[[Dreyeck]] ⇒ [[Wiki School]] [http://school.wiki.dreyeck.ch page] ⇒ [[dreyeck Portal]]"
+    },
+    {
+      "type": "paragraph",
       "id": "8aed217e5e100728",
       "text": "[[Wrapper Pattern]]"
     },
@@ -87,6 +92,26 @@
       "text": "[[Wahrscheinlichkeit und Wissenschaft]] See: [[Stochastic Computing]], [[Trifference]]"
     },
     {
+      "type": "paragraph",
+      "id": "8fe38d2c7152e066",
+      "text": "Wrangling Untrusted File Formats Safely [https://github.com/google/wuffs github] (within [[Secure Automata]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "2b3104f099ac4e88",
+      "text": "[[Web Components]] (within [[Elm and Web Components]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "c575c0f5d73d4b17",
+      "text": "[[Wiki Turns 30]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "30d964a3142799ff",
+      "text": "[[Writing Down Boolean Algebra]] See: [[Movement]]"
+    },
+    {
       "type": "reference",
       "id": "cff13b8f1e169e91",
       "site": "wiki.ralfbarkow.ch",
@@ -97,7 +122,7 @@
     {
       "type": "frame",
       "id": "6f66c17ee7f83b9f",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -750,6 +775,92 @@
         "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph"
       },
       "date": 1709313266400
+    },
+    {
+      "type": "fork",
+      "site": "localhost:3000",
+      "date": 1709313337571
+    },
+    {
+      "type": "add",
+      "id": "8fe38d2c7152e066",
+      "item": {
+        "type": "paragraph",
+        "id": "8fe38d2c7152e066",
+        "text": "Wrangling Untrusted File Formats Safely (within [[Secure Automata]])"
+      },
+      "after": "9e5052075c565542",
+      "date": 1709622415436
+    },
+    {
+      "type": "edit",
+      "id": "8fe38d2c7152e066",
+      "item": {
+        "type": "paragraph",
+        "id": "8fe38d2c7152e066",
+        "text": "Wrangling Untrusted File Formats Safely [https://github.com/google/wuffs github] (within [[Secure Automata]])"
+      },
+      "date": 1709622441914
+    },
+    {
+      "type": "add",
+      "id": "2b3104f099ac4e88",
+      "item": {
+        "type": "paragraph",
+        "id": "2b3104f099ac4e88",
+        "text": "[[Web Components]] (within [[Elm and Web Components]])"
+      },
+      "after": "8fe38d2c7152e066",
+      "date": 1711386696832
+    },
+    {
+      "type": "edit",
+      "id": "6f66c17ee7f83b9f",
+      "item": {
+        "type": "frame",
+        "id": "6f66c17ee7f83b9f",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1713867551307
+    },
+    {
+      "id": "8ba314d4b592a49c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "8ba314d4b592a49c",
+        "text": "[[Dreyeck]] ⇒ [[Wiki School]] [http://school.wiki.dreyeck.ch page] ⇒ [[dreyeck Portal]]"
+      },
+      "after": "246adf5ed95d4e14",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713867602578
+    },
+    {
+      "type": "add",
+      "id": "c575c0f5d73d4b17",
+      "item": {
+        "type": "paragraph",
+        "id": "c575c0f5d73d4b17",
+        "text": "[[Wiki Turns 30]]"
+      },
+      "after": "2b3104f099ac4e88",
+      "date": 1715162349074
+    },
+    {
+      "id": "30d964a3142799ff",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "30d964a3142799ff",
+        "text": "[[Writing Down Boolean Algebra]] See: [[Movement]]"
+      },
+      "after": "c575c0f5d73d4b17",
+      "attribution": {
+        "page": "B"
+      },
+      "date": 1719918855786
     }
   ]
 }

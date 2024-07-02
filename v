@@ -23,8 +23,8 @@
     },
     {
       "type": "paragraph",
-      "id": "6cc12b697d82eede",
-      "text": "[[Visualization]]"
+      "id": "fa659d7e1c00ec24",
+      "text": "[[Visitor Pattern]] (within [[Sitemap]])"
     },
     {
       "type": "reference",
@@ -37,7 +37,7 @@
     {
       "type": "frame",
       "id": "16e8dccaa15dfaed",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -215,20 +215,19 @@
       "date": 1708265049697
     },
     {
-      "type": "fork",
-      "site": "wiki.ralfbarkow.ch",
-      "date": 1709737313246
-    },
-    {
+      "id": "fa659d7e1c00ec24",
       "type": "add",
-      "id": "6cc12b697d82eede",
       "item": {
         "type": "paragraph",
-        "id": "6cc12b697d82eede",
-        "text": "[[Visualization]]"
+        "id": "fa659d7e1c00ec24",
+        "text": "[[Visitor Pattern]] (within [[Sitemap]])"
       },
       "after": "5331896a74df1672",
-      "date": 1709737323683
+      "attribution": {
+        "page": "2024-03-07",
+        "site": "localhost:3000"
+      },
+      "date": 1709808113986
     },
     {
       "type": "edit",
@@ -236,9 +235,9 @@
       "item": {
         "type": "frame",
         "id": "16e8dccaa15dfaed",
-        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
       },
-      "date": 1709737345545
+      "date": 1713869205433
     }
   ]
 }

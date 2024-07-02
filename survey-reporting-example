@@ -1,0 +1,622 @@
+{
+  "title": "Survey Reporting Example",
+  "story": [
+    {
+      "type": "html",
+      "text": "This example is taken from work that I did for a web portal company. At first people tried to do this all in SQL but when I got there I found it really gnarly and impossible to maintain so then I ended up doing it in Java with object-relational mapping. If there were methods I could've used to make this work manageable in SQL I'd be interested in hearing about it.",
+      "id": "8e92464b9484f52f685d25c116476674"
+    },
+    {
+      "type": "html",
+      "text": "\nThis site was partnering with consumer products companies to funnel their users towards surveys and then reporting the results to the companies. My job was to query an Oracle database and generate these reports.",
+      "id": "790718ef564e4bfe217b6ff8859bbadc"
+    },
+    {
+      "type": "html",
+      "text": "\nFirst, the schema looked something like this:",
+      "id": "b524e79a66e559d52cc15614285f5c69"
+    },
+    {
+      "type": "code",
+      "text": " CLIENTS\n    |\n    |\n PRODUCTS\n    |\n    |\n SURVEYS -------- USER_SURVEYS ------- USERS -------- AGE\n    |                                    | |\n    |                                    | |\n QUESTIONS                               | +--------- OCCUPATION\n    |                                    |\n    |                                    |\n ANSWERS -------- USER_ANSWERS ----------+",
+      "id": "eab5cb330baf55121022e533bddefa4b"
+    },
+    {
+      "type": "html",
+      "text": "Clients (like L'Oreal) could have multiple products (L'Oreal Hair Coloring Treatment) and each product had one or more survey. Each survey had multiple questions, and each question had multiple answers.",
+      "id": "055b1d718fff815de917d7c2317ec062"
+    },
+    {
+      "type": "html",
+      "text": "\nUSER_SURVEYS and USER_ANSWERS are mapping tables to figure out which users filled out which surveys, and when they did fill out a survey, which answers they chose. The tables like AGE and OCCUPATION were small tables that just had a key and a string value: 1: 16-21, 2: 22-25, etc.",
+      "id": "e7d8e199ece1fd8185f16f87821fb42b"
+    },
+    {
+      "type": "html",
+      "text": "\nThe clients were very interested in getting survey responses keyed up to demographic information. So you'd get user stories that went something like: For each one of a client's products, generate individual pages for each survey response, with answers keyed up to demo information. Pages might look like:",
+      "id": "1bdb3d74e2a1081cddf398f174a4b3a6"
+    },
+    {
+      "type": "code",
+      "text": " Q1. How many times in the last year have you colored your hair?",
+      "id": "09f4c8be6a9060563266c0f9fb2a3e20"
+    },
+    {
+      "type": "code",
+      "text": "                   AGE                                       OCCUPATION\n ANSWER            16-21  22-25  26-35  36-55  56 or older   Student  ...\n Never             1  1%  0  0%  1  1%  4  4%  3  3%\n 1 time            4  4%  3  3%  2  2%  6  5%  1  1%\n 2 - 4 times       7  6%  9  8%  2  2%  1  1%  7  6%\n 5 - 8 times       5  5%  4  4%  8  7%  5  5%  3  3%\n 10 or more times  1  1%  3  3%  2  2%  3  3%  2  2%\n No answer         0  0%  0  0%  2  2%  1  1%  0  0%",
+      "id": "65773493c643ef16a20900b948f4eb13"
+    },
+    {
+      "type": "code",
+      "text": "                   Total      90                             Total      ...\n                   Mean       3.6                            Mean       ...\n                   Std. dev.  2.4                            Std. dev.  ...",
+      "id": "935b093d284dd999bc9a065e7389f076"
+    },
+    {
+      "type": "html",
+      "text": "\nNote the individual percentages are compared to the entire number of responses (90), not the number of responses for all respondents in that demographic category or the number of responses for all respondents who chose that answer. Also note that \"No answer\" isn't an answer in the ANSWERS table; it's represented by the fact that the user completed the survey (they have a record in the USER_SURVEYS table) but they have no USER_ANSWERS record for any answer related to this question.",
+      "id": "c086b5b1e00829864eed90c8ba97e651"
+    },
+    {
+      "type": "html",
+      "text": "\nLike I said, I moved the code from being one SQL statement to being lots of OO code. How would a database-centric person do it? -- francis",
+      "id": "a8b821264aee554fd53180ce190ac071"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "d192d5b367c3cf6ab3803236e54f7106"
+    },
+    {
+      "type": "html",
+      "text": "\nFirst, let me make sure we have a decent schema to work with:",
+      "id": "9b893c232d65c38702f362bcad509c92"
+    },
+    {
+      "type": "html",
+      "text": "table:<br>surveys",
+      "id": "c2c135d92af75117ac3df29d92923e35"
+    },
+    {
+      "type": "code",
+      "text": "  ----------------\n  surveyID\n  surveyTitle\n  productRef",
+      "id": "b3980438d6d9956b2d16d0227c8bdeb8"
+    },
+    {
+      "type": "html",
+      "text": "table:<br>questions",
+      "id": "84880ff65a6b76c88b1a892811791644"
+    },
+    {
+      "type": "code",
+      "text": "  ----------------\n  questionID\n  surveyRef   (foreign key to survey table)\n  questionText",
+      "id": "41032f2573834874bef4decb85ed9655"
+    },
+    {
+      "type": "html",
+      "text": "table:<br>answers",
+      "id": "65639c188d3a6c4a63c6b08483a60a5b"
+    },
+    {
+      "type": "code",
+      "text": "  --------------\n  ansID\n  questionRef   \n  ansText\n  centralValue   (used to represent mean if range given)",
+      "id": "2773d4833bc8f32e7562108f2458a6f8"
+    },
+    {
+      "type": "html",
+      "text": "table:<br>responses",
+      "id": "0078ab746c9561a4e87d212536fdb09a"
+    },
+    {
+      "type": "code",
+      "text": "  ----------------\n  responseID\n  userRef\n  questionRef   (this is perhaps redundant)\n  ansRef",
+      "id": "2b5c63791cfde5a3e2b5fad8bf6b1c5e"
+    },
+    {
+      "type": "html",
+      "text": "tables:<br>users",
+      "id": "2b1894eadc6d1ca4a0219023c71b4b2a"
+    },
+    {
+      "type": "code",
+      "text": "  -------------\n  userID\n  userAge\n  userOccupation",
+      "id": "c1cf82fbaef468596435a44ae4e7269f"
+    },
+    {
+      "type": "html",
+      "text": "\nI am still working on a relational solution because I just got a new machine and have not moved all my software over yet, but I would note that you can get the answer by having multi-nested procedural loops with one loop per entity. You may need to make 2 passes for one of the inner loops to collect the summary statistics to use in the second pass. Thus, if SQL got too messy or two confusing, then why not procedural loops instead? You make it sound like that OO is the only alternative to relational.",
+      "id": "3c14d69801a5abea2b62c9dea1788167"
+    },
+    {
+      "type": "html",
+      "text": "<i>Personally, I'd be more interested in a DB-centric solution than a procedural-centric solution, simply because I know enough about procedural programming to be fairly certain that I almost always prefer OO. That is, if you try to sell me procedural over OO you've got a pretty tough sell. I'm not too hot on a DB-centric solution but I can imagine that perhaps there are some advanced DB features that I'm not familiar with that might change my mind on the subject. But that's just me; perhaps if you post a solution that's a blend of SQL & procedural then others will find it instructive. -- francis</i>",
+      "id": "4695404941308bd47aff6db1f33212a0"
+    },
+    {
+      "type": "html",
+      "text": "\nBut I am curious right now as to why you think an OO solution would be better than a mostly procedural loop based solution. For the parts of projects that I cannot find a decent relational solution for, I then turn to procedural (I am not saying this is such a case yet). First I want to understand your output requirements. Here is the reporting nesting as I understand it:",
+      "id": "ff625b2511404546986ab6f2bda28fb2"
+    },
+    {
+      "type": "code",
+      "text": "    \n     for each product\n       for each question\n         for each occupation (including all, and summary at)\n           for each age-group",
+      "id": "3f0461b5fe4e72eef8afe8e9578fffe3"
+    },
+    {
+      "type": "html",
+      "text": "\nNote that I generally avoid making the internal data structures \"shaped\" like the output in any way because output requirements often expand and change in these situations. Some say this is anti-[[Yag Ni]], but I don't always agree with pure [[Yag Ni]]. I would probably have a routine/module with a name like ReportX which would contain all this looping (if procedural route used). I suspect an OO solution would \"delegate\" various parts of this reporting process to each of the entities involved. I see no net benefits in such.",
+      "id": "41cdc82637f4f532be9e6e43b4547090"
+    },
+    {
+      "type": "html",
+      "text": "<i>The resulting files should be output as a tab-delimited text file so the customer can import them into Excel. </i>",
+      "id": "028990478c5f0963dfc884653833c3d5"
+    },
+    {
+      "type": "html",
+      "text": "\nBut it is not a perfect \"grid\" shape. It has the count and percentage under the same age group, for example.",
+      "id": "e39e05a539f02fd1bd31193bab6228f5"
+    },
+    {
+      "type": "html",
+      "text": "<i>Are you talking about the Total, Mean, and Std. Dev. cells at the bottom? </i>",
+      "id": "bff97e3c08da5e080454acf9d7d88916"
+    },
+    {
+      "type": "html",
+      "text": "\nNo. In the example above, the \"36-55\" group takes up two cells because below it are the quantity and percentage.",
+      "id": "b71d2e0e3066c1c3e1cc2adc193d16ab"
+    },
+    {
+      "type": "html",
+      "text": "<i>\"36-55\" should have two tabs after it to signify that it takes up two cells. The marketing intern will do a Merge-And-Center in [[Microsoft Excel]] by hand. (Not a good job, that marketing internship.)</i>",
+      "id": "227f4b83f33f703417518d3d78ac47c1"
+    },
+    {
+      "type": "html",
+      "text": "<i>The idea was that there would be some marketing intern who would spend a few minutes importing each file into Excel and then doing a little futzing -- merging cells, changing fonts, etc. -- to make it look presentable for the client. The code simply needs to insert the right number of tabs.</i>",
+      "id": "e3f84a4a21ec8cfd6c7dc1a1b70e27b7"
+    },
+    {
+      "type": "html",
+      "text": "<i>Also, it looks from your pseudo-code above that I might not have been clear enough on my requirements: Occupation and Age group shouldn't be nested inside of one another. They're largely independent on this report, but the customer wants them in the same file.</i>",
+      "id": "bd270770c26bcd5e671d9133c8370195"
+    },
+    {
+      "type": "html",
+      "text": "\nI think I need to see a bit more of the output to get a feel for this.",
+      "id": "c1d20bd1eb2c3d838e5542cf06c3f527"
+    },
+    {
+      "type": "html",
+      "text": "<i>I mean that you have the Age breakdown section, which will include the answers and ages of all 90 people who responded to the question. Then you'll have the Occupation breakdown which will include the answers and occupations of all 90 people who responded to the question. The two are side-by-side on the same file, but their data isn't dependent on one another. The customer doesn't care, for example, about finding homemakers from the ages of 22-25.</i>",
+      "id": "14a2e9f30bbd32528eb1582192c12dbd"
+    },
+    {
+      "type": "html",
+      "text": "\nSo every question will have an \"age grid\" and an \"occupation grid\" for each product? Is there any relationship between \"product\" and \"survey\"?",
+      "id": "be8abac8745344bfaee05e02cc860bbf"
+    },
+    {
+      "type": "html",
+      "text": "<i>Yes, there's an age grid and an occupation for each product. And, yes, there's a relationship between product and survey: Each survey is aimed at finding information pertinent to one product. They're product-specific surveys, as opposed to a more generalized lifestyle poll.</i>",
+      "id": "94bc7727721849df9c9c0d2b8a1caf90"
+    },
+    {
+      "type": "html",
+      "text": "\nHow about you show 3 example output sections or enough to show the pattern. They don't have to be pretty. The saying that a picture is worth a thousand words is generally true.",
+      "id": "7d494592c929b2052ced500b3f13a1bc"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "d192d5b367c3cf6ab3803236e54f7106"
+    },
+    {
+      "type": "html",
+      "text": "\nI have found that if the output \"shape\" does not match the table shape in the database, than an intermediate structure, preferrably a \"work table\", can be used to provide the indirection needed for output formatting. This intermediate table would look something like this:",
+      "id": "3709e540765c5d26ca9dc375c7d6ec86"
+    },
+    {
+      "type": "html",
+      "text": "table:<br>tempData",
+      "id": "05c321742857a1543667a9bda1f24def"
+    },
+    {
+      "type": "code",
+      "text": "  ---------------\n  factorA\n  factorB\n  factorC\n  ....\n  theValue",
+      "id": "3926111601cb91009a4a56655636b947"
+    },
+    {
+      "type": "html",
+      "text": "\nThe secret is one value per row. In this case, the factors would be things like questionID, personID, productID, etc. Then have loops such as:",
+      "id": "fb3fda38580e13702c55622b923e8467"
+    },
+    {
+      "type": "code",
+      "text": "  for each a in factorA_list\n    print(\"<tr>\")\n    for each b in factorB_list\n      sql = stringValues(\"select theValue from tempdata \n             where factorA = %1 and factorB = %2\", a, b)\n      useValue = queryForValue(sql)  // get only first result cell\n      print(stringValues(\"<td>%1</td>\", useValue))\n    end-for // b\n    print(\"</tr>\")\n  end-for // a",
+      "id": "f6b4a6f18f44b04bcbc2be5ded467df7"
+    },
+    {
+      "type": "html",
+      "text": "\nThis shows a 2-factor output. If you don't have temporary tables in your language or the implementation is too slow, then associative arrays (hash maps) can be used with some fiddling. Instead of using nested loops, sometimes you can just use the Order By clause.",
+      "id": "76eecdaf55c49f10179bc0ad8bb9fb26"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "d192d5b367c3cf6ab3803236e54f7106"
+    },
+    {
+      "type": "html",
+      "text": "<i>I didn't do it this way back then, but if I did it today I might use a templating-style language like Ruby .rhtml files in order to manage a lot of the outputting details, since, as you say, output requirements can change quickly. So I might have a Ruby .rhtml template file that looks like:</i>",
+      "id": "109dc772900d8a774c1229a1a9009914"
+    },
+    {
+      "type": "code",
+      "text": " <%\n question = objectStore.getQuestion questionId\n report = SurveyReport.new (question)\n %>\n Q<%= question.order %>. <%= question.questionText %>",
+      "id": "d6d56a7b1bfc77b696a94b3e2bad6423"
+    },
+    {
+      "type": "code",
+      "text": " \\t<%\n demographicCategories.each { |demoCat|\n   print demoCat.categoryName\n   print (\"\\t\" * demoCat.options.size)\n  }\n %>\n ANSWER\\t<%\n demographicCategories.each { |demoCat|\n   demoCat.options.each { |demoOption|\n     print demoOption.optionName + \"\\t\"\n   }\n }\n %>\n <%\n answers.each { |answer|\n   print answer.answerName, \"\\t\"\n   demographicCategories.each { |demoCat|\n     demoCat.options.each { |demoOption|\n       cell = report.cell (answer, demoOption)\n       print cell.count + \"  \" + cell.percentage + \"%\"\n       print \"\\t\"\n     }\n   }\n }\n %>",
+      "id": "b2c09a94f8a5579dc9b85b4a339d3f9b"
+    },
+    {
+      "type": "html",
+      "text": "<i>Hm. Maybe that's getting side-tracked on templating styles and formatting. (I view this sort of task as being similar to HTML generation; you use a templating language to try to separate out the logic from the presentation, though sometimes that's harder than it sounds.)</i>",
+      "id": "26f853087f69ba6a17b4b75ed461e56b"
+    },
+    {
+      "type": "html",
+      "text": "<i>Anyhow, one possibly useful feature of a setup like this is that if I delegate the data collecting and calculations to a S<b></b>urveyReport class then it's possible for me to run unit-tests on the S<b></b>urveyReport. I find it's easier to test OO code than procedural or SQL. -- francis</i>",
+      "id": "8e22ca8be0bba70d654127707d74ba95"
+    },
+    {
+      "type": "html",
+      "text": "\nEverybody will probably say that they find it easier in their favorite paradigm. ",
+      "id": "8bcb0f36316f8cccd1b584433aa89321"
+    },
+    {
+      "type": "html",
+      "text": "<i>True. And if you're interested in having a discussion at all you might even ask me my reasons why. -- francis</i>",
+      "id": "32d12973609d2f06c6ee414a22d890ad"
+    },
+    {
+      "type": "html",
+      "text": "\nThat is implied.",
+      "id": "36bcf9590e646805cf58937ba68b55ce"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "d192d5b367c3cf6ab3803236e54f7106"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Example]]",
+      "id": "6fc19351e4ff461f59913f536ae22639"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?SurveyReportingExample c2.com]",
+      "id": "59058f43e2d4e2bd14504fdb8a7b35d5"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1169014034000,
+      "id": "d324cf26a42f6403b3f3c2b051c8f2ef",
+      "type": "create",
+      "item": {
+        "title": "Survey Reporting Example",
+        "story": [
+          {
+            "type": "html",
+            "text": "This example is taken from work that I did for a web portal company. At first people tried to do this all in SQL but when I got there I found it really gnarly and impossible to maintain so then I ended up doing it in Java with object-relational mapping. If there were methods I could've used to make this work manageable in SQL I'd be interested in hearing about it.",
+            "id": "8e92464b9484f52f685d25c116476674"
+          },
+          {
+            "type": "html",
+            "text": "\nThis site was partnering with consumer products companies to funnel their users towards surveys and then reporting the results to the companies. My job was to query an Oracle database and generate these reports.",
+            "id": "790718ef564e4bfe217b6ff8859bbadc"
+          },
+          {
+            "type": "html",
+            "text": "\nFirst, the schema looked something like this:",
+            "id": "b524e79a66e559d52cc15614285f5c69"
+          },
+          {
+            "type": "code",
+            "text": " CLIENTS\n    |\n    |\n PRODUCTS\n    |\n    |\n SURVEYS -------- USER_SURVEYS ------- USERS -------- AGE\n    |                                    | |\n    |                                    | |\n QUESTIONS                               | +--------- OCCUPATION\n    |                                    |\n    |                                    |\n ANSWERS -------- USER_ANSWERS ----------+",
+            "id": "eab5cb330baf55121022e533bddefa4b"
+          },
+          {
+            "type": "html",
+            "text": "Clients (like L'Oreal) could have multiple products (L'Oreal Hair Coloring Treatment) and each product had one or more survey. Each survey had multiple questions, and each question had multiple answers.",
+            "id": "055b1d718fff815de917d7c2317ec062"
+          },
+          {
+            "type": "html",
+            "text": "\nUSER_SURVEYS and USER_ANSWERS are mapping tables to figure out which users filled out which surveys, and when they did fill out a survey, which answers they chose. The tables like AGE and OCCUPATION were small tables that just had a key and a string value: 1: 16-21, 2: 22-25, etc.",
+            "id": "e7d8e199ece1fd8185f16f87821fb42b"
+          },
+          {
+            "type": "html",
+            "text": "\nThe clients were very interested in getting survey responses keyed up to demographic information. So you'd get user stories that went something like: For each one of a client's products, generate individual pages for each survey response, with answers keyed up to demo information. Pages might look like:",
+            "id": "1bdb3d74e2a1081cddf398f174a4b3a6"
+          },
+          {
+            "type": "code",
+            "text": " Q1. How many times in the last year have you colored your hair?",
+            "id": "09f4c8be6a9060563266c0f9fb2a3e20"
+          },
+          {
+            "type": "code",
+            "text": "                   AGE                                       OCCUPATION\n ANSWER            16-21  22-25  26-35  36-55  56 or older   Student  ...\n Never             1  1%  0  0%  1  1%  4  4%  3  3%\n 1 time            4  4%  3  3%  2  2%  6  5%  1  1%\n 2 - 4 times       7  6%  9  8%  2  2%  1  1%  7  6%\n 5 - 8 times       5  5%  4  4%  8  7%  5  5%  3  3%\n 10 or more times  1  1%  3  3%  2  2%  3  3%  2  2%\n No answer         0  0%  0  0%  2  2%  1  1%  0  0%",
+            "id": "65773493c643ef16a20900b948f4eb13"
+          },
+          {
+            "type": "code",
+            "text": "                   Total      90                             Total      ...\n                   Mean       3.6                            Mean       ...\n                   Std. dev.  2.4                            Std. dev.  ...",
+            "id": "935b093d284dd999bc9a065e7389f076"
+          },
+          {
+            "type": "html",
+            "text": "\nNote the individual percentages are compared to the entire number of responses (90), not the number of responses for all respondents in that demographic category or the number of responses for all respondents who chose that answer. Also note that \"No answer\" isn't an answer in the ANSWERS table; it's represented by the fact that the user completed the survey (they have a record in the USER_SURVEYS table) but they have no USER_ANSWERS record for any answer related to this question.",
+            "id": "c086b5b1e00829864eed90c8ba97e651"
+          },
+          {
+            "type": "html",
+            "text": "\nLike I said, I moved the code from being one SQL statement to being lots of OO code. How would a database-centric person do it? -- francis",
+            "id": "a8b821264aee554fd53180ce190ac071"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "d192d5b367c3cf6ab3803236e54f7106"
+          },
+          {
+            "type": "html",
+            "text": "\nFirst, let me make sure we have a decent schema to work with:",
+            "id": "9b893c232d65c38702f362bcad509c92"
+          },
+          {
+            "type": "html",
+            "text": "table:<br>surveys",
+            "id": "c2c135d92af75117ac3df29d92923e35"
+          },
+          {
+            "type": "code",
+            "text": "  ----------------\n  surveyID\n  surveyTitle\n  productRef",
+            "id": "b3980438d6d9956b2d16d0227c8bdeb8"
+          },
+          {
+            "type": "html",
+            "text": "table:<br>questions",
+            "id": "84880ff65a6b76c88b1a892811791644"
+          },
+          {
+            "type": "code",
+            "text": "  ----------------\n  questionID\n  surveyRef   (foreign key to survey table)\n  questionText",
+            "id": "41032f2573834874bef4decb85ed9655"
+          },
+          {
+            "type": "html",
+            "text": "table:<br>answers",
+            "id": "65639c188d3a6c4a63c6b08483a60a5b"
+          },
+          {
+            "type": "code",
+            "text": "  --------------\n  ansID\n  questionRef   \n  ansText\n  centralValue   (used to represent mean if range given)",
+            "id": "2773d4833bc8f32e7562108f2458a6f8"
+          },
+          {
+            "type": "html",
+            "text": "table:<br>responses",
+            "id": "0078ab746c9561a4e87d212536fdb09a"
+          },
+          {
+            "type": "code",
+            "text": "  ----------------\n  responseID\n  userRef\n  questionRef   (this is perhaps redundant)\n  ansRef",
+            "id": "2b5c63791cfde5a3e2b5fad8bf6b1c5e"
+          },
+          {
+            "type": "html",
+            "text": "tables:<br>users",
+            "id": "2b1894eadc6d1ca4a0219023c71b4b2a"
+          },
+          {
+            "type": "code",
+            "text": "  -------------\n  userID\n  userAge\n  userOccupation",
+            "id": "c1cf82fbaef468596435a44ae4e7269f"
+          },
+          {
+            "type": "html",
+            "text": "\nI am still working on a relational solution because I just got a new machine and have not moved all my software over yet, but I would note that you can get the answer by having multi-nested procedural loops with one loop per entity. You may need to make 2 passes for one of the inner loops to collect the summary statistics to use in the second pass. Thus, if SQL got too messy or two confusing, then why not procedural loops instead? You make it sound like that OO is the only alternative to relational.",
+            "id": "3c14d69801a5abea2b62c9dea1788167"
+          },
+          {
+            "type": "html",
+            "text": "<i>Personally, I'd be more interested in a DB-centric solution than a procedural-centric solution, simply because I know enough about procedural programming to be fairly certain that I almost always prefer OO. That is, if you try to sell me procedural over OO you've got a pretty tough sell. I'm not too hot on a DB-centric solution but I can imagine that perhaps there are some advanced DB features that I'm not familiar with that might change my mind on the subject. But that's just me; perhaps if you post a solution that's a blend of SQL & procedural then others will find it instructive. -- francis</i>",
+            "id": "4695404941308bd47aff6db1f33212a0"
+          },
+          {
+            "type": "html",
+            "text": "\nBut I am curious right now as to why you think an OO solution would be better than a mostly procedural loop based solution. For the parts of projects that I cannot find a decent relational solution for, I then turn to procedural (I am not saying this is such a case yet). First I want to understand your output requirements. Here is the reporting nesting as I understand it:",
+            "id": "ff625b2511404546986ab6f2bda28fb2"
+          },
+          {
+            "type": "code",
+            "text": "    \n     for each product\n       for each question\n         for each occupation (including all, and summary at)\n           for each age-group",
+            "id": "3f0461b5fe4e72eef8afe8e9578fffe3"
+          },
+          {
+            "type": "html",
+            "text": "\nNote that I generally avoid making the internal data structures \"shaped\" like the output in any way because output requirements often expand and change in these situations. Some say this is anti-[[Yag Ni]], but I don't always agree with pure [[Yag Ni]]. I would probably have a routine/module with a name like ReportX which would contain all this looping (if procedural route used). I suspect an OO solution would \"delegate\" various parts of this reporting process to each of the entities involved. I see no net benefits in such.",
+            "id": "41cdc82637f4f532be9e6e43b4547090"
+          },
+          {
+            "type": "html",
+            "text": "<i>The resulting files should be output as a tab-delimited text file so the customer can import them into Excel. </i>",
+            "id": "028990478c5f0963dfc884653833c3d5"
+          },
+          {
+            "type": "html",
+            "text": "\nBut it is not a perfect \"grid\" shape. It has the count and percentage under the same age group, for example.",
+            "id": "e39e05a539f02fd1bd31193bab6228f5"
+          },
+          {
+            "type": "html",
+            "text": "<i>Are you talking about the Total, Mean, and Std. Dev. cells at the bottom? </i>",
+            "id": "bff97e3c08da5e080454acf9d7d88916"
+          },
+          {
+            "type": "html",
+            "text": "\nNo. In the example above, the \"36-55\" group takes up two cells because below it are the quantity and percentage.",
+            "id": "b71d2e0e3066c1c3e1cc2adc193d16ab"
+          },
+          {
+            "type": "html",
+            "text": "<i>\"36-55\" should have two tabs after it to signify that it takes up two cells. The marketing intern will do a Merge-And-Center in [[Microsoft Excel]] by hand. (Not a good job, that marketing internship.)</i>",
+            "id": "227f4b83f33f703417518d3d78ac47c1"
+          },
+          {
+            "type": "html",
+            "text": "<i>The idea was that there would be some marketing intern who would spend a few minutes importing each file into Excel and then doing a little futzing -- merging cells, changing fonts, etc. -- to make it look presentable for the client. The code simply needs to insert the right number of tabs.</i>",
+            "id": "e3f84a4a21ec8cfd6c7dc1a1b70e27b7"
+          },
+          {
+            "type": "html",
+            "text": "<i>Also, it looks from your pseudo-code above that I might not have been clear enough on my requirements: Occupation and Age group shouldn't be nested inside of one another. They're largely independent on this report, but the customer wants them in the same file.</i>",
+            "id": "bd270770c26bcd5e671d9133c8370195"
+          },
+          {
+            "type": "html",
+            "text": "\nI think I need to see a bit more of the output to get a feel for this.",
+            "id": "c1d20bd1eb2c3d838e5542cf06c3f527"
+          },
+          {
+            "type": "html",
+            "text": "<i>I mean that you have the Age breakdown section, which will include the answers and ages of all 90 people who responded to the question. Then you'll have the Occupation breakdown which will include the answers and occupations of all 90 people who responded to the question. The two are side-by-side on the same file, but their data isn't dependent on one another. The customer doesn't care, for example, about finding homemakers from the ages of 22-25.</i>",
+            "id": "14a2e9f30bbd32528eb1582192c12dbd"
+          },
+          {
+            "type": "html",
+            "text": "\nSo every question will have an \"age grid\" and an \"occupation grid\" for each product? Is there any relationship between \"product\" and \"survey\"?",
+            "id": "be8abac8745344bfaee05e02cc860bbf"
+          },
+          {
+            "type": "html",
+            "text": "<i>Yes, there's an age grid and an occupation for each product. And, yes, there's a relationship between product and survey: Each survey is aimed at finding information pertinent to one product. They're product-specific surveys, as opposed to a more generalized lifestyle poll.</i>",
+            "id": "94bc7727721849df9c9c0d2b8a1caf90"
+          },
+          {
+            "type": "html",
+            "text": "\nHow about you show 3 example output sections or enough to show the pattern. They don't have to be pretty. The saying that a picture is worth a thousand words is generally true.",
+            "id": "7d494592c929b2052ced500b3f13a1bc"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "d192d5b367c3cf6ab3803236e54f7106"
+          },
+          {
+            "type": "html",
+            "text": "\nI have found that if the output \"shape\" does not match the table shape in the database, than an intermediate structure, preferrably a \"work table\", can be used to provide the indirection needed for output formatting. This intermediate table would look something like this:",
+            "id": "3709e540765c5d26ca9dc375c7d6ec86"
+          },
+          {
+            "type": "html",
+            "text": "table:<br>tempData",
+            "id": "05c321742857a1543667a9bda1f24def"
+          },
+          {
+            "type": "code",
+            "text": "  ---------------\n  factorA\n  factorB\n  factorC\n  ....\n  theValue",
+            "id": "3926111601cb91009a4a56655636b947"
+          },
+          {
+            "type": "html",
+            "text": "\nThe secret is one value per row. In this case, the factors would be things like questionID, personID, productID, etc. Then have loops such as:",
+            "id": "fb3fda38580e13702c55622b923e8467"
+          },
+          {
+            "type": "code",
+            "text": "  for each a in factorA_list\n    print(\"<tr>\")\n    for each b in factorB_list\n      sql = stringValues(\"select theValue from tempdata \n             where factorA = %1 and factorB = %2\", a, b)\n      useValue = queryForValue(sql)  // get only first result cell\n      print(stringValues(\"<td>%1</td>\", useValue))\n    end-for // b\n    print(\"</tr>\")\n  end-for // a",
+            "id": "f6b4a6f18f44b04bcbc2be5ded467df7"
+          },
+          {
+            "type": "html",
+            "text": "\nThis shows a 2-factor output. If you don't have temporary tables in your language or the implementation is too slow, then associative arrays (hash maps) can be used with some fiddling. Instead of using nested loops, sometimes you can just use the Order By clause.",
+            "id": "76eecdaf55c49f10179bc0ad8bb9fb26"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "d192d5b367c3cf6ab3803236e54f7106"
+          },
+          {
+            "type": "html",
+            "text": "<i>I didn't do it this way back then, but if I did it today I might use a templating-style language like Ruby .rhtml files in order to manage a lot of the outputting details, since, as you say, output requirements can change quickly. So I might have a Ruby .rhtml template file that looks like:</i>",
+            "id": "109dc772900d8a774c1229a1a9009914"
+          },
+          {
+            "type": "code",
+            "text": " <%\n question = objectStore.getQuestion questionId\n report = SurveyReport.new (question)\n %>\n Q<%= question.order %>. <%= question.questionText %>",
+            "id": "d6d56a7b1bfc77b696a94b3e2bad6423"
+          },
+          {
+            "type": "code",
+            "text": " \\t<%\n demographicCategories.each { |demoCat|\n   print demoCat.categoryName\n   print (\"\\t\" * demoCat.options.size)\n  }\n %>\n ANSWER\\t<%\n demographicCategories.each { |demoCat|\n   demoCat.options.each { |demoOption|\n     print demoOption.optionName + \"\\t\"\n   }\n }\n %>\n <%\n answers.each { |answer|\n   print answer.answerName, \"\\t\"\n   demographicCategories.each { |demoCat|\n     demoCat.options.each { |demoOption|\n       cell = report.cell (answer, demoOption)\n       print cell.count + \"  \" + cell.percentage + \"%\"\n       print \"\\t\"\n     }\n   }\n }\n %>",
+            "id": "b2c09a94f8a5579dc9b85b4a339d3f9b"
+          },
+          {
+            "type": "html",
+            "text": "<i>Hm. Maybe that's getting side-tracked on templating styles and formatting. (I view this sort of task as being similar to HTML generation; you use a templating language to try to separate out the logic from the presentation, though sometimes that's harder than it sounds.)</i>",
+            "id": "26f853087f69ba6a17b4b75ed461e56b"
+          },
+          {
+            "type": "html",
+            "text": "<i>Anyhow, one possibly useful feature of a setup like this is that if I delegate the data collecting and calculations to a S<b></b>urveyReport class then it's possible for me to run unit-tests on the S<b></b>urveyReport. I find it's easier to test OO code than procedural or SQL. -- francis</i>",
+            "id": "8e22ca8be0bba70d654127707d74ba95"
+          },
+          {
+            "type": "html",
+            "text": "\nEverybody will probably say that they find it easier in their favorite paradigm. ",
+            "id": "8bcb0f36316f8cccd1b584433aa89321"
+          },
+          {
+            "type": "html",
+            "text": "<i>True. And if you're interested in having a discussion at all you might even ask me my reasons why. -- francis</i>",
+            "id": "32d12973609d2f06c6ee414a22d890ad"
+          },
+          {
+            "type": "html",
+            "text": "\nThat is implied.",
+            "id": "36bcf9590e646805cf58937ba68b55ce"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "d192d5b367c3cf6ab3803236e54f7106"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Example]]",
+            "id": "6fc19351e4ff461f59913f536ae22639"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?SurveyReportingExample c2.com]",
+            "id": "59058f43e2d4e2bd14504fdb8a7b35d5"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1707719950541
+    }
+  ]
+}

@@ -1,0 +1,702 @@
+{
+  "title": "Cee Formal Semantics",
+  "story": [
+    {
+      "type": "html",
+      "text": "This is a formal semantics of the C programming language, using state transition semantics. The state transitions are typed ([byte] -> state -> state) -> state -> state. Each denotation takes a continuation, and produces a state transition. The notation is Haskell.",
+      "id": "56e1d0565801770f1d676b4d153e5194"
+    },
+    {
+      "type": "html",
+      "text": "[[ expr ? thn :<br>els ]] C = [[ expr ]] (\\x -> (if x == 0 then [[ els ]] else [[ thn ]]) C)",
+      "id": "6aa535427f9e43dc708479c4237c9182"
+    },
+    {
+      "type": "html",
+      "text": "[[ if (expr) thn; else els ]] = [[ expr ? thn :<br>els ]]",
+      "id": "14bfdf19bcec1cf2ce134e300939f363"
+    },
+    {
+      "type": "code",
+      "text": "  [[ while (expr) stmt ]] C = [[ expr ]] (\\x -> if x == 0 then C 0 else [[ stmt; while (expr) stmt ]] C)",
+      "id": "bb62ef2cfcfb01abcd275cdb3d5a0ddf"
+    },
+    {
+      "type": "code",
+      "text": "  [[ do stmt while (expr) ]] = [[ stmt; while (expr) stmt ]]",
+      "id": "88d24f33b9a17477959191a2d3bdcd23"
+    },
+    {
+      "type": "code",
+      "text": "  [[ for (stmt;expr;stmt2) stmt3 ]] = [[ stmt; while (expr) { stmt3; stmt2 } ]]",
+      "id": "93d0ab0ab55e09b78afe7af4df620699"
+    },
+    {
+      "type": "code",
+      "text": "  [[ { stmt } ]] = [[ stmt ]]",
+      "id": "f450b28ecbd89c48ba896d331872d03d"
+    },
+    {
+      "type": "code",
+      "text": "  [[ stmt, expr ]] C = [[ stmt ]] (\\_ -> [[ expr ]] C)",
+      "id": "12610a4cc5280560c664e59130b993a6"
+    },
+    {
+      "type": "code",
+      "text": "  [[ stmt1; stmt2 ]] = [[ stmt1, stmt2 ]]",
+      "id": "294cca3709a097568b6c17fbcc5d55c1"
+    },
+    {
+      "type": "code",
+      "text": "  [[ return expr ]] _ = [[ expr ]] (\\x -> lookUp (\\(_, C) -> C x))",
+      "id": "2334660e6a12870ce6c23d2de9bedd1f"
+    },
+    {
+      "type": "code",
+      "text": "  [[ x = expr ]] C = [[ expr ]] (\\y -> C y . update x y)",
+      "id": "712d3a9468b042c58388d3e1d8f33ead"
+    },
+    {
+      "type": "code",
+      "text": "  [[ *x = expr ]] C = [[ expr ]] (\\y -> [[ x ]] (\\p -> C y . updateAt p y))",
+      "id": "b24982f5c78d04795fceb678897e08b1"
+    },
+    {
+      "type": "code",
+      "text": "  [[ *x ]] C = [[ x ]] (\\p -> deref p (sizeof (ptrType x)) C)",
+      "id": "dbb457cab71fb4ac80c9523e2ab39576"
+    },
+    {
+      "type": "code",
+      "text": "  [[ &x ]] = address x",
+      "id": "01257c020507147d361b2b17f9cbe9e9"
+    },
+    {
+      "type": "code",
+      "text": "  [[ f(x1,x2,...,x_n) ]] C = foldr\n        (\\x c xs -> [[ x ]] (c . (:xs)))\n        (\\xs -> [[ f ]] (\\(args, body) -> [[ body ]] (\\_ -> C' 0) . push (zip args xs, C')))\n        [x1,x2,...,x_n]\n        [] where\n        C' z = C z . pop",
+      "id": "b8a8a3e33da27a58c540905a715a050f"
+    },
+    {
+      "type": "code",
+      "text": "  [[ x ]] C = lookUp (\\(dict, _) -> C (lookup' x dict))",
+      "id": "5bf819ea2bf616f4fdecde43b3a8992d"
+    },
+    {
+      "type": "code",
+      "text": "  [[ T x, x2, ..., x_n ]] C = C 0 . define [x,x2,...,x_n] (sizeof T)",
+      "id": "ba90a74bda54977c552ee50efca5dfac"
+    },
+    {
+      "type": "code",
+      "text": "  [[ T x = expr, x2 = expr2, ..., x_n = expr_n ]] = [[ T x, x2, ..., x_n; x = expr; x2 = expr2; ...; x_n = expr_n ]]",
+      "id": "8e1f9f3f23320f5baa5525cdd4ed5cb5"
+    },
+    {
+      "type": "html",
+      "text": "\nThis concludes the formal semantics. I left out a few things, such as the break and continue keywords. I used a few functions that still need to be defined. They manipulate memory, which describes a stack, static memory, and heap:",
+      "id": "9dac6e1c6275e65f2bd2f420de4114c7"
+    },
+    {
+      "type": "code",
+      "text": "  Let state = ([([(Name, [byte])], [byte] -> state -> state)], [(Name, [byte])], [[byte]])",
+      "id": "5366ba3dbfa7857dda42ba0a9a350558"
+    },
+    {
+      "type": "html",
+      "text": "\nNow I can define the functions:",
+      "id": "e3256c127505cb7654aa3363dcf046f3"
+    },
+    {
+      "type": "code",
+      "text": "  Let lookUp C st@(stack, static, heap) = let (dict, c) = head stack in C (map ((,) 0) dict ++ map ((,) 1) static, c) st",
+      "id": "868d37d2b3a410d3d4ee63e6e1f62777"
+    },
+    {
+      "type": "code",
+      "text": "  Let lookup' x dict = fromJust (lookup x dict)",
+      "id": "d4b36c5cfdc1b2f1354be4accc345c80"
+    },
+    {
+      "type": "html",
+      "text": "Let update' x y (z:zs) = if fst z == x then (x, y) :<br>zs else update' x y zs",
+      "id": "84a6fa9247293b893a98925f80939611"
+    },
+    {
+      "type": "code",
+      "text": "      update' x y [] = [(x, y)]",
+      "id": "989e47ebd4981b88c0f8a820953763b0"
+    },
+    {
+      "type": "code",
+      "text": "  Let update x y (stack, static, heap) = if isJust (lookUp x stack) then (update' x y stack, static, heap) else (stack, update' x y static, heap))",
+      "id": "c8be16f5eff04816b6a5da48b70d78b7"
+    },
+    {
+      "type": "html",
+      "text": "Let push pr = update' (\\(stack, static, heap) -> (pr :<br>stack, static, heap))",
+      "id": "8a87fb757fb964a49408bbd09a2c42d0"
+    },
+    {
+      "type": "code",
+      "text": "  Let pop (stack, static, heap) = (tail stack, static, heap)",
+      "id": "88c8872282b7624edc6ffdf25289bec3"
+    },
+    {
+      "type": "html",
+      "text": "Let define ls sz ((dict, c) :<br>xs, static, heap) = ((map (\\x -> (x, replicate sz nasalDemons)) ls ++ dict, c) : xs, static, heap)",
+      "id": "65e3ca8afd4674b23da0f1b6b505e16b"
+    },
+    {
+      "type": "code",
+      "text": "  nasalDemons is a fixed value that you don't know what it is.",
+      "id": "d2df49754ae2ff3968a58f6063c8dc62"
+    },
+    {
+      "type": "html",
+      "text": "\nA pointer is defined as a triple (Word2, Word, Word30). The first entry is 0 for the stack, 1 for static memory, or 2 for the heap. The second entry is the index of the block, and the third entry is number of bytes into the block.",
+      "id": "a944249c2ef09af6c2fc5f8dfc01c430"
+    },
+    {
+      "type": "code",
+      "text": "  Let updateBlock b i y blocks = take b blocks\n    ++ (take i (blocks !! b) ++ y : drop (i + length y) (blocks !! b))\n    : drop (b + 1) blocks",
+      "id": "bc50a40afb444e3ab6b49dfad1ebbf25"
+    },
+    {
+      "type": "code",
+      "text": "  Let updateAt (n, b, i) y (stack, static, heap) = case n of\n    0 -> (updateBlock b i y stack, static, heap)\n    1 -> (stack, updateBlock b i y static, heap)\n    2 -> (stack, static, updateBlock b i y heap)",
+      "id": "b8909914a92ee4a0f7ff073cbb5beb16"
+    },
+    {
+      "type": "code",
+      "text": "  Let derefBlock b i sz blocks = if b >= length blocks || i + sz > length (blocks !! b) then\n      error \"Segfault\"\n    else\n      take sz (drop i (blocks !! b))",
+      "id": "e7eb585743673a4b11b4ec0ae05daacb"
+    },
+    {
+      "type": "code",
+      "text": "  Let deref (n, b, i) sz C (stack, static, heap) = case n of\n    0 -> derefBlock b i sz (concatMap (map snd . fst) stack)\n    1 -> derefBlock b i sz (map snd static)\n    2 -> derefBlock b i sz heap",
+      "id": "7d909952ff21bb73a425c754ae79d549"
+    },
+    {
+      "type": "code",
+      "text": "  Let address x C = lookUp (\\(dict, _) -> let (i, (n, _)) = fromJust (find (\\(i, (n, (y, _))) -> x == y) (zip [0..] dict)) in C (n, i, 0))",
+      "id": "4541e347c014316838965175fdbabb81"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "34de0c47c20d75537554b640cdd1d6ac"
+    },
+    {
+      "type": "html",
+      "text": "\nMemory representations:",
+      "id": "ae43600d4c3bbf0516bbeafd8518227d"
+    },
+    {
+      "type": "html",
+      "text": "Integers are two's complement, with system endianness and a size determined by their type.",
+      "id": "f57301e89b4e07346b6fef1cc1cd913a"
+    },
+    {
+      "type": "html",
+      "text": "Floating point types are IEEE standard.",
+      "id": "0749de9426701c0f44602d1903d539e2"
+    },
+    {
+      "type": "html",
+      "text": "Pointers are represented in memory using an unknown mapping. All you know is that pointers to bytes in a block are contiguous, and there is no allocated byte at 0x0.",
+      "id": "577d1ef3b7fafca6e0f89bd699334157"
+    },
+    {
+      "type": "html",
+      "text": "\nThe behavior and layout of arrays, structs, unions, and enums can be built using these primitives.",
+      "id": "34cfcb1203f060a581e52ff70d41abef"
+    },
+    {
+      "type": "html",
+      "text": "\nAlso notice that, since to the semantics pointers are just lists of bytes, you can form invalid pointers, and cast and alias freely.",
+      "id": "065d83925aca182a431fe290f632bc30"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "34de0c47c20d75537554b640cdd1d6ac"
+    },
+    {
+      "type": "html",
+      "text": "\nI can also define the standard library:",
+      "id": "50b93fba10b26ca5d5c04d2c6a54d6cc"
+    },
+    {
+      "type": "code",
+      "text": "  Let hPutChar hdl c C = C 0",
+      "id": "1c9e328208f6af739f65251888c521fa"
+    },
+    {
+      "type": "code",
+      "text": "  Let hGetChar hdl `c C = C c",
+      "id": "216ecd04c2764cf9f42c92fa32762514"
+    },
+    {
+      "type": "html",
+      "text": "\nThe backtick denotes a variable that is filled in by the environment. When considering a pair of programs communicating through a handle hdl, I use the following reduction:",
+      "id": "bcada819b5cd0b3823030d3e589cf816"
+    },
+    {
+      "type": "code",
+      "text": "  (hPutChar hdl c C st, hGetChar hdl `c C2 st2) ~~> (C 0 st, C2 c st2)",
+      "id": "754ff214e3f25df64ec5594639dc37b6"
+    },
+    {
+      "type": "html",
+      "text": "\nFork produces two processes the states of which evolve independently:",
+      "id": "609bb834da499b59a6c104a3646fe3fc"
+    },
+    {
+      "type": "code",
+      "text": "  Let fork C st = (C 0 st, C 1 st)",
+      "id": "fe35a838d28e725b4e42c49be855fee7"
+    },
+    {
+      "type": "html",
+      "text": "\nI promise never to let the states interact except at memory barriers. The two memory barriers are defined thus:",
+      "id": "1ab618be85bd073e7c55e8df22ff90fb"
+    },
+    {
+      "type": "code",
+      "text": "  Let readBarrier C = C 0",
+      "id": "fc388ee92c6c420e3b9d9eafc76d4093"
+    },
+    {
+      "type": "code",
+      "text": "  Let writeBarrier C = C 0",
+      "id": "6b0293515900cce63e9170e52d24393c"
+    },
+    {
+      "type": "html",
+      "text": "\nWhen the two processes are like this, their states are ready to interact:",
+      "id": "2aa4772056b9086dc6aa92d1a7c4dc20"
+    },
+    {
+      "type": "code",
+      "text": "  (writeBarrier C st, readBarrier C2 st2) ~~> ?",
+      "id": "27214fc62f5493633ce3289274b03ae0"
+    },
+    {
+      "type": "html",
+      "text": "\nI reduce this by:",
+      "id": "fb9ab76b7e9f437c2ce6307c15b16c66"
+    },
+    {
+      "type": "html",
+      "text": "\n1) Figuring out which memory cells the first process touched.",
+      "id": "667ab6367c3ed5d4744df602c24148d9"
+    },
+    {
+      "type": "html",
+      "text": "\n2) Applying those changes to the cells of the second process.",
+      "id": "812680b84cc3c26fa8c8553712054ebf"
+    },
+    {
+      "type": "html",
+      "text": "\n3) Adding blocks created by the first process to the state of the second.",
+      "id": "bbfae8b51225137c9f9861b13d050552"
+    },
+    {
+      "type": "html",
+      "text": "\n4) Fixing up pointers to point to those blocks.",
+      "id": "5bdabc465134b9c83ca3742d6d1cdb5a"
+    },
+    {
+      "type": "code",
+      "text": "  Let exit n _ st@(stack, _, _) = let (_, C) = last stack in C n st",
+      "id": "79b9dee88fd71f415027378d94bed322"
+    },
+    {
+      "type": "code",
+      "text": "  availableBlocks is a number between 0 and 2^32-1",
+      "id": "a60f69a61af3bd29c07548f947348fd1"
+    },
+    {
+      "type": "code",
+      "text": "  Let malloc sz C (stack, static, heap) = if length heap >= availableBlocks then\n      C 0x0 (stack, static, heap)\n    else\n      C (2, length heap, 0) (stack, static, heap ++ [replicate sz nasalDemons])",
+      "id": "197bce3c0d123449a9f496ffe84619af"
+    },
+    {
+      "type": "code",
+      "text": "  Let free p C = deref p 1 (\\_ -> C 0)",
+      "id": "9f88761dbb91b87f4cfac1b4f9a80b2a"
+    },
+    {
+      "type": "html",
+      "text": "\nBy [[James Candy]]",
+      "id": "d29ce9f0f36196f8ad991cce720fd001"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Category Cee]]",
+      "id": "9699c8b52d6771366c544276fd5fafb0"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?CeeFormalSemantics c2.com]",
+      "id": "ad851e6e7153766fa4b9cbb74343750f"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1419202024000,
+      "id": "ee83c2532351c68869a7cb626f230004",
+      "type": "create",
+      "item": {
+        "title": "Cee Formal Semantics",
+        "story": [
+          {
+            "type": "html",
+            "text": "This is a formal semantics of the C programming language, using state transition semantics. The state transitions are typed ([byte] -> state -> state) -> state -> state. Each denotation takes a continuation, and produces a state transition. The notation is Haskell.",
+            "id": "56e1d0565801770f1d676b4d153e5194"
+          },
+          {
+            "type": "html",
+            "text": "[[ expr ? thn :<br>els ]] C = [[ expr ]] (\\x -> (if x == 0 then [[ els ]] else [[ thn ]]) C)",
+            "id": "6aa535427f9e43dc708479c4237c9182"
+          },
+          {
+            "type": "html",
+            "text": "[[ if (expr) thn; else els ]] = [[ expr ? thn :<br>els ]]",
+            "id": "14bfdf19bcec1cf2ce134e300939f363"
+          },
+          {
+            "type": "code",
+            "text": "  [[ while (expr) stmt ]] C = [[ expr ]] (\\x -> if x == 0 then C 0 else [[ stmt; while (expr) stmt ]] C)",
+            "id": "bb62ef2cfcfb01abcd275cdb3d5a0ddf"
+          },
+          {
+            "type": "code",
+            "text": "  [[ do stmt while (expr) ]] = [[ stmt; while (expr) stmt ]]",
+            "id": "88d24f33b9a17477959191a2d3bdcd23"
+          },
+          {
+            "type": "code",
+            "text": "  [[ for (stmt;expr;stmt2) stmt3 ]] = [[ stmt; while (expr) { stmt3; stmt2 } ]]",
+            "id": "93d0ab0ab55e09b78afe7af4df620699"
+          },
+          {
+            "type": "code",
+            "text": "  [[ { stmt } ]] = [[ stmt ]]",
+            "id": "f450b28ecbd89c48ba896d331872d03d"
+          },
+          {
+            "type": "code",
+            "text": "  [[ stmt, expr ]] C = [[ stmt ]] (\\_ -> [[ expr ]] C)",
+            "id": "12610a4cc5280560c664e59130b993a6"
+          },
+          {
+            "type": "code",
+            "text": "  [[ stmt1; stmt2 ]] = [[ stmt1, stmt2 ]]",
+            "id": "294cca3709a097568b6c17fbcc5d55c1"
+          },
+          {
+            "type": "code",
+            "text": "  [[ return expr ]] _ = [[ expr ]] (\\x -> lookUp (\\(_, C) -> C x))",
+            "id": "2334660e6a12870ce6c23d2de9bedd1f"
+          },
+          {
+            "type": "code",
+            "text": "  [[ x = expr ]] C = [[ expr ]] (\\y -> C y . update x y)",
+            "id": "712d3a9468b042c58388d3e1d8f33ead"
+          },
+          {
+            "type": "code",
+            "text": "  [[ *x = expr ]] C = [[ expr ]] (\\y -> [[ x ]] (\\p -> C y . updateAt p y))",
+            "id": "b24982f5c78d04795fceb678897e08b1"
+          },
+          {
+            "type": "code",
+            "text": "  [[ *x ]] C = [[ x ]] (\\p -> deref p (sizeof (ptrType x)) C)",
+            "id": "dbb457cab71fb4ac80c9523e2ab39576"
+          },
+          {
+            "type": "code",
+            "text": "  [[ &x ]] = address x",
+            "id": "01257c020507147d361b2b17f9cbe9e9"
+          },
+          {
+            "type": "code",
+            "text": "  [[ f(x1,x2,...,x_n) ]] C = foldr\n        (\\x c xs -> [[ x ]] (c . (:xs)))\n        (\\xs -> [[ f ]] (\\(args, body) -> [[ body ]] (\\_ -> C' 0) . push (zip args xs, C')))\n        [x1,x2,...,x_n]\n        [] where\n        C' z = C z . pop",
+            "id": "b8a8a3e33da27a58c540905a715a050f"
+          },
+          {
+            "type": "code",
+            "text": "  [[ x ]] C = lookUp (\\(dict, _) -> C (lookup' x dict))",
+            "id": "5bf819ea2bf616f4fdecde43b3a8992d"
+          },
+          {
+            "type": "code",
+            "text": "  [[ T x, x2, ..., x_n ]] C = C 0 . define [x,x2,...,x_n] (sizeof T)",
+            "id": "ba90a74bda54977c552ee50efca5dfac"
+          },
+          {
+            "type": "code",
+            "text": "  [[ T x = expr, x2 = expr2, ..., x_n = expr_n ]] = [[ T x, x2, ..., x_n; x = expr; x2 = expr2; ...; x_n = expr_n ]]",
+            "id": "8e1f9f3f23320f5baa5525cdd4ed5cb5"
+          },
+          {
+            "type": "html",
+            "text": "\nThis concludes the formal semantics. I left out a few things, such as the break and continue keywords. I used a few functions that still need to be defined. They manipulate memory, which describes a stack, static memory, and heap:",
+            "id": "9dac6e1c6275e65f2bd2f420de4114c7"
+          },
+          {
+            "type": "code",
+            "text": "  Let state = ([([(Name, [byte])], [byte] -> state -> state)], [(Name, [byte])], [[byte]])",
+            "id": "5366ba3dbfa7857dda42ba0a9a350558"
+          },
+          {
+            "type": "html",
+            "text": "\nNow I can define the functions:",
+            "id": "e3256c127505cb7654aa3363dcf046f3"
+          },
+          {
+            "type": "code",
+            "text": "  Let lookUp C st@(stack, static, heap) = let (dict, c) = head stack in C (map ((,) 0) dict ++ map ((,) 1) static, c) st",
+            "id": "868d37d2b3a410d3d4ee63e6e1f62777"
+          },
+          {
+            "type": "code",
+            "text": "  Let lookup' x dict = fromJust (lookup x dict)",
+            "id": "d4b36c5cfdc1b2f1354be4accc345c80"
+          },
+          {
+            "type": "html",
+            "text": "Let update' x y (z:zs) = if fst z == x then (x, y) :<br>zs else update' x y zs",
+            "id": "84a6fa9247293b893a98925f80939611"
+          },
+          {
+            "type": "code",
+            "text": "      update' x y [] = [(x, y)]",
+            "id": "989e47ebd4981b88c0f8a820953763b0"
+          },
+          {
+            "type": "code",
+            "text": "  Let update x y (stack, static, heap) = if isJust (lookUp x stack) then (update' x y stack, static, heap) else (stack, update' x y static, heap))",
+            "id": "c8be16f5eff04816b6a5da48b70d78b7"
+          },
+          {
+            "type": "html",
+            "text": "Let push pr = update' (\\(stack, static, heap) -> (pr :<br>stack, static, heap))",
+            "id": "8a87fb757fb964a49408bbd09a2c42d0"
+          },
+          {
+            "type": "code",
+            "text": "  Let pop (stack, static, heap) = (tail stack, static, heap)",
+            "id": "88c8872282b7624edc6ffdf25289bec3"
+          },
+          {
+            "type": "html",
+            "text": "Let define ls sz ((dict, c) :<br>xs, static, heap) = ((map (\\x -> (x, replicate sz nasalDemons)) ls ++ dict, c) : xs, static, heap)",
+            "id": "65e3ca8afd4674b23da0f1b6b505e16b"
+          },
+          {
+            "type": "code",
+            "text": "  nasalDemons is a fixed value that you don't know what it is.",
+            "id": "d2df49754ae2ff3968a58f6063c8dc62"
+          },
+          {
+            "type": "html",
+            "text": "\nA pointer is defined as a triple (Word2, Word, Word30). The first entry is 0 for the stack, 1 for static memory, or 2 for the heap. The second entry is the index of the block, and the third entry is number of bytes into the block.",
+            "id": "a944249c2ef09af6c2fc5f8dfc01c430"
+          },
+          {
+            "type": "code",
+            "text": "  Let updateBlock b i y blocks = take b blocks\n    ++ (take i (blocks !! b) ++ y : drop (i + length y) (blocks !! b))\n    : drop (b + 1) blocks",
+            "id": "bc50a40afb444e3ab6b49dfad1ebbf25"
+          },
+          {
+            "type": "code",
+            "text": "  Let updateAt (n, b, i) y (stack, static, heap) = case n of\n    0 -> (updateBlock b i y stack, static, heap)\n    1 -> (stack, updateBlock b i y static, heap)\n    2 -> (stack, static, updateBlock b i y heap)",
+            "id": "b8909914a92ee4a0f7ff073cbb5beb16"
+          },
+          {
+            "type": "code",
+            "text": "  Let derefBlock b i sz blocks = if b >= length blocks || i + sz > length (blocks !! b) then\n      error \"Segfault\"\n    else\n      take sz (drop i (blocks !! b))",
+            "id": "e7eb585743673a4b11b4ec0ae05daacb"
+          },
+          {
+            "type": "code",
+            "text": "  Let deref (n, b, i) sz C (stack, static, heap) = case n of\n    0 -> derefBlock b i sz (concatMap (map snd . fst) stack)\n    1 -> derefBlock b i sz (map snd static)\n    2 -> derefBlock b i sz heap",
+            "id": "7d909952ff21bb73a425c754ae79d549"
+          },
+          {
+            "type": "code",
+            "text": "  Let address x C = lookUp (\\(dict, _) -> let (i, (n, _)) = fromJust (find (\\(i, (n, (y, _))) -> x == y) (zip [0..] dict)) in C (n, i, 0))",
+            "id": "4541e347c014316838965175fdbabb81"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "34de0c47c20d75537554b640cdd1d6ac"
+          },
+          {
+            "type": "html",
+            "text": "\nMemory representations:",
+            "id": "ae43600d4c3bbf0516bbeafd8518227d"
+          },
+          {
+            "type": "html",
+            "text": "Integers are two's complement, with system endianness and a size determined by their type.",
+            "id": "f57301e89b4e07346b6fef1cc1cd913a"
+          },
+          {
+            "type": "html",
+            "text": "Floating point types are IEEE standard.",
+            "id": "0749de9426701c0f44602d1903d539e2"
+          },
+          {
+            "type": "html",
+            "text": "Pointers are represented in memory using an unknown mapping. All you know is that pointers to bytes in a block are contiguous, and there is no allocated byte at 0x0.",
+            "id": "577d1ef3b7fafca6e0f89bd699334157"
+          },
+          {
+            "type": "html",
+            "text": "\nThe behavior and layout of arrays, structs, unions, and enums can be built using these primitives.",
+            "id": "34cfcb1203f060a581e52ff70d41abef"
+          },
+          {
+            "type": "html",
+            "text": "\nAlso notice that, since to the semantics pointers are just lists of bytes, you can form invalid pointers, and cast and alias freely.",
+            "id": "065d83925aca182a431fe290f632bc30"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "34de0c47c20d75537554b640cdd1d6ac"
+          },
+          {
+            "type": "html",
+            "text": "\nI can also define the standard library:",
+            "id": "50b93fba10b26ca5d5c04d2c6a54d6cc"
+          },
+          {
+            "type": "code",
+            "text": "  Let hPutChar hdl c C = C 0",
+            "id": "1c9e328208f6af739f65251888c521fa"
+          },
+          {
+            "type": "code",
+            "text": "  Let hGetChar hdl `c C = C c",
+            "id": "216ecd04c2764cf9f42c92fa32762514"
+          },
+          {
+            "type": "html",
+            "text": "\nThe backtick denotes a variable that is filled in by the environment. When considering a pair of programs communicating through a handle hdl, I use the following reduction:",
+            "id": "bcada819b5cd0b3823030d3e589cf816"
+          },
+          {
+            "type": "code",
+            "text": "  (hPutChar hdl c C st, hGetChar hdl `c C2 st2) ~~> (C 0 st, C2 c st2)",
+            "id": "754ff214e3f25df64ec5594639dc37b6"
+          },
+          {
+            "type": "html",
+            "text": "\nFork produces two processes the states of which evolve independently:",
+            "id": "609bb834da499b59a6c104a3646fe3fc"
+          },
+          {
+            "type": "code",
+            "text": "  Let fork C st = (C 0 st, C 1 st)",
+            "id": "fe35a838d28e725b4e42c49be855fee7"
+          },
+          {
+            "type": "html",
+            "text": "\nI promise never to let the states interact except at memory barriers. The two memory barriers are defined thus:",
+            "id": "1ab618be85bd073e7c55e8df22ff90fb"
+          },
+          {
+            "type": "code",
+            "text": "  Let readBarrier C = C 0",
+            "id": "fc388ee92c6c420e3b9d9eafc76d4093"
+          },
+          {
+            "type": "code",
+            "text": "  Let writeBarrier C = C 0",
+            "id": "6b0293515900cce63e9170e52d24393c"
+          },
+          {
+            "type": "html",
+            "text": "\nWhen the two processes are like this, their states are ready to interact:",
+            "id": "2aa4772056b9086dc6aa92d1a7c4dc20"
+          },
+          {
+            "type": "code",
+            "text": "  (writeBarrier C st, readBarrier C2 st2) ~~> ?",
+            "id": "27214fc62f5493633ce3289274b03ae0"
+          },
+          {
+            "type": "html",
+            "text": "\nI reduce this by:",
+            "id": "fb9ab76b7e9f437c2ce6307c15b16c66"
+          },
+          {
+            "type": "html",
+            "text": "\n1) Figuring out which memory cells the first process touched.",
+            "id": "667ab6367c3ed5d4744df602c24148d9"
+          },
+          {
+            "type": "html",
+            "text": "\n2) Applying those changes to the cells of the second process.",
+            "id": "812680b84cc3c26fa8c8553712054ebf"
+          },
+          {
+            "type": "html",
+            "text": "\n3) Adding blocks created by the first process to the state of the second.",
+            "id": "bbfae8b51225137c9f9861b13d050552"
+          },
+          {
+            "type": "html",
+            "text": "\n4) Fixing up pointers to point to those blocks.",
+            "id": "5bdabc465134b9c83ca3742d6d1cdb5a"
+          },
+          {
+            "type": "code",
+            "text": "  Let exit n _ st@(stack, _, _) = let (_, C) = last stack in C n st",
+            "id": "79b9dee88fd71f415027378d94bed322"
+          },
+          {
+            "type": "code",
+            "text": "  availableBlocks is a number between 0 and 2^32-1",
+            "id": "a60f69a61af3bd29c07548f947348fd1"
+          },
+          {
+            "type": "code",
+            "text": "  Let malloc sz C (stack, static, heap) = if length heap >= availableBlocks then\n      C 0x0 (stack, static, heap)\n    else\n      C (2, length heap, 0) (stack, static, heap ++ [replicate sz nasalDemons])",
+            "id": "197bce3c0d123449a9f496ffe84619af"
+          },
+          {
+            "type": "code",
+            "text": "  Let free p C = deref p 1 (\\_ -> C 0)",
+            "id": "9f88761dbb91b87f4cfac1b4f9a80b2a"
+          },
+          {
+            "type": "html",
+            "text": "\nBy [[James Candy]]",
+            "id": "d29ce9f0f36196f8ad991cce720fd001"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Category Cee]]",
+            "id": "9699c8b52d6771366c544276fd5fafb0"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?CeeFormalSemantics c2.com]",
+            "id": "ad851e6e7153766fa4b9cbb74343750f"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1707797048511
+    }
+  ]
+}

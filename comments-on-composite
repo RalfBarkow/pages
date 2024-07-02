@@ -1,0 +1,292 @@
+{
+  "title": "Comments On Composite",
+  "story": [
+    {
+      "type": "html",
+      "text": "We've used the Composite pattern within [[Genome Topographer]] for the \nExperiment hierarchy.  Experiments have inputs, conditions and \noutputs.  They also know how to compute themselves.  An atomic\nexperiment is one step in an experimental protocol.  The composite\nexperiments hold multiple atomic experiments, which may execute in sequence\nor in parallel depending on how they are linked together.  We're \nthinking about iterative and conditional links within the composite,\nas well.",
+      "id": "cddbdd6d8373dbf1eadf47625fede488"
+    },
+    {
+      "type": "html",
+      "text": "\nThe Composite pattern worked well for this application.  Our biggest\nchallenge has been to remember to not assume that we always have\na composite --- that is, to maintain the common interface.",
+      "id": "262b465d2c42399b4f11347e5f0487ad"
+    },
+    {
+      "type": "html",
+      "text": "\nThe [[Composite Experiment]] itself pretty much just represents a\ndata flow graph of experiments.  We associate an Experiment\nPrototype with a composite to provide specialized behavior. --[[Moira Mallison]]",
+      "id": "d98b043aabdadbfca001394c4959b4ea"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4543f5d75a6dc3189a6361a7637cb37c"
+    },
+    {
+      "type": "html",
+      "text": "C3 has a big use of [[Composite Pattern]] in its Bin and [[Bin Supply]] objects. It's a nice compact way to do the single/group thing. However, IMO it is rather deep in the bag of tricks and can be tricky to implement. Use when really needed, with caution. --[[Ron Jeffries]]",
+      "id": "41d1ee890b3284b4bcd74853bcf9c968"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4543f5d75a6dc3189a6361a7637cb37c"
+    },
+    {
+      "type": "html",
+      "text": "Composite as a nickname for the idea saved us in several really heated discussions.  Someone just said, \"that's a composite\", and the rest said, \"oh. yeah.\"  and that was that.",
+      "id": "ecec7d05f25cf63bb20e6acc91badab9"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4543f5d75a6dc3189a6361a7637cb37c"
+    },
+    {
+      "type": "html",
+      "text": "OTOH, Composite caused quite some trouble with the following design problem: company has legal and sales territories.  the top-level legal territories are the same as the top-level sales territories, but after that, they go their own ways, but the trees are always nicely triangular in shape. Certain properties and behaviors attach to the top levels, the middle levels, and the leaf levels in each.  The composite pattern does not cope with this top, middle, bottom stuff.  OMT (and UML?) couldn't handle the polymorphism.  So we used the general idea of Composite, but not the thing written in the book.  Each person who joined the project said, \"That's wrong.  That's not what's in the book.\"  And long, tedious arguments would follow for days until they got that what is in the book does not always work.  ugh.",
+      "id": "2ffa929672dab713e40f6ba3b5cdc9ce"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4543f5d75a6dc3189a6361a7637cb37c"
+    },
+    {
+      "type": "html",
+      "text": "I saw an article in C++ Journal describing [[Cascading Composite Pattern]].\nThe idea is that the leaves of your composite tree can also be instances of the composite pattern.\nIn other words, you apply the pattern recursively.",
+      "id": "b35cb61bb207741d5c8f2609df9b4b73"
+    },
+    {
+      "type": "html",
+      "text": "\nTo make this concrete, here's how to do the territories:",
+      "id": "b6849f39c47cb6998a513e3bad60ba0c"
+    },
+    {
+      "type": "code",
+      "text": "  C''''''ompanyTerritoryComponent --------------------------------------+\n            ^                                                     |\n            |                                                     |\n          +-+-----------------------+-----------------------+     |\n          |                         |                       |     |\n  L''''''egalTerritoryComponent   S''''''alesTerritoryComponent   C''''''ompanyComposite\n             ^        |              ^          |\n             |        |              |          |\n      +------+---+    |         +----+-----+    |\n      |          |    |         |          |    |\n  L''''''egalLeaf L''''''egalComposite  S''''''alesLeaf S''''''alesComposite",
+      "id": "b496f27bbbbcd0d267688fc2be68f882"
+    },
+    {
+      "type": "html",
+      "text": "\nThis ensures that the top nodes are [[Company Composite]], the shared Legal and Sales territories, and that once you get to a Legal or Sales territory, everything under it will be of the same type.  I've assumed that there are no [[Company Leafs]], but adding one is trivial.",
+      "id": "2f27ec895c942ad908bfa8878b302088"
+    },
+    {
+      "type": "html",
+      "text": "\nAs for the inexperienced developers, I wouldn't say that [[Design Patterns]] is \"wrong;\" it's only inapplicable to this situation.\nAnd anyway, you're <b>supposed to</b> modify the design patterns to fit your situation during implementation.\nThey're patterns, not a code library.  -- [[Jeff Grigg]]",
+      "id": "e87f856c071f5698b3b88a2eed6cd5a7"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4543f5d75a6dc3189a6361a7637cb37c"
+    },
+    {
+      "type": "html",
+      "text": "Jeff, I'm not sure I get this. The problem is that while your component and composites share type, and your components are all a <i>kind of</i> component, you composites are not a <i>kind of</i> composite. This makes it hard to create a Generic Visitor that simply visits <i>Component</i> or <i>Composite</i>. Of course, <i>the book doesn't handle this either</i>. That is one of the problems with the composite pattern. It cannot be provide in Java or Smalltalk as an extensible ADT. Each time you use it you must recreate the class hierarchy (except for the component). Any thoughts on this? -- [[Robert Di Falco]]",
+      "id": "09937aceab91a685826553fb08ea80c0"
+    },
+    {
+      "type": "html",
+      "text": "<i>Use the Java interface mechanism.  Each base class implements Composite.  However, this may violate [[Once And Only Once]] in some situations as each base class realizes its own copy of the shared composite interface.</i>  Wyatt Matthews",
+      "id": "99e2c06b475af06c549f6d2c87f1a895"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4543f5d75a6dc3189a6361a7637cb37c"
+    },
+    {
+      "type": "html",
+      "text": "I once commented to [[Kent Beck]] that I didn't like the \"official\" [[Design Patterns]] way of doing composite. He replied, as only he can, \"Well, you're much smarter than I am. You can do it that way if you want to ...\"  --[[Ron Jeffries]]",
+      "id": "ff3eb4b330b285b665e3145a7d8bdc40"
+    },
+    {
+      "type": "html",
+      "text": "\nOkay, Ron, don't leave us guessing. How do you like doing it? More like just another Collection Type (i.e. Abstract Data Type) something like a Tree or Graph? Or using another method alltogether? -- [[Robert Di Falco]]",
+      "id": "e419704ece66c6a85d86b6ba26055cf1"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "4543f5d75a6dc3189a6361a7637cb37c"
+    },
+    {
+      "type": "html",
+      "text": "I tend to favor using C++ pure virtual functions in the base classes, as it enables compile-time enforcement of the requirement that child classes implement certain methods.\nThis deviates from the \"official\" [[Design Patterns]] description, which recommends 'implementing (appropriate) default behavior' in the \"Component\" base class.\nI usually add another abstract base class between Component and the Leaf classes, to hold state and behavior that is common to all Leaf classes but different from the Composite class.\nI consider these minor implementation variations, rather than <i>heretical deviations from the faith.</i>\nOthers, I'm sure ;->, would be more than glad to argue.",
+      "id": "12d4165e6246bc0ffc990f9a979d2097"
+    },
+    {
+      "type": "html",
+      "text": "-- [[Jeff Grigg]]",
+      "id": "2b5151f107bd715910f5c5aa6b75830e"
+    },
+    {
+      "type": "html",
+      "text": "\nYou should take a look at the Composite and Visitor variations I used in [[Cpp Utx Overview]]. These allow you to get rid of the virtual functions altogether by trusting the dynamic dispatching done by the Visitor. All the base class (i.e. Component) really needs is the visitor acceptor. -- [[Robert Di Falco]]",
+      "id": "4751aeaaf9250bdf47f86a79365b39e4"
+    },
+    {
+      "type": "html",
+      "text": "\nMoving my controversy to [[Composite Considered Harmful]] . We'll see what happens. --[[Richard Henderson]].",
+      "id": "3ebd420afa848b7906fc0f11dbd63285"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?CommentsOnComposite c2.com]",
+      "id": "982f33dabf88d3e669de82a07a891273"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1047681967000,
+      "id": "fbff240e5e1a9fb44f25cd7a622d87f1",
+      "type": "create",
+      "item": {
+        "title": "Comments On Composite",
+        "story": [
+          {
+            "type": "html",
+            "text": "We've used the Composite pattern within [[Genome Topographer]] for the \nExperiment hierarchy.  Experiments have inputs, conditions and \noutputs.  They also know how to compute themselves.  An atomic\nexperiment is one step in an experimental protocol.  The composite\nexperiments hold multiple atomic experiments, which may execute in sequence\nor in parallel depending on how they are linked together.  We're \nthinking about iterative and conditional links within the composite,\nas well.",
+            "id": "cddbdd6d8373dbf1eadf47625fede488"
+          },
+          {
+            "type": "html",
+            "text": "\nThe Composite pattern worked well for this application.  Our biggest\nchallenge has been to remember to not assume that we always have\na composite --- that is, to maintain the common interface.",
+            "id": "262b465d2c42399b4f11347e5f0487ad"
+          },
+          {
+            "type": "html",
+            "text": "\nThe [[Composite Experiment]] itself pretty much just represents a\ndata flow graph of experiments.  We associate an Experiment\nPrototype with a composite to provide specialized behavior. --[[Moira Mallison]]",
+            "id": "d98b043aabdadbfca001394c4959b4ea"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4543f5d75a6dc3189a6361a7637cb37c"
+          },
+          {
+            "type": "html",
+            "text": "C3 has a big use of [[Composite Pattern]] in its Bin and [[Bin Supply]] objects. It's a nice compact way to do the single/group thing. However, IMO it is rather deep in the bag of tricks and can be tricky to implement. Use when really needed, with caution. --[[Ron Jeffries]]",
+            "id": "41d1ee890b3284b4bcd74853bcf9c968"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4543f5d75a6dc3189a6361a7637cb37c"
+          },
+          {
+            "type": "html",
+            "text": "Composite as a nickname for the idea saved us in several really heated discussions.  Someone just said, \"that's a composite\", and the rest said, \"oh. yeah.\"  and that was that.",
+            "id": "ecec7d05f25cf63bb20e6acc91badab9"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4543f5d75a6dc3189a6361a7637cb37c"
+          },
+          {
+            "type": "html",
+            "text": "OTOH, Composite caused quite some trouble with the following design problem: company has legal and sales territories.  the top-level legal territories are the same as the top-level sales territories, but after that, they go their own ways, but the trees are always nicely triangular in shape. Certain properties and behaviors attach to the top levels, the middle levels, and the leaf levels in each.  The composite pattern does not cope with this top, middle, bottom stuff.  OMT (and UML?) couldn't handle the polymorphism.  So we used the general idea of Composite, but not the thing written in the book.  Each person who joined the project said, \"That's wrong.  That's not what's in the book.\"  And long, tedious arguments would follow for days until they got that what is in the book does not always work.  ugh.",
+            "id": "2ffa929672dab713e40f6ba3b5cdc9ce"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4543f5d75a6dc3189a6361a7637cb37c"
+          },
+          {
+            "type": "html",
+            "text": "I saw an article in C++ Journal describing [[Cascading Composite Pattern]].\nThe idea is that the leaves of your composite tree can also be instances of the composite pattern.\nIn other words, you apply the pattern recursively.",
+            "id": "b35cb61bb207741d5c8f2609df9b4b73"
+          },
+          {
+            "type": "html",
+            "text": "\nTo make this concrete, here's how to do the territories:",
+            "id": "b6849f39c47cb6998a513e3bad60ba0c"
+          },
+          {
+            "type": "code",
+            "text": "  C''''''ompanyTerritoryComponent --------------------------------------+\n            ^                                                     |\n            |                                                     |\n          +-+-----------------------+-----------------------+     |\n          |                         |                       |     |\n  L''''''egalTerritoryComponent   S''''''alesTerritoryComponent   C''''''ompanyComposite\n             ^        |              ^          |\n             |        |              |          |\n      +------+---+    |         +----+-----+    |\n      |          |    |         |          |    |\n  L''''''egalLeaf L''''''egalComposite  S''''''alesLeaf S''''''alesComposite",
+            "id": "b496f27bbbbcd0d267688fc2be68f882"
+          },
+          {
+            "type": "html",
+            "text": "\nThis ensures that the top nodes are [[Company Composite]], the shared Legal and Sales territories, and that once you get to a Legal or Sales territory, everything under it will be of the same type.  I've assumed that there are no [[Company Leafs]], but adding one is trivial.",
+            "id": "2f27ec895c942ad908bfa8878b302088"
+          },
+          {
+            "type": "html",
+            "text": "\nAs for the inexperienced developers, I wouldn't say that [[Design Patterns]] is \"wrong;\" it's only inapplicable to this situation.\nAnd anyway, you're <b>supposed to</b> modify the design patterns to fit your situation during implementation.\nThey're patterns, not a code library.  -- [[Jeff Grigg]]",
+            "id": "e87f856c071f5698b3b88a2eed6cd5a7"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4543f5d75a6dc3189a6361a7637cb37c"
+          },
+          {
+            "type": "html",
+            "text": "Jeff, I'm not sure I get this. The problem is that while your component and composites share type, and your components are all a <i>kind of</i> component, you composites are not a <i>kind of</i> composite. This makes it hard to create a Generic Visitor that simply visits <i>Component</i> or <i>Composite</i>. Of course, <i>the book doesn't handle this either</i>. That is one of the problems with the composite pattern. It cannot be provide in Java or Smalltalk as an extensible ADT. Each time you use it you must recreate the class hierarchy (except for the component). Any thoughts on this? -- [[Robert Di Falco]]",
+            "id": "09937aceab91a685826553fb08ea80c0"
+          },
+          {
+            "type": "html",
+            "text": "<i>Use the Java interface mechanism.  Each base class implements Composite.  However, this may violate [[Once And Only Once]] in some situations as each base class realizes its own copy of the shared composite interface.</i>  Wyatt Matthews",
+            "id": "99e2c06b475af06c549f6d2c87f1a895"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4543f5d75a6dc3189a6361a7637cb37c"
+          },
+          {
+            "type": "html",
+            "text": "I once commented to [[Kent Beck]] that I didn't like the \"official\" [[Design Patterns]] way of doing composite. He replied, as only he can, \"Well, you're much smarter than I am. You can do it that way if you want to ...\"  --[[Ron Jeffries]]",
+            "id": "ff3eb4b330b285b665e3145a7d8bdc40"
+          },
+          {
+            "type": "html",
+            "text": "\nOkay, Ron, don't leave us guessing. How do you like doing it? More like just another Collection Type (i.e. Abstract Data Type) something like a Tree or Graph? Or using another method alltogether? -- [[Robert Di Falco]]",
+            "id": "e419704ece66c6a85d86b6ba26055cf1"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "4543f5d75a6dc3189a6361a7637cb37c"
+          },
+          {
+            "type": "html",
+            "text": "I tend to favor using C++ pure virtual functions in the base classes, as it enables compile-time enforcement of the requirement that child classes implement certain methods.\nThis deviates from the \"official\" [[Design Patterns]] description, which recommends 'implementing (appropriate) default behavior' in the \"Component\" base class.\nI usually add another abstract base class between Component and the Leaf classes, to hold state and behavior that is common to all Leaf classes but different from the Composite class.\nI consider these minor implementation variations, rather than <i>heretical deviations from the faith.</i>\nOthers, I'm sure ;->, would be more than glad to argue.",
+            "id": "12d4165e6246bc0ffc990f9a979d2097"
+          },
+          {
+            "type": "html",
+            "text": "-- [[Jeff Grigg]]",
+            "id": "2b5151f107bd715910f5c5aa6b75830e"
+          },
+          {
+            "type": "html",
+            "text": "\nYou should take a look at the Composite and Visitor variations I used in [[Cpp Utx Overview]]. These allow you to get rid of the virtual functions altogether by trusting the dynamic dispatching done by the Visitor. All the base class (i.e. Component) really needs is the visitor acceptor. -- [[Robert Di Falco]]",
+            "id": "4751aeaaf9250bdf47f86a79365b39e4"
+          },
+          {
+            "type": "html",
+            "text": "\nMoving my controversy to [[Composite Considered Harmful]] . We'll see what happens. --[[Richard Henderson]].",
+            "id": "3ebd420afa848b7906fc0f11dbd63285"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?CommentsOnComposite c2.com]",
+            "id": "982f33dabf88d3e669de82a07a891273"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1706653427742
+    }
+  ]
+}

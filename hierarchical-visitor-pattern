@@ -1,0 +1,1412 @@
+{
+  "title": "Hierarchical Visitor Pattern",
+  "story": [
+    {
+      "type": "html",
+      "text": "<b>Background</b>",
+      "id": "ffc18985292a9cdd607c5d5efc0de551"
+    },
+    {
+      "type": "html",
+      "text": "<b>Hierarchical Visitor</b> -- <i>found to recur</i> while working with the [[Composite Pattern]] and other hierarchical data-structures. Occurrences of [[Hierarchical Visitor Pattern]] included a logical and hierarchical grouping of network hosts, rules, Security Permissions and Roles, and the [[Test Case]] and [[Test Suite]] classes described in [[Cpp Utx Overview]]. I, along with some others have used the <b>hierarchical visitor</b> in favor of the traditional [[Visitor Pattern]] for the last three years. I recently attempted to simplify or decompose this pattern further in [[Hierarchical Visitor Discussion]]. While some great ideas were contributed, I still found this to be (for me) the most straight forward representation. -- [[Robert Di Falco]]",
+      "id": "a6e002c108dee19859333f968679c0a7"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6e150ce2680605fb432652fd44331f70"
+    },
+    {
+      "type": "html",
+      "text": "<b>Intent</b>",
+      "id": "faf435dddbe4e5e0c2046aecd1f7ea17"
+    },
+    {
+      "type": "html",
+      "text": "\nRepresent an operation to be performed on the nodes of a hierarchical object structure. Hierarchical Visitor lets one define new operations without changing the classes of the nodes on which it operates. Hierarchical Visitor overcomes the limitations of the traditional [[Visitor Pattern]] by allowing a programmer to track traversal depth and short-circuit branch traversal. ",
+      "id": "5ab7bfa0aaf04e64c6ec06656ca8dabb"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6e150ce2680605fb432652fd44331f70"
+    },
+    {
+      "type": "html",
+      "text": "<b>Motivation</b>",
+      "id": "75f073d6b76c8bfc05129a983829b5a6"
+    },
+    {
+      "type": "html",
+      "text": "\nConsider a file system represented using a hierarchical structure, such as that provided by the [[Composite Pattern]]. The file objects are leaf nodes and the directories are the composite nodes. Now consider two operations on a file system: (a) fully qualifying a file name and (b) searching for a specific file. ",
+      "id": "9427330ba6210ef74affa848c46b4c3d"
+    },
+    {
+      "type": "html",
+      "text": "\nTo fully qualify a  file name, we must traverse each of its parent composites. To do this, we start with a string representing the root composite, and concatenate each child composite until we reach the actual file object. We need to determine what composites (directories) are children of the root and which are its siblings. This requires we track when we are entering a composite and leaving a composite. If we enter the composite <i>bar</i> before we have left the composite <i>foo</i>, we know we have \"<i>foo/bar</i>\". However, if we leave <i>foo</i> before entering <i>bar</i> then <i>foo</i> and <i>bar</i> are siblings. \nThis is quite impossible if equipped only with the traditional [[Visitor Pattern]] as it only tells us when we are <i>entering</i> a composite node.",
+      "id": "c096f16b81f85bf9c0c9fa1a15b7ba9c"
+    },
+    {
+      "type": "html",
+      "text": "\nTo search a file system optimally, we need to take advantage of fully qualified names. If we are searching for \"<i>root/foo2/bar3/file.dat</i>\", we don't need to search through the branches \"<i>root/foo1/*</i>\", \"<i>root/foo2/bar1/*</i>\", or even \"<i>root/foo2/bar2/*</i>\". Unfortunately, because the traditional [[Visitor Pattern]] does not have the ability to conditionally traverse a hierarchical structure, we are left with only two choices -- (a) use an alternative means of traversal or (b) search even those branches that have no possibility of a match.",
+      "id": "f08d10d86ad2df55dcb273520d5b1838"
+    },
+    {
+      "type": "html",
+      "text": "\nThese two examples summarize the advantages of the [[Hierarchical Visitor Pattern]]. One no longer needs to rely on multiple traversal techniques when the limitations of the traditional visitor pattern must be exceeded. We can generalize these limitations as: ",
+      "id": "a098c24dc7595b29b9adab75413961d7"
+    },
+    {
+      "type": "html",
+      "text": " <b>hierarchical navigation</b> -- the traditional [[Visitor Pattern]] has no concept of depth. As a result, visitor cannot determine if one composite is within another composite or beside it.",
+      "id": "771b73c646044783d640c1ae7af9c900"
+    },
+    {
+      "type": "html",
+      "text": " <b>conditional navigation</b> -- the traditional [[Visitor Pattern]] does not allow branches to be skipped. As a result, visitor cannot stop, filter, or optimize traversal based on some condition. ",
+      "id": "cafc0edd9704d96dd41dadeb9cda7a8c"
+    },
+    {
+      "type": "html",
+      "text": "\nThe primary consequence of these limitations is a eventual violation of [[Once And Only Once]] when using the traditional [[Visitor Pattern]] with Hierarchical Structures. At some point the limitations are exceeded and another, more powerful mode of traversal -- usually [[External Iteration]] -- is required. The first two File System examples are typical of those operations that challenge these limitations. Further consider the File System sample discussed in [[Pattern Hatching]]. Some behavior is implemented with the [[Visitor Pattern]] while other more complex behaviors (such as indented tree-listings) require other iteration mechanisms. This is why we say that, eventually, [[Once And Only Once]] will be violated when using the traditional [[Visitor Pattern]].",
+      "id": "ce66879a8f9e0fb739b355a9a10bfc9a"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6e150ce2680605fb432652fd44331f70"
+    },
+    {
+      "type": "html",
+      "text": "<b>Applicability</b>",
+      "id": "9af2bd42c6c60cfc87378e588dde4ef4"
+    },
+    {
+      "type": "html",
+      "text": "\nLike the traditional [[Visitor Pattern]], the [[Hierarchical Visitor Pattern]] combines a [[Functor Object]] (the <i>Visitor</i> object itself) with [[Internal Iterator]]s (the <i>accept</i> members of the [[Composite Pattern]]). Together, these form a generalized mechanism for tree traversal. These allow the [[Hierarchical Visitor Pattern]] to be useful anywhere the traditional [[Visitor Pattern]] would. The hierarchical visitor is then made more useful by allowing <i>hierarchical navigation</i> and <i>conditional navigation</i>.",
+      "id": "fd53bdb0078eaff43e41f0212c6e77bc"
+    },
+    {
+      "type": "html",
+      "text": "<b>Hierarchical navigation</b>",
+      "id": "01c1860a73927899a3852e61ccfd9d2e"
+    },
+    {
+      "type": "html",
+      "text": "\nHierarchical navigation is important for any traversal that needs to know whether one node is the child of another or its sibling. The simplest example of this is tree listings where an indentation level needs to be maintained. With the traditional [[Visitor Pattern]], one can only determine when we are entering a node. This tells us that we may want to indent but gives us no clues about outdenting. We don't know if we have left the previous node before we entered the current node. ",
+      "id": "adbd06b26124d379150c9d540cb12693"
+    },
+    {
+      "type": "html",
+      "text": "\nThe [[Hierarchical Visitor Pattern]] removes this limitation by defining a two method protocol when visiting nodes -- <b>visitEnter</b> and <b>visitLeave</b>. If we are entering the composite node <i>bar</i> before leaving the composite node <i>foo</i>, we can safely assume that <i>bar</i> is a child (and not a sibling) of the composite <i>foo</i>.",
+      "id": "a683cf366b6ddd7f5aa0249009152f74"
+    },
+    {
+      "type": "html",
+      "text": "<b>Conditional Navigation</b>",
+      "id": "552d15b9bf313bea73c605b37dd26d25"
+    },
+    {
+      "type": "html",
+      "text": "\nConditional navigation is required to skip unnecessary branches and all of their children. Consider the second operation of the File System example. The search for a specific file in a particular path can only be performed optimally if we can dispose of branches that have no possibility of providing a match. Consider the following graph: ",
+      "id": "f1db8429538b9e09d805c6133f35db1a"
+    },
+    {
+      "type": "html",
+      "text": " 1. ",
+      "id": "983ba28746ea31cddf5ade794f1dabb0"
+    },
+    {
+      "type": "html",
+      "text": " 1.1 ",
+      "id": "a5b733e2185f7f478595e0c5a3083fdc"
+    },
+    {
+      "type": "html",
+      "text": " 1.2 ",
+      "id": "c2591513102c17bd30203cd48b5c969a"
+    },
+    {
+      "type": "html",
+      "text": " 1.2.1 ",
+      "id": "a36966a656bad18d6e950037ca5eb22e"
+    },
+    {
+      "type": "html",
+      "text": " 1.2.2 ",
+      "id": "a83a9675ca7c377b73772b51dd992b04"
+    },
+    {
+      "type": "html",
+      "text": " 1.3 ",
+      "id": "2c9f448c6c6340ffc764893caad2c5ab"
+    },
+    {
+      "type": "html",
+      "text": " 1.3.1 ",
+      "id": "440ff088b4441f10ee360ae4c515add2"
+    },
+    {
+      "type": "html",
+      "text": " 1.3.1.1 ",
+      "id": "a121d54a28283db15188931aeb235082"
+    },
+    {
+      "type": "html",
+      "text": " 1.3.2 ",
+      "id": "581ee45c481b6a167d7259a911f51729"
+    },
+    {
+      "type": "html",
+      "text": " 2. ",
+      "id": "946b386036637112c88eabb3fef3ae54"
+    },
+    {
+      "type": "html",
+      "text": " 2.1 ",
+      "id": "ac939b20574f7f2eaecc94b7d4208f5e"
+    },
+    {
+      "type": "html",
+      "text": " 2.2 ",
+      "id": "8bf60dd4e863dc0f3809109b13df4599"
+    },
+    {
+      "type": "html",
+      "text": "\nThe traditional [[Visitor Pattern]] would have to visit each leaf of the entire structure in order to find the leaf labeled \"2.2\"!  Even though we can see that \"1\" does not match the root ancestor of \"2.2\", we would still have no choice but to perform a match for the leaf \"1.3.1.1\". The only way to avoid this is to abandon the traditional visitor and use another means of traversal. Most programmers violate the encapsulation provided by the traditional visitor when performing tree searches.",
+      "id": "a12f3b376eb3199235985229c9251df5"
+    },
+    {
+      "type": "html",
+      "text": "\n[[Hierarchical Visitor Pattern]] allows us to solve this problem within a single visiting paradigm. It does so by having each invocation of <i>accept</i> answer a boolean traversal state for its depth of the tree. For example, if <i>accept</i> on a composite or leaf answers <i>false</i>, traversal immediately stops at that tree depth. In other words, no more of its siblings will be traversed, even if some of those siblings are composites with children of their own. Reconsider the example graph. As we visit the node labeled \"1\", we can cause its <i>accept</i> message to answer <i>false</i> like so:",
+      "id": "82ab013b688c990d1cff53f0861d23f3"
+    },
+    {
+      "type": "code",
+      "text": " boolean visitEnter( Composite node )\n {\n  String sLabel = node.getLabel();\n  return sLabel.equals( \"2.2\", sLabel.length() );\n }",
+      "id": "641fbd548397714fde1b33c7e61e668e"
+    },
+    {
+      "type": "html",
+      "text": "\nIf the composite's label does not match the first <i>N</i> characters of \"2.2\", we do not enter the node and we do not traverse its children. We then proceed directly to the node labeled \"2\". For this composite node, the expression will return <i>true</i>, causing us to continue searching its children. This strategy allows us to find the optimal path to \"2.2\". Furthermore, we cannot construct this strategy using the traditional visitor alone.",
+      "id": "3c373a750ca4a47e282fab23930a6b83"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6e150ce2680605fb432652fd44331f70"
+    },
+    {
+      "type": "html",
+      "text": "<b>Participants</b>",
+      "id": "c59cfd6716b99094f62c424c612a32cc"
+    },
+    {
+      "type": "html",
+      "text": "<b>H</b><b>ierarchicalVisitor</b> (F<b></b>ilenameQualifier):<br>defines the <i>visitEnter</i> and <i>visitLeave</i> operations for Composite nodes and <i>visit</i> operation for Leaf nodes ",
+      "id": "4ffe124e72e6cdc1ad2e0410be114d63"
+    },
+    {
+      "type": "html",
+      "text": "<b>Component</b> (File<b></b>System<b></b>Item):<br>defines the base class common to Leaf and Composite nodes. This interface/class establishes the basic <i>accept</i> protocol.",
+      "id": "5cbbae56a0e50164ce5aa56eef59b44b"
+    },
+    {
+      "type": "html",
+      "text": "<b>Composite</b> (Directory):<br>a Component that can contain children Components and implements <i>accept</i> to process itself and its children",
+      "id": "b67cd579c5664b47234957e5620d8288"
+    },
+    {
+      "type": "html",
+      "text": "<b>Leaf</b> (File):<br>a concrete Component that implements the <i>accept</i> protocol to process only itself ",
+      "id": "2d6df121e6da9eaa84b5bda75c8f7c25"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6e150ce2680605fb432652fd44331f70"
+    },
+    {
+      "type": "html",
+      "text": "<b>Collaborations</b>",
+      "id": "78095c94a0a751c703c9c6838504159d"
+    },
+    {
+      "type": "html",
+      "text": "\nHierarchical Visitor collaborates directly with <i>Leaf</i> and <i>Composite</i> objects. The members of the visitor interface are called indirectly by the implementation of <i>accept</i> in the Composite and Leaf classes. ",
+      "id": "9c23469fe5b615e0bb0906d70d576f6a"
+    },
+    {
+      "type": "html",
+      "text": "\nWhen <i>Composite</i> accepts a visitor (e.g. <i>composite.accept(Visitor)</i>), it notifies the visitor that it is entering a new branch by sending the visitor the message:",
+      "id": "aff518fdff7ff921c95e7c9d019ffcb9"
+    },
+    {
+      "type": "code",
+      "text": "  boolean visitEnter( ''this'' )",
+      "id": "70ac6885ff9ab3f29ccb583bd0b19f72"
+    },
+    {
+      "type": "html",
+      "text": "\nThe <i>this</i> argument is the <i>Composite</i> object itself. We can use <i>visitEnter</i> to process the composite or wait for <i>visitLeave</i> - after its children have been visited. The composite's <i>accept</i> implementation uses the answer from <i>visitEnter</i> to determine whether its children should accept this visitor. So, if <i>visitEnter</i> answers true, <i>accept</i> is invoked on each of its children or until one of the <i>accept</i> invocations answers <i>false</i>. This essentially works like a <i>do...while</i> loop. The first child accept that answers false causes traversal at that level to stop. We then give <i>accept</i> method of this composite to answer true or false. This result comes from the answer to <i>visitLeave</i>. The whole Composite <i>accept</i> implementation looks like the following: ",
+      "id": "7e9d7055c01e9425f282bacfed8fcc29"
+    },
+    {
+      "type": "code",
+      "text": "  public boolean accept( Visitor v )\n  {\n  if ( v.''visitEnter''( this ) )  // enter this node?\n    m_children.doWhile( ''<each>''.accept( v ) );",
+      "id": "ec50259670ea2908743537d4996163e2"
+    },
+    {
+      "type": "code",
+      "text": "  return ''visitLeave''( this );\n  }",
+      "id": "d1a0c724177acaf0bc5edfde682f4279"
+    },
+    {
+      "type": "html",
+      "text": "\nRemember that each Composite may itself be the child of another <i>Composite</i>. So, if <i>visitLeave</i> returns false, this would short-circuit visiting its sibling nodes. The Leaf implementation of <i>accept</i> is very simple. It just invokes <i>visit</i> on the passed Visitor with itself as the argument and uses the result for its return value:",
+      "id": "2cafd51601af608efa97f276927031a0"
+    },
+    {
+      "type": "code",
+      "text": "  boolean Leaf.accept( Visitor v )\n  {\n  return v.visit( this );\n  }",
+      "id": "a93840f576ae8fde09ef55d756ac6ff7"
+    },
+    {
+      "type": "html",
+      "text": "\nAny time a call to <i>accept</i> answers false, it signals the parent's <i>accept</i> member to stop processing children at that level in the tree.",
+      "id": "1f9905770a198d0c9f548b2516371320"
+    },
+    {
+      "type": "html",
+      "text": "\nOnce a parent node has called <i>accept</i> for each of its children, it will call <i>visitor.visitLeave</i>. This lets the visitor [[Functor Object]] know it is done with this branch and proceeding to either a sibling or parent Component node at the same tree-depth as this node.  ",
+      "id": "3fbcdd6718e3ce2e94daf5f899d3f907"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6e150ce2680605fb432652fd44331f70"
+    },
+    {
+      "type": "html",
+      "text": "<b>Implementation</b>",
+      "id": "c01eebaec06da6ea26cf004e32210862"
+    },
+    {
+      "type": "html",
+      "text": "\nConsider the following interface for the Hierarchical Visitor: ",
+      "id": "df03c2df5d726ed2de2ec5c1a22ee9d1"
+    },
+    {
+      "type": "code",
+      "text": "  public interface Visitor\n  {\n  boolean visitEnter( Composite node ); // going into a branch\n  boolean visitLeave( Composite node ); // coming out\n  boolean visit( Leaf node );\n  }",
+      "id": "b72fa47fea98481836925989cf054bbf"
+    },
+    {
+      "type": "html",
+      "text": "\nThat's pretty much it. To make life a little easier I provide a [[Null Object]] (Default Implementation) visitor.",
+      "id": "7758dbd56f0a81d054620d1ae7244522"
+    },
+    {
+      "type": "code",
+      "text": "  public interface Visitor\n  {\n  .\n  .\n  .\n  public static class Default implements Visitor\n  {\n    public boolean visitEnter( Composite node ) {\n    return true;\n    }\n    public boolean visitLeave( Composite node ) {\n    return true;\n    }\n    public boolean visit( Leaf node ) {\n    return true;\n    }\n  }\n  }",
+      "id": "dc5405d2d79ba030da480384f048c38c"
+    },
+    {
+      "type": "html",
+      "text": "\nNow we just need to create the Composite structure. For details on this see [[Composite Pattern]]. The only variation is the accept methods which both need to return a boolean. These members should be implemented as follows:",
+      "id": "817ffb1eb6817013739d9109f34f8f92"
+    },
+    {
+      "type": "code",
+      "text": "  boolean Composite.accept( Visitor v )\n  {\n  if ( v.''visitEnter''( this ) )  // enter this node?\n  {\n    Iterator at = m_children.iterator();\n    while ( at.hasNext() )\n    if ( ! ((Component)at.next()).''accept''( v ) )\n      break;\n  }",
+      "id": "1f7c49ab177943f64640635743a3cbe8"
+    },
+    {
+      "type": "code",
+      "text": "  return v.''visitLeave''( this );\n  }",
+      "id": "86de3847b559b2a4c41f97bde82bfaf2"
+    },
+    {
+      "type": "html",
+      "text": "\nAnd the leaf implementation: ",
+      "id": "a57e3651319a17962ba00ea2abd1129d"
+    },
+    {
+      "type": "code",
+      "text": "  boolean accept( Visitor visitor )\n  {\n  return visitor.visit( this );\n  }",
+      "id": "e3be712d05947c2b814386ef05df6cae"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6e150ce2680605fb432652fd44331f70"
+    },
+    {
+      "type": "html",
+      "text": "<b>Sample Code and Usage</b>",
+      "id": "e2838e47f3f457162b59810fb80e20cf"
+    },
+    {
+      "type": "html",
+      "text": "\nIn this example, the Composite node is a <i>Directory</i> and the Leaf node is a <i>File</i> object. We implement a Visitor that can construct the qualified path name for each <i>File</i> component. While this can be simply done using the [[Hierarchical Visitor Pattern]], it is quite difficult to achieve with the traditional [[Visitor Pattern]]. Note that this example only shows the <i>'hierarchical navigation</i> features of the hierarchical visitor and does not use any of its conditional features. ",
+      "id": "0ece65dc7cadb2fcda4c8d18d8686fdb"
+    },
+    {
+      "type": "code",
+      "text": " ''/**''\n '' * Maintains a string that when accessed in the \"visit\"''\n '' * member will return the current qualified file name.''\n '' */''\n public abstract \n  class  '''F''''''ilenameQualifier'''\n  implements F''''''ileVisitor\n {\n  static final String SEPCHAR = \"\\\\\";  // path separator",
+      "id": "bebd5e720cf74136a88f22db74c04f13"
+    },
+    {
+      "type": "code",
+      "text": "  private m_sPath = \"\";",
+      "id": "bae8f1b384312269f3c8feffa2f7a353"
+    },
+    {
+      "type": "html",
+      "text": "<i>// Entering a composite:<br>Push its name on the Path</i>",
+      "id": "d0ea434ece959b36de4c486a85282ff5"
+    },
+    {
+      "type": "code",
+      "text": "  public boolean '''visitEnter'''( Directory node )\n  {\n   m_sPath += node.getName();\n   m_sPath += SEPCHAR;  ''// NOTE: Don't forget the separator!''\n   return true;   ''// process leafs (i.e. files or subdirs)''\n  }",
+      "id": "670419a0b332f0b5b66ce25af731d693"
+    },
+    {
+      "type": "html",
+      "text": "<i>// Leaving a composite:<br>Pop its name from the Path</i>",
+      "id": "ac2cfeeb3f3beceac3d8fe7ff7266fcf"
+    },
+    {
+      "type": "code",
+      "text": "  public boolean '''visitLeave'''( Directory node )\n  {\n   m_sPath.resize( m_sPath.size() - node.getName().size() );\n   return true;   ''// go to next sibling''\n  }",
+      "id": "64c5cf5cd548f6ac0049fc7dbaffaaf1"
+    },
+    {
+      "type": "code",
+      "text": "  ''// Provide read-only access to the current qualifier''\n  String currentPath()\n  {\n  return m_sPath;\n  }\n }",
+      "id": "3a83f5d3389222e83e95ff5eca3565db"
+    },
+    {
+      "type": "html",
+      "text": "\nWe only added a protected member to access the current path for each call to <i>visit</i>. Because we are creating classes, we can extend them to add or refine behavior. For example, we can extend the qualifier to create a hierarchical listing of qualified file names: ",
+      "id": "cea8a36197088c47c46d320160dd1a26"
+    },
+    {
+      "type": "code",
+      "text": " public \n  class  F''''''ileListingVisitor\n  extends F''''''ilenameQualifier\n {\n  private int m_nLevel;  ''// Indent Level''",
+      "id": "879d2e208b3a784dce4c76ea539355a5"
+    },
+    {
+      "type": "code",
+      "text": "  public boolean '''visitEnter'''( Directory node )\n  {\n   ''super.visitEnter( node );''",
+      "id": "22338210e6b794e5869da3bebf06f1cd"
+    },
+    {
+      "type": "code",
+      "text": "   println( node.getName() );\n   m_nLevel++;   ''// increase indent level''\n   return true;\n  }",
+      "id": "2caf801dab5bf099c95372ce309ba12a"
+    },
+    {
+      "type": "code",
+      "text": "  public boolean '''visitLeave'''( Directory node )\n  {\n   ''super.visitLeave( node );''",
+      "id": "6d6c9652f5aebeef5fee627ec6014102"
+    },
+    {
+      "type": "code",
+      "text": "   m_nLevel--;   ''// decrease indent level''\n   return true;\n  }",
+      "id": "579db0aa5b5a3cc79a0d2c368d952df3"
+    },
+    {
+      "type": "code",
+      "text": "  public boolean '''visit'''( File leaf )\n  {\n   println( currentPath() + leaf.getName() );\n   return true;\n  }",
+      "id": "60045b9d276d373aded4c644b77ef5f3"
+    },
+    {
+      "type": "code",
+      "text": "  private void println( String s )\n  {\n   int N = m_nLevel * TABSIZE;\n   while ( N-- ) System.print( ' ' );\n   System.println( s );;\n  }\n  }",
+      "id": "b9efb01164a09fc599e7aedd87363596"
+    },
+    {
+      "type": "html",
+      "text": "\nTo use, you simply pass an instance of the F<b></b>ileListingVisitor to the <i>accept</i> member of any composite in the file system.",
+      "id": "1b3356bf754bd2f0ee19a961a99d86b5"
+    },
+    {
+      "type": "code",
+      "text": "  Directory dir = directoryAt( path );\n  dir.accept( new '''F''''''ileListingVisitor()''' );",
+      "id": "0a6fbc30f97af0c0b4a9674666f30e86"
+    },
+    {
+      "type": "html",
+      "text": "\nHere's an example of a composite hierarchy for this sample: ",
+      "id": "9d31829156db3832769aa6eb8e3acabd"
+    },
+    {
+      "type": "code",
+      "text": "  interface F''''''ileSystemObject\n  {\n  String  getName();\n  boolean accept( Visitor v );\n  }",
+      "id": "3a58667648f9c2b12cec7f87849f786d"
+    },
+    {
+      "type": "code",
+      "text": "  class Directory implements F''''''ileSystemObject\n  {\n  private String  m_name;\n  private I''''''temArray m_contents = new I''''''temArray();",
+      "id": "f8ce40ce91dc6d4440d94139f0746a22"
+    },
+    {
+      "type": "code",
+      "text": "  public Directory( String name )\n  {\n    m_name = name;\n  }",
+      "id": "c150d5e6cb593cb4cddf3d759b821d4d"
+    },
+    {
+      "type": "code",
+      "text": "  public String getName()\n  {\n    return m_name;\n  }",
+      "id": "220e26aef181cf47283f42573cc633ba"
+    },
+    {
+      "type": "code",
+      "text": "  public void add( F''''''ileSystemObject child )\n  {\n    m_contents.add( child );\n  }\n  .\n  .\n  .\n  public boolean accept( Visitor v )\n  {\n    if ( v.visitEnter( this ) )\n    m_contents.detect( new Block() {\n      public boolean is( Object each ) {\n      return !((F''''''ileSystemObject)each).accept( v ); } } );",
+      "id": "74ad8713170ea1bedc6d585ad73c0b7b"
+    },
+    {
+      "type": "code",
+      "text": "    return v.visitLeave( this );\n  }\n  }",
+      "id": "c8c2017c8c83ff940b024386b28a7812"
+    },
+    {
+      "type": "code",
+      "text": "  class File implements F''''''ileSystemObject\n  {\n  private String m_name;",
+      "id": "685dd7339097fae060b037ab766764eb"
+    },
+    {
+      "type": "code",
+      "text": "  public File( String name )\n  {\n    m_name = name;\n  }",
+      "id": "dce23b8cf9cc35666ea1b3a63a0c2d12"
+    },
+    {
+      "type": "code",
+      "text": "  public String getName()\n  {\n    return m_name;\n  }",
+      "id": "220e26aef181cf47283f42573cc633ba"
+    },
+    {
+      "type": "code",
+      "text": "  public boolean accept( Visitor v )\n  {\n    return v.visit( this );\n  }\n  }",
+      "id": "3bf61e38aa7394bfe6bddd014daed67e"
+    },
+    {
+      "type": "html",
+      "text": "\nThat's pretty much it. You add files to directories like so: ",
+      "id": "99a2878ba8e169ebedbb042cf7a0295f"
+    },
+    {
+      "type": "code",
+      "text": "  Directory root = new Directory( \"root\" );\n  Directory temp  = new Directory( \"temp\" );",
+      "id": "a9697aaad9a4910d59e624e7933b9cb0"
+    },
+    {
+      "type": "code",
+      "text": "  temp.add( new File( \"foo.txt\" ) );\n  root.add( temp )\n  root.add( new File( \"bar.txt\" ) );",
+      "id": "5f2c2867c0f1052e84a0883ef899bc21"
+    },
+    {
+      "type": "html",
+      "text": "\nThis creates the following file structure: ",
+      "id": "00deb03d9b6d7c1113c3d036317720ae"
+    },
+    {
+      "type": "code",
+      "text": "  root\n  |\n  +--temp\n  |  |\n  |  +--foo.txt\n  |\n  +--bar.txt",
+      "id": "1af122c0cbf8538bd568c03f8742c6b1"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6e150ce2680605fb432652fd44331f70"
+    },
+    {
+      "type": "html",
+      "text": "<b>Sample Code for Filtered Processing</b>",
+      "id": "0c33c201d330ac4d28c3263ff99c88e3"
+    },
+    {
+      "type": "html",
+      "text": "\nThis example shows the extensibility of the Hierarchical Visitor. The following shows us building on the basic Hierarchical Visitor to create a new abstraction that allows us to add filter objects and processing objects to selectively process a composite.",
+      "id": "9587fb767957295b0490589fe6998beb"
+    },
+    {
+      "type": "html",
+      "text": "\nFirst we define the interface for creating classes that filter nodes or operate on filtered nodes:",
+      "id": "cde72e8889a1482867baa7fc3e5eaa30"
+    },
+    {
+      "type": "code",
+      "text": "  interface Filter\n  {\n  boolean canVisit( Composite node );\n  boolean canVisit( Leaf leaf );\n  }",
+      "id": "81d7ab9c4e89794cdb82de4487a6e668"
+    },
+    {
+      "type": "code",
+      "text": "  interface Operator extends C''''''lassicVisitor\n  {\n  void visit( Composite node );\n  void visit( Leaf leaf );\n  }",
+      "id": "71d0d47e52b5299fde41223f3ea97835"
+    },
+    {
+      "type": "code",
+      "text": "  class F''''''ilteredVisitor extends H''''''ierarchicalVisitor\n  {\n  Items m_filters;  ''// one or more filter conditions''\n  Items m_operators;  ''// one or more operators''",
+      "id": "546a5ae282cb6dbebb07ffde84ac57ee"
+    },
+    {
+      "type": "code",
+      "text": "  ''...''",
+      "id": "19fb60c24e1034f9b9aa6ec945136273"
+    },
+    {
+      "type": "code",
+      "text": "  ''// Add a filter''\n  public void add( Filter filter ) {\n    m_filters.add( filter );\n  }",
+      "id": "fbff08756987399008671c5e8012e58f"
+    },
+    {
+      "type": "code",
+      "text": "  ''// Add an operator''\n  public void add( Operator process ) {\n    m_operators.add( process );\n  }",
+      "id": "644afa6e0b17e56c7aaf661a8af995f9"
+    },
+    {
+      "type": "code",
+      "text": "  ''...''",
+      "id": "19fb60c24e1034f9b9aa6ec945136273"
+    },
+    {
+      "type": "code",
+      "text": "  ''// Filter this entire Branch?''\n  public boolean '''visitEnter'''( Composite node )\n  {    \n    ''// Return first that rejects this node''\n    Object rejected =\n    m_filters.detect( new Block() {\n      public boolean is( Filter each ) {\n      return '''!'''each.'''canVisit'''( node ); } } );",
+      "id": "3d006892fecc384968a598d7f12ec077"
+    },
+    {
+      "type": "code",
+      "text": "    return ( rejected == null );\n  }",
+      "id": "c1b51e1f685f07039391b8798362ab23"
+    },
+    {
+      "type": "code",
+      "text": "  ''// Visit non-rejected nodes''\n  public boolean visitLeave( Composite node )\n  {\n    m_operators.enum( new Block() {\n    public void run( Operator each ) {\n      each.'''visit'''( node ); } } );",
+      "id": "c5ce96a6b27e6b0d41656402df12b700"
+    },
+    {
+      "type": "code",
+      "text": "    return true;\n  }",
+      "id": "80e95d208bc2560ee4349bf099ed363e"
+    },
+    {
+      "type": "code",
+      "text": "  ''// Check reject state for each condition, process if not rejected''\n  public boolean visit( Leaf node )\n  {\n    ''// Return first that rejects this leaf''\n    Object rejected =\n    m_filters.detect( new Block() {\n      public boolean is( Filter each ) {\n      return '''!'''each.'''canVisit'''( node ); } } );",
+      "id": "5c7a40d2512d012ca1528dbeaa7eca8c"
+    },
+    {
+      "type": "code",
+      "text": "    if ( rejected == null )  ''// no one rejected''\n    m_operators.enum( new Block() {\n      public void run( Operator each ) {\n      each.'''visit'''( node ); } } );",
+      "id": "dd7b01e1fe6f9b1695826044e89dfd46"
+    },
+    {
+      "type": "code",
+      "text": "    return true;    \n  }\n  }",
+      "id": "87de74af3322f271c5380952885356f3"
+    },
+    {
+      "type": "html",
+      "text": "\nThis allows you to aggregate various filters and operators into the Hierarchical Visitor.",
+      "id": "67df029d9d7add99021753e118476daf"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6e150ce2680605fb432652fd44331f70"
+    },
+    {
+      "type": "html",
+      "text": "<b>Existing Uses</b>",
+      "id": "001a0e55540742c3facf26a234e4cb7e"
+    },
+    {
+      "type": "html",
+      "text": "[[Cpp Utx Overview]]:<br>A version of [[Cpp Unit]] for large systems development",
+      "id": "29edfbe7e77350898ca9ce24454d1954"
+    },
+    {
+      "type": "html",
+      "text": "[[Eclipse Ide]]:<br>The Java Development Tooling uses hierarchical vistors for traversing its AST. It makes use of both, entering and leaving visit methods (called beginVisit()/endVisit()) and controlled traversal via a boolean return.",
+      "id": "ecb43d0aa1000a5b1d82df7c591873d6"
+    },
+    {
+      "type": "html",
+      "text": "SPACE:<br>The <i>Security Platform Architecture for Composition and Extension</i> is a [[Product Line Architecture]] for create <i>Surveillance and Response</i> systems (such as Intrusion Detection Systems or File Integrity Checkers) from a set of [[Core Assets]]. The [[Hierarchical Visitor Pattern]] is used throughout the system to provide system integrated from SPACE greater flexibility. Some example uses include:",
+      "id": "55714153b0bb18c3c9f26b0132a81900"
+    },
+    {
+      "type": "html",
+      "text": "<i>Permissions</i>:<br>in SPACE a Permission can be a single permission or a logically named group of permissions. The hierarchical visitor allows <i>implies</i> methods to be written efficiently.",
+      "id": "0206a840227c24ef1cd9fcebf9523f3d"
+    },
+    {
+      "type": "html",
+      "text": "<i>Node Grouping</i>:<br>nodes in the distributed system can be logically grouped together to ease the complexity of summarizing or administering a network of 10,000+ nodes/computers. You may have a group named <i>\"all-nodes\"</i> that contains the group called <i>\"saled-department\"</i>. This group might contain all the computers in the sales department. The [[Hierarchical Visitor Pattern]] is used to allow systems that are based on the SPACE [[Product Line Architecture]] to operate on nodes in unpredictable ways.",
+      "id": "731b19858250b49530e81a7f9186c993"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6e150ce2680605fb432652fd44331f70"
+    },
+    {
+      "type": "html",
+      "text": "<b>Related Patterns</b>",
+      "id": "ed00c4b8fd470f57ed1578b2825846f3"
+    },
+    {
+      "type": "html",
+      "text": " [[Visitor Pattern]] ",
+      "id": "de7baac4303cf08e0c4dcd92bd93fc8c"
+    },
+    {
+      "type": "html",
+      "text": " [[Composite Pattern]] ",
+      "id": "e7d1f4146d563f287fc67addbd7c34ce"
+    },
+    {
+      "type": "html",
+      "text": " [[Internal Iterator]]",
+      "id": "3cd99bc40adf6f0de373f0d9f6c60254"
+    },
+    {
+      "type": "html",
+      "text": "<i>-- [[Robert Di Falco]]</i>",
+      "id": "db8198a8d45135c727b96a46c93d8ba6"
+    },
+    {
+      "type": "html",
+      "text": "<b>See also:</b> [[Hierarchical Visitor Discussion]]",
+      "id": "32854e0e42a2452833070797708ce291"
+    },
+    {
+      "type": "html",
+      "text": "<hr>",
+      "id": "6e150ce2680605fb432652fd44331f70"
+    },
+    {
+      "type": "html",
+      "text": "[[Category Pattern]] | [[Category Behavioral Patterns]]",
+      "id": "c5e5b448d0d3707424db2e29205be047"
+    },
+    {
+      "type": "html",
+      "text": "See original on  [http://c2.com/cgi/wiki?HierarchicalVisitorPattern c2.com]",
+      "id": "d7da196227f50c5f58990fe4c1b0fa3c"
+    }
+  ],
+  "journal": [
+    {
+      "date": 1323962594000,
+      "id": "674a617f3a98a6b002ee90fe5fa020c6",
+      "type": "create",
+      "item": {
+        "title": "Hierarchical Visitor Pattern",
+        "story": [
+          {
+            "type": "html",
+            "text": "<b>Background</b>",
+            "id": "ffc18985292a9cdd607c5d5efc0de551"
+          },
+          {
+            "type": "html",
+            "text": "<b>Hierarchical Visitor</b> -- <i>found to recur</i> while working with the [[Composite Pattern]] and other hierarchical data-structures. Occurrences of [[Hierarchical Visitor Pattern]] included a logical and hierarchical grouping of network hosts, rules, Security Permissions and Roles, and the [[Test Case]] and [[Test Suite]] classes described in [[Cpp Utx Overview]]. I, along with some others have used the <b>hierarchical visitor</b> in favor of the traditional [[Visitor Pattern]] for the last three years. I recently attempted to simplify or decompose this pattern further in [[Hierarchical Visitor Discussion]]. While some great ideas were contributed, I still found this to be (for me) the most straight forward representation. -- [[Robert Di Falco]]",
+            "id": "a6e002c108dee19859333f968679c0a7"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6e150ce2680605fb432652fd44331f70"
+          },
+          {
+            "type": "html",
+            "text": "<b>Intent</b>",
+            "id": "faf435dddbe4e5e0c2046aecd1f7ea17"
+          },
+          {
+            "type": "html",
+            "text": "\nRepresent an operation to be performed on the nodes of a hierarchical object structure. Hierarchical Visitor lets one define new operations without changing the classes of the nodes on which it operates. Hierarchical Visitor overcomes the limitations of the traditional [[Visitor Pattern]] by allowing a programmer to track traversal depth and short-circuit branch traversal. ",
+            "id": "5ab7bfa0aaf04e64c6ec06656ca8dabb"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6e150ce2680605fb432652fd44331f70"
+          },
+          {
+            "type": "html",
+            "text": "<b>Motivation</b>",
+            "id": "75f073d6b76c8bfc05129a983829b5a6"
+          },
+          {
+            "type": "html",
+            "text": "\nConsider a file system represented using a hierarchical structure, such as that provided by the [[Composite Pattern]]. The file objects are leaf nodes and the directories are the composite nodes. Now consider two operations on a file system: (a) fully qualifying a file name and (b) searching for a specific file. ",
+            "id": "9427330ba6210ef74affa848c46b4c3d"
+          },
+          {
+            "type": "html",
+            "text": "\nTo fully qualify a  file name, we must traverse each of its parent composites. To do this, we start with a string representing the root composite, and concatenate each child composite until we reach the actual file object. We need to determine what composites (directories) are children of the root and which are its siblings. This requires we track when we are entering a composite and leaving a composite. If we enter the composite <i>bar</i> before we have left the composite <i>foo</i>, we know we have \"<i>foo/bar</i>\". However, if we leave <i>foo</i> before entering <i>bar</i> then <i>foo</i> and <i>bar</i> are siblings. \nThis is quite impossible if equipped only with the traditional [[Visitor Pattern]] as it only tells us when we are <i>entering</i> a composite node.",
+            "id": "c096f16b81f85bf9c0c9fa1a15b7ba9c"
+          },
+          {
+            "type": "html",
+            "text": "\nTo search a file system optimally, we need to take advantage of fully qualified names. If we are searching for \"<i>root/foo2/bar3/file.dat</i>\", we don't need to search through the branches \"<i>root/foo1/*</i>\", \"<i>root/foo2/bar1/*</i>\", or even \"<i>root/foo2/bar2/*</i>\". Unfortunately, because the traditional [[Visitor Pattern]] does not have the ability to conditionally traverse a hierarchical structure, we are left with only two choices -- (a) use an alternative means of traversal or (b) search even those branches that have no possibility of a match.",
+            "id": "f08d10d86ad2df55dcb273520d5b1838"
+          },
+          {
+            "type": "html",
+            "text": "\nThese two examples summarize the advantages of the [[Hierarchical Visitor Pattern]]. One no longer needs to rely on multiple traversal techniques when the limitations of the traditional visitor pattern must be exceeded. We can generalize these limitations as: ",
+            "id": "a098c24dc7595b29b9adab75413961d7"
+          },
+          {
+            "type": "html",
+            "text": " <b>hierarchical navigation</b> -- the traditional [[Visitor Pattern]] has no concept of depth. As a result, visitor cannot determine if one composite is within another composite or beside it.",
+            "id": "771b73c646044783d640c1ae7af9c900"
+          },
+          {
+            "type": "html",
+            "text": " <b>conditional navigation</b> -- the traditional [[Visitor Pattern]] does not allow branches to be skipped. As a result, visitor cannot stop, filter, or optimize traversal based on some condition. ",
+            "id": "cafc0edd9704d96dd41dadeb9cda7a8c"
+          },
+          {
+            "type": "html",
+            "text": "\nThe primary consequence of these limitations is a eventual violation of [[Once And Only Once]] when using the traditional [[Visitor Pattern]] with Hierarchical Structures. At some point the limitations are exceeded and another, more powerful mode of traversal -- usually [[External Iteration]] -- is required. The first two File System examples are typical of those operations that challenge these limitations. Further consider the File System sample discussed in [[Pattern Hatching]]. Some behavior is implemented with the [[Visitor Pattern]] while other more complex behaviors (such as indented tree-listings) require other iteration mechanisms. This is why we say that, eventually, [[Once And Only Once]] will be violated when using the traditional [[Visitor Pattern]].",
+            "id": "ce66879a8f9e0fb739b355a9a10bfc9a"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6e150ce2680605fb432652fd44331f70"
+          },
+          {
+            "type": "html",
+            "text": "<b>Applicability</b>",
+            "id": "9af2bd42c6c60cfc87378e588dde4ef4"
+          },
+          {
+            "type": "html",
+            "text": "\nLike the traditional [[Visitor Pattern]], the [[Hierarchical Visitor Pattern]] combines a [[Functor Object]] (the <i>Visitor</i> object itself) with [[Internal Iterator]]s (the <i>accept</i> members of the [[Composite Pattern]]). Together, these form a generalized mechanism for tree traversal. These allow the [[Hierarchical Visitor Pattern]] to be useful anywhere the traditional [[Visitor Pattern]] would. The hierarchical visitor is then made more useful by allowing <i>hierarchical navigation</i> and <i>conditional navigation</i>.",
+            "id": "fd53bdb0078eaff43e41f0212c6e77bc"
+          },
+          {
+            "type": "html",
+            "text": "<b>Hierarchical navigation</b>",
+            "id": "01c1860a73927899a3852e61ccfd9d2e"
+          },
+          {
+            "type": "html",
+            "text": "\nHierarchical navigation is important for any traversal that needs to know whether one node is the child of another or its sibling. The simplest example of this is tree listings where an indentation level needs to be maintained. With the traditional [[Visitor Pattern]], one can only determine when we are entering a node. This tells us that we may want to indent but gives us no clues about outdenting. We don't know if we have left the previous node before we entered the current node. ",
+            "id": "adbd06b26124d379150c9d540cb12693"
+          },
+          {
+            "type": "html",
+            "text": "\nThe [[Hierarchical Visitor Pattern]] removes this limitation by defining a two method protocol when visiting nodes -- <b>visitEnter</b> and <b>visitLeave</b>. If we are entering the composite node <i>bar</i> before leaving the composite node <i>foo</i>, we can safely assume that <i>bar</i> is a child (and not a sibling) of the composite <i>foo</i>.",
+            "id": "a683cf366b6ddd7f5aa0249009152f74"
+          },
+          {
+            "type": "html",
+            "text": "<b>Conditional Navigation</b>",
+            "id": "552d15b9bf313bea73c605b37dd26d25"
+          },
+          {
+            "type": "html",
+            "text": "\nConditional navigation is required to skip unnecessary branches and all of their children. Consider the second operation of the File System example. The search for a specific file in a particular path can only be performed optimally if we can dispose of branches that have no possibility of providing a match. Consider the following graph: ",
+            "id": "f1db8429538b9e09d805c6133f35db1a"
+          },
+          {
+            "type": "html",
+            "text": " 1. ",
+            "id": "983ba28746ea31cddf5ade794f1dabb0"
+          },
+          {
+            "type": "html",
+            "text": " 1.1 ",
+            "id": "a5b733e2185f7f478595e0c5a3083fdc"
+          },
+          {
+            "type": "html",
+            "text": " 1.2 ",
+            "id": "c2591513102c17bd30203cd48b5c969a"
+          },
+          {
+            "type": "html",
+            "text": " 1.2.1 ",
+            "id": "a36966a656bad18d6e950037ca5eb22e"
+          },
+          {
+            "type": "html",
+            "text": " 1.2.2 ",
+            "id": "a83a9675ca7c377b73772b51dd992b04"
+          },
+          {
+            "type": "html",
+            "text": " 1.3 ",
+            "id": "2c9f448c6c6340ffc764893caad2c5ab"
+          },
+          {
+            "type": "html",
+            "text": " 1.3.1 ",
+            "id": "440ff088b4441f10ee360ae4c515add2"
+          },
+          {
+            "type": "html",
+            "text": " 1.3.1.1 ",
+            "id": "a121d54a28283db15188931aeb235082"
+          },
+          {
+            "type": "html",
+            "text": " 1.3.2 ",
+            "id": "581ee45c481b6a167d7259a911f51729"
+          },
+          {
+            "type": "html",
+            "text": " 2. ",
+            "id": "946b386036637112c88eabb3fef3ae54"
+          },
+          {
+            "type": "html",
+            "text": " 2.1 ",
+            "id": "ac939b20574f7f2eaecc94b7d4208f5e"
+          },
+          {
+            "type": "html",
+            "text": " 2.2 ",
+            "id": "8bf60dd4e863dc0f3809109b13df4599"
+          },
+          {
+            "type": "html",
+            "text": "\nThe traditional [[Visitor Pattern]] would have to visit each leaf of the entire structure in order to find the leaf labeled \"2.2\"!  Even though we can see that \"1\" does not match the root ancestor of \"2.2\", we would still have no choice but to perform a match for the leaf \"1.3.1.1\". The only way to avoid this is to abandon the traditional visitor and use another means of traversal. Most programmers violate the encapsulation provided by the traditional visitor when performing tree searches.",
+            "id": "a12f3b376eb3199235985229c9251df5"
+          },
+          {
+            "type": "html",
+            "text": "\n[[Hierarchical Visitor Pattern]] allows us to solve this problem within a single visiting paradigm. It does so by having each invocation of <i>accept</i> answer a boolean traversal state for its depth of the tree. For example, if <i>accept</i> on a composite or leaf answers <i>false</i>, traversal immediately stops at that tree depth. In other words, no more of its siblings will be traversed, even if some of those siblings are composites with children of their own. Reconsider the example graph. As we visit the node labeled \"1\", we can cause its <i>accept</i> message to answer <i>false</i> like so:",
+            "id": "82ab013b688c990d1cff53f0861d23f3"
+          },
+          {
+            "type": "code",
+            "text": " boolean visitEnter( Composite node )\n {\n  String sLabel = node.getLabel();\n  return sLabel.equals( \"2.2\", sLabel.length() );\n }",
+            "id": "641fbd548397714fde1b33c7e61e668e"
+          },
+          {
+            "type": "html",
+            "text": "\nIf the composite's label does not match the first <i>N</i> characters of \"2.2\", we do not enter the node and we do not traverse its children. We then proceed directly to the node labeled \"2\". For this composite node, the expression will return <i>true</i>, causing us to continue searching its children. This strategy allows us to find the optimal path to \"2.2\". Furthermore, we cannot construct this strategy using the traditional visitor alone.",
+            "id": "3c373a750ca4a47e282fab23930a6b83"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6e150ce2680605fb432652fd44331f70"
+          },
+          {
+            "type": "html",
+            "text": "<b>Participants</b>",
+            "id": "c59cfd6716b99094f62c424c612a32cc"
+          },
+          {
+            "type": "html",
+            "text": "<b>H</b><b>ierarchicalVisitor</b> (F<b></b>ilenameQualifier):<br>defines the <i>visitEnter</i> and <i>visitLeave</i> operations for Composite nodes and <i>visit</i> operation for Leaf nodes ",
+            "id": "4ffe124e72e6cdc1ad2e0410be114d63"
+          },
+          {
+            "type": "html",
+            "text": "<b>Component</b> (File<b></b>System<b></b>Item):<br>defines the base class common to Leaf and Composite nodes. This interface/class establishes the basic <i>accept</i> protocol.",
+            "id": "5cbbae56a0e50164ce5aa56eef59b44b"
+          },
+          {
+            "type": "html",
+            "text": "<b>Composite</b> (Directory):<br>a Component that can contain children Components and implements <i>accept</i> to process itself and its children",
+            "id": "b67cd579c5664b47234957e5620d8288"
+          },
+          {
+            "type": "html",
+            "text": "<b>Leaf</b> (File):<br>a concrete Component that implements the <i>accept</i> protocol to process only itself ",
+            "id": "2d6df121e6da9eaa84b5bda75c8f7c25"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6e150ce2680605fb432652fd44331f70"
+          },
+          {
+            "type": "html",
+            "text": "<b>Collaborations</b>",
+            "id": "78095c94a0a751c703c9c6838504159d"
+          },
+          {
+            "type": "html",
+            "text": "\nHierarchical Visitor collaborates directly with <i>Leaf</i> and <i>Composite</i> objects. The members of the visitor interface are called indirectly by the implementation of <i>accept</i> in the Composite and Leaf classes. ",
+            "id": "9c23469fe5b615e0bb0906d70d576f6a"
+          },
+          {
+            "type": "html",
+            "text": "\nWhen <i>Composite</i> accepts a visitor (e.g. <i>composite.accept(Visitor)</i>), it notifies the visitor that it is entering a new branch by sending the visitor the message:",
+            "id": "aff518fdff7ff921c95e7c9d019ffcb9"
+          },
+          {
+            "type": "code",
+            "text": "  boolean visitEnter( ''this'' )",
+            "id": "70ac6885ff9ab3f29ccb583bd0b19f72"
+          },
+          {
+            "type": "html",
+            "text": "\nThe <i>this</i> argument is the <i>Composite</i> object itself. We can use <i>visitEnter</i> to process the composite or wait for <i>visitLeave</i> - after its children have been visited. The composite's <i>accept</i> implementation uses the answer from <i>visitEnter</i> to determine whether its children should accept this visitor. So, if <i>visitEnter</i> answers true, <i>accept</i> is invoked on each of its children or until one of the <i>accept</i> invocations answers <i>false</i>. This essentially works like a <i>do...while</i> loop. The first child accept that answers false causes traversal at that level to stop. We then give <i>accept</i> method of this composite to answer true or false. This result comes from the answer to <i>visitLeave</i>. The whole Composite <i>accept</i> implementation looks like the following: ",
+            "id": "7e9d7055c01e9425f282bacfed8fcc29"
+          },
+          {
+            "type": "code",
+            "text": "  public boolean accept( Visitor v )\n  {\n  if ( v.''visitEnter''( this ) )  // enter this node?\n    m_children.doWhile( ''<each>''.accept( v ) );",
+            "id": "ec50259670ea2908743537d4996163e2"
+          },
+          {
+            "type": "code",
+            "text": "  return ''visitLeave''( this );\n  }",
+            "id": "d1a0c724177acaf0bc5edfde682f4279"
+          },
+          {
+            "type": "html",
+            "text": "\nRemember that each Composite may itself be the child of another <i>Composite</i>. So, if <i>visitLeave</i> returns false, this would short-circuit visiting its sibling nodes. The Leaf implementation of <i>accept</i> is very simple. It just invokes <i>visit</i> on the passed Visitor with itself as the argument and uses the result for its return value:",
+            "id": "2cafd51601af608efa97f276927031a0"
+          },
+          {
+            "type": "code",
+            "text": "  boolean Leaf.accept( Visitor v )\n  {\n  return v.visit( this );\n  }",
+            "id": "a93840f576ae8fde09ef55d756ac6ff7"
+          },
+          {
+            "type": "html",
+            "text": "\nAny time a call to <i>accept</i> answers false, it signals the parent's <i>accept</i> member to stop processing children at that level in the tree.",
+            "id": "1f9905770a198d0c9f548b2516371320"
+          },
+          {
+            "type": "html",
+            "text": "\nOnce a parent node has called <i>accept</i> for each of its children, it will call <i>visitor.visitLeave</i>. This lets the visitor [[Functor Object]] know it is done with this branch and proceeding to either a sibling or parent Component node at the same tree-depth as this node.  ",
+            "id": "3fbcdd6718e3ce2e94daf5f899d3f907"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6e150ce2680605fb432652fd44331f70"
+          },
+          {
+            "type": "html",
+            "text": "<b>Implementation</b>",
+            "id": "c01eebaec06da6ea26cf004e32210862"
+          },
+          {
+            "type": "html",
+            "text": "\nConsider the following interface for the Hierarchical Visitor: ",
+            "id": "df03c2df5d726ed2de2ec5c1a22ee9d1"
+          },
+          {
+            "type": "code",
+            "text": "  public interface Visitor\n  {\n  boolean visitEnter( Composite node ); // going into a branch\n  boolean visitLeave( Composite node ); // coming out\n  boolean visit( Leaf node );\n  }",
+            "id": "b72fa47fea98481836925989cf054bbf"
+          },
+          {
+            "type": "html",
+            "text": "\nThat's pretty much it. To make life a little easier I provide a [[Null Object]] (Default Implementation) visitor.",
+            "id": "7758dbd56f0a81d054620d1ae7244522"
+          },
+          {
+            "type": "code",
+            "text": "  public interface Visitor\n  {\n  .\n  .\n  .\n  public static class Default implements Visitor\n  {\n    public boolean visitEnter( Composite node ) {\n    return true;\n    }\n    public boolean visitLeave( Composite node ) {\n    return true;\n    }\n    public boolean visit( Leaf node ) {\n    return true;\n    }\n  }\n  }",
+            "id": "dc5405d2d79ba030da480384f048c38c"
+          },
+          {
+            "type": "html",
+            "text": "\nNow we just need to create the Composite structure. For details on this see [[Composite Pattern]]. The only variation is the accept methods which both need to return a boolean. These members should be implemented as follows:",
+            "id": "817ffb1eb6817013739d9109f34f8f92"
+          },
+          {
+            "type": "code",
+            "text": "  boolean Composite.accept( Visitor v )\n  {\n  if ( v.''visitEnter''( this ) )  // enter this node?\n  {\n    Iterator at = m_children.iterator();\n    while ( at.hasNext() )\n    if ( ! ((Component)at.next()).''accept''( v ) )\n      break;\n  }",
+            "id": "1f7c49ab177943f64640635743a3cbe8"
+          },
+          {
+            "type": "code",
+            "text": "  return v.''visitLeave''( this );\n  }",
+            "id": "86de3847b559b2a4c41f97bde82bfaf2"
+          },
+          {
+            "type": "html",
+            "text": "\nAnd the leaf implementation: ",
+            "id": "a57e3651319a17962ba00ea2abd1129d"
+          },
+          {
+            "type": "code",
+            "text": "  boolean accept( Visitor visitor )\n  {\n  return visitor.visit( this );\n  }",
+            "id": "e3be712d05947c2b814386ef05df6cae"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6e150ce2680605fb432652fd44331f70"
+          },
+          {
+            "type": "html",
+            "text": "<b>Sample Code and Usage</b>",
+            "id": "e2838e47f3f457162b59810fb80e20cf"
+          },
+          {
+            "type": "html",
+            "text": "\nIn this example, the Composite node is a <i>Directory</i> and the Leaf node is a <i>File</i> object. We implement a Visitor that can construct the qualified path name for each <i>File</i> component. While this can be simply done using the [[Hierarchical Visitor Pattern]], it is quite difficult to achieve with the traditional [[Visitor Pattern]]. Note that this example only shows the <i>'hierarchical navigation</i> features of the hierarchical visitor and does not use any of its conditional features. ",
+            "id": "0ece65dc7cadb2fcda4c8d18d8686fdb"
+          },
+          {
+            "type": "code",
+            "text": " ''/**''\n '' * Maintains a string that when accessed in the \"visit\"''\n '' * member will return the current qualified file name.''\n '' */''\n public abstract \n  class  '''F''''''ilenameQualifier'''\n  implements F''''''ileVisitor\n {\n  static final String SEPCHAR = \"\\\\\";  // path separator",
+            "id": "bebd5e720cf74136a88f22db74c04f13"
+          },
+          {
+            "type": "code",
+            "text": "  private m_sPath = \"\";",
+            "id": "bae8f1b384312269f3c8feffa2f7a353"
+          },
+          {
+            "type": "html",
+            "text": "<i>// Entering a composite:<br>Push its name on the Path</i>",
+            "id": "d0ea434ece959b36de4c486a85282ff5"
+          },
+          {
+            "type": "code",
+            "text": "  public boolean '''visitEnter'''( Directory node )\n  {\n   m_sPath += node.getName();\n   m_sPath += SEPCHAR;  ''// NOTE: Don't forget the separator!''\n   return true;   ''// process leafs (i.e. files or subdirs)''\n  }",
+            "id": "670419a0b332f0b5b66ce25af731d693"
+          },
+          {
+            "type": "html",
+            "text": "<i>// Leaving a composite:<br>Pop its name from the Path</i>",
+            "id": "ac2cfeeb3f3beceac3d8fe7ff7266fcf"
+          },
+          {
+            "type": "code",
+            "text": "  public boolean '''visitLeave'''( Directory node )\n  {\n   m_sPath.resize( m_sPath.size() - node.getName().size() );\n   return true;   ''// go to next sibling''\n  }",
+            "id": "64c5cf5cd548f6ac0049fc7dbaffaaf1"
+          },
+          {
+            "type": "code",
+            "text": "  ''// Provide read-only access to the current qualifier''\n  String currentPath()\n  {\n  return m_sPath;\n  }\n }",
+            "id": "3a83f5d3389222e83e95ff5eca3565db"
+          },
+          {
+            "type": "html",
+            "text": "\nWe only added a protected member to access the current path for each call to <i>visit</i>. Because we are creating classes, we can extend them to add or refine behavior. For example, we can extend the qualifier to create a hierarchical listing of qualified file names: ",
+            "id": "cea8a36197088c47c46d320160dd1a26"
+          },
+          {
+            "type": "code",
+            "text": " public \n  class  F''''''ileListingVisitor\n  extends F''''''ilenameQualifier\n {\n  private int m_nLevel;  ''// Indent Level''",
+            "id": "879d2e208b3a784dce4c76ea539355a5"
+          },
+          {
+            "type": "code",
+            "text": "  public boolean '''visitEnter'''( Directory node )\n  {\n   ''super.visitEnter( node );''",
+            "id": "22338210e6b794e5869da3bebf06f1cd"
+          },
+          {
+            "type": "code",
+            "text": "   println( node.getName() );\n   m_nLevel++;   ''// increase indent level''\n   return true;\n  }",
+            "id": "2caf801dab5bf099c95372ce309ba12a"
+          },
+          {
+            "type": "code",
+            "text": "  public boolean '''visitLeave'''( Directory node )\n  {\n   ''super.visitLeave( node );''",
+            "id": "6d6c9652f5aebeef5fee627ec6014102"
+          },
+          {
+            "type": "code",
+            "text": "   m_nLevel--;   ''// decrease indent level''\n   return true;\n  }",
+            "id": "579db0aa5b5a3cc79a0d2c368d952df3"
+          },
+          {
+            "type": "code",
+            "text": "  public boolean '''visit'''( File leaf )\n  {\n   println( currentPath() + leaf.getName() );\n   return true;\n  }",
+            "id": "60045b9d276d373aded4c644b77ef5f3"
+          },
+          {
+            "type": "code",
+            "text": "  private void println( String s )\n  {\n   int N = m_nLevel * TABSIZE;\n   while ( N-- ) System.print( ' ' );\n   System.println( s );;\n  }\n  }",
+            "id": "b9efb01164a09fc599e7aedd87363596"
+          },
+          {
+            "type": "html",
+            "text": "\nTo use, you simply pass an instance of the F<b></b>ileListingVisitor to the <i>accept</i> member of any composite in the file system.",
+            "id": "1b3356bf754bd2f0ee19a961a99d86b5"
+          },
+          {
+            "type": "code",
+            "text": "  Directory dir = directoryAt( path );\n  dir.accept( new '''F''''''ileListingVisitor()''' );",
+            "id": "0a6fbc30f97af0c0b4a9674666f30e86"
+          },
+          {
+            "type": "html",
+            "text": "\nHere's an example of a composite hierarchy for this sample: ",
+            "id": "9d31829156db3832769aa6eb8e3acabd"
+          },
+          {
+            "type": "code",
+            "text": "  interface F''''''ileSystemObject\n  {\n  String  getName();\n  boolean accept( Visitor v );\n  }",
+            "id": "3a58667648f9c2b12cec7f87849f786d"
+          },
+          {
+            "type": "code",
+            "text": "  class Directory implements F''''''ileSystemObject\n  {\n  private String  m_name;\n  private I''''''temArray m_contents = new I''''''temArray();",
+            "id": "f8ce40ce91dc6d4440d94139f0746a22"
+          },
+          {
+            "type": "code",
+            "text": "  public Directory( String name )\n  {\n    m_name = name;\n  }",
+            "id": "c150d5e6cb593cb4cddf3d759b821d4d"
+          },
+          {
+            "type": "code",
+            "text": "  public String getName()\n  {\n    return m_name;\n  }",
+            "id": "220e26aef181cf47283f42573cc633ba"
+          },
+          {
+            "type": "code",
+            "text": "  public void add( F''''''ileSystemObject child )\n  {\n    m_contents.add( child );\n  }\n  .\n  .\n  .\n  public boolean accept( Visitor v )\n  {\n    if ( v.visitEnter( this ) )\n    m_contents.detect( new Block() {\n      public boolean is( Object each ) {\n      return !((F''''''ileSystemObject)each).accept( v ); } } );",
+            "id": "74ad8713170ea1bedc6d585ad73c0b7b"
+          },
+          {
+            "type": "code",
+            "text": "    return v.visitLeave( this );\n  }\n  }",
+            "id": "c8c2017c8c83ff940b024386b28a7812"
+          },
+          {
+            "type": "code",
+            "text": "  class File implements F''''''ileSystemObject\n  {\n  private String m_name;",
+            "id": "685dd7339097fae060b037ab766764eb"
+          },
+          {
+            "type": "code",
+            "text": "  public File( String name )\n  {\n    m_name = name;\n  }",
+            "id": "dce23b8cf9cc35666ea1b3a63a0c2d12"
+          },
+          {
+            "type": "code",
+            "text": "  public String getName()\n  {\n    return m_name;\n  }",
+            "id": "220e26aef181cf47283f42573cc633ba"
+          },
+          {
+            "type": "code",
+            "text": "  public boolean accept( Visitor v )\n  {\n    return v.visit( this );\n  }\n  }",
+            "id": "3bf61e38aa7394bfe6bddd014daed67e"
+          },
+          {
+            "type": "html",
+            "text": "\nThat's pretty much it. You add files to directories like so: ",
+            "id": "99a2878ba8e169ebedbb042cf7a0295f"
+          },
+          {
+            "type": "code",
+            "text": "  Directory root = new Directory( \"root\" );\n  Directory temp  = new Directory( \"temp\" );",
+            "id": "a9697aaad9a4910d59e624e7933b9cb0"
+          },
+          {
+            "type": "code",
+            "text": "  temp.add( new File( \"foo.txt\" ) );\n  root.add( temp )\n  root.add( new File( \"bar.txt\" ) );",
+            "id": "5f2c2867c0f1052e84a0883ef899bc21"
+          },
+          {
+            "type": "html",
+            "text": "\nThis creates the following file structure: ",
+            "id": "00deb03d9b6d7c1113c3d036317720ae"
+          },
+          {
+            "type": "code",
+            "text": "  root\n  |\n  +--temp\n  |  |\n  |  +--foo.txt\n  |\n  +--bar.txt",
+            "id": "1af122c0cbf8538bd568c03f8742c6b1"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6e150ce2680605fb432652fd44331f70"
+          },
+          {
+            "type": "html",
+            "text": "<b>Sample Code for Filtered Processing</b>",
+            "id": "0c33c201d330ac4d28c3263ff99c88e3"
+          },
+          {
+            "type": "html",
+            "text": "\nThis example shows the extensibility of the Hierarchical Visitor. The following shows us building on the basic Hierarchical Visitor to create a new abstraction that allows us to add filter objects and processing objects to selectively process a composite.",
+            "id": "9587fb767957295b0490589fe6998beb"
+          },
+          {
+            "type": "html",
+            "text": "\nFirst we define the interface for creating classes that filter nodes or operate on filtered nodes:",
+            "id": "cde72e8889a1482867baa7fc3e5eaa30"
+          },
+          {
+            "type": "code",
+            "text": "  interface Filter\n  {\n  boolean canVisit( Composite node );\n  boolean canVisit( Leaf leaf );\n  }",
+            "id": "81d7ab9c4e89794cdb82de4487a6e668"
+          },
+          {
+            "type": "code",
+            "text": "  interface Operator extends C''''''lassicVisitor\n  {\n  void visit( Composite node );\n  void visit( Leaf leaf );\n  }",
+            "id": "71d0d47e52b5299fde41223f3ea97835"
+          },
+          {
+            "type": "code",
+            "text": "  class F''''''ilteredVisitor extends H''''''ierarchicalVisitor\n  {\n  Items m_filters;  ''// one or more filter conditions''\n  Items m_operators;  ''// one or more operators''",
+            "id": "546a5ae282cb6dbebb07ffde84ac57ee"
+          },
+          {
+            "type": "code",
+            "text": "  ''...''",
+            "id": "19fb60c24e1034f9b9aa6ec945136273"
+          },
+          {
+            "type": "code",
+            "text": "  ''// Add a filter''\n  public void add( Filter filter ) {\n    m_filters.add( filter );\n  }",
+            "id": "fbff08756987399008671c5e8012e58f"
+          },
+          {
+            "type": "code",
+            "text": "  ''// Add an operator''\n  public void add( Operator process ) {\n    m_operators.add( process );\n  }",
+            "id": "644afa6e0b17e56c7aaf661a8af995f9"
+          },
+          {
+            "type": "code",
+            "text": "  ''...''",
+            "id": "19fb60c24e1034f9b9aa6ec945136273"
+          },
+          {
+            "type": "code",
+            "text": "  ''// Filter this entire Branch?''\n  public boolean '''visitEnter'''( Composite node )\n  {    \n    ''// Return first that rejects this node''\n    Object rejected =\n    m_filters.detect( new Block() {\n      public boolean is( Filter each ) {\n      return '''!'''each.'''canVisit'''( node ); } } );",
+            "id": "3d006892fecc384968a598d7f12ec077"
+          },
+          {
+            "type": "code",
+            "text": "    return ( rejected == null );\n  }",
+            "id": "c1b51e1f685f07039391b8798362ab23"
+          },
+          {
+            "type": "code",
+            "text": "  ''// Visit non-rejected nodes''\n  public boolean visitLeave( Composite node )\n  {\n    m_operators.enum( new Block() {\n    public void run( Operator each ) {\n      each.'''visit'''( node ); } } );",
+            "id": "c5ce96a6b27e6b0d41656402df12b700"
+          },
+          {
+            "type": "code",
+            "text": "    return true;\n  }",
+            "id": "80e95d208bc2560ee4349bf099ed363e"
+          },
+          {
+            "type": "code",
+            "text": "  ''// Check reject state for each condition, process if not rejected''\n  public boolean visit( Leaf node )\n  {\n    ''// Return first that rejects this leaf''\n    Object rejected =\n    m_filters.detect( new Block() {\n      public boolean is( Filter each ) {\n      return '''!'''each.'''canVisit'''( node ); } } );",
+            "id": "5c7a40d2512d012ca1528dbeaa7eca8c"
+          },
+          {
+            "type": "code",
+            "text": "    if ( rejected == null )  ''// no one rejected''\n    m_operators.enum( new Block() {\n      public void run( Operator each ) {\n      each.'''visit'''( node ); } } );",
+            "id": "dd7b01e1fe6f9b1695826044e89dfd46"
+          },
+          {
+            "type": "code",
+            "text": "    return true;    \n  }\n  }",
+            "id": "87de74af3322f271c5380952885356f3"
+          },
+          {
+            "type": "html",
+            "text": "\nThis allows you to aggregate various filters and operators into the Hierarchical Visitor.",
+            "id": "67df029d9d7add99021753e118476daf"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6e150ce2680605fb432652fd44331f70"
+          },
+          {
+            "type": "html",
+            "text": "<b>Existing Uses</b>",
+            "id": "001a0e55540742c3facf26a234e4cb7e"
+          },
+          {
+            "type": "html",
+            "text": "[[Cpp Utx Overview]]:<br>A version of [[Cpp Unit]] for large systems development",
+            "id": "29edfbe7e77350898ca9ce24454d1954"
+          },
+          {
+            "type": "html",
+            "text": "[[Eclipse Ide]]:<br>The Java Development Tooling uses hierarchical vistors for traversing its AST. It makes use of both, entering and leaving visit methods (called beginVisit()/endVisit()) and controlled traversal via a boolean return.",
+            "id": "ecb43d0aa1000a5b1d82df7c591873d6"
+          },
+          {
+            "type": "html",
+            "text": "SPACE:<br>The <i>Security Platform Architecture for Composition and Extension</i> is a [[Product Line Architecture]] for create <i>Surveillance and Response</i> systems (such as Intrusion Detection Systems or File Integrity Checkers) from a set of [[Core Assets]]. The [[Hierarchical Visitor Pattern]] is used throughout the system to provide system integrated from SPACE greater flexibility. Some example uses include:",
+            "id": "55714153b0bb18c3c9f26b0132a81900"
+          },
+          {
+            "type": "html",
+            "text": "<i>Permissions</i>:<br>in SPACE a Permission can be a single permission or a logically named group of permissions. The hierarchical visitor allows <i>implies</i> methods to be written efficiently.",
+            "id": "0206a840227c24ef1cd9fcebf9523f3d"
+          },
+          {
+            "type": "html",
+            "text": "<i>Node Grouping</i>:<br>nodes in the distributed system can be logically grouped together to ease the complexity of summarizing or administering a network of 10,000+ nodes/computers. You may have a group named <i>\"all-nodes\"</i> that contains the group called <i>\"saled-department\"</i>. This group might contain all the computers in the sales department. The [[Hierarchical Visitor Pattern]] is used to allow systems that are based on the SPACE [[Product Line Architecture]] to operate on nodes in unpredictable ways.",
+            "id": "731b19858250b49530e81a7f9186c993"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6e150ce2680605fb432652fd44331f70"
+          },
+          {
+            "type": "html",
+            "text": "<b>Related Patterns</b>",
+            "id": "ed00c4b8fd470f57ed1578b2825846f3"
+          },
+          {
+            "type": "html",
+            "text": " [[Visitor Pattern]] ",
+            "id": "de7baac4303cf08e0c4dcd92bd93fc8c"
+          },
+          {
+            "type": "html",
+            "text": " [[Composite Pattern]] ",
+            "id": "e7d1f4146d563f287fc67addbd7c34ce"
+          },
+          {
+            "type": "html",
+            "text": " [[Internal Iterator]]",
+            "id": "3cd99bc40adf6f0de373f0d9f6c60254"
+          },
+          {
+            "type": "html",
+            "text": "<i>-- [[Robert Di Falco]]</i>",
+            "id": "db8198a8d45135c727b96a46c93d8ba6"
+          },
+          {
+            "type": "html",
+            "text": "<b>See also:</b> [[Hierarchical Visitor Discussion]]",
+            "id": "32854e0e42a2452833070797708ce291"
+          },
+          {
+            "type": "html",
+            "text": "<hr>",
+            "id": "6e150ce2680605fb432652fd44331f70"
+          },
+          {
+            "type": "html",
+            "text": "[[Category Pattern]] | [[Category Behavioral Patterns]]",
+            "id": "c5e5b448d0d3707424db2e29205be047"
+          },
+          {
+            "type": "html",
+            "text": "See original on  [http://c2.com/cgi/wiki?HierarchicalVisitorPattern c2.com]",
+            "id": "d7da196227f50c5f58990fe4c1b0fa3c"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "sfw.c2.com",
+      "date": 1706653413438
+    }
+  ]
+}

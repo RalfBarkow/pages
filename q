@@ -15,6 +15,24 @@
       "type": "paragraph",
       "id": "7ebc24217a9efb4a",
       "text": "[[Query Recommendation]] (within [[Offer to the DKR Implemeters]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "cb9a9ac728c42195",
+      "text": "[[Q]], a functional language in the [[APL]] family used with time-series databases (within [[Lil]]) "
+    },
+    {
+      "type": "reference",
+      "id": "16ad2cc2ee4acb31",
+      "site": "wiki.ralfbarkow.ch",
+      "slug": "q",
+      "title": "Q",
+      "text": "?"
+    },
+    {
+      "type": "frame",
+      "id": "9ea41fd4805a2489",
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -129,9 +147,72 @@
       "date": 1709847312932
     },
     {
-      "type": "fork",
-      "site": "wiki.ralfbarkow.ch",
-      "date": 1709906562331
+      "type": "add",
+      "id": "cb9a9ac728c42195",
+      "item": {
+        "type": "paragraph",
+        "id": "cb9a9ac728c42195",
+        "text": "[Q]], a functional language in the [[APL]] family used with time-series databases (within [[Lil]]) "
+      },
+      "after": "7ebc24217a9efb4a",
+      "date": 1712160397687
+    },
+    {
+      "type": "edit",
+      "id": "cb9a9ac728c42195",
+      "item": {
+        "type": "paragraph",
+        "id": "cb9a9ac728c42195",
+        "text": "[[Q]], a functional language in the [[APL]] family used with time-series databases (within [[Lil]]) "
+      },
+      "date": 1712160415865
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9ea41fd4805a2489"
+      },
+      "id": "9ea41fd4805a2489",
+      "type": "add",
+      "after": "cb9a9ac728c42195",
+      "date": 1712160864173
+    },
+    {
+      "type": "edit",
+      "id": "9ea41fd4805a2489",
+      "item": {
+        "type": "frame",
+        "id": "9ea41fd4805a2489",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1712160866131
+    },
+    {
+      "id": "16ad2cc2ee4acb31",
+      "type": "add",
+      "item": {
+        "type": "reference",
+        "id": "16ad2cc2ee4acb31",
+        "site": "wiki.ralfbarkow.ch",
+        "slug": "q",
+        "title": "Q",
+        "text": "?"
+      },
+      "after": "cb9a9ac728c42195",
+      "attribution": {
+        "page": "scratch"
+      },
+      "date": 1712160892369
+    },
+    {
+      "type": "edit",
+      "id": "9ea41fd4805a2489",
+      "item": {
+        "type": "frame",
+        "id": "9ea41fd4805a2489",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1713869774146
     }
   ]
 }

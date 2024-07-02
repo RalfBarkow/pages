@@ -2,6 +2,14 @@
   "title": "D",
   "story": [
     {
+      "id": "f388b139df0ff7bc",
+      "type": "reference",
+      "site": "thompson.fed.wiki",
+      "slug": "fast-to-deep",
+      "title": "Fast to Deep",
+      "text": "We continue to explore how the wiki's new affordances allows us to quickly find [[Third-Order Meaning]] in our thinking."
+    },
+    {
       "type": "pagefold",
       "id": "1dbcb05a56540609",
       "text": "List Indexcard D"
@@ -60,6 +68,11 @@
       "type": "paragraph",
       "id": "9a61ac91750fe6b9",
       "text": "[[dreyeck Portal]] See [[Portal]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "8ba314d4b592a49c",
+      "text": "[[Dreyeck]] ⇒ [[Wiki School]] [http://school.wiki.dreyeck.ch page] ⇒ [[dreyeck Portal]]"
     },
     {
       "type": "paragraph",
@@ -217,6 +230,31 @@
       "text": "[[Degree of Folding]], [[Measure the Degree of Folding of a Protein]] See: [[Protein]]"
     },
     {
+      "type": "paragraph",
+      "id": "953c29484bebf606",
+      "text": "[[Decker]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "874f530936a86db0",
+      "text": "[[Dahinterismus]] See: [[force]] (within [[Murmuration]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "3713d61817d0e9c7",
+      "text": "[[Projects]] and [[Dojo Exercises]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "3c8330b1d92763a1",
+      "text": "[[Documentation]] (within [[Documentation System]])"
+    },
+    {
+      "type": "paragraph",
+      "id": "5eac05e2328457de",
+      "text": "[[Fast to Deep]] (Schnell bis in die Tiefe) See: [[Story Vector]]"
+    },
+    {
       "type": "reference",
       "id": "ec6d5f60c118e850",
       "site": "wiki.ralfbarkow.ch",
@@ -227,7 +265,7 @@
     {
       "type": "frame",
       "id": "bfaebd61519dfa08",
-      "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 111\nSOURCE graph"
+      "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
     }
   ],
   "journal": [
@@ -1744,9 +1782,136 @@
       "date": 1709660256107
     },
     {
-      "type": "fork",
-      "site": "wiki.ralfbarkow.ch",
-      "date": 1709713756144
+      "type": "add",
+      "id": "953c29484bebf606",
+      "item": {
+        "type": "paragraph",
+        "id": "953c29484bebf606",
+        "text": "[[Decker]]"
+      },
+      "after": "44b2b5992598537f",
+      "date": 1712158702793
+    },
+    {
+      "type": "edit",
+      "id": "bfaebd61519dfa08",
+      "item": {
+        "type": "frame",
+        "id": "bfaebd61519dfa08",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/parse-page-paragraphs/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1712741557545
+    },
+    {
+      "type": "edit",
+      "id": "bfaebd61519dfa08",
+      "item": {
+        "type": "frame",
+        "id": "bfaebd61519dfa08",
+        "text": "//wiki.ralfbarkow.ch/assets/pages/speed-bot/speed-bot.html\nHEIGHT 222\nSOURCE graph\nSOURCE paragraph"
+      },
+      "date": 1712741573381
+    },
+    {
+      "type": "add",
+      "id": "874f530936a86db0",
+      "item": {
+        "type": "paragraph",
+        "id": "874f530936a86db0",
+        "text": "[[Dahinterismus]] See: [[force]] (within [[Murmuration]])"
+      },
+      "after": "953c29484bebf606",
+      "date": 1712741619226
+    },
+    {
+      "id": "3713d61817d0e9c7",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "3713d61817d0e9c7",
+        "text": "[[Projects]] and [[Dojo Exercises]]"
+      },
+      "after": "874f530936a86db0",
+      "attribution": {
+        "page": "P"
+      },
+      "date": 1713867485700
+    },
+    {
+      "id": "8ba314d4b592a49c",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "8ba314d4b592a49c",
+        "text": "[[Dreyeck]] ⇒ [[Wiki School]] [http://school.wiki.dreyeck.ch page] ⇒ [[dreyeck Portal]]"
+      },
+      "after": "9a61ac91750fe6b9",
+      "attribution": {
+        "page": "Welcome Visitors"
+      },
+      "date": 1713867525886
+    },
+    {
+      "type": "add",
+      "id": "3c8330b1d92763a1",
+      "item": {
+        "type": "paragraph",
+        "id": "3c8330b1d92763a1",
+        "text": "[[Documentation]]"
+      },
+      "after": "3713d61817d0e9c7",
+      "date": 1716526965219
+    },
+    {
+      "type": "edit",
+      "id": "3c8330b1d92763a1",
+      "item": {
+        "type": "paragraph",
+        "id": "3c8330b1d92763a1",
+        "text": "[[Documentation]] (within [[Documentation System]])"
+      },
+      "date": 1716527203059
+    },
+    {
+      "id": "5eac05e2328457de",
+      "type": "add",
+      "item": {
+        "type": "paragraph",
+        "id": "5eac05e2328457de",
+        "text": "[[Fast to Deep]] (Schnell bis in die Tiefe)"
+      },
+      "after": "3c8330b1d92763a1",
+      "attribution": {
+        "page": "F"
+      },
+      "date": 1719754883867
+    },
+    {
+      "id": "f388b139df0ff7bc",
+      "type": "add",
+      "item": {
+        "id": "f388b139df0ff7bc",
+        "type": "reference",
+        "site": "thompson.fed.wiki",
+        "slug": "fast-to-deep",
+        "title": "Fast to Deep",
+        "text": "We continue to explore how the wiki's new affordances allows us to quickly find [[Third-Order Meaning]] in our thinking."
+      },
+      "after": "45d0887b265c5d6f",
+      "attribution": {
+        "page": "F"
+      },
+      "date": 1719754893033
+    },
+    {
+      "type": "edit",
+      "id": "5eac05e2328457de",
+      "item": {
+        "type": "paragraph",
+        "id": "5eac05e2328457de",
+        "text": "[[Fast to Deep]] (Schnell bis in die Tiefe) See: [[Story Vector]]"
+      },
+      "date": 1719754928353
     }
   ]
 }
